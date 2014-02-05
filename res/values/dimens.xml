@@ -27,9 +27,9 @@
     <!-- List and grid view padding -->
     <dimen name="list_preferred_item_padding">10.0dip</dimen>
     <!-- List view fast scroll padding left -->
-    <dimen name="fast_scroll_padding_left">8.0dip</dimen>
+    <dimen name="fast_scroll_padding_left">4.0dip</dimen>
     <!-- List view fast scroll padding right -->
-    <dimen name="fast_scroll_padding_right">32.0dip</dimen>
+    <dimen name="fast_scroll_padding_right">4.0dip</dimen>
     <!-- grid view vertical and horizontal spacing -->
     <dimen name="grid_item_spacing">4.0dip</dimen>
     <!-- List item detailed height -->
