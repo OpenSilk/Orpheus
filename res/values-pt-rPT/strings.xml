@@ -58,9 +58,9 @@
     <string name="save">Gravar</string>
     <string name="cancel">Cancelar</string>
     <string name="overwrite">Sobrescrever</string>
-    <string name="new_playlist_name_template">Lista de Reprodução <xliff:g id="number" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%d</xliff:g></string>
+    <string name="new_playlist_name_template">Lista de Reprodução <xliff:g id="number">%d</xliff:g></string>
     <string name="create_playlist_prompt">Nome da lista de rep.</string>
-    <string name="delete_dialog_title">Remover <xliff:g id="item" example="album" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%s</xliff:g>?</string>
+    <string name="delete_dialog_title">Remover <xliff:g id="item" example="album">%s</xliff:g>?</string>
     <string name="cannot_be_undone">Não pode ser desfeito</string>
     <string name="delete_warning">Isso vai remover permanentemente as entradas de imagem em cache</string>
     <string name="new_photo">Escolher foto da Galeria</string>
@@ -86,11 +86,11 @@
     <string name="accessibility_repeat">Repetir</string>
     <string name="accessibility_repeat_all">Repetir todas</string>
     <string name="accessibility_repeat_one">Repetir um</string>
-    <string name="pinned_to_home_screen"><xliff:g id="name" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%s</xliff:g> foi colocada no ecrã inicial</string>
-    <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%s</xliff:g> não pode ser colocada no ecrã inicial</string>
-    <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%s</xliff:g>\' definida como toque</string>
+    <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> foi colocada no ecrã inicial</string>
+    <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> não pode ser colocada no ecrã inicial</string>
+    <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' definida como toque</string>
     <string name="playlist_renamed">Lista de rep. foi renomeada</string>
-    <string name="theme_set"><xliff:g id="name" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%s</xliff:g> definido como tema</string>
+    <string name="theme_set"><xliff:g id="name">%s</xliff:g> definido como tema</string>
     <string name="settings_ui_category">Interface</string>
     <string name="settings_storage_category">Armazenamento</string>
     <string name="settings_data_category">Dados</string>
@@ -111,7 +111,7 @@
     <string name="settings_open_source_licenses">Licenças de código livre</string>
     <string name="settings_version_title">Número de versão</string>
     <string name="share_track_using">Partilhar música usando:</string>
-    <string name="now_listening_to">#Em reprodução <xliff:g id="title" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%1$s</xliff:g> por <xliff:g id="artist" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%2$s</xliff:g> #Apollo</string>
+    <string name="now_listening_to">#Em reprodução <xliff:g id="title">%1$s</xliff:g> por <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
     <string name="color_picker_title">Esquema de cor</string>
     <string name="current_color">Atual</string>
     <string name="new_color">Nova</string>

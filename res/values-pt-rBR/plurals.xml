@@ -48,6 +48,6 @@
     </plurals>
     <plurals name="NNNtracksfromplaylist">
         <item quantity="one">1 música removida da lista de reprodução.</item>
-        <item quantity="other"><xliff:g id="number" example="27" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%d</xliff:g> músicas removidas da lista de reprodução.</item>
+        <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> músicas removidas da lista de reprodução.</item>
     </plurals>
 </resources>
