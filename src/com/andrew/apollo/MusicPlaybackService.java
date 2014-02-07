@@ -110,7 +110,7 @@ public class MusicPlaybackService extends Service {
      * For backwards compatibility reasons, also provide sticky
      * broadcasts under the music package
      */
-    public static final String APOLLO_PACKAGE_NAME = "com.andrew.apollo";
+    private String APOLLO_PACKAGE_NAME;
     public static final String MUSIC_PACKAGE_NAME = "com.android.music";
 
     /**
@@ -528,6 +528,7 @@ public class MusicPlaybackService extends Service {
     public void onCreate() {
         if (D) Log.d(TAG, "Creating service");
         super.onCreate();
+        APOLLO_PACKAGE_NAME = getApplication().getPackageName();
 
         // Initialize the favorites and recents databases
         mRecentsCache = RecentStore.getInstance(this);

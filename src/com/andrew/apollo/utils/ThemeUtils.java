@@ -29,6 +29,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,7 +63,7 @@ public class ThemeUtils {
     /**
      * Default package name.
      */
-    public static final String APOLLO_PACKAGE = "com.andrew.apollo";
+    private final String APOLLO_PACKAGE;
 
     /**
      * Current theme package name.
@@ -110,6 +111,8 @@ public class ThemeUtils {
      * @param context The {@link Context} to use.
      */
     public ThemeUtils(final Context context) {
+        // Init package name
+        APOLLO_PACKAGE = context.getPackageName();
         // Get the search query
         sApolloSearch = context.getString(R.string.apollo_themes_shop_key);
         // Get the preferences
