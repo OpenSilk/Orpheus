@@ -15,7 +15,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="app_name">אפולו</string>
   <string name="page_recent">אחרונים</string>
   <string name="page_artists">אומנים</string>
   <string name="page_albums">אלבומים</string>

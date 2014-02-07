@@ -15,7 +15,7 @@
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="app_name">Apollo</string>
+    <string name="app_name">Orpheus</string>
 
     <string name="page_recent">履歴</string>
     <string name="page_artists">アーティスト</string>
@@ -109,11 +109,11 @@
     <string name="settings_data_category">データ</string>
     <string name="settings_about_category">情報</string>
     <string name="settings_author_title">作者</string>
-    <string name="settings_about_apollo">Apolloについて</string>
+    <string name="settings_about_apollo">Orpheusについて</string>
     <string name="settings_special_thanks">スペシャルサンクス</string>
     <string name="settings_lopez_summary">アイコンとプレイストアのバナーデザイン</string>
-    <string name="settings_color_scheme_title">Apolloのデフォルトカラースキームを選択</string>
-    <string name="settings_color_scheme_summary">Apolloのアクセントカラーを変更する</string>
+    <string name="settings_color_scheme_title">Orpheusのデフォルトカラースキームを選択</string>
+    <string name="settings_color_scheme_summary">Orpheusのアクセントカラーを変更する</string>
     <string name="settings_theme_chooser_title">テーマの選択</string>
     <string name="settings_delete_cache_title">キャシュの削除</string>
     <string name="settings_delete_cache_summary">全てのキャッシュされたイメージを削除</string>
@@ -124,7 +124,7 @@
     <string name="settings_open_source_licenses">オープンソースライセンス</string>
     <string name="settings_version_title">バージョン</string>
 
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
     <string name="share_track_using">トラックをシェア:</string>
 
     <string name="color_picker_title">カラースキーム</string>
@@ -132,10 +132,10 @@
     <string name="current_color">現在</string>
     <string name="new_color">新規</string>
 
-    <string name="app_widget_small">Apollo: 4x1</string>
-    <string name="app_widget_large">Apollo: 4x2</string>
-    <string name="app_widget_large_alt">Apollo: 4x2 (別タイプ)</string>
-    <string name="app_widget_recent">Apollo: 最近聴いた曲</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
+    <string name="app_widget_large_alt">Orpheus: 4x2 (別タイプ)</string>
+    <string name="app_widget_recent">Orpheus: 最近聴いた曲</string>
     <string name="app_widget_text_separator">-</string>
 
     <string name="no_effects_for_you">イコライザを開けませんでした。</string>

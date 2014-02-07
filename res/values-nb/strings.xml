@@ -14,7 +14,7 @@
      limitations under the License.
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Apollo</string>
+    <string name="app_name">Orpheus</string>
     <string name="page_recent">Siste</string>
     <string name="page_artists">Artister</string>
     <string name="page_albums">Album</string>
@@ -98,11 +98,11 @@
     <string name="settings_data_category">Data</string>
     <string name="settings_about_category">Om</string>
     <string name="settings_author_title">Skrevet av</string>
-    <string name="settings_about_apollo">Om Apollo</string>
+    <string name="settings_about_apollo">Om Orpheus</string>
     <string name="settings_special_thanks">Spesielt takk til</string>
     <string name="settings_lopez_summary">Ikon og Google Play banner design</string>
-    <string name="settings_color_scheme_title">Velg Apollo\'s standard fargevalg</string>
-    <string name="settings_color_scheme_summary">Endre hovedfargen i Apollo</string>
+    <string name="settings_color_scheme_title">Velg Orpheus\' standard fargevalg</string>
+    <string name="settings_color_scheme_summary">Endre hovedfargen i Orpheus</string>
     <string name="settings_theme_chooser_title">Temavelger</string>
     <string name="settings_delete_cache_title">Slett mellomlager</string>
     <string name="settings_delete_cache_summary">Slett alle mellomlagrede bilder</string>
@@ -112,16 +112,16 @@
     <string name="settings_download_artist_images_title">Last ned manglende artist bilder</string>
     <string name="settings_open_source_licenses">Åpen kildekode-lisenser</string>
     <string name="settings_version_title">Versjonsnummer</string>
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
     <string name="share_track_using">Del spor med:</string>
     <string name="color_picker_title">Fargevalg</string>
     <string name="hex">#</string>
     <string name="current_color">Nåværende</string>
     <string name="new_color">Ny</string>
-    <string name="app_widget_small">Apollo: 4x1</string>
-    <string name="app_widget_large">Apollo: 4x2</string>
-    <string name="app_widget_large_alt">Apollo: 4x2 (alternativ)</string>
-    <string name="app_widget_recent">Apollo: nylig lyttet til</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
+    <string name="app_widget_large_alt">Orpheus: 4x2 (alternativ)</string>
+    <string name="app_widget_recent">Orpheus: nylig lyttet til</string>
     <string name="app_widget_text_separator">-</string>
     <string name="no_effects_for_you">Equalizeren kan ikke åpnes.</string>
     <string name="empty_music">For å kopiere musikk fra en datamaskin til enheten, bruk en USB kabel.</string>

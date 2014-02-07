@@ -14,7 +14,7 @@
      limitations under the License.
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Apollo</string>
+    <string name="app_name">Orpheus</string>
     <string name="page_recent">يېقىنقى</string>
     <string name="page_artists">سەنئەتكار</string>
     <string name="page_albums">ناخشا توپلىمى</string>
@@ -99,11 +99,11 @@
     <string name="settings_data_category">سانلىق مەلۇمات</string>
     <string name="settings_about_category">ھەققىدە</string>
     <string name="settings_author_title">يازغۇچى</string>
-    <string name="settings_about_apollo">Apollo ھەققىدە</string>
+    <string name="settings_about_apollo">Orpheus ھەققىدە</string>
     <string name="settings_special_thanks">ئالاھىدە تەشەككۈر</string>
     <string name="settings_lopez_summary">سىنبەلگە ۋە Play دۇكاندىكى لوزۇنكا لايىھەسى</string>
-    <string name="settings_color_scheme_title">Apollo نىڭ كۆڭۈلدىكى رەڭ لايىھەسىنى تاللاڭ</string>
-    <string name="settings_color_scheme_summary">Apollo كۆرۈنۈشىنىڭ مۇھىم رەڭلىرىنى ئۆزگەرتىدۇ</string>
+    <string name="settings_color_scheme_title">Orpheus نىڭ كۆڭۈلدىكى رەڭ لايىھەسىنى تاللاڭ</string>
+    <string name="settings_color_scheme_summary">Orpheus كۆرۈنۈشىنىڭ مۇھىم رەڭلىرىنى ئۆزگەرتىدۇ</string>
     <string name="settings_theme_chooser_title">ئۆرنەك تاللىغۇچ</string>
     <string name="settings_delete_cache_title">غەملەكنى ئۆچۈر</string>
     <string name="settings_delete_cache_summary">غەملەنگەن ھەممە سۈرەتلەرنى چىقىرىۋەت</string>
@@ -113,16 +113,16 @@
     <string name="settings_download_artist_images_title">سەنئەتكارنىڭ كەم سۈرىتىنى چۈشۈر</string>
     <string name="settings_open_source_licenses">ئوچۇق كودلۇق ئىجازەتنامە</string>
     <string name="settings_version_title">نەشر نومۇرى</string>
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> - <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> - <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
     <string name="share_track_using">ناخشا ھەمبەھىرلەش ئۇسۇلى:</string>
     <string name="color_picker_title">رەڭ نۇسخىسى</string>
     <string name="hex">#</string>
     <string name="current_color">نۆۋەتتىكى</string>
     <string name="new_color">يېڭى</string>
-    <string name="app_widget_small">Apollo: 4x1</string>
-    <string name="app_widget_large">Apollo: 4x2</string>
-    <string name="app_widget_large_alt">Apollo: 4x2 (كېڭەيتىلگەن)</string>
-    <string name="app_widget_recent">Apollo: يېقىندا چېلىنغان</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
+    <string name="app_widget_large_alt">Orpheus: 4x2 (كېڭەيتىلگەن)</string>
+    <string name="app_widget_recent">Orpheus: يېقىندا چېلىنغان</string>
     <string name="app_widget_text_separator">-</string>
     <string name="no_effects_for_you">تەڭشىگۈچنى ئاچالمىدى.</string>
     <string name="empty_music">سىز USB سىمى ئارقىلىق نەغمىنى كومپيۇتېرىڭىزدىن ئۈسكۈنىگە كۆچۈرۈڭ.</string>

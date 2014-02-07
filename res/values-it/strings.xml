@@ -14,7 +14,7 @@
      limitations under the License.
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Apollo</string>
+    <string name="app_name">Orpheus</string>
     <string name="page_recent">Recenti</string>
     <string name="page_artists">Artisti</string>
     <string name="page_albums">Album</string>
@@ -100,11 +100,11 @@
     <string name="settings_data_category">Dati</string>
     <string name="settings_about_category">About</string>
     <string name="settings_author_title">Autore</string>
-    <string name="settings_about_apollo">About Apollo</string>
+    <string name="settings_about_apollo">About Orpheus</string>
     <string name="settings_special_thanks">Ringraziamenti</string>
     <string name="settings_lopez_summary">Design icona e banner Play Store</string>
-    <string name="settings_color_scheme_title">Schema colori Apollo</string>
-    <string name="settings_color_scheme_summary">Cambia il colore in primo piano di Apollo</string>
+    <string name="settings_color_scheme_title">Schema colori Orpheus</string>
+    <string name="settings_color_scheme_summary">Cambia il colore in primo piano di Orpheus</string>
     <string name="settings_theme_chooser_title">Selettore tema</string>
     <string name="settings_delete_cache_title">Cancella cache</string>
     <string name="settings_delete_cache_summary">Rimuovi tutte le immagini memorizzate nella cache</string>
@@ -114,16 +114,16 @@
     <string name="settings_download_artist_images_title">Scarica immagine artista</string>
     <string name="settings_open_source_licenses">Licenze open source</string>
     <string name="settings_version_title">Versione numero</string>
-    <string name="now_listening_to">#Ascoltando <xliff:g id="title">%1$s</xliff:g> di <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+    <string name="now_listening_to">#Ascoltando <xliff:g id="title">%1$s</xliff:g> di <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
     <string name="share_track_using">Condividi canzone:</string>
     <string name="color_picker_title">Schema colori</string>
     <string name="hex">#</string>
     <string name="current_color">Corrente</string>
     <string name="new_color">Nuovo</string>
-    <string name="app_widget_small">Apollo: 4x1</string>
-    <string name="app_widget_large">Apollo: 4x2</string>
-    <string name="app_widget_large_alt">Apollo: 4x2 (alternativo)</string>
-    <string name="app_widget_recent">Apollo: ascoltato recentemente</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
+    <string name="app_widget_large_alt">Orpheus: 4x2 (alternativo)</string>
+    <string name="app_widget_recent">Orpheus: ascoltato recentemente</string>
     <string name="app_widget_text_separator">-</string>
     <string name="no_effects_for_you">L\'equalizzatore non può essere aperto.</string>
     <string name="empty_music">Per copiare musica dal tuo computer al dispositivo, utilizzare un cavo USB.</string>

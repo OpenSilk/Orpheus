@@ -15,7 +15,7 @@
      limitations under the License.
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Apollo</string>
+    <string name="app_name">Orpheus</string>
     <string name="page_recent">Nedávne</string>
     <string name="page_artists">Interpreti</string>
     <string name="page_albums">Albumy</string>
@@ -99,11 +99,11 @@
     <string name="settings_data_category">Údaje</string>
     <string name="settings_about_category">O programe</string>
     <string name="settings_author_title">Autor</string>
-    <string name="settings_about_apollo">O programe Apollo</string>
+    <string name="settings_about_apollo">O programe Orpheus</string>
     <string name="settings_special_thanks">Špeciálne poďakovanie</string>
     <string name="settings_lopez_summary">Návrh ikony a banneru v obchode Play</string>
-    <string name="settings_color_scheme_title">Zvoliť predvolenú farebnú schému pre program Apollo</string>
-    <string name="settings_color_scheme_summary">Zmení farbu posuvníka v programe Apollo</string>
+    <string name="settings_color_scheme_title">Zvoliť predvolenú farebnú schému pre program Orpheus</string>
+    <string name="settings_color_scheme_summary">Zmení farbu posuvníka v programe Orpheus</string>
     <string name="settings_theme_chooser_title">Výber témy</string>
     <string name="settings_delete_cache_title">Odstrániť vyrovnávaciu pamäť</string>
     <string name="settings_delete_cache_summary">Odstráni všetky obrázky vo vyrovnávacej pamäti</string>
@@ -113,16 +113,16 @@
     <string name="settings_download_artist_images_title">Prevziať chýbajúce obrázky interpretov</string>
     <string name="settings_open_source_licenses">Licencie otvoreného zdroja</string>
     <string name="settings_version_title">Číslo verzie</string>
-    <string name="now_listening_to">#Teraz počúvam skladbu <xliff:g id="title">%1$s</xliff:g> od interpreta <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+    <string name="now_listening_to">#Teraz počúvam skladbu <xliff:g id="title">%1$s</xliff:g> od interpreta <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
     <string name="share_track_using">Zdieľať stopu cez:</string>
     <string name="color_picker_title">Farebná schéma</string>
     <string name="hex">#</string>
     <string name="current_color">Aktuálna</string>
     <string name="new_color">Nová</string>
-    <string name="app_widget_small">Apollo: 4x1</string>
-    <string name="app_widget_large">Apollo: 4x2</string>
-    <string name="app_widget_large_alt">Apollo: 4x2 (alternatívna)</string>
-    <string name="app_widget_recent">Apollo: nedávno počúvané</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
+    <string name="app_widget_large_alt">Orpheus: 4x2 (alternatívna)</string>
+    <string name="app_widget_recent">Orpheus: nedávno počúvané</string>
     <string name="app_widget_text_separator">-</string>
     <string name="no_effects_for_you">Nedá sa otvoriť ekvalizér.</string>
     <string name="empty_music">Na kopírovanie hudby z vášho počítača do vášho zariadenia použite kábel USB.</string>

@@ -15,7 +15,7 @@
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="app_name">Apollo</string>
+    <string name="app_name">Orpheus</string>
 
     <!-- Page titles -->
     <string name="page_recent">最近播放</string>
@@ -120,11 +120,11 @@
     <string name="settings_data_category">数据</string>
     <string name="settings_about_category">关于</string>
     <string name="settings_author_title">作者</string>
-    <string name="settings_about_apollo">关于 Apollo</string>
+    <string name="settings_about_apollo">关于 Orpheus</string>
     <string name="settings_special_thanks">特别感谢</string>
     <string name="settings_lopez_summary">图标与 Play 商店横幅设计</string>
-    <string name="settings_color_scheme_title">选择 Apollo 默认配色方案</string>
-    <string name="settings_color_scheme_summary">更改 Apollo 界面的重点色</string>
+    <string name="settings_color_scheme_title">选择 Orpheus 默认配色方案</string>
+    <string name="settings_color_scheme_summary">更改 Orpheus 界面的重点色</string>
     <string name="settings_theme_chooser_title">主题选择器</string>
     <string name="settings_delete_cache_title">清除缓存</string>
     <string name="settings_delete_cache_summary">清除所有缓存的图像</string>
@@ -136,7 +136,7 @@
     <string name="settings_version_title">版本号</string>
 
     <!-- Share Intent -->
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> - <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> - <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
     <string name="share_track_using">曲目分享方式:</string>
 
     <!-- ColorPicker -->
@@ -146,10 +146,10 @@
     <string name="new_color">新的</string>
 
     <!-- App widget -->
-    <string name="app_widget_small">Apollo: 4x1</string>
-    <string name="app_widget_large">Apollo: 4x2</string>
-    <string name="app_widget_large_alt">Apollo: 4x2 (扩展控制)</string>
-    <string name="app_widget_recent">Apollo: 最近播放</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
+    <string name="app_widget_large_alt">Orpheus: 4x2 (扩展控制)</string>
+    <string name="app_widget_recent">Orpheus: 最近播放</string>
     <string name="app_widget_text_separator">-</string>
 
     <!-- Empty list / error messages -->
