@@ -12,19 +12,16 @@
 package com.andrew.apollo.widgets.theme;
 
 import android.content.Context;
+import android.support.v4.view.PagerTabStrip;
 import android.util.AttributeSet;
 
 import com.andrew.apollo.utils.ThemeUtils;
-import com.viewpagerindicator.TitlePageIndicator;
 
 /**
- * This is a custom {@link TitlePageIndicator} that is made themeable by
- * allowing developers to choose the background and the selected and unselected
- * text colors.
- * 
- * @author Andrew Neal (andrewdneal@gmail.com)
+ * This is a custom {@link android.support.v4.view.PagerTabStrip} that is made themeable by
+ * allowing developers to choose the background and the text colors.
  */
-public class ThemeableTitlePageIndicator extends TitlePageIndicator {
+public class ThemeablePagerTabStrip extends PagerTabStrip {
 
     /**
      * Resource name used to theme the background
@@ -51,17 +48,16 @@ public class ThemeableTitlePageIndicator extends TitlePageIndicator {
      * @param attrs The attributes of the XML tag that is inflating the view.
      */
     @SuppressWarnings("deprecation")
-    public ThemeableTitlePageIndicator(final Context context, final AttributeSet attrs) {
+    public ThemeablePagerTabStrip(final Context context, final AttributeSet attrs) {
         super(context, attrs);
         // Initialze the theme resources
         final ThemeUtils resources = new ThemeUtils(context);
         // Theme the background
         setBackgroundDrawable(resources.getDrawable(BACKGROUND));
-        // Theme the selected text color
-        setSelectedColor(resources.getColor(SELECTED_TEXT));
-        // Theme the unselected text color
+        // Theme the text color
         setTextColor(resources.getColor(TEXT));
         // Theme the footer
-        setFooterColor(resources.getColor(FOOTER));
+        setTabIndicatorColor(resources.getColor(FOOTER));
     }
+
 }

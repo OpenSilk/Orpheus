@@ -45,7 +45,6 @@ import com.andrew.apollo.recycler.RecycleHolder;
 import com.andrew.apollo.ui.activities.BaseActivity;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
-import com.viewpagerindicator.TitlePageIndicator;
 
 import java.util.List;
 

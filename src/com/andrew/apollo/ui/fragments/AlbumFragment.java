@@ -53,7 +53,6 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
-import com.viewpagerindicator.TitlePageIndicator;
 
 import java.util.List;
 

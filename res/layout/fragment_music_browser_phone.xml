@@ -18,23 +18,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <RelativeLayout
-        android:id="@+id/fragment_home_phone_container"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/fragment_home_phone_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent">
 
-        <com.andrew.apollo.widgets.theme.ThemeableTitlePageIndicator
+        <com.andrew.apollo.widgets.theme.ThemeablePagerTabStrip
             android:id="@+id/fragment_home_phone_pager_titles"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="top"
             android:textSize="@dimen/text_size_micro" />
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/fragment_home_phone_pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/fragment_home_phone_pager_titles" />
-    </RelativeLayout>
+    </android.support.v4.view.ViewPager>
 
     <include layout="@layout/top_shadow" />
 

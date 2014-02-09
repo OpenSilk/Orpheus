@@ -32,8 +32,6 @@ import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.SortOrder;
 import com.andrew.apollo.utils.ThemeUtils;
-import com.viewpagerindicator.TitlePageIndicator;
-import com.viewpagerindicator.TitlePageIndicator.OnCenterItemClickListener;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
@@ -47,8 +45,7 @@ import com.viewpagerindicator.TitlePageIndicator.OnCenterItemClickListener;
  *        Apollo for a couple of weeks or so before merging it with CM.
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class MusicBrowserPhoneFragment extends Fragment implements
-        OnCenterItemClickListener {
+public class MusicBrowserPhoneFragment extends Fragment {
 
     /**
      * Pager
@@ -109,13 +106,6 @@ public class MusicBrowserPhoneFragment extends Fragment implements
         // Start on the last page the user was on
         mViewPager.setCurrentItem(mPreferences.getStartPage());
 
-        // Initialze the TPI
-        final TitlePageIndicator pageIndicator = (TitlePageIndicator)rootView
-                .findViewById(R.id.fragment_home_phone_pager_titles);
-        // Attach the ViewPager
-        pageIndicator.setViewPager(mViewPager);
-        // Scroll to the current artist, album, or song
-        pageIndicator.setOnCenterItemClickListener(this);
         return rootView;
     }
 
@@ -301,23 +291,6 @@ public class MusicBrowserPhoneFragment extends Fragment implements
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCenterItemClick(final int position) {
-        // If on the artist fragment, scrolls to the current artist
-        if (position == 2) {
-            getArtistFragment().scrollToCurrentArtist();
-            // If on the album fragment, scrolls to the current album
-        } else if (position == 3) {
-            getAlbumFragment().scrollToCurrentAlbum();
-            // If on the song fragment, scrolls to the current song
-        } else if (position == 4) {
-            getSongFragment().scrollToCurrentSong();
-        }
     }
 
     private boolean isArtistPage() {
