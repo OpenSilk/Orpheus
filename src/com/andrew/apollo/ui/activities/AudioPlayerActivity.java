@@ -53,6 +53,7 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.adapters.PagerAdapter;
 import com.andrew.apollo.cache.ImageFetcher;
+import com.andrew.apollo.ui.fragments.ArtFragment;
 import com.andrew.apollo.ui.fragments.QueueFragment;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.ApolloUtils;
@@ -66,6 +67,8 @@ import com.andrew.apollo.widgets.RepeatingImageButton;
 import com.andrew.apollo.widgets.ShuffleButton;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Apollo's "now playing" interface.
@@ -101,9 +104,6 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
 
     // Artist name
     private TextView mArtistName;
-
-    // Album art
-    private ImageView mAlbumArt;
 
     // Tiny artwork
     private ImageView mAlbumArtSmall;
@@ -166,7 +166,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         // Initialze the theme resources
         mResources = new ThemeUtils(this);
         // Set the overflow style
-        mResources.setOverflowStyle(this);
+        mResources.setThemeStyle(this);
 
         // Fade it in
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -350,7 +350,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
                 // Shuffle all the songs
                 MusicUtils.shuffleAll(this);
                 // Refresh the queue
-                ((QueueFragment)mPagerAdapter.getFragment(0)).refreshQueue();
+                ((QueueFragment)mPagerAdapter.getFragment(1)).refreshQueue();
                 return true;
             case R.id.menu_favorite:
                 // Toggle the current track as a favorite and update the menu
@@ -388,7 +388,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
 
     @Override
     public void onDelete(long[] ids) {
-        ((QueueFragment)mPagerAdapter.getFragment(0)).refreshQueue();
+        ((QueueFragment)mPagerAdapter.getFragment(1)).refreshQueue();
         if (MusicUtils.getQueue().length == 0) {
             NavUtils.goHome(this);
         }
@@ -414,7 +414,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         // Current info
         updateNowPlayingInfo();
         // Refresh the queue
-        ((QueueFragment)mPagerAdapter.getFragment(0)).refreshQueue();
+        ((QueueFragment)mPagerAdapter.getFragment(1)).refreshQueue();
     }
 
     /**
@@ -485,24 +485,19 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
 
         // Now playing header
         mAudioPlayerHeader = (LinearLayout)findViewById(R.id.audio_player_header);
-        // Opens the currently playing album profile
-        mAudioPlayerHeader.setOnClickListener(mOpenAlbumProfile);
-
-        // Used to hide the artwork and show the queue
-        final FrameLayout mSwitch = (FrameLayout)findViewById(R.id.audio_player_switch);
-        mSwitch.setOnClickListener(mToggleHiddenPanel);
 
         // Initialize the pager adapter
         mPagerAdapter = new PagerAdapter(this);
         // Queue
+        mPagerAdapter.add(ArtFragment.class, null);
         mPagerAdapter.add(QueueFragment.class, null);
 
         // Initialize the ViewPager
         mViewPager = (ViewPager)findViewById(R.id.audio_player_pager);
         // Attch the adapter
         mViewPager.setAdapter(mPagerAdapter);
-        // Offscreen pager loading limit
-        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
+
+        mViewPager.setOnPageChangeListener(mOnPageChangeListener);
         // Play and pause button
         mPlayPauseButton = (PlayPauseButton)findViewById(R.id.action_button_play);
         // Shuffle button
@@ -517,18 +512,19 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         mTrackName = (TextView)findViewById(R.id.audio_player_track_name);
         // Artist name
         mArtistName = (TextView)findViewById(R.id.audio_player_artist_name);
-        // Album art
-        mAlbumArt = (ImageView)findViewById(R.id.audio_player_album_art);
         // Small album art
         mAlbumArtSmall = (ImageView)findViewById(R.id.audio_player_switch_album_art);
+        // Opens the currently playing album profile
+        mAlbumArtSmall.setOnClickListener(mOpenAlbumProfile);
         // Current time
         mCurrentTime = (TextView)findViewById(R.id.audio_player_current_time);
         // Total time
         mTotalTime = (TextView)findViewById(R.id.audio_player_total_time);
         // Used to show and hide the queue fragment
-        mQueueSwitch = (ImageView)findViewById(R.id.audio_player_switch_queue);
+        mQueueSwitch = (ImageView) findViewById(R.id.audio_player_switch_queue);
         // Theme the queue switch icon
-        mQueueSwitch.setImageDrawable(mResources.getDrawable("btn_switch_queue"));
+        mQueueSwitch.setImageDrawable(mResources.getDrawable("btn_queue"));
+        mQueueSwitch.setOnClickListener(mToggleHiddenPanel);
         // Progress
         mProgress = (SeekBar)findViewById(android.R.id.progress);
 
@@ -551,7 +547,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         // Set the total time
         mTotalTime.setText(MusicUtils.makeTimeString(this, MusicUtils.duration() / 1000));
         // Set the album art
-        mImageFetcher.loadCurrentArtwork(mAlbumArt);
+        mImageFetcher.loadCurrentArtwork(((ArtFragment) mPagerAdapter.getFragment(0)).getArtImage());
         // Set the small artwork
         mImageFetcher.loadCurrentArtwork(mAlbumArtSmall);
         // Update the current time
@@ -599,7 +595,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
             // Make sure to process intent only once
             setIntent(new Intent());
             // Refresh the queue
-            ((QueueFragment)mPagerAdapter.getFragment(0)).refreshQueue();
+            ((QueueFragment)mPagerAdapter.getFragment(1)).refreshQueue();
         }
     }
 
@@ -778,32 +774,6 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
     }
 
     /**
-     * Called to show the album art and hide the queue
-     */
-    private void showAlbumArt() {
-        mPageContainer.setVisibility(View.INVISIBLE);
-        mAlbumArtSmall.setVisibility(View.GONE);
-        mQueueSwitch.setVisibility(View.VISIBLE);
-        // Fade out the pager container
-        fade(mPageContainer, 0f);
-        // Fade in the album art
-        fade(mAlbumArt, 1f);
-    }
-
-    /**
-     * Called to hide the album art and show the queue
-     */
-    public void hideAlbumArt() {
-        mPageContainer.setVisibility(View.VISIBLE);
-        mQueueSwitch.setVisibility(View.GONE);
-        mAlbumArtSmall.setVisibility(View.VISIBLE);
-        // Fade out the artwork
-        fade(mAlbumArt, 0f);
-        // Fade in the pager container
-        fade(mPageContainer, 1f);
-    }
-
-    /**
      * /** Used to shared what the user is currently listening to
      */
     private void shareCurrentTrack() {
@@ -818,6 +788,10 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
+    }
+
+    public ImageFetcher getImageFetcher() {
+        return mImageFetcher;
     }
 
     /**
@@ -857,17 +831,33 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
          */
         @Override
         public void onClick(final View v) {
-            if (mPageContainer.getVisibility() == View.VISIBLE) {
-                // Open the current album profile
-                mAudioPlayerHeader.setOnClickListener(mOpenAlbumProfile);
-                // Show the artwork, hide the queue
-                showAlbumArt();
+            if (mViewPager.getCurrentItem() == 0) {
+                mViewPager.setCurrentItem(1);
             } else {
-                // Scroll to the current track
-                mAudioPlayerHeader.setOnClickListener(mScrollToCurrentSong);
-                // Show the queue, hide the artwork
-                hideAlbumArt();
+                mViewPager.setCurrentItem(0);
             }
+        }
+    };
+
+    private final ViewPager.OnPageChangeListener mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int i, float v, int i2) {
+
+        }
+
+        @Override
+        public void onPageSelected(int i) {
+            if (i == 1) {
+                ((QueueFragment)mPagerAdapter.getFragment(1)).scrollToCurrentSong();
+                mQueueSwitch.setImageDrawable(mResources.getDrawable("btn_queue_inverse"));
+            } else {
+                mQueueSwitch.setImageDrawable(mResources.getDrawable("btn_queue"));
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int i) {
+
         }
     };
 
@@ -880,17 +870,6 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         public void onClick(final View v) {
             NavUtils.openAlbumProfile(AudioPlayerActivity.this, MusicUtils.getAlbumName(),
                     MusicUtils.getArtistName(), MusicUtils.getCurrentAlbumId());
-        }
-    };
-
-    /**
-     * Scrolls the queue to the currently playing song
-     */
-    private final OnClickListener mScrollToCurrentSong = new OnClickListener() {
-
-        @Override
-        public void onClick(final View v) {
-            ((QueueFragment)mPagerAdapter.getFragment(0)).scrollToCurrentSong();
         }
     };
 

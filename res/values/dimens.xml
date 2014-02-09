@@ -42,12 +42,9 @@
     <dimen name="item_normal_height">64.0dip</dimen>
 
     <!-- Bottom Action Bar -->
-    <dimen name="bottom_action_bar_height">48.0dip</dimen>
-    <dimen name="bottom_action_bar_item_width">56.0dip</dimen>
+    <dimen name="bottom_action_bar_height">56.0dip</dimen>
     <dimen name="bottom_action_bar_item_padding_left">12.0dip</dimen>
     <dimen name="bottom_action_bar_item_padding_right">12.0dip</dimen>
-    <dimen name="bottom_action_bar_album_art_width">30.0dip</dimen>
-    <dimen name="bottom_action_bar_album_art_height">30.0dip</dimen>
     <dimen name="bottom_action_bar_info_padding_left">5.0dip</dimen>
     <dimen name="bottom_action_bar_button_container_width">165.0dip</dimen>
 
@@ -82,10 +79,10 @@
     <dimen name="audio_player_switch_padding">10.0dip</dimen>
     <dimen name="audio_player_time_width">52.0dip</dimen>
     <dimen name="audio_player_seek_bar_margin_bottom">2.0dip</dimen>
-    <dimen name="audio_player_controls_end_button_width">50.0dip</dimen>
-    <dimen name="audio_player_controls_end_button_height">50.0dip</dimen>
-    <dimen name="audio_player_controls_main_button_width">58.0dip</dimen>
-    <dimen name="audio_player_controls_main_button_height">58.0dip</dimen>
+    <dimen name="audio_player_controls_end_button_width">64.0dip</dimen>
+    <dimen name="audio_player_controls_end_button_height">64.0dip</dimen>
+    <dimen name="audio_player_controls_main_button_width">64.0dip</dimen>
+    <dimen name="audio_player_controls_main_button_height">64.0dip</dimen>
 
     <!-- App Widgets -->
     <dimen name="app_widget_large_min_width">250.0dip</dimen>

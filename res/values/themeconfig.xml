@@ -16,35 +16,45 @@
 <resources>
 
     <!-- action bar color -->
-    <color name="action_bar">@color/action_bar_color</color>
+    <color name="action_bar">@android:color/holo_orange_dark</color>
 
     <!-- The action bar title color -->
-    <color name="action_bar_title">@color/white</color>
+    <color name="action_bar_title">@android:color/primary_text_dark</color>
 
     <!-- The action bar sub title color -->
-    <color name="action_bar_subtitle">@color/transparent_white</color>
+    <color name="action_bar_subtitle">@android:color/secondary_text_dark</color>
 
     <!-- Adpater lines -->
-    <color name="line_one">@color/white</color>
-    <color name="line_two">@color/transparent_white</color>
-    <color name="line_three">@color/transparent_white</color>
+    <color name="line_one">@android:color/primary_text_light</color>
+    <color name="line_two">@android:color/secondary_text_light</color>
+    <color name="line_three">@android:color/secondary_text_light</color>
 
     <!-- Now playing -->
-    <color name="audio_player_current_time">@color/white</color>
-    <color name="audio_player_total_time">@color/white</color>
-    <color name="audio_player_line_one">@color/white</color>
-    <color name="audio_player_line_two">@color/transparent_white</color>
-    <color name="audio_player_pager_container">@color/action_bar_color</color>
+    <color name="audio_player_current_time">@android:color/primary_text_light</color>
+    <color name="audio_player_total_time">@android:color/primary_text_light</color>
+    <color name="audio_player_line_one">@android:color/primary_text_light</color>
+    <color name="audio_player_line_two">@android:color/secondary_text_light</color>
+    <color name="audio_player_pager_container">@android:color/background_light</color>
 
     <!-- Bottom action bar -->
-    <color name="bottom_action_bar">@color/action_bar_color</color>
-    <color name="bab_line_one">@color/white</color>
-    <color name="bab_line_two">@color/transparent_white</color>
+    <color name="bottom_action_bar">@android:color/background_light</color>
+    <color name="bab_line_one">@android:color/primary_text_light</color>
+    <color name="bab_line_two">@android:color/secondary_text_light</color>
 
     <!-- Action bar items -->
-    <color name="favorite_normal">@color/transparent_white</color>
-    <color name="search_action">@color/transparent_white</color>
-    <color name="shop_action">@color/transparent_white</color>
-    <color name="pinn_to_action">@color/transparent_white</color>
+    <color name="favorite_normal">@color/near_white</color>
+    <color name="search_action">@color/near_white</color>
+    <color name="shop_action">@color/near_white</color>
+    <color name="pinn_to_action">@color/near_white</color>
 
+    <color name="tpi_unselected_text_color">@android:color/primary_text_light</color>
+    <color name="tpi_footer_color">@android:color/holo_orange_dark</color>
+
+    <color name="colorstrip">@android:color/holo_orange_dark</color>
+
+    <color name="pager_background">@android:color/background_light</color>
+
+    <color name="holo_selector">@android:color/holo_orange_light</color>
+
+    <bool name="is_default_theme">true</bool>
 </resources>

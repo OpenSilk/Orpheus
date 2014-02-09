@@ -59,6 +59,7 @@
         <!-- Main activity -->
         <activity
             android:name=".ui.activities.HomeActivity"
+            android:theme="@style/Orpheus.Theme.Default"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -72,6 +73,7 @@
         <!-- Now playing -->
         <activity
             android:name=".ui.activities.AudioPlayerActivity"
+            android:theme="@style/Orpheus.Theme.Default"
             android:clearTaskOnLaunch="true"
             android:exported="true"
             android:launchMode="singleTask"
@@ -133,6 +135,7 @@
         <!-- Profile phone Activity -->
         <activity
             android:name=".ui.activities.ProfileActivity"
+            android:theme="@style/Orpheus.Theme.Default"
             android:excludeFromRecents="true" />
         <!-- Shortcut launcher Activity -->
         <activity
@@ -149,6 +152,7 @@
         <!-- Search interface -->
         <activity
             android:name=".ui.activities.SearchActivity"
+            android:theme="@style/Orpheus.Theme.Default"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -165,10 +169,11 @@
         <activity
             android:name=".ui.activities.SettingsActivity"
             android:label="@string/menu_settings"
-            android:theme="@style/Apollo.Theme.Dark" />
+            android:theme="@style/Orpheus.Theme.Default" />
         <!-- Themes Activity -->
         <activity
             android:name=".ui.activities.ThemesActivity"
+            android:theme="@style/Orpheus.Theme.Default"
             android:excludeFromRecents="true" />
         <!-- 4x1 App Widget -->
         <receiver

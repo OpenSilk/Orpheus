@@ -36,7 +36,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -115,7 +114,7 @@ public class SearchActivity extends Activity implements LoaderCallbacks<Cursor>,
         // Initialze the theme resources
         mResources = new ThemeUtils(this);
         // Set the overflow style
-        mResources.setOverflowStyle(this);
+        mResources.setThemeStyle(this);
 
         // Fade it in
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

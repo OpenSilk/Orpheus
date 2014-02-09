@@ -62,6 +62,21 @@
                 app:themeResource="bab_line_two" />
         </RelativeLayout>
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <com.andrew.apollo.widgets.PlayPauseButton
+                android:id="@+id/action_button_play"
+                style="@style/BottomActionBarItem.Play" />
+
+            <com.andrew.apollo.widgets.RepeatingImageButton
+                android:id="@+id/action_button_next"
+                style="@style/BottomActionBarItem.Next" />
+
+        </LinearLayout>
+        <!--
         <HorizontalScrollView
             android:layout_width="@dimen/bottom_action_bar_button_container_width"
             android:layout_height="match_parent"
@@ -93,6 +108,7 @@
                     style="@style/BottomActionBarItem.Repeat" />
             </LinearLayout>
         </HorizontalScrollView>
+        -->
     </LinearLayout>
 
 </com.andrew.apollo.widgets.theme.BottomActionBar>

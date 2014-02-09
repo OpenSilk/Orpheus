@@ -18,15 +18,15 @@
 
     <item
         android:id="@android:id/background"
-        android:drawable="@drawable/scrubber_track_holo_dark"/>
-    <item android:id="@android:id/secondaryProgress">
-        <scale
-            android:drawable="@drawable/scrubber_secondary_holo"
-            android:scaleWidth="100%" />
-    </item>
+        android:drawable="@drawable/progress_bg"/>
     <item android:id="@android:id/progress">
         <scale
-            android:drawable="@drawable/scrubber_primary_holo"
+            android:drawable="@drawable/progress_primary"
+            android:scaleWidth="100%" />
+    </item>
+    <item android:id="@android:id/secondaryProgress">
+        <scale
+            android:drawable="@drawable/progress_secondary"
             android:scaleWidth="100%" />
     </item>
 
