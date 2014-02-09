@@ -50,7 +50,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="@bool/config_largeHeap"
-        android:taskAffinity="com.andrew.apollo.task" >
+        android:taskAffinity="org.opensilk.music.task" >
 
         <!-- Searchable -->
         <meta-data
