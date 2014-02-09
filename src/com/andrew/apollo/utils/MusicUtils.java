@@ -21,6 +21,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -426,7 +427,7 @@ public final class MusicUtils {
             } catch (final RemoteException ignored) {
             }
         }
-        return -1;
+        return AudioEffect.ERROR_BAD_VALUE;
     }
 
     /**
