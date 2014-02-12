@@ -30,8 +30,7 @@
         android:layout_marginLeft="@dimen/card_list_margin_left"
         android:layout_marginRight="@dimen/card_list_margin_right"
         android:layout_marginTop="@dimen/card_list_margin_top"
-        android:fastScrollEnabled="true"
-        android:fastScrollAlwaysVisible="true"
+        style="@style/Orpheus.Cards.ListView"
         card:list_card_layout_resourceID="@layout/card_list_item"/>
 
 </LinearLayout>

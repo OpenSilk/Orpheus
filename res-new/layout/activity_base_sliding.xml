@@ -169,7 +169,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/audio_player_seek_bar_margin_bottom"
                         android:max="1000"
-                        android:thumb="@null" />
+                        style="@style/Orpheus.Panel.ProgressBar"/>
 
                     <TextView
                         android:id="@+id/footer_player_total_time"

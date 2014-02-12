@@ -59,7 +59,7 @@
         <!-- Main activity -->
         <activity
             android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
-            android:theme="@style/Orpheus.Theme.Cards"
+            android:theme="@style/Orpheus.Theme.Panel"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>

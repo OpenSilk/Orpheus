@@ -32,9 +32,8 @@
         android:verticalSpacing="@dimen/card_grid_vertical_spacing"
         android:horizontalSpacing="@dimen/card_grid_horizontal_spacing"
         android:stretchMode="columnWidth"
-        android:fastScrollEnabled="true"
-        android:fastScrollAlwaysVisible="true"
         android:gravity="center"
+        style="@style/Orpheus.Cards.ListView"
         card:list_card_layout_resourceID="@layout/card_grid_item"/>
 
 </LinearLayout>

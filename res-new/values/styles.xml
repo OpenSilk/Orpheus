@@ -1,21 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Orpheus.Theme.Cards" parent="@android:style/Theme.Holo.Light">
+    <!-- Base Theme common to all activities -->
+    <style name="Orpheus.Theme.Base" parent="@android:style/Theme.Holo.Light">
         <item name="android:actionBarStyle">@style/Orpheus.Widget.ActionBar</item>
         <!-- holo.light has dark overflow button, we want a light overflow button for holo_orange-->
         <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+        <!-- doesn't work in Orpheus.Cards.ListView?? -->
+        <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
+    </style>
 
-        <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb</item>
+    <!-- Activities with panel needs ActionBarOverlay -->
+    <style name="Orpheus.Theme.Panel" parent="@style/Orpheus.Theme.Base">
         <!--needed to allow sliding up pane-->
         <item name="android:windowActionBarOverlay">true</item>
-        <!--dont overlay buttons on list view with scrollbar-->
-        <item name="android:scrollbarStyle">outsideInset</item>
     </style>
 
-    <!-- we want light menus -->
-    <style name="Orpheus.Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">@android:color/holo_orange_dark</item>
+    <!-- card lists / grids -->
+    <style name="Orpheus.Cards.ListView" parent="@android:style/Widget.ListView">
+        <item name="android:scrollbarStyle">outsideInset</item>
+        <item name="android:fastScrollEnabled">true</item>
+        <item name="android:fastScrollAlwaysVisible">true</item>
     </style>
+
+    <!-- Action Bar Global-->
+    <style name="Orpheus.Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@color/app_color</item>
+    </style>
+
+    <!-- Seekbar for now playing -->
+    <style name="Orpheus.Panel.ProgressBar" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal</item>
+        <item name="android:thumb">@drawable/seek_thumb</item>
+    </style>
+
 
 </resources>
