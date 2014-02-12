@@ -58,8 +58,9 @@
             android:value=".ui.activities.SearchActivity" />
         <!-- Main activity -->
         <activity
-            android:name=".ui.activities.HomeActivity"
-            android:theme="@style/Orpheus.Theme.Default"
+            android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
+            android:theme="@style/Orpheus.Theme.Cards"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -69,15 +70,6 @@
                 <category android:name="android.intent.category.APP_MUSIC" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-        <!-- Now playing -->
-        <activity
-            android:name=".ui.activities.AudioPlayerActivity"
-            android:theme="@style/Orpheus.Theme.Default"
-            android:clearTaskOnLaunch="true"
-            android:exported="true"
-            android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -135,7 +127,6 @@
         <!-- Profile phone Activity -->
         <activity
             android:name=".ui.activities.ProfileActivity"
-            android:theme="@style/Orpheus.Theme.Default"
             android:excludeFromRecents="true" />
         <!-- Shortcut launcher Activity -->
         <activity
@@ -152,7 +143,6 @@
         <!-- Search interface -->
         <activity
             android:name=".ui.activities.SearchActivity"
-            android:theme="@style/Orpheus.Theme.Default"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -168,12 +158,10 @@
         <!-- Used to set options -->
         <activity
             android:name=".ui.activities.SettingsActivity"
-            android:label="@string/menu_settings"
-            android:theme="@style/Orpheus.Theme.Default" />
+            android:label="@string/menu_settings"/>
         <!-- Themes Activity -->
         <activity
             android:name=".ui.activities.ThemesActivity"
-            android:theme="@style/Orpheus.Theme.Default"
             android:excludeFromRecents="true" />
         <!-- 4x1 App Widget -->
         <receiver

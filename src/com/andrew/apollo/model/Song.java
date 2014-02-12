@@ -41,9 +41,33 @@ public class Song {
     public String mAlbumName;
 
     /**
+     * Album Id
+     */
+    public long mAlbumId;
+
+    /**
      * The song duration in seconds
      */
     public int mDuration;
+
+    /**
+     * Constructor of <code>Song</code>
+     *
+     * @param songId The Id of the song
+     * @param songName The name of the song
+     * @param artistName The song artist
+     * @param albumName The song album
+     * @param duration The duration of a song in seconds
+     */
+    @Deprecated
+    public Song(final long songId, final String songName, final String artistName,
+                final String albumName, final int duration) {
+        mSongId = songId;
+        mSongName = songName;
+        mArtistName = artistName;
+        mAlbumName = albumName;
+        mDuration = duration;
+    }
 
     /**
      * Constructor of <code>Song</code>
@@ -52,14 +76,16 @@ public class Song {
      * @param songName The name of the song
      * @param artistName The song artist
      * @param albumName The song album
+     * @param albumId The album id
      * @param duration The duration of a song in seconds
      */
     public Song(final long songId, final String songName, final String artistName,
-            final String albumName, final int duration) {
+            final String albumName, final long albumId, final int duration) {
         mSongId = songId;
         mSongName = songName;
         mArtistName = artistName;
         mAlbumName = albumName;
+        mAlbumId = albumId;
         mDuration = duration;
     }
 
@@ -75,6 +101,7 @@ public class Song {
         result = prime * result + mDuration;
         result = prime * result + (int) mSongId;
         result = prime * result + (mSongName == null ? 0 : mSongName.hashCode());
+        result = prime * result + (int) mAlbumId;
         return result;
     }
 
@@ -97,6 +124,9 @@ public class Song {
             return false;
         }
         if (!TextUtils.equals(mAlbumName, other.mAlbumName)) {
+            return false;
+        }
+        if (mAlbumId != other.mAlbumId) {
             return false;
         }
         if (!TextUtils.equals(mArtistName, other.mArtistName)) {

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/sliding_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        sothree:collapsedHeight="68dp"
+        sothree:shadowHeight="4dp"
+        sothree:dragView="@+id/name">
+
+        <!-- main content -->
+        <FrameLayout
+            android:id="@+id/main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <!-- Sliding content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#eee"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="false">
+            <!-- header -->
+            <LinearLayout
+                android:id="@+id/panel_header"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:clickable="true"
+                android:orientation="horizontal" >
+                <!-- album art -->
+                <ImageView
+                    android:id="@+id/header_album_art"
+                    android:layout_gravity="left|center"
+                    android:scaleType="centerCrop"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:paddingLeft="4dp"
+                    android:background="@drawable/default_artwork" />
+                <!-- Track title / artist -->
+                <LinearLayout
+                    android:id="@+id/track_artist_info"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/header_track_info"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"/>
+
+                    <TextView
+                        android:id="@+id/header_artist_info"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"/>
+
+                </LinearLayout>
+
+                <!-- Play/pause / next buttons -->
+                <LinearLayout
+                    android:id="@+id/header_player_controls"
+                    android:layout_width="128dp"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" >
+
+                        <com.andrew.apollo.widgets.PlayPauseButton
+                            android:id="@+id/header_action_button_play"
+                            android:layout_width="@dimen/audio_player_controls_main_button_width"
+                            android:layout_height="@dimen/audio_player_controls_main_button_height"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/accessibility_play"
+                            android:focusable="true"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/btn_playback_play" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" >
+
+                        <com.andrew.apollo.widgets.RepeatingImageButton
+                            android:id="@+id/header_action_button_next"
+                            android:layout_width="@dimen/audio_player_controls_main_button_width"
+                            android:layout_height="@dimen/audio_player_controls_main_button_height"
+                            android:layout_gravity="center"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/btn_playback_next" />
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <!-- queue Button -->
+                <ImageView
+                    android:id="@+id/header_switch_queue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null" />
+
+            </LinearLayout>
+
+            <!-- album art / queue fragments -->
+            <FrameLayout
+                android:id="@+id/panel_main_content"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/shadow_height"
+                    android:layout_gravity="top"
+                    android:contentDescription="@null"
+                    android:src="@drawable/top_shadow" />
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/panel_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/shadow_height"
+                    android:layout_gravity="bottom"
+                    android:contentDescription="@null"
+                    android:src="@drawable/bottom_shadow" />
+
+            </FrameLayout>
+
+            <!-- footer -->
+            <LinearLayout
+                android:id="@+id/panel_footer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/footer_playback_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/footer_player_current_time"
+                        android:layout_width="@dimen/audio_player_time_width"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="@dimen/text_size_micro"/>
+
+                    <SeekBar
+                        android:id="@android:id/progress"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/audio_player_seek_bar_margin_bottom"
+                        android:max="1000"
+                        android:thumb="@null" />
+
+                    <TextView
+                        android:id="@+id/footer_player_total_time"
+                        android:layout_width="@dimen/audio_player_time_width"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="@dimen/text_size_micro"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/footer_player_controls"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="false"
+                    android:gravity="center" >
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" >
+
+                        <com.andrew.apollo.widgets.ShuffleButton
+                            android:id="@+id/footer_action_button_shuffle"
+                            android:layout_width="@dimen/audio_player_controls_end_button_width"
+                            android:layout_height="@dimen/audio_player_controls_end_button_height"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/accessibility_shuffle"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/btn_playback_shuffle" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" >
+
+                        <com.andrew.apollo.widgets.RepeatingImageButton
+                            android:id="@+id/footer_action_button_previous"
+                            android:layout_width="@dimen/audio_player_controls_main_button_width"
+                            android:layout_height="@dimen/audio_player_controls_main_button_height"
+                            android:layout_gravity="center"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/btn_playback_previous" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" >
+
+                        <com.andrew.apollo.widgets.PlayPauseButton
+                            android:id="@+id/footer_action_button_play"
+                            android:layout_width="@dimen/audio_player_controls_main_button_width"
+                            android:layout_height="@dimen/audio_player_controls_main_button_height"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/accessibility_play"
+                            android:focusable="true"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/btn_playback_play" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" >
+
+                        <com.andrew.apollo.widgets.RepeatingImageButton
+                            android:id="@+id/footer_action_button_next"
+                            android:layout_width="@dimen/audio_player_controls_main_button_width"
+                            android:layout_height="@dimen/audio_player_controls_main_button_height"
+                            android:layout_gravity="center"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/btn_playback_next" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" >
+
+                        <com.andrew.apollo.widgets.RepeatButton
+                            android:id="@+id/footer_action_button_repeat"
+                            android:layout_width="@dimen/audio_player_controls_end_button_width"
+                            android:layout_height="@dimen/audio_player_controls_end_button_height"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/accessibility_repeat"
+                            android:focusable="true"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/btn_playback_repeat" />
+                    </FrameLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+</RelativeLayout>

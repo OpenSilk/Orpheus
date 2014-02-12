@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Orpheus.Theme.Cards" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/Orpheus.Widget.ActionBar</item>
+        <!-- holo.light has dark overflow button, we want a light overflow button for holo_orange-->
+        <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+
+        <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb</item>
+        <!--needed to allow sliding up pane-->
+        <item name="android:windowActionBarOverlay">true</item>
+        <!--dont overlay buttons on list view with scrollbar-->
+        <item name="android:scrollbarStyle">outsideInset</item>
+    </style>
+
+    <!-- we want light menus -->
+    <style name="Orpheus.Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@android:color/holo_orange_dark</item>
+    </style>
+
+</resources>

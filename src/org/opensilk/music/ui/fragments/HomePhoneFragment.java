@@ -1,15 +1,21 @@
 /*
- * Copyright (C) 2012 Andrew Neal Licensed under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
- * or agreed to in writing, software distributed under the License is
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * Copyright (C) 2012 Andrew Neal
+ * Copyright (C) 2014 OpenSilk Productions LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package com.andrew.apollo.ui.fragments.phone;
+package org.opensilk.music.ui.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,15 +29,12 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.adapters.PagerAdapter;
-import com.andrew.apollo.adapters.PagerAdapter.MusicFragments;
-import com.andrew.apollo.ui.fragments.AlbumFragment;
-import com.andrew.apollo.ui.fragments.ArtistFragment;
-import com.andrew.apollo.ui.fragments.SongFragment;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.SortOrder;
-import com.andrew.apollo.utils.ThemeUtils;
+
+import org.opensilk.music.adapters.PagerAdapter.MusicFragments;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
@@ -45,7 +48,7 @@ import com.andrew.apollo.utils.ThemeUtils;
  *        Apollo for a couple of weeks or so before merging it with CM.
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class MusicBrowserPhoneFragment extends Fragment {
+public class HomePhoneFragment extends Fragment {
 
     /**
      * Pager
@@ -57,17 +60,12 @@ public class MusicBrowserPhoneFragment extends Fragment {
      */
     private PagerAdapter mPagerAdapter;
 
-    /**
-     * Theme resources
-     */
-    private ThemeUtils mResources;
-
     private PreferenceUtils mPreferences;
 
     /**
      * Empty constructor as per the {@link Fragment} documentation
      */
-    public MusicBrowserPhoneFragment() {
+    public HomePhoneFragment() {
     }
 
     /**
@@ -90,6 +88,7 @@ public class MusicBrowserPhoneFragment extends Fragment {
         final ViewGroup rootView = (ViewGroup)inflater.inflate(
                 R.layout.fragment_music_browser_phone, container, false);
 
+        getActivity().getActionBar().getHeight();
         // Initialize the adapter
         mPagerAdapter = new PagerAdapter(getActivity());
         final MusicFragments[] mFragments = MusicFragments.values();
@@ -115,8 +114,6 @@ public class MusicBrowserPhoneFragment extends Fragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // Initialze the theme resources
-        mResources = new ThemeUtils(getActivity());
         // Enable the options menu
         setHasOptionsMenu(true);
     }
@@ -137,7 +134,9 @@ public class MusicBrowserPhoneFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        mResources.setFavoriteIcon(menu);
+        //FIXME
+        final MenuItem favoriteAction = menu.findItem(R.id.menu_favorite);
+        favoriteAction.setIcon(R.drawable.ic_action_favorite);
     }
 
     /**

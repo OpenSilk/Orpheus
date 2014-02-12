@@ -25,9 +25,6 @@
                 android:id="@+id/menu_view_as_simple"
                 android:title="@string/menu_simple"/>
             <item
-                android:id="@+id/menu_view_as_detailed"
-                android:title="@string/menu_detailed"/>
-            <item
                 android:id="@+id/menu_view_as_grid"
                 android:title="@string/menu_grid"/>
         </menu>

@@ -14,6 +14,7 @@ package com.andrew.apollo.utils;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
@@ -21,9 +22,9 @@ import android.provider.MediaStore;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.ui.activities.AudioPlayerActivity;
-import com.andrew.apollo.ui.activities.HomeActivity;
+import org.opensilk.music.ui.activities.HomeSlidingActivity;
+
 import com.andrew.apollo.ui.activities.ProfileActivity;
 import com.andrew.apollo.ui.activities.SearchActivity;
 import com.andrew.apollo.ui.activities.SettingsActivity;
@@ -42,7 +43,7 @@ public final class NavUtils {
      * @param context The {@link Activity} to use.
      * @param artistName The name of the artist
      */
-    public static void openArtistProfile(final Activity context,
+    public static void openArtistProfile(final Context context,
             final String artistName) {
 
         // Create a new bundle to transfer the artist info
@@ -65,7 +66,7 @@ public final class NavUtils {
      * @param artistName The name of the album artist
      * @param albumId The id of the album
      */
-    public static void openAlbumProfile(final Activity context,
+    public static void openAlbumProfile(final Context context,
             final String albumName, final String artistName, final long albumId) {
 
         // Create a new bundle to transfer the album info
@@ -138,12 +139,12 @@ public final class NavUtils {
     }
 
     /**
-     * Opens to {@link HomeActivity}.
+     * Opens to {@link org.opensilk.music.ui.activities.HomeSlidingActivity}.
      * 
      * @param activity The {@link Activity} to use.
      */
     public static void goHome(final Activity activity) {
-        final Intent intent = new Intent(activity, HomeActivity.class);
+        final Intent intent = new Intent(activity, HomeSlidingActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

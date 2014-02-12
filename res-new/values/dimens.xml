@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="card_grid_columnwidth">175dp</dimen>
+    <dimen name="card_grid_cardwidth">175dp</dimen>
+    <dimen name="card_grid_horizontal_spacing">2dp</dimen>
+    <dimen name="card_grid_vertical_spacing">3dp</dimen>
+
+    <dimen name="card_list_margin_left">10dp</dimen>
+    <dimen name="card_list_margin_right">10dp</dimen>
+    <dimen name="card_list_margin_top">10dp</dimen>
+    <dimen name="card_list_thumbnail_size">50dp</dimen>
+
+</resources>
