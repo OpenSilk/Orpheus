@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 
 /**
@@ -63,7 +64,7 @@ public class ThemeUtils {
     /**
      * Default package name.
      */
-    private final String APOLLO_PACKAGE;
+    public static final String APOLLO_PACKAGE = BuildConfig.PACKAGE_NAME;
 
     /**
      * Current theme package name.
@@ -111,8 +112,6 @@ public class ThemeUtils {
      * @param context The {@link Context} to use.
      */
     public ThemeUtils(final Context context) {
-        // Init package name
-        APOLLO_PACKAGE = context.getPackageName();
         // Get the search query
         sApolloSearch = context.getString(R.string.apollo_themes_shop_key);
         // Get the preferences

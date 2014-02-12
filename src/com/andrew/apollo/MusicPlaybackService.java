@@ -75,89 +75,90 @@ public class MusicPlaybackService extends Service {
     private static final String TAG = "MusicPlaybackService";
     private static final boolean D = false;
 
+    public static final String APOLLO_PACKAGE_NAME = BuildConfig.PACKAGE_NAME;
+
     /**
      * Indicates that the music has paused or resumed
      */
-    public static final String PLAYSTATE_CHANGED = "com.andrew.apollo.playstatechanged";
+    public static final String PLAYSTATE_CHANGED = APOLLO_PACKAGE_NAME+".playstatechanged";
 
     /**
      * Indicates that music playback position within
      * a title was changed
      */
-    public static final String POSITION_CHANGED = "com.android.apollo.positionchanged";
+    public static final String POSITION_CHANGED = APOLLO_PACKAGE_NAME+".positionchanged";
 
     /**
      * Indicates the meta data has changed in some way, like a track change
      */
-    public static final String META_CHANGED = "com.andrew.apollo.metachanged";
+    public static final String META_CHANGED = APOLLO_PACKAGE_NAME+".metachanged";
 
     /**
      * Indicates the queue has been updated
      */
-    public static final String QUEUE_CHANGED = "com.andrew.apollo.queuechanged";
+    public static final String QUEUE_CHANGED = APOLLO_PACKAGE_NAME+".queuechanged";
 
     /**
      * Indicates the repeat mode chaned
      */
-    public static final String REPEATMODE_CHANGED = "com.andrew.apollo.repeatmodechanged";
+    public static final String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".repeatmodechanged";
 
     /**
      * Indicates the shuffle mode chaned
      */
-    public static final String SHUFFLEMODE_CHANGED = "com.andrew.apollo.shufflemodechanged";
+    public static final String SHUFFLEMODE_CHANGED = APOLLO_PACKAGE_NAME+".shufflemodechanged";
 
     /**
      * For backwards compatibility reasons, also provide sticky
      * broadcasts under the music package
      */
-    private String APOLLO_PACKAGE_NAME;
     public static final String MUSIC_PACKAGE_NAME = "com.android.music";
 
     /**
      * Called to indicate a general service commmand. Used in
      * {@link MediaButtonIntentReceiver}
      */
-    public static final String SERVICECMD = "com.andrew.apollo.musicservicecommand";
+    public static final String SERVICECMD = APOLLO_PACKAGE_NAME+".musicservicecommand";
 
     /**
      * Called to go toggle between pausing and playing the music
      */
-    public static final String TOGGLEPAUSE_ACTION = "com.andrew.apollo.togglepause";
+    public static final String TOGGLEPAUSE_ACTION = APOLLO_PACKAGE_NAME+".togglepause";
 
     /**
      * Called to go to pause the playback
      */
-    public static final String PAUSE_ACTION = "com.andrew.apollo.pause";
+    public static final String PAUSE_ACTION = APOLLO_PACKAGE_NAME+".pause";
 
     /**
      * Called to go to stop the playback
      */
-    public static final String STOP_ACTION = "com.andrew.apollo.stop";
+    public static final String STOP_ACTION = APOLLO_PACKAGE_NAME+".stop";
 
     /**
      * Called to go to the previous track
      */
-    public static final String PREVIOUS_ACTION = "com.andrew.apollo.previous";
+    public static final String PREVIOUS_ACTION = APOLLO_PACKAGE_NAME+".previous";
 
     /**
      * Called to go to the next track
      */
-    public static final String NEXT_ACTION = "com.andrew.apollo.next";
+    public static final String NEXT_ACTION = APOLLO_PACKAGE_NAME+".next";
 
     /**
      * Called to change the repeat mode
      */
-    public static final String REPEAT_ACTION = "com.andrew.apollo.repeat";
+    public static final String REPEAT_ACTION = APOLLO_PACKAGE_NAME+".repeat";
 
     /**
      * Called to change the shuffle mode
      */
-    public static final String SHUFFLE_ACTION = "com.andrew.apollo.shuffle";
+    public static final String SHUFFLE_ACTION = APOLLO_PACKAGE_NAME+".shuffle";
 
     /**
      * Called to update the service about the foreground state of Apollo's activities
      */
-    public static final String FOREGROUND_STATE_CHANGED = "com.andrew.apollo.fgstatechanged";
+    public static final String FOREGROUND_STATE_CHANGED = APOLLO_PACKAGE_NAME+".fgstatechanged";
 
     public static final String NOW_IN_FOREGROUND = "nowinforeground";
 
@@ -165,17 +166,17 @@ public class MusicPlaybackService extends Service {
      * Used to easily notify a list that it should refresh. i.e. A playlist
      * changes
      */
-    public static final String REFRESH = "com.andrew.apollo.refresh";
+    public static final String REFRESH = APOLLO_PACKAGE_NAME+".refresh";
 
     /**
      * Used by the alarm intent to shutdown the service after being idle
      */
-    private static final String SHUTDOWN = "com.andrew.apollo.shutdown";
+    private static final String SHUTDOWN = APOLLO_PACKAGE_NAME+".shutdown";
 
     /**
      * Called to update the remote control client
      */
-    public static final String UPDATE_LOCKSCREEN = "com.andrew.apollo.updatelockscreen";
+    public static final String UPDATE_LOCKSCREEN = APOLLO_PACKAGE_NAME+".updatelockscreen";
 
     public static final String CMDNAME = "command";
 
@@ -528,7 +529,6 @@ public class MusicPlaybackService extends Service {
     public void onCreate() {
         if (D) Log.d(TAG, "Creating service");
         super.onCreate();
-        APOLLO_PACKAGE_NAME = getApplication().getPackageName();
 
         // Initialize the favorites and recents databases
         mRecentsCache = RecentStore.getInstance(this);

@@ -118,7 +118,7 @@
                 <data android:mimeType="vnd.android.cursor.dir/playlist" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.andrew.apollo.AUDIO_PLAYER" />
+                <action android:name="org.opensilk.music.AUDIO_PLAYER" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

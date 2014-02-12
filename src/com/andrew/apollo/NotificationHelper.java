@@ -144,7 +144,7 @@ public class NotificationHelper {
      * Open to the now playing screen
      */
     private PendingIntent getPendingIntent() {
-        return PendingIntent.getActivity(mService, 0, new Intent("com.andrew.apollo.AUDIO_PLAYER")
+        return PendingIntent.getActivity(mService, 0, new Intent("org.opensilk.music.AUDIO_PLAYER")
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0);
     }
 
