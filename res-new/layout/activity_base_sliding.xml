@@ -57,36 +57,36 @@
                 android:id="@+id/panel_header"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/panel_header_height"
-                android:paddingLeft="@dimen/panel_header_padding_left"
-                android:paddingRight="12dp"
+                style="@style/Orpheus.PanelHeader"
                 android:clickable="true"
-                android:background="#e6fafafa"
-                android:orientation="horizontal" >
+            android:orientation="horizontal" >
                 <!-- album art -->
                 <ImageView
                     android:id="@+id/header_album_art"
-                    android:layout_gravity="left|center"
-                    android:scaleType="centerCrop"
-                    android:layout_width="@dimen/panel_header_album_art_size"
-                    android:layout_height="@dimen/panel_header_album_art_size"/>
-                <!-- Track title / artist -->
+                    style="@style/Orpheus.Thumbnail.PanelHeader"/>
+                <!-- Track title / artist
+                this is the anchor for sliding -->
                 <LinearLayout
                     android:id="@+id/track_artist_info"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_gravity="center_vertical"
+                    android:gravity="left|center_vertical"
+                    android:clickable="true"
                     android:orientation="vertical"
+                    android:paddingLeft="@dimen/panel_header_info_padding_left"
                     android:layout_weight="1">
 
                     <TextView
                         android:id="@+id/header_track_info"
                         android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"/>
+                        android:layout_width="wrap_content"
+                        style="@style/Orpheus.Text.PanelHeader.TrackInfo"/>
 
                     <TextView
                         android:id="@+id/header_artist_info"
                         android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"/>
+                        android:layout_width="wrap_content"
+                        style="@style/Orpheus.Text.PanelHeader.ArtistInfo"/>
 
                 </LinearLayout>
 
@@ -94,24 +94,29 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_gravity="right"
+                    android:gravity="right"
                     android:orientation="horizontal">
 
                     <org.opensilk.music.widgets.PlayPauseButton
                         android:id="@+id/header_action_button_play"
-                        style="@style/HeaderButton"
+                        style="@style/Orpheus.Button.PanelHeader"
                         android:contentDescription="@string/accessibility_play"/>
 
                     <org.opensilk.music.widgets.RepeatingImageButton
                         android:id="@+id/header_action_button_next"
-                        style="@style/HeaderButton"
+                        style="@style/Orpheus.Button.PanelHeader"
                         android:contentDescription="@string/accessibility_next"/>
 
                     <ImageButton
                         android:id="@+id/header_switch_queue"
-                        style="@style/HeaderButton"
+                        style="@style/Orpheus.Button.PanelHeader.Menu"
+                        android:src="@drawable/ic_queue"
                         android:contentDescription="@null"/>
 
+                    <ImageButton android:id="@+id/header_overflow"
+                        style="@style/Orpheus.Button.PanelHeader"
+                        android:src="@drawable/ic_menu_moreoverflow_holo_light"
+                        android:contentDescription="@null" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -172,27 +177,27 @@
 
                     <org.opensilk.music.widgets.ShuffleButton
                         android:id="@+id/footer_action_button_shuffle"
-                        style="@style/FooterButton"
+                        style="@style/Orpheus.Button.Footer"
                         android:contentDescription="@string/accessibility_shuffle" />
 
                     <org.opensilk.music.widgets.RepeatingImageButton
                         android:id="@+id/footer_action_button_previous"
-                        style="@style/FooterButton"
+                        style="@style/Orpheus.Button.Footer"
                         android:contentDescription="@string/accessibility_prev"/>
 
                     <org.opensilk.music.widgets.PlayPauseButton
                         android:id="@+id/footer_action_button_play"
-                        style="@style/FooterButton"
+                        style="@style/Orpheus.Button.Footer"
                         android:contentDescription="@string/accessibility_play"/>
 
                     <org.opensilk.music.widgets.RepeatingImageButton
                         android:id="@+id/footer_action_button_next"
-                        style="@style/FooterButton"
+                        style="@style/Orpheus.Button.Footer"
                         android:contentDescription="@string/accessibility_next"/>
 
                     <org.opensilk.music.widgets.RepeatButton
                         android:id="@+id/footer_action_button_repeat"
-                        style="@style/FooterButton"
+                        style="@style/Orpheus.Button.Footer"
                         android:contentDescription="@string/accessibility_repeat" />
 
                 </LinearLayout>

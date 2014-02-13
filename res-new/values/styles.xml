@@ -42,21 +42,14 @@
         <item name="android:background">@color/app_color</item>
     </style>
 
+    <style name="Orpheus.Button" parent="@android:style/Widget.Holo.Button.Borderless">
+
+    </style>
+
     <!-- Seekbar for now playing -->
     <style name="ProgressBar" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_orpheus</item>
         <item name="android:thumb">@drawable/seek_thumb</item>
-    </style>
-
-    <style name="HeaderButton" parent="@android:style/Widget.Holo.Button.Borderless">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">match_parent</item>
-    </style>
-
-    <style name="FooterButton" parent="@android:style/Widget.Holo.Button.Borderless">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_height">50dp</item>
     </style>
 
     <style name="Orpheus.FastScroll" parent="@android:style/Widget.AbsListView">
@@ -112,6 +105,72 @@
         <item name="android:textColor">@color/app_color</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:background">@color/tabstrip_background</item>
+    </style>
+
+    <style name="Orpheus.Thumbnail">
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="Orpheus.Thumbnail.GridCard">
+        <item name="android:layout_width">@dimen/card_grid_cardwidth</item>
+        <item name="android:layout_height">@dimen/card_grid_cardwidth</item>
+    </style>
+
+    <style name="Orpheus.Thumbnail.PanelHeader">
+        <item name="android:layout_width">@dimen/panel_header_album_art_size</item>
+        <item name="android:layout_height">@dimen/panel_header_album_art_size</item>
+    </style>
+
+    <style name="Orpheus.Thumbnail.ListCard">
+        <item name="android:layout_width">@dimen/card_list_thumbnail_size</item>
+        <item name="android:layout_height">@dimen/card_list_thumbnail_size</item>
+    </style>
+
+    <style name="Orpheus.Text">
+
+    </style>
+
+    <!--PANEL HEADER-->
+
+    <style name="Orpheus.PanelHeader">
+        <!--push the thumbnail over-->
+        <item name="android:paddingLeft">@dimen/panel_header_padding_left</item>
+        <!--push the queue button over-->
+        <item name="android:paddingRight">@dimen/panel_header_padding_right</item>
+        <!--default closed bg this is overrode when panel opens to @color/app_background_light_transparent-->
+        <item name="android:background">@color/app_background_light</item>
+    </style>
+
+    <style name="Orpheus.Text.PanelHeader">
+        <item name="android:ellipsize">end</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Orpheus.Text.PanelHeader.TrackInfo">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Orpheus.Text.PanelHeader.ArtistInfo">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
+    <style name="Orpheus.Button.PanelHeader">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">@dimen/panel_header_album_art_size</item>
+        <item name="android:layout_height">@dimen/panel_header_album_art_size</item>
+    </style>
+
+    <!--PANEL FOOTER-->
+
+    <style name="Orpheus.Button.Footer">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">50dp</item>
     </style>
 
 </resources>

@@ -38,6 +38,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -97,6 +98,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     private TimeHandler mTimeHandler;
 
     /** Panel Header */
+    private ViewGroup mPanelHeader;
     //play/pause
     private PlayPauseButton mHeaderPlayPauseButton;
     // Next button
@@ -105,6 +107,8 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     private ImageView mHeaderAlbumArt;
     // queue switch button
     private ImageButton mHeaderQueueSwitch;
+    // overflow btn
+    private ImageButton mHeaderOverflow;
     // Track name
     private TextView mHeaderTrackName;
     // Artist name
@@ -402,6 +406,9 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
                 .replace(R.id.panel_main_content, new ArtFragment(), "art_bg")
                 .commit();
 
+        //Header
+        mPanelHeader = (ViewGroup) findViewById(R.id.panel_header);
+
         // Play and pause button
         mHeaderPlayPauseButton = (PlayPauseButton)findViewById(R.id.header_action_button_play);
         // Next button
@@ -418,11 +425,13 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         mHeaderAlbumArt.setOnClickListener(mOpenCurrentAlbumProfile);
         // Used to show and hide the queue fragment
         mHeaderQueueSwitch = (ImageButton) findViewById(R.id.header_switch_queue);
-        // Theme the queue switch icon
-        mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue); //FIXME
         mHeaderQueueSwitch.setOnClickListener(mToggleHiddenPanel);
+        // overflow
+        mHeaderOverflow = (ImageButton) findViewById(R.id.header_overflow);
+
         if (!mSlidingPanel.isExpanded()) {
             mHeaderQueueSwitch.setVisibility(View.GONE);
+            mHeaderOverflow.setVisibility(View.GONE);
         }
 
         // Play and pause button
@@ -768,19 +777,23 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         public void onPanelExpanded(View panel) {
             Log.i(TAG, "onPanelExpanded");
             mHeaderQueueSwitch.setVisibility(View.VISIBLE);
+            mHeaderOverflow.setVisibility(View.VISIBLE);
             mHeaderPlayPauseButton.setVisibility(View.GONE);
             mHeaderNextButton.setVisibility(View.GONE);
+            mPanelHeader.setBackgroundResource(R.color.app_background_light_transparent);
         }
 
         @Override
         public void onPanelCollapsed(View panel) {
             Log.i(TAG, "onPanelCollapsed");
             mHeaderQueueSwitch.setVisibility(View.GONE);
+            mHeaderOverflow.setVisibility(View.GONE);
             mHeaderPlayPauseButton.setVisibility(View.VISIBLE);
             mHeaderNextButton.setVisibility(View.VISIBLE);
             if (mQueueShowing) {
                 popQueueFragment();
             }
+            mPanelHeader.setBackgroundResource(R.color.app_background_light);
         }
 
         @Override

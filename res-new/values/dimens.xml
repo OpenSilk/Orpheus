@@ -17,7 +17,10 @@
 
     <dimen name="panel_header_height">68dp</dimen>
     <dimen name="panel_footer_height">80dp</dimen>
+    <!-- want this to be half panel_header_height - panel_header_album_art_size -->
     <dimen name="panel_header_padding_left">4dp</dimen>
+    <dimen name="panel_header_info_padding_left">4dp</dimen>
+    <dimen name="panel_header_padding_right">4dp</dimen>
     <dimen name="panel_header_album_art_size">60dp</dimen>
     <dimen name="panel_header_player_controls_size">@dimen/panel_header_height</dimen>
 
