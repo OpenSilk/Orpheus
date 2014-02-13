@@ -45,4 +45,9 @@
         <item name="android:layout_height">50dp</item>
     </style>
 
+    <style name="Orpheus.FastScroll.AbsListView.DragSort">
+        <item name="use_default_controller">true</item>
+        <item name="drag_handle_id">@id/image</item>
+    </style>
+
 </resources>

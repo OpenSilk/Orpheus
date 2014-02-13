@@ -57,6 +57,8 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
+
+import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.PlayPauseButton;
 import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
@@ -65,7 +67,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.adapters.PagerAdapter;
 import org.opensilk.music.ui.fragments.ArtFragment;
-import org.opensilk.music.ui.fragments.QueueFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

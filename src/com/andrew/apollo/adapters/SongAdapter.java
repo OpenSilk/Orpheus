@@ -12,6 +12,7 @@
 package com.andrew.apollo.adapters;
 
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.andrew.apollo.ui.MusicHolder;
 import com.andrew.apollo.ui.MusicHolder.DataHolder;
 import com.andrew.apollo.ui.fragments.QueueFragment;
 import com.andrew.apollo.ui.fragments.SongFragment;
+import com.andrew.apollo.utils.ApolloUtils;
 
 /**
  * This {@link ArrayAdapter} is used to display all of the songs on a user's
@@ -83,6 +85,9 @@ public class SongAdapter extends ArrayAdapter<Song> {
         holder.mLineOne.get().setText(dataHolder.mLineOne);
         // Set the album name (line two)
         holder.mLineTwo.get().setText(dataHolder.mLineTwo);
+
+        ApolloUtils.getImageFetcher((FragmentActivity) getContext()).loadAlbumImage(dataHolder.mLineThree, dataHolder.mLineTwo, dataHolder.mItemId,
+                holder.mImage.get());
         return convertView;
     }
 
@@ -121,6 +126,7 @@ public class SongAdapter extends ArrayAdapter<Song> {
             mData[i].mLineOne = song.mSongName;
             // Album names (line two)
             mData[i].mLineTwo = song.mAlbumName;
+            mData[i].mLineThree = song.mArtistName;
         }
     }
 

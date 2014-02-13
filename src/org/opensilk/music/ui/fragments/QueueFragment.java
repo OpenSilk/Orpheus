@@ -11,11 +11,11 @@
 
 package org.opensilk.music.ui.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -46,16 +46,7 @@ import com.andrew.apollo.recycler.RecycleHolder;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.ui.cards.CardQueueList;
-import org.opensilk.music.ui.cards.CardSongList;
-import org.opensilk.music.views.DragSortCardsListView;
-
-import java.util.ArrayList;
 import java.util.List;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * This class is used to display all of the songs in the queue.
@@ -63,7 +54,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
 public class QueueFragment extends Fragment implements LoaderCallbacks<List<Song>>,
-        DropListener, RemoveListener, DragScrollProfile {
+        OnItemClickListener, DropListener, RemoveListener, DragScrollProfile {
 
     /**
      * Used to keep context menu items from bleeding into other fragments
@@ -83,14 +74,27 @@ public class QueueFragment extends Fragment implements LoaderCallbacks<List<Song
     /**
      * The list view
      */
-    //private DragSortListView mListView;
-    //private CardListView mListView;
-    private DragSortCardsListView mListView;
+    private DragSortListView mListView;
 
     /**
      * Represents a song
      */
     private Song mSong;
+
+    /**
+     * Position of a context menu item
+     */
+    private int mSelectedPosition;
+
+    /**
+     * Id of a context menu item
+     */
+    private long mSelectedId;
+
+    /**
+     * Song, album, and artist name used in the context menu
+     */
+    private String mSongName, mAlbumName, mArtistName;
 
     /**
      * Empty constructor as per the {@link Fragment} documentation
@@ -104,6 +108,8 @@ public class QueueFragment extends Fragment implements LoaderCallbacks<List<Song
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Create the adpater
+        mAdapter = new SongAdapter(getActivity(), R.layout.drag_sort_list_item);
     }
 
     /**
@@ -115,13 +121,15 @@ public class QueueFragment extends Fragment implements LoaderCallbacks<List<Song
         // The View for the fragment's UI
         final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.drag_sort_list, null);
         // Initialize the list
-        mListView = (DragSortCardsListView)rootView.findViewById(R.id.card_list_base);
+        mListView = (DragSortListView)rootView.findViewById(R.id.list_base);
         // Set the data behind the list
-//        mListView.setAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
         // Release any references to the recycled Views
         mListView.setRecyclerListener(new RecycleHolder());
         // Listen for ContextMenus to be created
         mListView.setOnCreateContextMenuListener(this);
+        // Play the selected song
+        mListView.setOnItemClickListener(this);
         // Set the drop listener
         mListView.setDropListener(this);
         // Set the swipe to remove listener
@@ -147,6 +155,149 @@ public class QueueFragment extends Fragment implements LoaderCallbacks<List<Song
      * {@inheritDoc}
      */
     @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        inflater.inflate(R.menu.queue, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_save_queue:
+                NowPlayingCursor queue = (NowPlayingCursor)QueueLoader
+                        .makeQueueCursor(getActivity());
+                CreateNewPlaylist.getInstance(MusicUtils.getSongListForCursor(queue)).show(
+                        getFragmentManager(), "CreatePlaylist");
+                queue.close();
+                queue = null;
+                return true;
+            case R.id.menu_clear_queue:
+                MusicUtils.clearQueue();
+                NavUtils.goHome(getActivity());
+                return true;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCreateContextMenu(final ContextMenu menu, final View v,
+            final ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        // Get the position of the selected item
+        final AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
+        mSelectedPosition = info.position;
+        // Creat a new song
+        mSong = mAdapter.getItem(mSelectedPosition);
+        mSelectedId = mSong.mSongId;
+        mSongName = mSong.mSongName;
+        mAlbumName = mSong.mAlbumName;
+        mArtistName = mSong.mArtistName;
+
+        // Play the song next
+        menu.add(GROUP_ID, FragmentMenuItems.PLAY_NEXT, Menu.NONE,
+                getString(R.string.context_menu_play_next));
+
+        // Add the song to a playlist
+        final SubMenu subMenu = menu.addSubMenu(GROUP_ID, FragmentMenuItems.ADD_TO_PLAYLIST,
+                Menu.NONE, R.string.add_to_playlist);
+        MusicUtils.makePlaylistMenu(getActivity(), GROUP_ID, subMenu, true);
+
+        // Remove the song from the queue
+        menu.add(GROUP_ID, FragmentMenuItems.REMOVE_FROM_QUEUE, Menu.NONE,
+                getString(R.string.remove_from_queue));
+
+        // View more content by the song artist
+        menu.add(GROUP_ID, FragmentMenuItems.MORE_BY_ARTIST, Menu.NONE,
+                getString(R.string.context_menu_more_by_artist));
+
+        // Make the song a ringtone
+        menu.add(GROUP_ID, FragmentMenuItems.USE_AS_RINGTONE, Menu.NONE,
+                getString(R.string.context_menu_use_as_ringtone));
+
+        // Delete the song
+        menu.add(GROUP_ID, FragmentMenuItems.DELETE, Menu.NONE,
+                getString(R.string.context_menu_delete));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onContextItemSelected(final android.view.MenuItem item) {
+        if (item.getGroupId() == GROUP_ID) {
+            switch (item.getItemId()) {
+                case FragmentMenuItems.PLAY_NEXT:
+                    NowPlayingCursor queue = (NowPlayingCursor)QueueLoader
+                            .makeQueueCursor(getActivity());
+                    queue.removeItem(mSelectedPosition);
+                    queue.close();
+                    queue = null;
+                    MusicUtils.playNext(new long[] {
+                        mSelectedId
+                    });
+                    refreshQueue();
+                    return true;
+                case FragmentMenuItems.REMOVE_FROM_QUEUE:
+                    MusicUtils.removeTrack(mSelectedId);
+                    refreshQueue();
+                    return true;
+                case FragmentMenuItems.ADD_TO_FAVORITES:
+                    FavoritesStore.getInstance(getActivity()).addSongId(
+                            mSelectedId, mSongName, mAlbumName, mArtistName);
+                    return true;
+                case FragmentMenuItems.NEW_PLAYLIST:
+                    CreateNewPlaylist.getInstance(new long[] {
+                        mSelectedId
+                    }).show(getFragmentManager(), "CreatePlaylist");
+                    return true;
+                case FragmentMenuItems.PLAYLIST_SELECTED:
+                    final long mPlaylistId = item.getIntent().getLongExtra("playlist", 0);
+                    MusicUtils.addToPlaylist(getActivity(), new long[] {
+                        mSelectedId
+                    }, mPlaylistId);
+                    return true;
+                case FragmentMenuItems.MORE_BY_ARTIST:
+                    NavUtils.openArtistProfile(getActivity(), mArtistName);
+                    return true;
+                case FragmentMenuItems.USE_AS_RINGTONE:
+                    MusicUtils.setRingtone(getActivity(), mSelectedId);
+                    return true;
+                case FragmentMenuItems.DELETE:
+                    DeleteDialog.newInstance(mSong.mSongName, new long[] {
+                        mSelectedId
+                    }, null).show(getFragmentManager(), "DeleteDialog");
+                    return true;
+                default:
+                    break;
+            }
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onItemClick(final AdapterView<?> parent, final View view, final int position,
+            final long id) {
+        // When selecting a track from the queue, just jump there instead of
+        // reloading the queue. This is both faster, and prevents accidentally
+        // dropping out of party shuffle.
+        MusicUtils.setQueuePosition(position);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Loader<List<Song>> onCreateLoader(final int id, final Bundle args) {
         return new QueueLoader(getActivity());
     }
@@ -161,20 +312,23 @@ public class QueueFragment extends Fragment implements LoaderCallbacks<List<Song
             return;
         }
 
-        ArrayList<Card> cards = new ArrayList<Card>();
-        for (int ii=0; ii<data.size(); ii++) {
-            CardQueueList card = new CardQueueList(getActivity(), data.get(ii));
-            card.setId(String.valueOf(ii));
-            cards.add(card);
+        // Start fresh
+        mAdapter.unload();
+        // Add the data to the adpater
+        for (final Song song : data) {
+            mAdapter.add(song);
         }
-        CardArrayAdapter adapter = new CardArrayAdapter(getActivity(), cards);
-        // Set the data behind the list
-        mListView.setAdapter(adapter);
+        // Build the cache
+        mAdapter.buildCache();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void onLoaderReset(Loader<List<Song>> listLoader) {
-
+    public void onLoaderReset(final Loader<List<Song>> loader) {
+        // Clear the data in the adapter
+        mAdapter.unload();
     }
 
     /**

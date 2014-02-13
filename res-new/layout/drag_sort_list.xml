@@ -2,7 +2,6 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:card="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,16 +16,14 @@
         <!--app:remove_enabled="false"-->
         <!--app:float_alpha="0.8" />-->
 
-    <org.opensilk.music.views.DragSortCardsListView
-        android:id="@+id/card_list_base"
+    <com.mobeta.android.dslv.DragSortListView
+        android:id="@+id/list_base"
         app:use_default_controller="true"
-        app:drag_handle_id="@id/card_thumbnail_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="@dimen/card_list_margin_left"
         android:layout_marginRight="@dimen/card_list_margin_right"
         android:layout_marginTop="@dimen/panel_header_height"
-        style="@style/Orpheus.FastScroll.AbsListView"
-        card:list_card_layout_resourceID="@layout/card_list_item"/>
+        style="@style/Orpheus.FastScroll.AbsListView.DragSort"/>
 
 </LinearLayout>
