@@ -80,10 +80,6 @@ public class CardArtistList extends CardBaseList<Artist> {
                         break;
                     case R.id.card_menu_add_playlist:
                         //TODO
-                        //                        CreateNewPlaylist.getInstance(mArtistList).show(getFragmentManager(),
-                        //                                "CreatePlaylist");
-                        //                        final long id = item.getIntent().getLongExtra("playlist", 0);
-                        //                        MusicUtils.addToPlaylist(getActivity(), mArtistList, id);
                         break;
                     case R.id.card_menu_delete:
                         final String artist = mData.mArtistName;

@@ -692,6 +692,10 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         return 500;
     }
 
+    public void refreshQueue() {
+        ((QueueFragment) mPanelPagerAdapter.getFragment(1)).refreshQueue();
+    }
+
     /**
      * Used to scan backwards through the track
      */

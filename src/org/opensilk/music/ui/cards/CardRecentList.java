@@ -81,10 +81,6 @@ public class CardRecentList extends CardBaseList<Album> {
                         break;
                     case R.id.card_menu_add_playlist:
                         //TODO
-                        //                    CreateNewPlaylist.getInstance(mAlbumList).show(getFragmentManager(),
-                        //                            "CreatePlaylist");
-                        //                    final long id = item.getIntent().getLongExtra("playlist", 0);
-                        //                    MusicUtils.addToPlaylist(getActivity(), mAlbumList, id);
                         break;
                     case R.id.card_menu_go_artist:
                         NavUtils.openArtistProfile(getContext(), mData.mArtistName);

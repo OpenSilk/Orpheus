@@ -8,7 +8,7 @@
     <dimen name="card_list_margin_left">10dp</dimen>
     <dimen name="card_list_margin_right">10dp</dimen>
     <dimen name="card_list_margin_top">10dp</dimen>
-    <dimen name="card_list_thumbnail_size">50dp</dimen>
+    <dimen name="card_list_thumbnail_size">60dp</dimen>
 
     <dimen name="panel_player_controls_size">64dp</dimen>
 
