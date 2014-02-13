@@ -158,7 +158,8 @@
         <!-- Used to set options -->
         <activity
             android:name=".ui.activities.SettingsActivity"
-            android:label="@string/menu_settings"/>
+            android:label="@string/menu_settings"
+            android:theme="@style/Apollo.Theme.Dark" />
         <!-- Themes Activity -->
         <activity
             android:name=".ui.activities.ThemesActivity"

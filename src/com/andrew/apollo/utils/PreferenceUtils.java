@@ -156,7 +156,7 @@ public final class PreferenceUtils {
      */
     public final int getDefaultThemeColor(final Context context) {
         return mPreferences.getInt(DEFAULT_THEME_COLOR,
-                context.getResources().getColor(android.R.color.holo_orange_dark));
+                context.getResources().getColor(R.color.holo_blue_light));
     }
 
     /**

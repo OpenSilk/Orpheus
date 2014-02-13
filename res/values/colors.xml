@@ -57,9 +57,4 @@
     <!-- A dark Holo shade of orange -->
     <color name="holo_orange_dark">#ffff8800</color>
 
-    <!-- UT Burnt orange -->
-    <color name="burnt_orange">#FFCC5500</color>
-
-    <!-- Ubuntu near-white -->
-    <color name="near_white">#FFF1F1ED</color>
 </resources>

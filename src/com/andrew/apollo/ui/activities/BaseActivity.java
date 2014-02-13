@@ -28,6 +28,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -77,6 +78,16 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
     private PlayPauseButton mPlayPauseButton;
 
     /**
+     * Repeat button (BAB)
+     */
+    private RepeatButton mRepeatButton;
+
+    /**
+     * Shuffle button (BAB)
+     */
+    private ShuffleButton mShuffleButton;
+
+    /**
      * Track name (BAB)
      */
     private TextView mTrackName;
@@ -117,7 +128,7 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
         mResources = new ThemeUtils(this);
 
         // Set the overflow style
-        mResources.setThemeStyle(this);
+        mResources.setOverflowStyle(this);
 
         // Fade it in
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -295,6 +306,10 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
     private void initBottomActionBar() {
         // Play and pause button
         mPlayPauseButton = (PlayPauseButton)findViewById(R.id.action_button_play);
+        // Shuffle button
+        mShuffleButton = (ShuffleButton)findViewById(R.id.action_button_shuffle);
+        // Repeat button
+        mRepeatButton = (RepeatButton)findViewById(R.id.action_button_repeat);
         // Track name
         mTrackName = (TextView)findViewById(R.id.bottom_action_bar_line_one);
         // Artist name
@@ -328,6 +343,10 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
     private void updatePlaybackControls() {
         // Set the play and pause image
         mPlayPauseButton.updateState();
+        // Set the shuffle image
+        mShuffleButton.updateShuffleState();
+        // Set the repeat image
+        mRepeatButton.updateRepeatState();
     }
 
     /**
@@ -404,6 +423,12 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
             } else if (action.equals(MusicPlaybackService.PLAYSTATE_CHANGED)) {
                 // Set the play and pause image
                 mReference.get().mPlayPauseButton.updateState();
+            } else if (action.equals(MusicPlaybackService.REPEATMODE_CHANGED)
+                    || action.equals(MusicPlaybackService.SHUFFLEMODE_CHANGED)) {
+                // Set the repeat image
+                mReference.get().mRepeatButton.updateRepeatState();
+                // Set the shuffle image
+                mReference.get().mShuffleButton.updateShuffleState();
             } else if (action.equals(MusicPlaybackService.REFRESH)) {
                 // Let the listener know to update a list
                 for (final MusicStateListener listener : mReference.get().mMusicStateListener) {

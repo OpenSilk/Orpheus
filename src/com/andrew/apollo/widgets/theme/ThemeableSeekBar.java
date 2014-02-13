@@ -28,11 +28,6 @@ public class ThemeableSeekBar extends SeekBar {
     public static final String PROGESS = "audio_player_seekbar";
 
     /**
-     * Used to set scrubber drawable
-     */
-    public static final String THUMB = "audio_player_scrubber";
-
-    /**
      * @param context The {@link Context} to use
      * @param attrs The attributes of the XML tag that is inflating the view.
      */
@@ -42,7 +37,6 @@ public class ThemeableSeekBar extends SeekBar {
         final ThemeUtils resources = new ThemeUtils(context);
         // Theme the seek bar
         setProgressDrawable(resources.getDrawable(PROGESS));
-        setThumb(resources.getDrawable(THUMB));
     }
 
 }

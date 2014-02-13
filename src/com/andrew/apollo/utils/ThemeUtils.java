@@ -212,20 +212,11 @@ public class ThemeUtils {
      * 
      * @param app The {@link Activity} used to set the theme.
      */
-    public void setThemeStyle(final Activity app) {
-        final int resourceId = mResources.getIdentifier("is_default_theme", "bool", mThemePackage);
-        try {
-            // Apollo themes wont have this so it will throw
-            if (mResources.getBoolean(resourceId)) {
-                //app.setTheme(R.style.Orpheus_Theme_Default);
-                return;
-            }
-        } catch (final Resources.NotFoundException e) {
-            if (isActionBarDark()) {
-                app.setTheme(R.style.Apollo_Theme_Dark);
-            } else {
-                app.setTheme(R.style.Apollo_Theme_Light);
-            }
+    public void setOverflowStyle(final Activity app) {
+        if (isActionBarDark()) {
+            app.setTheme(R.style.Apollo_Theme_Dark);
+        } else {
+            app.setTheme(R.style.Apollo_Theme_Light);
         }
     }
 
