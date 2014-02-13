@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="bottom"
         sothree:collapsedHeight="@dimen/panel_header_height"
-        sothree:shadowHeight="4dp"
+        sothree:shadowHeight="@dimen/shadow_height"
         sothree:dragView="@+id/name">
 
         <!-- main content -->
@@ -21,13 +21,26 @@
             android:layout_height="match_parent"/>
 
         <!-- Sliding content -->
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#eee"
             android:orientation="vertical"
             android:clickable="true"
             android:focusable="false">
+
+            <!-- album art / queue fragments -->
+            <FrameLayout
+                android:id="@+id/panel_main_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/panel_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+
             <!-- header -->
             <LinearLayout
                 android:id="@+id/panel_header"
@@ -36,6 +49,7 @@
                 android:paddingLeft="@dimen/panel_header_padding_left"
                 android:paddingRight="12dp"
                 android:clickable="true"
+                android:background="#e6fafafa"
                 android:orientation="horizontal" >
                 <!-- album art -->
                 <ImageView
@@ -74,59 +88,40 @@
 
                     <org.opensilk.music.widgets.PlayPauseButton
                         android:id="@+id/header_action_button_play"
-                        style="@style/HeaderButton" />
+                        style="@style/HeaderButton"
+                        android:contentDescription="@string/accessibility_play"/>
 
                     <org.opensilk.music.widgets.RepeatingImageButton
                         android:id="@+id/header_action_button_next"
-                        style="@style/HeaderButton" />
+                        style="@style/HeaderButton"
+                        android:contentDescription="@string/accessibility_next"/>
 
                     <ImageButton
                         android:id="@+id/header_switch_queue"
-                        style="@style/HeaderButton" />
+                        style="@style/HeaderButton"
+                        android:contentDescription="@null"/>
 
                 </LinearLayout>
 
-
-
             </LinearLayout>
 
-            <!-- album art / queue fragments -->
-            <FrameLayout
-                android:id="@+id/panel_main_content"
+            <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/shadow_height"
-                    android:layout_gravity="top"
-                    android:contentDescription="@null"
-                    android:src="@drawable/top_shadow" />
-
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/panel_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/shadow_height"
-                    android:layout_gravity="bottom"
-                    android:contentDescription="@null"
-                    android:src="@drawable/bottom_shadow" />
-
-            </FrameLayout>
+                android:layout_height="@dimen/shadow_height"
+                android:layout_below="@id/panel_header"
+                android:contentDescription="@null"
+                android:src="@drawable/top_shadow" />
 
             <!-- footer -->
             <LinearLayout
                 android:id="@+id/panel_footer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="#e6fafafa"
+                android:layout_alignParentBottom="true">
 
                 <LinearLayout
-                    android:id="@+id/footer_playback_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
@@ -145,7 +140,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/audio_player_seek_bar_margin_bottom"
                         android:max="1000"
-                        style="@style/Orpheus.Panel.ProgressBar"/>
+                        style="@style/ProgressBar"/>
 
                     <TextView
                         android:id="@+id/footer_player_total_time"
@@ -163,85 +158,43 @@
                     android:baselineAligned="false"
                     android:gravity="center" >
 
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
+                    <org.opensilk.music.widgets.ShuffleButton
+                        android:id="@+id/footer_action_button_shuffle"
+                        style="@style/FooterButton"
+                        android:contentDescription="@string/accessibility_shuffle" />
 
-                        <org.opensilk.music.widgets.ShuffleButton
-                            android:id="@+id/footer_action_button_shuffle"
-                            android:layout_width="@dimen/audio_player_controls_end_button_width"
-                            android:layout_height="@dimen/audio_player_controls_end_button_height"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/accessibility_shuffle"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/btn_playback_shuffle" />
-                    </FrameLayout>
+                    <org.opensilk.music.widgets.RepeatingImageButton
+                        android:id="@+id/footer_action_button_previous"
+                        style="@style/FooterButton"
+                        android:contentDescription="@string/accessibility_prev"/>
 
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
+                    <org.opensilk.music.widgets.PlayPauseButton
+                        android:id="@+id/footer_action_button_play"
+                        style="@style/FooterButton"
+                        android:contentDescription="@string/accessibility_play"/>
 
-                        <org.opensilk.music.widgets.RepeatingImageButton
-                            android:id="@+id/footer_action_button_previous"
-                            android:layout_width="@dimen/audio_player_controls_main_button_width"
-                            android:layout_height="@dimen/audio_player_controls_main_button_height"
-                            android:layout_gravity="center"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/btn_playback_previous" />
-                    </FrameLayout>
+                    <org.opensilk.music.widgets.RepeatingImageButton
+                        android:id="@+id/footer_action_button_next"
+                        style="@style/FooterButton"
+                        android:contentDescription="@string/accessibility_next"/>
 
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
+                    <org.opensilk.music.widgets.RepeatButton
+                        android:id="@+id/footer_action_button_repeat"
+                        style="@style/FooterButton"
+                        android:contentDescription="@string/accessibility_repeat" />
 
-                        <org.opensilk.music.widgets.PlayPauseButton
-                            android:id="@+id/footer_action_button_play"
-                            android:layout_width="@dimen/audio_player_controls_main_button_width"
-                            android:layout_height="@dimen/audio_player_controls_main_button_height"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/accessibility_play"
-                            android:focusable="true"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/btn_playback_play" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
-
-                        <org.opensilk.music.widgets.RepeatingImageButton
-                            android:id="@+id/footer_action_button_next"
-                            android:layout_width="@dimen/audio_player_controls_main_button_width"
-                            android:layout_height="@dimen/audio_player_controls_main_button_height"
-                            android:layout_gravity="center"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/btn_playback_next" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
-
-                        <org.opensilk.music.widgets.RepeatButton
-                            android:id="@+id/footer_action_button_repeat"
-                            android:layout_width="@dimen/audio_player_controls_end_button_width"
-                            android:layout_height="@dimen/audio_player_controls_end_button_height"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/accessibility_repeat"
-                            android:focusable="true"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/btn_playback_repeat" />
-                    </FrameLayout>
                 </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/shadow_height"
+                android:layout_above="@id/panel_footer"
+                android:contentDescription="@null"
+                android:src="@drawable/bottom_shadow" />
+
+        </RelativeLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
 </RelativeLayout>

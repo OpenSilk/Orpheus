@@ -29,7 +29,7 @@
     </style>
 
     <!-- Seekbar for now playing -->
-    <style name="Orpheus.Panel.ProgressBar" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
+    <style name="ProgressBar" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_orpheus</item>
         <item name="android:thumb">@drawable/seek_thumb</item>
     </style>
@@ -37,6 +37,12 @@
     <style name="HeaderButton" parent="@android:style/Widget.Holo.Button.Borderless">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="FooterButton" parent="@android:style/Widget.Holo.Button.Borderless">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">50dp</item>
     </style>
 
 </resources>
