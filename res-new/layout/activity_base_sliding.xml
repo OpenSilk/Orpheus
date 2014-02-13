@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="bottom"
-        sothree:collapsedHeight="68dp"
+        sothree:collapsedHeight="@dimen/panel_header_height"
         sothree:shadowHeight="4dp"
         sothree:dragView="@+id/name">
 
@@ -32,7 +32,7 @@
             <LinearLayout
                 android:id="@+id/panel_header"
                 android:layout_width="match_parent"
-                android:layout_height="68dp"
+                android:layout_height="@dimen/panel_header_height"
                 android:clickable="true"
                 android:orientation="horizontal" >
                 <!-- album art -->
@@ -40,10 +40,9 @@
                     android:id="@+id/header_album_art"
                     android:layout_gravity="left|center"
                     android:scaleType="centerCrop"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:paddingLeft="4dp"
-                    android:background="@drawable/default_artwork" />
+                    android:layout_width="@dimen/panel_header_album_art_size"
+                    android:layout_height="@dimen/panel_header_album_art_size"
+                    android:paddingLeft="@dimen/panel_header_album_art_padding_left" />
                 <!-- Track title / artist -->
                 <LinearLayout
                     android:id="@+id/track_artist_info"
@@ -65,11 +64,11 @@
 
                 </LinearLayout>
 
-                <!-- Play/pause / next buttons -->
+                <!-- Play/pause / next / queue buttons -->
                 <LinearLayout
-                    android:id="@+id/header_player_controls"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_gravity="right"
                     android:orientation="horizontal">
 
                     <FrameLayout
@@ -79,8 +78,8 @@
 
                         <com.andrew.apollo.widgets.PlayPauseButton
                             android:id="@+id/header_action_button_play"
-                            android:layout_width="@dimen/audio_player_controls_main_button_width"
-                            android:layout_height="@dimen/audio_player_controls_main_button_height"
+                            android:layout_width="@dimen/panel_header_player_controls_size"
+                            android:layout_height="@dimen/panel_header_player_controls_size"
                             android:layout_gravity="center"
                             android:contentDescription="@string/accessibility_play"
                             android:focusable="true"
@@ -95,22 +94,24 @@
 
                         <com.andrew.apollo.widgets.RepeatingImageButton
                             android:id="@+id/header_action_button_next"
-                            android:layout_width="@dimen/audio_player_controls_main_button_width"
-                            android:layout_height="@dimen/audio_player_controls_main_button_height"
+                            android:layout_width="@dimen/panel_header_player_controls_size"
+                            android:layout_height="@dimen/panel_header_player_controls_size"
                             android:layout_gravity="center"
                             android:scaleType="centerInside"
                             android:src="@drawable/btn_playback_next" />
                     </FrameLayout>
 
+                    <ImageView
+                        android:id="@+id/header_switch_queue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="12dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null" />
+
                 </LinearLayout>
 
-                <!-- queue Button -->
-                <ImageView
-                    android:id="@+id/header_switch_queue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:contentDescription="@null" />
+
 
             </LinearLayout>
 

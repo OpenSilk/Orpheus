@@ -6,7 +6,6 @@
         <item name="android:actionBarStyle">@style/Orpheus.Widget.ActionBar</item>
         <!-- holo.light has dark overflow button, we want a light overflow button for holo_orange-->
         <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        <!-- doesn't work in Orpheus.Cards.ListView?? -->
         <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
     </style>
 
@@ -17,7 +16,7 @@
     </style>
 
     <!-- card lists / grids -->
-    <style name="Orpheus.Cards.ListView" parent="@android:style/Widget.ListView">
+    <style name="Orpheus.FastScroll.AbsListView" parent="@android:style/Widget.AbsListView">
         <item name="android:scrollbarStyle">outsideInset</item>
         <item name="android:fastScrollEnabled">true</item>
         <item name="android:fastScrollAlwaysVisible">true</item>
@@ -30,7 +29,7 @@
 
     <!-- Seekbar for now playing -->
     <style name="Orpheus.Panel.ProgressBar" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal</item>
+        <item name="android:progressDrawable">@drawable/progress_horizontal_orpheus</item>
         <item name="android:thumb">@drawable/seek_thumb</item>
     </style>
 

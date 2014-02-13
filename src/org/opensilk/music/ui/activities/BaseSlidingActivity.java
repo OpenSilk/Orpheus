@@ -774,8 +774,8 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         public void onPanelExpanded(View panel) {
             Log.i(TAG, "onPanelExpanded");
             mHeaderQueueSwitch.setVisibility(View.VISIBLE);
-            mHeaderPlayPauseButton.setVisibility(View.INVISIBLE);
-            mHeaderNextButton.setVisibility(View.INVISIBLE);
+            mHeaderPlayPauseButton.setVisibility(View.GONE);
+            mHeaderNextButton.setVisibility(View.GONE);
         }
 
         @Override
