@@ -18,6 +18,10 @@
 -->
 <resources>
 
+    <style name="Orpheus">
+        <!--namespace-->
+    </style>
+
     <!-- Base Theme common to all activities -->
     <style name="Orpheus.Theme" parent="@android:style/Theme.Holo.Light">
         <item name="android:actionBarStyle">@style/Orpheus.Widget.ActionBar</item>
@@ -101,6 +105,13 @@
         <item name="android:footerDividersEnabled">false</item>
         <item name="android:headerDividersEnabled">false</item>
         <item name="android:divider">@null</item>
+    </style>
+
+    <style name="Orpheus.PagerTabStrip">
+        <!--<item name="android:textSize">@dimen/text_size_micro</item>-->
+        <item name="android:textColor">@color/app_color</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:background">@color/tabstrip_background</item>
     </style>
 
 </resources>

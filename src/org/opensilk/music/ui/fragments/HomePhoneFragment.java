@@ -86,7 +86,7 @@ public class HomePhoneFragment extends Fragment {
             final Bundle savedInstanceState) {
         // The View for the fragment's UI
         final ViewGroup rootView = (ViewGroup)inflater.inflate(
-                R.layout.fragment_music_browser_phone, container, false);
+                R.layout.fragment_home_phone, container, false);
 
         getActivity().getActionBar().getHeight();
         // Initialize the adapter
@@ -97,7 +97,7 @@ public class HomePhoneFragment extends Fragment {
         }
 
         // Initialize the ViewPager
-        mViewPager = (ViewPager)rootView.findViewById(R.id.fragment_home_phone_pager);
+        mViewPager = (ViewPager)rootView.findViewById(R.id.home_pager);
         // Attch the adapter
         mViewPager.setAdapter(mPagerAdapter);
         // Offscreen pager loading limit
