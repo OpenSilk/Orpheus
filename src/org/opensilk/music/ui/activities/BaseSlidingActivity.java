@@ -41,6 +41,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
@@ -56,10 +57,10 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.widgets.PlayPauseButton;
-import com.andrew.apollo.widgets.RepeatButton;
-import com.andrew.apollo.widgets.RepeatingImageButton;
-import com.andrew.apollo.widgets.ShuffleButton;
+import org.opensilk.music.widgets.PlayPauseButton;
+import org.opensilk.music.widgets.RepeatButton;
+import org.opensilk.music.widgets.RepeatingImageButton;
+import org.opensilk.music.widgets.ShuffleButton;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.adapters.PagerAdapter;
@@ -108,7 +109,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     // Album art
     private ImageView mHeaderAlbumArt;
     // queue switch button
-    private ImageView mHeaderQueueSwitch;
+    private ImageButton mHeaderQueueSwitch;
     // Track name
     private TextView mHeaderTrackName;
     // Artist name
@@ -432,9 +433,9 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         // Open to the currently playing album profile
         mHeaderAlbumArt.setOnClickListener(mOpenCurrentAlbumProfile);
         // Used to show and hide the queue fragment
-        mHeaderQueueSwitch = (ImageView) findViewById(R.id.header_switch_queue);
+        mHeaderQueueSwitch = (ImageButton) findViewById(R.id.header_switch_queue);
         // Theme the queue switch icon
-        mHeaderQueueSwitch.setImageResource(R.drawable.btn_queue); //FIXME
+        mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue); //FIXME
         mHeaderQueueSwitch.setOnClickListener(mToggleHiddenPanel);
         if (!mSlidingPanel.isExpanded()) {
             mHeaderQueueSwitch.setVisibility(View.GONE);
@@ -742,9 +743,9 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         public void onPageSelected(int i) {
             if (i == 1) {
                 ((QueueFragment)mPanelPagerAdapter.getFragment(1)).scrollToCurrentSong();
-                mHeaderQueueSwitch.setImageResource(R.drawable.btn_queue_inverse);
+                mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue_inverse);
             } else {
-                mHeaderQueueSwitch.setImageResource(R.drawable.btn_queue);
+                mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue);
             }
         }
 

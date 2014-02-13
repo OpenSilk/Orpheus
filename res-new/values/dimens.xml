@@ -13,8 +13,8 @@
     <dimen name="panel_player_controls_size">64dp</dimen>
 
     <dimen name="panel_header_height">68dp</dimen>
+    <dimen name="panel_header_padding_left">4dp</dimen>
     <dimen name="panel_header_album_art_size">60dp</dimen>
-    <dimen name="panel_header_album_art_padding_left">4dp</dimen>
     <dimen name="panel_header_player_controls_size">@dimen/panel_header_height</dimen>
 
 </resources>

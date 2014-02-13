@@ -33,6 +33,8 @@
                 android:id="@+id/panel_header"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/panel_header_height"
+                android:paddingLeft="@dimen/panel_header_padding_left"
+                android:paddingRight="12dp"
                 android:clickable="true"
                 android:orientation="horizontal" >
                 <!-- album art -->
@@ -41,8 +43,7 @@
                     android:layout_gravity="left|center"
                     android:scaleType="centerCrop"
                     android:layout_width="@dimen/panel_header_album_art_size"
-                    android:layout_height="@dimen/panel_header_album_art_size"
-                    android:paddingLeft="@dimen/panel_header_album_art_padding_left" />
+                    android:layout_height="@dimen/panel_header_album_art_size"/>
                 <!-- Track title / artist -->
                 <LinearLayout
                     android:id="@+id/track_artist_info"
@@ -71,43 +72,17 @@
                     android:layout_gravity="right"
                     android:orientation="horizontal">
 
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
+                    <org.opensilk.music.widgets.PlayPauseButton
+                        android:id="@+id/header_action_button_play"
+                        style="@style/HeaderButton" />
 
-                        <com.andrew.apollo.widgets.PlayPauseButton
-                            android:id="@+id/header_action_button_play"
-                            android:layout_width="@dimen/panel_header_player_controls_size"
-                            android:layout_height="@dimen/panel_header_player_controls_size"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/accessibility_play"
-                            android:focusable="true"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/btn_playback_play" />
-                    </FrameLayout>
+                    <org.opensilk.music.widgets.RepeatingImageButton
+                        android:id="@+id/header_action_button_next"
+                        style="@style/HeaderButton" />
 
-                    <FrameLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
-
-                        <com.andrew.apollo.widgets.RepeatingImageButton
-                            android:id="@+id/header_action_button_next"
-                            android:layout_width="@dimen/panel_header_player_controls_size"
-                            android:layout_height="@dimen/panel_header_player_controls_size"
-                            android:layout_gravity="center"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/btn_playback_next" />
-                    </FrameLayout>
-
-                    <ImageView
+                    <ImageButton
                         android:id="@+id/header_switch_queue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingRight="12dp"
-                        android:layout_gravity="center"
-                        android:contentDescription="@null" />
+                        style="@style/HeaderButton" />
 
                 </LinearLayout>
 
@@ -193,7 +168,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1" >
 
-                        <com.andrew.apollo.widgets.ShuffleButton
+                        <org.opensilk.music.widgets.ShuffleButton
                             android:id="@+id/footer_action_button_shuffle"
                             android:layout_width="@dimen/audio_player_controls_end_button_width"
                             android:layout_height="@dimen/audio_player_controls_end_button_height"
@@ -208,7 +183,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1" >
 
-                        <com.andrew.apollo.widgets.RepeatingImageButton
+                        <org.opensilk.music.widgets.RepeatingImageButton
                             android:id="@+id/footer_action_button_previous"
                             android:layout_width="@dimen/audio_player_controls_main_button_width"
                             android:layout_height="@dimen/audio_player_controls_main_button_height"
@@ -222,7 +197,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1" >
 
-                        <com.andrew.apollo.widgets.PlayPauseButton
+                        <org.opensilk.music.widgets.PlayPauseButton
                             android:id="@+id/footer_action_button_play"
                             android:layout_width="@dimen/audio_player_controls_main_button_width"
                             android:layout_height="@dimen/audio_player_controls_main_button_height"
@@ -238,7 +213,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1" >
 
-                        <com.andrew.apollo.widgets.RepeatingImageButton
+                        <org.opensilk.music.widgets.RepeatingImageButton
                             android:id="@+id/footer_action_button_next"
                             android:layout_width="@dimen/audio_player_controls_main_button_width"
                             android:layout_height="@dimen/audio_player_controls_main_button_height"
@@ -252,7 +227,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1" >
 
-                        <com.andrew.apollo.widgets.RepeatButton
+                        <org.opensilk.music.widgets.RepeatButton
                             android:id="@+id/footer_action_button_repeat"
                             android:layout_width="@dimen/audio_player_controls_end_button_width"
                             android:layout_height="@dimen/audio_player_controls_end_button_height"
