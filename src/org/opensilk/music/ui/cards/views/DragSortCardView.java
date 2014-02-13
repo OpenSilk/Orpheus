@@ -23,6 +23,8 @@ public class DragSortCardView extends CardView {
 
     @Override
     protected void setupListeners() {
+        // Disable this... all i know is it was fucking up the dragsortlist
+        // consequence is card isnt clickable so revisit later //TODO
         //super.setupListeners();
     }
 }

@@ -25,15 +25,7 @@
 
     <it.gmariotti.cardslib.library.view.CardGridView
         android:id="@+id/card_grid_base"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:columnWidth="@dimen/card_grid_columnwidth"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="@dimen/card_grid_vertical_spacing"
-        android:horizontalSpacing="@dimen/card_grid_horizontal_spacing"
-        android:stretchMode="columnWidth"
-        android:gravity="center"
-        style="@style/Orpheus.FastScroll.AbsListView"
+        style="@style/Orpheus.FastScroll.Card.GridView"
         card:list_card_layout_resourceID="@layout/card_grid_item"/>
 
 </LinearLayout>

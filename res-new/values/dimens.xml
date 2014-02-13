@@ -10,6 +10,9 @@
     <dimen name="card_list_margin_top">10dp</dimen>
     <dimen name="card_list_thumbnail_size">60dp</dimen>
 
+    <dimen name="card_list_dragsort_padding_bottom">8dp</dimen>
+    <dimen name="card_list_dragsort_padding_top">8dp</dimen>
+
     <dimen name="panel_player_controls_size">64dp</dimen>
 
     <dimen name="panel_header_height">68dp</dimen>

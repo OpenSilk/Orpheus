@@ -25,12 +25,7 @@
 
     <it.gmariotti.cardslib.library.view.CardListView
         android:id="@+id/card_list_base"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/card_list_margin_left"
-        android:layout_marginRight="@dimen/card_list_margin_right"
-        android:layout_marginTop="@dimen/card_list_margin_top"
-        style="@style/Orpheus.FastScroll.AbsListView"
+        style="@style/Orpheus.FastScroll.Card.ListView"
         card:list_card_layout_resourceID="@layout/card_list_item"/>
 
 </LinearLayout>

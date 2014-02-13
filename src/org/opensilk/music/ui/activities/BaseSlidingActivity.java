@@ -131,16 +131,14 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     /** Sliding panel */
     private SlidingUpPanelLayout mSlidingPanel;
 
+    /** Whether the queue is showing */
+    private boolean mQueueShowing;
+
     private long mPosOverride = -1;
-
     private long mStartSeekPos = 0;
-
     private long mLastSeekEventTime;
-
     private long mLastShortSeekEventTime;
-
     private boolean mIsPaused = false;
-
     private boolean mFromTouch = false;
 
     /**
@@ -343,9 +341,6 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     public void onBackPressed() {
         if (mSlidingPanel.isExpanded()) {
             mSlidingPanel.collapsePane();
-            if (mQueueShowing) {
-                popQueueFragment();
-            }
         } else {
             super.onBackPressed();
         }
@@ -683,9 +678,11 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     }
 
     public void refreshQueue() {
-        QueueFragment queue = (QueueFragment) getSupportFragmentManager().findFragmentByTag("queue");
-        if (queue != null) {
-            queue.refreshQueue();
+        if (mQueueShowing) {
+            QueueFragment queue = (QueueFragment) getSupportFragmentManager().findFragmentByTag("queue");
+            if (queue != null) {
+                queue.refreshQueue();
+            }
         }
     }
 
@@ -735,7 +732,6 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         }
     };
 
-    private boolean mQueueShowing;
     /**
      * Switches from the large album art screen to show the queue and lyric
      * fragments, then back again
@@ -782,6 +778,9 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
             mHeaderQueueSwitch.setVisibility(View.GONE);
             mHeaderPlayPauseButton.setVisibility(View.VISIBLE);
             mHeaderNextButton.setVisibility(View.VISIBLE);
+            if (mQueueShowing) {
+                popQueueFragment();
+            }
         }
 
         @Override

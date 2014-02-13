@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+* Copyright (C) 2014 OpenSilk Productions LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+-->
 <resources>
 
     <!-- Base Theme common to all activities -->
@@ -14,13 +31,6 @@
     <style name="Orpheus.Theme.Panel">
         <!--needed to allow sliding up pane-->
         <item name="android:windowActionBarOverlay">true</item>
-    </style>
-
-    <!-- card lists / grids -->
-    <style name="Orpheus.FastScroll.AbsListView" parent="@android:style/Widget.AbsListView">
-        <item name="android:scrollbarStyle">outsideInset</item>
-        <item name="android:fastScrollEnabled">true</item>
-        <item name="android:fastScrollAlwaysVisible">true</item>
     </style>
 
     <!-- Action Bar Global-->
@@ -45,7 +55,40 @@
         <item name="android:layout_height">50dp</item>
     </style>
 
-    <style name="Orpheus.FastScroll.AbsListView.DragSort">
+    <style name="Orpheus.FastScroll" parent="@android:style/Widget.AbsListView">
+        <item name="android:scrollbarStyle">outsideInset</item>
+        <item name="android:fastScrollEnabled">true</item>
+        <item name="android:fastScrollAlwaysVisible">true</item>
+    </style>
+
+    <style name="Orpheus.FastScroll.Card">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="Orpheus.FastScroll.Card.GridView">
+        <item name="android:columnWidth">@dimen/card_grid_columnwidth</item>
+        <item name="android:numColumns">auto_fit</item>
+        <item name="android:verticalSpacing">@dimen/card_grid_vertical_spacing</item>
+        <item name="android:horizontalSpacing">@dimen/card_grid_horizontal_spacing</item>
+        <item name="android:stretchMode">columnWidth</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="Orpheus.FastScroll.Card.ListView">
+
+        <item name="android:layout_marginLeft">@dimen/card_list_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/card_list_margin_right</item>
+        <item name="android:layout_marginTop">@dimen/card_list_margin_top</item>
+    </style>
+
+    <style name="Orpheus.FastScroll.Card.ListView.DragSort">
+        <!-- header / footer overlay view so need to push out past them -->
+        <item name="android:layout_marginBottom">@dimen/panel_footer_height</item>
+        <item name="android:layout_marginTop">@dimen/panel_header_height</item>
+        <!-- add some padding so the first/last items dont sit right on the header/footer-->
+        <item name="android:paddingBottom">@dimen/card_list_dragsort_padding_bottom</item>
+        <item name="android:paddingTop">@dimen/card_list_dragsort_padding_top</item>
         <!-- Setup dragsort options-->
         <item name="use_default_controller">true</item>
         <item name="drag_handle_id">@id/card_thumbnail_image</item>
