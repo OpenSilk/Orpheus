@@ -6,7 +6,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:0.8.+'
     }
 }
-apply plugin: 'android'
+apply plugin: 'android-library'
 
 repositories {
     mavenCentral()
@@ -17,11 +17,7 @@ android {
     buildToolsVersion "19.0.1"
 
     defaultConfig {
-        minSdkVersion 16
         targetSdkVersion 19
-        versionCode 1
-        versionName "0.1"
-        packageName "org.opensilk.music"
     }
 
     sourceSets {
@@ -29,23 +25,12 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
             resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
-            renderscript.srcDirs = ['src']
-            res.srcDirs = ['res','res-new']
+            res.srcDirs = ['res']
             assets.srcDirs = ['assets']
-        }
-    }
-
-    buildTypes {
-        debug {
-            packageNameSuffix ".debug"
         }
     }
 }
 
 dependencies {
     compile 'com.android.support:support-v4:19.0.1'
-    compile project(':AndroidSlidingUpPanel')
-    compile 'com.github.gabrielemariotti.cards:library:1.3.0'
-    compile project(':drag-sort-listview')
 }
