@@ -2,6 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -17,13 +18,16 @@
         <!--app:float_alpha="0.8" />-->
 
     <com.mobeta.android.dslv.DragSortListView
-        android:id="@+id/list_base"
-        app:use_default_controller="true"
+        android:id="@+id/card_list_base"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="@dimen/card_list_margin_left"
         android:layout_marginRight="@dimen/card_list_margin_right"
         android:layout_marginTop="@dimen/panel_header_height"
-        style="@style/Orpheus.FastScroll.AbsListView.DragSort"/>
+        android:layout_marginBottom="@dimen/panel_footer_height"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        style="@style/Orpheus.FastScroll.AbsListView.DragSort"
+        card:list_card_layout_resourceID="@layout/card_list_item"/>
 
 </LinearLayout>

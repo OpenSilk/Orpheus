@@ -13,6 +13,8 @@ package com.andrew.apollo.widgets.theme;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
 import com.andrew.apollo.utils.ThemeUtils;
@@ -36,7 +38,16 @@ public class ThemeableSeekBar extends SeekBar {
         // Initialze the theme resources
         final ThemeUtils resources = new ThemeUtils(context);
         // Theme the seek bar
-        setProgressDrawable(resources.getDrawable(PROGESS));
+//        setProgressDrawable(resources.getDrawable(PROGESS));
     }
 
+    @Override
+    protected synchronized void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+    }
 }

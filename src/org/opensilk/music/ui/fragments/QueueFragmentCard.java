@@ -12,6 +12,7 @@
 package org.opensilk.music.ui.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -31,6 +32,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.adapters.SongAdapter;
+import com.mobeta.android.dslv.DragSortController;
 import com.mobeta.android.dslv.DragSortListView;
 import com.mobeta.android.dslv.DragSortListView.DragScrollProfile;
 import com.mobeta.android.dslv.DragSortListView.DropListener;
@@ -78,19 +80,19 @@ public class QueueFragmentCard extends Fragment implements LoaderCallbacks<List<
     /**
      * The adapter for the list
      */
-    private SongAdapter mAdapter;
+    private CardArrayAdapter mAdapter;
 
     /**
      * The list view
      */
-    //private DragSortListView mListView;
+    private DragSortListView mListView;
     //private CardListView mListView;
-    private DragSortCardsListView mListView;
+    //private DragSortCardsListView mListView;
 
     /**
      * Represents a song
      */
-    private Song mSong;
+//    private Song mSong;
 
     /**
      * Empty constructor as per the {@link Fragment} documentation
@@ -115,7 +117,7 @@ public class QueueFragmentCard extends Fragment implements LoaderCallbacks<List<
         // The View for the fragment's UI
         final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.drag_sort_list, null);
         // Initialize the list
-        mListView = (DragSortCardsListView)rootView.findViewById(R.id.card_list_base);
+        mListView = (DragSortListView)rootView.findViewById(R.id.card_list_base);
         // Set the data behind the list
 //        mListView.setAdapter(mAdapter);
         // Release any references to the recycled Views
@@ -128,6 +130,14 @@ public class QueueFragmentCard extends Fragment implements LoaderCallbacks<List<
         mListView.setRemoveListener(this);
         // Quick scroll while dragging
         mListView.setDragScrollProfile(this);
+        DragSortController controller = new DragSortController(
+                mListView, R.id.card_thumbnail_image, DragSortController.ON_DOWN, DragSortController.FLING_REMOVE,
+                0, 0);
+        controller.setRemoveEnabled(false);
+        controller.setSortEnabled(true);
+        controller.setBackgroundColor(Color.BLACK);
+        mListView.setFloatViewManager(controller);
+        mListView.setOnTouchListener(controller);
         return rootView;
     }
 
@@ -167,9 +177,10 @@ public class QueueFragmentCard extends Fragment implements LoaderCallbacks<List<
             card.setId(String.valueOf(ii));
             cards.add(card);
         }
-        CardArrayAdapter adapter = new CardArrayAdapter(getActivity(), cards);
+        mAdapter = new CardArrayAdapter(getActivity(), cards);
+        mAdapter.setRowLayoutId(R.layout.drag_sort_list_item);
         // Set the data behind the list
-        mListView.setAdapter(adapter);
+        mListView.setAdapter(mAdapter);
     }
 
     @Override
@@ -194,12 +205,16 @@ public class QueueFragmentCard extends Fragment implements LoaderCallbacks<List<
      */
     @Override
     public void remove(final int which) {
-        mSong = mAdapter.getItem(which);
-        mAdapter.remove(mSong);
-        mAdapter.notifyDataSetChanged();
-        MusicUtils.removeTrack(mSong.mSongId);
+//        mSong = mAdapter.getItem(which);
+//        mAdapter.remove(mSong);
+//        mAdapter.notifyDataSetChanged();
+//        MusicUtils.removeTrack(mSong.mSongId);
         // Build the cache
-        mAdapter.buildCache();
+//        mAdapter.buildCache();
+        Card c = mAdapter.getItem(which);
+        mAdapter.remove(c);
+        mAdapter.notifyDataSetChanged();
+//        MusicUtils.removeTrack(c.ge)
     }
 
     /**
@@ -207,43 +222,46 @@ public class QueueFragmentCard extends Fragment implements LoaderCallbacks<List<
      */
     @Override
     public void drop(final int from, final int to) {
-        mSong = mAdapter.getItem(from);
-        mAdapter.remove(mSong);
-        mAdapter.insert(mSong, to);
+//        mSong = mAdapter.getItem(from);
+//        mAdapter.remove(mSong);
+//        mAdapter.insert(mSong, to);
+        Card c = mAdapter.getItem(from);
+        mAdapter.remove(c);
+        mAdapter.insert(c, to);
         mAdapter.notifyDataSetChanged();
         MusicUtils.moveQueueItem(from, to);
         // Build the cache
-        mAdapter.buildCache();
+//        mAdapter.buildCache();
     }
 
-    /**
-     * Scrolls the list to the currently playing song when the user touches the
-     * header in the {@link TitlePageIndicator}.
-     */
-    public void scrollToCurrentSong() {
-        final int currentSongPosition = getItemPositionBySong();
-
-        if (currentSongPosition != 0) {
-            mListView.setSelection(currentSongPosition);
-        }
-    }
-
-    /**
-     * @return The position of an item in the list based on the name of the
-     *         currently playing song.
-     */
-    private int getItemPositionBySong() {
-        final long trackId = MusicUtils.getCurrentAudioId();
-        if (mAdapter == null) {
-            return 0;
-        }
-        for (int i = 0; i < mAdapter.getCount(); i++) {
-            if (mAdapter.getItem(i).mSongId == trackId) {
-                return i;
-            }
-        }
-        return 0;
-    }
+//    /**
+//     * Scrolls the list to the currently playing song when the user touches the
+//     * header in the {@link TitlePageIndicator}.
+//     */
+//    public void scrollToCurrentSong() {
+//        final int currentSongPosition = getItemPositionBySong();
+//
+//        if (currentSongPosition != 0) {
+//            mListView.setSelection(currentSongPosition);
+//        }
+//    }
+//
+//    /**
+//     * @return The position of an item in the list based on the name of the
+//     *         currently playing song.
+//     */
+//    private int getItemPositionBySong() {
+//        final long trackId = MusicUtils.getCurrentAudioId();
+//        if (mAdapter == null) {
+//            return 0;
+//        }
+//        for (int i = 0; i < mAdapter.getCount(); i++) {
+//            if (mAdapter.getItem(i).mSongId == trackId) {
+//                return i;
+//            }
+//        }
+//        return 0;
+//    }
 
     /**
      * Called to restart the loader callbacks

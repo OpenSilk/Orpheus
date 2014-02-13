@@ -1,50 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/edit_track_list_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/item_normal_height" >
+    android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/image"
-        android:scaleType="fitXY"
-        android:layout_width="@dimen/card_list_thumbnail_size"
-        android:layout_height="@dimen/card_list_thumbnail_size" />
+    <!-- Card visible layout -->
+    <FrameLayout
+        android:id="@+id/card_main_layout"
+        style="@style/card.main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="@dimen/item_normal_height"
-        android:layout_toRightOf="@+id/album_art"
-        android:gravity="center_vertical"
-        android:orientation="vertical">
+        <!-- Compound view for Header Card
+             If you want to customize this element use attr card:card_header_layout_resourceID
+             You can also use your CardHeader subclass-->
+        <it.gmariotti.cardslib.library.view.component.CardHeaderView
+            style="@style/card.header_outer_layout"
+            android:id="@+id/card_header_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-            <TextView
-                android:id="@+id/line_one"
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/card_thumb_and_content_layout"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <it.gmariotti.cardslib.library.view.component.CardThumbnailView
+                style="@style/card_thumbnail_outer_layout"
+                android:id="@+id/card_thumbnail_layout"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:singleLine="true"
-                android:textSize="@dimen/text_size_medium"
-                android:textStyle="bold"/>
+                card:card_thumbnail_layout_resourceID="@layout/card_list_item_thumbnail"/>
 
-            <TextView
-                android:id="@+id/line_two"
+            <!-- Main Content View -->
+            <FrameLayout
+                android:id="@+id/card_main_content_layout"
+                style="@style/card.content_outer_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/line_one"
-                android:layout_marginTop="@dimen/list_item_line_two_margin_top"
-                android:singleLine="true"
-                android:textSize="@dimen/text_size_small"/>
+                android:layout_height="match_parent"/>
 
-            <TextView
-                android:id="@+id/line_three"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:singleLine="true"
-                android:textSize="@dimen/text_size_small"/>
+        </LinearLayout>
 
-    </LinearLayout>
+    </FrameLayout>
 
-</RelativeLayout>
+    <!-- Compound view for Shadow
+         If you want to customize this element use attr card:card_shadow_layout_resourceID -->
+    <it.gmariotti.cardslib.library.view.component.CardShadowView
+        style="@style/card.shadow_outer_layout"
+        android:id="@+id/card_shadow_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- Expand layout. You can customize this element with your CardExpand class -->
+    <!--<FrameLayout-->
+    <!--android:id="@+id/card_content_expand_layout"-->
+    <!--style="@style/card.main_contentExpand"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!-->-->
+    <!--</FrameLayout>-->
+
+</LinearLayout>

@@ -34,7 +34,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
@@ -58,7 +60,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.ui.fragments.QueueFragment;
+import org.opensilk.music.ui.fragments.QueueFragmentCard;
 import org.opensilk.music.widgets.PlayPauseButton;
 import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
@@ -99,9 +101,6 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     /** Handler used to update the current time */
     private TimeHandler mTimeHandler;
 
-    /** Keeps track of the back button being used */
-    private boolean mIsBackPressed = false;
-
     /** Panel Header */
     //play/pause
     private PlayPauseButton mHeaderPlayPauseButton;
@@ -133,11 +132,6 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     private TextView mFooterCurrentTime;
     // Total time
     private TextView mFooterTotalTime;
-
-    /** Panel main content area */
-    private FrameLayout mPanelContentContainer;
-    private ViewPager mPanelViewPager;
-    private PagerAdapter mPanelPagerAdapter;
 
     /** Sliding panel */
     private SlidingUpPanelLayout mSlidingPanel;
@@ -287,7 +281,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         // Current info
         updateNowPlayingInfo();
         // Refresh the queue
-        ((QueueFragment)mPanelPagerAdapter.getFragment(1)).refreshQueue();
+        refreshQueue();
     }
 
     /**
@@ -352,8 +346,14 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
      */
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        mIsBackPressed = true;
+        if (mSlidingPanel.isExpanded()) {
+            mSlidingPanel.collapsePane();
+            if (mQueueShowing) {
+                popQueueFragment();
+            }
+        } else {
+            super.onBackPressed();
+        }
     }
 
     /**
@@ -407,17 +407,10 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
      * Initializes the items in the bottom action bar.
      */
     private void initPanel() {
-        mPanelContentContainer = (FrameLayout) findViewById(R.id.panel_main_content);
-        // Initialize the pager adapter
-        mPanelPagerAdapter = new PagerAdapter(this);
-        // Queue
-        mPanelPagerAdapter.add(ArtFragment.class, null);
-        mPanelPagerAdapter.add(QueueFragment.class, null);
-        // Initialize the ViewPager
-        mPanelViewPager = (ViewPager)findViewById(R.id.panel_pager);
-        // Attch the adapter
-        mPanelViewPager.setAdapter(mPanelPagerAdapter);
-        mPanelViewPager.setOnPageChangeListener(mOnPageChangeListener);
+        //Load art
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.panel_main_content, new ArtFragment(), "art_bg")
+                .commit();
 
         // Play and pause button
         mHeaderPlayPauseButton = (PlayPauseButton)findViewById(R.id.header_action_button_play);
@@ -480,7 +473,8 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         mFooterTotalTime.setText(MusicUtils.makeTimeString(this, MusicUtils.duration() / 1000));
         // Set the album art
         ApolloUtils.getImageFetcher(this).loadCurrentArtwork(
-                ((ArtFragment) mPanelPagerAdapter.getFragment(0)).getArtImage());
+                ((ArtFragment) getSupportFragmentManager().findFragmentByTag("art_bg")).getArtImage()
+        );
         // Update the current time
         queueNextRefresh(1);
     }
@@ -539,7 +533,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
             // Make sure to process intent only once
             setIntent(new Intent());
             // Refresh the queue
-            ((QueueFragment)mPanelPagerAdapter.getFragment(1)).refreshQueue();
+            refreshQueue();
         }
     }
 
@@ -694,7 +688,30 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     }
 
     public void refreshQueue() {
-        ((QueueFragment) mPanelPagerAdapter.getFragment(1)).refreshQueue();
+        QueueFragmentCard queue = (QueueFragmentCard) getSupportFragmentManager().findFragmentByTag("queue");
+        if (queue != null) {
+            queue.refreshQueue();
+        }
+    }
+
+    private void pushQueueFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .hide(getSupportFragmentManager().findFragmentByTag("art_bg"))
+                .add(R.id.panel_main_content, new QueueFragmentCard(), "queue")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
+        mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue_inverse);
+        mQueueShowing = true;
+    }
+
+    private void popQueueFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .show(getSupportFragmentManager().findFragmentByTag("art_bg"))
+                .remove(getSupportFragmentManager().findFragmentByTag("queue"))
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
+        mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue);
+        mQueueShowing = false;
     }
 
     /**
@@ -723,6 +740,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         }
     };
 
+    private boolean mQueueShowing;
     /**
      * Switches from the large album art screen to show the queue and lyric
      * fragments, then back again
@@ -730,32 +748,11 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     private final View.OnClickListener mToggleHiddenPanel = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            if (mPanelViewPager.getCurrentItem() == 0) {
-                mPanelViewPager.setCurrentItem(1);
+            if (!mQueueShowing) {
+                pushQueueFragment();
             } else {
-                mPanelViewPager.setCurrentItem(0);
+                popQueueFragment();
             }
-        }
-    };
-
-    private final ViewPager.OnPageChangeListener mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
-        @Override
-        public void onPageScrolled(int i, float v, int i2) {
-
-        }
-
-        @Override
-        public void onPageSelected(int i) {
-            if (i == 1) {
-                ((QueueFragment)mPanelPagerAdapter.getFragment(1)).scrollToCurrentSong();
-                mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue_inverse);
-            } else {
-                mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue);
-            }
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int i) {
 
         }
     };
@@ -884,7 +881,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
                 mReference.get().mHeaderPlayPauseButton.updateState();
                 mReference.get().mFooterPlayPauseButton.updateState();
                 // Refresh the queue
-                ((QueueFragment) mReference.get().mPanelPagerAdapter.getFragment(1)).refreshQueue();
+                mReference.get().refreshQueue();
             } else if (action.equals(MusicPlaybackService.REFRESH)) {
                 // Let the listener know to update a list
                 for (final MusicStateListener listener : mReference.get().mMusicStateListener) {

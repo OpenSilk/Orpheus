@@ -28,20 +28,15 @@
             android:clickable="true"
             android:focusable="false">
 
-            <!-- album art / queue fragments -->
+            <!-- album art / queue fragments
+                fills whole screen acts as background -->
             <FrameLayout
                 android:id="@+id/panel_main_content"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent"/>
 
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/panel_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-            </FrameLayout>
-
-            <!-- header -->
+            <!-- header
+             sits on top of content area -->
             <LinearLayout
                 android:id="@+id/panel_header"
                 android:layout_width="match_parent"
@@ -112,11 +107,12 @@
                 android:contentDescription="@null"
                 android:src="@drawable/top_shadow" />
 
-            <!-- footer -->
+            <!-- footer
+            sits on top of content area floating on bottom of screen-->
             <LinearLayout
                 android:id="@+id/panel_footer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/panel_footer_height"
                 android:orientation="vertical"
                 android:background="#e6fafafa"
                 android:layout_alignParentBottom="true">
