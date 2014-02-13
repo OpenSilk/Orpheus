@@ -135,7 +135,7 @@ public class QueueFragmentCard extends Fragment implements LoaderCallbacks<List<
                 0, 0);
         controller.setRemoveEnabled(false);
         controller.setSortEnabled(true);
-        controller.setBackgroundColor(Color.BLACK);
+        controller.setBackgroundColor(Color.TRANSPARENT);
         mListView.setFloatViewManager(controller);
         mListView.setOnTouchListener(controller);
         return rootView;
