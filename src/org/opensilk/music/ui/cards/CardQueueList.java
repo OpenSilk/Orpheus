@@ -97,4 +97,8 @@ public class CardQueueList extends CardBaseList<Song> {
             }
         };
     }
+
+    public Song getData() {
+        return mData;
+    }
 }

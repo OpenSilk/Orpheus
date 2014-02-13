@@ -46,8 +46,18 @@
     </style>
 
     <style name="Orpheus.FastScroll.AbsListView.DragSort">
+        <!-- Setup dragsort options-->
         <item name="use_default_controller">true</item>
         <item name="drag_handle_id">@id/card_thumbnail_image</item>
+        <item name="remove_enabled">true</item>
+        <item name="remove_mode">flingRemove</item>
+        <item name="fling_handle_id">@id/card_main_content_layout</item>
+        <item name="float_background_color">@android:color/transparent</item>
+        <!-- since we arent using the CardListView we need to disable dividers ourselves-->
+        <item name="android:dividerHeight">0dp</item>
+        <item name="android:footerDividersEnabled">false</item>
+        <item name="android:headerDividersEnabled">false</item>
+        <item name="android:divider">@null</item>
     </style>
 
 </resources>

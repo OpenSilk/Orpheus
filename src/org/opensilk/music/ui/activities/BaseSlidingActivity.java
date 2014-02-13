@@ -16,8 +16,6 @@
  */
 package org.opensilk.music.ui.activities;
 
-import static com.andrew.apollo.utils.MusicUtils.mService;
-
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.BroadcastReceiver;
@@ -34,15 +32,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -59,19 +54,19 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import org.opensilk.music.ui.fragments.QueueFragmentCard;
+import org.opensilk.music.ui.fragments.ArtFragment;
+import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.PlayPauseButton;
 import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
-import org.opensilk.music.adapters.PagerAdapter;
-import org.opensilk.music.ui.fragments.ArtFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+
+import static com.andrew.apollo.utils.MusicUtils.mService;
 
 /**
  * A base {@link FragmentActivity} used to update the bottom bar and
@@ -688,7 +683,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     }
 
     public void refreshQueue() {
-        QueueFragmentCard queue = (QueueFragmentCard) getSupportFragmentManager().findFragmentByTag("queue");
+        QueueFragment queue = (QueueFragment) getSupportFragmentManager().findFragmentByTag("queue");
         if (queue != null) {
             queue.refreshQueue();
         }
@@ -697,7 +692,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     private void pushQueueFragment() {
         getSupportFragmentManager().beginTransaction()
                 .hide(getSupportFragmentManager().findFragmentByTag("art_bg"))
-                .add(R.id.panel_main_content, new QueueFragmentCard(), "queue")
+                .add(R.id.panel_main_content, new QueueFragment(), "queue")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
         mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue_inverse);
