@@ -109,12 +109,12 @@
 
                     <ImageButton
                         android:id="@+id/header_switch_queue"
-                        style="@style/Orpheus.Button.PanelHeader.Menu"
+                        style="@style/Orpheus.MenuButton"
                         android:src="@drawable/ic_queue"
                         android:contentDescription="@null"/>
 
                     <ImageButton android:id="@+id/header_overflow"
-                        style="@style/Orpheus.Button.PanelHeader"
+                        style="@style/Orpheus.MenuButton"
                         android:src="@drawable/ic_menu_moreoverflow_holo_light"
                         android:contentDescription="@null" />
                 </LinearLayout>

@@ -41,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SeekBar;
@@ -50,6 +51,10 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
+import com.andrew.apollo.loaders.NowPlayingCursor;
+import com.andrew.apollo.loaders.QueueLoader;
+import com.andrew.apollo.menu.CreateNewPlaylist;
+import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
@@ -428,6 +433,15 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         mHeaderQueueSwitch.setOnClickListener(mToggleHiddenPanel);
         // overflow
         mHeaderOverflow = (ImageButton) findViewById(R.id.header_overflow);
+        mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(BaseSlidingActivity.this, mHeaderOverflow);
+                popupMenu.getMenuInflater().inflate(R.menu.panel, popupMenu.getMenu());
+                popupMenu.setOnMenuItemClickListener(mPanelOverflowMenuClickListener);
+                popupMenu.show();
+            }
+        });
 
         if (!mSlidingPanel.isExpanded()) {
             mHeaderQueueSwitch.setVisibility(View.GONE);
@@ -822,6 +836,63 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
 //            if (BaseActivity.this instanceof ProfileActivity) {
 //                finish();
 //            }
+        }
+    };
+
+    /**
+     * Handles panel overflow menu
+     */
+    private final PopupMenu.OnMenuItemClickListener mPanelOverflowMenuClickListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.panel_menu_shuffle_all:
+                    // Shuffle all the songs
+                    MusicUtils.shuffleAll(BaseSlidingActivity.this);
+                    // Refresh the queue
+                    refreshQueue();
+                    return true;
+                case R.id.panel_menu_share:
+                    // Share the current meta data
+                    if (MusicUtils.getTrackName() != null && MusicUtils.getArtistName() != null) {
+                        final Intent shareIntent = new Intent();
+                        final String shareMessage = getString(R.string.now_listening_to,
+                                MusicUtils.getTrackName(), MusicUtils.getArtistName());
+                        shareIntent.setAction(Intent.ACTION_SEND);
+                        shareIntent.setType("text/plain");
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+                        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
+                    }
+                    return true;
+                case R.id.panel_menu_equalizer:
+                    // Sound effects
+                    NavUtils.openEffectsPanel(BaseSlidingActivity.this);
+                    return true;
+                case R.id.panel_menu_use_ringtone:
+                    // Set the current track as a ringtone
+                    MusicUtils.setRingtone(BaseSlidingActivity.this, MusicUtils.getCurrentAudioId());
+                    return true;
+                case R.id.menu_audio_player_delete:
+                    // Delete current song
+                    DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{
+                            MusicUtils.getCurrentAudioId()
+                    }, null).show(getSupportFragmentManager(), "DeleteDialog");
+                    return true;
+                case R.id.menu_save_queue:
+                    NowPlayingCursor queue = (NowPlayingCursor) QueueLoader
+                            .makeQueueCursor(BaseSlidingActivity.this);
+                    CreateNewPlaylist.getInstance(MusicUtils.getSongListForCursor(queue)).show(
+                            getSupportFragmentManager(), "CreatePlaylist");
+                    queue.close();
+                    return true;
+                case R.id.menu_clear_queue:
+                    MusicUtils.clearQueue();
+                    mSlidingPanel.collapsePane();
+                    return true;
+                default:
+                    break;
+            }
+            return false;
         }
     };
 

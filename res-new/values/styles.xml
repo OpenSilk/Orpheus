@@ -151,7 +151,7 @@
 
     <style name="Orpheus.Text.PanelHeader.TrackInfo">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textStyle">bold</item>
+        <!--<item name="android:textStyle">bold</item>-->
     </style>
 
     <style name="Orpheus.Text.PanelHeader.ArtistInfo">
@@ -163,6 +163,13 @@
         <item name="android:gravity">center</item>
         <item name="android:layout_width">@dimen/panel_header_album_art_size</item>
         <item name="android:layout_height">@dimen/panel_header_album_art_size</item>
+    </style>
+
+    <style name="Orpheus.MenuButton" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
     <!--PANEL FOOTER-->

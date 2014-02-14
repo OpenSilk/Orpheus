@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/panel_menu_shuffle_all"
+        android:title="@string/menu_shuffle"/>
+
+    <!--<item android:id="@+id/panel_menu_favorite"-->
+        <!--android:title="@string/add_to_favorites"/>-->
+
+    <item android:id="@+id/panel_menu_share"
+        android:title="@string/menu_share"/>
+
+    <item android:id="@+id/panel_menu_equalizer"
+        android:title="@string/menu_equalizer"/>
+
+    <item android:id="@+id/panel_menu_use_ringtone"
+        android:title="@string/context_menu_use_as_ringtone"/>
+
+    <item android:id="@+id/panel_menu_delete"
+        android:title="@string/context_menu_delete"/>
+
+    <item android:id="@+id/panel_menu_save_queue"
+        android:title="@string/menu_save_queue"/>
+
+    <item android:id="@+id/panel_menu_clear_queue"
+        android:title="@string/menu_clear_queue"/>
+
+</menu>
