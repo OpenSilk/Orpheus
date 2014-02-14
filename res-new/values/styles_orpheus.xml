@@ -30,7 +30,6 @@
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_orpheus</item>
         <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheus</item>
 
-        <!--OpenSilk mods-->
         <item name="actionOverflowButtonStyle">@style/Widget.AppCompat.Base.ActionButton.Overflow</item>
         <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
     </style>
@@ -42,15 +41,15 @@
     </style>
 
     <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
-        <item name="android:background">@drawable/ab_solid_orpheus</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_orpheus</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
+        <item name="background">@drawable/ab_solid_orpheus</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_orpheus</item>
+        <item name="progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 
     <style name="ActionBar.Transparent.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar">
-        <item name="android:background">@drawable/ab_transparent_orpheus</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
+        <item name="background">@drawable/ab_transparent_orpheus</item>
+        <item name="progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 	
     <style name="PopupMenu.Orpheus" parent="@style/Widget.AppCompat.Light.PopupMenu">	
@@ -73,8 +72,6 @@
     
     <style name="ProgressBar.Orpheus" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_orpheus</item>
-
-        <!--OpenSilk mods-->
         <item name="android:thumb">@drawable/seek_thumb</item>
     </style>
     
