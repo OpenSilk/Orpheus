@@ -1,2 +1,3 @@
 include ':AndroidSlidingUpPanel'
 include ':drag-sort-listview'
+include ':CastCompanionLibrary'
