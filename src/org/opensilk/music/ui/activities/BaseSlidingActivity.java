@@ -34,6 +34,11 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.MediaRouteActionProvider;
+import android.support.v7.app.MediaRouteButton;
+import android.support.v7.media.MediaRouter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,6 +51,7 @@ import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
@@ -60,8 +66,12 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
+import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
+import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
+import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.ui.fragments.ArtFragment;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.PlayPauseButton;
@@ -82,7 +92,7 @@ import static com.andrew.apollo.utils.MusicUtils.mService;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public abstract class BaseSlidingActivity extends FragmentActivity implements
+public abstract class BaseSlidingActivity extends ActionBarActivity implements
         ServiceConnection,
         SeekBar.OnSeekBarChangeListener {
 
@@ -102,6 +112,8 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     /** Handler used to update the current time */
     private TimeHandler mTimeHandler;
 
+    private VideoCastManager mCastManager;
+
     /** Panel Header */
     private ViewGroup mPanelHeader;
     //play/pause
@@ -118,6 +130,8 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     private TextView mHeaderTrackName;
     // Artist name
     private TextView mHeaderArtistName;
+    //media router btn
+    private MediaRouteButton mHeaderMediaRouteButton;
 
     /** Panel Footer */
     // Play and pause button
@@ -157,6 +171,9 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+
         // Fade it in
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
@@ -171,6 +188,8 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
 
         // Initialize the handler used to update the current time
         mTimeHandler = new TimeHandler(this);
+
+        mCastManager = CastUtils.getCastManager(this);
 
         // Set the layout
         setContentView(getContentView());
@@ -222,36 +241,13 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
      */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        // Search view
-        getMenuInflater().inflate(R.menu.search, menu);
+        // Media router
+        getMenuInflater().inflate(R.menu.cast_player_menu, menu);
+        // init router button
+        mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         // Settings
         getMenuInflater().inflate(R.menu.activity_base, menu);
-        // Theme the search icon
-        //FIXME
-        final MenuItem searchAction = menu.findItem(R.id.menu_search);
-        searchAction.setIcon(R.drawable.ic_action_search);
-
-        final SearchView searchView = (SearchView)menu.findItem(R.id.menu_search).getActionView();
-        // Add voice search
-        final SearchManager searchManager = (SearchManager)getSystemService(Context.SEARCH_SERVICE);
-        final SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
-        searchView.setSearchableInfo(searchableInfo);
-        // Perform the search
-        searchView.setOnQueryTextListener(new OnQueryTextListener() {
-
-            @Override
-            public boolean onQueryTextSubmit(final String query) {
-                // Open the search activity
-                NavUtils.openSearch(BaseSlidingActivity.this, query);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(final String newText) {
-                // Nothing to do
-                return false;
-            }
-        });
+        //TODO add back search
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -284,6 +280,9 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         updateNowPlayingInfo();
         // Refresh the queue
         refreshQueue();
+        mCastManager = CastUtils.getCastManager(this);
+        mCastManager.addVideoCastConsumer(mCastConsumer);
+        mCastManager.incrementUiCounter();
     }
 
     /**
@@ -307,6 +306,13 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         final long next = refreshCurrentTime();
         queueNextRefresh(next);
         MusicUtils.notifyForegroundStateChanged(this, true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mCastManager.decrementUiCounter();
+        mCastManager.removeVideoCastConsumer(mCastConsumer);
     }
 
     /**
@@ -431,6 +437,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
         // Used to show and hide the queue fragment
         mHeaderQueueSwitch = (ImageButton) findViewById(R.id.header_switch_queue);
         mHeaderQueueSwitch.setOnClickListener(mToggleHiddenPanel);
+
         // overflow
         mHeaderOverflow = (ImageButton) findViewById(R.id.header_overflow);
         mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
@@ -443,9 +450,14 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
             }
         });
 
+        mHeaderMediaRouteButton = (MediaRouteButton) findViewById(R.id.panel_mediarouter);
+        // init router button TODO might need to hide if no routes available
+        mHeaderMediaRouteButton.setRouteSelector(mCastManager.getMediaRouteSelector());
+
         if (!mSlidingPanel.isExpanded()) {
             mHeaderQueueSwitch.setVisibility(View.GONE);
             mHeaderOverflow.setVisibility(View.GONE);
+            mHeaderMediaRouteButton.setVisibility(View.GONE);
         }
 
         // Play and pause button
@@ -792,6 +804,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
             Log.i(TAG, "onPanelExpanded");
             mHeaderQueueSwitch.setVisibility(View.VISIBLE);
             mHeaderOverflow.setVisibility(View.VISIBLE);
+            mHeaderMediaRouteButton.setVisibility(View.VISIBLE);
             mHeaderPlayPauseButton.setVisibility(View.GONE);
             mHeaderNextButton.setVisibility(View.GONE);
             mPanelHeader.setBackgroundResource(R.color.app_background_light_transparent);
@@ -802,6 +815,7 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
             Log.i(TAG, "onPanelCollapsed");
             mHeaderQueueSwitch.setVisibility(View.GONE);
             mHeaderOverflow.setVisibility(View.GONE);
+            mHeaderMediaRouteButton.setVisibility(View.GONE);
             mHeaderPlayPauseButton.setVisibility(View.VISIBLE);
             mHeaderNextButton.setVisibility(View.VISIBLE);
             if (mQueueShowing) {
@@ -836,6 +850,30 @@ public abstract class BaseSlidingActivity extends FragmentActivity implements
 //            if (BaseActivity.this instanceof ProfileActivity) {
 //                finish();
 //            }
+        }
+    };
+
+    private final IVideoCastConsumer mCastConsumer = new VideoCastConsumerImpl() {
+
+        @Override
+        public void onFailed(int resourceId, int statusCode) {
+
+        }
+
+        @Override
+        public void onConnectionSuspended(int cause) {
+            Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
+            Toast.makeText(BaseSlidingActivity.this, "connnection lost", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onConnectivityRecovered() {
+            Toast.makeText(BaseSlidingActivity.this, "connnection recovered", Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onCastDeviceDetected(final MediaRouter.RouteInfo info) {
+
         }
     };
 
