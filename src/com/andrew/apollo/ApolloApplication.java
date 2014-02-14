@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
 public class ApolloApplication extends Application {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = BuildConfig.DEBUG;
 
     /**
      * {@inheritDoc}
@@ -37,8 +37,6 @@ public class ApolloApplication extends Application {
     public void onCreate() {
         // Enable strict mode logging
         enableStrictMode();
-        // Turn off logging for jaudiotagger.
-        Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
     }
 
     /**
