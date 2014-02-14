@@ -17,6 +17,7 @@
  */
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -107,6 +108,11 @@
                         style="@style/Orpheus.Button.PanelHeader"
                         android:contentDescription="@string/accessibility_next"/>
 
+                    <android.support.v7.app.MediaRouteButton
+                        style="@style/Orpheus.MenuButton"
+                        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+                        android:id="@+id/panel_mediarouter"/>
+
                     <ImageButton
                         android:id="@+id/header_switch_queue"
                         style="@style/Orpheus.MenuButton"
@@ -157,7 +163,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/audio_player_seek_bar_margin_bottom"
                         android:max="1000"
-                        style="@style/ProgressBar"/>
+                        style="@style/ProgressBar.Orpheus"/>
 
                     <TextView
                         android:id="@+id/footer_player_total_time"

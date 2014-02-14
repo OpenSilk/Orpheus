@@ -19,54 +19,73 @@
 
 <resources>
 
-    <style name="Theme.Orpheus" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
-        <item name="android:popupMenuStyle">@style/PopupMenu.Orpheus</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
-        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Orpheus</item>
-        <item name="android:actionDropDownStyle">@style/DropDownNav.Orpheus</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Solid.Orpheus</item>
-        <item name="android:actionModeBackground">@drawable/cab_background_top_orpheus</item>
-        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_orpheus</item>
-        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheus</item>
+    <style name="Theme.Orpheus" parent="@style/Theme.AppCompat.Light">
+        <item name="actionBarItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="popupMenuStyle">@style/PopupMenu.Orpheus</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
+        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Orpheus</item>
+        <item name="actionDropDownStyle">@style/DropDownNav.Orpheus</item>
+        <item name="actionBarStyle">@style/ActionBar.Solid.Orpheus</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_orpheus</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_orpheus</item>
+        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheus</item>
+
+        <!--OpenSilk mods-->
+        <item name="actionOverflowButtonStyle">@style/Widget.AppCompat.Base.ActionButton.Overflow</item>
+        <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
     </style>
 
-    <style name="ActionBar.Solid.Orpheus" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+    <!-- Activities with panel needs ActionBarOverlay -->
+    <style name="Theme.Orpheus.Panel">
+        <!--needed to allow sliding up pane-->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
         <item name="android:background">@drawable/ab_solid_orpheus</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_orpheus</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 
-    <style name="ActionBar.Transparent.Orpheus" parent="@android:style/Widget.Holo.Light.ActionBar">
+    <style name="ActionBar.Transparent.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar">
         <item name="android:background">@drawable/ab_transparent_orpheus</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
-
-    <style name="PopupMenu.Orpheus" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+	
+    <style name="PopupMenu.Orpheus" parent="@style/Widget.AppCompat.Light.PopupMenu">	
         <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>	
     </style>
-
-    <style name="DropDownListView.Orpheus" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+	
+    <style name="DropDownListView.Orpheus" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
         <item name="android:listSelector">@drawable/selectable_background_orpheus</item>
     </style>
 
-    <style name="ActionBarTabStyle.Orpheus" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+    <style name="ActionBarTabStyle.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.TabView">
         <item name="android:background">@drawable/tab_indicator_ab_orpheus</item>
     </style>
-
-    <style name="DropDownNav.Orpheus" parent="@android:style/Widget.Holo.Light.Spinner">
+	
+    <style name="DropDownNav.Orpheus" parent="@style/Widget.AppCompat.Light.Spinner.DropDown.ActionBar">
         <item name="android:background">@drawable/spinner_background_ab_orpheus</item>
         <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>
         <item name="android:dropDownSelector">@drawable/selectable_background_orpheus</item>
     </style>
     
-    <style name="ActionButton.CloseMode.Orpheus" parent="@android:style/Widget.Holo.Light.ActionButton.CloseMode">
+    <style name="ProgressBar.Orpheus" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_orpheus</item>
+
+        <!--OpenSilk mods-->
+        <item name="android:thumb">@drawable/seek_thumb</item>
+    </style>
+    
+    <style name="ActionButton.CloseMode.Orpheus" parent="@style/Widget.AppCompat.Light.ActionButton.CloseMode">
         <item name="android:background">@drawable/btn_cab_done_orpheus</item>
     </style>
-
+    
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Orpheus.Widget" parent="@android:style/Theme.Holo">
-        <item name="android:popupMenuStyle">@style/PopupMenu.Orpheus</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
+    <style name="Theme.Orpheus.Widget" parent="@style/Theme.AppCompat">
+        <item name="popupMenuStyle">@style/PopupMenu.Orpheus</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
     </style>
 
 </resources>

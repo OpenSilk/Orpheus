@@ -22,34 +22,13 @@
         <!--namespace-->
     </style>
 
-    <!-- Base Theme common to all activities -->
-    <style name="Orpheus.Theme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionBarStyle">@style/Orpheus.Widget.ActionBar</item>
-        <!-- holo.light has dark overflow button, we want a light overflow button for holo_orange-->
-        <item name="android:actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
-        <!--<item name="android:colorFocusedHighlight">@color/app_color</item>-->
-    </style>
-
-    <!-- Activities with panel needs ActionBarOverlay -->
-    <style name="Orpheus.Theme.Panel">
-        <!--needed to allow sliding up pane-->
-        <item name="android:windowActionBarOverlay">true</item>
-    </style>
-
-    <!-- Action Bar Global-->
-    <style name="Orpheus.Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
-        <item name="android:background">@color/app_color</item>
+    <!-- push down main content area to compensate for ActionBarOverlay-->
+    <style name="Orpheus.ActionBarOverlay">
+        <item name="android:layout_marginTop">?attr/actionBarSize</item>
     </style>
 
     <style name="Orpheus.Button" parent="@android:style/Widget.Holo.Button.Borderless">
 
-    </style>
-
-    <!-- Seekbar for now playing -->
-    <style name="ProgressBar" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_orpheus</item>
-        <item name="android:thumb">@drawable/seek_thumb</item>
     </style>
 
     <style name="Orpheus.FastScroll" parent="@android:style/Widget.AbsListView">
@@ -73,7 +52,6 @@
     </style>
 
     <style name="Orpheus.FastScroll.Card.ListView">
-
         <item name="android:layout_marginLeft">@dimen/card_list_margin_left</item>
         <item name="android:layout_marginRight">@dimen/card_list_margin_right</item>
         <item name="android:layout_marginTop">@dimen/card_list_margin_top</item>
