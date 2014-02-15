@@ -460,6 +460,7 @@ public final class ImageCache {
             if (parcelFileDescriptor != null) {
                 final FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
                 artwork = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+                parcelFileDescriptor.close();
             }
         } catch (final IllegalStateException e) {
             // Log.e(TAG, "IllegalStateExcetpion - getArtworkFromFile - ", e);
@@ -468,6 +469,8 @@ public final class ImageCache {
         } catch (final OutOfMemoryError evict) {
             // Log.e(TAG, "OutOfMemoryError - getArtworkFromFile - ", evict);
             evictAll();
+        } catch (IOException e) {
+            // pass
         }
         return artwork;
     }
