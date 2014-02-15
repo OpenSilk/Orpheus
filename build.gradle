@@ -4,9 +4,11 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.jakewharton.hugo:hugo-plugin:1.0.1'
     }
 }
 apply plugin: 'android'
+apply plugin: 'hugo'
 
 repositories {
     mavenCentral()
