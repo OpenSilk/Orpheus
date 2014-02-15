@@ -73,7 +73,7 @@ import java.util.TreeSet;
 @SuppressLint("NewApi")
 public class MusicPlaybackService extends Service {
     private static final String TAG = "MusicPlaybackService";
-    private static final boolean D = false;
+    private static final boolean D = true;
 
     public static final String APOLLO_PACKAGE_NAME = BuildConfig.PACKAGE_NAME;
 

@@ -41,6 +41,11 @@
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <!-- Used to check if the app is in the background -->
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <!-- Used to get ip address for casting -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <!-- Casting is currently only supported over wifi -->
+    <uses-feature android:name="android.hardware.wifi"/>
 
     <application
         android:name=".ApolloApplication"
@@ -126,6 +131,31 @@
                 <data android:mimeType="vnd.android.cursor.dir/audio"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.google.sample.castcompanionlibrary.cast.player.VideoCastControllerActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:parentActivityName="org.opensilk.music.ui.activities.HomeSlidingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <service
+            android:name="com.google.sample.castcompanionlibrary.notification.VideoCastNotificationService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.sample.castcompanionlibrary.action.toggleplayback" />
+                <action android:name="com.google.sample.castcompanionlibrary.action.stop" />
+                <action android:name="com.google.sample.castcompanionlibrary.action.notificationvisibility" />
+            </intent-filter>
+        </service>
 
         <!-- Profile phone Activity -->
         <activity

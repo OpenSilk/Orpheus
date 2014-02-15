@@ -66,12 +66,16 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
+import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
 import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
 import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.google.sample.castcompanionlibrary.cast.exceptions.NoConnectionException;
+import com.google.sample.castcompanionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.cast.CastUtils;
+import org.opensilk.music.cast.CastWebServer;
 import org.opensilk.music.ui.fragments.ArtFragment;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.PlayPauseButton;
@@ -79,7 +83,9 @@ import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import static com.andrew.apollo.utils.MusicUtils.mService;
@@ -164,6 +170,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private boolean mIsPaused = false;
     private boolean mFromTouch = false;
 
+    CastWebServer server;
+
     /**
      * {@inheritDoc}
      */
@@ -202,6 +210,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Initialze the panel
         initPanel();
 
+        try {
+            server = new CastWebServer(this, CastUtils.getWifiIpAddress(this), 8080);
+            server.start();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -259,7 +275,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         switch (item.getItemId()) {
             case R.id.menu_settings:
                 // Settings
-                NavUtils.openSettings(this);
+                //NavUtils.openSettings(this);
+                try {
+                    mCastManager.loadMedia(CastUtils.buildSample(this), true, 0);
+                } catch (TransientNetworkDisconnectionException e) {
+                    e.printStackTrace();
+                } catch (NoConnectionException e) {
+                    e.printStackTrace();
+                }
                 return true;
 
             default:
@@ -347,6 +370,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         // Remove any music status listeners
         mMusicStateListener.clear();
+
+        if (server != null) {
+            server.stop();
+        }
     }
 
     /**
@@ -854,6 +881,27 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     };
 
     private final IVideoCastConsumer mCastConsumer = new VideoCastConsumerImpl() {
+        @Override
+        public void onApplicationConnected(ApplicationMetadata appMetadata,
+                                           String sessionId, boolean wasLaunched) {
+            Log.d(TAG, "onApplicationLaunched() is reached");
+
+        }
+
+        @Override
+        public void onApplicationDisconnected(int errorCode) {
+            Log.d(TAG, "onApplicationDisconnected() is reached with errorCode: " + errorCode);
+        }
+
+        @Override
+        public void onDisconnected() {
+            Log.d(TAG, "onDisconnected() is reached");
+        }
+
+        @Override
+        public void onRemoteMediaPlayerMetadataUpdated() {
+
+        }
 
         @Override
         public void onFailed(int resourceId, int statusCode) {
