@@ -725,6 +725,12 @@ public abstract class NanoHTTPD {
             this.chunkedTransfer = chunkedTransfer;
         }
 
+        @Override
+        public String toString() {
+            // Right now i only care about status
+            return getStatus().getDescription();
+        }
+
         /**
          * Some HTTP response status codes
          */
