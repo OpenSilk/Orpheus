@@ -28,6 +28,11 @@ public final class Config {
     public static final String LASTFM_API_KEY = "0bec3f7ec1f914d7c960c12a916c8fb3";
 
     /**
+     * Cast application id
+     */
+    public static final String CAST_APPLICATION_ID = "25A19AAC";
+
+    /**
      * Used to distinguish album art from artist images
      */
     public static final String ALBUM_ART_SUFFIX = "album";

@@ -34,10 +34,13 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.app.MediaRouteButton;
+import android.support.v7.media.MediaControlIntent;
+import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
 import android.view.Menu;
@@ -53,6 +56,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.andrew.apollo.Config;
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.MusicStateListener;
@@ -67,6 +71,9 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
 import com.google.android.gms.cast.ApplicationMetadata;
+import com.google.android.gms.cast.CastMediaControlIntent;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.sample.castcompanionlibrary.cast.CastMediaRouterCallback;
 import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
 import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
 import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
@@ -87,6 +94,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+
+import hugo.weaving.DebugLog;
 
 import static com.andrew.apollo.utils.MusicUtils.mService;
 
@@ -117,8 +126,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     /** Handler used to update the current time */
     private TimeHandler mTimeHandler;
-
-    private VideoCastManager mCastManager;
 
     /** Panel Header */
     private ViewGroup mPanelHeader;
@@ -170,7 +177,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private boolean mIsPaused = false;
     private boolean mFromTouch = false;
 
-    CastWebServer server;
+    /**
+     * Cast stuff
+     */
+    MediaRouter mMediaRouter;
+    MediaRouteSelector mMediaRouteSelector;
 
     /**
      * {@inheritDoc}
@@ -179,11 +190,15 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Set the layout
+        setContentView(getContentView());
+
+        // Setup action bar
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         // Fade it in
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        //overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         // Control the media volume
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -197,10 +212,12 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Initialize the handler used to update the current time
         mTimeHandler = new TimeHandler(this);
 
-        mCastManager = CastUtils.getCastManager(this);
-
-        // Set the layout
-        setContentView(getContentView());
+        // Initialize the media router
+        mMediaRouter = MediaRouter.getInstance(this);
+        mMediaRouteSelector = new MediaRouteSelector.Builder()
+                .addControlCategory(CastMediaControlIntent.categoryForCast(Config.CAST_APPLICATION_ID))
+                //.addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
+                .build();
 
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         mSlidingPanel.setShadowDrawable(getResources().getDrawable(R.drawable.above_shadow));
@@ -210,14 +227,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Initialze the panel
         initPanel();
 
-        try {
-            server = new CastWebServer(this, CastUtils.getWifiIpAddress(this), 8080);
-            server.start();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -260,7 +269,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Media router
         getMenuInflater().inflate(R.menu.cast_player_menu, menu);
         // init router button
-        mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
+//        mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
+        MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
+        MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
+                MenuItemCompat.getActionProvider(mediaRouteMenuItem);
+        mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
         // Settings
         getMenuInflater().inflate(R.menu.activity_base, menu);
         //TODO add back search
@@ -275,14 +288,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         switch (item.getItemId()) {
             case R.id.menu_settings:
                 // Settings
-                //NavUtils.openSettings(this);
-                try {
-                    mCastManager.loadMedia(CastUtils.buildSample(this), true, 0);
-                } catch (TransientNetworkDisconnectionException e) {
-                    e.printStackTrace();
-                } catch (NoConnectionException e) {
-                    e.printStackTrace();
-                }
+                NavUtils.openSettings(this);
                 return true;
 
             default:
@@ -297,15 +303,22 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        // Start scanning for routes
+        mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
+                MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
         // Set the playback drawables
         updatePlaybackControls();
         // Current info
         updateNowPlayingInfo();
         // Refresh the queue
         refreshQueue();
-        mCastManager = CastUtils.getCastManager(this);
-        mCastManager.addVideoCastConsumer(mCastConsumer);
-        mCastManager.incrementUiCounter();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // stop scanning for routes
+        mMediaRouter.removeCallback(mMediaRouterCallback);
     }
 
     /**
@@ -329,13 +342,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         final long next = refreshCurrentTime();
         queueNextRefresh(next);
         MusicUtils.notifyForegroundStateChanged(this, true);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mCastManager.decrementUiCounter();
-        mCastManager.removeVideoCastConsumer(mCastConsumer);
     }
 
     /**
@@ -371,9 +377,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Remove any music status listeners
         mMusicStateListener.clear();
 
-        if (server != null) {
-            server.stop();
-        }
     }
 
     /**
@@ -477,9 +480,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             }
         });
 
+        // init router button
         mHeaderMediaRouteButton = (MediaRouteButton) findViewById(R.id.panel_mediarouter);
-        // init router button TODO might need to hide if no routes available
-        mHeaderMediaRouteButton.setRouteSelector(mCastManager.getMediaRouteSelector());
+        mHeaderMediaRouteButton.setRouteSelector(mMediaRouteSelector);
 
         if (!mSlidingPanel.isExpanded()) {
             mHeaderQueueSwitch.setVisibility(View.GONE);
@@ -831,6 +834,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             Log.i(TAG, "onPanelExpanded");
             mHeaderQueueSwitch.setVisibility(View.VISIBLE);
             mHeaderOverflow.setVisibility(View.VISIBLE);
+            // TODO hide if no routes available
             mHeaderMediaRouteButton.setVisibility(View.VISIBLE);
             mHeaderPlayPauseButton.setVisibility(View.GONE);
             mHeaderNextButton.setVisibility(View.GONE);
@@ -880,48 +884,65 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     };
 
-    private final IVideoCastConsumer mCastConsumer = new VideoCastConsumerImpl() {
+    private final MediaRouter.Callback mMediaRouterCallback = new MediaRouter.Callback() {
+        @DebugLog
         @Override
-        public void onApplicationConnected(ApplicationMetadata appMetadata,
-                                           String sessionId, boolean wasLaunched) {
-            Log.d(TAG, "onApplicationLaunched() is reached");
-
+        public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteSelected(router, route);
         }
 
+        @DebugLog
         @Override
-        public void onApplicationDisconnected(int errorCode) {
-            Log.d(TAG, "onApplicationDisconnected() is reached with errorCode: " + errorCode);
+        public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteUnselected(router, route);
         }
 
+        @DebugLog
         @Override
-        public void onDisconnected() {
-            Log.d(TAG, "onDisconnected() is reached");
+        public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteAdded(router, route);
         }
 
+        @DebugLog
         @Override
-        public void onRemoteMediaPlayerMetadataUpdated() {
-
+        public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteRemoved(router, route);
         }
 
+        @DebugLog
         @Override
-        public void onFailed(int resourceId, int statusCode) {
-
+        public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteChanged(router, route);
         }
 
+        @DebugLog
         @Override
-        public void onConnectionSuspended(int cause) {
-            Log.d(TAG, "onConnectionSuspended() was called with cause: " + cause);
-            Toast.makeText(BaseSlidingActivity.this, "connnection lost", Toast.LENGTH_LONG).show();
+        public void onRouteVolumeChanged(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteVolumeChanged(router, route);
         }
 
+        @DebugLog
         @Override
-        public void onConnectivityRecovered() {
-            Toast.makeText(BaseSlidingActivity.this, "connnection recovered", Toast.LENGTH_LONG).show();
+        public void onRoutePresentationDisplayChanged(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRoutePresentationDisplayChanged(router, route);
         }
 
+        @DebugLog
         @Override
-        public void onCastDeviceDetected(final MediaRouter.RouteInfo info) {
+        public void onProviderAdded(MediaRouter router, MediaRouter.ProviderInfo provider) {
+            super.onProviderAdded(router, provider);
+        }
 
+        @DebugLog
+        @Override
+        public void onProviderRemoved(MediaRouter router, MediaRouter.ProviderInfo provider) {
+            super.onProviderRemoved(router, provider);
+        }
+
+        @DebugLog
+        @Override
+        public void onProviderChanged(MediaRouter router, MediaRouter.ProviderInfo provider) {
+            super.onProviderChanged(router, provider);
         }
     };
 

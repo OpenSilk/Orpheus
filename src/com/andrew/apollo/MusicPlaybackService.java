@@ -45,6 +45,7 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.AlbumColumns;
 import android.provider.MediaStore.Audio.AudioColumns;
+import android.support.v7.media.MediaRouter;
 import android.util.Log;
 
 import com.andrew.apollo.appwidgets.AppWidgetLarge;
@@ -59,12 +60,27 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+import com.google.android.gms.cast.ApplicationMetadata;
+import com.google.android.gms.cast.CastStatusCodes;
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
+import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
+import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.google.sample.castcompanionlibrary.cast.exceptions.CastException;
+import com.google.sample.castcompanionlibrary.cast.exceptions.NoConnectionException;
+import com.google.sample.castcompanionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
+
+import org.opensilk.music.cast.CastUtils;
+import org.opensilk.music.cast.CastWebServer;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.TreeSet;
+
+import hugo.weaving.DebugLog;
 
 /**
  * A backbround {@link Service} used to keep music playing between activities
@@ -279,7 +295,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Idle time before stopping the foreground notfication (1 minute)
      */
-    private static final int IDLE_DELAY = 60000;
+    private static final int IDLE_DELAY = 5000000; //TODO set back
 
     /**
      * The max size allowed for the track history
@@ -476,6 +492,31 @@ public class MusicPlaybackService extends Service {
     private FavoritesStore mFavoritesCache;
 
     /**
+     * Cast manager
+     */
+    private VideoCastManager mCastManager;
+
+    /**
+     * Http server for service cast devices
+     */
+    private CastWebServer mCastServer;
+
+
+    /**
+     * indicates whether we are doing a local or a remote playback
+     */
+    public static enum PlaybackLocation {
+        LOCAL,
+        REMOTE
+    }
+
+    /**
+     * Current playback location
+     */
+    private PlaybackLocation mPlaybackLocation = PlaybackLocation.LOCAL;
+
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -572,6 +613,10 @@ public class MusicPlaybackService extends Service {
         // Initialize the media player
         mPlayer = new MultiPlayer(this);
         mPlayer.setHandler(mPlayerHandler);
+
+        // Initialize the cast manager
+        mCastManager = CastUtils.getCastManager(this);
+        mCastManager.addVideoCastConsumer(mCastConsumer);
 
         // Initialize the intent filter and each action
         final IntentFilter filter = new IntentFilter();
@@ -684,6 +729,14 @@ public class MusicPlaybackService extends Service {
         if (mUnmountReceiver != null) {
             unregisterReceiver(mUnmountReceiver);
             mUnmountReceiver = null;
+        }
+
+        // Unregister with cast manager
+        mCastManager.removeVideoCastConsumer(mCastConsumer);
+
+        // Stop http server
+        if (mCastServer != null) {
+            mCastServer.stop();
         }
 
         // Release the wake lock
@@ -1815,6 +1868,20 @@ public class MusicPlaybackService extends Service {
     }
 
     /**
+     * Returns the mimeType
+     *
+     * @return The current song mimeType
+     */
+    public String getMimeType() {
+        synchronized (this) {
+            if (mCursor == null) {
+                return null;
+            }
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.MIME_TYPE));
+        }
+    }
+
+    /**
      * Seeks the current track to a specific time
      *
      * @param position The time to seek to
@@ -1945,6 +2012,7 @@ public class MusicPlaybackService extends Service {
      * Resumes or starts playback.
      */
     public void play() {
+        //TODO shouldnt need for casting
         int status = mAudioManager.requestAudioFocus(mAudioFocusListener,
                 AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
@@ -2254,6 +2322,51 @@ public class MusicPlaybackService extends Service {
         notifyChange(REFRESH);
     }
 
+    /**
+     * Updates current playback location
+     * @param newLocation
+     */
+    private void updatePlaybackLocation(PlaybackLocation newLocation) {
+        mPlaybackLocation = newLocation;
+    }
+
+    /**
+     * Whether we are currently in a remote session
+     * @return
+     */
+    private boolean isRemotePlayback() {
+        if (mPlaybackLocation == PlaybackLocation.REMOTE) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Starts cast http server, creating it if needed.
+     * @return success of operation
+     */
+    private boolean startCastServer() {
+        if (mCastServer == null) {
+            mCastServer = new CastWebServer(this);
+        }
+        try {
+            mCastServer.start();
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Stops cast http server if running
+     */
+    private void stopCastServer() {
+        if (mCastServer != null) {
+            mCastServer.stop();
+        }
+        mCastServer = null;
+    }
+
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         /**
          * {@inheritDoc}
@@ -2288,6 +2401,152 @@ public class MusicPlaybackService extends Service {
         @Override
         public void onAudioFocusChange(final int focusChange) {
             mPlayerHandler.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
+        }
+    };
+
+    /**
+     * Callback handler for cast manager
+     */
+    private final IVideoCastConsumer mCastConsumer = new VideoCastConsumerImpl() {
+
+        /**
+         * BaseCastManager: has connected to cast device and is attempting to launch the remote app
+         */
+        @Override
+        @DebugLog
+        public void onConnected() {
+
+        }
+
+        /**
+         * VideoCastManager: we've successfully connected to the remote app.. have your way with it.
+         * @param appMetadata
+         * @param sessionId
+         * @param wasLaunched
+         */
+        @Override
+        @DebugLog
+        public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
+            updatePlaybackLocation(PlaybackLocation.REMOTE);
+            if (startCastServer()) {
+                MediaInfo currentTrack = CastUtils.buildMediaInfo(
+                        getTrackName(),
+                        getAlbumName(),
+                        getArtistName(),
+                        getMimeType(),
+                        CastUtils.buildMusicUrl(getAudioId(), mCastServer.getHost()),
+                        CastUtils.buildArtUrl(getAudioId(), mCastServer.getHost()),
+                        null);
+                try {
+                    mCastManager.loadMedia(currentTrack, true, 0);
+                } catch (TransientNetworkDisconnectionException e) {
+                    e.printStackTrace();
+                } catch (NoConnectionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+        /**
+         * VideoCastManager: failed to launch remote add
+         * @param errorCode is a CastStatusCodes
+         * @return true to show error dialog, false otherwise
+         */
+        @Override
+        @DebugLog
+        public boolean onApplicationConnectionFailed(int errorCode) {
+            return true;
+        }
+
+        @Override
+        @DebugLog
+        public void onApplicationStopFailed(int errorCode) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onApplicationStatusChanged(String appStatus) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onVolumeChanged(double value, boolean isMute) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onApplicationDisconnected(int errorCode) {
+            stopCastServer();
+        }
+
+        @Override
+        @DebugLog
+        public void onRemoteMediaPlayerMetadataUpdated() {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onRemoteMediaPlayerStatusUpdated() {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onRemovedNamespace() {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onDataMessageSendFailed(int errorCode) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onDataMessageReceived(String message) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onConnectionSuspended(int cause) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onDisconnected() {
+
+        }
+
+        @Override
+        @DebugLog
+        public boolean onConnectionFailed(ConnectionResult result) {
+            return false;
+        }
+
+        @Override
+        @DebugLog
+        public void onCastDeviceDetected(MediaRouter.RouteInfo info) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onConnectivityRecovered() {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onFailed(int resourceId, int statusCode) {
+
         }
     };
 

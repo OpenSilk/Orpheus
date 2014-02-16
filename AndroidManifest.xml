@@ -132,31 +132,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.google.sample.castcompanionlibrary.cast.player.VideoCastControllerActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:parentActivityName="org.opensilk.music.ui.activities.HomeSlidingActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity" />
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-        <service
-            android:name="com.google.sample.castcompanionlibrary.notification.VideoCastNotificationService"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.google.sample.castcompanionlibrary.action.toggleplayback" />
-                <action android:name="com.google.sample.castcompanionlibrary.action.stop" />
-                <action android:name="com.google.sample.castcompanionlibrary.action.notificationvisibility" />
-            </intent-filter>
-        </service>
-
         <!-- Profile phone Activity -->
         <activity
             android:name=".ui.activities.ProfileActivity"
