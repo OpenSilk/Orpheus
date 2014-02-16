@@ -92,7 +92,7 @@
 
     <style name="Orpheus.Thumbnail.GridCard">
         <item name="android:layout_width">@dimen/card_grid_cardwidth</item>
-        <item name="android:layout_height">@dimen/card_grid_cardwidth</item>
+        <item name="android:layout_height">@dimen/card_grid_thumbheight</item>
     </style>
 
     <style name="Orpheus.Thumbnail.PanelHeader">
@@ -107,6 +107,26 @@
 
     <style name="Orpheus.Text">
 
+    </style>
+
+    <style name="Orpheus.Text.Card">
+
+    </style>
+
+    <style name="Orpheus.Text.Card.Header">
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="Orpheus.Text.Card.Header.Title">
+
+    </style>
+
+    <style name="Orpheus.Text.Card.Header.SubTitle">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <!--PANEL HEADER-->
