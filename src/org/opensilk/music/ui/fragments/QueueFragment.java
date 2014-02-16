@@ -33,6 +33,7 @@ import org.opensilk.music.ui.cards.CardQueueList;
 import java.util.ArrayList;
 import java.util.List;
 
+import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 
@@ -81,8 +82,6 @@ public class QueueFragment extends Fragment implements
         mListView = (DragSortListView)rootView.findViewById(R.id.card_list_base);
         // Release any references to the recycled Views
         mListView.setRecyclerListener(new RecycleHolder());
-        // Listen for ContextMenus to be created
-        mListView.setOnCreateContextMenuListener(this);
         // Set the drop listener
         mListView.setDropListener(this);
         // Set the swipe to remove listener
@@ -112,6 +111,7 @@ public class QueueFragment extends Fragment implements
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public Loader<List<Song>> onCreateLoader(final int id, final Bundle args) {
         return new QueueLoader(getActivity());
     }
@@ -120,6 +120,7 @@ public class QueueFragment extends Fragment implements
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public void onLoadFinished(final Loader<List<Song>> loader, final List<Song> data) {
         // Check for any errors
         if (data.isEmpty()) {
@@ -137,9 +138,11 @@ public class QueueFragment extends Fragment implements
         mAdapter.setRowLayoutId(R.layout.drag_sort_list_item);
         // Set the data behind the list
         mListView.setAdapter(mAdapter);
+        scrollToCurrentSong();
     }
 
     @Override
+    @DebugLog
     public void onLoaderReset(Loader<List<Song>> listLoader) {
 
     }
@@ -148,6 +151,7 @@ public class QueueFragment extends Fragment implements
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public void remove(final int which) {
         Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
@@ -171,6 +175,7 @@ public class QueueFragment extends Fragment implements
      * Scrolls the list to the currently playing song when the user touches the
      * header in the {@link TitlePageIndicator}.
      */
+    @DebugLog
     public void scrollToCurrentSong() {
         final int currentSongPosition = getItemPositionBySong();
 
@@ -183,6 +188,7 @@ public class QueueFragment extends Fragment implements
      * @return The position of an item in the list based on the name of the
      *         currently playing song.
      */
+    @DebugLog
     private int getItemPositionBySong() {
         final long trackId = MusicUtils.getCurrentAudioId();
         if (mAdapter == null) {
@@ -199,9 +205,14 @@ public class QueueFragment extends Fragment implements
     /**
      * Called to restart the loader callbacks
      */
+    @DebugLog
     public void refreshQueue() {
         if (isAdded()) {
             getLoaderManager().restartLoader(LOADER, null, this);
         }
+    }
+
+    public CardArrayAdapter getAdapter() {
+        return mAdapter;
     }
 }

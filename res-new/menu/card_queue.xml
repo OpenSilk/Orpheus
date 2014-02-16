@@ -3,6 +3,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/card_menu_play"
+        android:title="@string/accessibility_play"/>
+    <item
         android:id="@+id/card_menu_play_next"
         android:title="@string/context_menu_play_next"/>
     <item

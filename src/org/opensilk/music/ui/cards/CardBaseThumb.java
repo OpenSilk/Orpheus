@@ -64,6 +64,10 @@ public abstract class CardBaseThumb<D> extends Card {
         addCardThumbnail(cardThumbnail);
     }
 
+    public D getData() {
+        return mData;
+    }
+
     /**
      * call appropriate method in ImageFetcher to load image
      * @param fetcher

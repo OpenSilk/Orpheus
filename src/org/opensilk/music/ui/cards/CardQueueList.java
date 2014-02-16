@@ -16,6 +16,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
+import org.opensilk.music.ui.fragments.QueueFragment;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -38,16 +39,6 @@ public class CardQueueList extends CardBaseList<Song> {
         mTitle = mData.mSongName;
         mSecondTitle = mData.mArtistName;
         mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
-        setOnLongClickListener(new OnLongCardClickListener() {
-            @Override
-            public boolean onLongClick(Card card, View view) {
-                // When selecting a track from the queue, just jump there instead of
-                // reloading the queue. This is both faster, and prevents accidentally
-                // dropping out of party shuffle.
-                MusicUtils.setQueuePosition(Integer.valueOf(getId()));
-                return false;
-            }
-        });
     }
 
     @Override
@@ -66,6 +57,12 @@ public class CardQueueList extends CardBaseList<Song> {
             @Override
             public void onMenuItemClick(BaseCard baseCard, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
+                    case R.id.card_menu_play:
+                        // When selecting a track from the queue, just jump there instead of
+                        // reloading the queue. This is both faster, and prevents accidentally
+                        // dropping out of party shuffle.
+                        MusicUtils.setQueuePosition(Integer.valueOf(getId()));
+                        break;
                     case R.id.card_menu_play_next:
                         NowPlayingCursor queue = (NowPlayingCursor) QueueLoader
                                 .makeQueueCursor(getContext());
@@ -100,7 +97,4 @@ public class CardQueueList extends CardBaseList<Song> {
         };
     }
 
-    public Song getData() {
-        return mData;
-    }
 }
