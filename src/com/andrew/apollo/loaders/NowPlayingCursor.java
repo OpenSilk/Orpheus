@@ -1,7 +1,7 @@
 
 package com.andrew.apollo.loaders;
 
-import static com.andrew.apollo.utils.MusicUtils.mService;
+import static com.andrew.apollo.utils.MusicUtils.sService;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -12,7 +12,6 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.AudioColumns;
 
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 
 import java.util.Arrays;
@@ -272,7 +271,7 @@ public class NowPlayingCursor extends AbstractCursor {
      */
     public boolean removeItem(final int which) {
         try {
-            if (mService.removeTracks(which, which) == 0) {
+            if (sService.removeTracks(which, which) == 0) {
                 return false;
             }
             int i = which;

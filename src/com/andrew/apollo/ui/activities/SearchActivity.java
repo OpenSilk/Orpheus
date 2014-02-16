@@ -11,7 +11,7 @@
 
 package com.andrew.apollo.ui.activities;
 
-import static com.andrew.apollo.utils.MusicUtils.mService;
+import static com.andrew.apollo.utils.MusicUtils.sService;
 
 import android.app.Activity;
 import android.app.ActionBar;
@@ -36,7 +36,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -227,7 +226,7 @@ public class SearchActivity extends Activity implements LoaderCallbacks<Cursor>,
     protected void onDestroy() {
         super.onDestroy();
         // Unbind from the service
-        if (mService != null) {
+        if (sService != null) {
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }
@@ -391,7 +390,7 @@ public class SearchActivity extends Activity implements LoaderCallbacks<Cursor>,
      */
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
-        mService = IApolloService.Stub.asInterface(service);
+        sService = IApolloService.Stub.asInterface(service);
     }
 
     /**
@@ -399,7 +398,7 @@ public class SearchActivity extends Activity implements LoaderCallbacks<Cursor>,
      */
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        mService = null;
+        sService = null;
     }
 
     /**

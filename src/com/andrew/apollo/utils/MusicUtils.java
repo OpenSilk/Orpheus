@@ -53,8 +53,6 @@ import com.devspark.appmsg.AppMsg;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Formatter;
-import java.util.Locale;
 import java.util.WeakHashMap;
 
 /**
@@ -64,7 +62,7 @@ import java.util.WeakHashMap;
  */
 public final class MusicUtils {
 
-    public static IApolloService mService = null;
+    public static IApolloService sService = null;
 
     private static int sForegroundActivities = 0;
 
@@ -119,7 +117,7 @@ public final class MusicUtils {
         }
         mContextWrapper.unbindService(mBinder);
         if (mConnectionMap.isEmpty()) {
-            mService = null;
+            sService = null;
         }
     }
 
@@ -137,7 +135,7 @@ public final class MusicUtils {
 
         @Override
         public void onServiceConnected(final ComponentName className, final IBinder service) {
-            mService = IApolloService.Stub.asInterface(service);
+            sService = IApolloService.Stub.asInterface(service);
             if (mCallback != null) {
                 mCallback.onServiceConnected(className, service);
             }
@@ -148,7 +146,7 @@ public final class MusicUtils {
             if (mCallback != null) {
                 mCallback.onServiceDisconnected(className);
             }
-            mService = null;
+            sService = null;
         }
     }
 
@@ -205,8 +203,8 @@ public final class MusicUtils {
      */
     public static void next() {
         try {
-            if (mService != null) {
-                mService.next();
+            if (sService != null) {
+                sService.next();
             }
         } catch (final RemoteException ignored) {
         }
@@ -237,11 +235,11 @@ public final class MusicUtils {
      */
     public static void playOrPause() {
         try {
-            if (mService != null) {
-                if (mService.isPlaying()) {
-                    mService.pause();
+            if (sService != null) {
+                if (sService.isPlaying()) {
+                    sService.pause();
                 } else {
-                    mService.play();
+                    sService.play();
                 }
             }
         } catch (final Exception ignored) {
@@ -253,19 +251,19 @@ public final class MusicUtils {
      */
     public static void cycleRepeat() {
         try {
-            if (mService != null) {
-                switch (mService.getRepeatMode()) {
+            if (sService != null) {
+                switch (sService.getRepeatMode()) {
                     case MusicPlaybackService.REPEAT_NONE:
-                        mService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
+                        sService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
                         break;
                     case MusicPlaybackService.REPEAT_ALL:
-                        mService.setRepeatMode(MusicPlaybackService.REPEAT_CURRENT);
-                        if (mService.getShuffleMode() != MusicPlaybackService.SHUFFLE_NONE) {
-                            mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+                        sService.setRepeatMode(MusicPlaybackService.REPEAT_CURRENT);
+                        if (sService.getShuffleMode() != MusicPlaybackService.SHUFFLE_NONE) {
+                            sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
                         }
                         break;
                     default:
-                        mService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
+                        sService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
                         break;
                 }
             }
@@ -278,19 +276,19 @@ public final class MusicUtils {
      */
     public static void cycleShuffle() {
         try {
-            if (mService != null) {
-                switch (mService.getShuffleMode()) {
+            if (sService != null) {
+                switch (sService.getShuffleMode()) {
                     case MusicPlaybackService.SHUFFLE_NONE:
-                        mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-                        if (mService.getRepeatMode() == MusicPlaybackService.REPEAT_CURRENT) {
-                            mService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
+                        sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+                        if (sService.getRepeatMode() == MusicPlaybackService.REPEAT_CURRENT) {
+                            sService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
                         }
                         break;
                     case MusicPlaybackService.SHUFFLE_NORMAL:
-                        mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+                        sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
                         break;
                     case MusicPlaybackService.SHUFFLE_AUTO:
-                        mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+                        sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
                         break;
                     default:
                         break;
@@ -304,9 +302,9 @@ public final class MusicUtils {
      * @return True if we're playing music, false otherwise.
      */
     public static final boolean isPlaying() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.isPlaying();
+                return sService.isPlaying();
             } catch (final RemoteException ignored) {
             }
         }
@@ -317,9 +315,9 @@ public final class MusicUtils {
      * @return The current shuffle mode.
      */
     public static final int getShuffleMode() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getShuffleMode();
+                return sService.getShuffleMode();
             } catch (final RemoteException ignored) {
             }
         }
@@ -330,9 +328,9 @@ public final class MusicUtils {
      * @return The current repeat mode.
      */
     public static final int getRepeatMode() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getRepeatMode();
+                return sService.getRepeatMode();
             } catch (final RemoteException ignored) {
             }
         }
@@ -343,9 +341,9 @@ public final class MusicUtils {
      * @return The current track name.
      */
     public static final String getTrackName() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getTrackName();
+                return sService.getTrackName();
             } catch (final RemoteException ignored) {
             }
         }
@@ -356,9 +354,9 @@ public final class MusicUtils {
      * @return The current artist name.
      */
     public static final String getArtistName() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getArtistName();
+                return sService.getArtistName();
             } catch (final RemoteException ignored) {
             }
         }
@@ -369,9 +367,9 @@ public final class MusicUtils {
      * @return The current album name.
      */
     public static final String getAlbumName() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getAlbumName();
+                return sService.getAlbumName();
             } catch (final RemoteException ignored) {
             }
         }
@@ -382,9 +380,9 @@ public final class MusicUtils {
      * @return The current album Id.
      */
     public static final long getCurrentAlbumId() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getAlbumId();
+                return sService.getAlbumId();
             } catch (final RemoteException ignored) {
             }
         }
@@ -395,9 +393,9 @@ public final class MusicUtils {
      * @return The current song Id.
      */
     public static final long getCurrentAudioId() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getAudioId();
+                return sService.getAudioId();
             } catch (final RemoteException ignored) {
             }
         }
@@ -408,9 +406,9 @@ public final class MusicUtils {
      * @return The current artist Id.
      */
     public static final long getCurrentArtistId() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getArtistId();
+                return sService.getArtistId();
             } catch (final RemoteException ignored) {
             }
         }
@@ -421,9 +419,9 @@ public final class MusicUtils {
      * @return The audio session Id.
      */
     public static final int getAudioSessionId() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.getAudioSessionId();
+                return sService.getAudioSessionId();
             } catch (final RemoteException ignored) {
             }
         }
@@ -435,8 +433,8 @@ public final class MusicUtils {
      */
     public static final long[] getQueue() {
         try {
-            if (mService != null) {
-                return mService.getQueue();
+            if (sService != null) {
+                return sService.getQueue();
             } else {
             }
         } catch (final RemoteException ignored) {
@@ -450,8 +448,8 @@ public final class MusicUtils {
      */
     public static final int removeTrack(final long id) {
         try {
-            if (mService != null) {
-                return mService.removeTrack(id);
+            if (sService != null) {
+                return sService.removeTrack(id);
             }
         } catch (final RemoteException ingored) {
         }
@@ -463,8 +461,8 @@ public final class MusicUtils {
      */
     public static final int getQueuePosition() {
         try {
-            if (mService != null) {
-                return mService.getQueuePosition();
+            if (sService != null) {
+                return sService.getQueuePosition();
             }
         } catch (final RemoteException ignored) {
         }
@@ -572,7 +570,7 @@ public final class MusicUtils {
      * @param uri The source of the file
      */
     public static void playFile(final Context context, final Uri uri) {
-        if (uri == null || mService == null) {
+        if (uri == null || sService == null) {
             return;
         }
 
@@ -587,9 +585,9 @@ public final class MusicUtils {
         }
 
         try {
-            mService.stop();
-            mService.openFile(filename);
-            mService.play();
+            sService.stop();
+            sService.openFile(filename);
+            sService.play();
         } catch (final RemoteException ignored) {
         }
     }
@@ -602,29 +600,29 @@ public final class MusicUtils {
      */
     public static void playAll(final Context context, final long[] list, int position,
             final boolean forceShuffle) {
-        if (list.length == 0 || mService == null) {
+        if (list.length == 0 || sService == null) {
             return;
         }
         try {
             if (forceShuffle) {
-                mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
             } else {
-                mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
             }
-            final long currentId = mService.getAudioId();
+            final long currentId = sService.getAudioId();
             final int currentQueuePosition = getQueuePosition();
             if (position != -1 && currentQueuePosition == position && currentId == list[position]) {
                 final long[] playlist = getQueue();
                 if (Arrays.equals(list, playlist)) {
-                    mService.play();
+                    sService.play();
                     return;
                 }
             }
             if (position < 0) {
                 position = 0;
             }
-            mService.open(list, forceShuffle ? -1 : position);
-            mService.play();
+            sService.open(list, forceShuffle ? -1 : position);
+            sService.play();
         } catch (final RemoteException ignored) {
         }
     }
@@ -633,11 +631,11 @@ public final class MusicUtils {
      * @param list The list to enqueue.
      */
     public static void playNext(final long[] list) {
-        if (mService == null) {
+        if (sService == null) {
             return;
         }
         try {
-            mService.enqueue(list, MusicPlaybackService.NEXT);
+            sService.enqueue(list, MusicPlaybackService.NEXT);
         } catch (final RemoteException ignored) {
         }
     }
@@ -649,23 +647,23 @@ public final class MusicUtils {
         Cursor cursor = SongLoader.makeSongCursor(context);
         final long[] mTrackList = getSongListForCursor(cursor);
         final int position = 0;
-        if (mTrackList.length == 0 || mService == null) {
+        if (mTrackList.length == 0 || sService == null) {
             return;
         }
         try {
-            mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-            final long mCurrentId = mService.getAudioId();
+            sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+            final long mCurrentId = sService.getAudioId();
             final int mCurrentQueuePosition = getQueuePosition();
             if (position != -1 && mCurrentQueuePosition == position
                     && mCurrentId == mTrackList[position]) {
                 final long[] mPlaylist = getQueue();
                 if (Arrays.equals(mTrackList, mPlaylist)) {
-                    mService.play();
+                    sService.play();
                     return;
                 }
             }
-            mService.open(mTrackList, -1);
-            mService.play();
+            sService.open(mTrackList, -1);
+            sService.play();
             cursor.close();
             cursor = null;
         } catch (final RemoteException ignored) {
@@ -860,11 +858,11 @@ public final class MusicUtils {
      * @param list The list to enqueue.
      */
     public static void addToQueue(final Context context, final long[] list) {
-        if (mService == null) {
+        if (sService == null) {
             return;
         }
         try {
-            mService.enqueue(list, MusicPlaybackService.LAST);
+            sService.enqueue(list, MusicPlaybackService.LAST);
             final String message = makeLabel(context, R.plurals.NNNtrackstoqueue, list.length);
             AppMsg.makeText((Activity)context, message, AppMsg.STYLE_CONFIRM).show();
         } catch (final RemoteException ignored) {
@@ -965,8 +963,8 @@ public final class MusicUtils {
      */
     public static final String getFilePath() {
         try {
-            if (mService != null) {
-                return mService.getPath();
+            if (sService != null) {
+                return sService.getPath();
             }
         } catch (final RemoteException ignored) {
         }
@@ -979,8 +977,8 @@ public final class MusicUtils {
      */
     public static void moveQueueItem(final int from, final int to) {
         try {
-            if (mService != null) {
-                mService.moveQueueItem(from, to);
+            if (sService != null) {
+                sService.moveQueueItem(from, to);
             } else {
             }
         } catch (final RemoteException ignored) {
@@ -992,8 +990,8 @@ public final class MusicUtils {
      */
     public static void toggleFavorite() {
         try {
-            if (mService != null) {
-                mService.toggleFavorite();
+            if (sService != null) {
+                sService.toggleFavorite();
             }
         } catch (final RemoteException ignored) {
         }
@@ -1004,8 +1002,8 @@ public final class MusicUtils {
      */
     public static final boolean isFavorite() {
         try {
-            if (mService != null) {
-                return mService.isFavorite();
+            if (sService != null) {
+                return sService.isFavorite();
             }
         } catch (final RemoteException ignored) {
         }
@@ -1167,8 +1165,8 @@ public final class MusicUtils {
      */
     public static void refresh() {
         try {
-            if (mService != null) {
-                mService.refresh();
+            if (sService != null) {
+                sService.refresh();
             }
         } catch (final RemoteException ignored) {
         }
@@ -1191,9 +1189,9 @@ public final class MusicUtils {
      * @param position The position to seek to
      */
     public static void seek(final long position) {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                mService.seek(position);
+                sService.seek(position);
             } catch (final RemoteException ignored) {
             }
         }
@@ -1203,9 +1201,9 @@ public final class MusicUtils {
      * @return The current position time of the track
      */
     public static final long position() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.position();
+                return sService.position();
             } catch (final RemoteException ignored) {
             }
         }
@@ -1216,9 +1214,9 @@ public final class MusicUtils {
      * @return The total length of the current track
      */
     public static final long duration() {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                return mService.duration();
+                return sService.duration();
             } catch (final RemoteException ignored) {
             }
         }
@@ -1229,9 +1227,9 @@ public final class MusicUtils {
      * @param position The position to move the queue to
      */
     public static void setQueuePosition(final int position) {
-        if (mService != null) {
+        if (sService != null) {
             try {
-                mService.setQueuePosition(position);
+                sService.setQueuePosition(position);
             } catch (final RemoteException ignored) {
             }
         }
@@ -1242,7 +1240,7 @@ public final class MusicUtils {
      */
     public static void clearQueue() {
         try {
-            mService.removeTracks(0, Integer.MAX_VALUE);
+            sService.removeTracks(0, Integer.MAX_VALUE);
         } catch (final RemoteException ignored) {
         }
     }

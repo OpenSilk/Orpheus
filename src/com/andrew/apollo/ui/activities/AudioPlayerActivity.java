@@ -11,7 +11,7 @@
 
 package com.andrew.apollo.ui.activities;
 
-import static com.andrew.apollo.utils.MusicUtils.mService;
+import static com.andrew.apollo.utils.MusicUtils.sService;
 
 import android.animation.ObjectAnimator;
 import android.app.ActionBar;
@@ -212,7 +212,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
      */
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
-        mService = IApolloService.Stub.asInterface(service);
+        sService = IApolloService.Stub.asInterface(service);
         // Check whether we were asked to start any playback
         startPlayback();
         // Set the playback drawables
@@ -228,7 +228,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
      */
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        mService = null;
+        sService = null;
     }
 
     /**
@@ -236,7 +236,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
      */
     @Override
     public void onProgressChanged(final SeekBar bar, final int progress, final boolean fromuser) {
-        if (!fromuser || mService == null) {
+        if (!fromuser || sService == null) {
             return;
         }
         final long now = SystemClock.elapsedRealtime();
@@ -459,7 +459,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         mIsPaused = false;
         mTimeHandler.removeMessages(REFRESH_TIME);
         // Unbind from the service
-        if (mService != null) {
+        if (sService != null) {
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }
@@ -566,7 +566,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
     private void startPlayback() {
         Intent intent = getIntent();
 
-        if (intent == null || mService == null) {
+        if (intent == null || sService == null) {
             return;
         }
 
@@ -633,7 +633,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
      * @param delta The long press duration
      */
     private void scanBackward(final int repcnt, long delta) {
-        if (mService == null) {
+        if (sService == null) {
             return;
         }
         if (repcnt == 0) {
@@ -675,7 +675,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
      * @param delta The long press duration
      */
     private void scanForward(final int repcnt, long delta) {
-        if (mService == null) {
+        if (sService == null) {
             return;
         }
         if (repcnt == 0) {
@@ -716,7 +716,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
 
     /* Used to update the current time string */
     private long refreshCurrentTime() {
-        if (mService == null) {
+        if (sService == null) {
             return 500;
         }
         try {

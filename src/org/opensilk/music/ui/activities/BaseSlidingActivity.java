@@ -16,8 +16,6 @@
  */
 package org.opensilk.music.ui.activities;
 
-import android.app.SearchManager;
-import android.app.SearchableInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,7 +37,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.app.MediaRouteButton;
-import android.support.v7.media.MediaControlIntent;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
@@ -50,11 +47,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.SearchView;
-import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.IApolloService;
@@ -70,19 +64,9 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
-import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.CastMediaControlIntent;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.sample.castcompanionlibrary.cast.CastMediaRouterCallback;
-import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
-import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
-import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
-import com.google.sample.castcompanionlibrary.cast.exceptions.NoConnectionException;
-import com.google.sample.castcompanionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import org.opensilk.music.cast.CastUtils;
-import org.opensilk.music.cast.CastWebServer;
 import org.opensilk.music.ui.fragments.ArtFragment;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.PlayPauseButton;
@@ -90,14 +74,12 @@ import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import hugo.weaving.DebugLog;
 
-import static com.andrew.apollo.utils.MusicUtils.mService;
+import static com.andrew.apollo.utils.MusicUtils.sService;
 
 /**
  * A base {@link FragmentActivity} used to update the bottom bar and
@@ -243,7 +225,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
-        mService = IApolloService.Stub.asInterface(service);
+        sService = IApolloService.Stub.asInterface(service);
         startPlayback();
         // Set the playback drawables
         updatePlaybackControls();
@@ -258,7 +240,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        mService = null;
+        sService = null;
     }
 
     /**
@@ -396,7 +378,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public void onProgressChanged(final SeekBar bar, final int progress, final boolean fromuser) {
-        if (!fromuser || mService == null) {
+        if (!fromuser || sService == null) {
             return;
         }
         final long now = SystemClock.elapsedRealtime();
@@ -555,7 +537,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private void startPlayback() {
         Intent intent = getIntent();
 
-        if (intent == null || mService == null) {
+        if (intent == null || sService == null) {
             return;
         }
 
@@ -610,7 +592,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      * @param delta The long press duration
      */
     private void scanBackward(final int repcnt, long delta) {
-        if (mService == null) {
+        if (sService == null) {
             return;
         }
         if (repcnt == 0) {
@@ -652,7 +634,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      * @param delta The long press duration
      */
     private void scanForward(final int repcnt, long delta) {
-        if (mService == null) {
+        if (sService == null) {
             return;
         }
         if (repcnt == 0) {
@@ -693,7 +675,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     /* Used to update the current time string */
     private long refreshCurrentTime() {
-        if (mService == null) {
+        if (sService == null) {
             return 500;
         }
         try {

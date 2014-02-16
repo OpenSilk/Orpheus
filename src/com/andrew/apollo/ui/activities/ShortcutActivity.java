@@ -12,7 +12,7 @@
 package com.andrew.apollo.ui.activities;
 
 import static com.andrew.apollo.Config.MIME_TYPE;
-import static com.andrew.apollo.utils.MusicUtils.mService;
+import static com.andrew.apollo.utils.MusicUtils.sService;
 
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -113,12 +113,12 @@ public class ShortcutActivity extends FragmentActivity implements ServiceConnect
      */
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
-        mService = IApolloService.Stub.asInterface(service);
+        sService = IApolloService.Stub.asInterface(service);
 
         // Check for a voice query
         if (mIntent.getAction().equals(Config.PLAY_FROM_SEARCH)) {
             getSupportLoaderManager().initLoader(0, null, mSongAlbumArtistQuery);
-        } else if (mService != null) {
+        } else if (sService != null) {
             AsyncHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -196,7 +196,7 @@ public class ShortcutActivity extends FragmentActivity implements ServiceConnect
      */
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        mService = null;
+        sService = null;
     }
 
     /**
@@ -206,7 +206,7 @@ public class ShortcutActivity extends FragmentActivity implements ServiceConnect
     protected void onDestroy() {
         super.onDestroy();
         // Unbind from the service
-        if (mService != null) {
+        if (sService != null) {
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }

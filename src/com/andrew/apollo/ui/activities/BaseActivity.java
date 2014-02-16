@@ -11,7 +11,7 @@
 
 package com.andrew.apollo.ui.activities;
 
-import static com.andrew.apollo.utils.MusicUtils.mService;
+import static com.andrew.apollo.utils.MusicUtils.sService;
 
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -28,7 +28,6 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -157,7 +156,7 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
      */
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
-        mService = IApolloService.Stub.asInterface(service);
+        sService = IApolloService.Stub.asInterface(service);
         // Set the playback drawables
         updatePlaybackControls();
         // Current info
@@ -171,7 +170,7 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
      */
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        mService = null;
+        sService = null;
     }
 
     /**
