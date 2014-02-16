@@ -238,8 +238,7 @@
         <!-- Music service -->
         <service
             android:name=".MusicPlaybackService"
-            android:label="@string/app_name"
-            android:process=":main" />
+            android:label="@string/app_name" />
     </application>
 
 </manifest>
