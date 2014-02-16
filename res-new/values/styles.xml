@@ -144,6 +144,12 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style name="Orpheus.Text.Empty">
+        <item name="android:padding">@dimen/list_preferred_item_padding</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
     <!--PANEL HEADER-->
 
     <style name="Orpheus.PanelHeader">
