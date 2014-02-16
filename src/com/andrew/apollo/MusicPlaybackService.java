@@ -528,6 +528,10 @@ public class MusicPlaybackService extends Service {
      */
     private PlaybackLocation mPlaybackLocation = PlaybackLocation.LOCAL;
 
+    /**
+     * Flag if we need to force reload the current media
+     */
+    private boolean mRemoteMediaNeedsReload = false;
 
     /**
      * {@inheritDoc}
@@ -537,6 +541,8 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "Service bound, intent = " + intent);
         cancelShutdown();
         mServiceInUse = true;
+        // look and see if we were just disconnected
+        mCastManager.reconnectSessionIfPossible(this, false, 1);
         return mBinder;
     }
 
@@ -574,6 +580,8 @@ public class MusicPlaybackService extends Service {
     public void onRebind(final Intent intent) {
         cancelShutdown();
         mServiceInUse = true;
+        // look and see if we were just disconnected
+        mCastManager.reconnectSessionIfPossible(this, false, 1);
     }
 
     /**
@@ -744,6 +752,11 @@ public class MusicPlaybackService extends Service {
             mUnmountReceiver = null;
         }
 
+        // kill the remote app.
+        try {
+            mCastManager.stopApplication();
+        } catch (Exception ignored) { /*pass*/ }
+
         // Unregister with cast manager
         mCastManager.removeVideoCastConsumer(mCastConsumer);
 
@@ -814,8 +827,7 @@ public class MusicPlaybackService extends Service {
             if (position() < 2000) {
                 prev();
             } else {
-                seek(0);
-                play();
+                seekAndPlay(0);
             }
         } else if (CMDTOGGLEPAUSE.equals(command) || TOGGLEPAUSE_ACTION.equals(action)) {
             if (isPlaying()) {
@@ -940,6 +952,35 @@ public class MusicPlaybackService extends Service {
      */
     private void stop(final boolean goToIdle) {
         if (D) Log.d(TAG, "Stopping playback, goToIdle = " + goToIdle);
+        if (isRemotePlayback()) {
+            stopRemote(goToIdle);
+        } else {
+            stopLocal(goToIdle);
+        }
+    }
+
+    private void stopRemote(final boolean goToIdle) {
+        try {
+            if (goToIdle) {
+                mCastManager.stopApplication();
+            } else {
+                mCastManager.pause();
+                mRemoteMediaNeedsReload = true;
+                mCurrentMediaInfo = null;
+            }
+        } catch (CastException e) {
+            e.printStackTrace();
+        } catch (TransientNetworkDisconnectionException e) {
+            e.printStackTrace();
+        } catch (NoConnectionException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        stopLocal(goToIdle);
+    }
+
+    private void stopLocal(final boolean goToIdle) {
         if (mPlayer.isInitialized()) {
             mPlayer.stop();
         }
@@ -1896,11 +1937,34 @@ public class MusicPlaybackService extends Service {
     }
 
     /**
+     * Seeks the current track and initiates playback if needed
+     *
+     */
+    public long seekAndPlay(long position) {
+        long seekedTo = -1;
+        if (isRemotePlayback()) {
+            try {
+                mCastManager.seekAndPlay((int)position);
+                seekedTo = position;
+            } catch (TransientNetworkDisconnectionException e) {
+                e.printStackTrace();
+            } catch (NoConnectionException e) {
+                e.printStackTrace();
+            }
+        } else {
+            seekedTo = seekLocal(position);
+            playLocal();
+        }
+        return seekedTo;
+    }
+
+    /**
      * Seeks the current track to a specific time
      *
      * @param position The time to seek to
      * @return The time to play the track at
      */
+    @DebugLog
     public long seek(long position) {
         if (isRemotePlayback()) {
             return seekRemote(position);
@@ -1909,6 +1973,7 @@ public class MusicPlaybackService extends Service {
         }
     }
 
+    @DebugLog
     private long seekRemote(long position) {
         try {
             if (position < 0) {
@@ -2093,6 +2158,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Resumes or starts playback.
      */
+    @DebugLog
     public void play() {
         if (isRemotePlayback()) {
             playRemote();
@@ -2101,13 +2167,20 @@ public class MusicPlaybackService extends Service {
         }
     }
 
+    @DebugLog
     private void playRemote() {
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
         try {
-            if (mCastManager.isRemoteMediaLoaded()) {
-                final double duration = mCastManager.getMediaDuration();
+            // If we just skipped forward the remote device
+            // will still be loaded with the old track
+            if (mRemoteMediaNeedsReload) {
+                mRemoteMediaNeedsReload = false;
+                loadRemoteCurrent();
+            } else if (mCastManager.isRemoteMediaLoaded()) {
+                final double duration = duration();
                 final double position = mCastManager.getCurrentMediaPosition();
+                // if not repeating and only 2 seconds left in current track goToNext
                 if (mRepeatMode != REPEAT_CURRENT && duration > 2000
                         && position >= duration - 2000) {
                     gotoNext(true);
@@ -2123,6 +2196,8 @@ public class MusicPlaybackService extends Service {
                 updateNotification();
             } else if (mPlayListLen <= 0) {
                 setShuffleMode(SHUFFLE_AUTO);
+            } else {
+                Log.e(TAG, "What should i do?");
             }
         } catch (TransientNetworkDisconnectionException e) {
             e.printStackTrace();
@@ -2147,6 +2222,7 @@ public class MusicPlaybackService extends Service {
 
         if (mPlayer.isInitialized()) {
             final long duration = mPlayer.duration();
+            // if not repeating and only 2 seconds left in current track goToNext
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000
                     && mPlayer.position() >= duration - 2000) {
                 gotoNext(true);
@@ -2242,6 +2318,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Changes from the current track to the previous played track
      */
+    @DebugLog
     public void prev() {
         if (D) Log.d(TAG, "Going to previous track");
         synchronized (this) {
@@ -2486,11 +2563,12 @@ public class MusicPlaybackService extends Service {
                 mCastManager.checkConnectivity();
                 return true;
             } catch (TransientNetworkDisconnectionException e) {
-                e.printStackTrace();
+                Log.e(TAG, "isRemotePlayback" + e.getMessage());
             } catch (NoConnectionException e) {
-                e.printStackTrace();
+                Log.e(TAG, "isRemotePlayback" + e.getMessage());
             }
         }
+        updatePlaybackLocation(PlaybackLocation.LOCAL);
         return false;
     }
 
@@ -2543,7 +2621,7 @@ public class MusicPlaybackService extends Service {
      * Initiates remote playback for current track
      */
     @DebugLog
-    private void loadCurrentRemote() {
+    private void loadRemoteCurrent() {
         int startPos = 0;
         // if we are currently playing start where we left off
         if (mPlayer.isInitialized()) {
@@ -2565,9 +2643,11 @@ public class MusicPlaybackService extends Service {
 
     /**
      * Initiates remote playback for next track
+     * This pretends to be a handoff between the currentMediaPlayer
+     * and the nextMediaPlayer @see MultiPlayer.OnComplete()
      */
     @DebugLog
-    private void loadNextRemote() {
+    private void loadRemoteNext() {
         if (mNextMediaInfo != null) {
             if (loadRemote(mNextMediaInfo, true, 0)) {
                 mPlayer.mHandler.sendEmptyMessage(TRACK_WENT_TO_NEXT);
@@ -2655,7 +2735,7 @@ public class MusicPlaybackService extends Service {
             }
             updatePlaybackLocation(PlaybackLocation.REMOTE);
             startCastServer();
-            loadCurrentRemote();
+            loadRemoteCurrent();
         }
 
         /**
@@ -2709,7 +2789,7 @@ public class MusicPlaybackService extends Service {
 
             if (status.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE) {
                 if (status.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED) {
-                    loadNextRemote();
+                    loadRemoteNext();
                 }
             }
 
@@ -2833,8 +2913,7 @@ public class MusicPlaybackService extends Service {
                     break;
                 case TRACK_ENDED:
                     if (service.mRepeatMode == REPEAT_CURRENT) {
-                        service.seek(0);
-                        service.play();
+                        service.seekAndPlay(0);
                     } else {
                         service.gotoNext(false);
                     }
