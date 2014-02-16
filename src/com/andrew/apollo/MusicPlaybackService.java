@@ -1,12 +1,18 @@
 /*
- * Copyright (C) 2012 Andrew Neal Licensed under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
- * or agreed to in writing, software distributed under the License is
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * Copyright (C) 2012 Andrew Neal
+ * Copyright (C) 2014 OpenSilk Productions LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.andrew.apollo;
@@ -293,7 +299,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Idle time before stopping the foreground notfication (1 minute)
      */
-    private static final int IDLE_DELAY = 5000000; //TODO set back
+    private static final int IDLE_DELAY = 60000;
 
     /**
      * The max size allowed for the track history
@@ -1896,6 +1902,35 @@ public class MusicPlaybackService extends Service {
      * @return The time to play the track at
      */
     public long seek(long position) {
+        if (isRemotePlayback()) {
+            return seekRemote(position);
+        } else {
+            return seekLocal(position);
+        }
+    }
+
+    private long seekRemote(long position) {
+        try {
+            if (position < 0) {
+                position = 0;
+            } else {
+                long duration = duration();
+                if (position > duration) {
+                    position = duration;
+                }
+            }
+            mCastManager.seek((int) position);
+            notifyChange(POSITION_CHANGED);
+            return position;
+        } catch (TransientNetworkDisconnectionException e) {
+            e.printStackTrace();
+        } catch (NoConnectionException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private long seekLocal(long position) {
         if (mPlayer.isInitialized()) {
             if (position < 0) {
                 position = 0;
@@ -1915,6 +1950,25 @@ public class MusicPlaybackService extends Service {
      * @return The current playback position in miliseconds
      */
     public long position() {
+        if (isRemotePlayback()) {
+            return positionRemote();
+        } else {
+            return positionLocal();
+        }
+    }
+
+    private long positionRemote() {
+        try {
+            return (long) mCastManager.getCurrentMediaPosition();
+        } catch (TransientNetworkDisconnectionException e) {
+            e.printStackTrace();
+        } catch (NoConnectionException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private long positionLocal() {
         if (mPlayer.isInitialized()) {
             return mPlayer.position();
         }
@@ -1927,6 +1981,26 @@ public class MusicPlaybackService extends Service {
      * @return The duration of the current track in miliseconds
      */
     public long duration() {
+        // We'll just cheat and always get it from the local player
+//        if (isRemotePlayback()) {
+//            return durationRemote();
+//        } else {
+            return durationLocal();
+//        }
+    }
+
+    public long durationRemote() {
+        try {
+            return (long) mCastManager.getMediaDuration();
+        } catch (TransientNetworkDisconnectionException e) {
+            e.printStackTrace();
+        } catch (NoConnectionException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public long durationLocal() {
         if (mPlayer.isInitialized()) {
             return mPlayer.duration();
         }

@@ -931,21 +931,21 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     private static final class TimeHandler extends Handler {
 
-        private final WeakReference<BaseSlidingActivity> mAudioPlayer;
+        private final WeakReference<BaseSlidingActivity> mActivity;
 
         /**
          * Constructor of <code>TimeHandler</code>
          */
         public TimeHandler(final BaseSlidingActivity player) {
-            mAudioPlayer = new WeakReference<BaseSlidingActivity>(player);
+            mActivity = new WeakReference<BaseSlidingActivity>(player);
         }
 
         @Override
         public void handleMessage(final Message msg) {
             switch (msg.what) {
                 case REFRESH_TIME:
-                    final long next = mAudioPlayer.get().refreshCurrentTime();
-                    mAudioPlayer.get().queueNextRefresh(next);
+                    final long next = mActivity.get().refreshCurrentTime();
+                    mActivity.get().queueNextRefresh(next);
                     break;
                 default:
                     break;
