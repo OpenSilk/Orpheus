@@ -65,6 +65,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
 import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
 import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.google.sample.castcompanionlibrary.cast.exceptions.CastException;
 import com.google.sample.castcompanionlibrary.cast.exceptions.NoConnectionException;
 import com.google.sample.castcompanionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 
@@ -2019,7 +2020,45 @@ public class MusicPlaybackService extends Service {
      * Resumes or starts playback.
      */
     public void play() {
-        //TODO shouldnt need for casting
+        if (isRemotePlayback()) {
+            playRemote();
+        } else {
+            playLocal();
+        }
+    }
+
+    private void playRemote() {
+        mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
+                MediaButtonIntentReceiver.class.getName()));
+        try {
+            if (mCastManager.isRemoteMediaLoaded()) {
+                final double duration = mCastManager.getMediaDuration();
+                final double position = mCastManager.getCurrentMediaPosition();
+                if (mRepeatMode != REPEAT_CURRENT && duration > 2000
+                        && position >= duration - 2000) {
+                    gotoNext(true);
+                    return;
+                }
+                mCastManager.play((int)position);
+                if (!mIsSupposedToBePlaying) {
+                    mIsSupposedToBePlaying = true;
+                    notifyChange(PLAYSTATE_CHANGED);
+                }
+
+                cancelShutdown();
+                updateNotification();
+            } else if (mPlayListLen <= 0) {
+                setShuffleMode(SHUFFLE_AUTO);
+            }
+        } catch (TransientNetworkDisconnectionException e) {
+            e.printStackTrace();
+        } catch (NoConnectionException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void playLocal() {
         int status = mAudioManager.requestAudioFocus(mAudioFocusListener,
                 AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
@@ -2037,6 +2076,7 @@ public class MusicPlaybackService extends Service {
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000
                     && mPlayer.position() >= duration - 2000) {
                 gotoNext(true);
+                return;
             }
 
             mPlayer.start();
@@ -2059,6 +2099,31 @@ public class MusicPlaybackService extends Service {
      * Temporarily pauses playback.
      */
     public void pause() {
+        if (isRemotePlayback()) {
+            pauseRemote();
+        } else {
+            pauseLocal();
+        }
+    }
+
+    private void pauseRemote() {
+        if (mIsSupposedToBePlaying) {
+            try {
+                mCastManager.pause();
+                scheduleDelayedShutdown();
+                mIsSupposedToBePlaying = false;
+                notifyChange(PLAYSTATE_CHANGED);
+            } catch (CastException e) {
+                e.printStackTrace();
+            } catch (TransientNetworkDisconnectionException e) {
+                e.printStackTrace();
+            } catch (NoConnectionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void pauseLocal() {
         if (D) Log.d(TAG, "Pausing playback");
         synchronized (this) {
             mPlayerHandler.removeMessages(FADEUP);
@@ -2343,7 +2408,14 @@ public class MusicPlaybackService extends Service {
      */
     private boolean isRemotePlayback() {
         if (mPlaybackLocation == PlaybackLocation.REMOTE) {
-            return true;
+            try {
+                mCastManager.checkConnectivity();
+                return true;
+            } catch (TransientNetworkDisconnectionException e) {
+                e.printStackTrace();
+            } catch (NoConnectionException e) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
@@ -2397,26 +2469,44 @@ public class MusicPlaybackService extends Service {
      * Initiates remote playback for current track
      */
     @DebugLog
-    private void playCurrentRemote() {
-        playRemote(mCurrentMediaInfo, true);
+    private void loadCurrentRemote() {
+        int startPos = 0;
+        // if we are currently playing start where we left off
+        if (mPlayer.isInitialized()) {
+            startPos = (int) mPlayer.position();
+        }
+        if (loadRemote(mCurrentMediaInfo, true, startPos)) {
+            mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
+                    MediaButtonIntentReceiver.class.getName()));
+            if (!mIsSupposedToBePlaying) {
+                mIsSupposedToBePlaying = true;
+                notifyChange(PLAYSTATE_CHANGED);
+            }
+            cancelShutdown();
+            updateNotification();
+        } else {
+            Log.e(TAG, "Failed to load remote media");
+        }
     }
 
     /**
      * Initiates remote playback for next track
      */
     @DebugLog
-    private void playNextRemote() {
+    private void loadNextRemote() {
         if (mNextMediaInfo != null) {
-            if (playRemote(mNextMediaInfo, true)) {
+            if (loadRemote(mNextMediaInfo, true, 0)) {
                 mPlayer.mHandler.sendEmptyMessage(TRACK_WENT_TO_NEXT);
+            } else {
+                Log.e(TAG, "Failed to load remote media");
             }
         }
     }
 
     @DebugLog
-    private boolean playRemote(MediaInfo info, boolean autoplay) {
+    private boolean loadRemote(MediaInfo info, boolean autoplay, int startPos) {
         try {
-            mCastManager.loadMedia(info, autoplay, 0);
+            mCastManager.loadMedia(info, autoplay, startPos);
             return true;
         } catch (TransientNetworkDisconnectionException e) {
             e.printStackTrace();
@@ -2486,9 +2576,12 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
+            if (isPlaying()) {
+                pause();
+            }
             updatePlaybackLocation(PlaybackLocation.REMOTE);
             startCastServer();
-            playCurrentRemote();
+            loadCurrentRemote();
         }
 
         /**
@@ -2524,7 +2617,9 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onApplicationDisconnected(int errorCode) {
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
             stopCastServer();
+            pause(); //What to do?? this might not be best
         }
 
         @Override
@@ -2540,7 +2635,7 @@ public class MusicPlaybackService extends Service {
 
             if (status.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE) {
                 if (status.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED) {
-                    playNextRemote();
+                    loadNextRemote();
                 }
             }
 
