@@ -29,7 +29,6 @@ import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
 import android.media.RemoteControlClient;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
@@ -59,15 +58,13 @@ import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.ApplicationMetadata;
-import com.google.android.gms.cast.CastStatusCodes;
 import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
 import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
 import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
-import com.google.sample.castcompanionlibrary.cast.exceptions.CastException;
 import com.google.sample.castcompanionlibrary.cast.exceptions.NoConnectionException;
 import com.google.sample.castcompanionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 
@@ -305,7 +302,7 @@ public class MusicPlaybackService extends Service {
     /**
      * The columns used to retrieve any info from the current track
      */
-    private static final String[] PROJECTION = new String[] {
+    public static final String[] PROJECTION = new String[] {
             "audio._id AS _id", MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.MIME_TYPE, MediaStore.Audio.Media.ALBUM_ID,
@@ -315,7 +312,7 @@ public class MusicPlaybackService extends Service {
     /**
      * The columns used to retrieve any info from the current album
      */
-    private static final String[] ALBUM_PROJECTION = new String[] {
+    public static final String[] ALBUM_PROJECTION = new String[] {
             MediaStore.Audio.Albums.ALBUM, MediaStore.Audio.Albums.ARTIST,
             MediaStore.Audio.Albums.LAST_YEAR
     };
@@ -501,6 +498,15 @@ public class MusicPlaybackService extends Service {
      */
     private CastWebServer mCastServer;
 
+    /**
+     * MediaInfo for the current track
+     */
+    MediaInfo mCurrentMediaInfo;
+
+    /**
+     * MediaInfo for track next in queue
+     */
+    MediaInfo mNextMediaInfo;
 
     /**
      * indicates whether we are doing a local or a remote playback
@@ -735,9 +741,7 @@ public class MusicPlaybackService extends Service {
         mCastManager.removeVideoCastConsumer(mCastConsumer);
 
         // Stop http server
-        if (mCastServer != null) {
-            mCastServer.stop();
-        }
+        stopCastServer();
 
         // Release the wake lock
         mWakeLock.release();
@@ -1229,8 +1233,10 @@ public class MusicPlaybackService extends Service {
         if (mNextPlayPos >= 0 && mPlayList != null) {
             final long id = mPlayList[mNextPlayPos];
             mPlayer.setNextDataSource(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
+            mNextMediaInfo = CastUtils.buildMediaInfo(this, id);
         } else {
             mPlayer.setNextDataSource(null);
+            mNextMediaInfo = null;
         }
     }
 
@@ -1658,6 +1664,7 @@ public class MusicPlaybackService extends Service {
             }
             mFileToPlay = path;
             mPlayer.setDataSource(mFileToPlay);
+            mCurrentMediaInfo = buildCurrentMediaInfo();
             if (mPlayer.isInitialized()) {
                 mOpenFailedCounter = 0;
                 return true;
@@ -2345,6 +2352,7 @@ public class MusicPlaybackService extends Service {
      * Starts cast http server, creating it if needed.
      * @return success of operation
      */
+    @DebugLog
     private boolean startCastServer() {
         if (mCastServer == null) {
             mCastServer = new CastWebServer(this);
@@ -2352,7 +2360,13 @@ public class MusicPlaybackService extends Service {
         try {
             mCastServer.start();
         } catch (IOException e) {
-            return false;
+            e.printStackTrace();
+            // At the moment the only thing i can think
+            // would case a fail is if its already running
+            // causing the port to be bound
+            stopCastServer();
+            // XXX
+            return startCastServer();
         }
         return true;
     }
@@ -2360,11 +2374,56 @@ public class MusicPlaybackService extends Service {
     /**
      * Stops cast http server if running
      */
+    @DebugLog
     private void stopCastServer() {
         if (mCastServer != null) {
             mCastServer.stop();
         }
         mCastServer = null;
+    }
+
+    private MediaInfo buildCurrentMediaInfo() {
+        return CastUtils.buildMediaInfo(
+                getTrackName(),
+                getAlbumName(),
+                getArtistName(),
+                getMimeType(),
+                CastUtils.buildMusicUrl(getAudioId(), CastUtils.getWifiIpAddress(this)),
+                CastUtils.buildArtUrl(getAudioId(), CastUtils.getWifiIpAddress(this)),
+                null);
+    }
+
+    /**
+     * Initiates remote playback for current track
+     */
+    @DebugLog
+    private void playCurrentRemote() {
+        playRemote(mCurrentMediaInfo, true);
+    }
+
+    /**
+     * Initiates remote playback for next track
+     */
+    @DebugLog
+    private void playNextRemote() {
+        if (mNextMediaInfo != null) {
+            if (playRemote(mNextMediaInfo, true)) {
+                mPlayer.mHandler.sendEmptyMessage(TRACK_WENT_TO_NEXT);
+            }
+        }
+    }
+
+    @DebugLog
+    private boolean playRemote(MediaInfo info, boolean autoplay) {
+        try {
+            mCastManager.loadMedia(info, autoplay, 0);
+            return true;
+        } catch (TransientNetworkDisconnectionException e) {
+            e.printStackTrace();
+        } catch (NoConnectionException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
@@ -2428,24 +2487,8 @@ public class MusicPlaybackService extends Service {
         @DebugLog
         public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
             updatePlaybackLocation(PlaybackLocation.REMOTE);
-            if (startCastServer()) {
-                MediaInfo currentTrack = CastUtils.buildMediaInfo(
-                        getTrackName(),
-                        getAlbumName(),
-                        getArtistName(),
-                        getMimeType(),
-                        CastUtils.buildMusicUrl(getAudioId(), mCastServer.getHost()),
-                        CastUtils.buildArtUrl(getAudioId(), mCastServer.getHost()),
-                        null);
-                try {
-                    mCastManager.loadMedia(currentTrack, true, 0);
-                } catch (TransientNetworkDisconnectionException e) {
-                    e.printStackTrace();
-                } catch (NoConnectionException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            startCastServer();
+            playCurrentRemote();
         }
 
         /**
@@ -2456,7 +2499,8 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public boolean onApplicationConnectionFailed(int errorCode) {
-            return true;
+            //TODO notify activity
+            return false;
         }
 
         @Override
@@ -2492,6 +2536,13 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onRemoteMediaPlayerStatusUpdated() {
+            MediaStatus status = mCastManager.getRemoteMediaPlayer().getMediaStatus();
+
+            if (status.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE) {
+                if (status.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED) {
+                    playNextRemote();
+                }
+            }
 
         }
 
@@ -2522,7 +2573,7 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onDisconnected() {
-
+            stopCastServer();
         }
 
         @Override

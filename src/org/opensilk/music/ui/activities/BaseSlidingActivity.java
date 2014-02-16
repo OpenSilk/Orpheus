@@ -817,7 +817,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             new SlidingUpPanelLayout.PanelSlideListener() {
         @Override
         public void onPanelSlide(View panel, float slideOffset) {
-            Log.i(TAG, "onPanelSlide, offset " + slideOffset);
             if (slideOffset < 0.2) {
                 if (getActionBar().isShowing()) {
                     getActionBar().hide();
@@ -829,9 +828,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             }
         }
 
+        @DebugLog
         @Override
         public void onPanelExpanded(View panel) {
-            Log.i(TAG, "onPanelExpanded");
             mHeaderQueueSwitch.setVisibility(View.VISIBLE);
             mHeaderOverflow.setVisibility(View.VISIBLE);
             // TODO hide if no routes available
@@ -841,6 +840,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mPanelHeader.setBackgroundResource(R.color.app_background_light_transparent);
         }
 
+        @DebugLog
         @Override
         public void onPanelCollapsed(View panel) {
             Log.i(TAG, "onPanelCollapsed");
@@ -857,7 +857,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         @Override
         public void onPanelAnchored(View panel) {
-            Log.i(TAG, "onPanelAnchored");
 
         }
     };
@@ -885,65 +884,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     };
 
     private final MediaRouter.Callback mMediaRouterCallback = new MediaRouter.Callback() {
-        @DebugLog
-        @Override
-        public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteSelected(router, route);
-        }
-
-        @DebugLog
-        @Override
-        public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteUnselected(router, route);
-        }
-
-        @DebugLog
-        @Override
-        public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteAdded(router, route);
-        }
-
-        @DebugLog
-        @Override
-        public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteRemoved(router, route);
-        }
-
-        @DebugLog
-        @Override
-        public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteChanged(router, route);
-        }
-
-        @DebugLog
-        @Override
-        public void onRouteVolumeChanged(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteVolumeChanged(router, route);
-        }
-
-        @DebugLog
-        @Override
-        public void onRoutePresentationDisplayChanged(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRoutePresentationDisplayChanged(router, route);
-        }
-
-        @DebugLog
-        @Override
-        public void onProviderAdded(MediaRouter router, MediaRouter.ProviderInfo provider) {
-            super.onProviderAdded(router, provider);
-        }
-
-        @DebugLog
-        @Override
-        public void onProviderRemoved(MediaRouter router, MediaRouter.ProviderInfo provider) {
-            super.onProviderRemoved(router, provider);
-        }
-
-        @DebugLog
-        @Override
-        public void onProviderChanged(MediaRouter router, MediaRouter.ProviderInfo provider) {
-            super.onProviderChanged(router, provider);
-        }
+        //For now we dont need anything here
     };
 
     /**

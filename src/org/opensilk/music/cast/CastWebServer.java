@@ -3,7 +3,6 @@ package org.opensilk.music.cast;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,14 +17,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 2/14/14.
+ * Based on SimpleWebServer from NanoHttpd
  *
  * Serves audio files and album art
  * url requests must be in the form:
@@ -54,7 +57,6 @@ public class CastWebServer extends NanoHTTPD {
     };
 
     private final boolean quiet = !BuildConfig.DEBUG;
-    private final String host;
     private final Context mContext;
     private final ImageFetcher mImageFetcher;
 
@@ -64,7 +66,6 @@ public class CastWebServer extends NanoHTTPD {
 
     public CastWebServer(Context context, String host, int port) {
         super(host, port);
-        this.host = host;
         mContext = context;
         // Initialize the image fetcher
         mImageFetcher = ImageFetcher.getInstance(context);
@@ -72,6 +73,7 @@ public class CastWebServer extends NanoHTTPD {
         mImageFetcher.setImageCache(ImageCache.getInstance(context));
     }
 
+    @DebugLog
     public Response serve(IHTTPSession session) {
         Map<String, String> header = session.getHeaders();
         Map<String, String> parms = session.getParms();
@@ -95,6 +97,7 @@ public class CastWebServer extends NanoHTTPD {
         return respond(Collections.unmodifiableMap(header), uri);
     }
 
+    @DebugLog
     private Response respond(Map<String, String> headers, String uri) {
         // Remove URL arguments
         uri = uri.trim().replace(File.separatorChar, '/');
@@ -118,29 +121,57 @@ public class CastWebServer extends NanoHTTPD {
         return response != null ? response : notFoundResponse();
     }
 
+
+    /* Change if needed */
+    private static final String MIME_ART = "image/webp";
+
+    /**
+     * Fetches and serves the album art
+     *
+     * @param uri
+     * @param headers
+     * @return
+     */
+    @DebugLog
     private Response serveArt(String uri, Map<String, String> headers) {
-        InputStream art;
-
-        //TODO check cache
-
-        String id = getId(uri);
-        Cursor c = getCursor(id);
+        Response res;
+        String id = parseId(uri);
+        Cursor c = CastUtils.getSingleTrackCursor(mContext, id);
         if (c == null) {
             return notFoundResponse();
         }
-        art = getAlbumArt(c); //At current this will always return an image
+        // get the cached artwork
+        // TODO play with ImageCache and create method to return raw InputStream
+        final Bitmap bitmap = mImageFetcher.getArtwork(getAlbumName(c), getAlbumId(c), getArtistName(c));
         c.close();
-        return createResponse(Response.Status.OK, MIME_ART, art);
+        // Convert the bitmap into a bytearray
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
+        // form and check etag
+        String etag = Integer.toHexString(os.hashCode());
+        // build response
+        if (etag.equals(headers.get("if-none-match"))) {
+            res = createResponse(Response.Status.NOT_MODIFIED, MIME_ART, "");
+        } else {
+            res = createResponse(Response.Status.OK, MIME_ART, new ByteArrayInputStream(os.toByteArray()));
+            res.addHeader("ETag", etag);
+        }
+        return res;
 
     }
 
-    /* See @SimpleWebServer#serveFile
-     * Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias
+    /**
+     * Locates and serves the audio track
+     *
+     * @param uri
+     * @param headers
+     * @return
      */
+    @DebugLog
     private Response serveSong(String uri, Map<String,String> headers) {
         Response res;
-        String id = getId(uri);
-        Cursor c = getCursor(id);
+        String id = parseId(uri);
+        Cursor c = CastUtils.getSingleTrackCursor(mContext, id);
         if (c == null) {
             return notFoundResponse();
         }
@@ -154,6 +185,9 @@ public class CastWebServer extends NanoHTTPD {
             mime = MIME_DEFAULT_BINARY;
         }
         File file = new File(filePath);
+        /* See @SimpleWebServer#serveFile
+        * Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias
+        */
         try {
             // Calculate etag
             String etag = Integer.toHexString((file.getAbsolutePath() + file.lastModified() + "" + file.length()).hashCode());
@@ -222,11 +256,11 @@ public class CastWebServer extends NanoHTTPD {
         return res;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    private String getId(String uri) {
+    /**
+     * @param uri
+     * @return track id from url
+     */
+    private String parseId(String uri) {
         int start = uri.lastIndexOf("/");
         return uri.substring(start+1);
     }
@@ -271,40 +305,6 @@ public class CastWebServer extends NanoHTTPD {
      */
     public static String getMimeType(Cursor c) {
         return c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
-    }
-
-    /** Change if needed */
-    private static final String MIME_ART = "image/webp";
-
-    /**
-     * @return The album art for the current album.
-     * TODO play with ImageCache and create method to return raw InputStream
-     */
-    public InputStream getAlbumArt(Cursor c) {
-        // Return the cached artwork
-        final Bitmap bitmap = mImageFetcher.getArtwork(getAlbumName(c), getAlbumId(c), getArtistName(c));
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
-        return new ByteArrayInputStream(os.toByteArray());
-    }
-
-    private Cursor getCursor(String id) {
-        return openCursorAndGoToFirst(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                PROJECTION, "_id="+id, null);
-    }
-
-    private Cursor openCursorAndGoToFirst(Uri uri, String[] projection,
-                                          String selection, String[] selectionArgs) {
-        Cursor c = mContext.getContentResolver().query(uri, projection,
-                selection, selectionArgs, null, null);
-        if (c == null) {
-            return null;
-        }
-        if (!c.moveToFirst()) {
-            c.close();
-            return null;
-        }
-        return c;
     }
 
     private static Response notFoundResponse() {
