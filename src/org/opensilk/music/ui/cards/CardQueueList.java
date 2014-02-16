@@ -36,14 +36,16 @@ public class CardQueueList extends CardBaseList<Song> {
     @Override
     protected void initContent() {
         mTitle = mData.mSongName;
-        mSecondTitle = mData.mArtistName + " " + MusicUtils.makeTimeString(getContext(),mData.mDuration);
-        setOnClickListener(new OnCardClickListener() {
+        mSecondTitle = mData.mArtistName;
+        mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
+        setOnLongClickListener(new OnLongCardClickListener() {
             @Override
-            public void onClick(Card card, View view) {
+            public boolean onLongClick(Card card, View view) {
                 // When selecting a track from the queue, just jump there instead of
                 // reloading the queue. This is both faster, and prevents accidentally
                 // dropping out of party shuffle.
                 MusicUtils.setQueuePosition(Integer.valueOf(getId()));
+                return false;
             }
         });
     }

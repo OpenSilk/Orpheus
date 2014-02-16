@@ -43,7 +43,8 @@
             android:id="@+id/card_thumb_and_content_layout"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginRight="24dp">
 
             <it.gmariotti.cardslib.library.view.component.CardThumbnailView
                 style="@style/card_thumbnail_outer_layout"

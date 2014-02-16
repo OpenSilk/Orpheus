@@ -16,10 +16,11 @@
   ~   limitations under the License.
   ~  *****************************************************************************
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:layout_marginLeft="4dp">
 
 
     <!-- This is the base Inner View inside a Card.
@@ -29,13 +30,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/card_main_inner_simple_title"
-        style="@style/card.base_simple_title"/>
+        style="@style/Orpheus.Text.Card.Title"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/card_main_inner_secondary_title"
-        style="@style/card.base_simple_title"/>
+        android:layout_below="@id/card_main_inner_simple_title"
+        style="@style/Orpheus.Text.Card.SubTitle"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/card_main_inner_extra_text"
+        android:layout_toRightOf="@id/card_main_inner_secondary_title"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@id/card_main_inner_secondary_title"
+        style="@style/Orpheus.Text.Card.Extra"/>
 
-</LinearLayout>
+</RelativeLayout>

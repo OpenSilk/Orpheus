@@ -46,7 +46,8 @@ public class CardSongList extends CardBaseList<Song> {
     @Override
     protected void initContent() {
         mTitle = mData.mSongName;
-        mSecondTitle = mData.mArtistName + " " + MusicUtils.makeTimeString(getContext(),mData.mDuration);
+        mSecondTitle = mData.mArtistName;
+        mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
         //TODO onclick
     }
 

@@ -110,14 +110,29 @@
     </style>
 
     <style name="Orpheus.Text.Card">
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:layout_gravity">left|center_vertical</item>
+        <item name="android:gravity">left|center_vertical</item>
+    </style>
 
+    <style name="Orpheus.Text.Card.Title">
+    </style>
+
+    <style name="Orpheus.Text.Card.SubTitle">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Orpheus.Text.Card.Extra">
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_gravity">right|center_vertical</item>
+        <item name="android:gravity">right|center_vertical</item>
     </style>
 
     <style name="Orpheus.Text.Card.Header">
-        <item name="android:ellipsize">end</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:gravity">center_vertical</item>
+
     </style>
 
     <style name="Orpheus.Text.Card.Header.Title">

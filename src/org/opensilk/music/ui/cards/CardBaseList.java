@@ -30,6 +30,7 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
 public abstract class CardBaseList<D> extends CardBaseThumb<D> {
 
     protected String mSecondTitle;
+    protected String mExtraText;
 
     public CardBaseList(Context context, D data) {
         super(context, data);
@@ -43,10 +44,20 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
     public void setupInnerViewElements(ViewGroup parent, View view) {
         // Super sets title
         super.setupInnerViewElements(parent, view);
-        if (mSecondTitle != null) {
-            TextView v = (TextView) view.findViewById(R.id.card_main_inner_secondary_title);
-            if (v != null) {
+        TextView v = (TextView) view.findViewById(R.id.card_main_inner_secondary_title);
+        if (v != null) {
+            if (mSecondTitle != null) {
                 v.setText(mSecondTitle);
+            } else {
+                v.setVisibility(View.GONE);
+            }
+        }
+        TextView v2 = (TextView) view.findViewById(R.id.card_main_inner_extra_text);
+        if (v2 != null) {
+            if (mExtraText != null) {
+                v2.setText(mExtraText);
+            } else {
+                v2.setVisibility(View.GONE);
             }
         }
     }
