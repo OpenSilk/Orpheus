@@ -73,7 +73,6 @@ public class CastWebServer extends NanoHTTPD {
         mImageFetcher.setImageCache(ImageCache.getInstance(context));
     }
 
-    @DebugLog
     public Response serve(IHTTPSession session) {
         Map<String, String> header = session.getHeaders();
         Map<String, String> parms = session.getParms();
@@ -97,7 +96,6 @@ public class CastWebServer extends NanoHTTPD {
         return respond(Collections.unmodifiableMap(header), uri);
     }
 
-    @DebugLog
     private Response respond(Map<String, String> headers, String uri) {
         // Remove URL arguments
         uri = uri.trim().replace(File.separatorChar, '/');
@@ -121,7 +119,6 @@ public class CastWebServer extends NanoHTTPD {
         return response != null ? response : notFoundResponse();
     }
 
-
     /* Change if needed */
     private static final String MIME_ART = "image/webp";
 
@@ -144,15 +141,16 @@ public class CastWebServer extends NanoHTTPD {
         // TODO play with ImageCache and create method to return raw InputStream
         final Bitmap bitmap = mImageFetcher.getArtwork(getAlbumName(c), getAlbumId(c), getArtistName(c));
         c.close();
-        // Convert the bitmap into a bytearray
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
         // form and check etag
-        String etag = Integer.toHexString(os.hashCode());
+        String etag = Integer.toHexString(bitmap.hashCode());
+        Log.d(TAG, "Art etag " + etag);
         // build response
         if (etag.equals(headers.get("if-none-match"))) {
             res = createResponse(Response.Status.NOT_MODIFIED, MIME_ART, "");
         } else {
+            // Convert the bitmap into a bytearray
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
             res = createResponse(Response.Status.OK, MIME_ART, new ByteArrayInputStream(os.toByteArray()));
             res.addHeader("ETag", etag);
         }
