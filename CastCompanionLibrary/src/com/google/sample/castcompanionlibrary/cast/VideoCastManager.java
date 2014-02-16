@@ -1473,22 +1473,24 @@ public class VideoCastManager extends BaseCastManager
         if (null == info) {
             return;
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Bitmap bm = getBitmapForLockScreen(info);
-                    if (null == bm) {
-                        return;
+        if (isFeatureEnabled(FEATURE_LOCKSCREEN)) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Bitmap bm = getBitmapForLockScreen(info);
+                        if (null == bm) {
+                            return;
+                        }
+                        mRemoteControlClientCompat.editMetadata(false).putBitmap(
+                                RemoteControlClientCompat.MetadataEditorCompat.
+                                METADATA_KEY_ARTWORK, bm).apply();
+                    } catch (Exception e) {
+                        LOGD(TAG, "Failed to update lock screen image", e);
                     }
-                    mRemoteControlClientCompat.editMetadata(false).putBitmap(
-                            RemoteControlClientCompat.MetadataEditorCompat.
-                            METADATA_KEY_ARTWORK, bm).apply();
-                } catch (Exception e) {
-                    LOGD(TAG, "Failed to update lock screen image", e);
                 }
-            }
-        }).start();
+            }).start();
+        }
     }
 
     /*
