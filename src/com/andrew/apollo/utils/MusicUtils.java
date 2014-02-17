@@ -429,6 +429,32 @@ public final class MusicUtils {
     }
 
     /**
+     * @return true if currently casting
+     */
+    public static boolean isRemotePlayback() {
+        if (sService != null) {
+            try {
+                return sService.isRemotePlayback();
+            } catch (final RemoteException ignored) {
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Increments volume on remote device by delta
+     * @param increment delta
+     */
+    public static void changeRemoteVolume(double increment) {
+        if (sService != null) {
+            try {
+                sService.changeRemoteVolume(increment);
+            } catch (final RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
      * @return The queue.
      */
     public static final long[] getQueue() {

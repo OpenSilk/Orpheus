@@ -40,6 +40,7 @@ import android.support.v7.app.MediaRouteButton;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -371,6 +372,23 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (MusicUtils.isRemotePlayback()) {
+            double increment = 0;
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                increment = 0.05;
+            } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                increment = -0.05;
+            }
+            if (increment != 0) {
+                MusicUtils.changeRemoteVolume(increment);
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     /**

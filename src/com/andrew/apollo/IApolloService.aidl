@@ -38,5 +38,7 @@ interface IApolloService
     int getRepeatMode();
     int getMediaMountedCount();
     int getAudioSessionId();
+    boolean isRemotePlayback();
+    void changeRemoteVolume(double increment);
 }
 

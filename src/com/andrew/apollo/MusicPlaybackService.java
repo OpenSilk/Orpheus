@@ -712,6 +712,7 @@ public class MusicPlaybackService extends Service {
         }
 
         mRemoteControlClient.setTransportControlFlags(flags);
+
     }
 
     /**
@@ -2559,7 +2560,7 @@ public class MusicPlaybackService extends Service {
      * Whether we are currently in a remote session
      * @return
      */
-    private boolean isRemotePlayback() {
+    public boolean isRemotePlayback() {
         if (mPlaybackLocation == PlaybackLocation.REMOTE) {
             try {
                 mCastManager.checkConnectivity();
@@ -2572,6 +2573,22 @@ public class MusicPlaybackService extends Service {
         }
         updatePlaybackLocation(PlaybackLocation.LOCAL);
         return false;
+    }
+
+    /**
+     * Increments volume on remote devices by given delta
+     * @param increment delta
+     */
+    public void changeRemoteVolume(double increment) {
+        try {
+            mCastManager.incrementVolume(increment);
+        } catch (CastException e) {
+            e.printStackTrace();
+        } catch (TransientNetworkDisconnectionException e) {
+            e.printStackTrace();
+        } catch (NoConnectionException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -3527,6 +3544,22 @@ public class MusicPlaybackService extends Service {
         @Override
         public int getAudioSessionId() throws RemoteException {
             return mService.get().getAudioSessionId();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean isRemotePlayback() throws RemoteException {
+            return mService.get().isRemotePlayback();
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void changeRemoteVolume(double increment) throws RemoteException {
+            mService.get().changeRemoteVolume(increment);
         }
 
     }
