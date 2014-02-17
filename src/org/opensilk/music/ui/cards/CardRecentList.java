@@ -29,6 +29,8 @@ import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
+
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
@@ -80,7 +82,8 @@ public class CardRecentList extends CardBaseList<Album> {
                         MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId));
                         break;
                     case R.id.card_menu_add_playlist:
-                        //TODO
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId))
+                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_go_artist:
                         NavUtils.openArtistProfile(getContext(), mData.mArtistName);

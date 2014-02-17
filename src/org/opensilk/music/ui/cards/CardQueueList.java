@@ -3,7 +3,6 @@ package org.opensilk.music.ui.cards;
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.andrew.apollo.R;
@@ -15,10 +14,9 @@ import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
-import org.opensilk.music.ui.fragments.QueueFragment;
 
-import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
@@ -74,7 +72,9 @@ public class CardQueueList extends CardBaseList<Song> {
                         ((BaseSlidingActivity) getContext()).refreshQueue();
                         break;
                     case R.id.card_menu_add_playlist:
-                        // TODO
+                        AddToPlaylistDialog.newInstance(new long[]{
+                                mData.mSongId
+                        }).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_remove_queue:
                         MusicUtils.removeTrack(mData.mSongId);

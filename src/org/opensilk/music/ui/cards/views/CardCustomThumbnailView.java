@@ -23,8 +23,6 @@ import android.widget.ImageView;
 
 import com.andrew.apollo.cache.ImageFetcher;
 
-import org.opensilk.music.ui.cards.CardBaseThumb;
-
 import it.gmariotti.cardslib.library.R;
 import it.gmariotti.cardslib.library.view.component.CardThumbnailView;
 

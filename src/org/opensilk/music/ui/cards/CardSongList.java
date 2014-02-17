@@ -27,6 +27,8 @@ import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
+
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
@@ -83,7 +85,9 @@ public class CardSongList extends CardBaseList<Song> {
                         });
                         break;
                     case R.id.card_menu_add_playlist:
-                        // TODO
+                        AddToPlaylistDialog.newInstance(new long[]{
+                                mData.mSongId
+                        }).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_more_by:
                         NavUtils.openArtistProfile(getContext(), mData.mArtistName);

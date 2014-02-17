@@ -121,4 +121,39 @@ public class PlaylistLoader extends WrappedAsyncTaskLoader<List<Playlist>> {
                         PlaylistsColumns.NAME
                 }, null, null, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
     }
+
+    /**
+     * Returns user created playlists
+     * @param context
+     * @return
+     */
+    public static List<Playlist> makeUserPlaylistList(final Context context) {
+        List<Playlist> usrPlaylists = Lists.newArrayList();
+        // Create the Cursor
+        Cursor c = makePlaylistCursor(context);
+        // Gather the data
+        if (c != null && c.moveToFirst()) {
+            do {
+                // Copy the playlist id
+                final long id = c.getLong(0);
+
+                // Copy the playlist name
+                final String name = c.getString(1);
+
+                final List<Song> songs = PlaylistSongLoader.makePlaylistSongList(context, id);
+
+                // Create a new playlist
+                final Playlist playlist = new Playlist(id, name, songs);
+
+                // Add everything up
+                usrPlaylists.add(playlist);
+            } while (c.moveToNext());
+        }
+        // Close the cursor
+        if (c != null) {
+            c.close();
+        }
+        return usrPlaylists;
+    }
+
 }

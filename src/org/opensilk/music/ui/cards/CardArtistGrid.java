@@ -28,6 +28,8 @@ import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
+
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
@@ -82,7 +84,8 @@ public class CardArtistGrid extends CardBaseThumb<Artist> {
                         MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId));
                         break;
                     case R.id.card_menu_add_playlist:
-                        //TODO
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForArtist(getContext(), mData.mArtistId))
+                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_delete:
                         final String artist = mData.mArtistName;
