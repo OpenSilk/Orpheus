@@ -782,16 +782,17 @@ public final class MusicUtils {
             final String selection = PlaylistsColumns.NAME + " = '" + name + "'";
             Cursor cursor = resolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                     projection, selection, null, null);
-            if (cursor.getCount() <= 0) {
+            int count = 1;
+            if (cursor != null) {
+                count = cursor.getCount();
+                cursor.close();
+            }
+            if (count <= 0) {
                 final ContentValues values = new ContentValues(1);
                 values.put(PlaylistsColumns.NAME, name);
                 final Uri uri = resolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                         values);
                 return Long.parseLong(uri.getLastPathSegment());
-            }
-            if (cursor != null) {
-                cursor.close();
-                cursor = null;
             }
             return -1;
         }
