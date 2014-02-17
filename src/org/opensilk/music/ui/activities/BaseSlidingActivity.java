@@ -68,6 +68,7 @@ import com.andrew.apollo.utils.NavUtils;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.ArtFragment;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.PlayPauseButton;
@@ -250,13 +251,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Media router
-        getMenuInflater().inflate(R.menu.cast_player_menu, menu);
+        getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
         // init router button
-//        mCastManager.addMediaRouterButton(menu, R.id.media_route_menu_item);
         MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
         MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
                 MenuItemCompat.getActionProvider(mediaRouteMenuItem);
         mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
+        mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
+
         // Settings
         getMenuInflater().inflate(R.menu.activity_base, menu);
         //TODO add back search
@@ -483,6 +485,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // init router button
         mHeaderMediaRouteButton = (MediaRouteButton) findViewById(R.id.panel_mediarouter);
         mHeaderMediaRouteButton.setRouteSelector(mMediaRouteSelector);
+        mHeaderMediaRouteButton.setDialogFactory(new StyledMediaRouteDialogFactory());
 
         if (!mSlidingPanel.isExpanded()) {
             mHeaderQueueSwitch.setVisibility(View.GONE);

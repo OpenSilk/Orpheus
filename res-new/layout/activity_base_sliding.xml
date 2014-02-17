@@ -109,7 +109,7 @@
                         android:contentDescription="@string/accessibility_next"/>
 
                     <android.support.v7.app.MediaRouteButton
-                        style="@style/Orpheus.MenuButton"
+                        style="@style/Orpheus.MenuButton.MediaRouter"
                         app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
                         android:id="@+id/panel_mediarouter"/>
 
