@@ -128,7 +128,13 @@ public class GenreSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
                 }, selection.toString(), null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
     }
 
-    public static List<Song> getGenreSongList(final Context context, final Long genreId) {
+    /**
+     * Returns a list of all songs in in the genre
+     * @param context The {@link Context} to use.
+     * @param genreId The Id of the genre the songs belong to.
+     * @return The song list
+     */
+    public static List<Song> makeGenreSongList(final Context context, final Long genreId) {
         List<Song> songList = Lists.newArrayList();
         // Create the Cursor
         Cursor c = makeGenreSongCursor(context, genreId);

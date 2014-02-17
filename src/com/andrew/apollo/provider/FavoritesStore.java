@@ -17,6 +17,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.andrew.apollo.model.Song;
+
 /**
  * This class is used to to create the database used to make the Favorites
  * playlist.
@@ -29,7 +31,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class FavoritesStore extends SQLiteOpenHelper {
 
     /* Version constant to increment when the database should be rebuilt */
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     /* Name of database file */
     public static final String DATABASENAME = "favorites.db";
@@ -50,10 +52,14 @@ public class FavoritesStore extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(final SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + FavoriteColumns.NAME + " (" + FavoriteColumns.ID
-                + " LONG NOT NULL," + FavoriteColumns.SONGNAME + " TEXT NOT NULL,"
-                + FavoriteColumns.ALBUMNAME + " TEXT NOT NULL," + FavoriteColumns.ARTISTNAME
-                + " TEXT NOT NULL," + FavoriteColumns.PLAYCOUNT + " LONG NOT NULL);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + FavoriteColumns.NAME + " ("
+                + FavoriteColumns.ID + " LONG NOT NULL,"
+                + FavoriteColumns.SONGNAME + " TEXT NOT NULL,"
+                + FavoriteColumns.ALBUMNAME + " TEXT NOT NULL,"
+                + FavoriteColumns.ARTISTNAME + " TEXT NOT NULL,"
+                + FavoriteColumns.ALBUMID + " LONG NOT NULL,"
+                + FavoriteColumns.DURATION + " INT NOT NULL,"
+                + FavoriteColumns.PLAYCOUNT + " LONG NOT NULL);");
     }
 
     /**
@@ -78,36 +84,48 @@ public class FavoritesStore extends SQLiteOpenHelper {
 
     /**
      * Used to store song Ids in our database
+     * @param song
+     */
+    public void addSongId(final Song song) {
+
+        final Long playCount = getPlayCount(song.mSongId);
+        final SQLiteDatabase database = getWritableDatabase();
+        final ContentValues values = new ContentValues(7);
+
+        database.beginTransaction();
+
+        values.put(FavoriteColumns.ID, song.mSongId);
+        values.put(FavoriteColumns.SONGNAME, song.mSongName);
+        values.put(FavoriteColumns.ALBUMNAME, song.mAlbumName);
+        values.put(FavoriteColumns.ARTISTNAME, song.mAlbumName);
+        values.put(FavoriteColumns.ALBUMID, song.mAlbumId);
+        values.put(FavoriteColumns.DURATION, song.mDuration);
+        values.put(FavoriteColumns.PLAYCOUNT, playCount != 0 ? playCount + 1 : 1);
+
+        database.delete(FavoriteColumns.NAME, FavoriteColumns.ID + " = ?", new String[] {
+                String.valueOf(song.mSongId)
+        });
+        database.insert(FavoriteColumns.NAME, null, values);
+        database.setTransactionSuccessful();
+        database.endTransaction();
+    }
+
+    /**
+     * Used to store song Ids in our database
      * 
      * @param songId The album's ID
      * @param songName The song name
      * @param albumName The album name
      * @param artistName The artist name
      */
+    @Deprecated
     public void addSongId(final Long songId, final String songName, final String albumName,
             final String artistName) {
         if (songId == null || songName == null || albumName == null || artistName == null) {
             return;
         }
 
-        final Long playCount = getPlayCount(songId);
-        final SQLiteDatabase database = getWritableDatabase();
-        final ContentValues values = new ContentValues(5);
-
-        database.beginTransaction();
-
-        values.put(FavoriteColumns.ID, songId);
-        values.put(FavoriteColumns.SONGNAME, songName);
-        values.put(FavoriteColumns.ALBUMNAME, albumName);
-        values.put(FavoriteColumns.ARTISTNAME, artistName);
-        values.put(FavoriteColumns.PLAYCOUNT, playCount != 0 ? playCount + 1 : 1);
-
-        database.delete(FavoriteColumns.NAME, FavoriteColumns.ID + " = ?", new String[] {
-            String.valueOf(songId)
-        });
-        database.insert(FavoriteColumns.NAME, null, values);
-        database.setTransactionSuccessful();
-        database.endTransaction();
+        addSongId(new Song(songId, songName, artistName, albumName, -1, -1));
 
     }
 
@@ -195,6 +213,7 @@ public class FavoritesStore extends SQLiteOpenHelper {
     /**
      * Toggle the current song as favorite
      */
+    @Deprecated
     public void toggleSong(final Long songId, final String songName, final String albumName,
             final String artistName) {
         if (getSongId(songId) == null) {
@@ -203,6 +222,17 @@ public class FavoritesStore extends SQLiteOpenHelper {
             removeItem(songId);
         }
 
+    }
+
+    /**
+     * Toggle the current song as favorite
+     */
+    public void toggleSong(final Song song) {
+        if (getSongId(song.mSongId) == null) {
+            addSongId(song);
+        } else {
+            removeItem(song.mSongId);
+        }
     }
 
     /**
@@ -233,8 +263,15 @@ public class FavoritesStore extends SQLiteOpenHelper {
         /* Artist name column */
         public static final String ARTISTNAME = "artistname";
 
+        /* Album id */
+        public static final String ALBUMID = "albumid";
+
+        /* Song duration */
+        public static final String DURATION = "duration";
+
         /* Play count column */
         public static final String PLAYCOUNT = "playcount";
+
     }
 
 }

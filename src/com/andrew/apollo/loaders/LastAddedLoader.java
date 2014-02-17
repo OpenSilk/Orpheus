@@ -72,8 +72,17 @@ public class LastAddedLoader extends WrappedAsyncTaskLoader<List<Song>> {
                 // Copy the album name
                 final String album = mCursor.getString(3);
 
+                // Copy the album id
+                final long albumId = mCursor.getLong(4);
+
+                // Copy the duration
+                final long duration = mCursor.getLong(5);
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
+
                 // Create a new song
-                final Song song = new Song(id, songName, artist, album, -1);
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
 
                 // Add everything up
                 mSongList.add(song);
@@ -107,7 +116,58 @@ public class LastAddedLoader extends WrappedAsyncTaskLoader<List<Song>> {
                         /* 2 */
                         AudioColumns.ARTIST,
                         /* 3 */
-                        AudioColumns.ALBUM
+                        AudioColumns.ALBUM,
+                        /* 4 */
+                        AudioColumns.ALBUM_ID,
+                        /* 5 */
+                        AudioColumns.DURATION,
                 }, selection.toString(), null, MediaStore.Audio.Media.DATE_ADDED + " DESC");
+    }
+
+    /**
+     * Returns list of recently added songs
+     * @param context
+     * @return
+     */
+    public static List<Song> makeLastAddedSongList(final Context context) {
+        final List<Song> songList = Lists.newArrayList();
+        // Create the Cursor
+        final Cursor c = makeLastAddedCursor(context);
+        // Gather the data
+        if (c != null && c.moveToFirst()) {
+            do {
+                // Copy the song Id
+                final long id = c.getLong(0);
+
+                // Copy the song name
+                final String songName = c.getString(1);
+
+                // Copy the artist name
+                final String artist = c.getString(2);
+
+                // Copy the album name
+                final String album = c.getString(3);
+
+                // Copy the album id
+                final long albumId = c.getLong(4);
+
+                // Copy the duration
+                final long duration = c.getLong(5);
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
+
+                // Create a new song
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
+
+                // Add everything up
+                songList.add(song);
+            } while (c.moveToNext());
+        }
+        // Close the cursor
+        if (c != null) {
+            c.close();
+        }
+        return songList;
     }
 }

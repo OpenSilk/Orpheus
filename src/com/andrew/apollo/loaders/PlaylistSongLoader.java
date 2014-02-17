@@ -82,8 +82,19 @@ public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
                 final String album = mCursor.getString(mCursor
                         .getColumnIndexOrThrow(AudioColumns.ALBUM));
 
+                // Copy the album id
+                final long albumId = mCursor.getLong(mCursor
+                        .getColumnIndexOrThrow(AudioColumns.ALBUM_ID));
+
+                // Copy the duration
+                final long duration = mCursor.getLong(mCursor
+                        .getColumnIndexOrThrow(AudioColumns.DURATION));
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
+
                 // Create a new song
-                final Song song = new Song(id, songName, artist, album, -1);
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
 
                 // Add everything up
                 mSongList.add(song);
@@ -120,8 +131,63 @@ public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
                         /* 3 */
                         AudioColumns.ARTIST,
                         /* 4 */
-                        AudioColumns.ALBUM
+                        AudioColumns.ALBUM,
+                        /* 4 */
+                        AudioColumns.ALBUM_ID,
+                        /* 5 */
+                        AudioColumns.DURATION,
                 }, mSelection.toString(), null,
                 MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+    }
+
+    /**
+     * Returns a list of all songs in in the playlist
+     * @param context The {@link Context} to use.
+     * @param genreId The Id of the playlist the songs belong to.
+     * @return The song list
+     */
+    public static List<Song> makePlaylistSongList(final Context context, final Long playlistId) {
+        final List<Song> songList = Lists.newArrayList();
+        final Cursor c = makePlaylistSongCursor(context, playlistId);
+        if (c != null && c.moveToFirst()) {
+            do {
+                // Copy the song Id
+                final long id = c.getLong(c
+                        .getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID));
+
+                // Copy the song name
+                final String songName = c.getString(c
+                        .getColumnIndexOrThrow(AudioColumns.TITLE));
+
+                // Copy the artist name
+                final String artist = c.getString(c
+                        .getColumnIndexOrThrow(AudioColumns.ARTIST));
+
+                // Copy the album name
+                final String album = c.getString(c
+                        .getColumnIndexOrThrow(AudioColumns.ALBUM));
+
+                // Copy the album id
+                final long albumId = c.getLong(c
+                        .getColumnIndexOrThrow(AudioColumns.ALBUM_ID));
+
+                // Copy the duration
+                final long duration = c.getLong(c
+                        .getColumnIndexOrThrow(AudioColumns.DURATION));
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
+
+                // Create a new song
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
+
+                // Add everything up
+                songList.add(song);
+            } while (c.moveToNext());
+        }
+        if (c != null) {
+            c.close();
+        }
+        return songList;
     }
 }

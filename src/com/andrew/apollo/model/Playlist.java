@@ -13,6 +13,10 @@ package com.andrew.apollo.model;
 
 import android.text.TextUtils;
 
+import com.andrew.apollo.utils.Lists;
+
+import java.util.List;
+
 /**
  * A class that represents a playlist.
  * 
@@ -31,15 +35,35 @@ public class Playlist {
     public String mPlaylistName;
 
     /**
-     * Constructor of <code>Genre</code>
+     * Songs in playlist
+     */
+    public List<Song> mSongs;
+
+    /**
+     * Constructor of <code>Playlist</code>
      * 
      * @param playlistId The Id of the playlist
      * @param playlistName The playlist name
      */
+    @Deprecated
     public Playlist(final long playlistId, final String playlistName) {
         super();
         mPlaylistId = playlistId;
         mPlaylistName = playlistName;
+        mSongs = Lists.newArrayList();
+    }
+
+    /**
+     * Constructor of <code>Playlist</code>
+     *
+     * @param playlistId The Id of the playlist
+     * @param playlistName The playlist name
+     */
+    public Playlist(final long playlistId, final String playlistName, final List<Song> songs) {
+        super();
+        mPlaylistId = playlistId;
+        mPlaylistName = playlistName;
+        mSongs = songs;
     }
 
     /**

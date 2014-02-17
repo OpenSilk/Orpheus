@@ -75,8 +75,19 @@ public class FavoritesLoader extends WrappedAsyncTaskLoader<List<Song>> {
                 final String album = mCursor.getString(mCursor
                         .getColumnIndexOrThrow(FavoriteColumns.ALBUMNAME));
 
+                // Copy the album id
+                final long albumId = mCursor.getLong(mCursor
+                        .getColumnIndexOrThrow(FavoriteColumns.ALBUMID));
+
+                // Copy the duration
+                final long duration = mCursor.getLong(mCursor
+                        .getColumnIndexOrThrow(FavoriteColumns.DURATION));
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
+
                 // Create a new song
-                final Song song = new Song(id, songName, artist, album, -1);
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
 
                 // Add everything up
                 mSongList.add(song);
@@ -95,14 +106,74 @@ public class FavoritesLoader extends WrappedAsyncTaskLoader<List<Song>> {
      * @return The {@link Cursor} used to run the favorites query.
      */
     public static final Cursor makeFavoritesCursor(final Context context) {
+        //noinspection ConstantConditions
         return FavoritesStore
                 .getInstance(context)
                 .getReadableDatabase()
                 .query(FavoriteColumns.NAME,
                         new String[] {
-                                FavoriteColumns.ID + " as _id", FavoriteColumns.ID,
-                                FavoriteColumns.SONGNAME, FavoriteColumns.ALBUMNAME,
-                                FavoriteColumns.ARTISTNAME, FavoriteColumns.PLAYCOUNT
+                                FavoriteColumns.ID + " as _id",
+                                FavoriteColumns.ID,
+                                FavoriteColumns.SONGNAME,
+                                FavoriteColumns.ALBUMNAME,
+                                FavoriteColumns.ARTISTNAME,
+                                FavoriteColumns.ALBUMID,
+                                FavoriteColumns.DURATION,
+                                FavoriteColumns.PLAYCOUNT
                         }, null, null, null, null, FavoriteColumns.PLAYCOUNT + " DESC");
+    }
+
+    /**
+     * Returns list of all songs in favorites database
+     * @param context
+     * @return
+     */
+    public static List<Song> makeFavoritesSongList(final Context context) {
+        List<Song> songList = Lists.newArrayList();
+        Cursor c = makeFavoritesCursor(context);
+        // Gather the data
+        if (c != null && c.moveToFirst()) {
+            do {
+
+                // Copy the song Id
+                final long id = c.getLong(c
+                        .getColumnIndexOrThrow(FavoriteColumns.ID));
+
+                // Copy the song name
+                final String songName = c.getString(c
+                        .getColumnIndexOrThrow(FavoriteColumns.SONGNAME));
+
+                // Copy the artist name
+                final String artist = c.getString(c
+                        .getColumnIndexOrThrow(FavoriteColumns.ARTISTNAME));
+
+                // Copy the album name
+                final String album = c.getString(c
+                        .getColumnIndexOrThrow(FavoriteColumns.ALBUMNAME));
+
+                // Copy the album id
+                final long albumId = c.getLong(c
+                        .getColumnIndexOrThrow(FavoriteColumns.ALBUMID));
+
+                // Copy the duration
+                final long duration = c.getLong(c
+                        .getColumnIndexOrThrow(FavoriteColumns.DURATION));
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
+
+                // Create a new song
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
+
+                // Add everything up
+                songList.add(song);
+            } while (c.moveToNext());
+        }
+        // Close the cursor
+        if (c != null) {
+            c.close();
+        }
+        return songList;
+
     }
 }

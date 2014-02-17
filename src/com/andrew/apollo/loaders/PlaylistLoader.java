@@ -20,6 +20,7 @@ import android.provider.MediaStore.Audio.PlaylistsColumns;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.Lists;
 
 import java.util.ArrayList;
@@ -71,8 +72,10 @@ public class PlaylistLoader extends WrappedAsyncTaskLoader<List<Playlist>> {
                 // Copy the playlist name
                 final String name = mCursor.getString(1);
 
+                final List<Song> songs = PlaylistSongLoader.makePlaylistSongList(getContext(), id);
+
                 // Create a new playlist
-                final Playlist playlist = new Playlist(id, name);
+                final Playlist playlist = new Playlist(id, name, songs);
 
                 // Add everything up
                 mPlaylistList.add(playlist);
@@ -92,12 +95,14 @@ public class PlaylistLoader extends WrappedAsyncTaskLoader<List<Playlist>> {
 
         /* Favorites list */
         final Playlist favorites = new Playlist(-1,
-                resources.getString(R.string.playlist_favorites));
+                resources.getString(R.string.playlist_favorites),
+                FavoritesLoader.makeFavoritesSongList(getContext()));
         mPlaylistList.add(favorites);
 
         /* Last added list */
         final Playlist lastAdded = new Playlist(-2,
-                resources.getString(R.string.playlist_last_added));
+                resources.getString(R.string.playlist_last_added),
+                LastAddedLoader.makeLastAddedSongList(getContext()));
         mPlaylistList.add(lastAdded);
     }
 
