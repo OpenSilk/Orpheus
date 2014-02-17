@@ -2169,6 +2169,8 @@ public class MusicPlaybackService extends Service {
 
     @DebugLog
     private void playRemote() {
+        mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
         try {
@@ -2628,6 +2630,8 @@ public class MusicPlaybackService extends Service {
             startPos = (int) mPlayer.position();
         }
         if (loadRemote(mCurrentMediaInfo, true, startPos)) {
+            mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
             mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
                     MediaButtonIntentReceiver.class.getName()));
             if (!mIsSupposedToBePlaying) {
