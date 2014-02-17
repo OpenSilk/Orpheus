@@ -18,6 +18,7 @@ package org.opensilk.music.cast;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.wifi.WifiManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -75,6 +76,7 @@ public class CastWebServer extends NanoHTTPD {
     private final boolean quiet = !BuildConfig.DEBUG;
     private final Context mContext;
     private final ImageFetcher mImageFetcher;
+    private WifiManager.WifiLock mWifiLock;
 
     public CastWebServer(Context context) {
         this(context, CastUtils.getWifiIpAddress(context), PORT);
@@ -85,8 +87,20 @@ public class CastWebServer extends NanoHTTPD {
         mContext = context;
         // Initialize the image fetcher
         mImageFetcher = ImageFetcher.getInstance(context);
-        // Initialize the image cache
-        mImageFetcher.setImageCache(ImageCache.getInstance(context));
+        // get the lock
+        mWifiLock = ((WifiManager) mContext.getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "CastServer");
+    }
+
+    @Override
+    public void start() throws IOException {
+        super.start();
+        mWifiLock.acquire();
+    }
+
+    @Override
+    public void stop() {
+        mWifiLock.release();
+        super.stop();
     }
 
     public Response serve(IHTTPSession session) {
