@@ -28,6 +28,7 @@ import android.content.Context;
 
 import com.andrew.apollo.lastfm.Result.Status;
 
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -145,6 +146,7 @@ public class Caller {
             return result;
         } catch (final IOException ignored) {
         } catch (final SAXException ignored) {
+        } catch (final DOMException ignored) {
         }
         return null;
     }
