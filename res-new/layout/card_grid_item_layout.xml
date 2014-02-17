@@ -31,7 +31,7 @@
         android:layout_height="match_parent"
         >
 
-        <it.gmariotti.cardslib.library.view.component.CardThumbnailView
+        <org.opensilk.music.ui.cards.views.CardCustomThumbnailView
             style="@style/card_thumbnail_outer_layout"
             android:id="@+id/card_thumbnail_layout"
             android:layout_width="match_parent"

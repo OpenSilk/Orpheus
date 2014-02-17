@@ -18,6 +18,7 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.GenresColumns;
 
 import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.Lists;
 
 import java.util.ArrayList;
@@ -66,8 +67,15 @@ public class GenreLoader extends WrappedAsyncTaskLoader<List<Genre>> {
                 // Copy the genre name
                 final String name = mCursor.getString(1);
 
+                final List<Song> songList = GenreSongLoader.getGenreSongList(getContext(), id);
+
+                // Don't add genres without any songs //TODO remove genre from mediastore
+                if (songList.size() == 0) {
+                    continue;
+                }
+
                 // Create a new genre
-                final Genre genre = new Genre(id, name);
+                final Genre genre = new Genre(id, name, songList);
 
                 // Add everything up
                 mGenreList.add(genre);
@@ -95,7 +103,8 @@ public class GenreLoader extends WrappedAsyncTaskLoader<List<Genre>> {
                         /* 0 */
                         BaseColumns._ID,
                         /* 1 */
-                        GenresColumns.NAME
+                        GenresColumns.NAME,
                 }, selection.toString(), null, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
     }
+
 }

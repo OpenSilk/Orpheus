@@ -34,6 +34,8 @@ import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
 import java.util.List;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Created by drew on 2/11/14.
  */
@@ -120,6 +122,7 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public void onLoaderReset(final Loader<List<D>> loader) {
 
     }

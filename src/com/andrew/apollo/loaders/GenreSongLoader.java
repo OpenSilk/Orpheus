@@ -71,14 +71,23 @@ public class GenreSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
                 // Copy the song name
                 final String songName = mCursor.getString(1);
 
-                // Copy the album name
-                final String album = mCursor.getString(2);
-
                 // Copy the artist name
-                final String artist = mCursor.getString(3);
+                final String artist = mCursor.getString(2);
+
+                // Copy the album name
+                final String album = mCursor.getString(3);
+
+                // Copy the album id
+                final long albumId = mCursor.getLong(4);
+
+                // Copy the duration
+                final long duration = mCursor.getLong(5);
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
 
                 // Create a new song
-                final Song song = new Song(id, songName, artist, album, -1);
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
 
                 // Add everything up
                 mSongList.add(song);
@@ -109,9 +118,55 @@ public class GenreSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
                         /* 1 */
                         MediaStore.Audio.Genres.Members.TITLE,
                         /* 2 */
-                        MediaStore.Audio.Genres.Members.ALBUM,
+                        MediaStore.Audio.Genres.Members.ARTIST,
                         /* 3 */
-                        MediaStore.Audio.Genres.Members.ARTIST
+                        MediaStore.Audio.AudioColumns.ALBUM,
+                        /* 4 */
+                        MediaStore.Audio.AudioColumns.ALBUM_ID,
+                        /* 5 */
+                        MediaStore.Audio.AudioColumns.DURATION
                 }, selection.toString(), null, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+    }
+
+    public static List<Song> getGenreSongList(final Context context, final Long genreId) {
+        List<Song> songList = Lists.newArrayList();
+        // Create the Cursor
+        Cursor c = makeGenreSongCursor(context, genreId);
+        // Gather the data
+        if (c != null && c.moveToFirst()) {
+            do {
+                // Copy the song Id
+                final long id = c.getLong(0);
+
+                // Copy the song name
+                final String songName = c.getString(1);
+
+                // Copy the artist name
+                final String artist = c.getString(2);
+
+                // Copy the album name
+                final String album = c.getString(3);
+
+                // Copy the album id
+                final long albumId = c.getLong(4);
+
+                // Copy the duration
+                final long duration = c.getLong(5);
+
+                // Make the duration label
+                final int seconds = (int) (duration / 1000);
+
+                // Create a new song
+                final Song song = new Song(id, songName, artist, album, albumId, seconds);
+
+                // Add everything up
+                songList.add(song);
+            } while (c.moveToNext());
+        }
+        // Close the cursor
+        if (c != null) {
+            c.close();
+        }
+        return songList;
     }
 }

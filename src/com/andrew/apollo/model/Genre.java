@@ -13,6 +13,8 @@ package com.andrew.apollo.model;
 
 import android.text.TextUtils;
 
+import java.util.List;
+
 /**
  * A class that represents a genre.
  * 
@@ -31,15 +33,35 @@ public class Genre {
     public String mGenreName;
 
     /**
+     * Genre songs
+     */
+    public List<Song> mSongs;
+
+    /**
      * Constructor of <code>Genre</code>
      * 
      * @param genreId The Id of the genre
      * @param genreName The genre name
      */
+    @Deprecated
     public Genre(final long genreId, final String genreName) {
         super();
         mGenreId = genreId;
         mGenreName = genreName;
+        mSongs = null;
+    }
+
+    /**
+     * Constructor of <code>Genre</code>
+     *
+     * @param genreId The Id of the genre
+     * @param genreName The genre name
+     */
+    public Genre(final long genreId, final String genreName, List<Song> songs) {
+        super();
+        mGenreId = genreId;
+        mGenreName = genreName;
+        mSongs = songs;
     }
 
     /**

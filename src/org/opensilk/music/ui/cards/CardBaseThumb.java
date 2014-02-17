@@ -30,7 +30,7 @@ import it.gmariotti.cardslib.library.internal.CardThumbnail;
  */
 public abstract class CardBaseThumb<D> extends Card {
 
-    D mData;
+    protected D mData;
 
     public CardBaseThumb(Context context, D data) {
         this(context, data, -1); // -1 will cause super to skip
