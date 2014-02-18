@@ -923,20 +923,20 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                     // Set the current track as a ringtone
                     MusicUtils.setRingtone(BaseSlidingActivity.this, MusicUtils.getCurrentAudioId());
                     return true;
-                case R.id.menu_audio_player_delete:
+                case R.id.panel_menu_delete:
                     // Delete current song
                     DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{
                             MusicUtils.getCurrentAudioId()
                     }, null).show(getSupportFragmentManager(), "DeleteDialog");
                     return true;
-                case R.id.menu_save_queue:
+                case R.id.panel_menu_save_queue:
                     NowPlayingCursor queue = (NowPlayingCursor) QueueLoader
                             .makeQueueCursor(BaseSlidingActivity.this);
                     CreateNewPlaylist.getInstance(MusicUtils.getSongListForCursor(queue)).show(
                             getSupportFragmentManager(), "CreatePlaylist");
                     queue.close();
                     return true;
-                case R.id.menu_clear_queue:
+                case R.id.panel_menu_clear_queue:
                     MusicUtils.clearQueue();
                     mSlidingPanel.collapsePane();
                     return true;
