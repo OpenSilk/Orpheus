@@ -25,7 +25,7 @@ import it.gmariotti.cardslib.library.view.CardView;
  *
  * Created by drew on 2/13/14.
  */
-public class DragSortCardView extends CardView {
+public class DragSortCardView extends ReceivingCardView {
     public DragSortCardView(Context context) {
         super(context);
     }
