@@ -77,9 +77,9 @@ public class QueueFragment extends Fragment implements
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
         // The View for the fragment's UI
-        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.drag_sort_list, null);
+        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.dragsort_listview, null);
         // Initialize the list
-        mListView = (DragSortListView)rootView.findViewById(R.id.card_list_base);
+        mListView = (DragSortListView)rootView.findViewById(R.id.card_list);
         // Release any references to the recycled Views
         mListView.setRecyclerListener(new RecycleHolder());
         // Set the drop listener
@@ -135,7 +135,7 @@ public class QueueFragment extends Fragment implements
         }
         mAdapter = new CardArrayAdapter(getActivity(), cards);
         //We have to set this manually since we arent using CardListView
-        mAdapter.setRowLayoutId(R.layout.drag_sort_list_item);
+        mAdapter.setRowLayoutId(R.layout.dragsort_card_list_thumb);
         // Set the data behind the list
         mListView.setAdapter(mAdapter);
         scrollToCurrentSong();

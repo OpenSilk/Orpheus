@@ -18,15 +18,16 @@
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card_grid_base_container"
+    android:id="@+id/card_list_container"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <it.gmariotti.cardslib.library.view.CardGridView
-        android:id="@+id/card_grid_base"
-        style="@style/Orpheus.FastScroll.Card.GridView"
-        card:list_card_layout_resourceID="@layout/card_grid_item"/>
+    <it.gmariotti.cardslib.library.view.CardListView
+        android:id="@+id/card_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        card:list_card_layout_resourceID="@layout/card_list_thumb" />
 
     <TextView
         android:id="@+id/empty"

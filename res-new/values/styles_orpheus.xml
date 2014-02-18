@@ -30,14 +30,24 @@
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_orpheus</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheus</item>
 
+        <!-- we want a light overflow button so need the dark theme -->
         <item name="android:actionOverflowButtonStyle">@style/Widget.AppCompat.Base.ActionButton.Overflow</item>
+        <!-- override fastscroll drawable -->
         <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
+        <!-- default all gridviews to the card style -->
+        <item name="android:gridViewStyle">@style/GridView.Orpheus.Card</item>
+        <!-- default all listviews to the card style -->
+        <item name="android:listViewStyle">@style/ListView.Orpheus.Card</item>
+        <item name="android:listViewWhiteStyle">@style/ListView.Orpheus.Card</item>
+        <!-- -->
+        <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
     </style>
 
-    <!-- Activities with panel needs ActionBarOverlay -->
+    <!-- base theme for activites using the sliding up panel -->
     <style name="Theme.Orpheus.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+
     </style>
 
     <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">

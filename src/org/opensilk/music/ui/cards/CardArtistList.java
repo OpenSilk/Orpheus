@@ -40,7 +40,7 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
 public class CardArtistList extends CardBaseList<Artist> {
 
     public CardArtistList(Context context, Artist data) {
-        this(context, data, R.layout.card_list_item_inner);
+        this(context, data, R.layout.card_list_thumb_inner_layout);
     }
 
     public CardArtistList(Context context, Artist data, int innerLayout) {
@@ -50,7 +50,7 @@ public class CardArtistList extends CardBaseList<Artist> {
     @Override
     protected void initContent() {
         mTitle = mData.mArtistName;
-        mSecondTitle = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber);
+        mSubTitle = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber);
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {

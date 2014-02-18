@@ -41,7 +41,7 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
 public class CardRecentList extends CardBaseList<Album> {
 
     public CardRecentList(Context context, Album data) {
-        this(context, data, R.layout.card_list_item_inner);
+        this(context, data, R.layout.card_list_thumb_inner_layout);
     }
 
     public CardRecentList(Context context, Album data, int innerLayout) {
@@ -51,7 +51,7 @@ public class CardRecentList extends CardBaseList<Album> {
     @Override
     protected void initContent() {
         mTitle = mData.mAlbumName;
-        mSecondTitle = mData.mArtistName;
+        mSubTitle = mData.mArtistName;
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {

@@ -16,14 +16,24 @@
   ~   limitations under the License.
   ~  *****************************************************************************
   -->
-<it.gmariotti.cardslib.library.view.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/list_cardId"
+    android:id="@+id/card_grid_container"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="@dimen/card_list_margin_left"
-    android:layout_marginRight="@dimen/card_list_margin_right"
-    android:layout_marginTop="@dimen/card_list_margin_top"
-    style="@style/list_card.thumbnail"
-    card:card_layout_resourceID="@layout/card_list_item_layout"/>
+    android:layout_height="match_parent">
+
+    <it.gmariotti.cardslib.library.view.CardGridView
+        android:id="@+id/card_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        card:list_card_layout_resourceID="@layout/card_grid_item" />
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Orpheus.Text.Empty"
+        android:visibility="gone" />
+
+</LinearLayout>

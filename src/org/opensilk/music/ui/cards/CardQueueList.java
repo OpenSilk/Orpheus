@@ -25,7 +25,7 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
  */
 public class CardQueueList extends CardBaseList<Song> {
     public CardQueueList(Context context, Song data) {
-        this(context, data, R.layout.card_list_item_inner);
+        this(context, data, R.layout.card_list_thumb_inner_layout);
     }
 
     public CardQueueList(Context context, Song data, int innerLayout) {
@@ -35,7 +35,7 @@ public class CardQueueList extends CardBaseList<Song> {
     @Override
     protected void initContent() {
         mTitle = mData.mSongName;
-        mSecondTitle = mData.mArtistName;
+        mSubTitle = mData.mArtistName;
         mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
     }
 

@@ -31,18 +31,13 @@
 
     </style>
 
-    <style name="Orpheus.FastScroll" parent="@android:style/Widget.AbsListView">
+    <!-- default style for all card grids -->
+    <style name="GridView.Orpheus.Card" parent="@android:style/Widget.Holo.Light.GridView">
+        <!--fastscroll-->
         <item name="android:scrollbarStyle">outsideInset</item>
         <item name="android:fastScrollEnabled">true</item>
         <item name="android:fastScrollAlwaysVisible">true</item>
-    </style>
-
-    <style name="Orpheus.FastScroll.Card">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-    </style>
-
-    <style name="Orpheus.FastScroll.Card.GridView">
+        <!--dimens-->
         <item name="android:columnWidth">@dimen/card_grid_columnwidth</item>
         <item name="android:numColumns">auto_fit</item>
         <item name="android:verticalSpacing">@dimen/card_grid_vertical_spacing</item>
@@ -51,12 +46,16 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="Orpheus.FastScroll.Card.ListView">
-        <item name="android:layout_marginLeft">@dimen/card_list_margin_left</item>
-        <item name="android:layout_marginRight">@dimen/card_list_margin_right</item>
+    <!-- default style for all card lists -->
+    <style name="ListView.Orpheus.Card" parent="@android:style/Widget.Holo.Light.ListView">
+        <!--fastscroll-->
+        <item name="android:scrollbarStyle">outsideInset</item>
+        <item name="android:fastScrollEnabled">true</item>
+        <item name="android:fastScrollAlwaysVisible">true</item>
     </style>
 
-    <style name="Orpheus.FastScroll.Card.ListView.DragSort">
+    <!-- setup for the queue's dragsort list -->
+    <style name="DragSort.Orpheus.Card" parent="@android:style/Widget.Holo.Light.ListView">
         <!-- header / footer overlay view so need to push out past them -->
         <item name="android:layout_marginBottom">@dimen/panel_footer_height</item>
         <item name="android:layout_marginTop">@dimen/panel_header_height</item>

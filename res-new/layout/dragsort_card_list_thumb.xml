@@ -22,8 +22,5 @@
     android:id="@+id/list_cardId"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="@dimen/card_list_margin_left"
-    android:layout_marginRight="@dimen/card_list_margin_right"
-    android:layout_marginTop="@dimen/card_list_margin_top"
-    style="@style/list_card.thumbnail"
-    card:card_layout_resourceID="@layout/card_list_item_layout"/>
+    card:card_layout_resourceID="@layout/card_list_thumb_layout"
+    style="@style/list_card.thumbnail" />

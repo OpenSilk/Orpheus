@@ -22,6 +22,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <!-- OpenSilk: Im using a framelayout here as a hack to get the thumbnail
+         at the full height of the card while letting me use the headers
+         overflow button and have it look like its on the main content -->
+
     <!-- Card visible layout -->
     <FrameLayout
         android:id="@+id/card_main_layout"
@@ -44,14 +48,14 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="24dp">
+            android:layout_marginRight="28dp"><!-- OpenSilk: push content over enough for the overflow button-->
 
             <it.gmariotti.cardslib.library.view.component.CardThumbnailView
                 style="@style/card_thumbnail_outer_layout"
                 android:id="@+id/card_thumbnail_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                card:card_thumbnail_layout_resourceID="@layout/card_list_item_thumbnail"/>
+                card:card_thumbnail_layout_resourceID="@layout/card_list_thumb_thumbnail_layout"/>
 
             <!-- Main Content View -->
             <FrameLayout
@@ -73,12 +77,12 @@
         android:layout_height="wrap_content"/>
 
     <!-- Expand layout. You can customize this element with your CardExpand class -->
-    <!--<FrameLayout-->
-        <!--android:id="@+id/card_content_expand_layout"-->
-        <!--style="@style/card.main_contentExpand"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!-->-->
-    <!--</FrameLayout>-->
+    <FrameLayout
+        android:id="@+id/card_content_expand_layout"
+        style="@style/card.main_contentExpand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+    </FrameLayout>
 
 </LinearLayout>

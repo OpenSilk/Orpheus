@@ -89,11 +89,11 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
                              final Bundle savedInstanceState) {
         // The View for the fragment's UI
         if (isSimpleLayout()) {
-            mRootView = (ViewGroup)inflater.inflate(R.layout.card_list_base, null);
-            mListView = (ListView) mRootView.findViewById(R.id.card_list_base);
+            mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_thumb, null);
+            mListView = (ListView) mRootView.findViewById(R.id.card_list);
         } else {
-            mRootView = (ViewGroup)inflater.inflate(R.layout.card_grid_base, null);
-            mGridView = (GridView) mRootView.findViewById(R.id.card_grid_base);
+            mRootView = (ViewGroup)inflater.inflate(R.layout.card_gridview, null);
+            mGridView = (GridView) mRootView.findViewById(R.id.card_grid);
         }
         return mRootView;
     }

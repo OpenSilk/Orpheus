@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2014 OpenSilk Productions LLC
   ~
@@ -15,12 +16,10 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <!-- Style for Main Layout ****************************************-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:exitFadeDuration="@android:integer/config_mediumAnimTime">
 
-    <!-- Style for Main Layout-->
-    <style name="Orpheus.card.main_layout" parent="card.main_layout">
-        <item name="android:background">@drawable/card_background_orpheus</item>
-    </style>
-
-</resources>
+    <item android:state_activated="true" android:drawable="@drawable/list_focused_orpheus"/>
+    <item android:state_pressed="true" android:drawable="@drawable/list_pressed_orpheus"/>
+    <item android:drawable="@color/app_background_light"/>
+</selector>
