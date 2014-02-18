@@ -1018,6 +1018,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                         listener.restartLoader();
                     }
                 }
+                // Cancel the broadcast so we aren't constantly refreshing
+                context.removeStickyBroadcast(intent);
             } else if (action.equals(MusicPlaybackService.REPEATMODE_CHANGED)
                     || action.equals(MusicPlaybackService.SHUFFLEMODE_CHANGED)) {
                 // Set the repeat image
