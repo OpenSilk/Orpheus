@@ -20,17 +20,17 @@
 <resources>
 
     <style name="Theme.Orpheus" parent="@style/Theme.AppCompat.Light">
-        <item name="actionBarItemBackground">@drawable/selectable_background_orpheus</item>
-        <item name="popupMenuStyle">@style/PopupMenu.Orpheus</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
-        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Orpheus</item>
-        <item name="actionDropDownStyle">@style/DropDownNav.Orpheus</item>
-        <item name="actionBarStyle">@style/ActionBar.Solid.Orpheus</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_orpheus</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_orpheus</item>
-        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheus</item>
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Orpheus</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Orpheus</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Orpheus</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Orpheus</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_orpheus</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_orpheus</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheus</item>
 
-        <item name="actionOverflowButtonStyle">@style/Widget.AppCompat.Base.ActionButton.Overflow</item>
+        <item name="android:actionOverflowButtonStyle">@style/Widget.AppCompat.Base.ActionButton.Overflow</item>
         <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
     </style>
 
@@ -41,15 +41,15 @@
     </style>
 
     <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
-        <item name="background">@drawable/ab_solid_orpheus</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_orpheus</item>
-        <item name="progressBarStyle">@style/ProgressBar.Orpheus</item>
+        <item name="android:background">@drawable/ab_solid_orpheus</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_orpheus</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 
     <style name="ActionBar.Transparent.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar">
-        <item name="background">@drawable/ab_transparent_orpheus</item>
-        <item name="progressBarStyle">@style/ProgressBar.Orpheus</item>
+        <item name="android:background">@drawable/ab_transparent_orpheus</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 	
     <style name="PopupMenu.Orpheus" parent="@style/Widget.AppCompat.Light.PopupMenu">	
@@ -78,11 +78,11 @@
     <style name="ActionButton.CloseMode.Orpheus" parent="@style/Widget.AppCompat.Light.ActionButton.CloseMode">
         <item name="android:background">@drawable/btn_cab_done_orpheus</item>
     </style>
-    
+
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
     <style name="Theme.Orpheus.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/PopupMenu.Orpheus</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Orpheus</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
     </style>
 
 </resources>
