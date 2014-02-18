@@ -68,6 +68,11 @@ public class CardAlbumList extends CardBaseList<Album> {
         return R.menu.card_album;
     }
 
+    @Override
+    protected boolean shouldStartAnimating(long trackId) {
+        return false;
+    }
+
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
         return new CardHeader.OnClickCardHeaderPopupMenuListener() {
             @Override

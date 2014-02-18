@@ -70,6 +70,11 @@ public class CardRecentList extends CardBaseList<Album> {
         return R.menu.card_recent;
     }
 
+    @Override
+    protected boolean shouldStartAnimating(long trackId) {
+        return false;
+    }
+
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
         return new CardHeader.OnClickCardHeaderPopupMenuListener() {
             @Override

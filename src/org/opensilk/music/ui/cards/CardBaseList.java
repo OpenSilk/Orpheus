@@ -15,12 +15,19 @@
  */
 package org.opensilk.music.ui.cards;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.widgets.NowPlayingAnimation;
 
 import it.gmariotti.cardslib.library.internal.CardHeader;
 
@@ -31,6 +38,7 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
 
     protected String mSubTitle;
     protected String mExtraText;
+    protected NowPlayingAnimation mAnimation;
 
     public CardBaseList(Context context, D data) {
         super(context, data);
@@ -60,6 +68,13 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
                 v2.setVisibility(View.GONE);
             }
         }
+        mAnimation = (NowPlayingAnimation) view.findViewById(R.id.play_animation);
+        final IntentFilter filter = new IntentFilter();
+        // Play and pause changes
+        filter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
+        // Track changes
+        filter.addAction(MusicPlaybackService.META_CHANGED);
+        getContext().registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -80,7 +95,28 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
      */
     protected abstract CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener();
 
-    public void setSecondTitle(String title) {
+    public void setSubTitle(String title) {
         mSubTitle = title;
     }
+
+    protected abstract boolean shouldStartAnimating(long trackId);
+
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (MusicPlaybackService.PLAYSTATE_CHANGED.equals(intent.getAction())
+                    || MusicPlaybackService.META_CHANGED.equals(intent.getAction())) {
+                if (mAnimation != null) {
+                    long trackId = MusicUtils.getCurrentAudioId();
+                    if (MusicUtils.isPlaying() && shouldStartAnimating(trackId)) {
+                        mAnimation.startAnimating(trackId);
+                    } else {
+                        if (mAnimation.isAnimating()) {
+                            mAnimation.stopAnimating();
+                        }
+                    }
+                }
+            }
+        }
+    };
 }

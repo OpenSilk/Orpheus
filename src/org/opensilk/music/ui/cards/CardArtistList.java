@@ -69,6 +69,11 @@ public class CardArtistList extends CardBaseList<Artist> {
         return R.menu.card_artist;
     }
 
+    @Override
+    protected boolean shouldStartAnimating(long trackId) {
+        return false;
+    }
+
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
         return new CardHeader.OnClickCardHeaderPopupMenuListener() {
             @Override

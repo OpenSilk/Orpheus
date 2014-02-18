@@ -64,6 +64,11 @@ public class CardSongList extends CardBaseList<Song> {
     }
 
     @Override
+    protected boolean shouldStartAnimating(long trackId) {
+        return trackId == mData.mSongId;
+    }
+
+    @Override
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
         return new CardHeader.OnClickCardHeaderPopupMenuListener() {
             @Override
