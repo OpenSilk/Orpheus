@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="28dp"><!-- OpenSilk: push content over enough for the overflow button-->
 
-            <it.gmariotti.cardslib.library.view.component.CardThumbnailView
+            <org.opensilk.music.ui.cards.views.CardCustomThumbnailView
                 style="@style/card_thumbnail_outer_layout"
                 android:id="@+id/card_thumbnail_layout"
                 android:layout_width="wrap_content"
