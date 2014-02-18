@@ -536,19 +536,19 @@ public class MusicPlaybackService extends Service {
     /**
      * {@inheritDoc}
      */
+    @DebugLog
     @Override
     public IBinder onBind(final Intent intent) {
         if (D) Log.d(TAG, "Service bound, intent = " + intent);
         cancelShutdown();
         mServiceInUse = true;
-        // look and see if we were just disconnected
-        mCastManager.reconnectSessionIfPossible(this, false, 1);
         return mBinder;
     }
 
     /**
      * {@inheritDoc}
      */
+    @DebugLog
     @Override
     public boolean onUnbind(final Intent intent) {
         if (D) Log.d(TAG, "Service unbound");
@@ -576,12 +576,11 @@ public class MusicPlaybackService extends Service {
     /**
      * {@inheritDoc}
      */
+    @DebugLog
     @Override
     public void onRebind(final Intent intent) {
         cancelShutdown();
         mServiceInUse = true;
-        // look and see if we were just disconnected
-        mCastManager.reconnectSessionIfPossible(this, false, 1);
     }
 
     /**
@@ -782,6 +781,13 @@ public class MusicPlaybackService extends Service {
             if (intent.hasExtra(NOW_IN_FOREGROUND)) {
                 mAnyActivityInForeground = intent.getBooleanExtra(NOW_IN_FOREGROUND, false);
                 updateNotification();
+                if (mAnyActivityInForeground) {
+                    // look and see if we were just disconnected
+                    mCastManager.reconnectSessionIfPossible(this, false, 2);
+                    mCastManager.incrementUiCounter();
+                } else {
+                    mCastManager.decrementUiCounter();
+                }
             }
 
             if (SHUTDOWN.equals(action)) {
