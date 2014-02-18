@@ -17,6 +17,7 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
+import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
@@ -49,8 +50,9 @@ public class CardQueueList extends CardBaseList<Song> {
         return R.menu.card_queue;
     }
 
+    @DebugLog
     @Override
-    protected boolean shouldStartAnimating(long trackId) {
+    public boolean shouldStartAnimating(long trackId) {
         return trackId == mData.mSongId;
     }
 

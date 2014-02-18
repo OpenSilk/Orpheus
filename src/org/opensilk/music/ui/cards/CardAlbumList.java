@@ -69,7 +69,7 @@ public class CardAlbumList extends CardBaseList<Album> {
     }
 
     @Override
-    protected boolean shouldStartAnimating(long trackId) {
+    public boolean shouldStartAnimating(long trackId) {
         return false;
     }
 

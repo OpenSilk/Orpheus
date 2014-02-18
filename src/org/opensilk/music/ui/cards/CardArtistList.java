@@ -70,7 +70,7 @@ public class CardArtistList extends CardBaseList<Artist> {
     }
 
     @Override
-    protected boolean shouldStartAnimating(long trackId) {
+    public boolean shouldStartAnimating(long trackId) {
         return false;
     }
 

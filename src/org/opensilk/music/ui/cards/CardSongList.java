@@ -64,7 +64,7 @@ public class CardSongList extends CardBaseList<Song> {
     }
 
     @Override
-    protected boolean shouldStartAnimating(long trackId) {
+    public boolean shouldStartAnimating(long trackId) {
         return trackId == mData.mSongId;
     }
 
