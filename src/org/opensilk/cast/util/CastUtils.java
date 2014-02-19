@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.cast;
+package org.opensilk.cast.util;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -28,6 +28,8 @@ import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
+
+import org.opensilk.music.cast.CastWebServer;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
