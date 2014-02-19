@@ -16,8 +16,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="false"
             android:cropToPadding="false"
-            android:scaleType="centerCrop"
-            android:src="@drawable/video_placeholder_200x200"/>
+            android:scaleType="centerCrop" />
 
     </RelativeLayout>
 
@@ -27,8 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="9dp"
-        android:src="@drawable/ic_av_pause_sm_dark"/>
+        android:layout_marginRight="9dp" />
 
     <ProgressBar
         android:id="@+id/loadingView"
