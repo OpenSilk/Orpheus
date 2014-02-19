@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Failures -->
+    <string name="failed_to_connect">Could not connect to the device</string>
+    <string name="failed_setting_volume">Failed to set the volume</string>
+    <string name="failed_no_connection">No connection to the cast device is present</string>
+    <string name="failed_no_connection_short">No connection</string>
+    <string name="failed_no_connection_trans">Connection to the cast device has been lost. Application is trying to re-etablish the connection, if possible. Please wait for a few seconds and try again.</string>
+    <string name="failed_perform_action">Failed to perform the action</string>
+    <string name="failed_status_request">Failed to sync up with the cast device</string>
+    <string name="failed_load">Failed to load media on the cast device</string>
+    <string name="failed_seek">Failed to seek to the new position on the cast device</string>
+    <string name="failed_receiver_player_error">Receiver player has encountered a sever error</string>
+</resources>

@@ -55,6 +55,7 @@ import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.OnFailedListener;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 import org.opensilk.cast.util.LogUtils;
+import org.opensilk.cast.util.Utils;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -76,11 +77,8 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
     }
 
     public static final int FEATURE_DEBUGGING = 1;
-    public static final int FEATURE_NOTIFICATION = 4;
-    public static final int FEATURE_LOCKSCREEN = 2;
     public static final String PREFS_KEY_SESSION_ID = "session-id";
     public static final String PREFS_KEY_APPLICATION_ID = "application-id";
-    public static final String PREFS_KEY_CAST_ACTIVITY_NAME = "cast-activity-name";
     public static final String PREFS_KEY_VOLUME_INCREMENT = "volume-increment";
     public static final String PREFS_KEY_ROUTE_ID = "route-id";
 
@@ -130,14 +128,6 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
      * @return
      */
     abstract Cast.CastOptions.Builder getCastOptionBuilder(CastDevice device);
-
-    /**
-     * Subclasses can decide how the Cast Controller Dialog should be built. If this returns
-     * <code>null</code>, the default dialog will be shown.
-     *
-     * @return
-     */
-    abstract MediaRouteDialogFactory getMediaRouteDialogFactory();
 
     /**
      * Subclasses should implement this to react appropriately to the successful launch of their
@@ -282,26 +272,6 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
                 }
             }
         }
-    }
-
-    /**
-     * Adds and wires up the Media Router cast button. It returns a pointer to the Media Router menu
-     * item if the caller needs such reference.
-     *
-     * @param menu
-     * @param menuResourceId The resource id of the cast button in the xml menu descriptor file
-     * @return
-     */
-
-    public MenuItem addMediaRouterButton(Menu menu, int menuResourceId) {
-        MenuItem mediaRouteMenuItem = menu.findItem(menuResourceId);
-        MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
-                MenuItemCompat.getActionProvider(mediaRouteMenuItem);
-        mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
-        if (null != getMediaRouteDialogFactory()) {
-            mediaRouteActionProvider.setDialogFactory(getMediaRouteDialogFactory());
-        }
-        return mediaRouteMenuItem;
     }
 
     /*************************************************************************/
@@ -661,80 +631,23 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
 
             // we may need to reconnect to an existing session
             mReconnectionTask = new AsyncTask<Void, Integer, Integer>() {
-                private ProgressDialog dlg;
                 private final int SUCCESS = 1;
                 private final int FAILED = 2;
 
                 @Override
                 protected void onCancelled() {
-                    if (null != dlg) {
-                        dlg.dismiss();
-                    }
                     super.onCancelled();
                 }
 
                 @Override
                 protected void onPreExecute() {
-                    if (!showDialog) {
-                        return;
-                    }
-                    dlg = new ProgressDialog(context);
-                    dlg.setMessage(context.getString(R.string.session_reconnection_attempt));
-                    dlg.setIndeterminate(true);
-                    dlg.setCancelable(true);
-                    dlg.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            switch (mReconnectionStatus) {
-                                case STARTED:
-                                case IN_PROGRESS:
-                                case FINALIZE:
-                                    mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                                    onDeviceSelected(null);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                            if (null != dlg) {
-                                dlg.dismiss();
-                            }
-                            mReconnectionTask.cancel(true);
-                        }
-                    });
-                    dlg.setButton(ProgressDialog.BUTTON_NEGATIVE, "Cancel",
-                            new DialogInterface.OnClickListener() {
-
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    switch (mReconnectionStatus) {
-                                        case STARTED:
-                                        case IN_PROGRESS:
-                                        case FINALIZE:
-                                            mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                                            onDeviceSelected(null);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                    mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                                    if (null != dlg) {
-                                        dlg.cancel();
-                                    }
-                                    mReconnectionTask.cancel(true);
-                                }
-                            });
-                    dlg.show();
                 }
 
                 @Override
                 protected Integer doInBackground(Void... params) {
                     for (int i = 0; i < timeoutInSeconds; i++) {
                         if (mReconnectionTask.isCancelled()) {
-                            if (null != dlg) {
-                                dlg.dismiss();
-                            }
                             return SUCCESS;
                         }
                         try {
@@ -751,9 +664,6 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
 
                 @Override
                 protected void onPostExecute(Integer result) {
-                    if (showDialog && null != dlg) {
-                        dlg.dismiss();
-                    }
                     if (null != result) {
                         if (result == FAILED) {
                             mReconnectionStatus = ReconnectionStatus.INACTIVE;
@@ -887,9 +797,6 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
                     LOGE(TAG, "onConnectionFailed(): Failed to inform " + consumer, e);
                 }
             }
-        }
-        if (showError) {
-            Utils.showErrorDialog(mContext, R.string.failed_to_connect);
         }
     }
 

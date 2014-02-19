@@ -25,6 +25,7 @@ import android.support.v7.media.MediaRouter.RouteInfo;
 import com.google.android.gms.cast.CastDevice;
 import org.opensilk.cast.manager.BaseCastManager.ReconnectionStatus;
 import org.opensilk.cast.util.LogUtils;
+import org.opensilk.cast.util.Utils;
 
 /**
  * Provides a handy implementation of {@link MediaRouter.Callback}. When a {@link RouteInfo} is

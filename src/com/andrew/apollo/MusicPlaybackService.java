@@ -68,14 +68,14 @@ import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
-import com.google.sample.castcompanionlibrary.cast.callbacks.IVideoCastConsumer;
-import com.google.sample.castcompanionlibrary.cast.callbacks.VideoCastConsumerImpl;
-import com.google.sample.castcompanionlibrary.cast.exceptions.CastException;
-import com.google.sample.castcompanionlibrary.cast.exceptions.NoConnectionException;
-import com.google.sample.castcompanionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
+import org.opensilk.cast.manager.VideoCastManager;
+import org.opensilk.cast.callbacks.IVideoCastConsumer;
+import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
+import org.opensilk.cast.exceptions.CastException;
+import org.opensilk.cast.exceptions.NoConnectionException;
+import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 
-import org.opensilk.music.cast.CastUtils;
+import org.opensilk.cast.util.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 
 import java.io.IOException;

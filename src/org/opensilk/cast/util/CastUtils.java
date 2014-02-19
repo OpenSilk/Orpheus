@@ -27,7 +27,7 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
-import com.google.sample.castcompanionlibrary.cast.VideoCastManager;
+import org.opensilk.cast.manager.VideoCastManager;
 
 import org.opensilk.music.cast.CastWebServer;
 

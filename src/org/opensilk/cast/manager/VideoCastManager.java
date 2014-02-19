@@ -37,6 +37,7 @@ import android.support.v7.media.MediaRouter.RouteInfo;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.andrew.apollo.R;
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.Cast.CastOptions.Builder;
@@ -115,14 +116,10 @@ public class VideoCastManager extends BaseCastManager
 
     private static final String TAG = LogUtils.makeLogTag(VideoCastManager.class);
     private static VideoCastManager sInstance;
-    private final Class<?> mTargetActivity;
-    private final AudioManager mAudioManager;
     private RemoteMediaPlayer mRemoteMediaPlayer;
     private VolumeType mVolumeType = VolumeType.DEVICE;
     private int mState = MediaStatus.PLAYER_STATE_IDLE;
     private int mIdleReason;
-    private Bitmap mVideoArtBitmap;
-    private final ComponentName mMediaButtonReceiverComponent;
     private final String mDataNamespace;
     private Cast.MessageReceivedCallback mDataChannel;
     protected Set<IVideoCastConsumer> mVideoConsumers;
@@ -228,15 +225,6 @@ public class VideoCastManager extends BaseCastManager
         if (null == mRemoteMediaPlayer) {
             throw new NoConnectionException();
         }
-    }
-
-    /**
-     * Returns the bitmap for the current video
-     *
-     * @return
-     */
-    public Bitmap getAlbumArt() {
-        return mVideoArtBitmap;
     }
 
     /**
@@ -496,54 +484,13 @@ public class VideoCastManager extends BaseCastManager
         return mRemoteMediaPlayer.getApproximateStreamPosition();
     }
 
-    /**
-     * Returns the target activity that points to the player page
-     *
-     * @return
-     */
-    public Class<?> getTargetActivity() {
-        return mTargetActivity;
-    }
-
     /*
      * This is called when ui visibility of the client has changed
      */
     @Override
     protected void onUiVisibilityChanged(boolean visible) {
         super.onUiVisibilityChanged(visible);
-        if (isFeatureEnabled(FEATURE_NOTIFICATION)) {
-            Intent intent = new Intent(VideoCastNotificationService.ACTION_VISIBILITY);
-            intent.setPackage(mContext.getPackageName());
-            intent.putExtra("visible", !visible);
-            mContext.startService(intent);
-        }
-    }
 
-    /************************************************************/
-    /***** Notification Service *********************************/
-    /************************************************************/
-
-    /*
-     * Starts a service that can last beyond the lifetime of the application to provide
-     * notifications. The service brings itself down when needed. The service will be started only
-     * if the notification feature has been enabled during the initialization.
-     * @see {@link BaseCastManager#enableFeatures()}
-     */
-    private boolean startNotificationService() {
-        if (!isFeatureEnabled(FEATURE_NOTIFICATION)) {
-            return true;
-        }
-        LOGD(TAG, "startNotificationService() ");
-        Intent service = new Intent(mContext, VideoCastNotificationService.class);
-        service.setPackage(mContext.getPackageName());
-        return null != mContext.startService(service);
-    }
-
-    private void stopNotificationService() {
-        if (!isFeatureEnabled(FEATURE_NOTIFICATION)) {
-            return;
-        }
-        mContext.stopService(new Intent(mContext, VideoCastNotificationService.class));
     }
 
     /************************************************************/
@@ -552,10 +499,6 @@ public class VideoCastManager extends BaseCastManager
 
     private void onApplicationDisconnected(int errorCode) {
         LOGD(TAG, "onApplicationDisconnected() reached with error code: " + errorCode);
-        updateRemoteControl(false);
-        if (null != mRemoteControlClientCompat && isFeatureEnabled(FEATURE_LOCKSCREEN)) {
-            mRemoteControlClientCompat.removeFromMediaRouter(mMediaRouter);
-        }
         for (IVideoCastConsumer consumer : mVideoConsumers) {
             try {
                 consumer.onApplicationDisconnected(errorCode);
@@ -567,8 +510,6 @@ public class VideoCastManager extends BaseCastManager
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
         }
         onDeviceSelected(null);
-        updateMiniControllersVisibility(false);
-        stopNotificationService();
     }
 
     private void onApplicationStatusChanged() {
@@ -635,7 +576,6 @@ public class VideoCastManager extends BaseCastManager
                 }
             }
         }
-        startNotificationService();
         try {
             attachDataChannel();
             attachMediaChannel();
@@ -721,16 +661,13 @@ public class VideoCastManager extends BaseCastManager
                     case CastStatusCodes.APPLICATION_NOT_FOUND:
                         LOGD(TAG, "onApplicationConnectionFailed(): failed due to: " +
                                 "ERROR_APPLICATION_NOT_FOUND");
-                        Utils.showErrorDialog(mContext, R.string.failed_to_find_app);
                         break;
                     case CastStatusCodes.TIMEOUT:
                         LOGD(TAG, "onApplicationConnectionFailed(): failed due to: ERROR_TIMEOUT");
-                        Utils.showErrorDialog(mContext, R.string.failed_app_launch_timeout);
                         break;
                     default:
                         LOGD(TAG, "onApplicationConnectionFailed(): failed due to: errorcode="
                                 + errorCode);
-                        Utils.showErrorDialog(mContext, R.string.failed_to_launch_app);
                         break;
                 }
             }
@@ -965,7 +902,12 @@ public class VideoCastManager extends BaseCastManager
         if (isPlaying) {
             pause();
         } else {
-            play();
+            if (mState == MediaStatus.PLAYER_STATE_IDLE
+                    && mIdleReason == MediaStatus.IDLE_REASON_FINISHED) {
+                loadMedia(getRemoteMediaInformation(), true, 0);
+            } else {
+                play();
+            }
         }
     }
 
@@ -1191,34 +1133,22 @@ public class VideoCastManager extends BaseCastManager
             boolean idle = false;
             if (mState == MediaStatus.PLAYER_STATE_PLAYING) {
                 System.out.println("status: playing");
-                updateRemoteControl(true);
             } else if (mState == MediaStatus.PLAYER_STATE_PAUSED) {
                 System.out.println("status: paused");
-                updateRemoteControl(false);
             } else if (mState == MediaStatus.PLAYER_STATE_IDLE) {
                 idle = true;
-                updateRemoteControl(false);
                 if (mIdleReason == MediaStatus.IDLE_REASON_FINISHED) {
-                    stopNotificationService();
-                    removeRemoteControlClient();
-                    updateMiniControllersVisibility(false);
                 } else if (mIdleReason == MediaStatus.IDLE_REASON_ERROR) {
                     // something bad happened on the cast device
                     LOGD(TAG, "Player on the receiver has thrown an error");
-                    stopNotificationService();
-                    removeRemoteControlClient();
-                    updateMiniControllersVisibility(false);
                     onFailed(R.string.failed_receiver_player_error, NO_STATUS_CODE);
                 }
             } else if (mState == MediaStatus.PLAYER_STATE_BUFFERING) {
                 System.out.println("status: buffering");
-                updateRemoteControl(false);
             } else {
                 System.out.println("status: unknown");
                 idle = true;
             }
-            updateMiniControllersVisibility(!idle);
-            updateMiniControllers();
             for (IVideoCastConsumer consumer : mVideoConsumers) {
                 try {
                     consumer.onRemoteMediaPlayerStatusUpdated();
@@ -1241,205 +1171,11 @@ public class VideoCastManager extends BaseCastManager
      */
     public void onRemoteMediaPlayerMetadataUpdated() {
         LOGD(TAG, "onRemoteMediaPlayerMetadataUpdated() reached");
-        updateLockScreenMetadata();
         for (IVideoCastConsumer consumer : mVideoConsumers) {
             try {
                 consumer.onRemoteMediaPlayerMetadataUpdated();
             } catch (Exception e) {
                 LOGE(TAG, "onRemoteMediaPlayerMetadataUpdated(): Failed to inform " + consumer, e);
-            }
-        }
-        updateLockScreenMetadata();
-        try {
-            updateLockScreenImage(getRemoteMediaInformation());
-        } catch (TransientNetworkDisconnectionException e) {
-            LOGE(TAG, "Failed to update lock screen metadaa due to a network issue", e);
-        } catch (NoConnectionException e) {
-            LOGE(TAG, "Failed to update lock screen metadaa due to a network issue", e);
-        }
-    }
-
-    /*************************************************************************/
-    /************** RemoteControlClient management ***************************/
-    /*************************************************************************/
-    /*
-     * Sets up the {@link RemoteControlClient} for this application. It also handles the audio
-     * focus.
-     */
-    @SuppressLint("InlinedApi")
-    private void setUpRemoteControl(final MediaInfo info) {
-        if (!isFeatureEnabled(BaseCastManager.FEATURE_LOCKSCREEN)) {
-            return;
-        }
-        LOGD(TAG, "setupRemoteControl() was called");
-        mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
-
-        ComponentName eventReceiver = new ComponentName(
-                mContext, VideoIntentReceiver.class.getName());
-        mAudioManager.registerMediaButtonEventReceiver(eventReceiver);
-
-        if (mRemoteControlClientCompat == null) {
-            Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-            intent.setComponent(mMediaButtonReceiverComponent);
-            mRemoteControlClientCompat = new RemoteControlClientCompat(
-                    PendingIntent.getBroadcast(mContext, 0, intent, 0));
-            RemoteControlHelper.registerRemoteControlClient(mAudioManager,
-                    mRemoteControlClientCompat);
-        }
-        mRemoteControlClientCompat.addToMediaRouter(mMediaRouter);
-        mRemoteControlClientCompat.setTransportControlFlags(
-                RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE);
-        if (null == info) {
-            mRemoteControlClientCompat.setPlaybackState(RemoteControlClient.PLAYSTATE_PAUSED);
-            return;
-        } else {
-            mRemoteControlClientCompat.setPlaybackState(RemoteControlClient.PLAYSTATE_PLAYING);
-        }
-
-        // Update the remote control's image
-        updateLockScreenImage(info);
-
-        // update the remote control's metadata
-        updateLockScreenMetadata();
-    }
-
-    /*
-     * Updates lock screen image
-     */
-    private void updateLockScreenImage(final MediaInfo info) {
-        if (null == info) {
-            return;
-        }
-        if (isFeatureEnabled(FEATURE_LOCKSCREEN)) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Bitmap bm = getBitmapForLockScreen(info);
-                        if (null == bm) {
-                            return;
-                        }
-                        mRemoteControlClientCompat.editMetadata(false).putBitmap(
-                                RemoteControlClientCompat.MetadataEditorCompat.
-                                METADATA_KEY_ARTWORK, bm).apply();
-                    } catch (Exception e) {
-                        LOGD(TAG, "Failed to update lock screen image", e);
-                    }
-                }
-            }).start();
-        }
-    }
-
-    /*
-     * Returns the {@link Bitmap} appropriate for the right size image for lock screen. In ICS and
-     * JB, the image shown on the lock screen is a small size bitmap but for KitKat, the image is a
-     * full-screen image so we need to separately handle these two cases.
-     */
-    private Bitmap getBitmapForLockScreen(MediaInfo video) {
-        if (null == video) {
-            return null;
-        }
-        URL imgUrl = null;
-        List<WebImage> images = video.getMetadata().getImages();
-        try {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                if (images.size() > 1) {
-                    imgUrl = new URL(images.get(1).getUrl().toString());
-                } else if (images.size() == 1) {
-                    imgUrl = new URL(images.get(0).getUrl().toString());
-                }
-            } else if (!images.isEmpty()) {
-                imgUrl = new URL(images.get(0).getUrl().toString());
-            }
-        } catch (MalformedURLException e) {
-            LOGE(TAG, "Failed to get the url for images", e);
-        }
-        Bitmap bm = null;
-        if (null != imgUrl) {
-            try {
-                bm = BitmapFactory.decodeStream(imgUrl.openStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (null == bm) {
-            bm = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.dummy_album_art);
-        }
-
-        return bm;
-    }
-
-    /*
-     * Updates the playback status of the RemoteControlClient
-     */
-    @SuppressLint("InlinedApi")
-    private void updateRemoteControl(boolean playing) {
-        if (!isFeatureEnabled(FEATURE_LOCKSCREEN)) {
-            return;
-        }
-        try {
-            if (null == mRemoteControlClientCompat) {
-                setUpRemoteControl(getRemoteMediaInformation());
-            }
-            if (mRemoteControlClientCompat != null) {
-                mRemoteControlClientCompat
-                        .setPlaybackState(playing ? RemoteControlClient.PLAYSTATE_PLAYING
-                                : RemoteControlClient.PLAYSTATE_PAUSED);
-            }
-        } catch (TransientNetworkDisconnectionException e) {
-            LOGE(TAG, "Failed to setup RCC due to network issues", e);
-        } catch (NoConnectionException e) {
-            LOGE(TAG, "Failed to setup RCC due to network issues", e);
-        }
-    }
-
-    /*
-     * On ICS and JB, lock screen metadata is one liner: Title - Album Artist - Album. On KitKat, it
-     * has two lines: Title , Album Artist - Album
-     */
-    private void updateLockScreenMetadata() {
-        if (null == mRemoteControlClientCompat || !isFeatureEnabled(FEATURE_LOCKSCREEN)) {
-            return;
-        }
-
-        try {
-            // Update the remote controls
-            MediaInfo info = getRemoteMediaInformation();
-            if (null == info) {
-                return;
-            }
-            final MediaMetadata mm = info.getMetadata();
-
-            mRemoteControlClientCompat.editMetadata(false)
-                    .putString(MediaMetadataRetriever.METADATA_KEY_TITLE,
-                            mm.getString(MediaMetadata.KEY_TITLE))
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
-                            mContext.getResources().getString(
-                                    R.string.casting_to_device, getDeviceName()))
-                    .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION,
-                            info.getStreamDuration())
-                    .apply();
-        } catch (NotFoundException e) {
-            LOGE(TAG, "Failed to update RCC due to resource not found", e);
-        } catch (TransientNetworkDisconnectionException e) {
-            LOGE(TAG, "Failed to update RCC due to network issues", e);
-        } catch (NoConnectionException e) {
-            LOGE(TAG, "Failed to update RCC due to network issues", e);
-        }
-    }
-
-    /*
-     * Removes the remote control client
-     */
-    private void removeRemoteControlClient() {
-        if (isFeatureEnabled(FEATURE_LOCKSCREEN)) {
-            mAudioManager.abandonAudioFocus(null);
-            if (null != mRemoteControlClientCompat) {
-                RemoteControlHelper.unregisterRemoteControlClient(mAudioManager,
-                        mRemoteControlClientCompat);
-                mRemoteControlClientCompat = null;
             }
         }
     }
@@ -1476,64 +1212,6 @@ public class VideoCastManager extends BaseCastManager
     }
 
     /*************************************************************/
-    /***** Registering IMiniController listeners *****************/
-    /*************************************************************/
-
-    /**
-     * Adds a new {@link IMiniController} component. Callers need to provide their own
-     * {@link OnMiniControllerChangedListener}.
-     *
-     * @param miniController
-     * @param OnMiniControllerChangedListener
-     * @see setOnMiniControllerChangedListener
-     */
-    public synchronized void addMiniController(IMiniController miniController,
-            OnMiniControllerChangedListener onChangedListener) {
-        if (null != miniController) {
-            boolean result = mMiniControllers.add(miniController);
-            if (result) {
-                miniController.setOnMiniControllerChangedListener(null == onChangedListener ? this
-                        : onChangedListener);
-                try {
-                    if (isConnected() && isRemoteMediaLoaded()) {
-                        updateMiniController(miniController);
-                        miniController.setVisibility(View.VISIBLE);
-                    }
-                } catch (TransientNetworkDisconnectionException e) {
-                    LOGE(TAG, "Failed to get the status of media playback on receiver", e);
-                } catch (NoConnectionException e) {
-                    LOGE(TAG, "Failed to get the status of media playback on receiver", e);
-                }
-                LOGD(TAG, "Successfully added the new MiniController " + miniController);
-            } else {
-                LOGD(TAG, "Attempting to adding " + miniController + " but it was already " +
-                        "registered, skipping this step");
-            }
-        }
-    }
-
-    /**
-     * Adds a new {@link IMiniController} component and assigns {@link VideoCastManager} as the
-     * {@link OnMiniControllerChangedListener} for this component.
-     *
-     * @param miniController
-     */
-    public synchronized void addMiniController(IMiniController miniController) {
-        addMiniController(miniController, null);
-    }
-
-    /**
-     * Removes a {@link IMiniController} listener from the list of listeners.
-     *
-     * @param listener
-     */
-    public synchronized void removeMiniController(IMiniController listener) {
-        if (null != listener) {
-            mMiniControllers.remove(listener);
-        }
-    }
-
-    /*************************************************************/
     /***** Implementing abstract methods of BaseCastManager ******/
     /*************************************************************/
 
@@ -1542,7 +1220,6 @@ public class VideoCastManager extends BaseCastManager
         try {
             detachMediaChannel();
             removeDataChannel();
-            stopNotificationService();
         } catch (TransientNetworkDisconnectionException e) {
             LOGD(TAG, "Failed to clean up on onDeviceUnselected()", e);
         } catch (NoConnectionException e) {
@@ -1562,23 +1239,14 @@ public class VideoCastManager extends BaseCastManager
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         super.onConnectionFailed(result);
-        updateRemoteControl(false);
-        stopNotificationService();
 
     }
 
     @Override
     public void onDisconnected() {
         super.onDisconnected();
-        updateMiniControllersVisibility(false);
-        stopNotificationService();
-        removeRemoteControlClient();
     }
 
-    @Override
-    MediaRouteDialogFactory getMediaRouteDialogFactory() {
-        return new VideoMediaRouteDialogFactory();
-    }
 
     class CastListener extends Cast.Listener {
 
