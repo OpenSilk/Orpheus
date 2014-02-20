@@ -448,7 +448,7 @@ public final class MusicUtils {
     public static void changeRemoteVolume(double increment) {
         if (sService != null) {
             try {
-                sService.changeRemoteVolume(increment);
+                sService.getCastManagerInterface().changeVolume(increment);
             } catch (final RemoteException ignored) {
             }
         }

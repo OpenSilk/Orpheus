@@ -1,6 +1,7 @@
 package com.andrew.apollo;
 
 import android.graphics.Bitmap;
+import org.opensilk.cast.ICastManager;
 
 interface IApolloService
 {
@@ -39,6 +40,6 @@ interface IApolloService
     int getMediaMountedCount();
     int getAudioSessionId();
     boolean isRemotePlayback();
-    void changeRemoteVolume(double increment);
+    ICastManager getCastManagerInterface();
 }
 

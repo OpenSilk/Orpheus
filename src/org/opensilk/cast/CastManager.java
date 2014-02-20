@@ -492,7 +492,7 @@ public class CastManager extends BaseCastManager
         if (null != mMediaRouter) {
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
         }
-        setDevice(null);
+        selectDevice(null);
     }
 
     private void onApplicationStatusChanged() {
@@ -627,7 +627,7 @@ public class CastManager extends BaseCastManager
                 // found out that the app is not running so we need
                 // to disconnect
                 mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                setDevice(null);
+                selectDevice(null);
             }
             return;
         } else {
@@ -655,7 +655,7 @@ public class CastManager extends BaseCastManager
                 }
             }
 
-            setDevice(null);
+            selectDevice(null);
             if (null != mMediaRouter) {
                 mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
             }

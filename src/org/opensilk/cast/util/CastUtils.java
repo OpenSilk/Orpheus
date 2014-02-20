@@ -44,22 +44,6 @@ public class CastUtils {
         //static
     }
 
-    public static CastManager sCastMgr = null;
-
-    public static CastManager getCastManager(Context context) {
-        if (null == sCastMgr) {
-            sCastMgr = CastManager.initialize(context, Config.CAST_APPLICATION_ID, null, null);
-            if (BuildConfig.DEBUG) {
-                sCastMgr.enableFeatures(CastManager.FEATURE_DEBUGGING);
-            }
-            // We are streaming /from/ the device so it needs to exit
-            sCastMgr.setStopOnDisconnect(true);
-        }
-        sCastMgr.setContext(context);
-
-        return sCastMgr;
-    }
-
     public static Cursor getSingleTrackCursor(Context context, long id) {
         return getSingleTrackCursor(context, String.valueOf(id));
     }

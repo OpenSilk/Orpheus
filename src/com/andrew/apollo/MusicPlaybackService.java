@@ -70,6 +70,8 @@ import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.common.ConnectionResult;
 
 import org.opensilk.cast.CastManager;
+import org.opensilk.cast.CastManagerFactory;
+import org.opensilk.cast.ICastManager;
 import org.opensilk.cast.callbacks.IVideoCastConsumer;
 import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
 import org.opensilk.cast.exceptions.CastException;
@@ -502,6 +504,11 @@ public class MusicPlaybackService extends Service {
     private CastManager mCastManager;
 
     /**
+     * aidl front end for CastManager used by activity
+     */
+    private CastManagerInterface mCastManagerInterface;
+
+    /**
      * Http server for service cast devices
      */
     private CastWebServer mCastServer;
@@ -636,8 +643,11 @@ public class MusicPlaybackService extends Service {
         mPlayer.setHandler(mPlayerHandler);
 
         // Initialize the cast manager
-        mCastManager = CastUtils.getCastManager(this);
+        mCastManager = CastManagerFactory.getCastManager(this);
         mCastManager.addVideoCastConsumer(mCastConsumer);
+
+        // Initialize the cast manager interface for activity
+        mCastManagerInterface = new CastManagerInterface(mCastManager);
 
         // Initialize the intent filter and each action
         final IntentFilter filter = new IntentFilter();
@@ -2583,22 +2593,6 @@ public class MusicPlaybackService extends Service {
     }
 
     /**
-     * Increments volume on remote devices by given delta
-     * @param increment delta
-     */
-    public void changeRemoteVolume(double increment) {
-        try {
-            mCastManager.incrementVolume(increment);
-        } catch (CastException e) {
-            e.printStackTrace();
-        } catch (TransientNetworkDisconnectionException e) {
-            e.printStackTrace();
-        } catch (NoConnectionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Starts cast http server, creating it if needed.
      * @return success of operation
      */
@@ -2734,6 +2728,23 @@ public class MusicPlaybackService extends Service {
             mPlayerHandler.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
         }
     };
+
+    private static class CastManagerInterface extends ICastManager.Stub {
+        private final WeakReference<CastManager> mCastManager;
+
+        CastManagerInterface(CastManager castManager) {
+            mCastManager = new WeakReference<CastManager>(castManager);
+        }
+
+
+        @Override
+        public void changeVolume(double increment) throws RemoteException {
+            try {
+                mCastManager.get().incrementVolume(increment);
+            } catch (Exception ignored) {
+            }
+        }
+    }
 
     /**
      * Callback handler for cast manager
@@ -3561,14 +3572,10 @@ public class MusicPlaybackService extends Service {
             return mService.get().isRemotePlayback();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        public void changeRemoteVolume(double increment) throws RemoteException {
-            mService.get().changeRemoteVolume(increment);
+        public ICastManager getCastManagerInterface() throws RemoteException {
+            return mService.get().mCastManagerInterface;
         }
-
     }
 
 }

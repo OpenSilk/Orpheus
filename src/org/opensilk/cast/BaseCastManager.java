@@ -201,11 +201,11 @@ public abstract class BaseCastManager implements
         mContext = context;
     }
 
-    public void setDevice(CastDevice device) {
-        setDevice(device, mDestroyOnDisconnect);
+    public void selectDevice(CastDevice device) {
+        selectDevice(device, mDestroyOnDisconnect);
     }
 
-    public void setDevice(CastDevice device, boolean stopAppOnExit) {
+    public void selectDevice(CastDevice device, boolean stopAppOnExit) {
         mSelectedCastDevice = device;
         mDeviceName = mSelectedCastDevice != null ? mSelectedCastDevice.getFriendlyName() : null;
 
@@ -365,7 +365,7 @@ public abstract class BaseCastManager implements
      */
     public void disconnect() {
         if (isConnected()) {
-            setDevice(null, true);
+            selectDevice(null, true);
         }
     }
 
@@ -563,7 +563,7 @@ public abstract class BaseCastManager implements
 
         if (null != device) {
             LOGD(TAG, "trying to acquire Cast Client for " + device);
-            setDevice(device);
+            selectDevice(device);
         }
     }
 
@@ -660,7 +660,7 @@ public abstract class BaseCastManager implements
                     if (null != result) {
                         if (result == FAILED) {
                             mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                            setDevice(null);
+                            selectDevice(null);
                         }
                     }
                 }
@@ -973,14 +973,14 @@ public abstract class BaseCastManager implements
             }
             Utils.saveStringToPreference(mContext, PREFS_KEY_ROUTE_ID, info.getId());
             CastDevice device = CastDevice.getFromBundle(info.getExtras());
-            setDevice(device);
+            selectDevice(device);
             LOGD(TAG, "onResult: mSelectedDevice=" + device.getFriendlyName());
         }
 
         @Override
         public void onRouteUnselected(MediaRouter router, RouteInfo route) {
             LOGD(TAG, "onRouteUnselected: route=" + route);
-            setDevice(null);
+            selectDevice(null);
         }
 
         @Override
@@ -998,7 +998,7 @@ public abstract class BaseCastManager implements
 
                     CastDevice device = CastDevice.getFromBundle(route.getExtras());
                     LOGD(TAG, "onRouteAdded: Attempting to recover a session with device: " + device.getFriendlyName());
-                    setDevice(device);
+                    selectDevice(device);
                 }
             }
         }
