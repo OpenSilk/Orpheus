@@ -2769,12 +2769,23 @@ public class MusicPlaybackService extends Service {
         private final CastRouteListener mListener = new CastRouteListener.Stub() {
             @Override
             public void onRouteSelected(Bundle castDevice) throws RemoteException {
-                mCastManager.get().selectDevice(CastDevice.getFromBundle(castDevice));
+                final CastDevice device = CastDevice.getFromBundle(castDevice);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCastManager.get().selectDevice(device);
+                    }
+                });
             }
 
             @Override
             public void onRouteUnselected() throws RemoteException {
-                mCastManager.get().selectDevice(null);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCastManager.get().selectDevice(null);
+                    }
+                });
             }
         };
     }
