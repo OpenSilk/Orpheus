@@ -55,6 +55,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import hugo.weaving.DebugLog;
+
 /**
  * An abstract class that manages connectivity to a cast device. Subclasses are expected to extend
  * the functionality of this class based on their purpose.
@@ -998,6 +1000,36 @@ public abstract class BaseCastManager implements
                     selectDevice(device);
                 }
             }
+        }
+
+        @DebugLog
+        @Override
+        public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteRemoved(router, route);
+        }
+
+        @DebugLog
+        @Override
+        public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo route) {
+            super.onRouteChanged(router, route);
+        }
+
+        @DebugLog
+        @Override
+        public void onProviderAdded(MediaRouter router, MediaRouter.ProviderInfo provider) {
+            super.onProviderAdded(router, provider);
+        }
+
+        @DebugLog
+        @Override
+        public void onProviderRemoved(MediaRouter router, MediaRouter.ProviderInfo provider) {
+            super.onProviderRemoved(router, provider);
+        }
+
+        @DebugLog
+        @Override
+        public void onProviderChanged(MediaRouter router, MediaRouter.ProviderInfo provider) {
+            super.onProviderChanged(router, provider);
         }
 
     }
