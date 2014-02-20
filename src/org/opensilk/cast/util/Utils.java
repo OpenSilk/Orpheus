@@ -108,7 +108,7 @@ public class Utils {
             // we want to remove
             pref.edit().remove(key).apply();
         } else {
-            pref.edit().putString(key, value).apply();
+            pref.edit().putString(key, value).commit();
         }
     }
 
@@ -126,7 +126,7 @@ public class Utils {
             // we want to remove
             pref.edit().remove(key).apply();
         } else {
-            pref.edit().putFloat(key, value).apply();
+            pref.edit().putFloat(key, value).commit();
         }
 
     }
