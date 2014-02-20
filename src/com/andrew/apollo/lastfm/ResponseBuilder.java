@@ -181,7 +181,7 @@ public final class ResponseBuilder {
      * @return
      */
     public static <T> T buildItem(final Result result, final ItemFactory<T> factory) {
-        if (!result.isSuccessful()) {
+        if (result == null || !result.isSuccessful()) {
             return null;
         }
         return buildItem(result.getContentElement(), factory);
