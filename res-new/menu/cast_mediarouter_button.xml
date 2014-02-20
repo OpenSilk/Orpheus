@@ -7,7 +7,6 @@
         android:id="@+id/media_route_menu_item"
         android:title="@string/media_route_menu_title"
         app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-        app:showAsAction="always"
-        style="@style/Theme.MediaRouter" />
+        app:showAsAction="always" />
 
 </menu>

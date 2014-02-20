@@ -49,6 +49,7 @@
 
     <application
         android:name=".ApolloApplication"
+        android:theme="@style/Theme.Orpheus"
         android:allowBackup="true"
         android:allowTaskReparenting="true"
         android:hardwareAccelerated="@bool/config_hardwareAccelerated"
@@ -166,8 +167,7 @@
         <!-- Used to set options -->
         <activity
             android:name=".ui.activities.SettingsActivity"
-            android:label="@string/menu_settings"
-            android:theme="@style/Apollo.Theme.Dark" />
+            android:label="@string/menu_settings" />
         <!-- Themes Activity -->
         <activity
             android:name=".ui.activities.ThemesActivity"

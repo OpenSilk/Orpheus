@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.Orpheus" parent="@style/Theme.AppCompat.Light">
+    <style name="Theme.Orpheus" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Orpheus</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
@@ -30,51 +30,58 @@
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_orpheus</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheus</item>
 
-        <!-- we want a light overflow button so need the dark theme -->
-        <item name="android:actionOverflowButtonStyle">@style/Widget.AppCompat.Base.ActionButton.Overflow</item>
-        <!-- override fastscroll drawable -->
-        <item name="android:fastScrollThumbDrawable">@drawable/fastscroll_thumb_holo</item>
+        <!-- Light.DarkActionBar specific -->
+        <item name="android:actionBarWidgetTheme">@style/Theme.Orpheus.Widget</item>
+
+        <!-- Generated with http://android-holo-colors.com -->
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheus</item>
+        <item name="android:seekBarStyle">@style/SeekBarOrpheus</item>
+        <item name="android:fastScrollThumbDrawable">@drawable/orpheus_fastscroll_thumb_holo</item>
+
+        <!--OpenSilk-->
         <!-- default all gridviews to the card style -->
         <item name="android:gridViewStyle">@style/GridView.Orpheus.Card</item>
         <!-- default all listviews to the card style -->
         <item name="android:listViewStyle">@style/ListView.Orpheus.Card</item>
         <item name="android:listViewWhiteStyle">@style/ListView.Orpheus.Card</item>
-        <!-- -->
+        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
+
     </style>
 
+    <!--OpenSilk-->
     <!-- base theme for activites using the sliding up panel -->
     <style name="Theme.Orpheus.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
-
     </style>
+    <!--end OpenSilk-->
 
-    <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+    <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@drawable/ab_solid_orpheus</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_orpheus</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 
-    <style name="ActionBar.Transparent.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar">
+    <style name="ActionBar.Transparent.Orpheus" parent="@style/Widget.AppCompat.ActionBar">
         <item name="android:background">@drawable/ab_transparent_orpheus</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 	
-    <style name="PopupMenu.Orpheus" parent="@style/Widget.AppCompat.Light.PopupMenu">	
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>	
+    <style name="PopupMenu.Orpheus" parent="@style/Widget.AppCompat.Light.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>
     </style>
 	
-    <style name="DropDownListView.Orpheus" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
+    <style name="DropDownListView.Orpheus" parent="@style/Widget.AppCompat.ListView.DropDown">
         <item name="android:listSelector">@drawable/selectable_background_orpheus</item>
     </style>
 
-    <style name="ActionBarTabStyle.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.TabView">
+    <style name="ActionBarTabStyle.Orpheus" parent="@style/Widget.AppCompat.ActionBar.TabView">
         <item name="android:background">@drawable/tab_indicator_ab_orpheus</item>
     </style>
 	
-    <style name="DropDownNav.Orpheus" parent="@style/Widget.AppCompat.Light.Spinner.DropDown.ActionBar">
+    <style name="DropDownNav.Orpheus" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
         <item name="android:background">@drawable/spinner_background_ab_orpheus</item>
         <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>
         <item name="android:dropDownSelector">@drawable/selectable_background_orpheus</item>
@@ -82,17 +89,31 @@
     
     <style name="ProgressBar.Orpheus" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_orpheus</item>
-        <item name="android:thumb">@drawable/seek_thumb</item>
     </style>
     
-    <style name="ActionButton.CloseMode.Orpheus" parent="@style/Widget.AppCompat.Light.ActionButton.CloseMode">
+    <style name="ActionButton.CloseMode.Orpheus" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
         <item name="android:background">@drawable/btn_cab_done_orpheus</item>
     </style>
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Orpheus.Widget" parent="@style/Theme.AppCompat">
+    <style name="Theme.Orpheus.Widget" parent="@style/Theme.AppCompat.Light">
         <item name="android:popupMenuStyle">@style/PopupMenu.Orpheus</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheus</item>
+        <!--OpenSilk-->
+        <!-- This is a hack to make the mediarouter icon white -->
+        <item name="isLightTheme">false</item>
+    </style>
+
+    <!-- Generated with http://android-holo-colors.com -->
+    <style name="ProgressBarOrpheus" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/orpheus_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/orpheus_progress_indeterminate_horizontal_holo_light</item>
+    </style>
+
+    <style name="SeekBarOrpheus" parent="android:Widget.Holo.Light.SeekBar">
+        <item name="android:progressDrawable">@drawable/orpheus_scrubber_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/orpheus_scrubber_progress_horizontal_holo_light</item>
+        <item name="android:thumb">@drawable/orpheus_scrubber_control_selector_holo_light</item>
     </style>
 
 </resources>

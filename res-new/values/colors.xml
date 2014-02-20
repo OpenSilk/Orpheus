@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="app_color">#fff98022</color> <!--Google Music-->
-    <item type="color" name="nowplaying_progressbar_progress">@color/app_color</item>
-    <color name="nowplaying_progressbar_secondary_progress">#ffdddddd</color>
-    <color name="nowplaying_progressbar_bg">#ffeeeeee</color>
     <color name="tabstrip_background">#ffe4e4e4</color>
     <color name="app_background_light">#fffafafa</color>
     <color name="app_background_light_transparent">#e6fafafa</color>
-
 </resources>
