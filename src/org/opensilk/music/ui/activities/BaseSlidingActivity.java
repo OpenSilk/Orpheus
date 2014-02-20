@@ -164,8 +164,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     /**
      * Cast stuff
      */
-    MediaRouter mMediaRouter;
-    MediaRouteSelector mMediaRouteSelector;
+    private MediaRouter mMediaRouter;
+    private MediaRouteSelector mMediaRouteSelector;
+    /** Determines whether the cast buttons should be shown */
+    private boolean mCastDeviceAvailable = false;
 
     /**
      * {@inheritDoc}
@@ -250,14 +252,17 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
+
         // Media router
-        getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
-        // init router button
-        MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
-        MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
-                MenuItemCompat.getActionProvider(mediaRouteMenuItem);
-        mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
-        mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
+        if (mCastDeviceAvailable) {
+            getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
+            // init router button
+            MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
+            MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
+                    MenuItemCompat.getActionProvider(mediaRouteMenuItem);
+            mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
+            mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
+        }
 
         // Settings
         getMenuInflater().inflate(R.menu.activity_base, menu);
@@ -446,7 +451,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     }
 
     /**
-     * Initializes the items in the bottom action bar.
+     * Initializes the items in sliding panel.
      */
     private void initPanel() {
         //Load art
@@ -520,6 +525,17 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mFooterProgress = (SeekBar)findViewById(android.R.id.progress);
         // Update the progress
         mFooterProgress.setOnSeekBarChangeListener(this);
+    }
+
+    /**
+     * Possibly shows media route button
+     */
+    private void maybeShowHeaderMediaRouteButton(){
+        if (mCastDeviceAvailable && mSlidingPanel.isExpanded()) {
+            mHeaderMediaRouteButton.setVisibility(View.VISIBLE);
+        } else {
+            mHeaderMediaRouteButton.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -841,8 +857,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         public void onPanelExpanded(View panel) {
             mHeaderQueueSwitch.setVisibility(View.VISIBLE);
             mHeaderOverflow.setVisibility(View.VISIBLE);
-            // TODO hide if no routes available
-            mHeaderMediaRouteButton.setVisibility(View.VISIBLE);
+            maybeShowHeaderMediaRouteButton();
             mHeaderPlayPauseButton.setVisibility(View.GONE);
             mHeaderNextButton.setVisibility(View.GONE);
             mPanelHeader.setBackgroundResource(R.color.app_background_light_transparent);
@@ -912,13 +927,23 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @DebugLog
         @Override
         public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteAdded(router, route);
+            // Show the router buttons
+            if (!router.getDefaultRoute().equals(route)) {
+                mCastDeviceAvailable = true;
+                invalidateOptionsMenu();
+                maybeShowHeaderMediaRouteButton();
+            }
         }
 
         @DebugLog
         @Override
         public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteRemoved(router, route);
+            // Hide the router buttons
+            if (!router.getDefaultRoute().equals(route)) {
+                mCastDeviceAvailable = false;
+                invalidateOptionsMenu();
+                maybeShowHeaderMediaRouteButton();
+            }
         }
 
         @DebugLog
