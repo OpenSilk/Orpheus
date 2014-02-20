@@ -297,6 +297,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         updateNowPlayingInfo();
         // Refresh the queue
         refreshQueue();
+        // Make sure we dont overlap the panel
+        if (mSlidingPanel.isExpanded()
+                && getSupportActionBar().isShowing()) {
+            getSupportActionBar().hide();
+        }
     }
 
     @Override
@@ -821,12 +826,12 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @Override
         public void onPanelSlide(View panel, float slideOffset) {
             if (slideOffset < 0.2) {
-                if (getActionBar().isShowing()) {
-                    getActionBar().hide();
+                if (getSupportActionBar().isShowing()) {
+                    getSupportActionBar().hide();
                 }
             } else {
-                if (!getActionBar().isShowing()) {
-                    getActionBar().show();
+                if (!getSupportActionBar().isShowing()) {
+                    getSupportActionBar().show();
                 }
             }
         }
