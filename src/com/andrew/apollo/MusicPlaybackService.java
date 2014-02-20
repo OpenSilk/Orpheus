@@ -797,7 +797,7 @@ public class MusicPlaybackService extends Service {
                 updateNotification();
                 if (mAnyActivityInForeground) {
                     // look and see if we were just disconnected
-                    mCastManager.reconnectSessionIfPossible(this, false, 2);
+//                    mCastManager.reconnectSessionIfPossible(this, false, 2);
                     mCastManager.incrementUiCounter();
                 } else {
                     mCastManager.decrementUiCounter();
