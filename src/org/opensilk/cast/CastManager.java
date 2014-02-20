@@ -14,28 +14,14 @@
  * limitations under the License.
  */
 
-package org.opensilk.cast.manager;
+package org.opensilk.cast;
 
 import static org.opensilk.cast.util.LogUtils.LOGD;
 import static org.opensilk.cast.util.LogUtils.LOGE;
 
-import android.annotation.SuppressLint;
-import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources.NotFoundException;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.AudioManager;
-import android.media.MediaMetadataRetriever;
-import android.media.RemoteControlClient;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v7.app.MediaRouteDialogFactory;
 import android.support.v7.media.MediaRouter.RouteInfo;
 import android.text.TextUtils;
-import android.view.View;
 
 import com.andrew.apollo.R;
 import com.google.android.gms.cast.ApplicationMetadata;
@@ -45,7 +31,6 @@ import com.google.android.gms.cast.Cast.MessageReceivedCallback;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.RemoteMediaPlayer;
 import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
@@ -53,7 +38,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.common.images.WebImage;
+
 import org.opensilk.cast.callbacks.IVideoCastConsumer;
 import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
 import org.opensilk.cast.exceptions.CastException;
@@ -66,14 +51,12 @@ import org.json.JSONObject;
 import org.opensilk.cast.util.Utils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
- * A concrete subclass of {@link BaseCastManager} that is suitable for casting video contents (it
+ * A concrete subclass of {@link org.opensilk.cast.BaseCastManager} that is suitable for casting video contents (it
  * also provides a single custom data channel/namespace if an out-of-bound communication is needed).
  * <p>
  * This is a singleton that needs to be "initialized" (by calling <code>initialize()</code>) prior
@@ -102,7 +85,7 @@ import java.util.Set;
  * learn more about this library, please read the documentation that is distributed as part of this
  * library.
  */
-public class VideoCastManager extends BaseCastManager
+public class CastManager extends BaseCastManager
         implements OnFailedListener {
 
     /**
@@ -114,8 +97,8 @@ public class VideoCastManager extends BaseCastManager
         DEVICE;
     }
 
-    private static final String TAG = LogUtils.makeLogTag(VideoCastManager.class);
-    private static VideoCastManager sInstance;
+    private static final String TAG = LogUtils.makeLogTag(CastManager.class);
+    private static CastManager sInstance;
     private RemoteMediaPlayer mRemoteMediaPlayer;
     private VolumeType mVolumeType = VolumeType.DEVICE;
     private int mState = MediaStatus.PLAYER_STATE_IDLE;
@@ -141,7 +124,7 @@ public class VideoCastManager extends BaseCastManager
      *            be created.
      * @return
      */
-    public static synchronized VideoCastManager initialize(Context context,
+    public static synchronized CastManager initialize(Context context,
             String applicationId, Class<?> targetActivity, String dataNamespace) {
         if (null == sInstance) {
             LOGD(TAG, "New instance of VideoCastManager is created");
@@ -150,7 +133,7 @@ public class VideoCastManager extends BaseCastManager
                 String msg = "Couldn't find the appropriate version of Goolge Play Services";
                 LOGE(TAG, msg);
             }
-            sInstance = new VideoCastManager(context, applicationId, targetActivity, dataNamespace);
+            sInstance = new CastManager(context, applicationId, targetActivity, dataNamespace);
             mCastManager = sInstance;
         }
         return sInstance;
@@ -164,7 +147,7 @@ public class VideoCastManager extends BaseCastManager
      * @return
      * @throws CastException
      */
-    public static VideoCastManager getInstance() throws CastException {
+    public static CastManager getInstance() throws CastException {
         if (null == sInstance) {
             LOGE(TAG, "No VideoCastManager instance was built, you need to build one first");
             throw new CastException();
@@ -185,7 +168,7 @@ public class VideoCastManager extends BaseCastManager
      * @return
      * @throws CastException
      */
-    public static VideoCastManager getInstance(Context context) throws CastException {
+    public static CastManager getInstance(Context context) throws CastException {
         if (null == sInstance) {
             LOGE(TAG, "No VideoCastManager instance was built, you need to build one first");
             throw new CastException();
@@ -195,8 +178,8 @@ public class VideoCastManager extends BaseCastManager
         return sInstance;
     }
 
-    private VideoCastManager(Context context, String applicationId, Class<?> targetActivity,
-            String dataNamespace) {
+    private CastManager(Context context, String applicationId, Class<?> targetActivity,
+                        String dataNamespace) {
         super(context, applicationId);
         LOGD(TAG, "VideoCastManager is instantiated");
         mVideoConsumers = new HashSet<IVideoCastConsumer>();
@@ -509,7 +492,7 @@ public class VideoCastManager extends BaseCastManager
         if (null != mMediaRouter) {
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
         }
-        onDeviceSelected(null);
+        setDevice(null);
     }
 
     private void onApplicationStatusChanged() {
@@ -644,7 +627,7 @@ public class VideoCastManager extends BaseCastManager
                 // found out that the app is not running so we need
                 // to disconnect
                 mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                onDeviceSelected(null);
+                setDevice(null);
             }
             return;
         } else {
@@ -672,7 +655,7 @@ public class VideoCastManager extends BaseCastManager
                 }
             }
 
-            onDeviceSelected(null);
+            setDevice(null);
             if (null != mMediaRouter) {
                 mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
             }
@@ -924,7 +907,7 @@ public class VideoCastManager extends BaseCastManager
                         @Override
                         public void onStatusUpdated() {
                             LOGD(TAG, "RemoteMediaPlayer::onStatusUpdated() is reached");
-                            VideoCastManager.this.onRemoteMediaPlayerStatusUpdated();
+                            CastManager.this.onRemoteMediaPlayerStatusUpdated();
                         }
                     });
 
@@ -933,7 +916,7 @@ public class VideoCastManager extends BaseCastManager
                         @Override
                         public void onMetadataUpdated() {
                             LOGD(TAG, "RemoteMediaPlayer::onMetadataUpdated() is reached");
-                            VideoCastManager.this.onRemoteMediaPlayerMetadataUpdated();
+                            CastManager.this.onRemoteMediaPlayerMetadataUpdated();
                         }
                     }
                     );
@@ -1080,7 +1063,7 @@ public class VideoCastManager extends BaseCastManager
                     @Override
                     public void onResult(Status result) {
                         if (!result.isSuccess()) {
-                            VideoCastManager.this.onMessageSendFailed(result.getStatusCode());
+                            CastManager.this.onMessageSendFailed(result.getStatusCode());
                         }
                     }
                 });
@@ -1256,7 +1239,7 @@ public class VideoCastManager extends BaseCastManager
          */
         @Override
         public void onApplicationDisconnected(int statusCode) {
-            VideoCastManager.this.onApplicationDisconnected(statusCode);
+            CastManager.this.onApplicationDisconnected(statusCode);
         }
 
         /*
@@ -1265,12 +1248,12 @@ public class VideoCastManager extends BaseCastManager
          */
         @Override
         public void onApplicationStatusChanged() {
-            VideoCastManager.this.onApplicationStatusChanged();
+            CastManager.this.onApplicationStatusChanged();
         }
 
         @Override
         public void onVolumeChanged() {
-            VideoCastManager.this.onVolumeChanged();
+            CastManager.this.onVolumeChanged();
         }
     }
 

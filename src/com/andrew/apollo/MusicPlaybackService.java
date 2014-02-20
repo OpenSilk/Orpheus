@@ -68,7 +68,8 @@ import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.common.ConnectionResult;
-import org.opensilk.cast.manager.VideoCastManager;
+
+import org.opensilk.cast.CastManager;
 import org.opensilk.cast.callbacks.IVideoCastConsumer;
 import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
 import org.opensilk.cast.exceptions.CastException;
@@ -498,7 +499,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Cast manager
      */
-    private VideoCastManager mCastManager;
+    private CastManager mCastManager;
 
     /**
      * Http server for service cast devices

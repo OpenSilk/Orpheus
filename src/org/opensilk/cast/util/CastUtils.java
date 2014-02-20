@@ -27,7 +27,8 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
-import org.opensilk.cast.manager.VideoCastManager;
+
+import org.opensilk.cast.CastManager;
 
 import org.opensilk.music.cast.CastWebServer;
 
@@ -43,13 +44,13 @@ public class CastUtils {
         //static
     }
 
-    public static VideoCastManager sCastMgr = null;
+    public static CastManager sCastMgr = null;
 
-    public static VideoCastManager getCastManager(Context context) {
+    public static CastManager getCastManager(Context context) {
         if (null == sCastMgr) {
-            sCastMgr = VideoCastManager.initialize(context, Config.CAST_APPLICATION_ID, null, null);
+            sCastMgr = CastManager.initialize(context, Config.CAST_APPLICATION_ID, null, null);
             if (BuildConfig.DEBUG) {
-                sCastMgr.enableFeatures(VideoCastManager.FEATURE_DEBUGGING);
+                sCastMgr.enableFeatures(CastManager.FEATURE_DEBUGGING);
             }
             // We are streaming /from/ the device so it needs to exit
             sCastMgr.setStopOnDisconnect(true);

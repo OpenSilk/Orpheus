@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-package org.opensilk.cast.manager;
+package org.opensilk.cast;
 
 import static org.opensilk.cast.util.LogUtils.LOGD;
 import static org.opensilk.cast.util.LogUtils.LOGE;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.media.RemoteControlClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.MediaRouteActionProvider;
-import android.support.v7.app.MediaRouteDialogFactory;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
@@ -66,14 +59,16 @@ import java.util.Set;
  * An abstract class that manages connectivity to a cast device. Subclasses are expected to extend
  * the functionality of this class based on their purpose.
  */
-public abstract class BaseCastManager implements DeviceSelectionListener, ConnectionCallbacks,
-        OnConnectionFailedListener, OnFailedListener {
+public abstract class BaseCastManager implements
+        ConnectionCallbacks,
+        OnConnectionFailedListener,
+        OnFailedListener {
 
     /**
      * Enumerates various stages during a session recovery
      */
     public static enum ReconnectionStatus {
-        STARTED, IN_PROGRESS, FINALIZE, INACTIVE;
+        STARTED, IN_PROGRESS, FINALIZE, INACTIVE
     }
 
     public static final int FEATURE_DEBUGGING = 1;
@@ -170,7 +165,7 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
         mMediaRouteSelector = new MediaRouteSelector.Builder().addControlCategory(
                 CastMediaControlIntent.categoryForCast(mApplicationId)).build();
 
-        mMediaRouterCallback = new CastMediaRouterCallback(this, context);
+        mMediaRouterCallback = new CastMediaRouterCallback();
         mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
                 MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
     }
@@ -206,8 +201,7 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
         mContext = context;
     }
 
-    @Override
-    public void onDeviceSelected(CastDevice device) {
+    public void setDevice(CastDevice device) {
         setDevice(device, mDestroyOnDisconnect);
     }
 
@@ -261,7 +255,6 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
         }
     }
 
-    @Override
     public void onCastDeviceDetected(RouteInfo info) {
         if (null != mBaseCastConsumers) {
             for (IBaseCastConsumer consumer : mBaseCastConsumers) {
@@ -570,7 +563,7 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
 
         if (null != device) {
             LOGD(TAG, "trying to acquire Cast Client for " + device);
-            onDeviceSelected(device);
+            setDevice(device);
         }
     }
 
@@ -667,7 +660,7 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
                     if (null != result) {
                         if (result == FAILED) {
                             mReconnectionStatus = ReconnectionStatus.INACTIVE;
-                            onDeviceSelected(null);
+                            setDevice(null);
                         }
                     }
                 }
@@ -950,6 +943,63 @@ public abstract class BaseCastManager implements DeviceSelectionListener, Connec
                 consumer.onFailed(resourceId, statusCode);
             } catch (Exception e) {
                 LOGE(TAG, "onFailed(): Failed to inform " + consumer, e);
+            }
+        }
+
+    }
+
+    /**
+     * Provides a handy implementation of {@link MediaRouter.Callback}. When a {@link RouteInfo} is
+     * selected by user from the list of available routes, this class will call the
+     * {@link DeviceSelectionListener#setDevice(CastDevice))} of the listener that was passed to it in
+     * the constructor. In addition, as soon as a non-default route is discovered, the
+     * {@link DeviceSelectionListener#onCastDeviceDetected(CastDevice))} is called.
+     * <p>
+     * There is also logic in this class to help with the process of previous session recovery.
+     */
+    private class CastMediaRouterCallback extends MediaRouter.Callback {
+        private final String TAG = LogUtils.makeLogTag(CastMediaRouterCallback.class);
+
+        public CastMediaRouterCallback() {
+        }
+
+        @Override
+        public void onRouteSelected(MediaRouter router, RouteInfo info) {
+            LOGD(TAG, "onRouteSelected: info=" + info);
+            if (getReconnectionStatus() == ReconnectionStatus.FINALIZE) {
+                setReconnectionStatus(ReconnectionStatus.INACTIVE);
+                cancelReconnectionTask();
+                return;
+            }
+            Utils.saveStringToPreference(mContext, PREFS_KEY_ROUTE_ID, info.getId());
+            CastDevice device = CastDevice.getFromBundle(info.getExtras());
+            setDevice(device);
+            LOGD(TAG, "onResult: mSelectedDevice=" + device.getFriendlyName());
+        }
+
+        @Override
+        public void onRouteUnselected(MediaRouter router, RouteInfo route) {
+            LOGD(TAG, "onRouteUnselected: route=" + route);
+            setDevice(null);
+        }
+
+        @Override
+        public void onRouteAdded(MediaRouter router, RouteInfo route) {
+            super.onRouteAdded(router, route);
+            if (!router.getDefaultRoute().equals(route)) {
+                onCastDeviceDetected(route);
+            }
+            if (getReconnectionStatus() == ReconnectionStatus.STARTED) {
+                String routeId = Utils.getStringFromPreference(mContext, PREFS_KEY_ROUTE_ID);
+                if (route.getId().equals(routeId)) {
+                    // we found the route, so lets go with that
+                    LOGD(TAG, "onRouteAdded: Attempting to recover a session with info=" + route);
+                    setReconnectionStatus(ReconnectionStatus.IN_PROGRESS);
+
+                    CastDevice device = CastDevice.getFromBundle(route.getExtras());
+                    LOGD(TAG, "onRouteAdded: Attempting to recover a session with device: " + device.getFriendlyName());
+                    setDevice(device);
+                }
             }
         }
 
