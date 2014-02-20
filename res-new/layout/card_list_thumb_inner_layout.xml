@@ -48,12 +48,4 @@
         android:layout_alignBottom="@id/card_main_inner_sub_title"
         style="@style/Orpheus.Text.Card.Extra"/>
 
-    <org.opensilk.music.widgets.NowPlayingAnimation
-        android:id="@+id/play_animation"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/card_main_inner_extra_text"
-        android:layout_alignRight="@id/card_main_inner_extra_text"/>
-
 </RelativeLayout>

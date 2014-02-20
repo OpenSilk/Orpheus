@@ -22,8 +22,6 @@ import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.widgets.NowPlayingAnimation;
-
 import it.gmariotti.cardslib.library.internal.CardHeader;
 
 /**
@@ -33,7 +31,6 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
 
     protected String mSubTitle;
     protected String mExtraText;
-    protected NowPlayingAnimation mAnimation;
 
     public CardBaseList(Context context, D data) {
         super(context, data);
@@ -63,7 +60,6 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
                 v2.setVisibility(View.GONE);
             }
         }
-        mAnimation = (NowPlayingAnimation) view.findViewById(R.id.play_animation);
     }
 
     @Override
@@ -80,22 +76,11 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
     protected abstract int getHeaderMenuId();
 
     /**
-     * Decide whether we contain the currently playing song
-     * @param trackId id of current track
-     * @return true if we are the current track
-     */
-    public abstract boolean shouldStartAnimating(long trackId);
-
-    /**
      * @return Listener for popup menu actions
      */
     protected abstract CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener();
 
-    public void setSubTitle(String title) {
+    public void setSecondTitle(String title) {
         mSubTitle = title;
-    }
-
-    public NowPlayingAnimation getAnimation() {
-        return mAnimation;
     }
 }
