@@ -64,13 +64,6 @@ public abstract class BaseCastManager implements
         OnConnectionFailedListener,
         OnFailedListener {
 
-    /**
-     * Enumerates various stages during a session recovery
-     */
-    public static enum ReconnectionStatus {
-        STARTED, IN_PROGRESS, FINALIZE, INACTIVE
-    }
-
     public static final int FEATURE_DEBUGGING = 1;
     public static final String PREFS_KEY_SESSION_ID = "session-id";
     public static final String PREFS_KEY_APPLICATION_ID = "application-id";
@@ -92,7 +85,7 @@ public abstract class BaseCastManager implements
     private boolean mDestroyOnDisconnect = false;
     protected String mApplicationId;
     protected Handler mHandler;
-    protected ReconnectionStatus mReconnectionStatus = ReconnectionStatus.INACTIVE;
+    protected int mReconnectionStatus = ReconnectionStatus.INACTIVE;
     protected int mVisibilityCounter;
     protected boolean mUiVisible;
     protected GoogleApiClient mApiClient;
@@ -516,7 +509,7 @@ public abstract class BaseCastManager implements
      *
      * @return
      */
-    public ReconnectionStatus getReconnectionStatus() {
+    public int getReconnectionStatus() {
         return mReconnectionStatus;
     }
 
@@ -525,8 +518,12 @@ public abstract class BaseCastManager implements
      *
      * @param status
      */
-    public final void setReconnectionStatus(ReconnectionStatus status) {
+    public final void setReconnectionStatus(int status) {
         mReconnectionStatus = status;
+        // Do this ourselfs since the activity cant reach it
+        if (mReconnectionStatus == ReconnectionStatus.INACTIVE) {
+            cancelReconnectionTask();
+        }
     }
 
     /**
@@ -968,7 +965,7 @@ public abstract class BaseCastManager implements
             LOGD(TAG, "onRouteSelected: info=" + info);
             if (getReconnectionStatus() == ReconnectionStatus.FINALIZE) {
                 setReconnectionStatus(ReconnectionStatus.INACTIVE);
-                cancelReconnectionTask();
+//                cancelReconnectionTask();
                 return;
             }
             Utils.saveStringToPreference(mContext, PREFS_KEY_ROUTE_ID, info.getId());

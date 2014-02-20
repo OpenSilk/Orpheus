@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.cast.util;
+package org.opensilk.music.cast;
 
 import android.content.Context;
 import android.database.Cursor;

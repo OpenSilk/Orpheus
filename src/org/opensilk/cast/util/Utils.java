@@ -103,7 +103,7 @@ public class Utils {
      * @param value
      */
     public static void saveStringToPreference(Context context, String key, String value) {
-        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, 0);
+        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, Context.MODE_MULTI_PROCESS);
         if (null == value) {
             // we want to remove
             pref.edit().remove(key).apply();
@@ -121,7 +121,7 @@ public class Utils {
      * @param value
      */
     public static void saveFloatToPreference(Context context, String key, float value) {
-        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, 0);
+        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, Context.MODE_MULTI_PROCESS);
         if (Float.MIN_VALUE == value) {
             // we want to remove
             pref.edit().remove(key).apply();
@@ -140,7 +140,7 @@ public class Utils {
      * @return
      */
     public static String getStringFromPreference(Context context, String key) {
-        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, 0);
+        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, Context.MODE_MULTI_PROCESS);
         return pref.getString(key, null);
     }
 
@@ -153,7 +153,7 @@ public class Utils {
      * @return
      */
     public static float getFloatFromPreference(Context context, String key) {
-        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, 0);
+        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, Context.MODE_MULTI_PROCESS);
         return pref.getFloat(key, Float.MIN_VALUE);
     }
 
@@ -168,7 +168,7 @@ public class Utils {
      */
     public static boolean getBooleanFromPreference(Context context, String key,
             boolean defaultValue) {
-        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, 0);
+        SharedPreferences pref = context.getSharedPreferences(PREF_FILE, Context.MODE_MULTI_PROCESS);
         return pref.getBoolean(key, defaultValue);
     }
 

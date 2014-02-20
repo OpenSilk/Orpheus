@@ -887,7 +887,22 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     };
 
     private final MediaRouter.Callback mMediaRouterCallback = new MediaRouter.Callback() {
-        //For now we dont need anything here
+
+        @DebugLog
+        @Override
+        public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
+            if (!MusicUtils.notifyRouteSelected(BaseSlidingActivity.this, route)) {
+                // If we couldnt notify the service we need to reset the router so
+                // the user can try again
+                router.selectRoute(router.getDefaultRoute());
+            }
+        }
+
+        @DebugLog
+        @Override
+        public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
+            MusicUtils.notifyRouteUnselected();
+        }
     };
 
     /**

@@ -38,6 +38,7 @@ import android.media.MediaPlayer;
 import android.media.RemoteControlClient;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -65,12 +66,14 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.google.android.gms.cast.ApplicationMetadata;
+import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.common.ConnectionResult;
 
 import org.opensilk.cast.CastManager;
 import org.opensilk.cast.CastManagerFactory;
+import org.opensilk.cast.CastRouteListener;
 import org.opensilk.cast.ICastManager;
 import org.opensilk.cast.callbacks.IVideoCastConsumer;
 import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
@@ -78,7 +81,7 @@ import org.opensilk.cast.exceptions.CastException;
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 
-import org.opensilk.cast.util.CastUtils;
+import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 
 import java.io.IOException;
@@ -2729,6 +2732,9 @@ public class MusicPlaybackService extends Service {
         }
     };
 
+    /**
+     * Front end for activity to communicate with the cast mananger
+     */
     private static class CastManagerInterface extends ICastManager.Stub {
         private final WeakReference<CastManager> mCastManager;
 
@@ -2744,6 +2750,33 @@ public class MusicPlaybackService extends Service {
             } catch (Exception ignored) {
             }
         }
+
+        @Override
+        public int getReconnectionStatus() throws RemoteException {
+            return mCastManager.get().getReconnectionStatus();
+        }
+
+        @Override
+        public void setReconnectionStatus(int status) throws RemoteException {
+            mCastManager.get().setReconnectionStatus(status);
+        }
+
+        @Override
+        public CastRouteListener getRouteListener() throws RemoteException {
+            return mListener;
+        }
+
+        private final CastRouteListener mListener = new CastRouteListener.Stub() {
+            @Override
+            public void onRouteSelected(Bundle castDevice) throws RemoteException {
+                mCastManager.get().selectDevice(CastDevice.getFromBundle(castDevice));
+            }
+
+            @Override
+            public void onRouteUnselected() throws RemoteException {
+                mCastManager.get().selectDevice(null);
+            }
+        };
     }
 
     /**

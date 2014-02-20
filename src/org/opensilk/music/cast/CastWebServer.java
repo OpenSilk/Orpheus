@@ -26,8 +26,6 @@ import android.util.Log;
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.cache.ImageFetcher;
 
-import org.opensilk.cast.util.CastUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
