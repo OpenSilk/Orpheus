@@ -65,6 +65,11 @@ public final class Config {
     public static final String MIME_TYPE = "mime_type";
 
     /**
+     * Parcelable data sent to fragments
+     */
+    public static final String EXTRA_DATA = "extra_data";
+
+    /**
      * Play from search intent
      */
     public static final String PLAY_FROM_SEARCH = "android.media.action.MEDIA_PLAY_FROM_SEARCH";

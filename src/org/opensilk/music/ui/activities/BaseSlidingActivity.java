@@ -60,6 +60,7 @@ import com.andrew.apollo.loaders.NowPlayingCursor;
 import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
@@ -895,14 +896,13 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @Override
         public void onClick(final View v) {
             if (MusicUtils.getCurrentAudioId() != -1) {
-                NavUtils.openAlbumProfile(BaseSlidingActivity.this, MusicUtils.getAlbumName(),
-                        MusicUtils.getArtistName(), MusicUtils.getCurrentAlbumId());
+                Album album = MusicUtils.getCurrentAlbum(BaseSlidingActivity.this);
+                if (album != null) {
+                    NavUtils.openAlbumProfile(BaseSlidingActivity.this, album);
+                }
             } else {
                 MusicUtils.shuffleAll(BaseSlidingActivity.this);
             }
-//            if (BaseActivity.this instanceof ProfileActivity) {
-//                finish();
-//            }
         }
     };
 

@@ -61,7 +61,7 @@
     </style>
 
     <style name="Theme.Orpheus.Panel.Profile">
-        <item name="android:actionBarStyle">@style/ActionBar.Transparent.Orpheus</item>
+        <!--<item name="android:actionBarStyle">@style/ActionBar.Transparent.Orpheus</item>-->
     </style>
     <!--end OpenSilk-->
 

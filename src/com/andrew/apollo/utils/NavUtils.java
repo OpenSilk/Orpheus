@@ -22,6 +22,7 @@ import android.provider.MediaStore;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.model.Album;
 import com.andrew.apollo.ui.activities.AudioPlayerActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 
@@ -67,6 +68,7 @@ public final class NavUtils {
      * @param artistName The name of the album artist
      * @param albumId The id of the album
      */
+    @Deprecated
     public static void openAlbumProfile(final Context context,
             final String albumName, final String artistName, final long albumId) {
 
@@ -81,6 +83,21 @@ public final class NavUtils {
         // Create the intent to launch the profile activity
         final Intent intent = new Intent(context, ProfileSlidingActivity.class);
         intent.putExtras(bundle);
+        context.startActivity(intent);
+    }
+
+    /**
+     * Opens Album profile activity
+     * @param context
+     * @param album
+     */
+    public static void openAlbumProfile(final Context context, final Album album) {
+        final Bundle b = new Bundle();
+        b.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
+        b.putParcelable(Config.EXTRA_DATA, album);
+        // Create the intent to launch the profile activity
+        final Intent intent = new Intent(context, ProfileSlidingActivity.class);
+        intent.putExtras(b);
         context.startActivity(intent);
     }
 

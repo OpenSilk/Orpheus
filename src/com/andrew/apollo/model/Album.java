@@ -11,6 +11,8 @@
 
 package com.andrew.apollo.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 /**
@@ -18,7 +20,7 @@ import android.text.TextUtils;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class Album {
+public class Album implements Parcelable {
 
     /**
      * The unique Id of the album
@@ -90,7 +92,7 @@ public class Album {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Album)) {
             return false;
         }
         final Album other = (Album)obj;
@@ -120,4 +122,41 @@ public class Album {
         return mAlbumName;
     }
 
+    /*
+     * Implement Parcelable Interface
+     */
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mAlbumId);
+        dest.writeString(mAlbumName);
+        dest.writeString(mArtistName);
+        dest.writeInt(mSongNumber);
+        dest.writeString(mYear);
+    }
+
+    private Album(Parcel in) {
+        mAlbumId = in.readLong();
+        mAlbumName = in.readString();
+        mArtistName = in.readString();
+        mSongNumber = in.readInt();
+        mYear = in.readString();
+    }
+
+    public static final Creator<Album> CREATOR = new Creator<Album>() {
+        @Override
+        public Album createFromParcel(Parcel source) {
+            return new Album(source);
+        }
+
+        @Override
+        public Album[] newArray(int size) {
+            return new Album[size];
+        }
+    };
 }

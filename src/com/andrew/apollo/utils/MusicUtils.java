@@ -48,6 +48,7 @@ import com.andrew.apollo.loaders.LastAddedLoader;
 import com.andrew.apollo.loaders.PlaylistLoader;
 import com.andrew.apollo.loaders.SongLoader;
 import com.andrew.apollo.menu.FragmentMenuItems;
+import com.andrew.apollo.model.Album;
 import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
@@ -433,6 +434,51 @@ public final class MusicUtils {
             }
         }
         return AudioEffect.ERROR_BAD_VALUE;
+    }
+
+    /**
+     * @param context
+     * @return the currently playing album
+     */
+    public static Album getCurrentAlbum(final Context context) {
+        long albumId = getCurrentAlbumId();
+        return getAlbum(context, albumId);
+    }
+
+    /**
+     * @param context The {@link Context} to use.
+     * @param id The ID of the album.
+     * @return new album.
+     */
+    public static Album getAlbum(final Context context, long albumId) {
+        Album album = null;
+        final String selection = BaseColumns._ID + "=" + albumId;
+        Cursor c = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                new String[] {
+                        /* 0 */
+                        BaseColumns._ID,
+                        /* 1 */
+                        AlbumColumns.ALBUM,
+                        /* 2 */
+                        AlbumColumns.ARTIST,
+                        /* 3 */
+                        AlbumColumns.NUMBER_OF_SONGS,
+                        /* 4 */
+                        AlbumColumns.FIRST_YEAR
+                }, selection, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+        if (c != null && c.moveToFirst()) {
+            album = new Album(
+                    c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)),
+                    c.getString(c.getColumnIndexOrThrow(AlbumColumns.ALBUM)),
+                    c.getString(c.getColumnIndexOrThrow(AlbumColumns.ARTIST)),
+                    c.getInt(c.getColumnIndexOrThrow(AlbumColumns.NUMBER_OF_SONGS)),
+                    c.getString(c.getColumnIndexOrThrow(AlbumColumns.FIRST_YEAR))
+            );
+        }
+        if (c != null) {
+            c.close();
+        }
+        return album;
     }
 
     /**

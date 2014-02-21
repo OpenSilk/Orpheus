@@ -54,7 +54,7 @@ public class CardAlbumList extends CardBaseList<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openAlbumProfile(getContext(), mData.mAlbumName, mData.mArtistName, mData.mAlbumId);
+                NavUtils.openAlbumProfile(getContext(), mData);
             }
         });
     }

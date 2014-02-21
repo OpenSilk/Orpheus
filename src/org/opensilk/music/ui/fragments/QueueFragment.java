@@ -79,7 +79,7 @@ public class QueueFragment extends Fragment implements
         // The View for the fragment's UI
         final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.dragsort_listview, null);
         // Initialize the list
-        mListView = (DragSortListView)rootView.findViewById(R.id.card_list);
+        mListView = (DragSortListView)rootView.findViewById(android.R.id.list);
         // Release any references to the recycled Views
         mListView.setRecyclerListener(new RecycleHolder());
         // Set the drop listener

@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/card_menu_play"
-        android:title="@string/menu_play_all"/>
+        android:title="@string/accessibility_play"/>
     <item
         android:id="@+id/card_menu_play_next"
         android:title="@string/context_menu_play_next"/>

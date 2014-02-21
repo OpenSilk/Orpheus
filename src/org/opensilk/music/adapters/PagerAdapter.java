@@ -20,13 +20,14 @@ import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.Lists;
+
 import org.opensilk.music.ui.fragments.AlbumFragment;
 import org.opensilk.music.ui.fragments.ArtistFragment;
 import org.opensilk.music.ui.fragments.GenreFragment;
 import org.opensilk.music.ui.fragments.PlaylistFragment;
 import org.opensilk.music.ui.fragments.RecentFragment;
 import org.opensilk.music.ui.fragments.SongFragment;
-import com.andrew.apollo.utils.Lists;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

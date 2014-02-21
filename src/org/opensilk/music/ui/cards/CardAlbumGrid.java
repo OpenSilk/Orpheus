@@ -52,7 +52,7 @@ public class CardAlbumGrid extends CardBaseThumb<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openAlbumProfile(getContext(), mData.mAlbumName, mData.mArtistName, mData.mAlbumId);
+                NavUtils.openAlbumProfile(getContext(), mData);
             }
         });
     }
