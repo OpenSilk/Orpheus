@@ -25,7 +25,8 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.ui.activities.AudioPlayerActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 
-import com.andrew.apollo.ui.activities.ProfileActivity;
+import org.opensilk.music.ui.profile.ProfileSlidingActivity;
+
 import com.andrew.apollo.ui.activities.SearchActivity;
 import com.andrew.apollo.ui.activities.SettingsActivity;
 import com.devspark.appmsg.AppMsg;
@@ -53,7 +54,7 @@ public final class NavUtils {
         bundle.putString(Config.ARTIST_NAME, artistName);
 
         // Create the intent to launch the profile activity
-        final Intent intent = new Intent(context, ProfileActivity.class);
+        final Intent intent = new Intent(context, ProfileSlidingActivity.class);
         intent.putExtras(bundle);
         context.startActivity(intent);
     }
@@ -78,7 +79,7 @@ public final class NavUtils {
         bundle.putString(Config.NAME, albumName);
 
         // Create the intent to launch the profile activity
-        final Intent intent = new Intent(context, ProfileActivity.class);
+        final Intent intent = new Intent(context, ProfileSlidingActivity.class);
         intent.putExtras(bundle);
         context.startActivity(intent);
     }

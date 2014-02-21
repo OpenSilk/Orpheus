@@ -39,11 +39,7 @@
         <item name="android:fastScrollThumbDrawable">@drawable/orpheus_fastscroll_thumb_holo</item>
 
         <!--OpenSilk-->
-        <!-- default all gridviews to the card style -->
-        <item name="android:gridViewStyle">@style/GridView.Orpheus.Card</item>
-        <!-- default all listviews to the card style -->
-        <item name="android:listViewStyle">@style/ListView.Orpheus.Card</item>
-        <item name="android:listViewWhiteStyle">@style/ListView.Orpheus.Card</item>
+
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
 
@@ -54,6 +50,18 @@
     <style name="Theme.Orpheus.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="Theme.Orpheus.Panel.Home">
+        <!-- default all gridviews to the card style -->
+        <item name="android:gridViewStyle">@style/GridView.Orpheus.Card</item>
+        <!-- default all listviews to the card style -->
+        <item name="android:listViewStyle">@style/ListView.Orpheus.Card</item>
+        <item name="android:listViewWhiteStyle">@style/ListView.Orpheus.Card</item>
+    </style>
+
+    <style name="Theme.Orpheus.Panel.Profile">
+        <item name="android:actionBarStyle">@style/ActionBar.Transparent.Orpheus</item>
     </style>
     <!--end OpenSilk-->
 

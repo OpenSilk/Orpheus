@@ -68,8 +68,8 @@
         <!-- Main activity -->
         <activity
             android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
-            android:theme="@style/Theme.Orpheus.Panel"
-            android:launchMode="singleTask"
+            android:theme="@style/Theme.Orpheus.Panel.Home"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -135,8 +135,9 @@
 
         <!-- Profile phone Activity -->
         <activity
-            android:name=".ui.activities.ProfileActivity"
-            android:excludeFromRecents="true" />
+            android:name="org.opensilk.music.ui.profile.ProfileSlidingActivity"
+            android:theme="@style/Theme.Orpheus.Panel.Profile"
+            android:exported="false"/>
         <!-- Shortcut launcher Activity -->
         <activity
             android:name=".ui.activities.ShortcutActivity"

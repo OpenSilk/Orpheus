@@ -177,7 +177,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
 
         // Set the layout
-        setContentView(getContentView());
+        setContentView(R.layout.activity_base_sliding);
 
         // Setup action bar
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -1122,8 +1122,4 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     }
 
-    /**
-     * @return The resource ID to be inflated.
-     */
-    public abstract int getContentView();
 }

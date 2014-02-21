@@ -39,12 +39,4 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
                     .replace(R.id.main, new HomePhoneFragment()).commit();
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getContentView() {
-        return R.layout.activity_base_sliding;
-    }
 }
