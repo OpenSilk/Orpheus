@@ -2046,7 +2046,18 @@ public class MusicPlaybackService extends Service {
 
     private long positionRemote() {
         try {
-            return (long) mCastManager.getCurrentMediaPosition();
+            long position = (long) mCastManager.getCurrentMediaPosition();
+            // We seek the local player so we dont have to keep
+            // a separate record of remote seek position
+            if (mPlayer.isInitialized()) {
+                if (position < 0) {
+                    position = 0;
+                } else if (position > mPlayer.duration()) {
+                    position = mPlayer.duration();
+                }
+                long result = mPlayer.seek(position);
+            }
+            return position;
         } catch (TransientNetworkDisconnectionException e) {
             e.printStackTrace();
         } catch (NoConnectionException e) {
@@ -2669,14 +2680,13 @@ public class MusicPlaybackService extends Service {
 
     /**
      * Initiates remote playback for next track
-     * This pretends to be a handoff between the currentMediaPlayer
-     * and the nextMediaPlayer @see MultiPlayer.OnComplete()
      */
     @DebugLog
     private void loadRemoteNext() {
         if (mNextMediaInfo != null) {
             if (loadRemote(mNextMediaInfo, true, 0)) {
-                mPlayer.mHandler.sendEmptyMessage(TRACK_WENT_TO_NEXT);
+                // Force the local player onto the next track
+                mPlayer.onCompletion(mPlayer.mCurrentMediaPlayer);
             } else {
                 Log.e(TAG, "Failed to load remote media");
             }
