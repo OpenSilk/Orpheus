@@ -72,6 +72,7 @@ import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.common.ConnectionResult;
 
 import org.opensilk.cast.CastManager;
+import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.cast.CastManagerFactory;
 import org.opensilk.cast.CastRouteListener;
 import org.opensilk.cast.ICastManager;
@@ -2766,6 +2767,16 @@ public class MusicPlaybackService extends Service {
             return mListener;
         }
 
+        @Override
+        public void registerListener(CastManagerCallback cb) throws RemoteException {
+            mCastManager.get().registerListener(cb);
+        }
+
+        @Override
+        public void unregisterListener(CastManagerCallback cb) throws RemoteException {
+            mCastManager.get().unregisterListener(cb);
+        }
+
         private final CastRouteListener mListener = new CastRouteListener.Stub() {
             @Override
             public void onRouteSelected(Bundle castDevice) throws RemoteException {
@@ -2905,7 +2916,9 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onDisconnected() {
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
             stopCastServer();
+            pause(); //What to do?? this might not be best
         }
 
         @Override

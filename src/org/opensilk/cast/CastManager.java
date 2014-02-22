@@ -20,6 +20,8 @@ import static org.opensilk.cast.util.LogUtils.LOGD;
 import static org.opensilk.cast.util.LogUtils.LOGE;
 
 import android.content.Context;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.support.v7.media.MediaRouter.RouteInfo;
 import android.text.TextUtils;
 
@@ -489,6 +491,15 @@ public class CastManager extends BaseCastManager
                 LOGE(TAG, "onApplicationDisconnected(): Failed to inform " + consumer, e);
             }
         }
+        int ii = mListeners.beginBroadcast();
+        while (ii-->0) {
+            try {
+                mListeners.getBroadcastItem(ii).onApplicationDisconnected(errorCode);
+            } catch (RemoteException e) {
+                LOGE(TAG, "onApplicationDisconnected(): ", e);
+            }
+        }
+        mListeners.finishBroadcast();
         if (null != mMediaRouter) {
             mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
         }
@@ -631,30 +642,22 @@ public class CastManager extends BaseCastManager
             }
             return;
         } else {
-            boolean showError = false;
             for (IVideoCastConsumer consumer : mVideoConsumers) {
                 try {
-                    showError = showError || consumer.onApplicationConnectionFailed(errorCode);
+                    consumer.onApplicationConnectionFailed(errorCode);
                 } catch (Exception e) {
                     LOGE(TAG, "onApplicationLaunchFailed(): Failed to inform " + consumer, e);
                 }
             }
-            if (showError) {
-                switch (errorCode) {
-                    case CastStatusCodes.APPLICATION_NOT_FOUND:
-                        LOGD(TAG, "onApplicationConnectionFailed(): failed due to: " +
-                                "ERROR_APPLICATION_NOT_FOUND");
-                        break;
-                    case CastStatusCodes.TIMEOUT:
-                        LOGD(TAG, "onApplicationConnectionFailed(): failed due to: ERROR_TIMEOUT");
-                        break;
-                    default:
-                        LOGD(TAG, "onApplicationConnectionFailed(): failed due to: errorcode="
-                                + errorCode);
-                        break;
+            int ii = mListeners.beginBroadcast();
+            while (ii-->0) {
+                try {
+                    mListeners.getBroadcastItem(ii).onApplicationConnectionFailed(errorCode);
+                } catch (RemoteException e) {
+                    LOGE(TAG, "onApplicationLaunchFailed(): ", e);
                 }
             }
-
+            mListeners.finishBroadcast();
             selectDevice(null);
             if (null != mMediaRouter) {
                 mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
@@ -1193,6 +1196,7 @@ public class CastManager extends BaseCastManager
             mVideoConsumers.remove(listener);
         }
     }
+
 
     /*************************************************************/
     /***** Implementing abstract methods of BaseCastManager ******/

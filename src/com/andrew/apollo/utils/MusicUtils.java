@@ -56,6 +56,7 @@ import com.devspark.appmsg.AppMsg;
 import com.google.android.gms.cast.CastDevice;
 
 import org.opensilk.cast.BaseCastManager;
+import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.cast.ReconnectionStatus;
 import org.opensilk.cast.util.Utils;
 
@@ -169,6 +170,14 @@ public final class MusicUtils {
         public ServiceToken(final ContextWrapper context) {
             mWrappedContext = context;
         }
+    }
+
+    /**
+     * Used by activity to decide whether it can show error dialogs
+     * @return
+     */
+    public static boolean isForeground() {
+        return sForegroundActivities > 0;
     }
 
     /**
@@ -540,6 +549,36 @@ public final class MusicUtils {
                 sService.getCastManagerInterface().getRouteListener().onRouteUnselected();
             } catch (final RemoteException ignored) {
 
+            }
+        }
+    }
+
+    /**
+     * Registers callback with castmanager
+     * @param cb
+     */
+    public static void registerCastManagerCallback(CastManagerCallback cb) {
+        if (sService != null) {
+            try {
+                sService.getCastManagerInterface().registerListener(cb);
+            } catch (RemoteException ignored) {
+
+            }
+        }
+    }
+
+    /**
+     * unregisters callback with castmanager
+     * @param cb
+     */
+    public static void unRegisterCastManagerCallback(CastManagerCallback cb) {
+        if (sService != null) {
+            try {
+                sService.getCastManagerInterface().unregisterListener(cb);
+            } catch (RemoteException ignored) {
+
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
         }
     }

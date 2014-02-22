@@ -16,17 +16,11 @@
 
 package org.opensilk.cast;
 
-import org.opensilk.cast.CastRouteListener;
-import org.opensilk.cast.CastManagerCallback;
-
 /**
- * Created by drew on 2/19/14.
+ * Created by drew on 2/21/14.
  */
-interface ICastManager {
-    void changeVolume(double increment);
-    int getReconnectionStatus();
-    void setReconnectionStatus(int status);
-    CastRouteListener getRouteListener();
-    void registerListener(CastManagerCallback cb);
-    void unregisterListener(CastManagerCallback cb);
+oneway interface CastManagerCallback {
+    void onApplicationConnectionFailed(int errorCode);
+    void onApplicationDisconnected(int errorCode);
+    void onConnectionSuspended(int cause);
 }

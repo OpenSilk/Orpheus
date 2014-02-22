@@ -26,6 +26,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
@@ -84,6 +86,7 @@ public abstract class BaseCastManager implements
     protected CastDevice mSelectedCastDevice;
     protected String mDeviceName;
     private final Set<IBaseCastConsumer> mBaseCastConsumers = new HashSet<IBaseCastConsumer>();
+    protected RemoteCallbackList<CastManagerCallback> mListeners = new RemoteCallbackList<CastManagerCallback>();
     private boolean mDestroyOnDisconnect = false;
     protected String mApplicationId;
     protected Handler mHandler;
@@ -803,6 +806,15 @@ public abstract class BaseCastManager implements
                 LOGE(TAG, "onConnectionSuspended(): Failed to inform " + consumer, e);
             }
         }
+        int ii = mListeners.beginBroadcast();
+        while (ii-->0) {
+            try {
+                mListeners.getBroadcastItem(ii).onConnectionSuspended(cause);
+            } catch (RemoteException e) {
+                LOGE(TAG, "onConnectionSuspended(): ", e);
+            }
+        }
+        mListeners.finishBroadcast();
     }
 
     /*
@@ -914,6 +926,24 @@ public abstract class BaseCastManager implements
                 LOGD(TAG, "Successfully removed the existing BaseCastConsumer listener " +
                         listener);
             }
+        }
+    }
+
+
+    /*
+     * Registering cross process callbacks, these are used by activities
+     * to show user messages pertaining to state.
+     */
+
+    public synchronized void registerListener(CastManagerCallback cb) {
+        if (cb != null) {
+            mListeners.register(cb);
+        }
+    }
+
+    public synchronized void unregisterListener(CastManagerCallback cb) {
+        if (cb != null) {
+            mListeners.unregister(cb);
         }
     }
 

@@ -16,6 +16,7 @@
  */
 package org.opensilk.music.ui.activities;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
@@ -67,8 +69,10 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
 import com.google.android.gms.cast.CastMediaControlIntent;
+import com.google.android.gms.cast.CastStatusCodes;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.ArtFragment;
 import org.opensilk.music.ui.fragments.QueueFragment;
@@ -231,6 +235,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
         sService = IApolloService.Stub.asInterface(service);
+        // register for callbacks
+        MusicUtils.registerCastManagerCallback(mCastManagerCallback);
+
         startPlayback();
         // Set the playback drawables
         updatePlaybackControls();
@@ -359,6 +366,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mTimeHandler.removeMessages(REFRESH_TIME);
         // Unbind from the service
         if (mToken != null) {
+            // unregister with castmanager
+            MusicUtils.unRegisterCastManagerCallback(mCastManagerCallback);
+
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }
@@ -970,6 +980,54 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @Override
         public void onProviderChanged(MediaRouter router, MediaRouter.ProviderInfo provider) {
             super.onProviderChanged(router, provider);
+        }
+    };
+
+    private final CastManagerCallback mCastManagerCallback = new CastManagerCallback.Stub() {
+
+        @DebugLog
+        @Override
+        public void onApplicationConnectionFailed(int errorCode) throws RemoteException {
+            final String errorMsg;
+            switch (errorCode) {
+                case CastStatusCodes.APPLICATION_NOT_FOUND:
+                    errorMsg = "ERROR_APPLICATION_NOT_FOUND";
+                    break;
+                case CastStatusCodes.TIMEOUT:
+                    errorMsg = "ERROR_TIMEOUT";
+                    break;
+                default:
+                    errorMsg = "UNKNOWN: err=" + errorCode;
+                    break;
+            }
+            Log.d(TAG, "onApplicationConnectionFailed(): failed due to: " + errorMsg);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // Reset the route
+                    mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
+                    // notify if possible
+                    if (MusicUtils.isForeground()) {
+                        new AlertDialog.Builder(BaseSlidingActivity.this)
+                                .setTitle("Failed to connect to cast device")
+                                .setMessage(errorMsg)
+                                .setNeutralButton(android.R.string.ok, null)
+                                .show();
+                    }
+                }
+            });
+        }
+
+        @DebugLog
+        @Override
+        public void onApplicationDisconnected(int errorCode) throws RemoteException {
+
+        }
+
+        @DebugLog
+        @Override
+        public void onConnectionSuspended(int cause) throws RemoteException {
+
         }
     };
 
