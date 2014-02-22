@@ -17,6 +17,9 @@ package org.opensilk.music.ui.cards.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+
+import com.andrew.apollo.R;
 
 import it.gmariotti.cardslib.library.view.CardView;
 
@@ -41,7 +44,21 @@ public class DragSortCardView extends CardView {
     @Override
     protected void setupListeners() {
         // Disable this... all i know is it was fucking up the dragsortlist
-        // consequence is card isnt clickable so revisit later //TODO
         //super.setupListeners();
+    }
+
+    @Override
+    protected void setupMainView() {
+        super.setupMainView();
+        // Since our card is not clickable we will just transfer the cards
+        // onclick listener to the main content view
+        mInternalContentLayout.setBackgroundResource(R.drawable.selectable_background_orpheus);
+        mInternalContentLayout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCard.getOnClickListener()!=null)
+                    mCard.getOnClickListener().onClick(mCard,v);
+            }
+        });
     }
 }

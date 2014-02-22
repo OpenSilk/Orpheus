@@ -3,6 +3,7 @@ package org.opensilk.music.ui.cards;
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.andrew.apollo.R;
@@ -17,6 +18,7 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
+import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
@@ -37,6 +39,15 @@ public class CardQueueList extends CardBaseList<Song> {
         mTitle = mData.mSongName;
         mSubTitle = mData.mArtistName;
         mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
+        setOnClickListener(new OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                // When selecting a track from the queue, just jump there instead of
+                // reloading the queue. This is both faster, and prevents accidentally
+                // dropping out of party shuffle.
+                MusicUtils.setQueuePosition(Integer.valueOf(getId()));
+            }
+        });
     }
 
     @Override
@@ -55,12 +66,6 @@ public class CardQueueList extends CardBaseList<Song> {
             @Override
             public void onMenuItemClick(BaseCard baseCard, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
-                    case R.id.card_menu_play:
-                        // When selecting a track from the queue, just jump there instead of
-                        // reloading the queue. This is both faster, and prevents accidentally
-                        // dropping out of party shuffle.
-                        MusicUtils.setQueuePosition(Integer.valueOf(getId()));
-                        break;
                     case R.id.card_menu_play_next:
                         NowPlayingCursor queue = (NowPlayingCursor) QueueLoader
                                 .makeQueueCursor(getContext());
