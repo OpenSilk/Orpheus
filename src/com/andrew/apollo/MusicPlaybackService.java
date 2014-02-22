@@ -1735,7 +1735,7 @@ public class MusicPlaybackService extends Service {
             }
             mFileToPlay = path;
             mPlayer.setDataSource(mFileToPlay);
-            mCurrentMediaInfo = buildCurrentMediaInfo();
+            mCurrentMediaInfo = CastUtils.buildMediaInfo(this, mCursor);
             if (mPlayer.isInitialized()) {
                 mOpenFailedCounter = 0;
                 return true;
@@ -2640,17 +2640,6 @@ public class MusicPlaybackService extends Service {
             mCastServer.stop();
         }
         mCastServer = null;
-    }
-
-    private MediaInfo buildCurrentMediaInfo() {
-        return CastUtils.buildMediaInfo(
-                getTrackName(),
-                getAlbumName(),
-                getArtistName(),
-                getMimeType(),
-                CastUtils.buildMusicUrl(getAudioId(), CastUtils.getWifiIpAddress(this)),
-                CastUtils.buildArtUrl(getAudioId(), CastUtils.getWifiIpAddress(this)),
-                null);
     }
 
     /**

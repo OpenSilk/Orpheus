@@ -20,11 +20,15 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.wifi.WifiManager;
 import android.provider.MediaStore;
+import android.support.v4.util.LruCache;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
+import com.andrew.apollo.cache.ImageCache;
 import com.andrew.apollo.cache.ImageFetcher;
+import com.andrew.apollo.model.Album;
+import com.andrew.apollo.utils.MusicUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,9 +48,10 @@ import hugo.weaving.DebugLog;
  *
  * Serves audio files and album art
  * url requests must be in the form:
- *      /audio/${id}
- *      /art/${id}
- * where id is value of audio._id of the track in the MediaStore
+ *      /audio/${audio._id}
+ *      /art/${album._id}
+ *
+ * We use the album id for art so our etags will work effectively
  *
  * Created by drew on 2/14/14.
  */
@@ -73,7 +78,8 @@ public class CastWebServer extends NanoHTTPD {
     private final boolean quiet = !BuildConfig.DEBUG;
     private final Context mContext;
     private final ImageFetcher mImageFetcher;
-    private WifiManager.WifiLock mWifiLock;
+    private final WifiManager.WifiLock mWifiLock;
+    private final LruCache<String, String> mEtagCache;
 
     public CastWebServer(Context context) {
         this(context, CastUtils.getWifiIpAddress(context), PORT);
@@ -84,8 +90,11 @@ public class CastWebServer extends NanoHTTPD {
         mContext = context;
         // Initialize the image fetcher
         mImageFetcher = ImageFetcher.getInstance(context);
+        mImageFetcher.setImageCache(ImageCache.getInstance(context));
         // get the lock
         mWifiLock = ((WifiManager) mContext.getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "CastServer");
+        // arbitrary size might increase as needed;
+        mEtagCache = new LruCache<String, String>(20);
     }
 
     @Override
@@ -158,31 +167,43 @@ public class CastWebServer extends NanoHTTPD {
      */
     @DebugLog
     private Response serveArt(String uri, Map<String, String> headers) {
-        Response res;
         String id = parseId(uri);
-        Cursor c = CastUtils.getSingleTrackCursor(mContext, id);
-        if (c == null) {
+        String reqEtag = headers.get("if-none-match");
+        Log.d(TAG, "requested Art etag " + reqEtag);
+        // Check our cache if we served up this etag for this url already
+        // we can just return and save ourselfs a lot of expensive db/disk queries
+        if (!TextUtils.isEmpty(reqEtag)) {
+            String oldUri;
+            synchronized (mEtagCache) {
+                oldUri = mEtagCache.get(reqEtag);
+            }
+            if (oldUri != null && oldUri.equals(uri)) {
+                // We already served it
+                return createResponse(Response.Status.NOT_MODIFIED, MIME_ART, "");
+            }
+        }
+        // We've got get get the art
+        Album album = MusicUtils.getAlbum(mContext, Integer.valueOf(id));
+        if (album == null) {
             return notFoundResponse();
         }
-        // get the cached artwork
-        // TODO play with ImageCache and create method to return raw InputStream
-        final Bitmap bitmap = mImageFetcher.getArtwork(getAlbumName(c), getAlbumId(c), getArtistName(c));
-        c.close();
-        // form and check etag
+        Bitmap bitmap;
+        synchronized (mImageFetcher) {
+            bitmap = mImageFetcher.getCachedArtwork(album.mAlbumName, album.mArtistName, album.mAlbumId);
+        }
+        // form etag todo this isnt working like i want
         String etag = Integer.toHexString(bitmap.hashCode());
         Log.d(TAG, "Art etag " + etag);
-        // build response
-        if (etag.equals(headers.get("if-none-match"))) {
-            res = createResponse(Response.Status.NOT_MODIFIED, MIME_ART, "");
-        } else {
-            // Convert the bitmap into a bytearray
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
-            res = createResponse(Response.Status.OK, MIME_ART, new ByteArrayInputStream(os.toByteArray()));
-            res.addHeader("ETag", etag);
+        // Cache the art etag
+        synchronized (mEtagCache) {
+            mEtagCache.put(etag, uri);
         }
+        // Convert the bitmap into a bytearray
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
+        Response res = createResponse(Response.Status.OK, MIME_ART, new ByteArrayInputStream(os.toByteArray()));
+        res.addHeader("ETag", etag);
         return res;
-
     }
 
     /**

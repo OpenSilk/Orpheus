@@ -19,6 +19,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
 import com.andrew.apollo.BuildConfig;
@@ -87,18 +88,28 @@ public class CastUtils {
     }
 
     public static MediaInfo buildMediaInfo(Context context, long id) {
+        MediaInfo info = null;
         Cursor c = getSingleTrackCursor(context, id);
+        if (c != null) {
+            info = buildMediaInfo(context, c);
+            c.close();
+        }
+        return info;
+    }
+
+    public static MediaInfo buildMediaInfo(Context context, Cursor c) {
         if (c != null) {
             MediaInfo info = buildMediaInfo(
                     c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
                     c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM)),
                     c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),
                     c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),
-                    buildMusicUrl(id, getWifiIpAddress(context)),
-                    buildArtUrl(id, getWifiIpAddress(context)),
+                    buildMusicUrl(c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)),
+                            getWifiIpAddress(context)),
+                    buildArtUrl(c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID)),
+                            getWifiIpAddress(context)),
                     null
             );
-            c.close();
             return info;
         }
         return null;
