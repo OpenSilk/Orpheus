@@ -71,6 +71,7 @@ import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.common.ConnectionResult;
 
+import org.opensilk.cast.BaseCastManager;
 import org.opensilk.cast.CastManager;
 import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.cast.CastManagerFactory;
@@ -81,7 +82,7 @@ import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
 import org.opensilk.cast.exceptions.CastException;
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
-
+import org.opensilk.cast.util.Utils;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 
@@ -2706,6 +2707,32 @@ public class MusicPlaybackService extends Service {
         return false;
     }
 
+    /**
+     * If we had changed the volume previously restore its value
+     * This is mostly because the cast device keeps getting reset
+     * to max volume on every reconnect
+     */
+    private void restoreRemoteVolumeLevel() {
+        try {
+            double curVol = mCastManager.getVolume();
+            float oldVol = Utils.getFloatFromPreference(this, BaseCastManager.PREFS_KEY_REMOTE_VOLUME);
+            if (oldVol == Float.MIN_VALUE) return; //No preference
+            if (oldVol != curVol) {
+                mCastManager.setVolume(oldVol);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Called when we disconnect or think we are disconnectetd from the cast device
+     */
+    private void restoreLocalState() {
+        updatePlaybackLocation(PlaybackLocation.LOCAL);
+        pause(); //What to do?? this might not be best
+        stopCastServer();
+    }
+
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         /**
          * {@inheritDoc}
@@ -2788,6 +2815,12 @@ public class MusicPlaybackService extends Service {
         }
 
         private final CastRouteListener mListener = new CastRouteListener.Stub() {
+            /**
+             * The user has selected a device, we won't receive a callback from
+             * the mediarouter so the activity has told us to connect manually
+             * @param castDevice bundle representation of cast device
+             * @throws RemoteException
+             */
             @Override
             public void onRouteSelected(Bundle castDevice) throws RemoteException {
                 final CastDevice device = CastDevice.getFromBundle(castDevice);
@@ -2799,12 +2832,20 @@ public class MusicPlaybackService extends Service {
                 });
             }
 
+            /**
+             * The user has disconnected from the device, again we won't be receiving
+             * a callback from the mediarouter so they have informed us to stop the app
+             * @throws RemoteException
+             */
             @Override
             public void onRouteUnselected() throws RemoteException {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        mCastManager.get().selectDevice(null);
+                        try {
+                            mCastManager.get().stopApplication();
+                        } catch (Exception ignored) {
+                        }
                     }
                 });
             }
@@ -2816,21 +2857,12 @@ public class MusicPlaybackService extends Service {
      */
     private final IVideoCastConsumer mCastConsumer = new VideoCastConsumerImpl() {
 
-        /**
-         * BaseCastManager: has connected to cast device and is attempting to launch the remote app
-         */
         @Override
         @DebugLog
         public void onConnected() {
-
+            // Nothing i can think of to do here, we are still waiting for the app to connect
         }
 
-        /**
-         * VideoCastManager: we've successfully connected to the remote app.. have your way with it.
-         * @param appMetadata
-         * @param sessionId
-         * @param wasLaunched
-         */
         @Override
         @DebugLog
         public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
@@ -2840,24 +2872,21 @@ public class MusicPlaybackService extends Service {
             updatePlaybackLocation(PlaybackLocation.REMOTE);
             startCastServer();
             loadRemoteCurrent();
+            restoreRemoteVolumeLevel();
         }
 
-        /**
-         * VideoCastManager: failed to launch remote add
-         * @param errorCode is a CastStatusCodes
-         * @return true to show error dialog, false otherwise
-         */
         @Override
         @DebugLog
         public boolean onApplicationConnectionFailed(int errorCode) {
-            //TODO notify activity
-            return false;
+            return false; //Nothing for us to do, the user must manually try again
         }
 
+        /** Called when stopApplication() fails */
         @Override
         @DebugLog
         public void onApplicationStopFailed(int errorCode) {
-
+            // As far as the activity is concered we are disconnected;
+            restoreLocalState();
         }
 
         @Override
@@ -2875,9 +2904,7 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onApplicationDisconnected(int errorCode) {
-            updatePlaybackLocation(PlaybackLocation.LOCAL);
-            stopCastServer();
-            pause(); //What to do?? this might not be best
+            restoreLocalState();
         }
 
         @Override
@@ -2891,8 +2918,10 @@ public class MusicPlaybackService extends Service {
         public void onRemoteMediaPlayerStatusUpdated() {
             MediaStatus status = mCastManager.getRemoteMediaPlayer().getMediaStatus();
 
+            // This is the best i can currently do for sequential playback
             if (status.getPlayerState() == MediaStatus.PLAYER_STATE_IDLE) {
-                if (status.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED) {
+                if (status.getIdleReason() == MediaStatus.IDLE_REASON_FINISHED ||
+                        status.getIdleReason() == MediaStatus.IDLE_REASON_ERROR) {
                     loadRemoteNext();
                 }
             }
@@ -2920,15 +2949,13 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onConnectionSuspended(int cause) {
-
+            restoreLocalState();
         }
 
         @Override
         @DebugLog
         public void onDisconnected() {
-            updatePlaybackLocation(PlaybackLocation.LOCAL);
-            stopCastServer();
-            pause(); //What to do?? this might not be best
+            restoreLocalState();
         }
 
         @Override

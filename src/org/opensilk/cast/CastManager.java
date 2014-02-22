@@ -334,6 +334,8 @@ public class CastManager extends BaseCastManager
         } else if (volume < 0) {
             volume = 0.0;
         }
+        // Save our new volume so we can restore it later
+        Utils.saveFloatToPreference(mContext, PREFS_KEY_REMOTE_VOLUME, (float) volume);
         if (mVolumeType == VolumeType.STREAM) {
             checkRemoteMediaPlayerAvailable();
             mRemoteMediaPlayer.setStreamVolume(mApiClient, volume).setResultCallback(

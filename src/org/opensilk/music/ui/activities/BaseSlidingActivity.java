@@ -983,6 +983,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     };
 
+    /**
+     * Remote callbacks received from the CastManager
+     * these all pertain to notifying the user of changes and making sure
+     * the mediarouter buttons are reset when the service is no longer casting
+     */
     private final CastManagerCallback mCastManagerCallback = new CastManagerCallback.Stub() {
 
         @DebugLog
@@ -1001,11 +1006,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                     break;
             }
             Log.d(TAG, "onApplicationConnectionFailed(): failed due to: " + errorMsg);
+            resetDefaultMediaRoute();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    // Reset the route
-                    mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
                     // notify if possible
                     if (MusicUtils.isForeground()) {
                         new AlertDialog.Builder(BaseSlidingActivity.this)
@@ -1021,13 +1025,31 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @DebugLog
         @Override
         public void onApplicationDisconnected(int errorCode) throws RemoteException {
-
+            // This is just in case
+            resetDefaultMediaRoute();
         }
 
         @DebugLog
         @Override
         public void onConnectionSuspended(int cause) throws RemoteException {
+            // We are effectively disconnected at this point, there is still the
+            // possiblity the framework will reconnect automatically but im not
+            // sure what happens then
+            resetDefaultMediaRoute();
+        }
 
+        /**
+         * We only do this to reset the mediarouter buttons, the cast manager
+         * will have already done this, but our buttons dont know about it
+         */
+        private void resetDefaultMediaRoute() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // Reset the route
+                    mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
+                }
+            });
         }
     };
 

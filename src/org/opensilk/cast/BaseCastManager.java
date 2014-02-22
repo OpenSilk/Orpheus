@@ -73,6 +73,7 @@ public abstract class BaseCastManager implements
     public static final String PREFS_KEY_APPLICATION_ID = "application-id";
     public static final String PREFS_KEY_VOLUME_INCREMENT = "volume-increment";
     public static final String PREFS_KEY_ROUTE_ID = "route-id";
+    public static final String PREFS_KEY_REMOTE_VOLUME = "volume-remote";
 
     public static final int NO_STATUS_CODE = -1;
 
