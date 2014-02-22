@@ -18,11 +18,10 @@ package org.opensilk.music.ui.cards;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
-
-import it.gmariotti.cardslib.library.internal.CardHeader;
 
 /**
  * Created by drew on 2/12/14.
@@ -52,35 +51,32 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
                 v.setVisibility(View.GONE);
             }
         }
-        TextView v2 = (TextView) view.findViewById(R.id.card_main_inner_extra_text);
-        if (v2 != null) {
-            if (mExtraText != null) {
-                v2.setText(mExtraText);
-            } else {
-                v2.setVisibility(View.GONE);
-            }
-        }
+//        TextView v2 = (TextView) view.findViewById(R.id.card_main_inner_extra_text);
+//        if (v2 != null) {
+//            if (mExtraText != null) {
+//                v2.setText(mExtraText);
+//            } else {
+//                v2.setVisibility(View.GONE);
+//            }
+//        }
     }
 
     @Override
     protected void initHeader() {
-        final CardHeader header = new CardHeader(getContext());
-        header.setButtonOverflowVisible(true);
-        header.setPopupMenu(getHeaderMenuId(), getNewHeaderPopupMenuListener());
-        addCardHeader(header);
+
     }
 
     /**
      * @return Resource id of popup menu
      */
-    protected abstract int getHeaderMenuId();
+    public abstract int getOverflowMenuId();
 
     /**
      * @return Listener for popup menu actions
      */
-    protected abstract CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener();
+    public abstract PopupMenu.OnMenuItemClickListener getOverflowPopupMenuListener();
 
-    public void setSecondTitle(String title) {
+    public void setSubTitle(String title) {
         mSubTitle = title;
     }
 }

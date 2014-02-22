@@ -20,6 +20,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
@@ -31,8 +32,6 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
 /**
  * Created by drew on 2/11/14.
@@ -65,15 +64,15 @@ public class CardArtistList extends CardBaseList<Artist> {
     }
 
     @Override
-    protected int getHeaderMenuId() {
+    public int getOverflowMenuId() {
         return R.menu.card_artist;
     }
 
-    protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
-        return new CardHeader.OnClickCardHeaderPopupMenuListener() {
+    public PopupMenu.OnMenuItemClickListener getOverflowPopupMenuListener() {
+        return new PopupMenu.OnMenuItemClickListener() {
             @Override
-            public void onMenuItemClick(BaseCard baseCard, MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
                     case R.id.card_menu_play:
                         MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, true);
                         break;
@@ -90,6 +89,7 @@ public class CardArtistList extends CardBaseList<Artist> {
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }
+                return false;
             }
         };
     }

@@ -13,50 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opensilk.music.ui.cards.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 
+import org.opensilk.music.ui.cards.CardBaseList;
+
+import it.gmariotti.cardslib.library.view.CardView;
+
 /**
- * Special CardView for use with a DragSortListView
- *
- * Created by drew on 2/13/14.
+ * Created by drew on 2/22/14.
  */
-public class DragSortCardView extends CardViewNoHeader {
-    public DragSortCardView(Context context) {
+public class CardViewNoHeader extends CardView {
+
+    protected View mInternalOverflowButton;
+
+    public CardViewNoHeader(Context context) {
         super(context);
     }
 
-    public DragSortCardView(Context context, AttributeSet attrs) {
+    public CardViewNoHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public DragSortCardView(Context context, AttributeSet attrs, int defStyle) {
+    public CardViewNoHeader(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
     @Override
-    protected void setupListeners() {
-        // Disable this... all i know is it was fucking up the dragsortlist
-        //super.setupListeners();
-        setupOverflowButtonListener();
+    protected void retrieveLayoutIDs() {
+        super.retrieveLayoutIDs();
+        mInternalOverflowButton = (View) findViewById(R.id.card_overflow_button);
     }
 
     @Override
-    protected void setupMainView() {
-        super.setupMainView();
-        // Since our card is not clickable we will just transfer the cards
-        // onclick listener to the main content view
-        mInternalContentLayout.setBackgroundResource(R.drawable.selectable_background_orpheus);
-        mInternalContentLayout.setOnClickListener(new OnClickListener() {
+    protected void setupListeners() {
+        super.setupListeners();
+        setupOverflowButtonListener();
+    }
+
+    protected void setupOverflowButtonListener() {
+        mInternalOverflowButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCard.getOnClickListener()!=null)
-                    mCard.getOnClickListener().onClick(mCard,v);
+                PopupMenu menu = new PopupMenu(v.getContext(), v);
+                menu.inflate(((CardBaseList) getCard()).getOverflowMenuId());
+                menu.setOnMenuItemClickListener(((CardBaseList) getCard()).getOverflowPopupMenuListener());
+                menu.show();
             }
         });
     }

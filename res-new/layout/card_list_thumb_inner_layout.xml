@@ -39,13 +39,13 @@
         android:layout_below="@id/card_main_inner_simple_title"
         style="@style/Orpheus.Text.Card.SubTitle"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/card_main_inner_extra_text"
-        android:layout_toRightOf="@id/card_main_inner_sub_title"
-        android:layout_alignParentRight="true"
-        android:layout_alignBottom="@id/card_main_inner_sub_title"
-        style="@style/Orpheus.Text.Card.Extra"/>
+    <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/card_main_inner_extra_text"-->
+        <!--android:layout_toRightOf="@id/card_main_inner_sub_title"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignBottom="@id/card_main_inner_sub_title"-->
+        <!--style="@style/Orpheus.Text.Card.Extra"/>-->
 
 </RelativeLayout>

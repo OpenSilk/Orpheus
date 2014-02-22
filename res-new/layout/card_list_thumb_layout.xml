@@ -22,13 +22,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <!-- OpenSilk: Im using a framelayout here as a hack to get the thumbnail
-         at the full height of the card while letting me use the headers
-         overflow button and have it look like its on the main content -->
-
     <!-- Card visible layout -->
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/card_main_layout"
+        android:orientation="vertical"
         style="@style/Orpheus.card.main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -48,25 +45,36 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="28dp"><!-- OpenSilk: push content over enough for the overflow button-->
+            >
 
             <org.opensilk.music.ui.cards.views.CardCustomThumbnailView
                 style="@style/card_thumbnail_outer_layout"
                 android:id="@+id/card_thumbnail_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="4dp"
                 card:card_thumbnail_layout_resourceID="@layout/card_list_thumb_thumbnail_layout"/>
 
             <!-- Main Content View -->
             <FrameLayout
                 android:id="@+id/card_main_content_layout"
                 style="@style/card.content_outer_layout"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"/>
+
+            <!-- OverflowButton -->
+            <ImageButton android:id="@+id/card_overflow_button"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:background="?android:selectableItemBackground"
+                android:src="@drawable/configure_item_overflow_default"
+                android:scaleType="fitXY"
+                android:contentDescription="@null" />
 
         </LinearLayout>
 
-    </FrameLayout>
+    </LinearLayout>
 
     <!-- Compound view for Shadow
          If you want to customize this element use attr card:card_shadow_layout_resourceID -->
