@@ -20,11 +20,9 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -36,16 +34,14 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.loaders.AlbumSongLoader;
-import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
-import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
+import org.opensilk.music.ui.cards.CardAlbumList;
 
 /**
  * Created by drew on 2/21/14.
@@ -119,7 +115,16 @@ public class AlbumFragment extends Fragment implements
         mInfoTitle.setText(mAlbum.mAlbumName);
         mInfoSubTitle.setText(mAlbum.mArtistName);
         // initialize header overflow
-        mOverflowButton.setOnClickListener(mOverflowListener);
+        final CardAlbumList card = new CardAlbumList(getActivity(), mAlbum);
+        mOverflowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu menu = new PopupMenu(v.getContext(), v);
+                menu.inflate(card.getOverflowMenuId());
+                menu.setOnMenuItemClickListener(card.getOverflowPopupMenuListener());
+                menu.show();
+            }
+        });
         // Init the fading action bar
         mFadingHelper.initActionBar(getActivity());
         // init the adapter
@@ -166,43 +171,5 @@ public class AlbumFragment extends Fragment implements
         MusicUtils.playAll(getActivity(), list, position - 1, false);
         cursor.close();
     }
-
-    protected final View.OnClickListener mOverflowListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            PopupMenu menu = new PopupMenu(v.getContext(), v);
-            //Todo combine this and the CardAlbum* menus
-            menu.inflate(R.menu.card_album);
-            menu.setOnMenuItemClickListener(
-                    new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            switch (item.getItemId()) {
-                                case R.id.card_menu_play:
-                                    MusicUtils.playAll(getActivity(), MusicUtils.getSongListForAlbum(getActivity(), mAlbum.mAlbumId), 0, false);
-                                    return true;
-                                case R.id.card_menu_add_queue:
-                                    MusicUtils.addToQueue(getActivity(), MusicUtils.getSongListForAlbum(getActivity(), mAlbum.mAlbumId));
-                                    return true;
-                                case R.id.card_menu_add_playlist:
-                                    AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getActivity(), mAlbum.mAlbumId))
-                                            .show(((FragmentActivity) getActivity()).getSupportFragmentManager(), "AddToPlaylistDialog");
-                                    return true;
-                                case R.id.card_menu_more_by:
-                                    NavUtils.openArtistProfile(getActivity(), mAlbum.mArtistName);
-                                    return true;
-                                case R.id.card_menu_delete:
-                                    final String album = mAlbum.mAlbumName;
-                                    DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getActivity(), mAlbum.mAlbumId),
-                                            ImageFetcher.generateAlbumCacheKey(album, mAlbum.mArtistName))
-                                            .show(((FragmentActivity) getActivity()).getSupportFragmentManager(), "DeleteDialog");
-                                    return true;
-                            }
-                            return false;
-                        }
-                    });
-            menu.show();
-        }
-    };
 
 }

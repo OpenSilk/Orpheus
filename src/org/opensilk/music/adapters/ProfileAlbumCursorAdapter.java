@@ -18,19 +18,17 @@ package org.opensilk.music.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.menu.DeleteDialog;
+
+import org.opensilk.music.loaders.AlbumSongCursorLoader;
+import org.opensilk.music.ui.cards.CardSongList;
 
 import hugo.weaving.DebugLog;
 
@@ -51,31 +49,16 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final FragmentActivity activity = (FragmentActivity) context;
-        final String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
-        final long songId = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+        final CardSongList card = new CardSongList(context, AlbumSongCursorLoader.getSongFromCursor(cursor));
         TextView title = (TextView) view.findViewById(R.id.track_info);
-        title.setText(songName);
+        title.setText(card.getData().mSongName);
         View overflowButton = view.findViewById(R.id.overflow_button);
         overflowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 PopupMenu menu = new PopupMenu(view.getContext(), view);
-                menu.inflate(R.menu.card_song);
-                menu.setOnMenuItemClickListener(
-                        new PopupMenu.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                switch (item.getItemId()) {
-                                    case R.id.card_menu_delete:
-                                        DeleteDialog.newInstance(songName, new long[]{
-                                                songId
-                                        }, null).show(activity.getSupportFragmentManager(), "DeleteDialog");
-                                        return true;
-                                }
-                                return false;
-                            }
-                        });
+                menu.inflate(card.getOverflowMenuId());
+                menu.setOnMenuItemClickListener(card.getOverflowPopupMenuListener());
                 menu.show();
             }
         });

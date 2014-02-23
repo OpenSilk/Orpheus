@@ -17,10 +17,12 @@
 package org.opensilk.music.loaders;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
+import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 /**
@@ -50,6 +52,29 @@ public class AlbumSongCursorLoader extends CursorLoader {
                 .toString());
         setSelectionArgs(null);
         setSortOrder(PreferenceUtils.getInstance(context).getAlbumSongSortOrder());
+    }
+
+    public static Song getSongFromCursor(Cursor c) {
+        // Copy the song Id
+        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+
+        // Copy the song name
+        final String songName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
+
+        // Copy the artist name
+        final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+
+        // Copy the album name
+        final String album = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+
+        // Copy the duration
+        final long duration = c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION));
+
+        // Make the duration label
+        final int seconds = (int) (duration / 1000);
+
+        // Create a new song
+        return new Song(id, songName, artist, album, seconds);
     }
 
 }
