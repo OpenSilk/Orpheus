@@ -105,6 +105,11 @@
         <item name="android:layout_height">@dimen/card_list_thumbnail_size</item>
     </style>
 
+    <style name="Orpheus.Thumbnail.ProfileListCard">
+        <item name="android:layout_width">@dimen/card_grid_cardwidth</item>
+        <item name="android:layout_height">@dimen/card_grid_cardwidth</item>
+    </style>
+
     <!-- List item text appearance -->
 
     <style name="TextAppearanceList.Title" parent="@android:style/TextAppearance.Holo.Medium">

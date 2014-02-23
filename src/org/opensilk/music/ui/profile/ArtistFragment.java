@@ -26,24 +26,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
-import com.andrew.apollo.loaders.ArtistLoader;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.AlbumGridCardCursorAdapter;
-import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
-import org.opensilk.music.loaders.AlbumSongCursorLoader;
+import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
-import org.opensilk.music.ui.cards.CardAlbumList;
 
 import it.gmariotti.cardslib.library.view.CardGridView;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Created by drew on 2/21/14.
@@ -54,8 +51,8 @@ public class ArtistFragment extends Fragment implements
     /* Manages our views */
     protected FadingActionBarHelper mFadingHelper;
     /* main content */
-    protected CardGridView mGridView;
-    protected AlbumGridCardCursorAdapter mAdapter;
+    protected CardListView mListView;
+    protected ProfileAlbumListCardCursorAdapter mAdapter;
     /* header image */
     protected ImageView mHeaderImage;
     /* header overlay stuff */
@@ -79,7 +76,7 @@ public class ArtistFragment extends Fragment implements
                 .actionBarBackground(R.drawable.ab_solid_orpheus)
                 .headerLayout(R.layout.profile_header_image)
                 .headerOverlayLayout(R.layout.profile_header_overlay_artist)
-                .contentLayout(R.layout.profile_card_grid);
+                .contentLayout(R.layout.profile_card_listview);
     }
 
     @Override
@@ -95,7 +92,7 @@ public class ArtistFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = mFadingHelper.createView(inflater);
-        mGridView = (CardGridView) v.findViewById(R.id.card_grid);
+        mListView = (CardListView) v.findViewById(android.R.id.list);
         mHeaderImage = (ImageView) v.findViewById(R.id.artist_image_header);
         mInfoTitle = (TextView) v.findViewById(R.id.info_title);
         mInfoSubTitle = (TextView) v.findViewById(R.id.info_subtitle);
@@ -124,9 +121,9 @@ public class ArtistFragment extends Fragment implements
         // Init the fading action bar
         mFadingHelper.initActionBar(getActivity());
         // init the adapter
-        mAdapter = new AlbumGridCardCursorAdapter(getActivity());
+        mAdapter = new ProfileAlbumListCardCursorAdapter(getActivity());
         // set the adapter
-        mGridView.setAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
         // start the loader
         final Bundle b = new Bundle();
         b.putLong(Config.ID, mArtist.mArtistId);
