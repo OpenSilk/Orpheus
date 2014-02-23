@@ -26,6 +26,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.ui.cards.CardSongList;
 
@@ -46,9 +47,20 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+        // setup card content
         final CardSongList card = new CardSongList(context, CursorHelpers.makeSongFromCursor(cursor));
         TextView title = (TextView) view.findViewById(R.id.track_info);
         title.setText(card.getData().mSongName);
+        // hack i dont know why onitemclick doesnt work, might be cause the fading header
+        final Context ctx = context;
+        View mainContet = view.findViewById(R.id.track_artist_info);
+        mainContet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MusicUtils.playAll(ctx, new long[]{card.getData().mSongId}, 0, false);
+            }
+        });
+        // init overflow
         View overflowButton = view.findViewById(R.id.overflow_button);
         overflowButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -25,19 +25,16 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
-import com.andrew.apollo.loaders.AlbumSongLoader;
 import com.andrew.apollo.model.Album;
-import com.andrew.apollo.utils.MusicUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
-import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
@@ -47,13 +44,12 @@ import org.opensilk.music.ui.cards.CardAlbumList;
  * Created by drew on 2/21/14.
  */
 public class AlbumFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>,
-        AdapterView.OnItemClickListener {
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     /* Manages our views */
     protected FadingActionBarHelper mFadingHelper;
     /* main content */
-    protected DragSortListView mListView;
+    protected ListView mListView;
     protected ProfileAlbumCursorAdapter mAdapter;
     /* header image */
     protected ImageView mHeaderImage;
@@ -95,7 +91,7 @@ public class AlbumFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = mFadingHelper.createView(inflater);
-        mListView = (DragSortListView) v.findViewById(android.R.id.list);
+        mListView = (ListView) v.findViewById(android.R.id.list);
         mHeaderImage = (ImageView) v.findViewById(R.id.artist_image_header);
         mHeaderThumb = (ImageView) v.findViewById(R.id.album_image_header);
         mInfoTitle = (TextView) v.findViewById(R.id.info_title);
@@ -154,22 +150,6 @@ public class AlbumFragment extends Fragment implements
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
-    }
-
-    /*
-     * On click callback
-     */
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (position == 0) {
-            return;
-        }
-        Cursor cursor = AlbumSongLoader.makeAlbumSongCursor(getActivity(), getArguments()
-                .getLong(Config.ID));
-        final long[] list = MusicUtils.getSongListForCursor(cursor);
-        MusicUtils.playAll(getActivity(), list, position - 1, false);
-        cursor.close();
     }
 
 }

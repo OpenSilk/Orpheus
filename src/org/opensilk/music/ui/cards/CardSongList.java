@@ -18,6 +18,7 @@ package org.opensilk.music.ui.cards;
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 
@@ -29,6 +30,8 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+
+import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 2/11/14.
@@ -48,7 +51,14 @@ public class CardSongList extends CardBaseList<Song> {
         mTitle = mData.mSongName;
         mSubTitle = mData.mArtistName;
         mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
-        //TODO onclick
+        setOnClickListener(new OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                MusicUtils.playAll(getContext(), new long[]{
+                        mData.mSongId
+                }, 0, false);
+            }
+        });
     }
 
     @Override
@@ -67,11 +77,6 @@ public class CardSongList extends CardBaseList<Song> {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.card_menu_play:
-                        MusicUtils.playAll(getContext(), new long[]{
-                                mData.mSongId
-                        }, 0, false);
-                        break;
                     case R.id.card_menu_play_next:
                         MusicUtils.playNext(new long[] {
                                 mData.mSongId

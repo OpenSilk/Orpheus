@@ -28,8 +28,9 @@
         android:layout_height="match_parent"
         android:gravity="left|center_vertical"
         android:clickable="true"
+        android:background="@drawable/selectable_background_orpheus"
         android:orientation="vertical"
-        android:layout_marginLeft="16dp"
+        android:paddingLeft="16dp"
         android:layout_weight="1">
 
         <TextView
