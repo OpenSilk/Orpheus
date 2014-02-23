@@ -27,10 +27,7 @@ import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.loaders.AlbumSongCursorLoader;
 import org.opensilk.music.ui.cards.CardSongList;
-
-import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 2/21/14.
@@ -49,7 +46,7 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final CardSongList card = new CardSongList(context, AlbumSongCursorLoader.getSongFromCursor(cursor));
+        final CardSongList card = new CardSongList(context, CursorHelpers.makeSongFromCursor(cursor));
         TextView title = (TextView) view.findViewById(R.id.track_info);
         title.setText(card.getData().mSongName);
         View overflowButton = view.findViewById(R.id.overflow_button);
@@ -64,9 +61,4 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
         });
     }
 
-    @Override
-    @DebugLog
-    protected void onContentChanged() {
-        super.onContentChanged();
-    }
 }

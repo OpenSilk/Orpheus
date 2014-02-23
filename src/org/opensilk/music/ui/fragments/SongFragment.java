@@ -17,67 +17,71 @@
 
 package org.opensilk.music.ui.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.view.View;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.SongLoader;
-import com.andrew.apollo.model.Song;
 
-import org.opensilk.music.ui.cards.CardSongList;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import org.opensilk.music.adapters.SongListCardCursorAdapter;
+import org.opensilk.music.loaders.SongCursorLoader;
 
 /**
  * This class is used to display all of the songs on a user's device.
- * 
+ *
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class SongFragment extends HomePagerBaseFragment<Song> {
+public class SongFragment extends HomePagerBaseCursorFragment {
 
-    /**
-     * {@inheritDoc}
-     */
+    protected SongListCardCursorAdapter mAdapter;
+
     @Override
-    public Loader<List<Song>> onCreateLoader(final int id, final Bundle args) {
-        return new SongLoader(getActivity());
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Set the empty text
+        final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
+        empty.setText(getString(R.string.empty_music));
+        mListView.setEmptyView(empty);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onLoadFinished(final Loader<List<Song>> loader, final List<Song> data) {
-        // Check for any errors
-        if (data.isEmpty()) {
-            // Set the empty text
-            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
-            empty.setText(getString(R.string.empty_music));
-            mListView.setEmptyView(empty);
-            return;
-        }
-
-        ArrayList<Card> cards = new ArrayList<Card>();
-        for (final Song song: data) {
-            cards.add(new CardSongList(getActivity(), song));
-        }
-        CardArrayAdapter adapter = new CardArrayAdapter(getActivity(), cards);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mAdapter = new SongListCardCursorAdapter(getActivity());
         // Set the data behind the list
-        mListView.setAdapter(adapter);
+        mListView.setAdapter(mAdapter);
+        // Start the loader
+        getLoaderManager().initLoader(LOADER, null, this);
     }
+
+    /*
+     * Loader Callbacks
+     */
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new SongCursorLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
+    }
+
+    /*
+     * Implement abstract methods
+     */
 
     @Override
     protected boolean isSimpleLayout() {
-        return true;
+        return true; // Were always list
     }
 
-    @Override
-    protected boolean isDetailedLayout() {
-        return false;
-    }
 }

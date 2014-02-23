@@ -23,21 +23,19 @@ import android.support.v4.content.CursorLoader;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 /**
- * Created by drew on 2/21/14.
+ * Created by drew on 2/18/14.
  */
-public class AlbumSongCursorLoader extends CursorLoader {
+public class SongCursorLoader extends CursorLoader {
 
-    public AlbumSongCursorLoader(Context context, long albumId) {
+    public SongCursorLoader(Context context) {
         super(context);
         setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         setProjection(Projections.SONG);
         setSelection(new StringBuilder()
                 .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
-                .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''")
-                .append(" AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=" + albumId)
-                .toString());
+                .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''").toString());
         setSelectionArgs(null);
-        setSortOrder(PreferenceUtils.getInstance(context).getAlbumSongSortOrder());
+        setSortOrder(PreferenceUtils.getInstance(getContext()).getSongSortOrder());
     }
 
 }
