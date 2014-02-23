@@ -20,6 +20,8 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
+import com.andrew.apollo.model.Album;
+import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Song;
 
 /**
@@ -53,5 +55,44 @@ public class CursorHelpers {
         final int seconds = (int) (duration / 1000);
         // Create a new song
         return new Song(id, songName, artist, album, albumId, seconds);
+    }
+
+    /**
+     * Creates album from given cursor
+     *
+     * @param c cursor created with makeAlbumCursor
+     * @return new Album
+     */
+    public static Album makeAlbumFromCursor(final Cursor c) {
+        // Copy the album id
+        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        // Copy the album name
+        final String albumName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM));
+        // Copy the artist name
+        final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ARTIST));
+        // Copy the number of songs
+        final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS));
+        // Copy the release year
+        final String year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.FIRST_YEAR));
+        // Create a new album
+        return new Album(id, albumName, artist, songCount, year);
+    }
+
+    /**
+     * Create artist from cusor
+     * @param c cursor created with makeArtistCursor
+     * @return new artist
+     */
+    public static Artist makeArtistFromCursor(final Cursor c) {
+        // Copy the artist id
+        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        // Copy the artist name
+        final String artistName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.ARTIST));
+        // Copy the number of albums
+        final int albumCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS));
+        // Copy the number of songs
+        final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS));
+        // Create a new artist
+        return new Artist(id, artistName, songCount, albumCount);
     }
 }

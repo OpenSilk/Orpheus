@@ -48,9 +48,12 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         mType = mArguments.getString(Config.MIME_TYPE);
         // Load the appropriate fragment
         if (savedInstanceState == null) {
-            if (mType.equals(MediaStore.Audio.Albums.CONTENT_TYPE)) {
+            if (MediaStore.Audio.Albums.CONTENT_TYPE.equals(mType)) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.main, AlbumFragment.newInstance(mArguments)).commit();
+            } else if (MediaStore.Audio.Artists.CONTENT_TYPE.equals(mType)) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main, ArtistFragment.newInstance(mArguments)).commit();
             }
         }
     }

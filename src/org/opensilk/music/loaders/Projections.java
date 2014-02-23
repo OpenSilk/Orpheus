@@ -29,6 +29,8 @@ public class Projections {
     }
 
     public static final String[] SONG;
+    public static final String[] ALBUM;
+    public static final String[] ARTIST;
 
     static {
         SONG = new String[] {
@@ -44,6 +46,28 @@ public class Projections {
                 MediaStore.Audio.AudioColumns.ALBUM_ID,
                         /* 5 */
                 MediaStore.Audio.AudioColumns.DURATION
+        };
+        ALBUM = new String[] {
+                        /* 0 */
+                BaseColumns._ID,
+                        /* 1 */
+                MediaStore.Audio.AlbumColumns.ALBUM,
+                        /* 2 */
+                MediaStore.Audio.AlbumColumns.ARTIST,
+                        /* 3 */
+                MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS,
+                        /* 4 */
+                MediaStore.Audio.AlbumColumns.FIRST_YEAR
+        };
+        ARTIST = new String[] {
+                        /* 0 */
+                BaseColumns._ID,
+                        /* 1 */
+                MediaStore.Audio.ArtistColumns.ARTIST,
+                        /* 2 */
+                MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS,
+                        /* 3 */
+                MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS
         };
     }
 
