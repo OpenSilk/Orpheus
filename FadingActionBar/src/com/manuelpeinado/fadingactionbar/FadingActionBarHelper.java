@@ -15,23 +15,33 @@
  */
 package com.manuelpeinado.fadingactionbar;
 
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 
-public class FadingActionBarHelper extends FadingActionBarHelperBase {
+public final class FadingActionBarHelper extends FadingActionBarHelperBase {
 
     private ActionBar mActionBar;
 
-    @SuppressLint("NewApi")
     @Override
     public void initActionBar(Activity activity) {
-        mActionBar = activity.getActionBar();
+        mActionBar = getActionBar(activity);
         super.initActionBar(activity);
     }
 
-    @SuppressLint("NewApi")
+    private ActionBar getActionBar(Activity activity) {
+        if (activity instanceof ActionBarActivity) {
+            return ((ActionBarActivity) activity).getSupportActionBar();
+        }
+        ActionBar actionBar = getActionBarWithReflection(activity, "getSupportActionBar");
+        if (actionBar == null) {
+            throw new RuntimeException("Activity should derive from ActionBarActivity "
+                + "or implement a method called getSupportActionBar");
+        }
+        return actionBar;
+    }
+
     @Override
     protected int getActionBarHeight() {
         return mActionBar.getHeight();
@@ -42,7 +52,6 @@ public class FadingActionBarHelper extends FadingActionBarHelperBase {
         return mActionBar == null;
     }
 
-    @SuppressLint("NewApi")
     @Override
     protected void setActionBarBackgroundDrawable(Drawable drawable) {
         mActionBar.setBackgroundDrawable(drawable);
