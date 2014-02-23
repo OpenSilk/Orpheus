@@ -134,9 +134,6 @@ public class HomePhoneFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        //FIXME
-        final MenuItem favoriteAction = menu.findItem(R.id.menu_favorite);
-        favoriteAction.setIcon(R.drawable.ic_action_favorite);
     }
 
     /**
@@ -145,8 +142,6 @@ public class HomePhoneFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        // Favorite action
-        inflater.inflate(R.menu.favorite, menu);
         // Shuffle all
         inflater.inflate(R.menu.shuffle, menu);
         // Sort orders
