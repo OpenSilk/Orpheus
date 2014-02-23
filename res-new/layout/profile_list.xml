@@ -28,7 +28,7 @@
         android:layout_height="match_parent"
         android:gravity="left|center_vertical"
         android:clickable="true"
-        android:background="@drawable/selectable_background_orpheus"
+        android:background="?android:selectableItemBackground"
         android:orientation="vertical"
         android:paddingLeft="16dp"
         android:layout_weight="1">
@@ -37,13 +37,8 @@
             android:id="@+id/track_info"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            style="?android:textAppearanceListItemSmall"/>
-
-        <TextView
-            android:id="@+id/artist_info"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            style="@style/Orpheus.Text.PanelHeader.ArtistInfo"/>
+            android:textAppearance="?android:textAppearanceListItem"
+            style="@style/SingleLineTextView"/>
 
     </LinearLayout>
 

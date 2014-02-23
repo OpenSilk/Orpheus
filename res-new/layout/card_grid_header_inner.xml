@@ -20,10 +20,9 @@
     android:orientation="vertical"
     style="@style/card"
     android:layout_gravity="center_vertical"
+    android:gravity="center_vertical"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:paddingLeft="4dp"
-    android:layout_marginRight="16dp">
+    android:layout_height="match_parent">
 
     <!-- This is the base Inner View inside a CardHeader.
          You can customize it with your layout xml file and your CardHeader.
@@ -32,14 +31,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/card_header_inner_simple_title"
-        style="@style/Orpheus.Text.Card.Header.Title"
-        />
+        android:textAppearance="@style/TextAppearanceGrid.Title"
+        style="@style/SingleLineTextView"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/card_header_inner_secondary_title"
-        style="@style/Orpheus.Text.Card.Header.SubTitle"
-        />
+        android:textAppearance="@style/TextAppearanceGrid"
+        style="@style/SingleLineTextView"/>
 
 </LinearLayout>

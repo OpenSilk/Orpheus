@@ -42,7 +42,8 @@
 
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
-
+        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
+        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
     </style>
 
     <!--OpenSilk-->
@@ -63,6 +64,7 @@
     <style name="Theme.Orpheus.Panel.Profile">
         <!--<item name="android:actionBarStyle">@style/ActionBar.Transparent.Orpheus</item>-->
     </style>
+
     <!--end OpenSilk-->
 
     <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">

@@ -30,14 +30,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/card_main_inner_simple_title"
-        style="@style/Orpheus.Text.Card.Title"/>
+        android:textAppearance="?android:textAppearanceListItem"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/card_main_inner_sub_title"
         android:layout_below="@id/card_main_inner_simple_title"
-        style="@style/Orpheus.Text.Card.SubTitle"/>
+        android:textAppearance="?android:textAppearanceListItemSmall"
+        style="@style/SingleLineTextView"/>
 
     <!--<TextView-->
         <!--android:layout_width="wrap_content"-->

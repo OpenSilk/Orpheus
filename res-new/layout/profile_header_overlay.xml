@@ -39,13 +39,13 @@
                 android:id="@+id/info_title"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                style="?android:attr/textAppearanceMedium"/>
+                android:textAppearance="@style/TextAppearancePanelHeader.Title"/>
 
             <TextView
                 android:id="@+id/info_subtitle"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                style="?android:attr/textAppearanceSmall"/>
+                android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"/>
 
 
         </LinearLayout>

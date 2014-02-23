@@ -105,49 +105,33 @@
         <item name="android:layout_height">@dimen/card_list_thumbnail_size</item>
     </style>
 
-    <style name="Orpheus.Text">
+    <!-- List item text appearance -->
+
+    <style name="TextAppearanceList.Title" parent="@android:style/TextAppearance.Holo.Medium">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearanceList.SubTitle" parent="@android:style/TextAppearance.Holo.Small">
 
     </style>
 
-    <style name="Orpheus.Text.Card">
+    <!-- Grid item text appearance -->
+
+    <style name="TextAppearanceGrid" parent="@android:style/TextAppearance.Holo.Small">
+
+    </style>
+
+    <style name="TextAppearanceGrid.Title">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- text views for lists and grids -->
+
+    <style name="SingleLineTextView">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:layout_gravity">left|center_vertical</item>
         <item name="android:gravity">left|center_vertical</item>
-    </style>
-
-    <style name="Orpheus.Text.Card.Title">
-    </style>
-
-    <style name="Orpheus.Text.Card.SubTitle">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="Orpheus.Text.Card.Extra">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textSize">12sp</item>
-        <item name="android:layout_gravity">right|center_vertical</item>
-        <item name="android:gravity">right|center_vertical</item>
-    </style>
-
-    <style name="Orpheus.Text.Card.Header">
-
-    </style>
-
-    <style name="Orpheus.Text.Card.Header.Title">
-
-    </style>
-
-    <style name="Orpheus.Text.Card.Header.SubTitle">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="Orpheus.Text.Empty">
-        <item name="android:padding">@dimen/list_preferred_item_padding</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:layout_gravity">center</item>
     </style>
 
     <!--PANEL HEADER-->
@@ -161,19 +145,12 @@
         <item name="android:background">@color/app_background_light</item>
     </style>
 
-    <style name="Orpheus.Text.PanelHeader">
-        <item name="android:ellipsize">end</item>
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:singleLine">true</item>
+    <style name="TextAppearancePanelHeader.Title" parent="@android:style/TextAppearance.Holo.Medium">
+        <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="Orpheus.Text.PanelHeader.TrackInfo">
-        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <!--<item name="android:textStyle">bold</item>-->
-    </style>
+    <style name="TextAppearancePanelHeader.SubTitle" parent="@android:style/TextAppearance.Holo.Small">
 
-    <style name="Orpheus.Text.PanelHeader.ArtistInfo">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
     <style name="Orpheus.Button.PanelHeader">
@@ -183,7 +160,7 @@
         <item name="android:layout_height">@dimen/panel_header_album_art_size</item>
     </style>
 
-    <style name="Orpheus.MenuButton" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+    <style name="Orpheus.MenuButton" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
         <item name="android:layout_width">wrap_content</item>

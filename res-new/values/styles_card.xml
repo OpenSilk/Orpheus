@@ -20,7 +20,7 @@
 
     <!-- Style for Main Layout-->
     <style name="Orpheus.card.main_layout" parent="card.main_layout">
-        <item name="android:background">@drawable/card_background_orpheus</item>
+        <item name="android:background">?android:selectableItemBackground</item>
     </style>
 
 </resources>
