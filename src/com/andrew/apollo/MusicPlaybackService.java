@@ -2770,6 +2770,7 @@ public class MusicPlaybackService extends Service {
         }
 
 
+        @DebugLog
         @Override
         public void changeVolume(double increment) throws RemoteException {
             try {
@@ -2778,26 +2779,31 @@ public class MusicPlaybackService extends Service {
             }
         }
 
+        @DebugLog
         @Override
         public int getReconnectionStatus() throws RemoteException {
             return mCastManager.get().getReconnectionStatus();
         }
 
+        @DebugLog
         @Override
         public void setReconnectionStatus(int status) throws RemoteException {
             mCastManager.get().setReconnectionStatus(status);
         }
 
+        @DebugLog
         @Override
         public CastRouteListener getRouteListener() throws RemoteException {
             return mListener;
         }
 
+        @DebugLog
         @Override
         public void registerListener(CastManagerCallback cb) throws RemoteException {
             mCastManager.get().registerListener(cb);
         }
 
+        @DebugLog
         @Override
         public void unregisterListener(CastManagerCallback cb) throws RemoteException {
             mCastManager.get().unregisterListener(cb);
@@ -2810,6 +2816,7 @@ public class MusicPlaybackService extends Service {
              * @param castDevice bundle representation of cast device
              * @throws RemoteException
              */
+            @DebugLog
             @Override
             public void onRouteSelected(Bundle castDevice) throws RemoteException {
                 final CastDevice device = CastDevice.getFromBundle(castDevice);
@@ -2826,6 +2833,7 @@ public class MusicPlaybackService extends Service {
              * a callback from the mediarouter so they have informed us to stop the app
              * @throws RemoteException
              */
+            @DebugLog
             @Override
             public void onRouteUnselected() throws RemoteException {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {

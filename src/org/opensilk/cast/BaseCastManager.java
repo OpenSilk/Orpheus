@@ -204,6 +204,7 @@ public abstract class BaseCastManager implements
         selectDevice(device, mDestroyOnDisconnect);
     }
 
+    @DebugLog
     public void selectDevice(CastDevice device, boolean stopAppOnExit) {
         mSelectedCastDevice = device;
         mDeviceName = mSelectedCastDevice != null ? mSelectedCastDevice.getFriendlyName() : null;
@@ -881,6 +882,7 @@ public abstract class BaseCastManager implements
      * @throws NoConnectionException
      * @throws TransientNetworkDisconnectionException
      */
+    @DebugLog
     public void stopApplication() throws IllegalStateException, IOException,
             TransientNetworkDisconnectionException, NoConnectionException {
         checkConnectivity();
@@ -936,12 +938,14 @@ public abstract class BaseCastManager implements
      * to show user messages pertaining to state.
      */
 
+    @DebugLog
     public synchronized void registerListener(CastManagerCallback cb) {
         if (cb != null) {
             mListeners.register(cb);
         }
     }
 
+    @DebugLog
     public synchronized void unregisterListener(CastManagerCallback cb) {
         if (cb != null) {
             mListeners.unregister(cb);
@@ -1045,19 +1049,16 @@ public abstract class BaseCastManager implements
             super.onRouteChanged(router, route);
         }
 
-        @DebugLog
         @Override
         public void onProviderAdded(MediaRouter router, MediaRouter.ProviderInfo provider) {
             super.onProviderAdded(router, provider);
         }
 
-        @DebugLog
         @Override
         public void onProviderRemoved(MediaRouter router, MediaRouter.ProviderInfo provider) {
             super.onProviderRemoved(router, provider);
         }
 
-        @DebugLog
         @Override
         public void onProviderChanged(MediaRouter router, MediaRouter.ProviderInfo provider) {
             super.onProviderChanged(router, provider);

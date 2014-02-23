@@ -964,19 +964,16 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             super.onRouteChanged(router, route);
         }
 
-        @DebugLog
         @Override
         public void onProviderAdded(MediaRouter router, MediaRouter.ProviderInfo provider) {
             super.onProviderAdded(router, provider);
         }
 
-        @DebugLog
         @Override
         public void onProviderRemoved(MediaRouter router, MediaRouter.ProviderInfo provider) {
             super.onProviderRemoved(router, provider);
         }
 
-        @DebugLog
         @Override
         public void onProviderChanged(MediaRouter router, MediaRouter.ProviderInfo provider) {
             super.onProviderChanged(router, provider);
