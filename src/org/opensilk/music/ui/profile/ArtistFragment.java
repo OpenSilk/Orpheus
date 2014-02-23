@@ -33,7 +33,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.MusicUtils;
-import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
+import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.AlbumGridCardCursorAdapter;
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
