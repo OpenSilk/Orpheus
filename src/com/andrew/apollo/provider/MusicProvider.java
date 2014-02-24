@@ -23,9 +23,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.util.Log;
-
-import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 2/24/14.
@@ -50,7 +47,6 @@ public class MusicProvider extends ContentProvider {
     private static SQLiteDatabase sFavorites;
 
     @Override
-    @DebugLog
     public boolean onCreate() {
         sRecents = RecentStore.getInstance(getContext()).getWritableDatabase();
         sFavorites = FavoritesStore.getInstance(getContext()).getWritableDatabase();
@@ -58,7 +54,6 @@ public class MusicProvider extends ContentProvider {
     }
 
     @Override
-    @DebugLog
     public synchronized Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor c = null;
         switch (sUriMatcher.match(uri)) {
@@ -110,8 +105,19 @@ public class MusicProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+    public synchronized int delete(Uri uri, String selection, String[] selectionArgs) {
+        int ret = 0;
+        switch (sUriMatcher.match(uri)) {
+            case 1:
+                ret = sRecents.delete(RecentStore.RecentStoreColumns.NAME, selection, selectionArgs);
+                break;
+            case 2:
+                break;
+        }
+        if (ret != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return ret;
     }
 
     @Override
