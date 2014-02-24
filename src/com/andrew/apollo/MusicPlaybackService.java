@@ -2308,15 +2308,16 @@ public class MusicPlaybackService extends Service {
         if (mIsSupposedToBePlaying) {
             try {
                 mCastManager.pause();
-                scheduleDelayedShutdown();
-                mIsSupposedToBePlaying = false;
-                notifyChange(PLAYSTATE_CHANGED);
             } catch (CastException e) {
                 e.printStackTrace();
             } catch (TransientNetworkDisconnectionException e) {
                 e.printStackTrace();
             } catch (NoConnectionException e) {
                 e.printStackTrace();
+            } finally {
+                scheduleDelayedShutdown();
+                mIsSupposedToBePlaying = false;
+                notifyChange(PLAYSTATE_CHANGED);
             }
         }
     }
@@ -2855,7 +2856,8 @@ public class MusicPlaybackService extends Service {
                     public void run() {
                         try {
                             mCastManager.get().stopApplication();
-                        } catch (Exception ignored) {
+                        } catch (Exception e) {
+                            Log.e(TAG, "Failed to stop application: " + e.getMessage());
                         }
                     }
                 });
@@ -3009,6 +3011,7 @@ public class MusicPlaybackService extends Service {
 
         @Override
         public void handleMessage(Message msg) {
+            Log.d(TAG, "Fetching remote progress");
             if (mService.get().isRemotePlayback()) {
                 mService.get().positionRemote();
                 mService.get().mRemoteProgressHandler.sendEmptyMessageDelayed(0, 3000); //Might increase this

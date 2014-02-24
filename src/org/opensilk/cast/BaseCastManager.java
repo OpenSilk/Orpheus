@@ -210,6 +210,7 @@ public abstract class BaseCastManager implements
         mDeviceName = mSelectedCastDevice != null ? mSelectedCastDevice.getFriendlyName() : null;
 
         if (mSelectedCastDevice == null) {
+            LOGD(TAG, "selectDevice: Device is null");
             if (!mConnectionSuspened) {
                 Utils.saveStringToPreference(mContext, PREFS_KEY_SESSION_ID, null);
                 Utils.saveStringToPreference(mContext, PREFS_KEY_ROUTE_ID, null);
@@ -251,7 +252,10 @@ public abstract class BaseCastManager implements
                     .build();
             mApiClient.connect();
         } else if (!mApiClient.isConnected()) {
+            LOGD(TAG, "selectDevice: Connecting to apiClient");
             mApiClient.connect();
+        } else {
+            LOGD(TAG, "selectDevice: Doing nothing");
         }
     }
 
