@@ -1018,6 +1018,7 @@ public abstract class BaseCastManager implements
         }
 
         @Override
+        @DebugLog
         public void onRouteAdded(MediaRouter router, RouteInfo route) {
             super.onRouteAdded(router, route);
             if (!router.getDefaultRoute().equals(route)) {

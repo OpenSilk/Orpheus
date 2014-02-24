@@ -1115,42 +1115,44 @@ public class CastManager extends BaseCastManager
         }
         mState = mRemoteMediaPlayer.getMediaStatus().getPlayerState();
         mIdleReason = mRemoteMediaPlayer.getMediaStatus().getIdleReason();
-        try {
-            double volume = getVolume();
-            boolean isMute = isMute();
+//        try {
+//            double volume = getVolume();
+//            boolean isMute = isMute();
             boolean idle = false;
             if (mState == MediaStatus.PLAYER_STATE_PLAYING) {
-                System.out.println("status: playing");
+                LOGD(TAG,"status: playing");
             } else if (mState == MediaStatus.PLAYER_STATE_PAUSED) {
-                System.out.println("status: paused");
+                LOGD(TAG,"status: paused");
             } else if (mState == MediaStatus.PLAYER_STATE_IDLE) {
                 idle = true;
                 if (mIdleReason == MediaStatus.IDLE_REASON_FINISHED) {
+                    //Anything?
                 } else if (mIdleReason == MediaStatus.IDLE_REASON_ERROR) {
                     // something bad happened on the cast device
                     LOGD(TAG, "Player on the receiver has thrown an error");
+                    //TODO not sure we should do this, i still havent encountered it yet though
                     onFailed(R.string.failed_receiver_player_error, NO_STATUS_CODE);
                 }
             } else if (mState == MediaStatus.PLAYER_STATE_BUFFERING) {
-                System.out.println("status: buffering");
+                LOGD(TAG,"status: buffering");
             } else {
-                System.out.println("status: unknown");
+                LOGD(TAG,"status: unknown");
                 idle = true;
             }
             for (IVideoCastConsumer consumer : mVideoConsumers) {
                 try {
                     consumer.onRemoteMediaPlayerStatusUpdated();
-                    consumer.onVolumeChanged(volume, isMute);
+//                    consumer.onVolumeChanged(volume, isMute); //Dont know why they were calling this every damn time
                 } catch (Exception e) {
                     LOGE(TAG, "onRemoteMediaplayerStatusUpdated(): Failed to inform "
                             + consumer, e);
                 }
             }
-        } catch (TransientNetworkDisconnectionException e) {
-            LOGE(TAG, "Failed to get volume state due to network issues", e);
-        } catch (NoConnectionException e) {
-            LOGE(TAG, "Failed to get volume state due to network issues", e);
-        }
+//        } catch (TransientNetworkDisconnectionException e) {
+//            LOGE(TAG, "Failed to get volume state due to network issues", e);
+//        } catch (NoConnectionException e) {
+//            LOGE(TAG, "Failed to get volume state due to network issues", e);
+//        }
 
     }
 
