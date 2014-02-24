@@ -133,11 +133,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Profile phone Activity -->
-        <activity
-            android:name="org.opensilk.music.ui.profile.ProfileSlidingActivity"
-            android:theme="@style/Theme.Orpheus.Panel.Profile"
-            android:exported="false"/>
         <!-- Shortcut launcher Activity -->
         <activity
             android:name=".ui.activities.ShortcutActivity"

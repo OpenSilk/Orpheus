@@ -17,8 +17,12 @@
 
 package org.opensilk.music.ui.fragments;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,13 +32,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.adapters.PagerAdapter;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.SortOrder;
 
+import org.opensilk.music.adapters.PagerAdapter;
 import org.opensilk.music.adapters.PagerAdapter.MusicFragments;
+
+import java.util.Locale;
+
+import hugo.weaving.DebugLog;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
@@ -62,39 +70,27 @@ public class HomePhoneFragment extends Fragment {
 
     private PreferenceUtils mPreferences;
 
-    /**
-     * Empty constructor as per the {@link Fragment} documentation
-     */
-    public HomePhoneFragment() {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Get the preferences
         mPreferences = PreferenceUtils.getInstance(getActivity());
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
-            final Bundle savedInstanceState) {
-        // The View for the fragment's UI
-        final ViewGroup rootView = (ViewGroup)inflater.inflate(
-                R.layout.fragment_home_phone, container, false);
-
-        getActivity().getActionBar().getHeight();
         // Initialize the adapter
-        mPagerAdapter = new PagerAdapter(getActivity());
+        mPagerAdapter = new PagerAdapter(getActivity(), getChildFragmentManager());
         final MusicFragments[] mFragments = MusicFragments.values();
         for (final MusicFragments mFragment : mFragments) {
             mPagerAdapter.add(mFragment.getFragmentClass(), null);
         }
+    }
+
+    @Override
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+            final Bundle savedInstanceState) {
+
+        // The View for the fragment's UI
+        final ViewGroup rootView = (ViewGroup)inflater.inflate(
+                R.layout.fragment_home_phone, container, false);
 
         // Initialize the ViewPager
         mViewPager = (ViewPager)rootView.findViewById(R.id.home_pager);
@@ -108,9 +104,6 @@ public class HomePhoneFragment extends Fragment {
         return rootView;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -118,9 +111,6 @@ public class HomePhoneFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onPause() {
         super.onPause();
@@ -128,17 +118,12 @@ public class HomePhoneFragment extends Fragment {
         mPreferences.setStartPage(mViewPager.getCurrentItem());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onPrepareOptionsMenu(final Menu menu) {
-        super.onPrepareOptionsMenu(menu);
+    public void onDestroyView() {
+        super.onDestroyView();
+        mViewPager = null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -158,9 +143,6 @@ public class HomePhoneFragment extends Fragment {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
@@ -304,4 +286,5 @@ public class HomePhoneFragment extends Fragment {
     private boolean isRecentPage() {
         return mViewPager.getCurrentItem() == 1;
     }
+
 }

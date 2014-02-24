@@ -16,15 +16,13 @@
 
 package org.opensilk.music.ui.profile;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -35,26 +33,17 @@ import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
-import org.opensilk.music.adapters.AlbumGridCardCursorAdapter;
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
 
-import it.gmariotti.cardslib.library.view.CardGridView;
+import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Created by drew on 2/21/14.
  */
-public class ArtistFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
 
-    /* Manages our views */
-    protected FadingActionBarHelper mFadingHelper;
-    /* main content */
-    protected CardListView mListView;
-    protected ProfileAlbumListCardCursorAdapter mAdapter;
-    /* header image */
-    protected ImageView mHeaderImage;
     /* header overlay stuff */
     protected TextView mInfoTitle;
     protected TextView mInfoSubTitle;
@@ -62,37 +51,32 @@ public class ArtistFragment extends Fragment implements
 
     private Artist mArtist;
 
-    public static ArtistFragment newInstance(Bundle args) {
-        ArtistFragment f = new ArtistFragment();
+    public static ProfileArtistFragment newInstance(Bundle args) {
+        ProfileArtistFragment f = new ProfileArtistFragment();
         f.setArguments(args);
         return f;
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    @DebugLog
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mArtist = mBundleData;
+    }
+
+    @Override
+    @DebugLog
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Init the helper here so its around for onCreateView
         mFadingHelper = new FadingActionBarHelper()
                 .actionBarBackground(R.drawable.ab_solid_orpheus)
                 .headerLayout(R.layout.profile_header_image)
                 .headerOverlayLayout(R.layout.profile_header_overlay_artist)
                 .contentLayout(R.layout.profile_card_listview);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() == null) {
-            // We're fucked;
-            getActivity().finish();
-        }
-        mArtist = getArguments().getParcelable(Config.EXTRA_DATA);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = mFadingHelper.createView(inflater);
         mListView = (CardListView) v.findViewById(android.R.id.list);
+        // set the adapter
+        mListView.setAdapter(mAdapter);
         mHeaderImage = (ImageView) v.findViewById(R.id.artist_image_header);
         mInfoTitle = (TextView) v.findViewById(R.id.info_title);
         mInfoSubTitle = (TextView) v.findViewById(R.id.info_subtitle);
@@ -101,6 +85,7 @@ public class ArtistFragment extends Fragment implements
     }
 
     @Override
+    @DebugLog
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
@@ -120,14 +105,15 @@ public class ArtistFragment extends Fragment implements
 //        });
         // Init the fading action bar
         mFadingHelper.initActionBar(getActivity());
-        // init the adapter
-        mAdapter = new ProfileAlbumListCardCursorAdapter(getActivity());
-        // set the adapter
-        mListView.setAdapter(mAdapter);
-        // start the loader
-        final Bundle b = new Bundle();
-        b.putLong(Config.ID, mArtist.mArtistId);
-        getLoaderManager().initLoader(0, b, this);
+    }
+
+    @Override
+    @DebugLog
+    public void onDestroyView() {
+        super.onDestroyView();
+        mInfoTitle = null;
+        mInfoSubTitle = null;
+        mOverflowButton = null;
     }
 
     /*
@@ -135,18 +121,25 @@ public class ArtistFragment extends Fragment implements
      */
 
     @Override
+    @DebugLog
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new ArtistAlbumCursorLoader(getActivity(), args.getLong(Config.ID));
     }
 
+    /*
+     * Implement abstract methods
+     */
+
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
+    protected CursorAdapter createAdapter() {
+        return new ProfileAlbumListCardCursorAdapter(getActivity());
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+    protected Bundle createLoaderArgs() {
+        final Bundle b = new Bundle();
+        b.putLong(Config.ID, mBundleData.mArtistId);
+        return b;
     }
 
 }

@@ -32,6 +32,7 @@ import org.opensilk.music.ui.cards.CardArtistList;
 import java.util.ArrayList;
 import java.util.List;
 
+import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
@@ -49,6 +50,7 @@ public class ArtistFragment extends HomePagerBaseFragment<Artist> {
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public Loader<List<Artist>> onCreateLoader(final int id, final Bundle args) {
         return new ArtistLoader(getActivity());
     }
@@ -57,6 +59,7 @@ public class ArtistFragment extends HomePagerBaseFragment<Artist> {
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public void onLoadFinished(final Loader<List<Artist>> loader, final List<Artist> data) {
         // Check for any errors
         if (data.isEmpty()) {

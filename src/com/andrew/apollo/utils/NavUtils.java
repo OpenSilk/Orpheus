@@ -19,23 +19,22 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.ArtistAlbumLoader;
-import com.andrew.apollo.loaders.ArtistLoader;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.ui.activities.AudioPlayerActivity;
-
-import org.opensilk.music.adapters.CursorHelpers;
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
-
-import org.opensilk.music.ui.profile.ProfileSlidingActivity;
-
 import com.andrew.apollo.ui.activities.SearchActivity;
 import com.andrew.apollo.ui.activities.SettingsActivity;
 import com.devspark.appmsg.AppMsg;
+
+import org.opensilk.music.ui.activities.BaseSlidingActivity;
+import org.opensilk.music.ui.activities.HomeSlidingActivity;
+import org.opensilk.music.ui.profile.ProfileAlbumFragment;
+import org.opensilk.music.ui.profile.ProfileArtistFragment;
 
 /**
  * Various navigation helpers.
@@ -53,19 +52,6 @@ public final class NavUtils {
     @Deprecated
     public static void openArtistProfile(final Context context, final String artistName) {
 
-        Artist artist = CursorHelpers.makeArtistFromCursor(ArtistAlbumLoader.makeArtistAlbumCursor(context,
-                MusicUtils.getIdForArtist(context, artistName)));
-        openArtistProfile(context, artist);
-//        // Create a new bundle to transfer the artist info
-//        final Bundle bundle = new Bundle();
-//        bundle.putLong(Config.ID, MusicUtils.getIdForArtist(context, artistName));
-//        bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
-//        bundle.putString(Config.ARTIST_NAME, artistName);
-//
-//        // Create the intent to launch the profile activity
-//        final Intent intent = new Intent(context, ProfileSlidingActivity.class);
-//        intent.putExtras(bundle);
-//        context.startActivity(intent);
     }
 
     /**
@@ -77,14 +63,18 @@ public final class NavUtils {
     public static void openArtistProfile(final Context context, final Artist artist) {
 
         // Create a new bundle to transfer the artist info
-        final Bundle bundle = new Bundle();
-        bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
-        bundle.putParcelable(Config.EXTRA_DATA, artist);
+        final Bundle b = new Bundle();
+        b.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
+        b.putParcelable(Config.EXTRA_DATA, artist);
 
-        // Create the intent to launch the profile activity
-        final Intent intent = new Intent(context, ProfileSlidingActivity.class);
-        intent.putExtras(bundle);
-        context.startActivity(intent);
+        // We are making teh assumption that all contexts passed through were created
+        // with getActivity()
+        FragmentManager fm = ((BaseSlidingActivity) context).getSupportFragmentManager();
+        fm.beginTransaction()
+                .replace(R.id.main, ProfileArtistFragment.newInstance(b), "artist")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack("artist")
+                .commit();
     }
 
     /**
@@ -99,18 +89,6 @@ public final class NavUtils {
     public static void openAlbumProfile(final Context context,
             final String albumName, final String artistName, final long albumId) {
 
-        // Create a new bundle to transfer the album info
-        final Bundle bundle = new Bundle();
-        bundle.putString(Config.ALBUM_YEAR, MusicUtils.getReleaseDateForAlbum(context, albumId));
-        bundle.putString(Config.ARTIST_NAME, artistName);
-        bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
-        bundle.putLong(Config.ID, albumId);
-        bundle.putString(Config.NAME, albumName);
-
-        // Create the intent to launch the profile activity
-        final Intent intent = new Intent(context, ProfileSlidingActivity.class);
-        intent.putExtras(bundle);
-        context.startActivity(intent);
     }
 
     /**
@@ -125,10 +103,14 @@ public final class NavUtils {
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, album);
 
-        // Create the intent to launch the profile activity
-        final Intent intent = new Intent(context, ProfileSlidingActivity.class);
-        intent.putExtras(b);
-        context.startActivity(intent);
+        // We are making teh assumption that all contexts passed through were created
+        // with getActivity()
+        FragmentManager fm = ((BaseSlidingActivity) context).getSupportFragmentManager();
+        fm.beginTransaction()
+                .replace(R.id.main, ProfileAlbumFragment.newInstance(b), "album")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack("album")
+                .commit();
     }
 
     /**

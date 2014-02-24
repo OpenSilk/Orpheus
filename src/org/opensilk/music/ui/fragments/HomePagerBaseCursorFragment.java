@@ -26,12 +26,14 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 
+import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
 import it.gmariotti.cardslib.library.view.CardGridView;
@@ -64,11 +66,25 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
      */
     protected CardListView mListView;
 
+    /**
+     * Our cursor adapter
+     */
+    protected CursorAdapter mAdapter;
+
+
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
-        // Register the music status listener
+        // Register the music status listener //TODO dont want this anymore
         ((BaseSlidingActivity)activity).setMusicStateListenerListener(this);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mAdapter = createAdapter();
+        // Start the loader
+        getLoaderManager().initLoader(LOADER, null, this);
     }
 
     @Override
@@ -92,6 +108,14 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
         setHasOptionsMenu(true);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mRootView = null;
+        mListView = null;
+        mGridView = null;
+    }
+
     /**
      * Restarts the loader. Called when user updates the sort by option
      */
@@ -99,6 +123,20 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
         // Wait a moment for the preference to change.
         SystemClock.sleep(10);
         getLoaderManager().restartLoader(LOADER, null, this);
+    }
+
+    /*
+     * Loader Callbacks
+     */
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 
     /*
@@ -119,5 +157,6 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
      * Abstract methods
      */
 
+    protected abstract CursorAdapter createAdapter();
     protected abstract boolean isSimpleLayout();
 }

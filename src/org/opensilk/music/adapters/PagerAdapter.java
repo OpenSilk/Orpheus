@@ -15,6 +15,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.util.SparseArray;
 import android.view.ViewGroup;
@@ -53,8 +54,8 @@ public class PagerAdapter extends FragmentPagerAdapter {
      * @param fragmentActivity The {@link Activity} of the
      *            {@link Fragment}.
      */
-    public PagerAdapter(final FragmentActivity fragmentActivity) {
-        super(fragmentActivity.getSupportFragmentManager());
+    public PagerAdapter(final FragmentActivity fragmentActivity, FragmentManager fm) {
+        super(fm);
         mFragmentActivity = fragmentActivity;
     }
 

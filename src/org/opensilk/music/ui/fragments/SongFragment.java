@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.view.View;
+import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
@@ -35,8 +36,6 @@ import org.opensilk.music.loaders.SongCursorLoader;
  */
 public class SongFragment extends HomePagerBaseCursorFragment {
 
-    protected SongListCardCursorAdapter mAdapter;
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -44,16 +43,8 @@ public class SongFragment extends HomePagerBaseCursorFragment {
         final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
         empty.setText(getString(R.string.empty_music));
         mListView.setEmptyView(empty);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mAdapter = new SongListCardCursorAdapter(getActivity());
         // Set the data behind the list
         mListView.setAdapter(mAdapter);
-        // Start the loader
-        getLoaderManager().initLoader(LOADER, null, this);
     }
 
     /*
@@ -65,19 +56,14 @@ public class SongFragment extends HomePagerBaseCursorFragment {
         return new SongCursorLoader(getActivity());
     }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
-    }
-
     /*
      * Implement abstract methods
      */
+
+    @Override
+    protected CursorAdapter createAdapter() {
+        return new SongListCardCursorAdapter(getActivity());
+    }
 
     @Override
     protected boolean isSimpleLayout() {

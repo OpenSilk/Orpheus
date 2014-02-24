@@ -16,15 +16,13 @@
 
 package org.opensilk.music.ui.profile;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
@@ -43,16 +41,9 @@ import org.opensilk.music.ui.cards.CardAlbumList;
 /**
  * Created by drew on 2/21/14.
  */
-public class AlbumFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
 
-    /* Manages our views */
-    protected FadingActionBarHelper mFadingHelper;
-    /* main content */
-    protected ListView mListView;
-    protected ProfileAlbumCursorAdapter mAdapter;
-    /* header image */
-    protected ImageView mHeaderImage;
+
     /* header overlay stuff */
     protected ImageView mHeaderThumb;
     protected TextView mInfoTitle;
@@ -61,37 +52,30 @@ public class AlbumFragment extends Fragment implements
 
     private Album mAlbum;
 
-    public static AlbumFragment newInstance(Bundle args) {
-        AlbumFragment f = new AlbumFragment();
+    public static ProfileAlbumFragment newInstance(Bundle args) {
+        ProfileAlbumFragment f = new ProfileAlbumFragment();
         f.setArguments(args);
         return f;
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mAlbum = mBundleData;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Init the helper here so its around for onCreateView
         mFadingHelper = new FadingActionBarHelper()
                 .actionBarBackground(R.drawable.ab_solid_orpheus)
                 .headerLayout(R.layout.profile_header_image)
                 .headerOverlayLayout(R.layout.profile_header_overlay)
                 .contentLayout(R.layout.profile_listview);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() == null) {
-            // We're fucked;
-            getActivity().finish();
-        }
-        mAlbum = getArguments().getParcelable(Config.EXTRA_DATA);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = mFadingHelper.createView(inflater);
         mListView = (ListView) v.findViewById(android.R.id.list);
+        // set the adapter
+        mListView.setAdapter(mAdapter);
         mHeaderImage = (ImageView) v.findViewById(R.id.artist_image_header);
         mHeaderThumb = (ImageView) v.findViewById(R.id.album_image_header);
         mInfoTitle = (TextView) v.findViewById(R.id.info_title);
@@ -123,14 +107,16 @@ public class AlbumFragment extends Fragment implements
         });
         // Init the fading action bar
         mFadingHelper.initActionBar(getActivity());
-        // init the adapter
-        mAdapter = new ProfileAlbumCursorAdapter(getActivity());
-        // set the adapter
-        mListView.setAdapter(mAdapter);
-        // start the loader
-        final Bundle b = new Bundle();
-        b.putLong(Config.ID, mAlbum.mAlbumId);
-        getLoaderManager().initLoader(0, b, this);
+    }
+
+    @Override
+    public void onDestroyView() {
+        mListView.setDivider(null); //HACK!!!!!!!!!! Fuckin ArrayOutOfBounds bullshit comment this and youll see
+        super.onDestroyView();
+        mHeaderThumb = null;
+        mInfoTitle = null;
+        mInfoSubTitle = null;
+        mOverflowButton = null;
     }
 
     /*
@@ -142,14 +128,20 @@ public class AlbumFragment extends Fragment implements
         return new AlbumSongCursorLoader(getActivity(), args.getLong(Config.ID));
     }
 
+    /*
+     * Implement Abstract methods
+     */
+
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
+    protected CursorAdapter createAdapter() {
+        return new ProfileAlbumCursorAdapter(getActivity());
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+    protected Bundle createLoaderArgs() {
+        final Bundle b = new Bundle();
+        b.putLong(Config.ID, mBundleData.mAlbumId);
+        return b;
     }
 
 }

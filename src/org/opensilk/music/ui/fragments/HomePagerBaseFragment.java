@@ -85,6 +85,7 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         // The View for the fragment's UI
@@ -102,6 +103,7 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Enable the options menu
@@ -110,12 +112,12 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
         getLoaderManager().initLoader(LOADER, null, this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onDestroyView() {
+        super.onDestroyView();
+        mRootView = null;
+        mListView = null;
+        mGridView = null;
     }
 
     /**
