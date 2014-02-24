@@ -40,8 +40,7 @@ public class SongFragment extends HomePagerBaseCursorFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Set the empty text
-        final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
-        empty.setText(getString(R.string.empty_music));
+        final View empty = mRootView.findViewById(android.R.id.empty);
         mListView.setEmptyView(empty);
         // Set the data behind the list
         mListView.setAdapter(mAdapter);

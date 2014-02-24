@@ -29,6 +29,15 @@
         android:layout_height="match_parent"
         card:list_card_layout_resourceID="@layout/card_list_thumb" />
 
+    <ProgressBar
+        android:id="@android:id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        style="?android:progressBarStyle"
+        android:visibility="gone"/>
+
     <TextView
         android:id="@+id/empty"
         android:layout_width="wrap_content"
