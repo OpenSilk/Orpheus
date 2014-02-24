@@ -47,6 +47,9 @@
     <!-- Casting is currently only supported over wifi -->
     <uses-feature android:name="android.hardware.wifi"/>
 
+    <permission android:name="com.andrew.apollo.provider.ACCESS"
+        android:protectionLevel="signature"/>
+
     <application
         android:name=".ApolloApplication"
         android:theme="@style/Theme.Orpheus"
@@ -168,6 +171,14 @@
         <activity
             android:name=".ui.activities.ThemesActivity"
             android:excludeFromRecents="true" />
+
+        <!-- Local Content Provider-->
+        <provider
+            android:authorities="com.andrew.apollo.provider"
+            android:name=".provider.MusicProvider"
+            android:multiprocess="true"
+            android:permission="com.andrew.apollo.provider.ACCESS"/>
+        
         <!-- 4x1 App Widget -->
         <receiver
             android:name="com.andrew.apollo.appwidgets.AppWidgetSmall"

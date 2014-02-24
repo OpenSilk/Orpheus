@@ -16,6 +16,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 
 import com.andrew.apollo.model.Song;
 
@@ -31,7 +32,7 @@ import com.andrew.apollo.model.Song;
 public class FavoritesStore extends SQLiteOpenHelper {
 
     /* Version constant to increment when the database should be rebuilt */
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
     /* Name of database file */
     public static final String DATABASENAME = "favorites.db";
@@ -53,7 +54,7 @@ public class FavoritesStore extends SQLiteOpenHelper {
     @Override
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + FavoriteColumns.NAME + " ("
-                + FavoriteColumns.ID + " LONG NOT NULL,"
+                + FavoriteColumns._ID + " LONG NOT NULL,"
                 + FavoriteColumns.SONGNAME + " TEXT NOT NULL,"
                 + FavoriteColumns.ALBUMNAME + " TEXT NOT NULL,"
                 + FavoriteColumns.ARTISTNAME + " TEXT NOT NULL,"
@@ -94,7 +95,7 @@ public class FavoritesStore extends SQLiteOpenHelper {
 
         database.beginTransaction();
 
-        values.put(FavoriteColumns.ID, song.mSongId);
+        values.put(FavoriteColumns._ID, song.mSongId);
         values.put(FavoriteColumns.SONGNAME, song.mSongName);
         values.put(FavoriteColumns.ALBUMNAME, song.mAlbumName);
         values.put(FavoriteColumns.ARTISTNAME, song.mAlbumName);
@@ -102,7 +103,7 @@ public class FavoritesStore extends SQLiteOpenHelper {
         values.put(FavoriteColumns.DURATION, song.mDuration);
         values.put(FavoriteColumns.PLAYCOUNT, playCount != 0 ? playCount + 1 : 1);
 
-        database.delete(FavoriteColumns.NAME, FavoriteColumns.ID + " = ?", new String[] {
+        database.delete(FavoriteColumns.NAME, FavoriteColumns._ID + " = ?", new String[] {
                 String.valueOf(song.mSongId)
         });
         database.insert(FavoriteColumns.NAME, null, values);
@@ -142,17 +143,17 @@ public class FavoritesStore extends SQLiteOpenHelper {
 
         final SQLiteDatabase database = getReadableDatabase();
         final String[] projection = new String[] {
-                FavoriteColumns.ID, FavoriteColumns.SONGNAME, FavoriteColumns.ALBUMNAME,
+                FavoriteColumns._ID, FavoriteColumns.SONGNAME, FavoriteColumns.ALBUMNAME,
                 FavoriteColumns.ARTISTNAME, FavoriteColumns.PLAYCOUNT
         };
-        final String selection = FavoriteColumns.ID + "=?";
+        final String selection = FavoriteColumns._ID + "=?";
         final String[] having = new String[] {
             String.valueOf(songId)
         };
         Cursor cursor = database.query(FavoriteColumns.NAME, projection, selection, having, null,
                 null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
-            final Long id = cursor.getLong(cursor.getColumnIndexOrThrow(FavoriteColumns.ID));
+            final Long id = cursor.getLong(cursor.getColumnIndexOrThrow(FavoriteColumns._ID));
             cursor.close();
             cursor = null;
             return id;
@@ -177,10 +178,10 @@ public class FavoritesStore extends SQLiteOpenHelper {
 
         final SQLiteDatabase database = getReadableDatabase();
         final String[] projection = new String[] {
-                FavoriteColumns.ID, FavoriteColumns.SONGNAME, FavoriteColumns.ALBUMNAME,
+                FavoriteColumns._ID, FavoriteColumns.SONGNAME, FavoriteColumns.ALBUMNAME,
                 FavoriteColumns.ARTISTNAME, FavoriteColumns.PLAYCOUNT
         };
-        final String selection = FavoriteColumns.ID + "=?";
+        final String selection = FavoriteColumns._ID + "=?";
         final String[] having = new String[] {
             String.valueOf(songId)
         };
@@ -240,19 +241,20 @@ public class FavoritesStore extends SQLiteOpenHelper {
      */
     public void removeItem(final Long songId) {
         final SQLiteDatabase database = getReadableDatabase();
-        database.delete(FavoriteColumns.NAME, FavoriteColumns.ID + " = ?", new String[] {
+        database.delete(FavoriteColumns.NAME, FavoriteColumns._ID + " = ?", new String[] {
             String.valueOf(songId)
         });
 
     }
 
-    public interface FavoriteColumns {
+    public interface FavoriteColumns extends BaseColumns {
 
         /* Table name */
         public static final String NAME = "favorites";
 
         /* Song IDs column */
-        public static final String ID = "songid";
+        @Deprecated
+        public static final String ID = _ID;
 
         /* Song name column */
         public static final String SONGNAME = "songname";

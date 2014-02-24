@@ -16,9 +16,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 import android.text.TextUtils;
 
 import com.andrew.apollo.ui.activities.ProfileActivity;
+
+import hugo.weaving.DebugLog;
 
 /**
  * The {@link RecentlyListenedFragment} is used to display a a grid or list of
@@ -36,7 +39,7 @@ import com.andrew.apollo.ui.activities.ProfileActivity;
 public class RecentStore extends SQLiteOpenHelper {
 
     /* Version constant to increment when the database should be rebuilt */
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     /* Name of database file */
     public static final String DATABASENAME = "albumhistory.db";
@@ -58,7 +61,7 @@ public class RecentStore extends SQLiteOpenHelper {
     @Override
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + RecentStoreColumns.NAME + " ("
-                + RecentStoreColumns.ID + " LONG NOT NULL," + RecentStoreColumns.ALBUMNAME
+                + RecentStoreColumns._ID + " LONG NOT NULL," + RecentStoreColumns.ALBUMNAME
                 + " TEXT NOT NULL," + RecentStoreColumns.ARTISTNAME + " TEXT NOT NULL,"
                 + RecentStoreColumns.ALBUMSONGCOUNT + " TEXT NOT NULL,"
                 + RecentStoreColumns.ALBUMYEAR + " TEXT," + RecentStoreColumns.TIMEPLAYED
@@ -105,20 +108,35 @@ public class RecentStore extends SQLiteOpenHelper {
 
         database.beginTransaction();
 
-        values.put(RecentStoreColumns.ID, albumId);
+        values.put(RecentStoreColumns._ID, albumId);
         values.put(RecentStoreColumns.ALBUMNAME, albumName);
         values.put(RecentStoreColumns.ARTISTNAME, artistName);
         values.put(RecentStoreColumns.ALBUMSONGCOUNT, songCount);
         values.put(RecentStoreColumns.ALBUMYEAR, albumYear);
         values.put(RecentStoreColumns.TIMEPLAYED, System.currentTimeMillis());
 
-        database.delete(RecentStoreColumns.NAME, RecentStoreColumns.ID + " = ?", new String[] {
+        database.delete(RecentStoreColumns.NAME, RecentStoreColumns._ID + " = ?", new String[] {
             String.valueOf(albumId)
         });
         database.insert(RecentStoreColumns.NAME, null, values);
         database.setTransactionSuccessful();
         database.endTransaction();
 
+    }
+
+    public static ContentValues createAlbumContentValues(final Long albumId, final String albumName, final String artistName,
+                                                         final String songCount, final String albumYear) {
+        if (albumId == null || albumName == null || artistName == null || songCount == null) {
+            return null;
+        }
+        final ContentValues values = new ContentValues(6);
+        values.put(RecentStoreColumns._ID, albumId);
+        values.put(RecentStoreColumns.ALBUMNAME, albumName);
+        values.put(RecentStoreColumns.ARTISTNAME, artistName);
+        values.put(RecentStoreColumns.ALBUMSONGCOUNT, songCount);
+        values.put(RecentStoreColumns.ALBUMYEAR, albumYear);
+        values.put(RecentStoreColumns.TIMEPLAYED, System.currentTimeMillis());
+        return values;
     }
 
     /**
@@ -133,7 +151,7 @@ public class RecentStore extends SQLiteOpenHelper {
         }
         final SQLiteDatabase database = getReadableDatabase();
         final String[] projection = new String[] {
-                RecentStoreColumns.ID, RecentStoreColumns.ALBUMNAME, RecentStoreColumns.ARTISTNAME,
+                RecentStoreColumns._ID, RecentStoreColumns.ALBUMNAME, RecentStoreColumns.ARTISTNAME,
                 RecentStoreColumns.TIMEPLAYED
         };
         final String selection = RecentStoreColumns.ARTISTNAME + "=?";
@@ -171,19 +189,20 @@ public class RecentStore extends SQLiteOpenHelper {
      */
     public void removeItem(final long albumId) {
         final SQLiteDatabase database = getReadableDatabase();
-        database.delete(RecentStoreColumns.NAME, RecentStoreColumns.ID + " = ?", new String[] {
+        database.delete(RecentStoreColumns.NAME, RecentStoreColumns._ID + " = ?", new String[] {
             String.valueOf(albumId)
         });
 
     }
 
-    public interface RecentStoreColumns {
+    public interface RecentStoreColumns extends BaseColumns {
 
         /* Table name */
         public static final String NAME = "albumhistory";
 
         /* Album IDs column */
-        public static final String ID = "albumid";
+        @Deprecated
+        public static final String ID = _ID;
 
         /* Album name column */
         public static final String ALBUMNAME = "itemname";

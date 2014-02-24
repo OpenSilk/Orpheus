@@ -23,6 +23,7 @@ import android.provider.MediaStore;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Song;
+import com.andrew.apollo.provider.RecentStore;
 
 /**
  * Created by drew on 2/22/14.
@@ -94,5 +95,25 @@ public class CursorHelpers {
         final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS));
         // Create a new artist
         return new Artist(id, artistName, songCount, albumCount);
+    }
+
+    /**
+     * CReates album from cursor created by RecentCursorLoader
+     * @param c
+     * @return
+     */
+    public static Album makeAlbumFromRecentCursor(Cursor c) {
+        // Copy the album id
+        final long id = c.getLong(c.getColumnIndexOrThrow(RecentStore.RecentStoreColumns._ID));
+        // Copy the album name
+        final String albumName = c.getString(c.getColumnIndexOrThrow(RecentStore.RecentStoreColumns.ALBUMNAME));
+        // Copy the artist name
+        final String artist = c.getString(c.getColumnIndexOrThrow(RecentStore.RecentStoreColumns.ARTISTNAME));
+        // Copy the number of songs
+        final int songCount = c.getInt(c.getColumnIndexOrThrow(RecentStore.RecentStoreColumns.ALBUMSONGCOUNT));
+        // Copy the release year
+        final String year = c.getString(c.getColumnIndexOrThrow(RecentStore.RecentStoreColumns.ALBUMYEAR));
+        // Create a new album
+        return new Album(id, albumName, artist, songCount, year);
     }
 }

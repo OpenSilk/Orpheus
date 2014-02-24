@@ -64,6 +64,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.WeakHashMap;
 
+import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
+
 /**
  * A collection of helpers directly related to music or Apollo's service.
  *
@@ -1456,7 +1458,12 @@ public final class MusicUtils {
                 // Remove from the favorites playlist
                 FavoritesStore.getInstance(context).removeItem(id);
                 // Remove any items in the recents database
-                RecentStore.getInstance(context).removeItem(c.getLong(2));
+                context.getContentResolver().delete(RECENTS_URI,
+                        RecentStore.RecentStoreColumns._ID + " = ?",
+                        new String[] {
+                                String.valueOf(c.getLong(2))
+                        }
+                );
                 c.moveToNext();
             }
 

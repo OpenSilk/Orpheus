@@ -34,6 +34,8 @@ import org.opensilk.music.dialogs.AddToPlaylistDialog;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
+import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
+
 /**
  * Created by drew on 2/11/14.
  */
@@ -88,8 +90,12 @@ public class CardRecentList extends CardBaseList<Album> {
                         NavUtils.openArtistProfile(getContext(), mData.mArtistName);
                         break;
                     case R.id.card_menu_remove_from_recent:
-                        RecentStore.getInstance(getContext()).removeItem(mData.mAlbumId);
-                        MusicUtils.refresh();
+                        getContext().getContentResolver().delete(RECENTS_URI,
+                                RecentStore.RecentStoreColumns._ID + " = ?",
+                                new String[]{
+                                        String.valueOf(mData.mAlbumId)
+                                }
+                        );
                         break;
                     case R.id.card_menu_delete:
                         final String album = mData.mAlbumName;

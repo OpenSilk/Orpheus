@@ -17,24 +17,17 @@
 
 package org.opensilk.music.ui.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.CursorAdapter;
 
-import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.RecentLoader;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.ui.cards.CardRecentGrid;
-import org.opensilk.music.ui.cards.CardRecentList;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
+import org.opensilk.music.adapters.RecentGridCardCursorAdapter;
+import org.opensilk.music.adapters.RecentListCardCursorAdapter;
+import org.opensilk.music.loaders.RecentCursorLoader;
 
 import static com.andrew.apollo.utils.PreferenceUtils.RECENT_LAYOUT;
 
@@ -44,50 +37,44 @@ import static com.andrew.apollo.utils.PreferenceUtils.RECENT_LAYOUT;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class RecentFragment extends HomePagerBaseFragment<Album> {
+public class RecentFragment extends HomePagerBaseCursorFragment {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Loader<List<Album>> onCreateLoader(final int id, final Bundle args) {
-        return new RecentLoader(getActivity());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onLoadFinished(final Loader<List<Album>> loader, final List<Album> data) {
-        // Check for any errors
-        if (data.isEmpty()) {
-            // Set the empty text
-            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
-            empty.setText(getString(R.string.empty_recent));
-            if (isSimpleLayout()) {
-                mListView.setEmptyView(empty);
-            } else {
-                mGridView.setEmptyView(empty);
-            }
-            return;
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Set the empty text
+        final View empty = mRootView.findViewById(android.R.id.empty);
+        if (isSimpleLayout()) {
+            mListView.setEmptyView(empty);
+            // Set the data behind the list
+            mListView.setAdapter(mAdapter);
+        } else {
+            mGridView.setEmptyView(empty);
+            // Set the data behind the grid
+            mGridView.setAdapter(mAdapter);
         }
 
-        ArrayList<Card> cards = new ArrayList<Card>();
+    }
 
+    /*
+     * Loader Callbacks
+     */
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new RecentCursorLoader(getActivity());
+    }
+
+    /*
+     * Implement abstract methods
+     */
+
+    @Override
+    protected CursorAdapter createAdapter() {
         if (isSimpleLayout()) {
-            for (final Album album: data) {
-                cards.add(new CardRecentList(getActivity(), album));
-            }
-            CardArrayAdapter adapter = new CardArrayAdapter(getActivity(), cards);
-            // Set the data behind the list
-            mListView.setAdapter(adapter);
+            return new RecentListCardCursorAdapter(getActivity());
         } else {
-            for (final Album album: data) {
-                cards.add(new CardRecentGrid(getActivity(), album));
-            }
-            CardGridArrayAdapter adapter = new CardGridArrayAdapter(getActivity(), cards);
-            // Set the data behind the grid
-            mGridView.setAdapter(adapter);
+            return new RecentGridCardCursorAdapter(getActivity());
         }
     }
 
@@ -96,8 +83,4 @@ public class RecentFragment extends HomePagerBaseFragment<Album> {
                 getActivity());
     }
 
-    protected boolean isDetailedLayout() {
-        return PreferenceUtils.getInstance(getActivity()).isDetailedLayout(RECENT_LAYOUT,
-                getActivity());
-    }
 }

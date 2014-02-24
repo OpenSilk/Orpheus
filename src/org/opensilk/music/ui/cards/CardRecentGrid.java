@@ -25,7 +25,6 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.Album;
-import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
@@ -34,6 +33,9 @@ import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
+
+import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
+import static com.andrew.apollo.provider.RecentStore.RecentStoreColumns;
 
 /**
  * Created by drew on 2/11/14.
@@ -92,8 +94,12 @@ public class CardRecentGrid extends CardBaseThumb<Album> {
                         NavUtils.openArtistProfile(getContext(), mData.mArtistName);
                         break;
                     case R.id.card_menu_remove_from_recent:
-                        RecentStore.getInstance(getContext()).removeItem(mData.mAlbumId);
-                        MusicUtils.refresh();
+                        getContext().getContentResolver().delete(RECENTS_URI,
+                                RecentStoreColumns._ID + " = ?",
+                                new String[]{
+                                        String.valueOf(mData.mAlbumId)
+                                }
+                        );
                         break;
                     case R.id.card_menu_delete:
                         final String album = mData.mAlbumName;

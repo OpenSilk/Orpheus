@@ -94,6 +94,8 @@ import java.util.TreeSet;
 
 import hugo.weaving.DebugLog;
 
+import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
+
 /**
  * A backbround {@link Service} used to keep music playing between activities
  * and when the user moves Apollo into the background.
@@ -494,11 +496,6 @@ public class MusicPlaybackService extends Service {
     private NotificationHelper mNotificationHelper;
 
     /**
-     * Recently listened database
-     */
-    private RecentStore mRecentsCache;
-
-    /**
      * Favorites database
      */
     private FavoritesStore mFavoritesCache;
@@ -611,7 +608,6 @@ public class MusicPlaybackService extends Service {
         super.onCreate();
 
         // Initialize the favorites and recents databases
-        mRecentsCache = RecentStore.getInstance(this);
         mFavoritesCache = FavoritesStore.getInstance(this);
 
         // Initialize the notification helper
@@ -1460,9 +1456,11 @@ public class MusicPlaybackService extends Service {
                         getArtistName());
             }
             // Add the track to the recently played list.
-            mRecentsCache.addAlbumId(getAlbumId(), getAlbumName(), getArtistName(),
-                    MusicUtils.getSongCountForAlbum(this, getAlbumId()),
-                    MusicUtils.getReleaseDateForAlbum(this, getAlbumId()));
+            getContentResolver().insert(RECENTS_URI,
+                    RecentStore.createAlbumContentValues( //TODO make method to get current album object
+                            getAlbumId(), getAlbumName(), getArtistName(),
+                            MusicUtils.getSongCountForAlbum(this, getAlbumId()),
+                            MusicUtils.getReleaseDateForAlbum(this, getAlbumId())));
         } else if (what.equals(QUEUE_CHANGED)) {
             saveQueue(true);
             if (isPlaying()) {
