@@ -1032,7 +1032,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             // We are effectively disconnected at this point, there is still the
             // possiblity the framework will reconnect automatically but im not
             // sure what happens then
-            resetDefaultMediaRoute();
+            //resetDefaultMediaRoute();
         }
 
         /**

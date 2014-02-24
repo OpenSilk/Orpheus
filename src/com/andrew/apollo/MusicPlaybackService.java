@@ -2628,6 +2628,7 @@ public class MusicPlaybackService extends Service {
             // XXX
             return startCastServer();
         }
+        mWakeLock.acquire();
         return true;
     }
 
@@ -2640,6 +2641,7 @@ public class MusicPlaybackService extends Service {
             mCastServer.stop();
         }
         mCastServer = null;
+        mWakeLock.release();
     }
 
     /**
@@ -2946,7 +2948,7 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onConnectionSuspended(int cause) {
-            restoreLocalState();
+            //restoreLocalState();
         }
 
         @Override
