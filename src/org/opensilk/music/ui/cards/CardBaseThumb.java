@@ -16,11 +16,13 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.andrew.apollo.cache.ImageFetcher;
+import com.andrew.apollo.utils.ApolloUtils;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
@@ -90,7 +92,7 @@ public abstract class CardBaseThumb<D> extends Card {
              * If your cardthumbnail uses external library you have to provide how to load the image.
              * If your cardthumbnail doesn't use an external library it will use a built-in method
              */
-            final ImageFetcher imageFetcher = ImageFetcher.getInstance(getContext().getApplicationContext());
+            final ImageFetcher imageFetcher = ApolloUtils.getImageFetcher((FragmentActivity) getContext());
             loadThumbnail(imageFetcher, (ImageView) viewImage);
         }
     }
