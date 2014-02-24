@@ -23,4 +23,6 @@ oneway interface CastManagerCallback {
     void onApplicationConnectionFailed(int errorCode);
     void onApplicationDisconnected(int errorCode);
     void onConnectionSuspended(int cause);
+    void onConnectivityRecovered();
+    void onDisconnected();
 }

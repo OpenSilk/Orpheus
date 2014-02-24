@@ -2610,9 +2610,9 @@ public class MusicPlaybackService extends Service {
                 mCastManager.checkConnectivity();
                 return true;
             } catch (TransientNetworkDisconnectionException e) {
-                Log.e(TAG, "isRemotePlayback" + e.getMessage());
+                Log.e(TAG, "isRemotePlayback TransientNetworkDisconnection");
             } catch (NoConnectionException e) {
-                Log.e(TAG, "isRemotePlayback" + e.getMessage());
+                Log.e(TAG, "isRemotePlayback " + e.getMessage());
             }
         }
         updatePlaybackLocation(PlaybackLocation.LOCAL);
@@ -2984,7 +2984,13 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onConnectivityRecovered() {
-
+            if (isPlaying()) {
+                pause();
+            }
+            updatePlaybackLocation(PlaybackLocation.REMOTE);
+            startCastServer();
+            loadRemoteCurrent();
+            restoreRemoteVolumeLevel();
         }
 
         @Override

@@ -711,6 +711,15 @@ public abstract class BaseCastManager implements
                 LOGE(TAG, "onConnectivityRecovered: Failed to inform " + consumer, e);
             }
         }
+        int ii = mListeners.beginBroadcast();
+        while (ii-->0) {
+            try {
+                mListeners.getBroadcastItem(ii).onConnectivityRecovered();
+            } catch (RemoteException e) {
+                LOGE(TAG, "onConnectionSuspended(): ", e);
+            }
+        }
+        mListeners.finishBroadcast();
     }
 
     /*
@@ -774,6 +783,15 @@ public abstract class BaseCastManager implements
                 }
             }
         }
+        int ii = mListeners.beginBroadcast();
+        while (ii-->0) {
+            try {
+                mListeners.getBroadcastItem(ii).onDisconnected();
+            } catch (RemoteException e) {
+                LOGE(TAG, "onDisconnected(): ", e);
+            }
+        }
+        mListeners.finishBroadcast();
     }
 
     /*
@@ -899,6 +917,7 @@ public abstract class BaseCastManager implements
                     onApplicationStopFailed(result.getStatusCode());
                 } else {
                     LOGD(TAG, "stopApplication -> onResult Stopped application " + "successfully");
+                    //onApplicationStopped(); //TODO
                 }
             }
         });

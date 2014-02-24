@@ -931,7 +931,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @DebugLog
         @Override
         public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
-            MusicUtils.notifyRouteUnselected();
+            //
+            if (!mTransientNetworkDisconnection) {
+                MusicUtils.notifyRouteUnselected();
+            }
         }
 
         @DebugLog
@@ -964,21 +967,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             super.onRouteChanged(router, route);
         }
 
-        @Override
-        public void onProviderAdded(MediaRouter router, MediaRouter.ProviderInfo provider) {
-            super.onProviderAdded(router, provider);
-        }
-
-        @Override
-        public void onProviderRemoved(MediaRouter router, MediaRouter.ProviderInfo provider) {
-            super.onProviderRemoved(router, provider);
-        }
-
-        @Override
-        public void onProviderChanged(MediaRouter router, MediaRouter.ProviderInfo provider) {
-            super.onProviderChanged(router, provider);
-        }
     };
+
+    private boolean mTransientNetworkDisconnection = false;
 
     /**
      * Remote callbacks received from the CastManager
@@ -1029,10 +1020,19 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @DebugLog
         @Override
         public void onConnectionSuspended(int cause) throws RemoteException {
-            // We are effectively disconnected at this point, there is still the
-            // possiblity the framework will reconnect automatically but im not
-            // sure what happens then
-            //resetDefaultMediaRoute();
+            mTransientNetworkDisconnection = true;
+        }
+
+        @DebugLog
+        @Override
+        public void onConnectivityRecovered() throws RemoteException {
+            mTransientNetworkDisconnection = false;
+        }
+
+        @DebugLog
+        @Override
+        public void onDisconnected() throws RemoteException {
+            mTransientNetworkDisconnection = false;
         }
 
         /**
