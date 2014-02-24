@@ -17,25 +17,17 @@
 
 package org.opensilk.music.ui.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.CursorAdapter;
 
-import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.ArtistLoader;
-import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.ui.cards.CardArtistGrid;
-import org.opensilk.music.ui.cards.CardArtistList;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import hugo.weaving.DebugLog;
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
+import org.opensilk.music.adapters.ArtistGridCardCursorAdapter;
+import org.opensilk.music.adapters.ArtistListCardCursorAdapter;
+import org.opensilk.music.loaders.ArtistCursorLoader;
 
 import static com.andrew.apollo.utils.PreferenceUtils.ARTIST_LAYOUT;
 
@@ -44,52 +36,43 @@ import static com.andrew.apollo.utils.PreferenceUtils.ARTIST_LAYOUT;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class ArtistFragment extends HomePagerBaseFragment<Artist> {
+public class ArtistFragment extends HomePagerBaseCursorFragment {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @DebugLog
-    public Loader<List<Artist>> onCreateLoader(final int id, final Bundle args) {
-        return new ArtistLoader(getActivity());
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Set the empty text
+        final View empty = mRootView.findViewById(android.R.id.empty);
+        if (isSimpleLayout()) {
+            mListView.setEmptyView(empty);
+            // Set the data behind the list
+            mListView.setAdapter(mAdapter);
+        } else {
+            mGridView.setEmptyView(empty);
+            // Set the data behind the grid
+            mGridView.setAdapter(mAdapter);
+        }
     }
 
-    /**
-     * {@inheritDoc}
+    /*
+     * Loader Callbacks
      */
+
     @Override
-    @DebugLog
-    public void onLoadFinished(final Loader<List<Artist>> loader, final List<Artist> data) {
-        // Check for any errors
-        if (data.isEmpty()) {
-            // Set the empty text
-            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
-            empty.setText(getString(R.string.empty_music));
-            if (isSimpleLayout()) {
-                mListView.setEmptyView(empty);
-            } else {
-                mGridView.setEmptyView(empty);
-            }
-            return;
-        }
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new ArtistCursorLoader(getActivity());
+    }
 
-        ArrayList<Card> cards = new ArrayList<Card>();
+    /*
+     * Implement abstract methods
+     */
 
+    @Override
+    protected CursorAdapter createAdapter() {
         if (isSimpleLayout()) {
-            for (final Artist artist: data) {
-                cards.add(new CardArtistList(getActivity(), artist));
-            }
-            CardArrayAdapter adapter = new CardArrayAdapter(getActivity(), cards);
-            // Set the data behind the list
-            mListView.setAdapter(adapter);
+            return new ArtistListCardCursorAdapter(getActivity());
         } else {
-            for (final Artist artist: data) {
-                cards.add(new CardArtistGrid(getActivity(), artist));
-            }
-            CardGridArrayAdapter adapter = new CardGridArrayAdapter(getActivity(), cards);
-            // Set the data behind the grid
-            mGridView.setAdapter(adapter);
+            return new ArtistGridCardCursorAdapter(getActivity());
         }
     }
 
@@ -98,8 +81,4 @@ public class ArtistFragment extends HomePagerBaseFragment<Artist> {
                 getActivity());
     }
 
-    protected boolean isDetailedLayout() {
-        return PreferenceUtils.getInstance(getActivity()).isDetailedLayout(ARTIST_LAYOUT,
-                getActivity());
-    }
 }
