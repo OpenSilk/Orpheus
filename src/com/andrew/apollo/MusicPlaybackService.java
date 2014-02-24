@@ -546,6 +546,12 @@ public class MusicPlaybackService extends Service {
      */
     private boolean mRemoteMediaNeedsReload = false;
 
+
+    /**
+     * Fetches remote progress while we are in background
+     */
+    private RemoteProgressHandler mRemoteProgressHandler;
+
     /**
      * {@inheritDoc}
      */
@@ -653,6 +659,9 @@ public class MusicPlaybackService extends Service {
 
         // Initialize the cast manager interface for activity
         mCastManagerInterface = new CastManagerInterface(mCastManager);
+
+        // Initialize the remote progress updater task
+        mRemoteProgressHandler = new RemoteProgressHandler(this);
 
         // Initialize the intent filter and each action
         final IntentFilter filter = new IntentFilter();
@@ -801,8 +810,10 @@ public class MusicPlaybackService extends Service {
                     // look and see if we were just disconnected
 //                    mCastManager.reconnectSessionIfPossible(this, false, 2);
                     mCastManager.incrementUiCounter();
+                    mRemoteProgressHandler.removeMessages(0);
                 } else {
                     mCastManager.decrementUiCounter();
+                    mRemoteProgressHandler.sendEmptyMessage(0);
                 }
             }
 
@@ -831,6 +842,7 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "Nothing is playing anymore, releasing notification");
         mNotificationHelper.killNotification();
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
+        mRemoteProgressHandler.removeMessages(0);
 
         if (!mServiceInUse) {
             saveQueue(true);
@@ -2981,6 +2993,30 @@ public class MusicPlaybackService extends Service {
 
         }
     };
+
+    /**
+     * When the ui is running the progress bar updater task will
+     * fetch the remote progress for us, when we are in the background
+     * this will do it
+     */
+    private static final class RemoteProgressHandler extends Handler {
+        private final WeakReference<MusicPlaybackService> mService;
+
+        public RemoteProgressHandler(MusicPlaybackService service) {
+            super();
+            mService = new WeakReference<MusicPlaybackService>(service);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (mService.get().isRemotePlayback()) {
+                mService.get().positionRemote();
+                mService.get().mRemoteProgressHandler.sendEmptyMessageDelayed(0, 3000); //Might increase this
+            } else {
+                mService.get().mRemoteProgressHandler.removeMessages(0);
+            }
+        }
+    }
 
     private static final class MusicPlayerHandler extends Handler {
         private final WeakReference<MusicPlaybackService> mService;
