@@ -15,8 +15,7 @@ import android.content.Context;
 import android.support.v4.view.PagerTabStrip;
 import android.util.AttributeSet;
 
-import com.andrew.apollo.utils.PreferenceUtils;
-import com.andrew.apollo.utils.ThemeUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * This is a custom {@link android.support.v4.view.PagerTabStrip} that is made themeable by
@@ -25,42 +24,17 @@ import com.andrew.apollo.utils.ThemeUtils;
 public class ThemeablePagerTabStrip extends PagerTabStrip {
 
     /**
-     * Resource name used to theme the background
-     */
-    private static final String BACKGROUND = "tpi_background";
-
-    /**
-     * Resource name used to theme the selected text color
-     */
-    private static final String SELECTED_TEXT = "tpi_selected_text_color";
-
-    /**
-     * Resource name used to theme the unselected text color
-     */
-    private static final String TEXT = "tpi_unselected_text_color";
-
-    /**
-     * Resource name used to theme the footer color
-     */
-    private static final String FOOTER = "tpi_footer_color";
-
-    /**
      * @param context The {@link Context} to use
      * @param attrs The attributes of the XML tag that is inflating the view.
      */
     @SuppressWarnings("deprecation")
     public ThemeablePagerTabStrip(final Context context, final AttributeSet attrs) {
         super(context, attrs);
-        // Initialze the theme resources
-        //final ThemeUtils resources = new ThemeUtils(context);
-        // Theme the background
-        //setBackgroundDrawable(resources.getDrawable(BACKGROUND));
+        int color = ThemeHelper.getInstance(getContext()).getThemeColor();
         // Theme the text color
-        //setTextColor(resources.getColor(TEXT));
-        setTextColor(getResources().getColor(PreferenceUtils.getInstance(getContext()).getDefaultThemeColor()));
+        setTextColor(color);
         // Theme the footer
-        //setTabIndicatorColor(resources.getColor(FOOTER));
-        setTabIndicatorColor(getResources().getColor(PreferenceUtils.getInstance(getContext()).getDefaultThemeColor()));
+        setTabIndicatorColor(color);
     }
 
 }

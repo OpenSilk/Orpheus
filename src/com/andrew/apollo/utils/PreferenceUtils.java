@@ -13,7 +13,6 @@ package com.andrew.apollo.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
@@ -85,7 +84,6 @@ public final class PreferenceUtils {
 
     private final SharedPreferences mPreferences;
     private final Context mContext;
-    private final int mActiveTheme;
 
     /**
      * Constructor for <code>PreferenceUtils</code>
@@ -95,7 +93,6 @@ public final class PreferenceUtils {
     public PreferenceUtils(final Context context) {
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         mContext = context.getApplicationContext();
-        mActiveTheme = getThemeStyle();
     }
 
     /**
@@ -137,9 +134,29 @@ public final class PreferenceUtils {
         return mPreferences.getInt(START_PAGE, DEFFAULT_PAGE);
     }
 
-    public static class ThemeStyle {
-        public static final int ORPHEUS = 1;
-        public static final int BLUPHEUS = 2;
+    /**
+     * Sets theme used by themehelper to choose resources
+     * @param themeStyle
+     */
+    public void setThemeStyle(final int themeStyle) {
+        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(final Void... unused) {
+                final SharedPreferences.Editor editor = mPreferences.edit();
+                editor.putInt(THEME_STYLE, themeStyle);
+                editor.apply();
+
+                return null;
+            }
+        }, (Void[])null);
+    }
+
+    /**
+     * gets active theme
+     * @return
+     */
+    public final int getThemeStyle() {
+        return mPreferences.getInt(THEME_STYLE, ThemeHelper.ThemeStyle.BLUPHEUS);
     }
 
     /**
@@ -170,44 +187,6 @@ public final class PreferenceUtils {
     public final int getDefaultThemeColor(final Context context) {
         return mPreferences.getInt(DEFAULT_THEME_COLOR,
                 context.getResources().getColor(R.color.holo_blue_light));
-    }
-
-    public final int getDefaultThemeColor() {
-        switch (mActiveTheme) {
-            case ThemeStyle.ORPHEUS:
-                return R.color.app_color_orpheus;
-            case ThemeStyle.BLUPHEUS:
-                return R.color.app_color_blupheus;
-        }
-        return -1;
-    }
-
-
-    public void setThemeStyle(final int themeStyle) {
-        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(final Void... unused) {
-                final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putInt(THEME_STYLE, themeStyle);
-                editor.apply();
-
-                return null;
-            }
-        }, (Void[])null);
-    }
-
-    public final int getThemeStyle() {
-        return mPreferences.getInt(THEME_STYLE, ThemeStyle.BLUPHEUS);
-    }
-
-    public final Drawable getActionBarBackground() {
-        switch (mActiveTheme) {
-            case ThemeStyle.ORPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_orpheus);
-            case ThemeStyle.BLUPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_blupheus);
-        }
-        return null;
     }
 
     /**

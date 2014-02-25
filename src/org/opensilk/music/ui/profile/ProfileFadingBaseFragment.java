@@ -21,8 +21,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.widget.ImageView;
 
-import com.andrew.apollo.R;
-import com.andrew.apollo.utils.PreferenceUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
 /**
@@ -40,14 +39,14 @@ public abstract class ProfileFadingBaseFragment<D extends Parcelable> extends Pr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActionBarBackground = PreferenceUtils.getInstance(getActivity()).getActionBarBackground();
+        mActionBarBackground = ThemeHelper.getInstance(getActivity()).getActionBarBackground();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         // Reset our action bar color XXX it appears mActionBarBackground get gc'd before we reach here
-        getActivity().getActionBar().setBackgroundDrawable(PreferenceUtils.getInstance(getActivity()).getActionBarBackground());
+        getActivity().getActionBar().setBackgroundDrawable(ThemeHelper.getInstance(getActivity()).getActionBarBackground());
         mFadingHelper = null;
         mHeaderImage = null;
     }
