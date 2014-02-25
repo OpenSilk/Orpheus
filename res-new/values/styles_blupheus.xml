@@ -33,6 +33,11 @@
         <!-- Light.DarkActionBar specific -->
         <item name="android:actionBarWidgetTheme">@style/Theme.Blupheus.Widget</item>
 
+        <!-- Generated with http://android-holo-colors.com -->
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarBlupheus</item>
+        <item name="android:seekBarStyle">@style/SeekBarBlupheus</item>
+        <item name="android:fastScrollThumbDrawable">@drawable/blupheus_fastscroll_thumb_holo</item>
+
         <!--OpenSilk-->
 
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
@@ -95,6 +100,18 @@
         <!--OpenSilk-->
         <!-- This is a hack to make the mediarouter icon white -->
         <item name="isLightTheme">false</item>
+    </style>
+
+    <!-- Generated with http://android-holo-colors.com -->
+    <style name="ProgressBarBlupheus" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/blupheus_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/blupheus_progress_indeterminate_horizontal_holo_light</item>
+    </style>
+
+    <style name="SeekBarBlupheus" parent="android:Widget.Holo.Light.SeekBar">
+        <item name="android:progressDrawable">@drawable/blupheus_scrubber_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/blupheus_scrubber_progress_horizontal_holo_light</item>
+        <item name="android:thumb">@drawable/blupheus_scrubber_control_selector_holo_light</item>
     </style>
 
 </resources>

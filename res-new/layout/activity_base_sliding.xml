@@ -166,8 +166,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/audio_player_seek_bar_margin_bottom"
-                        android:max="1000"
-                        style="@style/ProgressBar.Orpheus"/>
+                        android:max="1000" />
 
                     <TextView
                         android:id="@+id/footer_player_total_time"
