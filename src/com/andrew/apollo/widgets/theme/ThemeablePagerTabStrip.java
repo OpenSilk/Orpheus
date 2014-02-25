@@ -15,6 +15,7 @@ import android.content.Context;
 import android.support.v4.view.PagerTabStrip;
 import android.util.AttributeSet;
 
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeUtils;
 
 /**
@@ -51,13 +52,15 @@ public class ThemeablePagerTabStrip extends PagerTabStrip {
     public ThemeablePagerTabStrip(final Context context, final AttributeSet attrs) {
         super(context, attrs);
         // Initialze the theme resources
-        final ThemeUtils resources = new ThemeUtils(context);
+        //final ThemeUtils resources = new ThemeUtils(context);
         // Theme the background
-        setBackgroundDrawable(resources.getDrawable(BACKGROUND));
+        //setBackgroundDrawable(resources.getDrawable(BACKGROUND));
         // Theme the text color
-        setTextColor(resources.getColor(TEXT));
+        //setTextColor(resources.getColor(TEXT));
+        setTextColor(getResources().getColor(PreferenceUtils.getInstance(getContext()).getDefaultThemeColor()));
         // Theme the footer
-        setTabIndicatorColor(resources.getColor(FOOTER));
+        //setTabIndicatorColor(resources.getColor(FOOTER));
+        setTabIndicatorColor(getResources().getColor(PreferenceUtils.getInstance(getContext()).getDefaultThemeColor()));
     }
 
 }

@@ -18,6 +18,12 @@
 -->
 <resources>
 
+    <!-- Place holder theme -->
+    <style name="Theme.AppCompat.Light.Panel" parent="@style/Theme.AppCompat.Light">
+        <!--needed to allow sliding up pane-->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
     <style name="Orpheus">
         <!--namespace-->
     </style>
@@ -77,9 +83,9 @@
         <item name="android:divider">@null</item>
     </style>
 
-    <style name="Orpheus.PagerTabStrip">
+    <style name="PagerTabStrip">
         <!--<item name="android:textSize">@dimen/text_size_micro</item>-->
-        <item name="android:textColor">@color/app_color</item>
+        <!--<item name="android:textColor">@color/app_color_orpheus</item>-->
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
         <item name="android:background">@color/tabstrip_background</item>
     </style>

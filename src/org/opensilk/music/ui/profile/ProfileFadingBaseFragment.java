@@ -16,10 +16,13 @@
 
 package org.opensilk.music.ui.profile;
 
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.widget.ImageView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
 /**
@@ -32,11 +35,19 @@ public abstract class ProfileFadingBaseFragment<D extends Parcelable> extends Pr
     /* header image */
     protected ImageView mHeaderImage;
 
+    protected Drawable mActionBarBackground;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mActionBarBackground = PreferenceUtils.getInstance(getActivity()).getActionBarBackground();
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Reset our action bar color
-        getActivity().getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.ab_solid_orpheus));
+        // Reset our action bar color XXX it appears mActionBarBackground get gc'd before we reach here
+        getActivity().getActionBar().setBackgroundDrawable(PreferenceUtils.getInstance(getActivity()).getActionBarBackground());
         mFadingHelper = null;
         mHeaderImage = null;
     }

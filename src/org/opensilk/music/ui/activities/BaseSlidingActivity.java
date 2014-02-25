@@ -68,6 +68,7 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -180,6 +181,16 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Set theme
+        switch (PreferenceUtils.getInstance(this).getThemeStyle()) {
+            case PreferenceUtils.ThemeStyle.ORPHEUS:
+                setTheme(R.style.Theme_Orpheus_Panel);
+                break;
+            case PreferenceUtils.ThemeStyle.BLUPHEUS:
+                setTheme(R.style.Theme_Blupheus_Panel);
+                break;
+        }
 
         // Set the layout
         setContentView(R.layout.activity_base_sliding);

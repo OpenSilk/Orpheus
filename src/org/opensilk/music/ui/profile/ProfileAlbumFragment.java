@@ -68,7 +68,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Init the helper here so its around for onCreateView
         mFadingHelper = new FadingActionBarHelper()
-                .actionBarBackground(R.drawable.ab_solid_orpheus)
+                .actionBarBackground(mActionBarBackground)
                 .headerLayout(R.layout.profile_header_image)
                 .headerOverlayLayout(R.layout.profile_header_overlay)
                 .contentLayout(R.layout.profile_listview);

@@ -52,7 +52,7 @@
 
     <application
         android:name=".ApolloApplication"
-        android:theme="@style/Theme.Orpheus"
+        android:theme="@style/Theme.AppCompat.Light"
         android:allowBackup="true"
         android:allowTaskReparenting="true"
         android:hardwareAccelerated="@bool/config_hardwareAccelerated"
@@ -71,7 +71,7 @@
         <!-- Main activity -->
         <activity
             android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
-            android:theme="@style/Theme.Orpheus.Panel.Home"
+            android:theme="@style/Theme.AppCompat.Light.Panel"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
