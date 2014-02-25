@@ -25,4 +25,5 @@
     <dimen name="panel_header_album_art_size">60dp</dimen>
     <dimen name="panel_header_player_controls_size">@dimen/panel_header_height</dimen>
 
+    <dimen name="profile_header_height">260dp</dimen>
 </resources>
