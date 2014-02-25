@@ -32,12 +32,12 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.recycler.RecycleHolder;
 import com.andrew.apollo.ui.MusicHolder;
 import com.andrew.apollo.utils.ThemeUtils;
-import com.devspark.appmsg.AppMsg;
 
 import java.util.List;
 
@@ -192,8 +192,8 @@ public class ThemeFragment extends Fragment implements OnItemClickListener {
     public void onItemClick(final AdapterView<?> parent, final View view, final int position,
             final long id) {
         mTheme.setThemePackageName(mValues[position]);
-        AppMsg.makeText(getActivity(),
-                getString(R.string.theme_set, mEntries[position]), AppMsg.STYLE_CONFIRM)
+        Toast.makeText(getActivity(),
+                getString(R.string.theme_set, mEntries[position]), Toast.LENGTH_SHORT)
                 .show();
     }
 

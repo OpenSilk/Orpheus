@@ -42,7 +42,6 @@ import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.ui.activities.ShortcutActivity;
 import com.andrew.apollo.widgets.ColorPickerView;
 import com.andrew.apollo.widgets.ColorSchemeDialog;
-import com.devspark.appmsg.AppMsg;
 
 /**
  * Mostly general and UI helpers.
@@ -319,15 +318,15 @@ public final class ApolloUtils {
             intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, displayName);
             intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
             context.sendBroadcast(intent);
-            AppMsg.makeText(context,
+            Toast.makeText(context,
                     context.getString(R.string.pinned_to_home_screen, displayName),
-                    AppMsg.STYLE_CONFIRM).show();
+                    Toast.LENGTH_LONG).show();
         } catch (final Exception e) {
             Log.e("ApolloUtils", "createShortcutIntent", e);
-            AppMsg.makeText(
+            Toast.makeText(
                     context,
                     context.getString(R.string.could_not_be_pinned_to_home_screen, displayName),
-                    AppMsg.STYLE_ALERT).show();
+                    Toast.LENGTH_LONG).show();
         }
     }
 

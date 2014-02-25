@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
@@ -29,7 +30,6 @@ import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.ui.activities.AudioPlayerActivity;
 import com.andrew.apollo.ui.activities.SearchActivity;
 import com.andrew.apollo.ui.activities.SettingsActivity;
-import com.devspark.appmsg.AppMsg;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
@@ -128,8 +128,8 @@ public final class NavUtils {
             effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
             context.startActivityForResult(effects, 0);
         } catch (final ActivityNotFoundException notFound) {
-            AppMsg.makeText(context, context.getString(R.string.no_effects_for_you),
-                    AppMsg.STYLE_ALERT);
+            Toast.makeText(context, context.getString(R.string.no_effects_for_you),
+                    Toast.LENGTH_LONG);
         }
     }
 

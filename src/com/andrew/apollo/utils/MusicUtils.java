@@ -38,6 +38,7 @@ import android.support.v7.media.MediaRouter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.SubMenu;
+import android.widget.Toast;
 
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
@@ -52,7 +53,6 @@ import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
-import com.devspark.appmsg.AppMsg;
 
 import org.opensilk.cast.BaseCastManager;
 import org.opensilk.cast.CastManagerCallback;
@@ -1015,7 +1015,7 @@ public final class MusicUtils {
         }
         final String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplaylist, numinserted, numinserted);
-        AppMsg.makeText((Activity)context, message, AppMsg.STYLE_CONFIRM).show();
+        Toast.makeText((Activity) context, message, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -1033,7 +1033,7 @@ public final class MusicUtils {
         });
         final String message = context.getResources().getQuantityString(
                 R.plurals.NNNtracksfromplaylist, 1, 1);
-        AppMsg.makeText((Activity)context, message, AppMsg.STYLE_CONFIRM).show();
+        Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -1047,7 +1047,7 @@ public final class MusicUtils {
         try {
             sService.enqueue(list, MusicPlaybackService.LAST);
             final String message = makeLabel(context, R.plurals.NNNtrackstoqueue, list.length);
-            AppMsg.makeText((Activity)context, message, AppMsg.STYLE_CONFIRM).show();
+            Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
         } catch (final RemoteException ignored) {
         }
     }
@@ -1081,7 +1081,7 @@ public final class MusicUtils {
                 Settings.System.putString(resolver, Settings.System.RINGTONE, uri.toString());
                 final String message = context.getString(R.string.set_as_ringtone,
                         cursor.getString(2));
-                AppMsg.makeText((Activity)context, message, AppMsg.STYLE_CONFIRM).show();
+                Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
             }
         } finally {
             if (cursor != null) {
@@ -1517,7 +1517,7 @@ public final class MusicUtils {
 
         final String message = makeLabel(context, R.plurals.NNNtracksdeleted, list.length);
 
-        AppMsg.makeText((Activity)context, message, AppMsg.STYLE_CONFIRM).show();
+        Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
         // We deleted a number of tracks, which could affect any number of
         // things
         // in the media content domain, so update everything.
