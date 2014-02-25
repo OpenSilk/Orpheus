@@ -93,7 +93,7 @@ public class CardSongList extends CardBaseList<Song> {
                         }).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_more_by:
-                        NavUtils.openArtistProfile(getContext(), mData.mArtistName);
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
                         break;
                     case R.id.card_menu_set_ringtone:
                         MusicUtils.setRingtone(getContext(), mData.mSongId);

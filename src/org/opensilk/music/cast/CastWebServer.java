@@ -183,7 +183,7 @@ public class CastWebServer extends NanoHTTPD {
             }
         }
         // We've got get get the art
-        Album album = MusicUtils.getAlbum(mContext, Integer.valueOf(id));
+        Album album = MusicUtils.makeAlbum(mContext, Integer.valueOf(id));
         if (album == null) {
             return notFoundResponse();
         }

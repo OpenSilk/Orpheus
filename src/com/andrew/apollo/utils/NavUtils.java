@@ -62,6 +62,9 @@ public final class NavUtils {
      */
     public static void openArtistProfile(final Context context, final Artist artist) {
 
+        if (artist == null) {
+            return;
+        }
         // Create a new bundle to transfer the artist info
         final Bundle b = new Bundle();
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);

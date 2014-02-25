@@ -87,7 +87,7 @@ public class CardRecentList extends CardBaseList<Album> {
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_go_artist:
-                        NavUtils.openArtistProfile(getContext(), mData.mArtistName);
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
                         break;
                     case R.id.card_menu_remove_from_recent:
                         getContext().getContentResolver().delete(RECENTS_URI,

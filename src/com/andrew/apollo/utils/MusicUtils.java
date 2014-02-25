@@ -23,7 +23,6 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
@@ -49,16 +48,18 @@ import com.andrew.apollo.loaders.PlaylistLoader;
 import com.andrew.apollo.loaders.SongLoader;
 import com.andrew.apollo.menu.FragmentMenuItems;
 import com.andrew.apollo.model.Album;
+import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
 import com.devspark.appmsg.AppMsg;
-import com.google.android.gms.cast.CastDevice;
 
 import org.opensilk.cast.BaseCastManager;
 import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.cast.ReconnectionStatus;
 import org.opensilk.cast.util.Utils;
+import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.loaders.Projections;
 
 import java.io.File;
 import java.util.Arrays;
@@ -453,7 +454,7 @@ public final class MusicUtils {
      */
     public static Album getCurrentAlbum(final Context context) {
         long albumId = getCurrentAlbumId();
-        return getAlbum(context, albumId);
+        return makeAlbum(context, albumId);
     }
 
     /**
@@ -461,7 +462,7 @@ public final class MusicUtils {
      * @param id The ID of the album.
      * @return new album.
      */
-    public static Album getAlbum(final Context context, long albumId) {
+    public static Album makeAlbum(final Context context, long albumId) {
         Album album = null;
         final String selection = BaseColumns._ID + "=" + albumId;
         Cursor c = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
@@ -490,6 +491,30 @@ public final class MusicUtils {
             c.close();
         }
         return album;
+    }
+
+    /**
+     * Creates artist object from their name;
+     * @param context
+     * @param artistName
+     * @return
+     */
+    public static Artist makeArtist(final Context context, final String artistName) {
+        Artist artist = null;
+        final String selection = MediaStore.Audio.ArtistColumns.ARTIST  + "=?";
+        final String[] selectionArgs = new String[] { artistName };
+        final Cursor c = context.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+                Projections.ARTIST,
+                selection,
+                selectionArgs,
+                null);
+        if (c != null && c.moveToFirst()) {
+            artist = CursorHelpers.makeArtistFromCursor(c);
+        }
+        if (c != null) {
+            c.close();
+        }
+        return artist;
     }
 
     /**

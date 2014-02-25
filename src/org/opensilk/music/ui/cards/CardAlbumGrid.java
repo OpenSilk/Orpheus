@@ -87,7 +87,7 @@ public class CardAlbumGrid extends CardBaseThumb<Album> {
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_more_by:
-                        NavUtils.openArtistProfile(getContext(), mData.mArtistName);
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
                         break;
                     case R.id.card_menu_delete:
                         final String album = mData.mAlbumName;

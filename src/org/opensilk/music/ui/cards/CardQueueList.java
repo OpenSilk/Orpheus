@@ -85,7 +85,7 @@ public class CardQueueList extends CardBaseList<Song> {
                         ((BaseSlidingActivity) getContext()).refreshQueue();
                         break;
                     case R.id.card_menu_more_by:
-                        NavUtils.openArtistProfile(getContext(), mData.mArtistName);
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
                         break;
                     case R.id.card_menu_set_ringtone:
                         MusicUtils.setRingtone(getContext(), mData.mSongId);
