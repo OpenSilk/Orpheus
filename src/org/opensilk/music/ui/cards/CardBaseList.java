@@ -29,6 +29,7 @@ import com.andrew.apollo.R;
 public abstract class CardBaseList<D> extends CardBaseThumb<D> {
 
     protected String mSubTitle;
+    protected String mSubTitleAlt;
     protected String mExtraText;
 
     public CardBaseList(Context context, D data) {
@@ -51,14 +52,22 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
                 v.setVisibility(View.GONE);
             }
         }
-//        TextView v2 = (TextView) view.findViewById(R.id.card_main_inner_extra_text);
-//        if (v2 != null) {
-//            if (mExtraText != null) {
-//                v2.setText(mExtraText);
-//            } else {
-//                v2.setVisibility(View.GONE);
-//            }
-//        }
+        TextView v1 = (TextView) view.findViewById(R.id.card_main_inner_sub_title_alt);
+        if (v1 != null) {
+            if (mSubTitleAlt != null) {
+                v1.setText(mSubTitleAlt);
+            } else {
+                v1.setVisibility(View.GONE);
+            }
+        }
+        TextView v2 = (TextView) view.findViewById(R.id.card_main_inner_extra_text);
+        if (v2 != null) {
+            if (mExtraText != null) {
+                v2.setText(mExtraText);
+            } else {
+                v2.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override

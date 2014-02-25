@@ -19,6 +19,8 @@ package org.opensilk.music.adapters;
 import android.content.Context;
 import android.database.Cursor;
 
+import com.andrew.apollo.R;
+
 import org.opensilk.music.ui.cards.CardAlbumList;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -35,6 +37,7 @@ public class ProfileAlbumListCardCursorAdapter extends CardCursorAdapter {
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardAlbumList(getContext(), CursorHelpers.makeAlbumFromCursor(cursor));
+        return new CardAlbumList(getContext(), CursorHelpers.makeAlbumFromCursor(cursor),
+                R.layout.card_list_thumb_inner_layout_extra);
     }
 }
