@@ -20,11 +20,12 @@ import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,8 +36,10 @@ import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
-import com.andrew.apollo.ui.activities.ProfileActivity;
 import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.ui.activities.BaseSlidingActivity;
+import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -64,12 +67,14 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
                 String playlistName;
                 // Favorites list
                 if (mData.mPlaylistId == -1) {
-                    playlistName = getContext().getString(R.string.playlist_favorites);
-                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_favorites));
+                    return;
+//                    playlistName = getContext().getString(R.string.playlist_favorites);
+//                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_favorites));
                     // Last added
                 } else if (mData.mPlaylistId == -2) {
-                    playlistName = getContext().getString(R.string.playlist_last_added);
-                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_last_added));
+                    return;
+//                    playlistName = getContext().getString(R.string.playlist_last_added);
+//                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_last_added));
                 } else {
                     // User created
                     playlistName = mData.mPlaylistName;
@@ -78,11 +83,14 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
                 }
 
                 bundle.putString(Config.NAME, playlistName);
+                bundle.putParcelable(Config.EXTRA_DATA, mData);
 
-                // Create the intent to launch the profile activity
-                final Intent intent = new Intent(getContext(), ProfileActivity.class);
-                intent.putExtras(bundle);
-                getContext().startActivity(intent);
+                FragmentManager fm = ((BaseSlidingActivity) getContext()).getSupportFragmentManager();
+                fm.beginTransaction()
+                        .replace(R.id.main, ProfilePlaylistFragment.newInstance(bundle), "playlist")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .addToBackStack("playlist")
+                        .commit();
             }
         });
     }

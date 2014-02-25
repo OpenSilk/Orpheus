@@ -11,6 +11,8 @@
 
 package com.andrew.apollo.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.andrew.apollo.utils.Lists;
@@ -22,7 +24,7 @@ import java.util.List;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class Playlist {
+public class Playlist implements Parcelable {
 
     /**
      * The unique Id of the playlist
@@ -89,7 +91,7 @@ public class Playlist {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Playlist)) {
             return false;
         }
         final Playlist other = (Playlist)obj;
@@ -106,5 +108,38 @@ public class Playlist {
     public String toString() {
         return mPlaylistName;
     }
+
+    /*
+     * Implement the Parcelable interface
+     */
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mPlaylistId);
+        dest.writeString(mPlaylistName);
+    }
+
+    private Playlist(Parcel in) {
+        mPlaylistId = in.readLong();
+        mPlaylistName = in.readString();
+        mSongs = null;
+    }
+
+    public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {
+        @Override
+        public Playlist createFromParcel(Parcel source) {
+            return new Playlist(source);
+        }
+
+        @Override
+        public Playlist[] newArray(int size) {
+            return new Playlist[size];
+        }
+    };
 
 }
