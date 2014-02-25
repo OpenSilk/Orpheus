@@ -962,9 +962,13 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @DebugLog
         @Override
         public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo route) {
-            //Called when whe connnect from service
-            //How to update the buttons?
-            super.onRouteChanged(router, route);
+            // make sure the router buttons are showing
+            // *this gets called alot
+            if (!router.getDefaultRoute().equals(route)) {
+                mCastDeviceAvailable = true;
+                invalidateOptionsMenu();
+                maybeShowHeaderMediaRouteButton();
+            }
         }
 
     };

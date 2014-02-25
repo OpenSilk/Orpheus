@@ -2876,6 +2876,12 @@ public class MusicPlaybackService extends Service {
 
         @Override
         @DebugLog
+        public void onDisconnected() {
+            restoreLocalState();
+        }
+
+        @Override
+        @DebugLog
         public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
             if (isPlaying()) {
                 pause();
@@ -2890,6 +2896,12 @@ public class MusicPlaybackService extends Service {
         @DebugLog
         public boolean onApplicationConnectionFailed(int errorCode) {
             return false; //Nothing for us to do, the user must manually try again
+        }
+
+        @Override
+        @DebugLog
+        public void onApplicationDisconnected(int errorCode) {
+            restoreLocalState();
         }
 
         /** Called when stopApplication() fails */
@@ -2908,14 +2920,45 @@ public class MusicPlaybackService extends Service {
 
         @Override
         @DebugLog
-        public void onVolumeChanged(double value, boolean isMute) {
+        public void onConnectionSuspended(int cause) {
+            //restoreLocalState();
+        }
+
+        @Override
+        @DebugLog
+        public void onConnectivityRecovered() {
+            updatePlaybackLocation(PlaybackLocation.REMOTE);
+            if (mCastServer == null) {
+                startCastServer();
+            }
+            if (mCastManager.isConnected()) {
+                try {
+                    if (mCastManager.isRemoteMediaLoaded() && mCastManager.isRemoteMoviePlaying()) {
+                        Log.d(TAG, "onConnectivityRecovered: remote media currently playing");
+                        position();// force update the local position
+                        if (!mRemoteProgressHandler.hasMessages(0)) {
+                            // restart progress updater if needed
+                            mRemoteProgressHandler.sendEmptyMessage(0);
+                        }
+                    } else {
+                        loadRemoteCurrent();
+                        restoreRemoteVolumeLevel();
+                    }
+                } catch (TransientNetworkDisconnectionException e) {
+                    e.printStackTrace();
+                } catch (NoConnectionException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e(TAG, "onConnectivityRecoverd: Whoa, we arent connected??");
+            }
 
         }
 
         @Override
         @DebugLog
-        public void onApplicationDisconnected(int errorCode) {
-            restoreLocalState();
+        public void onVolumeChanged(double value, boolean isMute) {
+
         }
 
         @Override
@@ -2959,18 +3002,6 @@ public class MusicPlaybackService extends Service {
 
         @Override
         @DebugLog
-        public void onConnectionSuspended(int cause) {
-            //restoreLocalState();
-        }
-
-        @Override
-        @DebugLog
-        public void onDisconnected() {
-            restoreLocalState();
-        }
-
-        @Override
-        @DebugLog
         public boolean onConnectionFailed(ConnectionResult result) {
             return false;
         }
@@ -2979,18 +3010,6 @@ public class MusicPlaybackService extends Service {
         @DebugLog
         public void onCastDeviceDetected(MediaRouter.RouteInfo info) {
 
-        }
-
-        @Override
-        @DebugLog
-        public void onConnectivityRecovered() {
-            if (isPlaying()) {
-                pause();
-            }
-            updatePlaybackLocation(PlaybackLocation.REMOTE);
-            startCastServer();
-            loadRemoteCurrent();
-            restoreRemoteVolumeLevel();
         }
 
         @Override
