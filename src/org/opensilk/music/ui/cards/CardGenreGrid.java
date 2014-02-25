@@ -40,8 +40,9 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
  * Created by drew on 2/16/14.
  */
 public class CardGenreGrid extends CardBaseThumb<Genre> {
+
     public CardGenreGrid(Context context, Genre data) {
-        this(context, data, R.layout.card_grid_item_layout);
+        super(context, data);
     }
 
     public CardGenreGrid(Context context, Genre data, int innerLayout) {

@@ -40,7 +40,7 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
 public class CardArtistGrid extends CardBaseThumb<Artist> {
 
     public CardArtistGrid(Context context, Artist data) {
-        this(context, data, R.layout.card_grid_item_layout);
+        super(context, data);
     }
 
     public CardArtistGrid(Context context, Artist data, int innerLayout) {

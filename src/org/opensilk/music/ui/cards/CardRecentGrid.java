@@ -43,7 +43,7 @@ import static com.andrew.apollo.provider.RecentStore.RecentStoreColumns;
 public class CardRecentGrid extends CardBaseThumb<Album> {
 
     public CardRecentGrid(Context context, Album data) {
-        this(context, data, R.layout.card_grid_item_layout);
+        super(context, data);
     }
 
     public CardRecentGrid(Context context, Album data, int innerLayout) {

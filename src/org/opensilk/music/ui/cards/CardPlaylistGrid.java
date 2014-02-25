@@ -48,7 +48,7 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
 public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
 
     public CardPlaylistGrid(Context context, Playlist data) {
-        this(context, data, R.layout.card_grid_item_layout);
+        super(context, data);
     }
 
     public CardPlaylistGrid(Context context, Playlist data, int innerLayout) {
