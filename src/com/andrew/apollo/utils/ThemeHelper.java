@@ -37,6 +37,7 @@ public class ThemeHelper {
         public static final int BLUPHEUS = 2;
         public static final int REPHEUS = 4;
         public static final int GREPHEUS = 8;
+        public static final int PURPHEUS = 16;
     }
 
     public static ThemeHelper getInstance(Context context) {
@@ -66,6 +67,8 @@ public class ThemeHelper {
                 return R.style.Theme_Repheus_Panel;
             case ThemeStyle.GREPHEUS:
                 return R.style.Theme_Grepheus_Panel;
+            case ThemeStyle.PURPHEUS:
+                return R.style.Theme_Purpheus_Panel;
         }
         return -1;
     }
@@ -84,6 +87,8 @@ public class ThemeHelper {
                 return R.style.Theme_Repheus;
             case ThemeStyle.GREPHEUS:
                 return R.style.Theme_Repheus;
+            case ThemeStyle.PURPHEUS:
+                return R.style.Theme_Purpheus;
         }
         return -1;
     }
@@ -101,6 +106,8 @@ public class ThemeHelper {
                 return mContext.getResources().getColor(R.color.app_color_repheus);
             case ThemeStyle.GREPHEUS:
                 return mContext.getResources().getColor(R.color.app_color_grepheus);
+            case ThemeStyle.PURPHEUS:
+                return mContext.getResources().getColor(R.color.app_color_purpheus);
         }
         return -1;
     }
@@ -118,6 +125,8 @@ public class ThemeHelper {
                 return mContext.getResources().getDrawable(R.drawable.ab_solid_repheus);
             case ThemeStyle.GREPHEUS:
                 return mContext.getResources().getDrawable(R.drawable.ab_solid_grepheus);
+            case ThemeStyle.PURPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ab_solid_purpheus);
         }
         return null;
     }
