@@ -3,6 +3,7 @@
     <color name="app_color_orpheus">#fff98022</color> <!--Google Music-->
     <color name="app_color_blupheus">@android:color/holo_blue_dark</color>
     <color name="app_color_repheus">@android:color/holo_red_dark</color>
+    <color name="app_color_grepheus">@android:color/holo_green_dark</color>
     <color name="tabstrip_background">#ffe4e4e4</color>
     <color name="app_background_light">#fffafafa</color>
     <color name="app_background_light_transparent">#e6fafafa</color>
