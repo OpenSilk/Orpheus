@@ -20,22 +20,22 @@ import android.content.Context;
 import android.database.Cursor;
 
 import org.opensilk.music.loaders.AlbumCursorLoader;
-import org.opensilk.music.ui.cards.CardAlbumGrid;
+import org.opensilk.music.ui.cards.CardAlbumList;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
+import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 
 /**
  * Created by drew on 2/18/14.
  */
-public class AlbumGridCardCursorAdapter extends CardGridCursorAdapter {
+public class AlbumListCardCursorAdapter extends CardCursorAdapter {
 
-    public AlbumGridCardCursorAdapter(Context context) {
+    public AlbumListCardCursorAdapter(Context context) {
         super(context);
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardAlbumGrid(getContext(), CursorHelpers.makeAlbumFromCursor(cursor));
+        return new CardAlbumList(getContext(), CursorHelpers.makeAlbumFromCursor(cursor));
     }
 }

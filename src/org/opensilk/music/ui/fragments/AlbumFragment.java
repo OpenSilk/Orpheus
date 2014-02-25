@@ -16,24 +16,17 @@
  */
 package org.opensilk.music.ui.fragments;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.CursorAdapter;
 
-import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.AlbumLoader;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.ui.cards.CardAlbumGrid;
-import org.opensilk.music.ui.cards.CardAlbumList;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
+import org.opensilk.music.adapters.AlbumGridCardCursorAdapter;
+import org.opensilk.music.adapters.AlbumListCardCursorAdapter;
+import org.opensilk.music.loaders.AlbumCursorLoader;
 
 import static com.andrew.apollo.utils.PreferenceUtils.ALBUM_LAYOUT;
 
@@ -42,52 +35,44 @@ import static com.andrew.apollo.utils.PreferenceUtils.ALBUM_LAYOUT;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class AlbumFragment extends HomePagerBaseFragment<Album> {
+public class AlbumFragment extends HomePagerBaseCursorFragment {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Loader<List<Album>> onCreateLoader(final int id, final Bundle args) {
-        return new AlbumLoader(getActivity());
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Set the empty text
+        final View empty = mRootView.findViewById(android.R.id.empty);
+        if (isSimpleLayout()) {
+            mListView.setEmptyView(empty);
+            // Set the data behind the list
+            mListView.setAdapter(mAdapter);
+        } else {
+            mGridView.setEmptyView(empty);
+            // Set the data behind the grid
+            mGridView.setAdapter(mAdapter);
+        }
     }
 
-    /**
-     * {@inheritDoc}
+    /*
+     * Loader Callbacks
      */
+
     @Override
-    public void onLoadFinished(final Loader<List<Album>> loader, final List<Album> data) {
-        // Check for any errors
-        if (data.isEmpty()) {
-            // Set the empty text
-            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
-            empty.setText(getString(R.string.empty_music));
-            if (isSimpleLayout()) {
-                mListView.setEmptyView(empty);
-            } else {
-                mGridView.setEmptyView(empty);
-            }
-            return;
-        }
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new AlbumCursorLoader(getActivity());
+    }
 
-        ArrayList<Card> cards = new ArrayList<Card>();
+    /*
+     * Implement abstract methods
+     */
 
+    @Override
+    protected CursorAdapter createAdapter() {
         if (isSimpleLayout()) {
-            for (final Album album: data) {
-                cards.add(new CardAlbumList(getActivity(), album));
-            }
-            CardArrayAdapter adapter = new CardArrayAdapter(getActivity(), cards);
-            // Set the data behind the list
-            mListView.setAdapter(adapter);
+            return new AlbumListCardCursorAdapter(getActivity());
         } else {
-            for (final Album album: data) {
-                cards.add(new CardAlbumGrid(getActivity(), album));
-            }
-            CardGridArrayAdapter adapter = new CardGridArrayAdapter(getActivity(), cards);
-            // Set the data behind the grid
-            mGridView.setAdapter(adapter);
+            return new AlbumGridCardCursorAdapter(getActivity());
         }
-
     }
 
     protected boolean isSimpleLayout() {
@@ -95,8 +80,4 @@ public class AlbumFragment extends HomePagerBaseFragment<Album> {
                 getActivity());
     }
 
-    protected boolean isDetailedLayout() {
-        return PreferenceUtils.getInstance(getActivity()).isDetailedLayout(ALBUM_LAYOUT,
-                getActivity());
-    }
 }
