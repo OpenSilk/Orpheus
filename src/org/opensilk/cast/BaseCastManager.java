@@ -241,6 +241,8 @@ public abstract class BaseCastManager implements
                     mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
                 }
                 mApiClient = null;
+            } else {
+                LOGD(TAG, "mApiClient was null");
             }
         } else if (null == mApiClient) {
             LOGD(TAG, "acquiring a conenction to Google Play services for " + mSelectedCastDevice);

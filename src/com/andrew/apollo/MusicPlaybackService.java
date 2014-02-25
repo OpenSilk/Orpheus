@@ -2910,6 +2910,7 @@ public class MusicPlaybackService extends Service {
         public void onApplicationStopFailed(int errorCode) {
             // As far as the activity is concered we are disconnected;
             restoreLocalState();
+            mCastManager.selectDevice(null);
         }
 
         @Override
