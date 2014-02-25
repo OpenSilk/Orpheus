@@ -27,6 +27,7 @@
         android:id="@+id/card_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        style="@style/GridView.Orpheus.Card"
         card:list_card_layout_resourceID="@layout/card_grid_item" />
 
     <ProgressBar
