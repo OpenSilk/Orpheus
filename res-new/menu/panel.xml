@@ -2,8 +2,8 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/panel_menu_shuffle_all"
-        android:title="@string/menu_shuffle"/>
+    <!--<item android:id="@+id/panel_menu_shuffle_all"-->
+        <!--android:title="@string/menu_shuffle"/>-->
 
     <!--<item android:id="@+id/panel_menu_favorite"-->
         <!--android:title="@string/add_to_favorites"/>-->
