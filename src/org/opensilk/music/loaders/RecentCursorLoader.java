@@ -30,14 +30,7 @@ public class RecentCursorLoader extends CursorLoader {
     public RecentCursorLoader(Context context) {
         super(context);
         setUri(RECENTS_URI);
-        setProjection(new String[] {
-                RecentStoreColumns._ID,
-                RecentStoreColumns.ALBUMNAME,
-                RecentStoreColumns.ARTISTNAME,
-                RecentStoreColumns.ALBUMSONGCOUNT,
-                RecentStoreColumns.ALBUMYEAR,
-                RecentStoreColumns.TIMEPLAYED
-        });
+        setProjection(Projections.ALBUM);
         setSelection(null);
         setSelectionArgs(null);
         setSortOrder(RecentStoreColumns.TIMEPLAYED + " DESC");

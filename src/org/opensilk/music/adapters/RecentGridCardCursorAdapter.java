@@ -36,6 +36,6 @@ public class RecentGridCardCursorAdapter extends CardGridCursorAdapter {
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardRecentGrid(getContext(), CursorHelpers.makeAlbumFromRecentCursor(cursor));
+        return new CardRecentGrid(getContext(), CursorHelpers.makeAlbumFromCursor(cursor));
     }
 }

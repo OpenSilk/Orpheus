@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import com.andrew.apollo.ui.activities.ProfileActivity;
@@ -39,7 +40,7 @@ import hugo.weaving.DebugLog;
 public class RecentStore extends SQLiteOpenHelper {
 
     /* Version constant to increment when the database should be rebuilt */
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
     /* Name of database file */
     public static final String DATABASENAME = "albumhistory.db";
@@ -61,11 +62,12 @@ public class RecentStore extends SQLiteOpenHelper {
     @Override
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + RecentStoreColumns.NAME + " ("
-                + RecentStoreColumns._ID + " LONG NOT NULL," + RecentStoreColumns.ALBUMNAME
-                + " TEXT NOT NULL," + RecentStoreColumns.ARTISTNAME + " TEXT NOT NULL,"
-                + RecentStoreColumns.ALBUMSONGCOUNT + " TEXT NOT NULL,"
-                + RecentStoreColumns.ALBUMYEAR + " TEXT," + RecentStoreColumns.TIMEPLAYED
-                + " LONG NOT NULL);");
+                + RecentStoreColumns._ID + " LONG NOT NULL,"
+                + RecentStoreColumns.ALBUM + " TEXT NOT NULL,"
+                + RecentStoreColumns.ARTIST + " TEXT NOT NULL,"
+                + RecentStoreColumns.NUMBER_OF_SONGS + " INT NOT NULL,"
+                + RecentStoreColumns.ALBUMYEAR + " TEXT,"
+                + RecentStoreColumns.TIMEPLAYED + " LONG NOT NULL);");
     }
 
     /**
@@ -98,7 +100,7 @@ public class RecentStore extends SQLiteOpenHelper {
      * @param albumYear The year the album was released.
      */
     public void addAlbumId(final Long albumId, final String albumName, final String artistName,
-            final String songCount, final String albumYear) {
+            final Integer songCount, final String albumYear) {
         if (albumId == null || albumName == null || artistName == null || songCount == null) {
             return;
         }
@@ -125,7 +127,7 @@ public class RecentStore extends SQLiteOpenHelper {
     }
 
     public static ContentValues createAlbumContentValues(final Long albumId, final String albumName, final String artistName,
-                                                         final String songCount, final String albumYear) {
+                                                         final Integer songCount, final String albumYear) {
         if (albumId == null || albumName == null || artistName == null || songCount == null) {
             return null;
         }
@@ -195,7 +197,7 @@ public class RecentStore extends SQLiteOpenHelper {
 
     }
 
-    public interface RecentStoreColumns extends BaseColumns {
+    public interface RecentStoreColumns extends MediaStore.Audio.AudioColumns {
 
         /* Table name */
         public static final String NAME = "albumhistory";
@@ -204,17 +206,25 @@ public class RecentStore extends SQLiteOpenHelper {
         @Deprecated
         public static final String ID = _ID;
 
-        /* Album name column */
-        public static final String ALBUMNAME = "itemname";
+        public static final String NUMBER_OF_SONGS = MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS;
+
+        public static final String FIRST_YEAR = MediaStore.Audio.AlbumColumns.FIRST_YEAR;
+
+         /* Album name column */
+        @Deprecated
+        public static final String ALBUMNAME = ALBUM;
 
         /* Artist name column */
-        public static final String ARTISTNAME = "artistname";
+        @Deprecated
+        public static final String ARTISTNAME = ARTIST;
 
         /* Album song count column */
-        public static final String ALBUMSONGCOUNT = "albumsongcount";
+        @Deprecated
+        public static final String ALBUMSONGCOUNT = NUMBER_OF_SONGS;
 
         /* Album year column. It's okay for this to be null */
-        public static final String ALBUMYEAR = "albumyear";
+        @Deprecated
+        public static final String ALBUMYEAR = FIRST_YEAR;
 
         /* Time played column */
         public static final String TIMEPLAYED = "timeplayed";

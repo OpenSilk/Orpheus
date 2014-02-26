@@ -1096,19 +1096,19 @@ public final class MusicUtils {
      * @param id The id of the album.
      * @return The song count for an album.
      */
-    public static final String getSongCountForAlbum(final Context context, final long id) {
+    public static final int getSongCountForAlbum(final Context context, final long id) {
         if (id == -1) {
-            return null;
+            return 0;
         }
         Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, id);
         Cursor cursor = context.getContentResolver().query(uri, new String[] {
                     AlbumColumns.NUMBER_OF_SONGS
                 }, null, null, null);
-        String songCount = null;
+        int songCount = 0;
         if (cursor != null) {
             cursor.moveToFirst();
             if (!cursor.isAfterLast()) {
-                songCount = cursor.getString(0);
+                songCount = cursor.getInt(0);
             }
             cursor.close();
             cursor = null;

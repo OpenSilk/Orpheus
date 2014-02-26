@@ -33,23 +33,18 @@ public class MusicProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
 
     public static final Uri RECENTS_URI;
-    public static final Uri FAVORITES_URI;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         RECENTS_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("recents").build();
         sUriMatcher.addURI(AUTHORITY, "recents", 1);
-        FAVORITES_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("favorites").build();
-        sUriMatcher.addURI(AUTHORITY, "favorites", 2);
     }
 
-    private static SQLiteDatabase sRecents;
-    private static SQLiteDatabase sFavorites;
+    private static RecentStore sRecents;
 
     @Override
     public boolean onCreate() {
-        sRecents = RecentStore.getInstance(getContext()).getWritableDatabase();
-        sFavorites = FavoritesStore.getInstance(getContext()).getWritableDatabase();
+        sRecents = RecentStore.getInstance(getContext());
         return true;
     }
 
@@ -58,11 +53,7 @@ public class MusicProvider extends ContentProvider {
         Cursor c = null;
         switch (sUriMatcher.match(uri)) {
             case 1:
-                c = sRecents.query(RecentStore.RecentStoreColumns.NAME,
-                        projection, selection, selectionArgs, null, null, sortOrder);
-                break;
-            case 2:
-                c = sFavorites.query(FavoritesStore.FavoriteColumns.NAME,
+                c = sRecents.getReadableDatabase().query(RecentStore.RecentStoreColumns.NAME,
                         projection, selection, selectionArgs, null, null, sortOrder);
                 break;
         }
@@ -82,20 +73,19 @@ public class MusicProvider extends ContentProvider {
         Uri ret = null;
         switch (sUriMatcher.match(uri)) {
             case 1:
-                sRecents.beginTransaction();
+                SQLiteDatabase db = sRecents.getWritableDatabase();
+                db.beginTransaction();
                 // Todo update playcount instead
-                sRecents.delete(RecentStore.RecentStoreColumns.NAME,
+                db.delete(RecentStore.RecentStoreColumns.NAME,
                         BaseColumns._ID + " = ?",
                         new String[] {
                             String.valueOf(values.get(BaseColumns._ID))
                         }
                 );
-                sRecents.insert(RecentStore.RecentStoreColumns.NAME, null, values);
-                sRecents.setTransactionSuccessful();
-                sRecents.endTransaction();
+                db.insert(RecentStore.RecentStoreColumns.NAME, null, values);
+                db.setTransactionSuccessful();
+                db.endTransaction();
                 ret = RECENTS_URI.buildUpon().appendPath(values.getAsString(BaseColumns._ID)).build();
-                break;
-            case 2:
                 break;
         }
         if (ret != null) {
@@ -109,9 +99,7 @@ public class MusicProvider extends ContentProvider {
         int ret = 0;
         switch (sUriMatcher.match(uri)) {
             case 1:
-                ret = sRecents.delete(RecentStore.RecentStoreColumns.NAME, selection, selectionArgs);
-                break;
-            case 2:
+                ret = sRecents.getWritableDatabase().delete(RecentStore.RecentStoreColumns.NAME, selection, selectionArgs);
                 break;
         }
         if (ret != 0) {
