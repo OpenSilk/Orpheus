@@ -30,15 +30,7 @@ public class ThemeHelper {
 
     private final Context mContext;
     private final PreferenceUtils mPreferences;
-    private final int mActiveTheme;
-
-    public static class ThemeStyle {
-        public static final int ORPHEUS = 1;
-        public static final int BLUPHEUS = 2;
-        public static final int REPHEUS = 4;
-        public static final int GREPHEUS = 8;
-        public static final int PURPHEUS = 16;
-    }
+    private final ThemeStyle mActiveTheme;
 
     public static ThemeHelper getInstance(Context context) {
         if (sThemeHelper == null) {
@@ -59,15 +51,15 @@ public class ThemeHelper {
     public final int getPanelTheme() {
         //Set theme
         switch (mActiveTheme) {
-            case ThemeStyle.ORPHEUS:
+            case ORPHEUS:
                 return R.style.Theme_Orpheus_Panel;
-            case ThemeStyle.BLUPHEUS:
+            case BLUPHEUS:
                 return R.style.Theme_Blupheus_Panel;
-            case ThemeStyle.REPHEUS:
+            case REPHEUS:
                 return R.style.Theme_Repheus_Panel;
-            case ThemeStyle.GREPHEUS:
+            case GREPHEUS:
                 return R.style.Theme_Grepheus_Panel;
-            case ThemeStyle.PURPHEUS:
+            case PURPHEUS:
                 return R.style.Theme_Purpheus_Panel;
         }
         return -1;
@@ -79,15 +71,15 @@ public class ThemeHelper {
     public final int getTheme() {
         //Set theme
         switch (mActiveTheme) {
-            case ThemeStyle.ORPHEUS:
+            case ORPHEUS:
                 return R.style.Theme_Orpheus;
-            case ThemeStyle.BLUPHEUS:
+            case BLUPHEUS:
                 return R.style.Theme_Blupheus;
-            case ThemeStyle.REPHEUS:
+            case REPHEUS:
                 return R.style.Theme_Repheus;
-            case ThemeStyle.GREPHEUS:
+            case GREPHEUS:
                 return R.style.Theme_Repheus;
-            case ThemeStyle.PURPHEUS:
+            case PURPHEUS:
                 return R.style.Theme_Purpheus;
         }
         return -1;
@@ -98,15 +90,15 @@ public class ThemeHelper {
      */
     public final int getThemeColor() {
         switch (mActiveTheme) {
-            case ThemeStyle.ORPHEUS:
+            case ORPHEUS:
                 return mContext.getResources().getColor(R.color.app_color_orpheus);
-            case ThemeStyle.BLUPHEUS:
+            case BLUPHEUS:
                 return mContext.getResources().getColor(R.color.app_color_blupheus);
-            case ThemeStyle.REPHEUS:
+            case REPHEUS:
                 return mContext.getResources().getColor(R.color.app_color_repheus);
-            case ThemeStyle.GREPHEUS:
+            case GREPHEUS:
                 return mContext.getResources().getColor(R.color.app_color_grepheus);
-            case ThemeStyle.PURPHEUS:
+            case PURPHEUS:
                 return mContext.getResources().getColor(R.color.app_color_purpheus);
         }
         return -1;
@@ -117,15 +109,15 @@ public class ThemeHelper {
      */
     public final Drawable getActionBarBackground() {
         switch (mActiveTheme) {
-            case ThemeStyle.ORPHEUS:
+            case ORPHEUS:
                 return mContext.getResources().getDrawable(R.drawable.ab_solid_orpheus);
-            case ThemeStyle.BLUPHEUS:
+            case BLUPHEUS:
                 return mContext.getResources().getDrawable(R.drawable.ab_solid_blupheus);
-            case ThemeStyle.REPHEUS:
+            case REPHEUS:
                 return mContext.getResources().getDrawable(R.drawable.ab_solid_repheus);
-            case ThemeStyle.GREPHEUS:
+            case GREPHEUS:
                 return mContext.getResources().getDrawable(R.drawable.ab_solid_grepheus);
-            case ThemeStyle.PURPHEUS:
+            case PURPHEUS:
                 return mContext.getResources().getDrawable(R.drawable.ab_solid_purpheus);
         }
         return null;

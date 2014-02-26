@@ -138,12 +138,12 @@ public final class PreferenceUtils {
      * Sets theme used by themehelper to choose resources
      * @param themeStyle
      */
-    public void setThemeStyle(final int themeStyle) {
+    public void setThemeStyle(final ThemeStyle themeStyle) {
         ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(final Void... unused) {
                 final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putInt(THEME_STYLE, themeStyle);
+                editor.putString(THEME_STYLE, themeStyle.toString());
                 editor.apply();
 
                 return null;
@@ -155,8 +155,8 @@ public final class PreferenceUtils {
      * gets active theme
      * @return
      */
-    public final int getThemeStyle() {
-        return mPreferences.getInt(THEME_STYLE, ThemeHelper.ThemeStyle.REPHEUS);
+    public final ThemeStyle getThemeStyle() {
+        return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.REPHEUS.toString()));
     }
 
     /**
