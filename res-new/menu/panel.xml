@@ -5,8 +5,8 @@
     <!--<item android:id="@+id/panel_menu_shuffle_all"-->
         <!--android:title="@string/menu_shuffle"/>-->
 
-    <item android:id="@+id/panel_menu_favorite"
-        android:title="@string/add_to_favorites"/>
+    <!--<item android:id="@+id/panel_menu_favorite"-->
+        <!--android:title="@string/add_to_favorites"/>-->
 
     <item android:id="@+id/panel_menu_share"
         android:title="@string/menu_share"/>

@@ -1065,9 +1065,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.panel_menu_favorite:
-                    MusicUtils.toggleFavorite();
-                    return true;
                 case R.id.panel_menu_share:
                     // Share the current meta data
                     if (MusicUtils.getTrackName() != null && MusicUtils.getArtistName() != null) {
