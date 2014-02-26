@@ -937,6 +937,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
             //
             if (!mTransientNetworkDisconnection) {
+                if (MusicUtils.isPlaying()) {
+                    MusicUtils.playOrPause();
+                }
                 MusicUtils.notifyRouteUnselected();
             }
         }
