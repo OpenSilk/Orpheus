@@ -70,13 +70,10 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
                     return;
 //                    playlistName = getContext().getString(R.string.playlist_favorites);
 //                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_favorites));
-                    // Last added
-                } else if (mData.mPlaylistId == -2) {
-                    return;
-//                    playlistName = getContext().getString(R.string.playlist_last_added);
-//                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_last_added));
-                } else {
-                    // User created
+                } else if (mData.mPlaylistId == -2) { // Last added
+                    playlistName = getContext().getString(R.string.playlist_last_added);
+                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_last_added));
+                } else { // User created
                     playlistName = mData.mPlaylistName;
                     bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
                     bundle.putLong(Config.ID, mData.mPlaylistId);

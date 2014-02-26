@@ -156,7 +156,7 @@ public final class PreferenceUtils {
      * @return
      */
     public final int getThemeStyle() {
-        return mPreferences.getInt(THEME_STYLE, ThemeHelper.ThemeStyle.PURPHEUS);
+        return mPreferences.getInt(THEME_STYLE, ThemeHelper.ThemeStyle.REPHEUS);
     }
 
     /**

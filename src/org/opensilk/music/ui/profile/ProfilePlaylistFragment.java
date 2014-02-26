@@ -62,14 +62,19 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.dragsort_listview, container, false);
+        View v = inflater.inflate(R.layout.profile_dragsort_listview, container, false);
         mListView = (ListView) v.findViewById(android.R.id.list);
+        if (isLastAdded()) {
+            // last added arent sortable
+            ((DragSortListView) mListView).setDragEnabled(false);
+        } else {
+            // Set the drop listener
+            ((DragSortListView) mListView).setDropListener(this);
+            // Set the swipe to remove listener
+            ((DragSortListView) mListView).setRemoveListener(this);
+        }
         // set the adapter
         mListView.setAdapter(mAdapter);
-        // Set the drop listener
-        ((DragSortListView) mListView).setDropListener(this);
-        // Set the swipe to remove listener
-        ((DragSortListView) mListView).setRemoveListener(this);
         return v;
     }
 
@@ -83,6 +88,14 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
         super.onDestroyView();
     }
 
+    private boolean isFavorites() {
+        return mPlaylist.mPlaylistId == -1;
+    }
+
+    private boolean isLastAdded() {
+        return mPlaylist.mPlaylistId == -2;
+    }
+
     /*
      * DragSort callbacks
      */
@@ -90,16 +103,20 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     @Override
     public void remove(final int which) {
         Song song = ((CardSongList) mAdapter.getItem(which)).getData();
-        final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist.mPlaylistId);
-        getActivity().getContentResolver().delete(uri,
-                MediaStore.Audio.Playlists.Members.AUDIO_ID + "=" + song.mSongId,
-                null);
+        if (!isFavorites()) {
+            final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist.mPlaylistId);
+            getActivity().getContentResolver().delete(uri,
+                    MediaStore.Audio.Playlists.Members.AUDIO_ID + "=" + song.mSongId,
+                    null);
+        }
     }
 
     @Override
     public void drop(final int from, final int to) {
-        MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
-                mPlaylist.mPlaylistId, from, to);
+        if (!isFavorites()) {
+            MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
+                    mPlaylist.mPlaylistId, from, to);
+        }
     }
 
     /*

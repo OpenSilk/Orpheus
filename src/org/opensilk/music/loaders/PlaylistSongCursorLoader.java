@@ -17,6 +17,8 @@
 package org.opensilk.music.loaders;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
@@ -27,13 +29,35 @@ public class PlaylistSongCursorLoader extends CursorLoader {
 
     public PlaylistSongCursorLoader(Context context, long playlistId) {
         super(context);
-        setUri(MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId));
-        setProjection(Projections.PLAYLIST_SONGS);
-        setSelection(new StringBuilder()
-                .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
-                .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''").toString());
-        setSelectionArgs(null);
-        setSortOrder(MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+        if (isFavorites(playlistId)) {
+
+        } else if (isLastAdded(playlistId)) {
+            setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            setProjection(Projections.SONG);
+            setSelection(new StringBuilder()
+                    .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
+                    .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''")
+                    .append(" AND " + MediaStore.Audio.Media.DATE_ADDED + ">")
+                    .append(System.currentTimeMillis() / 1000 - (4 * 3600 * 24 * 7)).toString()); // Four weeks
+            setSelectionArgs(null);
+            setSortOrder(MediaStore.Audio.Media.DATE_ADDED + " DESC");
+        } else { //User generated playlist
+            setUri(MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId));
+            setProjection(Projections.PLAYLIST_SONGS);
+            setSelection(new StringBuilder()
+                    .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
+                    .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''").toString());
+            setSelectionArgs(null);
+            setSortOrder(MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+        }
+    }
+
+    private boolean isFavorites(long playlistId) {
+        return playlistId == -1;
+    }
+
+    private boolean isLastAdded(long playlistId) {
+        return playlistId == -2;
     }
 
 }

@@ -60,14 +60,12 @@
         <item name="android:fastScrollAlwaysVisible">true</item>
     </style>
 
-    <!-- setup for the queue's dragsort list -->
-    <style name="DragSort.Orpheus.Card" parent="@android:style/Widget.Holo.Light.ListView">
-        <!-- header / footer overlay view so need to push out past them -->
-        <item name="android:layout_marginBottom">@dimen/panel_footer_height</item>
-        <item name="android:layout_marginTop">@dimen/panel_header_height</item>
-        <!-- add some padding so the first/last items dont sit right on the header/footer-->
-        <item name="android:paddingBottom">@dimen/card_list_dragsort_padding_bottom</item>
-        <item name="android:paddingTop">@dimen/card_list_dragsort_padding_top</item>
+    <!-- common dragsort options -->
+    <style name="DragSort.Orpheus" parent="@android:style/Widget.Holo.Light.ListView">
+        <!--fastscroll-->
+        <item name="android:scrollbarStyle">outsideInset</item>
+        <item name="android:fastScrollEnabled">true</item>
+        <item name="android:fastScrollAlwaysVisible">true</item>
         <!-- Setup dragsort options-->
         <item name="use_default_controller">true</item>
         <item name="drag_handle_id">@id/card_thumbnail_image</item>
@@ -81,6 +79,21 @@
         <item name="android:footerDividersEnabled">false</item>
         <item name="android:headerDividersEnabled">false</item>
         <item name="android:divider">@null</item>
+    </style>
+
+    <!-- setup for the queue's dragsort list -->
+    <style name="DragSort.Orpheus.Queue">
+        <!-- header / footer overlay view so need to push out past them -->
+        <item name="android:layout_marginBottom">@dimen/panel_footer_height</item>
+        <item name="android:layout_marginTop">@dimen/panel_header_height</item>
+        <!-- add some padding so the first/last items dont sit right on the header/footer-->
+        <!--<item name="android:paddingBottom">@dimen/card_list_dragsort_padding_bottom</item>-->
+        <!--<item name="android:paddingTop">@dimen/card_list_dragsort_padding_top</item>-->
+    </style>
+
+    <!-- profile dragsort list used in playlist profile -->
+    <style name="DragSort.Orpheus.Profile">
+
     </style>
 
     <style name="PagerTabStrip">
