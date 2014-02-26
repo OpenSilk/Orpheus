@@ -22,7 +22,9 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.CursorAdapter;
+import android.widget.TextView;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.adapters.RecentGridCardCursorAdapter;
@@ -39,23 +41,6 @@ import static com.andrew.apollo.utils.PreferenceUtils.RECENT_LAYOUT;
  */
 public class RecentFragment extends HomePagerBaseCursorFragment {
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        // Set the empty text
-        final View empty = mRootView.findViewById(android.R.id.empty);
-        if (isSimpleLayout()) {
-            mListView.setEmptyView(empty);
-            // Set the data behind the list
-            mListView.setAdapter(mAdapter);
-        } else {
-            mGridView.setEmptyView(empty);
-            // Set the data behind the grid
-            mGridView.setAdapter(mAdapter);
-        }
-
-    }
-
     /*
      * Loader Callbacks
      */
@@ -63,6 +48,21 @@ public class RecentFragment extends HomePagerBaseCursorFragment {
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new RecentCursorLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        super.onLoadFinished(loader, data);
+        if (data == null) {
+            // Set the empty text
+            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
+            empty.setText(getString(R.string.empty_recent));
+            if (isSimpleLayout()) {
+                mListView.setEmptyView(empty);
+            } else {
+                mGridView.setEmptyView(empty);
+            }
+        }
     }
 
     /*

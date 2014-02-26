@@ -92,9 +92,11 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
         if (isSimpleLayout()) {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_thumb, null);
             mListView = (ListView) mRootView.findViewById(android.R.id.list);
+            mListView.setEmptyView(mRootView.findViewById(android.R.id.empty));
         } else {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_gridview, null);
             mGridView = (GridView) mRootView.findViewById(R.id.card_grid);
+            mGridView.setEmptyView(mRootView.findViewById(android.R.id.empty));
         }
         return mRootView;
     }

@@ -36,16 +36,6 @@ import org.opensilk.music.loaders.SongCursorLoader;
  */
 public class SongFragment extends HomePagerBaseCursorFragment {
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        // Set the empty text
-        final View empty = mRootView.findViewById(android.R.id.empty);
-        mListView.setEmptyView(empty);
-        // Set the data behind the list
-        mListView.setAdapter(mAdapter);
-    }
-
     /*
      * Loader Callbacks
      */

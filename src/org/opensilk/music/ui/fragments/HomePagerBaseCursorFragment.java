@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
@@ -94,9 +95,15 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
         if (isSimpleLayout()) {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_thumb, null);
             mListView = (CardListView) mRootView.findViewById(android.R.id.list);
+            mListView.setEmptyView(mRootView.findViewById(android.R.id.empty));
+            // Set the data behind the list
+            mListView.setAdapter(mAdapter);
         } else {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_gridview, null);
             mGridView = (CardGridView) mRootView.findViewById(R.id.card_grid);
+            mGridView.setEmptyView(mRootView.findViewById(android.R.id.empty));
+            // Set the data behind the grid
+            mGridView.setAdapter(mAdapter);
         }
         return mRootView;
     }
@@ -131,6 +138,16 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data == null) {
+            // Set the empty text
+            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
+            empty.setText(getString(R.string.empty_music));
+            if (isSimpleLayout()) {
+                mListView.setEmptyView(empty);
+            } else {
+                mGridView.setEmptyView(empty);
+            }
+        }
         mAdapter.swapCursor(data);
     }
 

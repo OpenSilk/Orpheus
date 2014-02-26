@@ -37,22 +37,6 @@ import static com.andrew.apollo.utils.PreferenceUtils.ALBUM_LAYOUT;
  */
 public class AlbumFragment extends HomePagerBaseCursorFragment {
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        // Set the empty text
-        final View empty = mRootView.findViewById(android.R.id.empty);
-        if (isSimpleLayout()) {
-            mListView.setEmptyView(empty);
-            // Set the data behind the list
-            mListView.setAdapter(mAdapter);
-        } else {
-            mGridView.setEmptyView(empty);
-            // Set the data behind the grid
-            mGridView.setAdapter(mAdapter);
-        }
-    }
-
     /*
      * Loader Callbacks
      */
