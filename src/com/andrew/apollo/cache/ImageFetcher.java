@@ -21,8 +21,8 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.lastfm.Album;
 import com.andrew.apollo.lastfm.Artist;
-import com.andrew.apollo.lastfm.MusicEntry;
 import com.andrew.apollo.lastfm.ImageSize;
+import com.andrew.apollo.lastfm.MusicEntry;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 
@@ -93,9 +93,7 @@ public class ImageFetcher extends ImageWorker {
     }
 
     private static String getBestImage(MusicEntry e) {
-        final ImageSize[] QUALITY = {ImageSize.EXTRALARGE, ImageSize.LARGE, ImageSize.MEDIUM,
-                ImageSize.SMALL, ImageSize.UNKNOWN};
-        for(ImageSize q : QUALITY) {
+        for (ImageSize q : ImageSize.values()) {
             String url = e.getImageURL(q);
             if (url != null) {
                 return url;
@@ -287,9 +285,9 @@ public class ImageFetcher extends ImageWorker {
         HttpURLConnection urlConnection = null;
         BufferedOutputStream out = null;
 
+        File tempFile = null;
         try {
-            final File tempFile = File.createTempFile("bitmap", null, cacheDir); //$NON-NLS-1$
-
+            tempFile = File.createTempFile("bitmap", null, cacheDir); //$NON-NLS-1$
             final URL url = new URL(urlString);
             urlConnection = (HttpURLConnection)url.openConnection();
             if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -305,6 +303,9 @@ public class ImageFetcher extends ImageWorker {
             }
             return tempFile;
         } catch (final IOException ignored) {
+            if (tempFile != null) {
+                tempFile.delete();
+            }
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();

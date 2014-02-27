@@ -70,6 +70,7 @@ public class Artist extends MusicEntry {
         if (locale != null && locale.getLanguage().length() != 0) {
             mParams.put("lang", locale.getLanguage());
         }
+        mParams.put("autocorrect", "1");
         final Result mResult = Caller.getInstance(context).call("artist.getInfo", apiKey, mParams);
         return ResponseBuilder.buildItem(mResult, Artist.class);
     }
