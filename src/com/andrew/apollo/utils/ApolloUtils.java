@@ -158,6 +158,11 @@ public final class ApolloUtils {
             state = wifiNetwork.isConnectedOrConnecting();
         }
 
+        // Don't bother checking the rest if we are connected or we have opted out of mobile
+        if (onlyOnWifi || state) {
+            return state;
+        }
+
         /* Mobile data connection */
         final NetworkInfo mbobileNetwork = connectivityManager
                 .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
