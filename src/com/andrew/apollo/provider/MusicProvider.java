@@ -70,6 +70,9 @@ public class MusicProvider extends ContentProvider {
 
     @Override
     public synchronized Uri insert(Uri uri, ContentValues values) {
+        if (uri == null || values == null) {
+            return null;
+        }
         Uri ret = null;
         switch (sUriMatcher.match(uri)) {
             case 1:
