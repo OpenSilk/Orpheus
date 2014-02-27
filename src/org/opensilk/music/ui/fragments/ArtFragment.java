@@ -36,6 +36,7 @@ public class ArtFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_albumart, container, false);
         mAlbumArt = (ImageView) v.findViewById(R.id.audio_player_album_art);
+        mAlbumArt.setScaleType(ImageView.ScaleType.CENTER_CROP);
         return v;
     }
 

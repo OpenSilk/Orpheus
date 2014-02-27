@@ -76,7 +76,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
         mListView = (CardListView) v.findViewById(android.R.id.list);
         // set the adapter
         mListView.setAdapter(mAdapter);
-        mHeaderImage = (ImageView) v.findViewById(R.id.artist_image_header);
+        mHeaderImage = (ProfileHeaderImage) v.findViewById(R.id.artist_image_header);
         mInfoTitle = (TextView) v.findViewById(R.id.info_title);
         mInfoSubTitle = (TextView) v.findViewById(R.id.info_subtitle);
         mOverflowButton = v.findViewById(R.id.profile_header_overflow);

@@ -32,7 +32,7 @@ public abstract class ProfileFadingBaseFragment<D extends Parcelable> extends Pr
     /* Manages our views */
     protected FadingActionBarHelper mFadingHelper;
     /* header image */
-    protected ImageView mHeaderImage;
+    protected ProfileHeaderImage mHeaderImage;
 
     protected Drawable mActionBarBackground;
 

@@ -18,11 +18,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    <org.opensilk.music.ui.profile.ProfileHeaderImage
         android:id="@+id/artist_image_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/profile_header_height"
-        android:scaleType="centerCrop"
         android:layout_gravity="center"
         android:gravity="center" />
 
