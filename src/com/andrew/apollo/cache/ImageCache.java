@@ -25,14 +25,13 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.text.TextUtils;
 import android.util.Log;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 
 import java.io.File;
@@ -64,7 +63,7 @@ public final class ImageCache {
     /**
      * Default disk cache size 10MB
      */
-    private static final int DISK_CACHE_SIZE = 1024 * 1024 * 10;
+    private static final int DISK_CACHE_SIZE = 1024 * 1024 * 30;
 
     /**
      * Compression settings when writing images to disk cache
@@ -181,8 +180,9 @@ public final class ImageCache {
     public void initLruCache(final Context context) {
         final ActivityManager activityManager = (ActivityManager)context
                 .getSystemService(Context.ACTIVITY_SERVICE);
-        final int lruCacheSize = Math.round(MEM_CACHE_DIVIDER * activityManager.getMemoryClass()
-                * 1024 * 1024);
+        int memClass = context.getResources().getBoolean(R.bool.config_largeHeap) ?
+                activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
+        final int lruCacheSize = Math.round(MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
         mLruCache = new MemoryCache(lruCacheSize);
 
         // Release some memory as needed
