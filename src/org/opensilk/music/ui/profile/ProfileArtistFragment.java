@@ -30,6 +30,7 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.model.Artist;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
@@ -89,7 +90,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-        ImageFetcher.getInstance(getActivity()).loadArtistImage(mArtist.mArtistName, mHeaderImage);
+        ApolloUtils.getImageFetcher(getActivity()).loadArtistImage(mArtist.mArtistName, mHeaderImage);
         // Load header text
         mInfoTitle.setText(mArtist.mArtistName);
         mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.mAlbumNumber));
