@@ -518,12 +518,12 @@ public class MusicPlaybackService extends Service {
     /**
      * MediaInfo for the current track
      */
-    MediaInfo mCurrentMediaInfo;
+    private MediaInfo mCurrentMediaInfo;
 
     /**
      * MediaInfo for track next in queue
      */
-    MediaInfo mNextMediaInfo;
+    private MediaInfo mNextMediaInfo;
 
     /**
      * indicates whether we are doing a local or a remote playback
@@ -2693,6 +2693,8 @@ public class MusicPlaybackService extends Service {
             } else {
                 Log.e(TAG, "Failed to load remote media");
             }
+        } else {
+            Log.e(TAG, "mNextMediaInfo was null");
         }
     }
 
@@ -3438,6 +3440,9 @@ public class MusicPlaybackService extends Service {
                 mCurrentMediaPlayer.release();
                 mCurrentMediaPlayer = mNextMediaPlayer;
                 mNextMediaPlayer = null;
+                // Update the remote media info
+                mService.get().mCurrentMediaInfo = mService.get().mNextMediaInfo;
+                mService.get().mNextMediaInfo = null;
                 mHandler.sendEmptyMessage(TRACK_WENT_TO_NEXT);
             } else {
                 mService.get().mWakeLock.acquire(30000);
