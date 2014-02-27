@@ -68,6 +68,11 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
     protected CardListView mListView;
 
     /**
+     * Loading progress
+     */
+    protected View mLoadingEmpty;
+
+    /**
      * Our cursor adapter
      */
     protected CursorAdapter mAdapter;
@@ -94,14 +99,16 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
         // The View for the fragment's UI
         if (isSimpleLayout()) {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_thumb, null);
+            mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
             mListView = (CardListView) mRootView.findViewById(android.R.id.list);
-            mListView.setEmptyView(mRootView.findViewById(android.R.id.empty));
+            mListView.setEmptyView(mLoadingEmpty);
             // Set the data behind the list
             mListView.setAdapter(mAdapter);
         } else {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_gridview, null);
+            mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
             mGridView = (CardGridView) mRootView.findViewById(R.id.card_grid);
-            mGridView.setEmptyView(mRootView.findViewById(android.R.id.empty));
+            mGridView.setEmptyView(mLoadingEmpty);
             // Set the data behind the grid
             mGridView.setAdapter(mAdapter);
         }
@@ -138,7 +145,9 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data == null) {
+        if (data == null || data.isClosed() || data.getCount() <= 0) {
+            // hide the progress
+            mLoadingEmpty.setVisibility(View.GONE);
             // Set the empty text
             final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
             empty.setText(getString(R.string.empty_music));

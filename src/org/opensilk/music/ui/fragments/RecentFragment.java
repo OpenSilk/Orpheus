@@ -53,7 +53,7 @@ public class RecentFragment extends HomePagerBaseCursorFragment {
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         super.onLoadFinished(loader, data);
-        if (data == null) {
+        if (data == null || data.isClosed() || data.getCount() <= 0) {
             // Set the empty text
             final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
             empty.setText(getString(R.string.empty_recent));
