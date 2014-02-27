@@ -26,6 +26,7 @@ import static com.andrew.apollo.lastfm.StringUtilities.map;
 
 import android.content.Context;
 
+import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.lastfm.Result.Status;
 
 import org.w3c.dom.DOMException;
@@ -74,7 +75,7 @@ public class Caller {
 
     private final String apiRootUrl = DEFAULT_API_ROOT;
 
-    private final String userAgent = "Apollo";
+    private final String userAgent = "Orpheus/" + BuildConfig.VERSION_NAME + " (Linux, U, Android)";
 
     private Result lastResult;
 

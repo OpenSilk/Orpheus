@@ -25,7 +25,7 @@ public final class Config {
     /**
      * My personal Last.fm API key, please use your own.
      */
-    public static final String LASTFM_API_KEY = "0bec3f7ec1f914d7c960c12a916c8fb3";
+    public static final String LASTFM_API_KEY = "6a847926e75808c33b63b25a2d0e555d";
 
     /**
      * Cast application id
