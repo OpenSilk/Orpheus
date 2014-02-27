@@ -2904,6 +2904,13 @@ public class MusicPlaybackService extends Service {
             restoreLocalState();
         }
 
+        /** Called when stopApplication() succeeds*/
+        @Override
+        @DebugLog
+        public void onApplicationStopped() {
+            mCastManager.selectDevice(null);
+        }
+
         /** Called when stopApplication() fails */
         @Override
         @DebugLog

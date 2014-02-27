@@ -52,6 +52,11 @@ public interface IVideoCastConsumer extends IBaseCastConsumer {
     public boolean onApplicationConnectionFailed(int errorCode);
 
     /**
+     * Called if stopApplication() was SuccessFull;
+     */
+    public void onApplicationStopped();
+
+    /**
      * Called when an attempt to stop a receiver application has failed.
      * 
      * @param errorCode

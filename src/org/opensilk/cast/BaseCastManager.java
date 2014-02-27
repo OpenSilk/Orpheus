@@ -144,6 +144,11 @@ public abstract class BaseCastManager implements
     abstract void onApplicationConnectionFailed(int statusCode);
 
     /**
+     * Called when stopApplication() succeeded
+     */
+    abstract void onApplicationStopped();
+
+    /**
      * Called when the attempt to stop application has failed.
      *
      * @param statusCode
@@ -919,7 +924,7 @@ public abstract class BaseCastManager implements
                     onApplicationStopFailed(result.getStatusCode());
                 } else {
                     LOGD(TAG, "stopApplication -> onResult Stopped application " + "successfully");
-                    //onApplicationStopped(); //TODO
+                    onApplicationStopped();
                 }
             }
         });

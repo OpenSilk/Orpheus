@@ -617,6 +617,20 @@ public class CastManager extends BaseCastManager
     }
 
     /*
+     * called when we sucessfully stopped application
+     */
+    @Override
+    void onApplicationStopped() {
+        for (IVideoCastConsumer consumer : mVideoConsumers) {
+            try {
+                consumer.onApplicationStopped();
+            } catch (Exception e) {
+                LOGE(TAG, "onApplicationLaunched(): Failed to inform " + consumer, e);
+            }
+        }
+    }
+
+    /*
      * (non-Javadoc)
      * @see com.google.android.gms.cast.CastClient.Listener#onApplicationStopFailed (int)
      */

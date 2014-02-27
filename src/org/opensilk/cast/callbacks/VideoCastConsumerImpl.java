@@ -57,6 +57,10 @@ public class VideoCastConsumerImpl extends BaseCastConsumerImpl
     }
 
     @Override
+    public void onApplicationStopped() {
+    }
+
+    @Override
     public void onApplicationStopFailed(int errorCode) {
     }
 
