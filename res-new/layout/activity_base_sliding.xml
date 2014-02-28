@@ -16,41 +16,44 @@
  * limitations under the License.
  */
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sothree.slidinguppanel.SlidingUpPanelLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="bottom"
+    sothree:collapsedHeight="@dimen/panel_header_height"
+    sothree:shadowHeight="@dimen/shadow_height"
+    sothree:dragView="@+id/name">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        xmlns:sothree="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/sliding_layout"
+    <!-- main content -->
+    <FrameLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="bottom"
-        sothree:collapsedHeight="@dimen/panel_header_height"
-        sothree:shadowHeight="@dimen/shadow_height"
-        sothree:dragView="@+id/name">
+        android:layout_height="match_parent"/>
 
-        <!-- main content -->
-        <FrameLayout
-            android:id="@+id/main"
+    <!-- frame for everything in the sliding panel -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--album art, replaces above fragment -->
+        <ImageView
+            android:id="@+id/panel_background_art"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
 
         <!-- Sliding content -->
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:clickable="true"
             android:focusable="false">
 
-            <!-- album art / queue fragments
-                fills whole screen acts as background -->
-            <FrameLayout
-                android:id="@+id/panel_main_content"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
 
             <!-- header
              sits on top of content area -->
@@ -131,22 +134,44 @@
 
             </LinearLayout>
 
-            <ImageView
+            <!-- Little hack to let the background of the queue
+                 fragment go under the shadows -->
+
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/shadow_height"
-                android:layout_below="@id/panel_header"
-                android:contentDescription="@null"
-                android:src="@drawable/top_shadow" />
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/shadow_height"
+                    android:layout_gravity="top"
+                    android:contentDescription="@null"
+                    android:src="@drawable/top_shadow" />
+
+                <!-- Used to show/hide the QueueFragment -->
+                <FrameLayout
+                    android:id="@+id/panel_middle_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/shadow_height"
+                    android:layout_gravity="bottom"
+                    android:contentDescription="@null"
+                    android:src="@drawable/bottom_shadow" />
+            </FrameLayout>
 
             <!-- footer
-            sits on top of content area floating on bottom of screen-->
+                sits on top of content area floating on bottom of screen-->
+
             <LinearLayout
                 android:id="@+id/panel_footer"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/panel_footer_height"
                 android:orientation="vertical"
-                android:background="#e6fafafa"
-                android:layout_alignParentBottom="true">
+                android:background="#e6fafafa">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -213,14 +238,8 @@
 
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/shadow_height"
-                android:layout_above="@id/panel_footer"
-                android:contentDescription="@null"
-                android:src="@drawable/bottom_shadow" />
+        </LinearLayout>
 
-        </RelativeLayout>
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    </FrameLayout>
 
-</RelativeLayout>
+</com.sothree.slidinguppanel.SlidingUpPanelLayout>

@@ -75,7 +75,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
-import org.opensilk.music.ui.fragments.ArtFragment;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.PlayPauseButton;
 import org.opensilk.music.widgets.RepeatButton;
@@ -116,6 +115,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     /** Handler used to update the current time */
     private TimeHandler mTimeHandler;
+
+    // Background art
+    private ImageView mArtBackground;
 
     /** Panel Header */
     private ViewGroup mPanelHeader;
@@ -469,13 +471,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      * Initializes the items in sliding panel.
      */
     private void initPanel() {
-        //Load art
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.panel_main_content, new ArtFragment(), "art_bg")
-                .commit();
-
         //Header
         mPanelHeader = (ViewGroup) findViewById(R.id.panel_header);
+
+        // Background art
+        mArtBackground = (ImageView) findViewById(R.id.panel_background_art);
 
         // Play and pause button
         mHeaderPlayPauseButton = (PlayPauseButton)findViewById(R.id.header_action_button_play);
@@ -566,9 +566,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Set the total time
         mFooterTotalTime.setText(MusicUtils.makeTimeString(this, MusicUtils.duration() / 1000));
         // Set the album art
-        ApolloUtils.getImageFetcher(this).loadCurrentArtwork(
-                ((ArtFragment) getSupportFragmentManager().findFragmentByTag("art_bg")).getArtImage()
-        );
+        ApolloUtils.getImageFetcher(this).loadCurrentArtwork(mArtBackground);
         // Update the current time
         queueNextRefresh(1);
     }
@@ -792,20 +790,20 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     private void pushQueueFragment() {
         getSupportFragmentManager().beginTransaction()
-                .hide(getSupportFragmentManager().findFragmentByTag("art_bg"))
-                .add(R.id.panel_main_content, new QueueFragment(), "queue")
+                .add(R.id.panel_middle_content, new QueueFragment(), "queue")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
+        mArtBackground.setVisibility(View.INVISIBLE);
         mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue_inverse);
         mQueueShowing = true;
     }
 
     private void popQueueFragment() {
         getSupportFragmentManager().beginTransaction()
-                .show(getSupportFragmentManager().findFragmentByTag("art_bg"))
                 .remove(getSupportFragmentManager().findFragmentByTag("queue"))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
+        mArtBackground.setVisibility(View.VISIBLE);
         mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue);
         mQueueShowing = false;
     }
