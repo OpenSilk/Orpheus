@@ -58,6 +58,9 @@ public class PlaylistLoader extends WrappedAsyncTaskLoader<List<Playlist>> {
      */
     @Override
     public List<Playlist> loadInBackground() {
+        // Reset the list
+        mPlaylistList.clear();
+
         // Add the deafult playlits to the adapter
         makeDefaultPlaylists();
 
