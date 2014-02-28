@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
@@ -36,6 +37,7 @@ import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
+import org.opensilk.music.ui.cards.CardArtistList;
 
 import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.view.CardListView;
@@ -94,16 +96,17 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
         // Load header text
         mInfoTitle.setText(mArtist.mArtistName);
         mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.mAlbumNumber));
+        final CardArtistList artistCard = new CardArtistList(getActivity(), mArtist);
         // initialize header overflow
-//        mOverflowButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                PopupMenu menu = new PopupMenu(v.getContext(), v);
-//                menu.inflate(card.getOverflowMenuId());
-//                menu.setOnMenuItemClickListener(card.getOverflowPopupMenuListener());
-//                menu.show();
-//            }
-//        });
+        mOverflowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu menu = new PopupMenu(v.getContext(), v);
+                menu.inflate(artistCard.getOverflowMenuId());
+                menu.setOnMenuItemClickListener(artistCard.getOverflowPopupMenuListener());
+                menu.show();
+            }
+        });
         // Init the fading action bar
         mFadingHelper.initActionBar(getActivity());
     }
