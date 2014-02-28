@@ -69,15 +69,8 @@ public class GenreLoader extends WrappedAsyncTaskLoader<List<Genre>> {
                 // Copy the genre name
                 final String name = mCursor.getString(1);
 
-                final List<Song> songList = GenreSongLoader.makeGenreSongList(getContext(), id);
-
-                // Don't add genres without any songs //TODO remove genre from mediastore
-                if (songList.size() == 0) {
-                    continue;
-                }
-
                 // Create a new genre
-                final Genre genre = new Genre(id, name, songList);
+                final Genre genre = new Genre(id, name);
 
                 // Add everything up
                 mGenreList.add(genre);

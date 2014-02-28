@@ -29,7 +29,6 @@ import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
@@ -39,7 +38,6 @@ import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
 import org.opensilk.music.ui.cards.CardArtistList;
 
-import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
@@ -61,14 +59,12 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     }
 
     @Override
-    @DebugLog
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mArtist = mBundleData;
     }
 
     @Override
-    @DebugLog
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Init the helper here so its around for onCreateView
         mFadingHelper = new FadingActionBarHelper()
@@ -88,7 +84,6 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     }
 
     @Override
-    @DebugLog
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
@@ -112,7 +107,6 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     }
 
     @Override
-    @DebugLog
     public void onDestroyView() {
         super.onDestroyView();
         mInfoTitle = null;
@@ -125,7 +119,6 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
      */
 
     @Override
-    @DebugLog
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new ArtistAlbumCursorLoader(getActivity(), args.getLong(Config.ID));
     }

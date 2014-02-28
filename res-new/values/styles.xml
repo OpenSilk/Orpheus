@@ -63,9 +63,9 @@
     <!-- common dragsort options -->
     <style name="DragSort.Orpheus" parent="@android:style/Widget.Holo.Light.ListView">
         <!--fastscroll-->
-        <item name="android:scrollbarStyle">outsideInset</item>
-        <item name="android:fastScrollEnabled">true</item>
-        <item name="android:fastScrollAlwaysVisible">true</item>
+        <!--<item name="android:scrollbarStyle">outsideInset</item>-->
+        <!--<item name="android:fastScrollEnabled">true</item>-->
+        <!--<item name="android:fastScrollAlwaysVisible">true</item>-->
         <!-- Setup dragsort options-->
         <item name="use_default_controller">true</item>
         <item name="drag_handle_id">@id/card_thumbnail_image</item>

@@ -11,16 +11,20 @@
 
 package com.andrew.apollo.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class that represents a genre.
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class Genre {
+public class Genre implements Parcelable {
 
     /**
      * The unique Id of the genre
@@ -33,9 +37,9 @@ public class Genre {
     public String mGenreName;
 
     /**
-     * Genre songs
+     * Genre song count
      */
-    public List<Song> mSongs;
+    public int mSongNumber;
 
     /**
      * Constructor of <code>Genre</code>
@@ -48,7 +52,7 @@ public class Genre {
         super();
         mGenreId = genreId;
         mGenreName = genreName;
-        mSongs = null;
+        mSongNumber = 0;
     }
 
     /**
@@ -57,11 +61,11 @@ public class Genre {
      * @param genreId The Id of the genre
      * @param genreName The genre name
      */
-    public Genre(final long genreId, final String genreName, List<Song> songs) {
+    public Genre(final long genreId, final String genreName, final int songNumber) {
         super();
         mGenreId = genreId;
         mGenreName = genreName;
-        mSongs = songs;
+        mSongNumber = songNumber;
     }
 
     /**
@@ -87,7 +91,7 @@ public class Genre {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof Genre)) {
             return false;
         }
         final Genre other = (Genre)obj;
@@ -105,4 +109,37 @@ public class Genre {
         return mGenreName;
     }
 
+    /*
+     * Implement Parcelable Interface
+     */
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(mGenreId);
+        dest.writeString(mGenreName);
+        dest.writeInt(mSongNumber);
+    }
+
+    private Genre(Parcel in) {
+        mGenreId = in.readLong();
+        mGenreName = in.readString();
+        mSongNumber = in.readInt();
+    }
+
+    public static final Creator<Genre> CREATOR = new Creator<Genre>() {
+        @Override
+        public Genre createFromParcel(Parcel source) {
+            return new Genre(source);
+        }
+
+        @Override
+        public Genre[] newArray(int size) {
+            return new Genre[size];
+        }
+    };
 }

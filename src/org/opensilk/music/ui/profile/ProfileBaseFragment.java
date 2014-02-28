@@ -32,10 +32,14 @@ import com.andrew.apollo.Config;
  */
 public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /* main content */
+    // Loader identifier
+    protected static final int LOADER = 2;
+
+    // main content
     protected ListView mListView;
     protected CursorAdapter mAdapter;
 
+    // object passed in bundle
     protected D mBundleData;
 
     @Override
@@ -49,7 +53,7 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
         // init the adapter
         mAdapter = createAdapter();
         // start the loader
-        getLoaderManager().initLoader(0, createLoaderArgs(), this);
+        getLoaderManager().initLoader(LOADER, createLoaderArgs(), this);
     }
 
     @Override

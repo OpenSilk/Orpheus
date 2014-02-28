@@ -30,7 +30,6 @@ import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
