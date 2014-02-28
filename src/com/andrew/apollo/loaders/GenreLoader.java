@@ -56,6 +56,8 @@ public class GenreLoader extends WrappedAsyncTaskLoader<List<Genre>> {
      */
     @Override
     public List<Genre> loadInBackground() {
+        // Reset the list
+        mGenreList.clear();
         // Create the Cursor
         mCursor = makeGenreCursor(getContext());
         // Gather the data
