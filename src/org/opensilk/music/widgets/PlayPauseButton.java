@@ -28,8 +28,6 @@ import android.widget.ImageButton;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeUtils;
-import com.andrew.apollo.widgets.theme.HoloSelector;
 
 /**
  * A custom {@link ImageButton} that represents the "play and pause" button.
@@ -81,10 +79,10 @@ public class PlayPauseButton extends ImageButton implements OnClickListener, OnL
     public void updateState() {
         if (MusicUtils.isPlaying()) {
             setContentDescription(getResources().getString(R.string.accessibility_pause));
-            setImageResource(R.drawable.ic_pause_dark);
+            setImageResource(R.drawable.ic_action_playback_pause_black);
         } else {
             setContentDescription(getResources().getString(R.string.accessibility_play));
-            setImageResource(R.drawable.ic_play_dark);
+            setImageResource(R.drawable.ic_action_playback_play_black);
         }
     }
 

@@ -18,6 +18,7 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,8 +30,7 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeUtils;
-import com.andrew.apollo.widgets.theme.HoloSelector;
+import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * A custom {@link ImageButton} that represents the "repeat" button.
@@ -38,6 +38,9 @@ import com.andrew.apollo.widgets.theme.HoloSelector;
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
 public class RepeatButton extends ImageButton implements OnClickListener, OnLongClickListener {
+
+    private final Drawable mRepeatDrawable;
+    private final Drawable mRepeatOneDrawable;
 
     public RepeatButton(Context context) {
         this(context, null);
@@ -51,6 +54,9 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
         super(context, attrs, defStyle);
         setOnClickListener(this);
         setOnLongClickListener(this);
+        ThemeHelper themeHelper = ThemeHelper.getInstance(getContext());
+        mRepeatDrawable = themeHelper.getRepeatButtonDrawable();
+        mRepeatOneDrawable = themeHelper.getRepeatOneButtonDrawable();
         updateRepeatState();
     }
 
@@ -83,15 +89,15 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
         switch (MusicUtils.getRepeatMode()) {
             case MusicPlaybackService.REPEAT_ALL:
                 setContentDescription(getResources().getString(R.string.accessibility_repeat_all));
-                setImageResource(R.drawable.ic_repeat_dark_selected);
+                setImageDrawable(mRepeatDrawable);
                 break;
             case MusicPlaybackService.REPEAT_CURRENT:
                 setContentDescription(getResources().getString(R.string.accessibility_repeat_one));
-                setImageResource(R.drawable.ic_repeat_one_song_dark);
+                setImageDrawable(mRepeatOneDrawable);
                 break;
             case MusicPlaybackService.REPEAT_NONE:
                 setContentDescription(getResources().getString(R.string.accessibility_repeat));
-                setImageResource(R.drawable.ic_repeat_dark);
+                setImageResource(R.drawable.ic_action_playback_repeat_black);
                 break;
             default:
                 break;

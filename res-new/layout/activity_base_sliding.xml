@@ -108,11 +108,15 @@
                     <org.opensilk.music.widgets.PlayPauseButton
                         android:id="@+id/header_action_button_play"
                         style="@style/Orpheus.Button.PanelHeader"
+                        android:layout_height="46dp"
+                        android:layout_width="46dp"
                         android:contentDescription="@string/accessibility_play"/>
 
                     <org.opensilk.music.widgets.RepeatingImageButton
                         android:id="@+id/header_action_button_next"
                         style="@style/Orpheus.Button.PanelHeader"
+                        android:layout_height="50dp"
+                        android:layout_width="50dp"
                         android:contentDescription="@string/accessibility_next"/>
 
                     <android.support.v7.app.MediaRouteButton
@@ -123,7 +127,6 @@
                     <ImageButton
                         android:id="@+id/header_switch_queue"
                         style="@style/Orpheus.MenuButton"
-                        android:src="@drawable/ic_queue"
                         android:contentDescription="@null"/>
 
                     <ImageButton android:id="@+id/header_overflow"
@@ -169,9 +172,9 @@
             <LinearLayout
                 android:id="@+id/panel_footer"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/panel_footer_height"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#e6fafafa">
+                android:background="@color/app_background_light_transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -207,6 +210,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:baselineAligned="false"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center" >
 
                     <org.opensilk.music.widgets.ShuffleButton

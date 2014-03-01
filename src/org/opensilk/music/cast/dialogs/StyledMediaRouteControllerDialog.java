@@ -18,7 +18,6 @@
 package org.opensilk.music.cast.dialogs;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.MediaRouteControllerDialog;
@@ -63,8 +62,8 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
         super(context, theme);
         mIsRemotePlayback = MusicUtils.isRemotePlayback();
         //TODO listen for changes in remote playback
-        mPauseDrawable = context.getResources().getDrawable(R.drawable.ic_pause_dark);
-        mPlayDrawable = context.getResources().getDrawable(R.drawable.ic_play_dark);
+        mPauseDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
+        mPlayDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_play_black);
     }
 
     @Override
@@ -149,13 +148,13 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
             }
         });
 
-        mIcon.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                getContext().startActivity(new Intent("org.opensilk.music.AUDIO_PLAYER"));
-            }
-        });
+//        mIcon.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                getContext().startActivity(new Intent("org.opensilk.music.AUDIO_PLAYER"));
+//            }
+//        });
     }
 
     private void loadViews(View controls) {

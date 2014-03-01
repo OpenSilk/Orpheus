@@ -156,7 +156,7 @@ public final class PreferenceUtils {
      * @return
      */
     public final ThemeStyle getThemeStyle() {
-        return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.REPHEUS.toString()));
+        return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.GREPHEUS.toString()));
     }
 
     /**

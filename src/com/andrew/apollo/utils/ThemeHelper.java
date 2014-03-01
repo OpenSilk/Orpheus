@@ -123,4 +123,84 @@ public class ThemeHelper {
         return null;
     }
 
+    public final Drawable getShuffleButtonDrawable() {
+        switch (mActiveTheme) {
+            case ORPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_orange);
+            case BLUPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_blue_dark);
+            case REPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_red_dark);
+            case GREPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_green_dark);
+            case PURPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_purple_dark);
+        }
+        return null;
+    }
+
+    public final Drawable getRepeatButtonDrawable() {
+        switch (mActiveTheme) {
+            case ORPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_orange);
+            case BLUPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_blue_dark);
+            case REPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_red_dark);
+            case GREPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_green_dark);
+            case PURPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_purple_dark);
+        }
+        return null;
+    }
+
+    public final Drawable getRepeatOneButtonDrawable() {
+        switch (mActiveTheme) {
+            case ORPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_orange);
+            case BLUPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_blue_dark);
+            case REPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_red_dark);
+            case GREPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_green_dark);
+            case PURPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_purple_dark);
+        }
+        return null;
+    }
+
+    public final Drawable getQueueButtonDrawable() {
+        switch (mActiveTheme) {
+            case ORPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_orange);
+            case BLUPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_blue_dark);
+            case REPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_red_dark);
+            case GREPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_green_dark);
+            case PURPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_purple_dark);
+        }
+        return null;
+    }
+
+    public final Drawable getQueueButtonInverseDrawable() {
+        switch (mActiveTheme) {
+            case ORPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_orange_inverse);
+            case BLUPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_blue_dark_inverse);
+            case REPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_red_dark_inverse);
+            case GREPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_green_dark_inverse);
+            case PURPHEUS:
+                return mContext.getResources().getDrawable(R.drawable.list_2_purple_dark_inverse);
+        }
+        return null;
+    }
+
 }

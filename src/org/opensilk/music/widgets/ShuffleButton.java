@@ -18,6 +18,7 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,13 +30,14 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeUtils;
-import com.andrew.apollo.widgets.theme.HoloSelector;
+import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
 public class ShuffleButton extends ImageButton implements OnClickListener, OnLongClickListener {
+
+    private final Drawable mShuffleDrawable;
 
     public ShuffleButton(Context context) {
         this(context, null);
@@ -49,6 +51,7 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
         super(context, attrs, defStyle);
         setOnClickListener(this);
         setOnLongClickListener(this);
+        mShuffleDrawable = ThemeHelper.getInstance(getContext()).getShuffleButtonDrawable();
     }
 
     /**
@@ -80,15 +83,15 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
         switch (MusicUtils.getShuffleMode()) {
             case MusicPlaybackService.SHUFFLE_NORMAL:
                 setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
-                setImageResource(R.drawable.ic_shuffle_dark_selected);
+                setImageDrawable(mShuffleDrawable);
                 break;
             case MusicPlaybackService.SHUFFLE_AUTO:
                 setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
-                setImageResource(R.drawable.ic_shuffle_dark_selected);
+                setImageDrawable(mShuffleDrawable);
                 break;
             case MusicPlaybackService.SHUFFLE_NONE:
                 setContentDescription(getResources().getString(R.string.accessibility_shuffle));
-                setImageResource(R.drawable.ic_shuffle_dark);
+                setImageResource(R.drawable.ic_action_playback_schuffle_black);
                 break;
             default:
                 break;

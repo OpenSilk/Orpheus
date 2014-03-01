@@ -29,8 +29,6 @@ import android.widget.ImageButton;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeUtils;
-import com.andrew.apollo.widgets.theme.HoloSelector;
 
 /**
  * A {@link ImageButton} that will repeatedly call a 'listener' method as long
@@ -188,11 +186,11 @@ public class RepeatingImageButton extends ImageButton implements OnClickListener
             case R.id.action_button_next:
             case R.id.header_action_button_next:
             case R.id.footer_action_button_next:
-                setImageResource(R.drawable.ic_fwd_dark);
+                setImageResource(R.drawable.ic_action_playback_next_black);
                 break;
             case R.id.action_button_previous:
             case R.id.footer_action_button_previous:
-                setImageResource(R.drawable.ic_rew_dark);
+                setImageResource(R.drawable.ic_action_playback_prev_black);
                 break;
             default:
                 break;

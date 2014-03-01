@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -128,7 +129,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     // Album art
     private ImageView mHeaderAlbumArt;
     // queue switch button
-    private ImageButton mHeaderQueueSwitch;
+    private ImageButton mHeaderQueueButton;
+    // queue button drawable
+    private Drawable mHeaderQueueDrawable;
+    // queue button drawable inversed
+    private Drawable mHeaderQueueDrawableInverse;
     // overflow btn
     private ImageButton mHeaderOverflow;
     // Track name
@@ -177,6 +182,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     /** Determines whether the cast buttons should be shown */
     private boolean mCastDeviceAvailable = false;
 
+    // Theme resourses
+    private ThemeHelper mThemeHelper;
+
     /**
      * {@inheritDoc}
      */
@@ -185,7 +193,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
 
         // Set our theme
-        setTheme(ThemeHelper.getInstance(this).getPanelTheme());
+        mThemeHelper = ThemeHelper.getInstance(this);
+        setTheme(mThemeHelper.getPanelTheme());
 
         // Set the layout
         setContentView(R.layout.activity_base_sliding);
@@ -492,8 +501,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Open to the currently playing album profile
         mHeaderAlbumArt.setOnClickListener(mOpenCurrentAlbumProfile);
         // Used to show and hide the queue fragment
-        mHeaderQueueSwitch = (ImageButton) findViewById(R.id.header_switch_queue);
-        mHeaderQueueSwitch.setOnClickListener(mToggleHiddenPanel);
+        mHeaderQueueButton = (ImageButton) findViewById(R.id.header_switch_queue);
+        mHeaderQueueButton.setOnClickListener(mToggleHiddenPanel);
+        // Cache queue button drawables
+        mHeaderQueueDrawable = mThemeHelper.getQueueButtonDrawable();
+        mHeaderQueueDrawableInverse = mThemeHelper.getQueueButtonInverseDrawable();
+        // Set initial queue button drawable
+        mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawable);
+
 
         // overflow
         mHeaderOverflow = (ImageButton) findViewById(R.id.header_overflow);
@@ -513,7 +528,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mHeaderMediaRouteButton.setDialogFactory(new StyledMediaRouteDialogFactory());
 
         if (!mSlidingPanel.isExpanded()) {
-            mHeaderQueueSwitch.setVisibility(View.GONE);
+            mHeaderQueueButton.setVisibility(View.GONE);
             mHeaderOverflow.setVisibility(View.GONE);
             mHeaderMediaRouteButton.setVisibility(View.GONE);
         }
@@ -794,7 +809,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
         mArtBackground.setVisibility(View.INVISIBLE);
-        mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue_inverse);
+        mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawableInverse);
         mQueueShowing = true;
     }
 
@@ -804,7 +819,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
         mArtBackground.setVisibility(View.VISIBLE);
-        mHeaderQueueSwitch.setImageResource(R.drawable.ic_queue);
+        mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawable);
         mQueueShowing = false;
     }
 
@@ -868,7 +883,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @DebugLog
         @Override
         public void onPanelExpanded(View panel) {
-            mHeaderQueueSwitch.setVisibility(View.VISIBLE);
+            mHeaderQueueButton.setVisibility(View.VISIBLE);
             mHeaderOverflow.setVisibility(View.VISIBLE);
             maybeShowHeaderMediaRouteButton();
             mHeaderPlayPauseButton.setVisibility(View.GONE);
@@ -880,7 +895,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @Override
         public void onPanelCollapsed(View panel) {
             Log.i(TAG, "onPanelCollapsed");
-            mHeaderQueueSwitch.setVisibility(View.GONE);
+            mHeaderQueueButton.setVisibility(View.GONE);
             mHeaderOverflow.setVisibility(View.GONE);
             mHeaderMediaRouteButton.setVisibility(View.GONE);
             mHeaderPlayPauseButton.setVisibility(View.VISIBLE);
