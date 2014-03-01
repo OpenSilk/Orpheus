@@ -481,7 +481,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     public void onStartTrackingTouch(final SeekBar bar) {
         mLastSeekEventTime = 0;
         mFromTouch = true;
-        mFooterCurrentTime.setVisibility(View.VISIBLE);
+        if (!mQueueShowing) {
+            mFooterCurrentTime.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -778,13 +780,17 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 if (mFromTouch) {
                     return 500;
                 } else if (MusicUtils.isPlaying()) {
-                    mFooterCurrentTime.setVisibility(View.VISIBLE);
+                    if (!mQueueShowing) {
+                        mFooterCurrentTime.setVisibility(View.VISIBLE);
+                    }
                 } else {
-                    // blink the counter
-                    final int vis = mFooterCurrentTime.getVisibility();
-                    mFooterCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE
-                            : View.INVISIBLE);
-                    return 500;
+                    if (!mQueueShowing) {
+                        // blink the counter
+                        final int vis = mFooterCurrentTime.getVisibility();
+                        mFooterCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE
+                                : View.INVISIBLE);
+                        return 500;
+                    }
                 }
             } else {
                 mFooterCurrentTime.setText("--:--");
@@ -844,10 +850,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mQueueShowing = true;
             mArtBackground.setVisibility(View.INVISIBLE);
             mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawableInverse);
+            mFooterCurrentTime.setVisibility(View.INVISIBLE);
+            mFooterTotalTime.setVisibility(View.INVISIBLE);
         } else {
             mQueueShowing = false;
             mArtBackground.setVisibility(View.VISIBLE);
             mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawable);
+            refreshCurrentTime();
+            mFooterTotalTime.setVisibility(View.VISIBLE);
         }
     }
 

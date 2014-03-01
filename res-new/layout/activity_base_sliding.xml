@@ -25,8 +25,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
     sothree:collapsedHeight="@dimen/panel_header_height"
-    sothree:shadowHeight="@dimen/shadow_height"
-    sothree:dragView="@+id/name">
+    sothree:shadowHeight="@dimen/shadow_height">
 
     <!-- main content -->
     <FrameLayout
@@ -34,217 +33,193 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <!-- frame for everything in the sliding panel -->
-    <FrameLayout
+    <!-- Sliding content -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:focusable="false"
+        android:background="?android:colorBackground">
 
-        <!--album art, replaces above fragment -->
+        <!--album art background -->
         <ImageView
             android:id="@+id/panel_background_art"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:contentDescription="@null"/>
 
-        <!-- Sliding content -->
+        <!-- header -->
         <LinearLayout
+            android:id="@+id/panel_header"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="false">
+            android:layout_height="@dimen/panel_header_height"
+            android:layout_gravity="top"
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal"
+            android:background="@color/app_background_light">
 
+            <!-- album art thumb -->
+            <ImageView
+                android:id="@+id/header_album_art"
+                style="@style/Orpheus.Thumbnail.PanelHeader"
+                android:contentDescription="@null"/>
 
-            <!-- header
-             sits on top of content area -->
+            <!-- Track title / artist
+            this is the anchor for sliding -->
             <LinearLayout
-                android:id="@+id/panel_header"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/panel_header_height"
-                style="@style/Orpheus.PanelHeader"
-                android:clickable="true"
-                android:orientation="horizontal" >
-                <!-- album art -->
-                <ImageView
-                    android:id="@+id/header_album_art"
-                    style="@style/Orpheus.Thumbnail.PanelHeader"/>
-                <!-- Track title / artist
-                this is the anchor for sliding -->
-                <LinearLayout
-                    android:id="@+id/track_artist_info"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:gravity="left|center_vertical"
-                    android:clickable="true"
-                    android:orientation="vertical"
-                    android:paddingLeft="@dimen/panel_header_info_padding_left"
-                    android:layout_weight="1">
-
-                    <TextView
-                        android:id="@+id/header_track_info"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:textAppearance="@style/TextAppearancePanelHeader.Title"
-                        android:background="@color/transparent"
-                        style="@style/SingleLineTextView"/>
-
-                    <TextView
-                        android:id="@+id/header_artist_info"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:background="@color/transparent"
-                        android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
-                        style="@style/SingleLineTextView"/>
-
-                </LinearLayout>
-
-                <!-- Play/pause / next / queue buttons -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="right"
-                    android:orientation="horizontal">
-
-                    <org.opensilk.music.widgets.PlayPauseButton
-                        android:id="@+id/header_action_button_play"
-                        style="@style/Orpheus.Button.PanelHeader"
-                        android:layout_height="46dp"
-                        android:layout_width="46dp"
-                        android:contentDescription="@string/accessibility_play"/>
-
-                    <org.opensilk.music.widgets.RepeatingImageButton
-                        android:id="@+id/header_action_button_next"
-                        style="@style/Orpheus.Button.PanelHeader"
-                        android:layout_height="50dp"
-                        android:layout_width="50dp"
-                        android:contentDescription="@string/accessibility_next"/>
-
-                    <android.support.v7.app.MediaRouteButton
-                        style="@style/Orpheus.MenuButton.MediaRouter"
-                        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-                        android:id="@+id/panel_mediarouter"/>
-
-                    <ImageButton
-                        android:id="@+id/header_switch_queue"
-                        style="@style/Orpheus.MenuButton"
-                        android:contentDescription="@null"/>
-
-                    <ImageButton android:id="@+id/header_overflow"
-                        style="@style/Orpheus.MenuButton"
-                        android:src="@drawable/ic_menu_moreoverflow_holo_light"
-                        android:contentDescription="@null" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Little hack to let the background of the queue
-                 fragment go under the shadows -->
-
-            <FrameLayout
-                android:layout_width="match_parent"
+                android:id="@+id/track_artist_info"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:gravity="left|center_vertical"
+                android:clickable="true"
+                android:orientation="vertical"
                 android:layout_weight="1">
 
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/shadow_height"
-                    android:layout_gravity="top"
-                    android:contentDescription="@null"
-                    android:src="@drawable/top_shadow" />
-
-                <!-- Used to show/hide the QueueFragment -->
-                <FrameLayout
-                    android:id="@+id/panel_middle_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/shadow_height"
-                    android:layout_gravity="bottom"
-                    android:contentDescription="@null"
-                    android:src="@drawable/bottom_shadow" />
-            </FrameLayout>
-
-            <!-- footer
-                sits on top of content area floating on bottom of screen-->
-
-            <LinearLayout
-                android:id="@+id/panel_footer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/app_background_light_transparent">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/header_track_info"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_width="wrap_content"
+                    android:textAppearance="@style/TextAppearancePanelHeader.Title"
+                    android:background="@color/transparent"
+                    style="@style/SingleLineTextView"/>
 
-                    <TextView
-                        android:id="@+id/footer_player_current_time"
-                        android:layout_width="@dimen/audio_player_time_width"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textSize="@dimen/text_size_micro"/>
-
-                    <SeekBar
-                        android:id="@android:id/progress"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/audio_player_seek_bar_margin_bottom"
-                        android:max="1000" />
-
-                    <TextView
-                        android:id="@+id/footer_player_total_time"
-                        android:layout_width="@dimen/audio_player_time_width"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textSize="@dimen/text_size_micro"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/footer_player_controls"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/header_artist_info"
                     android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center" >
-
-                    <org.opensilk.music.widgets.ShuffleButton
-                        android:id="@+id/footer_action_button_shuffle"
-                        style="@style/Orpheus.Button.Footer"
-                        android:contentDescription="@string/accessibility_shuffle" />
-
-                    <org.opensilk.music.widgets.RepeatingImageButton
-                        android:id="@+id/footer_action_button_previous"
-                        style="@style/Orpheus.Button.Footer"
-                        android:contentDescription="@string/accessibility_prev"/>
-
-                    <org.opensilk.music.widgets.PlayPauseButton
-                        android:id="@+id/footer_action_button_play"
-                        style="@style/Orpheus.Button.Footer"
-                        android:contentDescription="@string/accessibility_play"/>
-
-                    <org.opensilk.music.widgets.RepeatingImageButton
-                        android:id="@+id/footer_action_button_next"
-                        style="@style/Orpheus.Button.Footer"
-                        android:contentDescription="@string/accessibility_next"/>
-
-                    <org.opensilk.music.widgets.RepeatButton
-                        android:id="@+id/footer_action_button_repeat"
-                        style="@style/Orpheus.Button.Footer"
-                        android:contentDescription="@string/accessibility_repeat" />
-
-                </LinearLayout>
+                    android:layout_width="wrap_content"
+                    android:background="@color/transparent"
+                    android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
+                    style="@style/SingleLineTextView"/>
 
             </LinearLayout>
+
+            <org.opensilk.music.widgets.PlayPauseButton
+                android:id="@+id/header_action_button_play"
+                style="@style/Orpheus.MenuButton"
+                android:contentDescription="@string/accessibility_play"/>
+
+            <org.opensilk.music.widgets.RepeatingImageButton
+                android:id="@+id/header_action_button_next"
+                style="@style/Orpheus.MenuButton"
+                android:contentDescription="@string/accessibility_next"/>
+
+            <android.support.v7.app.MediaRouteButton
+                style="@style/Orpheus.MenuButton.MediaRouter"
+                app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+                android:id="@+id/panel_mediarouter"/>
+
+            <ImageButton
+                android:id="@+id/header_switch_queue"
+                style="@style/Orpheus.MenuButton"
+                android:contentDescription="@null"/>
+
+            <ImageButton android:id="@+id/header_overflow"
+                style="@style/Orpheus.MenuButton"
+                android:src="@drawable/ic_menu_moreoverflow_holo_light"
+                android:contentDescription="@null" />
 
         </LinearLayout>
 
-    </FrameLayout>
+        <!-- footer -->
+         <LinearLayout
+            android:id="@+id/panel_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:paddingTop="24dp"
+            android:gravity="center"
+            android:layout_gravity="bottom"
+            android:layout_alignParentBottom="true"
+            android:background="@color/app_background_light_transparent">
+             <!--^^Extra top padding here to compensate for 16dp overhang of seekbar-->
+
+            <org.opensilk.music.widgets.ShuffleButton
+                android:id="@+id/footer_action_button_shuffle"
+                style="@style/PlaybackControlButton"
+                android:contentDescription="@string/accessibility_shuffle" />
+
+            <org.opensilk.music.widgets.RepeatingImageButton
+                android:id="@+id/footer_action_button_previous"
+                style="@style/PlaybackControlButton"
+                android:contentDescription="@string/accessibility_prev"/>
+
+            <org.opensilk.music.widgets.PlayPauseButton
+                android:id="@+id/footer_action_button_play"
+                style="@style/PlaybackControlButton"
+                android:contentDescription="@string/accessibility_play"/>
+
+            <org.opensilk.music.widgets.RepeatingImageButton
+                android:id="@+id/footer_action_button_next"
+                style="@style/PlaybackControlButton"
+                android:contentDescription="@string/accessibility_next"/>
+
+            <org.opensilk.music.widgets.RepeatButton
+                android:id="@+id/footer_action_button_repeat"
+                style="@style/PlaybackControlButton"
+                android:contentDescription="@string/accessibility_repeat" />
+
+        </LinearLayout>
+
+        <!-- Used to show/hide the QueueFragment -->
+        <FrameLayout
+            android:id="@+id/panel_middle_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/panel_header"
+            android:layout_above="@id/panel_footer"/>
+
+        <!-- header shadow -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/shadow_height"
+            android:layout_below="@id/panel_header"
+            android:contentDescription="@null"
+            android:src="@drawable/top_shadow" />
+
+        <!-- footer shadow -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/shadow_height"
+            android:layout_above="@id/panel_footer"
+            android:contentDescription="@null"
+            android:src="@drawable/bottom_shadow" />
+
+        <!-- Our scrubber height is 32dp making the seekbar view
+             32dp so as a hack to get the bar to sit on the edge
+             of the footer we set a negative bottom margin -->
+        <SeekBar
+            android:id="@android:id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/panel_footer"
+            android:layout_marginBottom="-16dp"
+            android:gravity="center_vertical"
+            android:padding="0dp"
+            android:max="1000" />
+
+        <!-- current playtime -->
+        <TextView
+            android:id="@+id/footer_player_current_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@android:id/progress"
+            android:layout_alignParentLeft="true"
+            android:gravity="left"
+            android:paddingLeft="16dp"
+            android:textAppearance="@style/TextAppearancePlayTime"/>
+
+        <!-- total playtime -->
+        <TextView
+            android:id="@+id/footer_player_total_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@android:id/progress"
+            android:layout_alignParentRight="true"
+            android:gravity="right"
+            android:paddingRight="16dp"
+            android:textAppearance="@style/TextAppearancePlayTime"/>
+
+    </RelativeLayout>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

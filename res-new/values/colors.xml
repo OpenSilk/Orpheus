@@ -6,6 +6,6 @@
     <color name="app_color_grepheus">@android:color/holo_green_dark</color>
     <color name="app_color_purpheus">#ff9933cc</color> <!--holo_purple_dark-->
     <color name="tabstrip_background">#ffe4e4e4</color>
-    <color name="app_background_light">#fffafafa</color>
-    <color name="app_background_light_transparent">#e6fafafa</color>
+    <color name="app_background_light">#ffffffff</color>
+    <color name="app_background_light_transparent">#ccffffff</color>
 </resources>

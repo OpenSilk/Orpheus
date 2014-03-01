@@ -33,10 +33,6 @@
         <item name="android:layout_marginTop">?attr/actionBarSize</item>
     </style>
 
-    <style name="Orpheus.Button" parent="@android:style/Widget.Holo.Button.Borderless">
-
-    </style>
-
     <!-- default style for all card grids -->
     <style name="GridView.Orpheus.Card" parent="@android:style/Widget.Holo.Light.GridView">
         <!--fastscroll-->
@@ -79,13 +75,12 @@
         <item name="android:footerDividersEnabled">false</item>
         <item name="android:headerDividersEnabled">false</item>
         <item name="android:divider">@null</item>
+
     </style>
 
     <!-- setup for the queue's dragsort list -->
     <style name="DragSort.Orpheus.Queue">
-        <!-- add some padding so the first/last items dont sit right on the header/footer-->
-        <item name="android:paddingBottom">@dimen/card_list_dragsort_padding_bottom</item>
-        <item name="android:paddingTop">@dimen/card_list_dragsort_padding_top</item>
+
     </style>
 
     <!-- profile dragsort list used in playlist profile -->
@@ -112,8 +107,9 @@
     </style>
 
     <style name="Orpheus.Thumbnail.PanelHeader">
-        <item name="android:layout_width">@dimen/panel_header_album_art_size</item>
-        <item name="android:layout_height">@dimen/panel_header_album_art_size</item>
+        <item name="android:layout_width">@dimen/panel_header_thumbnail_size</item>
+        <item name="android:layout_height">@dimen/panel_header_thumbnail_size</item>
+        <item name="android:layout_margin">@dimen/panel_header_thumbnail_margin</item>
     </style>
 
     <style name="Orpheus.Thumbnail.ListCard">
@@ -157,15 +153,6 @@
 
     <!--PANEL HEADER-->
 
-    <style name="Orpheus.PanelHeader">
-        <!--push the thumbnail over-->
-        <item name="android:paddingLeft">@dimen/panel_header_padding_left</item>
-        <!--push the queue button over-->
-        <item name="android:paddingRight">@dimen/panel_header_padding_right</item>
-        <!--default closed bg this is overrode when panel opens to @color/app_background_light_transparent-->
-        <item name="android:background">@color/app_background_light</item>
-    </style>
-
     <style name="TextAppearancePanelHeader.Title" parent="@android:style/TextAppearance.Holo.Medium">
         <item name="android:textStyle">bold</item>
     </style>
@@ -174,13 +161,8 @@
 
     </style>
 
-    <style name="Orpheus.Button.PanelHeader">
-        <item name="android:layout_gravity">center</item>
-        <item name="android:gravity">center</item>
-    </style>
-
     <style name="Orpheus.MenuButton" parent="@style/Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_gravity">right|center_vertical</item>
         <item name="android:gravity">center</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -195,11 +177,19 @@
 
     <!--PANEL FOOTER-->
 
-    <style name="Orpheus.Button.Footer">
+    <style name="PlaybackControlButton" parent="@android:style/Widget.Holo.Button.Borderless">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:layout_height">46dp</item>
         <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="TextAppearancePlayTime" parent="@android:style/TextAppearance.Holo.Small.Inverse">
+        <item name="android:textColor">@color/app_background_light_transparent</item>
+        <item name="android:shadowColor">@color/black</item>
+        <!--<item name="android:shadowDx">2</item>-->
+        <!--<item name="android:shadowDy">2</item>-->
+        <item name="android:shadowRadius">3.8</item>
     </style>
 
     <!--MediarouterDialog-->
@@ -209,5 +199,6 @@
         <item name="mediaRouteConnectingDrawable">@drawable/mr_ic_media_route_connecting_holo_light</item>
         <item name="mediaRouteOnDrawable">@drawable/mr_ic_media_route_on_holo_light</item>
     </style>
+
 
 </resources>

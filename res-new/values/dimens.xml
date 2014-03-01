@@ -14,16 +14,10 @@
     <dimen name="card_list_dragsort_padding_bottom">8dp</dimen>
     <dimen name="card_list_dragsort_padding_top">8dp</dimen>
 
-    <dimen name="panel_player_controls_size">64dp</dimen>
-
     <dimen name="panel_header_height">68dp</dimen>
-    <dimen name="panel_footer_height">80dp</dimen>
-    <!-- want this to be half panel_header_height - panel_header_album_art_size -->
-    <dimen name="panel_header_padding_left">4dp</dimen>
-    <dimen name="panel_header_info_padding_left">4dp</dimen>
-    <dimen name="panel_header_padding_right">4dp</dimen>
-    <dimen name="panel_header_album_art_size">60dp</dimen>
-    <dimen name="panel_header_player_controls_size">@dimen/panel_header_height</dimen>
+    <dimen name="panel_header_thumbnail_size">60dp</dimen>
+    <!-- want this to be half panel_header_height - panel_header_thumbnail_size -->
+    <dimen name="panel_header_thumbnail_margin">4dp</dimen>
 
     <dimen name="profile_header_height">260dp</dimen>
 </resources>
