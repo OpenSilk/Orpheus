@@ -81,6 +81,8 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        // Set actionbar title
+        setTitle(mPlaylist.mPlaylistName);
     }
 
     @Override

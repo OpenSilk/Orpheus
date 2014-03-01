@@ -107,6 +107,11 @@ public class HomePhoneFragment extends Fragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        // Disable home as up
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
+        getActivity().getActionBar().setHomeButtonEnabled(false);
+        // set our title
+        getActivity().getActionBar().setTitle(R.string.app_name);
         // Enable the options menu
         setHasOptionsMenu(true);
     }

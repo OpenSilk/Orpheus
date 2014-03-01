@@ -22,6 +22,7 @@ import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.MenuItem;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 
@@ -57,9 +58,29 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // Set home as up
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
+        // Enable the options menu
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         mListView = null;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /*
@@ -74,6 +95,10 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
+    }
+
+    protected void setTitle(String title) {
+        getActivity().getActionBar().setTitle(title);
     }
 
     /*

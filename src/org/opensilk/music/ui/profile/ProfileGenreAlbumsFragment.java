@@ -72,6 +72,13 @@ public class ProfileGenreAlbumsFragment extends ProfileBaseFragment<Genre> {
         return v;
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // set actionbar title
+        setTitle(mGenre.mGenreName);
+    }
+
     /*
      * Loader Callbacks
      */

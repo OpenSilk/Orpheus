@@ -105,6 +105,8 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
                 menu.show();
             }
         });
+        // set the actionbar title
+        setTitle(mAlbum.mAlbumName);
         // Init the fading action bar
         mFadingHelper.initActionBar(getActivity());
     }
