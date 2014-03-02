@@ -1071,7 +1071,10 @@ public abstract class BaseCastManager implements
         @DebugLog
         @Override
         public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-            super.onRouteRemoved(router, route);
+            // In the process of trying to reconnect the framework lost the route
+            if (mConnectionSuspened) {
+                selectDevice(null);
+            }
         }
 
         @DebugLog
