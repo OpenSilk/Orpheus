@@ -1009,6 +1009,15 @@ public abstract class BaseCastManager implements
                 LOGE(TAG, "onFailed(): Failed to inform " + consumer, e);
             }
         }
+        int ii = mListeners.beginBroadcast();
+        while (ii-->0) {
+            try {
+                mListeners.getBroadcastItem(ii).onFailed(resourceId, statusCode);
+            } catch (RemoteException e) {
+                LOGE(TAG, "onFailed(): ", e);
+            }
+        }
+        mListeners.finishBroadcast();
 
     }
 

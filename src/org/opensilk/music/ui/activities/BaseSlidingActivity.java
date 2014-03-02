@@ -1014,7 +1014,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                     errorMsg = "ERROR_TIMEOUT";
                     break;
                 default:
-                    errorMsg = "UNKNOWN: err=" + errorCode;
+                    errorMsg = "UNKNOWN ERROR: " + errorCode;
                     break;
             }
             Log.d(TAG, "onApplicationConnectionFailed(): failed due to: " + errorMsg);
@@ -1025,8 +1025,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                     // notify if possible
                     if (MusicUtils.isForeground()) {
                         new AlertDialog.Builder(BaseSlidingActivity.this)
-                                .setTitle("Failed to connect to cast device")
-                                .setMessage(errorMsg)
+                                .setTitle("Cast Error")
+                                .setMessage("Failed to connect to cast device " + errorMsg)
                                 .setNeutralButton(android.R.string.ok, null)
                                 .show();
                     }
@@ -1057,6 +1057,29 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @Override
         public void onDisconnected() throws RemoteException {
             mTransientNetworkDisconnection = false;
+        }
+
+        @Override
+        public void onFailed(int resourceId, int statusCode) throws RemoteException {
+            final int error = resourceId;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // notify if possible
+                    if (MusicUtils.isForeground()) {
+                        switch (error) {
+                            case (R.string.failed_load):
+                                new AlertDialog.Builder(BaseSlidingActivity.this)
+                                        .setTitle("Cast Error")
+                                        .setMessage(R.string.failed_load)
+                                        .setNeutralButton(android.R.string.ok, null)
+                                        .show();
+                                break;
+                        }
+
+                    }
+                }
+            });
         }
 
         /**

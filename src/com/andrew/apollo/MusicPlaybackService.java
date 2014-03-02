@@ -3025,7 +3025,13 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onFailed(int resourceId, int statusCode) {
-
+            Log.e(TAG, "onFailed " + getString(resourceId));
+            switch (resourceId) {
+                case R.string.failed_load:
+                    pauseRemote();
+                    pauseLocal();
+                    break;
+            }
         }
     };
 
