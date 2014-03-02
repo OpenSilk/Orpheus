@@ -20,7 +20,6 @@ import static org.opensilk.cast.util.LogUtils.LOGD;
 import static org.opensilk.cast.util.LogUtils.LOGE;
 
 import android.content.Context;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.support.v7.media.MediaRouter.RouteInfo;
 import android.text.TextUtils;
@@ -41,8 +40,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-import org.opensilk.cast.callbacks.IVideoCastConsumer;
-import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
+import org.opensilk.cast.callbacks.ICastConsumer;
 import org.opensilk.cast.exceptions.CastException;
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.OnFailedListener;
@@ -76,9 +74,9 @@ import java.util.Set;
  * corresponding widget to their layout xml and then calling <code>addMiniController()</code>. This
  * class manages various states of the remote cast device.Client applications, however, can
  * complement the default behavior of this class by hooking into various callbacks that it provides
- * (see {@link IVideoCastConsumer}). Since the number of these callbacks is usually much larger than
+ * (see {@link org.opensilk.cast.callbacks.ICastConsumer}). Since the number of these callbacks is usually much larger than
  * what a single application might be interested in, there is a no-op implementation of this
- * interface (see {@link VideoCastConsumerImpl}) that applications can subclass to override only
+ * interface (see {@link org.opensilk.cast.callbacks.CastConsumerImpl}) that applications can subclass to override only
  * those methods that they are interested in. Since this library depends on the cast functionalities
  * provided by the Google Play services, the library checks to ensure that the right version of that
  * service is installed. It also provides a simple static method
@@ -107,7 +105,7 @@ public class CastManager extends BaseCastManager
     private int mIdleReason;
     private final String mDataNamespace;
     private Cast.MessageReceivedCallback mDataChannel;
-    protected Set<IVideoCastConsumer> mVideoConsumers;
+    protected Set<ICastConsumer> mCastConsumers;
 
     /**
      * Initializes the VideoCastManager for clients. Before clients can use VideoCastManager, they
@@ -129,7 +127,7 @@ public class CastManager extends BaseCastManager
     public static synchronized CastManager initialize(Context context,
             String applicationId, Class<?> targetActivity, String dataNamespace) {
         if (null == sInstance) {
-            LOGD(TAG, "New instance of VideoCastManager is created");
+            LOGD(TAG, "New instance of CastManager is created");
             if (ConnectionResult.SUCCESS != GooglePlayServicesUtil
                     .isGooglePlayServicesAvailable(context)) {
                 String msg = "Couldn't find the appropriate version of Goolge Play Services";
@@ -151,7 +149,7 @@ public class CastManager extends BaseCastManager
      */
     public static CastManager getInstance() throws CastException {
         if (null == sInstance) {
-            LOGE(TAG, "No VideoCastManager instance was built, you need to build one first");
+            LOGE(TAG, "No CastManager instance was built, you need to build one first");
             throw new CastException();
         }
         return sInstance;
@@ -172,7 +170,7 @@ public class CastManager extends BaseCastManager
      */
     public static CastManager getInstance(Context context) throws CastException {
         if (null == sInstance) {
-            LOGE(TAG, "No VideoCastManager instance was built, you need to build one first");
+            LOGE(TAG, "No CastManager instance was built, you need to build one first");
             throw new CastException();
         }
         LOGD(TAG, "Updated context to: " + context.getClass().getName());
@@ -183,8 +181,8 @@ public class CastManager extends BaseCastManager
     private CastManager(Context context, String applicationId, Class<?> targetActivity,
                         String dataNamespace) {
         super(context, applicationId);
-        LOGD(TAG, "VideoCastManager is instantiated");
-        mVideoConsumers = new HashSet<IVideoCastConsumer>();
+        LOGD(TAG, "CastManager is instantiated");
+        mCastConsumers = new HashSet<ICastConsumer>();
         mDataNamespace = dataNamespace;
     }
 
@@ -486,7 +484,7 @@ public class CastManager extends BaseCastManager
 
     private void onApplicationDisconnected(int errorCode) {
         LOGD(TAG, "onApplicationDisconnected() reached with error code: " + errorCode);
-        for (IVideoCastConsumer consumer : mVideoConsumers) {
+        for (ICastConsumer consumer : mCastConsumers) {
             try {
                 consumer.onApplicationDisconnected(errorCode);
             } catch (Exception e) {
@@ -518,7 +516,7 @@ public class CastManager extends BaseCastManager
             LOGD(TAG, "onApplicationStatusChanged() reached: "
                     + Cast.CastApi.getApplicationStatus(mApiClient));
 
-            for (IVideoCastConsumer consumer : mVideoConsumers) {
+            for (ICastConsumer consumer : mCastConsumers) {
                 try {
                     consumer.onApplicationStatusChanged(appStatus);
                 } catch (Exception e) {
@@ -536,7 +534,7 @@ public class CastManager extends BaseCastManager
         try {
             volume = getVolume();
             boolean isMute = isMute();
-            for (IVideoCastConsumer consumer : mVideoConsumers) {
+            for (ICastConsumer consumer : mCastConsumers) {
                 try {
                     consumer.onVolumeChanged(volume, isMute);
                 } catch (Exception e) {
@@ -589,7 +587,7 @@ public class CastManager extends BaseCastManager
 
                         }
                     });
-            for (IVideoCastConsumer consumer : mVideoConsumers) {
+            for (ICastConsumer consumer : mCastConsumers) {
                 try {
                     consumer.onApplicationConnected(appMetadata, sessionId, wasLaunched);
                 } catch (Exception e) {
@@ -621,7 +619,7 @@ public class CastManager extends BaseCastManager
      */
     @Override
     void onApplicationStopped() {
-        for (IVideoCastConsumer consumer : mVideoConsumers) {
+        for (ICastConsumer consumer : mCastConsumers) {
             try {
                 consumer.onApplicationStopped();
             } catch (Exception e) {
@@ -636,7 +634,7 @@ public class CastManager extends BaseCastManager
      */
     @Override
     public void onApplicationStopFailed(int errorCode) {
-        for (IVideoCastConsumer consumer : mVideoConsumers) {
+        for (ICastConsumer consumer : mCastConsumers) {
             try {
                 consumer.onApplicationStopFailed(errorCode);
             } catch (Exception e) {
@@ -658,7 +656,7 @@ public class CastManager extends BaseCastManager
             }
             return;
         } else {
-            for (IVideoCastConsumer consumer : mVideoConsumers) {
+            for (ICastConsumer consumer : mCastConsumers) {
                 try {
                     consumer.onApplicationConnectionFailed(errorCode);
                 } catch (Exception e) {
@@ -719,7 +717,7 @@ public class CastManager extends BaseCastManager
             return;
         }
         if (mRemoteMediaPlayer == null) {
-            LOGE(TAG, "Trying to load a video with no active media session");
+            LOGE(TAG, "Trying to load media with no active media session");
             throw new NoConnectionException();
         }
 
@@ -748,7 +746,7 @@ public class CastManager extends BaseCastManager
         checkConnectivity();
         LOGD(TAG, "attempting to play media at position " + position + " seconds");
         if (mRemoteMediaPlayer == null) {
-            LOGE(TAG, "Trying to play a video with no active media session");
+            LOGE(TAG, "Trying to play media with no active media session");
             throw new NoConnectionException();
         }
         seekAndPlay(position);
@@ -768,7 +766,7 @@ public class CastManager extends BaseCastManager
         checkConnectivity();
         try {
             if (mRemoteMediaPlayer == null) {
-                LOGE(TAG, "Trying to play a video with no active media session");
+                LOGE(TAG, "Trying to play media with no active media session");
                 throw new NoConnectionException();
             }
             mRemoteMediaPlayer.play(mApiClient);
@@ -815,7 +813,7 @@ public class CastManager extends BaseCastManager
         LOGD(TAG, "attempting to pause media");
         checkConnectivity();
         if (mRemoteMediaPlayer == null) {
-            LOGE(TAG, "Trying to pause a video with no active media session");
+            LOGE(TAG, "Trying to pause media with no active media session");
             throw new NoConnectionException();
         }
         try {
@@ -842,7 +840,7 @@ public class CastManager extends BaseCastManager
         LOGD(TAG, "attempting to seek media");
         checkConnectivity();
         if (mRemoteMediaPlayer == null) {
-            LOGE(TAG, "Trying to seek a video with no active media session");
+            LOGE(TAG, "Trying to seek media with no active media session");
             throw new NoConnectionException();
         }
         mRemoteMediaPlayer.seek(mApiClient,
@@ -873,7 +871,7 @@ public class CastManager extends BaseCastManager
         LOGD(TAG, "attempting to seek media");
         checkConnectivity();
         if (mRemoteMediaPlayer == null) {
-            LOGE(TAG, "Trying to seekAndPlay a video with no active media session");
+            LOGE(TAG, "Trying to seekAndPlay media with no active media session");
             throw new NoConnectionException();
         }
         ResultCallback<MediaChannelResult> resultCallback =
@@ -1032,7 +1030,7 @@ public class CastManager extends BaseCastManager
 
             @Override
             public void onMessageReceived(CastDevice castDevice, String namespace, String message) {
-                for (IVideoCastConsumer consumer : mVideoConsumers) {
+                for (ICastConsumer consumer : mCastConsumers) {
                     try {
                         consumer.onDataMessageReceived(message);
                     } catch (Exception e) {
@@ -1049,7 +1047,7 @@ public class CastManager extends BaseCastManager
     }
 
     private void onMessageSendFailed(int errorCode) {
-        for (IVideoCastConsumer consumer : mVideoConsumers) {
+        for (ICastConsumer consumer : mCastConsumers) {
             try {
                 consumer.onDataMessageSendFailed(errorCode);
             } catch (Exception e) {
@@ -1155,7 +1153,7 @@ public class CastManager extends BaseCastManager
                 LOGD(TAG,"status: unknown");
                 idle = true;
             }
-            for (IVideoCastConsumer consumer : mVideoConsumers) {
+            for (ICastConsumer consumer : mCastConsumers) {
                 try {
                     consumer.onRemoteMediaPlayerStatusUpdated();
 //                    consumer.onVolumeChanged(volume, isMute); //Dont know why they were calling this every damn time
@@ -1177,7 +1175,7 @@ public class CastManager extends BaseCastManager
      */
     public void onRemoteMediaPlayerMetadataUpdated() {
         LOGD(TAG, "onRemoteMediaPlayerMetadataUpdated() reached");
-        for (IVideoCastConsumer consumer : mVideoConsumers) {
+        for (ICastConsumer consumer : mCastConsumers) {
             try {
                 consumer.onRemoteMediaPlayerMetadataUpdated();
             } catch (Exception e) {
@@ -1187,33 +1185,33 @@ public class CastManager extends BaseCastManager
     }
 
     /*************************************************************/
-    /***** Registering IVideoCastConsumer listeners **************/
+    /***** Registering ICastConsumer listeners **************/
     /*************************************************************/
     /**
-     * Registers an {@link IVideoCastConsumer} interface with this class. Registered listeners will
+     * Registers an {@link org.opensilk.cast.callbacks.ICastConsumer} interface with this class. Registered listeners will
      * be notified of changes to a variety of lifecycle and media status changes through the
      * callbacks that the interface provides.
      *
-     * @see VideoCastConsumerImpl
+     * @see org.opensilk.cast.callbacks.CastConsumerImpl
      * @param listener
      */
-    public synchronized void addVideoCastConsumer(IVideoCastConsumer listener) {
+    public synchronized void addCastConsumer(ICastConsumer listener) {
         if (null != listener) {
             super.addBaseCastConsumer(listener);
-            mVideoConsumers.add(listener);
+            mCastConsumers.add(listener);
             LOGD(TAG, "Successfully added the new CastConsumer listener " + listener);
         }
     }
 
     /**
-     * Unregisters an {@link IVideoCastConsumer}.
+     * Unregisters an {@link org.opensilk.cast.callbacks.ICastConsumer}.
      *
      * @param listener
      */
-    public synchronized void removeVideoCastConsumer(IVideoCastConsumer listener) {
+    public synchronized void removeCastConsumer(ICastConsumer listener) {
         if (null != listener) {
             super.removeBaseCastConsumer(listener);
-            mVideoConsumers.remove(listener);
+            mCastConsumers.remove(listener);
         }
     }
 

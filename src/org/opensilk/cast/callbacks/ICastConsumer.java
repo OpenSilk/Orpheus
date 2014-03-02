@@ -20,7 +20,7 @@ import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.CastDevice;
 
-public interface IVideoCastConsumer extends IBaseCastConsumer {
+public interface ICastConsumer extends IBaseCastConsumer {
 
     /**
      * Called when the application is successfully launched or joined. Upon successful connection, a

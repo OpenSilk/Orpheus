@@ -77,8 +77,8 @@ import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.cast.CastManagerFactory;
 import org.opensilk.cast.CastRouteListener;
 import org.opensilk.cast.ICastManager;
-import org.opensilk.cast.callbacks.IVideoCastConsumer;
-import org.opensilk.cast.callbacks.VideoCastConsumerImpl;
+import org.opensilk.cast.callbacks.CastConsumerImpl;
+import org.opensilk.cast.callbacks.ICastConsumer;
 import org.opensilk.cast.exceptions.CastException;
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
@@ -651,7 +651,7 @@ public class MusicPlaybackService extends Service {
 
         // Initialize the cast manager
         mCastManager = CastManagerFactory.getCastManager(this);
-        mCastManager.addVideoCastConsumer(mCastConsumer);
+        mCastManager.addCastConsumer(mCastConsumer);
 
         // Initialize the cast manager interface for activity
         mCastManagerInterface = new CastManagerInterface(mCastManager);
@@ -779,7 +779,7 @@ public class MusicPlaybackService extends Service {
         } catch (Exception ignored) { /*pass*/ }
 
         // Unregister with cast manager
-        mCastManager.removeVideoCastConsumer(mCastConsumer);
+        mCastManager.removeCastConsumer(mCastConsumer);
 
         // Stop http server
         stopCastServer();
@@ -2868,7 +2868,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Callback handler for cast manager
      */
-    private final IVideoCastConsumer mCastConsumer = new VideoCastConsumerImpl() {
+    private final ICastConsumer mCastConsumer = new CastConsumerImpl() {
 
         @Override
         @DebugLog

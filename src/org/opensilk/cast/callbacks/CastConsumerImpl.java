@@ -19,12 +19,12 @@ package org.opensilk.cast.callbacks;
 import com.google.android.gms.cast.ApplicationMetadata;
 
 /**
- * This is a no-ops implementation of {@link IVideoCastConsumer} so that the clients that like to
- * (partially) implement {@link IVideoCastConsumer} can extend this class and only override the
+ * This is a no-ops implementation of {@link ICastConsumer} so that the clients that like to
+ * (partially) implement {@link ICastConsumer} can extend this class and only override the
  * desired methods.
  */
-public class VideoCastConsumerImpl extends BaseCastConsumerImpl
-        implements IVideoCastConsumer {
+public class CastConsumerImpl extends BaseCastConsumerImpl
+        implements ICastConsumer {
 
     @Override
     public void onApplicationConnected(ApplicationMetadata appMetadata,
