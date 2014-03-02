@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.ui.fragments;
+
+package org.opensilk.music.ui.home;
 
 import android.app.Activity;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
@@ -24,23 +26,24 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
-import android.widget.ListView;
+import android.widget.CursorAdapter;
+import android.widget.TextView;
 
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
-import java.util.List;
-
-import hugo.weaving.DebugLog;
+import it.gmariotti.cardslib.library.view.CardGridView;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
- * Created by drew on 2/11/14.
+ * All the common elements used in fragments backed by cursor loaders
+ *
+ * Created by drew on 2/22/14.
  */
-public abstract class HomePagerBaseFragment<D> extends Fragment implements
-        LoaderManager.LoaderCallbacks<List<D>>,
+public abstract class HomePagerBaseCursorFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>,
         MusicStateListener {
 
     /**
@@ -56,62 +59,66 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
     /**
      * The grid view
      */
-    protected GridView mGridView;
+    protected CardGridView mGridView;
 
     /**
      * The list view
      */
-    protected ListView mListView;
+    protected CardListView mListView;
 
     /**
-     * {@inheritDoc}
+     * Loading progress
      */
+    protected View mLoadingEmpty;
+
+    /**
+     * Our cursor adapter
+     */
+    protected CursorAdapter mAdapter;
+
+
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
-        // Register the music status listener
+        // Register the music status listener //TODO dont want this anymore
         ((BaseSlidingActivity)activity).setMusicStateListenerListener(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAdapter = createAdapter();
+        // Start the loader
+        getLoaderManager().initLoader(LOADER, null, this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @DebugLog
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         // The View for the fragment's UI
         if (isSimpleLayout()) {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_thumb, null);
-            mListView = (ListView) mRootView.findViewById(android.R.id.list);
-            mListView.setEmptyView(mRootView.findViewById(android.R.id.empty));
+            mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
+            mListView = (CardListView) mRootView.findViewById(android.R.id.list);
+            mListView.setEmptyView(mLoadingEmpty);
+            // Set the data behind the list
+            mListView.setAdapter(mAdapter);
         } else {
             mRootView = (ViewGroup)inflater.inflate(R.layout.card_gridview, null);
-            mGridView = (GridView) mRootView.findViewById(R.id.card_grid);
-            mGridView.setEmptyView(mRootView.findViewById(android.R.id.empty));
+            mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
+            mGridView = (CardGridView) mRootView.findViewById(R.id.card_grid);
+            mGridView.setEmptyView(mLoadingEmpty);
+            // Set the data behind the grid
+            mGridView.setAdapter(mAdapter);
         }
         return mRootView;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @DebugLog
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Enable the options menu
         setHasOptionsMenu(true);
-        // Start the loader
-        getLoaderManager().initLoader(LOADER, null, this);
     }
 
     @Override
@@ -123,16 +130,7 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    @DebugLog
-    public void onLoaderReset(final Loader<List<D>> loader) {
-
-    }
-
-    /**
-     * Restarts the loader.
+     * Restarts the loader. Called when user updates the sort by option
      */
     public void refresh() {
         // Wait a moment for the preference to change.
@@ -140,25 +138,50 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
         getLoaderManager().restartLoader(LOADER, null, this);
     }
 
-    /**
-     * Implement MusicStateListener
+    /*
+     * Loader Callbacks
      */
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data == null || data.isClosed() || data.getCount() <= 0) {
+            // hide the progress
+            mLoadingEmpty.setVisibility(View.GONE);
+            // Set the empty text
+            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
+            empty.setText(getString(R.string.empty_music));
+            if (isSimpleLayout()) {
+                mListView.setEmptyView(empty);
+            } else {
+                mGridView.setEmptyView(empty);
+            }
+        }
+        mAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
+    }
+
+    /*
+     * MusicState Listener
+     */
+
     @Override
     public void restartLoader() {
-        // Update the list when the user deletes any items
-        getLoaderManager().restartLoader(LOADER, null, this);
+
     }
 
-    /**
-     * ImplementMusicStateListener
-     */
     @Override
     public void onMetaChanged() {
-        // Nothing to do
+
     }
 
+    /*
+     * Abstract methods
+     */
+
+    protected abstract CursorAdapter createAdapter();
     protected abstract boolean isSimpleLayout();
-
-    protected abstract boolean isDetailedLayout();
-
 }

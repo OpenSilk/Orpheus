@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2012 Andrew Neal
  * Copyright (C) 2014 OpenSilk Productions LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.ui.fragments;
+package org.opensilk.music.ui.home;
 
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.view.View;
 import android.widget.CursorAdapter;
 
 import com.andrew.apollo.utils.PreferenceUtils;
@@ -31,11 +29,9 @@ import org.opensilk.music.loaders.AlbumCursorLoader;
 import static com.andrew.apollo.utils.PreferenceUtils.ALBUM_LAYOUT;
 
 /**
- * This class is used to display all of the albums on a user's device.
- * 
- * @author Andrew Neal (andrewdneal@gmail.com)
+ * Albums
  */
-public class AlbumFragment extends HomePagerBaseCursorFragment {
+public class HomeAlbumFragment extends HomePagerBaseCursorFragment {
 
     /*
      * Loader Callbacks

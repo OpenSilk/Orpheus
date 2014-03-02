@@ -17,7 +17,7 @@ import android.support.v4.view.ViewPager;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.ui.fragments.HomePhoneFragment;
+import org.opensilk.music.ui.home.HomePhoneFragment;
 
 /**
  * This class is used to display the {@link ViewPager} used to swipe between the

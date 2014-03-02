@@ -23,12 +23,12 @@ import android.view.ViewGroup;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.Lists;
 
-import org.opensilk.music.ui.fragments.AlbumFragment;
-import org.opensilk.music.ui.fragments.ArtistFragment;
-import org.opensilk.music.ui.fragments.GenreFragment;
-import org.opensilk.music.ui.fragments.PlaylistFragment;
-import org.opensilk.music.ui.fragments.RecentFragment;
-import org.opensilk.music.ui.fragments.SongFragment;
+import org.opensilk.music.ui.home.HomeAlbumFragment;
+import org.opensilk.music.ui.home.HomeArtistFragment;
+import org.opensilk.music.ui.home.HomeGenreFragment;
+import org.opensilk.music.ui.home.HomePlaylistFragment;
+import org.opensilk.music.ui.home.HomeRecentFragment;
+import org.opensilk.music.ui.home.HomeSongFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -171,27 +171,27 @@ public class PagerAdapter extends FragmentPagerAdapter {
         /**
          * The playlist fragment
          */
-        PLAYLIST(PlaylistFragment.class),
+        PLAYLIST(HomePlaylistFragment.class),
         /**
          * The recent fragment
          */
-        RECENT(RecentFragment.class),
+        RECENT(HomeRecentFragment.class),
         /**
          * The artist fragment
          */
-        ARTIST(ArtistFragment.class),
+        ARTIST(HomeArtistFragment.class),
         /**
          * The album fragment
          */
-        ALBUM(AlbumFragment.class),
+        ALBUM(HomeAlbumFragment.class),
         /**
          * The song fragment
          */
-        SONG(SongFragment.class),
+        SONG(HomeSongFragment.class),
         /**
          * The genre fragment
          */
-        GENRE(GenreFragment.class);
+        GENRE(HomeGenreFragment.class);
 
         private Class<? extends Fragment> mFragmentClass;
 

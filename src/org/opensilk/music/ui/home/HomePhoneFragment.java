@@ -15,14 +15,10 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.fragments;
+package org.opensilk.music.ui.home;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,10 +35,6 @@ import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.music.adapters.PagerAdapter;
 import org.opensilk.music.adapters.PagerAdapter.MusicFragments;
-
-import java.util.Locale;
-
-import hugo.weaving.DebugLog;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
@@ -268,24 +260,24 @@ public class HomePhoneFragment extends Fragment {
         return mViewPager.getCurrentItem() == 2;
     }
 
-    private ArtistFragment getArtistFragment() {
-        return (ArtistFragment)mPagerAdapter.getFragment(2);
+    private HomeArtistFragment getArtistFragment() {
+        return (HomeArtistFragment)mPagerAdapter.getFragment(2);
     }
 
     private boolean isAlbumPage() {
         return mViewPager.getCurrentItem() == 3;
     }
 
-    private AlbumFragment getAlbumFragment() {
-        return (AlbumFragment)mPagerAdapter.getFragment(3);
+    private HomeAlbumFragment getAlbumFragment() {
+        return (HomeAlbumFragment)mPagerAdapter.getFragment(3);
     }
 
     private boolean isSongPage() {
         return mViewPager.getCurrentItem() == 4;
     }
 
-    private SongFragment getSongFragment() {
-        return (SongFragment)mPagerAdapter.getFragment(4);
+    private HomeSongFragment getSongFragment() {
+        return (HomeSongFragment)mPagerAdapter.getFragment(4);
     }
 
     private boolean isRecentPage() {

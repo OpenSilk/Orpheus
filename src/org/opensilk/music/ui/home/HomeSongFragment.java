@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2012 Andrew Neal
  * Copyright (C) 2014 OpenSilk Productions LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,22 +14,20 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.fragments;
+package org.opensilk.music.ui.home;
 
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.widget.CursorAdapter;
 
-import org.opensilk.music.adapters.GenreGridCardCursorAdapter;
-import org.opensilk.music.loaders.GenreCursorLoader;
+import org.opensilk.music.adapters.SongListCardCursorAdapter;
+import org.opensilk.music.loaders.SongCursorLoader;
 
 /**
- * This class is used to display all of the genres on a user's device.
- * 
- * @author Andrew Neal (andrewdneal@gmail.com)
+ * Songs
  */
-public class GenreFragment extends HomePagerBaseCursorFragment {
+public class HomeSongFragment extends HomePagerBaseCursorFragment {
 
     /*
      * Loader Callbacks
@@ -38,7 +35,7 @@ public class GenreFragment extends HomePagerBaseCursorFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new GenreCursorLoader(getActivity());
+        return new SongCursorLoader(getActivity());
     }
 
     /*
@@ -47,12 +44,12 @@ public class GenreFragment extends HomePagerBaseCursorFragment {
 
     @Override
     protected CursorAdapter createAdapter() {
-        return new GenreGridCardCursorAdapter(getActivity());
+        return new SongListCardCursorAdapter(getActivity());
     }
 
     @Override
     protected boolean isSimpleLayout() {
-        return false; //Just grid for now.
+        return true; // Were always list
     }
 
 }

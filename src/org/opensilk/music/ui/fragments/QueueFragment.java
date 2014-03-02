@@ -1,12 +1,18 @@
 /*
- * Copyright (C) 2012 Andrew Neal Licensed under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
- * or agreed to in writing, software distributed under the License is
- * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
+ * Copyright (C) 2012 Andrew Neal
+ * Copyright (C) 2014 OpenSilk Productions LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opensilk.music.ui.fragments;
@@ -22,7 +28,6 @@ import android.view.ViewGroup;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.model.Song;
-import com.andrew.apollo.recycler.RecycleHolder;
 import com.andrew.apollo.utils.MusicUtils;
 import com.mobeta.android.dslv.DragSortListView;
 import com.mobeta.android.dslv.DragSortListView.DropListener;
@@ -62,17 +67,11 @@ public class QueueFragment extends Fragment implements
      */
     private DragSortListView mListView;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
@@ -87,9 +86,6 @@ public class QueueFragment extends Fragment implements
         return rootView;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -105,20 +101,12 @@ public class QueueFragment extends Fragment implements
         scrollToCurrentSong();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @DebugLog
     public Loader<List<Song>> onCreateLoader(final int id, final Bundle args) {
         return new QueueLoader(getActivity());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @DebugLog
     public void onLoadFinished(final Loader<List<Song>> loader, final List<Song> data) {
         // Check for any errors
         if (data.isEmpty()) {
@@ -140,16 +128,11 @@ public class QueueFragment extends Fragment implements
     }
 
     @Override
-    @DebugLog
     public void onLoaderReset(Loader<List<Song>> listLoader) {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    @DebugLog
     public void remove(final int which) {
         Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
@@ -157,9 +140,6 @@ public class QueueFragment extends Fragment implements
         MusicUtils.removeTrack(((CardQueueList) c).getData().mSongId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void drop(final int from, final int to) {
         Card c = mAdapter.getItem(from);
