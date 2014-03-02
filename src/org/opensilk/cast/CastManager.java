@@ -821,8 +821,10 @@ public class CastManager extends BaseCastManager
         try {
             mRemoteMediaPlayer.pause(mApiClient, customData);
         } catch (IOException e) {
-            LOGE(TAG, "Failed to pause media", e);
+            LOGE(TAG, "Failed to pause media ", e);
             throw new CastException(mContext, R.string.failed_to_pause, e);
+        } catch (IllegalStateException e) {
+            LOGE(TAG, "Failed to pause media " + e.getMessage());
         }
     }
 
