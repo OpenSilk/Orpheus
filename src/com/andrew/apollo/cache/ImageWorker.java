@@ -236,7 +236,7 @@ public abstract class ImageWorker {
                 mAlbumName = params[2];
                 mUrl = processImageUrl(mArtistName, mAlbumName, mImageType);
                 if (mUrl != null) {
-                    bitmap = processBitmap(mUrl);
+                    bitmap = processBitmap(mUrl, mKey);
                 }
             }
 
@@ -410,7 +410,7 @@ public abstract class ImageWorker {
      *            {@link ImageWorker#loadImage(mKey, ImageView)}
      * @return The processed {@link Bitmap}.
      */
-    protected abstract Bitmap processBitmap(String key);
+    protected abstract Bitmap processBitmap(String url, String key);
 
     /**
      * Subclasses should override this to define any processing or work that

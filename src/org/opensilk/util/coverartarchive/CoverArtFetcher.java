@@ -16,7 +16,6 @@
 
 package org.opensilk.util.coverartarchive;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
@@ -33,6 +32,8 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Locale;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Created by drew on 3/2/14.
  */
@@ -44,26 +45,12 @@ public class CoverArtFetcher {
     private static final String API_ROOT = "http://coverartarchive.org/release/";
     private static final String FRONT_COVER_URL = API_ROOT+"%s/front";
 
-    public static final String CACHE_DIR = "/downloaded-art/";
-
     private static final String USER_AGENT = "CoverArtFetcher";
 
-    private Context mContext;
-
-    private static CoverArtFetcher sInstance;
-
-    public static CoverArtFetcher getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new CoverArtFetcher(context);
-        }
-        return sInstance;
+    private CoverArtFetcher() {
     }
 
-    private CoverArtFetcher(Context context) {
-        mContext = context;
-    }
-
-    public String getFrontCoverUrl(String mbid) {
+    public static String getFrontCoverUrl(String mbid) {
         String urlString = String.format(Locale.US, FRONT_COVER_URL, mbid);
         if (D) Log.i(TAG, "Checking " + urlString);
         String coverUrl = null;
@@ -94,8 +81,9 @@ public class CoverArtFetcher {
         return coverUrl;
     }
 
-    public File downloadCover(String urlString, String fileName) {
-        File outFile = new File(mContext.getExternalCacheDir()+CACHE_DIR+fileName);
+    @DebugLog
+    public static boolean downloadFile(String urlString, File outFile) {
+        if (D) Log.i(TAG, "Fetching " + urlString);
         ReadableByteChannel in = null;
         FileChannel out = null;
         try {
@@ -121,14 +109,14 @@ public class CoverArtFetcher {
                 buffer.compact();
             } while (bytes >= 0 || buffer.position() > 0);
         } catch (MalformedURLException e) {
-            Log.e(TAG, "downloadCover(2)"+e.getMessage());
-            return null;
+            Log.e(TAG, "downloadFile(1) "+e.getMessage());
+            return false;
         } catch (IOException e) {
-            Log.e(TAG, "downloadCover(3)"+e.getMessage());
+            Log.e(TAG, "downloadFile(2) "+e.getMessage());
             if (outFile.exists()) {
                 outFile.delete();
             }
-            return null;
+            return false;
         } finally {
             if (in != null && in.isOpen()) {
                 try {
@@ -143,7 +131,7 @@ public class CoverArtFetcher {
                 }
             }
         }
-        return outFile;
+        return true;
     }
 
 }

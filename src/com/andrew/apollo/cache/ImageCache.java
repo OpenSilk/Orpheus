@@ -23,6 +23,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import android.os.Environment;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
@@ -81,14 +83,36 @@ public final class ImageCache {
     private static final int COMPRESS_QUALITY = 98;
 
     /**
-     * LRU cache
+     * Maximum sizes for artwork
      */
-    private MemoryCache mLruCache;
+    public final int mDefaultMaxImageHeight;
+    public final int mDefaultMaxImageWidth;
+
+    /**
+     * Largest size a thumbnail will be
+     */
+    public  final int DEFAULT_THUMBNAIL_SIZE_DP = 200; // Largest size of any thumbnail displayed
+    public final int mDefaultThumbnailSizePx;
+
+    /** Directory diskcache is stored in */
+    public static final String THUMBNAIL_CACHE_DIR = "ThumbnailCache";
+    /** Directory downloaded art is stored in */
+    public static final String DOWNLOAD_CACHE_DIR = "DownloadCache";
+
+    /**
+     * Context
+     */
+    private final Context mContext;
+
+    /**
+     * LRU cache for thumbnails
+     */
+    private MemoryCache mThumbnailMemCache;
 
     /**
      * Disk LRU cache
      */
-    private DiskLruCache mDiskCache;
+    private DiskLruCache mThumbnailDiskCache;
 
     private static ImageCache sInstance;
 
@@ -108,6 +132,11 @@ public final class ImageCache {
      * @param context The {@link Context} to use
      */
     public ImageCache(final Context context) {
+        mContext = context;
+        mDefaultMaxImageHeight = getDisplayHeight(context);
+        mDefaultMaxImageWidth = getDisplayWidth(context);
+        mDefaultThumbnailSizePx = convertDpToPx(context, DEFAULT_THUMBNAIL_SIZE_DP);
+        Log.e("XXX", "mx=" + mDefaultMaxImageWidth + " my=" + mDefaultMaxImageHeight + " mt=" + mDefaultThumbnailSizePx);
         init(context);
     }
 
@@ -154,15 +183,15 @@ public final class ImageCache {
      */
     private synchronized void initDiskCache(final Context context) {
         // Set up disk cache
-        if (mDiskCache == null || mDiskCache.isClosed()) {
-            File diskCacheDir = getDiskCacheDir(context, TAG);
+        if (mThumbnailDiskCache == null || mThumbnailDiskCache.isClosed()) {
+            File diskCacheDir = getDiskCacheDir(context, THUMBNAIL_CACHE_DIR);
             if (diskCacheDir != null) {
                 if (!diskCacheDir.exists()) {
                     diskCacheDir.mkdirs();
                 }
                 if (getUsableSpace(diskCacheDir) > DISK_CACHE_SIZE) {
                     try {
-                        mDiskCache = DiskLruCache.open(diskCacheDir, 1, 1, DISK_CACHE_SIZE);
+                        mThumbnailDiskCache = DiskLruCache.open(diskCacheDir, 1, 1, DISK_CACHE_SIZE);
                     } catch (final IOException e) {
                         diskCacheDir = null;
                     }
@@ -183,7 +212,7 @@ public final class ImageCache {
         int memClass = context.getResources().getBoolean(R.bool.config_largeHeap) ?
                 activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
         final int lruCacheSize = Math.round(MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
-        mLruCache = new MemoryCache(lruCacheSize);
+        mThumbnailMemCache = new MemoryCache(lruCacheSize);
 
         // Release some memory as needed
         context.registerComponentCallbacks(new ComponentCallbacks2() {
@@ -196,7 +225,7 @@ public final class ImageCache {
                 if (level >= TRIM_MEMORY_MODERATE) {
                     evictAll();
                 } else if (level >= TRIM_MEMORY_BACKGROUND) {
-                    mLruCache.trimToSize(mLruCache.size() / 2);
+                    mThumbnailMemCache.trimToSize(mThumbnailMemCache.size() / 2);
                 }
             }
 
@@ -279,13 +308,13 @@ public final class ImageCache {
         addBitmapToMemCache(data, bitmap);
 
         // Add to disk cache
-        if (mDiskCache != null) {
+        if (mThumbnailDiskCache != null) {
             final String key = hashKeyForDisk(data);
             OutputStream out = null;
             try {
-                final DiskLruCache.Snapshot snapshot = mDiskCache.get(key);
+                final DiskLruCache.Snapshot snapshot = mThumbnailDiskCache.get(key);
                 if (snapshot == null) {
-                    final DiskLruCache.Editor editor = mDiskCache.edit(key);
+                    final DiskLruCache.Editor editor = mThumbnailDiskCache.edit(key);
                     if (editor != null) {
                         out = editor.newOutputStream(DISK_CACHE_INDEX);
                         bitmap.compress(COMPRESS_FORMAT, COMPRESS_QUALITY, out);
@@ -325,7 +354,7 @@ public final class ImageCache {
         }
         // Add to memory cache
         if (getBitmapFromMemCache(data) == null) {
-            mLruCache.put(data, bitmap);
+            mThumbnailMemCache.put(data, bitmap);
         }
     }
 
@@ -339,8 +368,8 @@ public final class ImageCache {
         if (data == null) {
             return null;
         }
-        if (mLruCache != null) {
-            final Bitmap lruBitmap = mLruCache.get(data);
+        if (mThumbnailMemCache != null) {
+            final Bitmap lruBitmap = mThumbnailMemCache.get(data);
             if (lruBitmap != null) {
                 return lruBitmap;
             }
@@ -367,10 +396,10 @@ public final class ImageCache {
 
         waitUntilUnpaused();
         final String key = hashKeyForDisk(data);
-        if (mDiskCache != null) {
+        if (mThumbnailDiskCache != null) {
             InputStream inputStream = null;
             try {
-                final DiskLruCache.Snapshot snapshot = mDiskCache.get(key);
+                final DiskLruCache.Snapshot snapshot = mThumbnailDiskCache.get(key);
                 if (snapshot != null) {
                     inputStream = snapshot.getInputStream(DISK_CACHE_INDEX);
                     if (inputStream != null) {
@@ -418,23 +447,29 @@ public final class ImageCache {
 
     /**
      * Tries to return the album art from memory cache and disk cache, before
-     * calling {@code #getArtworkFromFile(Context, String)} again
+     * calling {@code #getArtworkFromMediaStore(Context, String)} again
      *
      * @param context The {@link Context} to use
-     * @param data The name of the album art
+     * @param key The name of the album art
      * @param id The ID of the album to find artwork for
      * @return The artwork for an album
      */
-    public final Bitmap getCachedArtwork(final Context context, final String data, final long id) {
-        if (context == null || data == null) {
+    public final Bitmap getCachedArtwork(final Context context, final String key, final long id) {
+        if (context == null || key == null) {
             return null;
         }
-        Bitmap cachedImage = getCachedBitmap(data);
-        if (cachedImage == null && id >= 0) {
-            cachedImage = getArtworkFromFile(context, id);
+        Bitmap cachedImage = getCachedBitmap(key);
+        if (cachedImage != null) {
+            return cachedImage;
+        }
+        if (id >= 0) {
+            cachedImage = getArtworkFromMediaStore(context, id);
+        }
+        if (cachedImage == null) {
+            cachedImage = getArtworkFromDownloadCache(key);
         }
         if (cachedImage != null) {
-            addBitmapToMemCache(data, cachedImage);
+            addBitmapToMemCache(key, cachedImage);
             return cachedImage;
         }
         return null;
@@ -447,7 +482,7 @@ public final class ImageCache {
      * @param albumID The ID of the album to find artwork for
      * @return The artwork for an album
      */
-    public final Bitmap getArtworkFromFile(final Context context, final long albumId) {
+    public final Bitmap getArtworkFromMediaStore(final Context context, final long albumId) {
         if (albumId < 0) {
             return null;
         }
@@ -463,16 +498,100 @@ public final class ImageCache {
                 parcelFileDescriptor.close();
             }
         } catch (final IllegalStateException e) {
-            // Log.e(TAG, "IllegalStateExcetpion - getArtworkFromFile - ", e);
+            // Log.e(TAG, "IllegalStateExcetpion - getArtworkFromMediaStore - ", e);
         } catch (final FileNotFoundException e) {
-            // Log.e(TAG, "FileNotFoundException - getArtworkFromFile - ", e);
+            // Log.e(TAG, "FileNotFoundException - getArtworkFromMediaStore - ", e);
         } catch (final OutOfMemoryError evict) {
-            // Log.e(TAG, "OutOfMemoryError - getArtworkFromFile - ", evict);
+            // Log.e(TAG, "OutOfMemoryError - getArtworkFromMediaStore - ", evict);
             evictAll();
         } catch (IOException e) {
             // pass
         }
         return artwork;
+    }
+
+    public final Bitmap getArtworkFromDownloadCache(String key) {
+        File f = new File(getDiskCacheDir(mContext, DOWNLOAD_CACHE_DIR), hashKeyForDisk(key));
+        if (f.exists()) {
+            return decodeSampledBitmapFromFile(f.toString(), mDefaultThumbnailSizePx, mDefaultThumbnailSizePx);
+        }
+        return null;
+    }
+
+    /**
+     * Decode and sample down a {@link Bitmap} from a file to the requested
+     * width and height.
+     *
+     * @param filename The full path of the file to decode
+     * @param reqWidth The requested width of the resulting bitmap
+     * @param reqHeight The requested height of the resulting bitmap
+     * @return A {@link Bitmap} sampled down from the original with the same
+     *         aspect ratio and dimensions that are equal to or greater than the
+     *         requested width and height
+     */
+    public static Bitmap decodeSampledBitmapFromFile(final String filename, int maxWidth, int maxHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filename, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(filename, options);
+    }
+
+    /**
+     * Calculate an inSampleSize for use in a
+     * {@link android.graphics.BitmapFactory.Options} object when decoding
+     * bitmaps using the decode* methods from {@link BitmapFactory}. This
+     * implementation calculates the closest inSampleSize that will result in
+     * the final decoded bitmap having a width and height equal to or larger
+     * than the requested width and height. This implementation does not ensure
+     * a power of 2 is returned for inSampleSize which can be faster when
+     * decoding but results in a larger bitmap which isn't as useful for caching
+     * purposes.
+     *
+     * @param options An options object with out* params already populated (run
+     *            through a decode* method with inJustDecodeBounds==true
+     * @param reqWidth The requested width of the resulting bitmap
+     * @param reqHeight The requested height of the resulting bitmap
+     * @return The value to be used for inSampleSize
+     */
+    public static int calculateInSampleSize(final BitmapFactory.Options options,
+                                                  final int reqWidth, final int reqHeight) {
+        /* Raw height and width of image */
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            if (width > height) {
+                inSampleSize = Math.round((float)height / (float)reqHeight);
+            } else {
+                inSampleSize = Math.round((float)width / (float)reqWidth);
+            }
+
+            // This offers some additional logic in case the image has a strange
+            // aspect ratio. For example, a panorama may have a much larger
+            // width than height. In these cases the total pixels might still
+            // end up being too large to fit comfortably in memory, so we should
+            // be more aggressive with sample down the image (=larger
+            // inSampleSize).
+
+            final float totalPixels = width * height;
+
+            /* More than 2x the requested pixels we'll sample down further */
+            final float totalReqPixelsCap = reqWidth * reqHeight * 2;
+
+            while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
+                inSampleSize++;
+            }
+        }
+        return inSampleSize;
     }
 
     /**
@@ -484,10 +603,10 @@ public final class ImageCache {
 
             @Override
             protected Void doInBackground(final Void... unused) {
-                if (mDiskCache != null) {
+                if (mThumbnailDiskCache != null) {
                     try {
-                        if (!mDiskCache.isClosed()) {
-                            mDiskCache.flush();
+                        if (!mThumbnailDiskCache.isClosed()) {
+                            mThumbnailDiskCache.flush();
                         }
                     } catch (final IOException e) {
                         Log.e(TAG, "flush - " + e);
@@ -508,9 +627,9 @@ public final class ImageCache {
             protected Void doInBackground(final Void... unused) {
                 // Clear the disk cache
                 try {
-                    if (mDiskCache != null) {
-                        mDiskCache.delete();
-                        mDiskCache = null;
+                    if (mThumbnailDiskCache != null) {
+                        mThumbnailDiskCache.delete();
+                        mThumbnailDiskCache = null;
                     }
                 } catch (final IOException e) {
                     Log.e(TAG, "clearCaches - " + e);
@@ -532,11 +651,11 @@ public final class ImageCache {
 
             @Override
             protected Void doInBackground(final Void... unused) {
-                if (mDiskCache != null) {
+                if (mThumbnailDiskCache != null) {
                     try {
-                        if (!mDiskCache.isClosed()) {
-                            mDiskCache.close();
-                            mDiskCache = null;
+                        if (!mThumbnailDiskCache.isClosed()) {
+                            mThumbnailDiskCache.close();
+                            mThumbnailDiskCache = null;
                         }
                     } catch (final IOException e) {
                         Log.e(TAG, "close - " + e);
@@ -552,8 +671,8 @@ public final class ImageCache {
      * now would be a good time to garbage collect
      */
     public void evictAll() {
-        if (mLruCache != null) {
-            mLruCache.evictAll();
+        if (mThumbnailMemCache != null) {
+            mThumbnailMemCache.evictAll();
         }
         System.gc();
     }
@@ -566,14 +685,14 @@ public final class ImageCache {
             return;
         }
         // Remove the Lru entry
-        if (mLruCache != null) {
-            mLruCache.remove(key);
+        if (mThumbnailMemCache != null) {
+            mThumbnailMemCache.remove(key);
         }
 
         try {
             // Remove the disk entry
-            if (mDiskCache != null) {
-                mDiskCache.remove(hashKeyForDisk(key));
+            if (mThumbnailDiskCache != null) {
+                mThumbnailDiskCache.remove(hashKeyForDisk(key));
             }
         } catch (final IOException e) {
             Log.e(TAG, "remove - " + e);
@@ -700,6 +819,40 @@ public final class ImageCache {
             builder.append(hex);
         }
         return builder.toString();
+    }
+
+    /**
+     * Converts given dp value to density specific pixel value
+     * @param context
+     * @param dp
+     * @return
+     */
+    public static int convertDpToPx(Context context, float dp) {
+        return Math.round(dp * (context.getResources().getDisplayMetrics().densityDpi / 160f));
+    }
+
+    /**
+     * Gets display height in pixes
+     * @param context
+     * @return
+     */
+    public static int getDisplayHeight(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Point size = new Point();
+        wm.getDefaultDisplay().getSize(size);
+        return size.y;
+    }
+
+    /**
+     * gets display width in pixels
+     * @param context
+     * @return
+     */
+    public static int getDisplayWidth(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Point size = new Point();
+        wm.getDefaultDisplay().getSize(size);
+        return size.x;
     }
 
     /**

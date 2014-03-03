@@ -13,7 +13,6 @@ package com.andrew.apollo.cache;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
@@ -26,14 +25,8 @@ import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.util.coverartarchive.CoverArtFetcher;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
@@ -49,10 +42,6 @@ public class ImageFetcher extends ImageWorker {
     private static final boolean D = BuildConfig.DEBUG;
 
     public static final int IO_BUFFER_SIZE_BYTES = 1024;
-
-    private static final int DEFAULT_MAX_IMAGE_HEIGHT = 1024;
-
-    private static final int DEFAULT_MAX_IMAGE_WIDTH = 1024;
 
     private static final String DEFAULT_HTTP_CACHE_DIR = "http"; //$NON-NLS-1$
 
@@ -84,18 +73,32 @@ public class ImageFetcher extends ImageWorker {
      * {@inheritDoc}
      */
     @Override
-    protected Bitmap processBitmap(final String url) {
-        if (url == null) {
+    protected Bitmap processBitmap(final String url, String key) {
+        if (url == null || key == null) {
             return null;
         }
-        final File file = downloadBitmapToFile(mContext, url, DEFAULT_HTTP_CACHE_DIR);
-        if (file != null) {
-            // Return a sampled down version
-            final Bitmap bitmap = decodeSampledBitmapFromFile(file.toString());
-            file.delete();
-            if (bitmap != null) {
-                return bitmap;
+        File downloadDir = ImageCache.getDiskCacheDir(mContext, ImageCache.DOWNLOAD_CACHE_DIR);
+        if (!downloadDir.exists()) {
+            downloadDir.mkdirs();
+        }
+        File temp = null;
+        try {
+            temp = File.createTempFile("temp", null, downloadDir);
+            if (CoverArtFetcher.downloadFile(url, temp) && temp.exists() && temp.length() > 0) {
+                // Return a sampled down version
+                final Bitmap bitmap = ImageCache.decodeSampledBitmapFromFile(temp.toString(),
+                        mImageCache.mDefaultMaxImageWidth, mImageCache.mDefaultMaxImageHeight);
+                if (bitmap != null) {
+                    // Move the file to its real location so we can find it later
+                    temp.renameTo(new File(downloadDir, ImageCache.hashKeyForDisk(key)));
+                    return bitmap;
+                }
             }
+        } catch (IOException e) {
+            Log.e(TAG, "processBitmap(1) "+e.getMessage());
+        }
+        if (temp != null && temp.exists()) {
+            temp.delete();
         }
         return null;
     }
@@ -104,7 +107,7 @@ public class ImageFetcher extends ImageWorker {
         // For albums first try the coverartarchive, they seem to have higher quality images
         if (e instanceof Album) {
             if (!TextUtils.isEmpty(e.getMbid())) {
-                String url = CoverArtFetcher.getInstance(mContext).getFrontCoverUrl(e.getMbid());
+                String url = CoverArtFetcher.getFrontCoverUrl(e.getMbid());
                 if (url != null) {
                     if (D) Log.i(TAG, "Found coverartarchive url for " + e.getName());
                     return url;
@@ -274,7 +277,7 @@ public class ImageFetcher extends ImageWorker {
         }
         if (artwork == null && albumId >= 0 && mImageCache != null) {
             // Check for local artwork
-            artwork = mImageCache.getArtworkFromFile(mContext, albumId);
+            artwork = mImageCache.getArtworkFromMediaStore(mContext, albumId);
         }
         // if (artwork == null && artistName != null && albumName != null) {
         // // Download missing artwork
@@ -285,137 +288,6 @@ public class ImageFetcher extends ImageWorker {
             return artwork;
         }
         return getDefaultArtwork();
-    }
-
-    /**
-     * Download a {@link Bitmap} from a URL, write it to a disk and return the
-     * File pointer. This implementation uses a simple disk cache.
-     *
-     * @param context The context to use
-     * @param urlString The URL to fetch
-     * @return A {@link File} pointing to the fetched bitmap
-     */
-    public static final File downloadBitmapToFile(final Context context, final String urlString,
-            final String uniqueName) {
-        final File cacheDir = ImageCache.getDiskCacheDir(context, uniqueName);
-
-        if (!cacheDir.exists()) {
-            cacheDir.mkdir();
-        }
-
-        HttpURLConnection urlConnection = null;
-        BufferedOutputStream out = null;
-
-        File tempFile = null;
-        try {
-            tempFile = File.createTempFile("bitmap", null, cacheDir); //$NON-NLS-1$
-            final URL url = new URL(urlString);
-            urlConnection = (HttpURLConnection)url.openConnection();
-            if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return null;
-            }
-            final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
-                    IO_BUFFER_SIZE_BYTES);
-            out = new BufferedOutputStream(new FileOutputStream(tempFile), IO_BUFFER_SIZE_BYTES);
-
-            int oneByte;
-            while ((oneByte = in.read()) != -1) {
-                out.write(oneByte);
-            }
-            return tempFile;
-        } catch (final IOException ignored) {
-            if (tempFile != null) {
-                tempFile.delete();
-            }
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (final IOException ignored) {
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Decode and sample down a {@link Bitmap} from a file to the requested
-     * width and height.
-     *
-     * @param filename The full path of the file to decode
-     * @param reqWidth The requested width of the resulting bitmap
-     * @param reqHeight The requested height of the resulting bitmap
-     * @return A {@link Bitmap} sampled down from the original with the same
-     *         aspect ratio and dimensions that are equal to or greater than the
-     *         requested width and height
-     */
-    public static Bitmap decodeSampledBitmapFromFile(final String filename) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filename, options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, DEFAULT_MAX_IMAGE_WIDTH,
-                DEFAULT_MAX_IMAGE_HEIGHT);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(filename, options);
-    }
-
-    /**
-     * Calculate an inSampleSize for use in a
-     * {@link android.graphics.BitmapFactory.Options} object when decoding
-     * bitmaps using the decode* methods from {@link BitmapFactory}. This
-     * implementation calculates the closest inSampleSize that will result in
-     * the final decoded bitmap having a width and height equal to or larger
-     * than the requested width and height. This implementation does not ensure
-     * a power of 2 is returned for inSampleSize which can be faster when
-     * decoding but results in a larger bitmap which isn't as useful for caching
-     * purposes.
-     *
-     * @param options An options object with out* params already populated (run
-     *            through a decode* method with inJustDecodeBounds==true
-     * @param reqWidth The requested width of the resulting bitmap
-     * @param reqHeight The requested height of the resulting bitmap
-     * @return The value to be used for inSampleSize
-     */
-    public static final int calculateInSampleSize(final BitmapFactory.Options options,
-            final int reqWidth, final int reqHeight) {
-        /* Raw height and width of image */
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-            if (width > height) {
-                inSampleSize = Math.round((float)height / (float)reqHeight);
-            } else {
-                inSampleSize = Math.round((float)width / (float)reqWidth);
-            }
-
-            // This offers some additional logic in case the image has a strange
-            // aspect ratio. For example, a panorama may have a much larger
-            // width than height. In these cases the total pixels might still
-            // end up being too large to fit comfortably in memory, so we should
-            // be more aggressive with sample down the image (=larger
-            // inSampleSize).
-
-            final float totalPixels = width * height;
-
-            /* More than 2x the requested pixels we'll sample down further */
-            final float totalReqPixelsCap = reqWidth * reqHeight * 2;
-
-            while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
-                inSampleSize++;
-            }
-        }
-        return inSampleSize;
     }
 
     /**
@@ -438,4 +310,5 @@ public class ImageFetcher extends ImageWorker {
                 .append(Config.ALBUM_ART_SUFFIX)
                 .toString();
     }
+
 }

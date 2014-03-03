@@ -31,6 +31,7 @@ import android.view.View;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.adapters.PagerAdapter;
+import com.andrew.apollo.cache.ImageCache;
 import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.menu.PhotoSelectionDialog;
 import com.andrew.apollo.menu.PhotoSelectionDialog.ProfileType;
@@ -531,7 +532,7 @@ public class ProfileActivity extends BaseActivity implements OnPageChangeListene
                         key = ImageFetcher.generateAlbumCacheKey(mProfileName, mArtistName);
                     }
 
-                    final Bitmap bitmap = ImageFetcher.decodeSampledBitmapFromFile(picturePath);
+                    final Bitmap bitmap = ImageCache.decodeSampledBitmapFromFile(picturePath, 1024, 1024);
                     mImageFetcher.addBitmapToCache(key, bitmap);
                     if (isAlbum()) {
                         mTabCarousel.getAlbumArt().setImageBitmap(bitmap);
