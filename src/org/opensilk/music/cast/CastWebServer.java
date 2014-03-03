@@ -17,7 +17,6 @@ package org.opensilk.music.cast;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.wifi.WifiManager;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
@@ -30,8 +29,6 @@ import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -156,7 +153,7 @@ public class CastWebServer extends NanoHTTPD {
     }
 
     /* Change if needed */
-    private static final String MIME_ART = "image/webp";
+    private static final String MIME_ART = "image/*";
 
     /**
      * Fetches and serves the album art
@@ -187,23 +184,20 @@ public class CastWebServer extends NanoHTTPD {
         if (album == null) {
             return notFoundResponse();
         }
-        Bitmap bitmap;
+        File file = null;
         synchronized (mImageFetcher) {
-            bitmap = mImageFetcher.getCachedArtwork(album.mAlbumName, album.mArtistName, album.mAlbumId);
+            file = mImageFetcher.getLargeArtworkFile(album.mAlbumName, album.mAlbumId, album.mArtistName);
         }
-        // form etag todo this isnt working like i want
-        String etag = Integer.toHexString(bitmap.hashCode());
-        Log.d(TAG, "Art etag " + etag);
-        // Cache the art etag
-        synchronized (mEtagCache) {
-            mEtagCache.put(etag, uri);
+        if (file != null) {
+            // Calculate etag
+            String etag = Integer.toHexString((file.getAbsolutePath() + file.lastModified() + "" + file.length()).hashCode());
+            // Cache the art etag
+            synchronized (mEtagCache) {
+                mEtagCache.put(etag, uri);
+            }
+            return serveFile(file, MIME_ART, headers);
         }
-        // Convert the bitmap into a bytearray
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.WEBP, 100, os);
-        Response res = createResponse(Response.Status.OK, MIME_ART, new ByteArrayInputStream(os.toByteArray()));
-        res.addHeader("ETag", etag);
-        return res;
+        return notFoundResponse();
     }
 
     /**
@@ -231,9 +225,15 @@ public class CastWebServer extends NanoHTTPD {
             mime = MIME_DEFAULT_BINARY;
         }
         File file = new File(filePath);
-        /* See @SimpleWebServer#serveFile
-        * Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias
-        */
+        return serveFile(file, mime, headers);
+    }
+
+    /* See @SimpleWebServer#serveFile
+     * Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias
+     */
+    @DebugLog
+    private Response serveFile(File file, String mime, Map<String, String> headers) {
+        Response res;
         try {
             // Calculate etag
             String etag = Integer.toHexString((file.getAbsolutePath() + file.lastModified() + "" + file.length()).hashCode());

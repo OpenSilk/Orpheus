@@ -55,7 +55,7 @@ public final class ImageCache {
     /**
      * The {@link Uri} used to retrieve album art
      */
-    private static final Uri mArtworkUri;
+    public static final Uri mArtworkUri;
 
     /**
      * Default memory cache size as a percent of device memory class
@@ -133,8 +133,7 @@ public final class ImageCache {
      */
     public ImageCache(final Context context) {
         mContext = context;
-        mDefaultMaxImageHeight = getDisplayHeight(context);
-        mDefaultMaxImageWidth = getDisplayWidth(context);
+        mDefaultMaxImageHeight = mDefaultMaxImageWidth = getMaxDisplaySize(context);
         mDefaultThumbnailSizePx = convertDpToPx(context, DEFAULT_THUMBNAIL_SIZE_DP);
         Log.e("XXX", "mx=" + mDefaultMaxImageWidth + " my=" + mDefaultMaxImageHeight + " mt=" + mDefaultThumbnailSizePx);
         init(context);
@@ -510,10 +509,28 @@ public final class ImageCache {
         return artwork;
     }
 
+    /**
+     * Returns bitmap from downloadcache suitable for thumbnail use
+     * @param key
+     * @return
+     */
     public final Bitmap getArtworkFromDownloadCache(String key) {
         File f = new File(getDiskCacheDir(mContext, DOWNLOAD_CACHE_DIR), hashKeyForDisk(key));
         if (f.exists()) {
             return decodeSampledBitmapFromFile(f.toString(), mDefaultThumbnailSizePx, mDefaultThumbnailSizePx);
+        }
+        return null;
+    }
+
+    /**
+     * Returns bitmap from downloadcache sampled down if neccessary for full screen display
+     * @param key
+     * @return
+     */
+    public final Bitmap getLargeArtworkFromDownloadCache(String key) {
+        File f = new File(getDiskCacheDir(mContext, DOWNLOAD_CACHE_DIR), hashKeyForDisk(key));
+        if (f.exists()) {
+            return decodeSampledBitmapFromFile(f.toString(), mDefaultMaxImageWidth, mDefaultMaxImageHeight);
         }
         return null;
     }
@@ -832,27 +849,15 @@ public final class ImageCache {
     }
 
     /**
-     * Gets display height in pixes
+     * Returns largest screen dimension
      * @param context
      * @return
      */
-    public static int getDisplayHeight(Context context) {
+    public static int getMaxDisplaySize(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Point size = new Point();
         wm.getDefaultDisplay().getSize(size);
-        return size.y;
-    }
-
-    /**
-     * gets display width in pixels
-     * @param context
-     * @return
-     */
-    public static int getDisplayWidth(Context context) {
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Point size = new Point();
-        wm.getDefaultDisplay().getSize(size);
-        return size.x;
+        return Math.max(size.x, size.y);
     }
 
     /**

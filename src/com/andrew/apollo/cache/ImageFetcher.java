@@ -12,7 +12,10 @@
 package com.andrew.apollo.cache;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
@@ -258,8 +261,7 @@ public class ImageFetcher extends ImageWorker {
     }
 
     /**
-     * Finds cached or downloads album art. Used in {@link MusicPlaybackService}
-     * to set the current album art in the notification and lock screen
+     * Finds cached album art.
      *
      * @param albumName The name of the current album
      * @param albumId The ID of the current album
@@ -288,6 +290,69 @@ public class ImageFetcher extends ImageWorker {
             return artwork;
         }
         return getDefaultArtwork();
+    }
+
+    /**
+     * Used in {@link MusicPlaybackService}
+     * to set the current album art in the notification and lock screen
+     *
+     * @param albumName The name of the current album
+     * @param albumId The ID of the current album
+     * @param artistName The album artist in case we should have to download
+     *            missing artwork
+     * @return The album art as an {@link Bitmap}
+     */
+    public Bitmap getLargeArtwork(final String albumName, final long albumId, final String artistName) {
+        Bitmap artwork = null;
+        if (albumId >= 0 && mImageCache != null) {
+            // Check for local artwork
+            artwork = mImageCache.getArtworkFromMediaStore(mContext, albumId);
+        }
+        if (artwork == null && artistName != null && albumName != null) {
+            // Check the download cache
+            artwork = mImageCache.getLargeArtworkFromDownloadCache(generateAlbumCacheKey(albumName, artistName));
+        }
+        if (artwork != null) {
+            return artwork;
+        }
+        return getDefaultArtwork();
+    }
+
+    /**
+     * Used in {@link org.opensilk.music.cast.CastWebServer}
+     * Returns file of artwork found in mediastore or downloadcache
+     *
+     * @param albumName The name of the current album
+     * @param albumId The ID of the current album
+     * @param artistName The album artist in case we should have to download
+     *            missing artwork
+     * @return The album art as an {@link Bitmap}
+     */
+    public File getLargeArtworkFile(final String albumName, final long albumId, final String artistName) {
+        File artwork = null;
+        if (albumId >= 0) {
+            Cursor c = mContext.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                    new String[] { MediaStore.Audio.Albums.ALBUM_ART },
+                    BaseColumns._ID + "=?", new String[] { String.valueOf(albumId) }, null);
+            if (c != null && c.moveToFirst()) {
+                String path = c.getString(0);
+                if (!TextUtils.isEmpty(path)) {
+                    artwork = new File(c.getString(0));
+                }
+            }
+            if (c != null) {
+                c.close();
+            }
+        }
+        if (artwork == null || !artwork.exists()) {
+            artwork = new File(ImageCache.getDiskCacheDir(mContext, ImageCache.DOWNLOAD_CACHE_DIR),
+                    ImageCache.hashKeyForDisk(generateAlbumCacheKey(albumName, artistName)));
+        }
+        if (artwork != null && artwork.exists()) {
+            Log.e(TAG, "Found album art at " + artwork.getPath());
+            return artwork;
+        }
+        return null;
     }
 
     /**

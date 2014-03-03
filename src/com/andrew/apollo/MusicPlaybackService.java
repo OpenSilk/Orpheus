@@ -2580,7 +2580,7 @@ public class MusicPlaybackService extends Service {
      */
     public Bitmap getAlbumArt() {
         // Return the cached artwork
-        final Bitmap bitmap = mImageFetcher.getArtwork(getAlbumName(),
+        final Bitmap bitmap = mImageFetcher.getLargeArtwork(getAlbumName(),
                 getAlbumId(), getArtistName());
         return bitmap;
     }
