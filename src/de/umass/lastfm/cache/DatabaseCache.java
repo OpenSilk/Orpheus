@@ -26,8 +26,15 @@
 
 package de.umass.lastfm.cache;
 
-import java.io.*;
-import java.sql.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
 /**
  * <p>Generic class for caching into a database. Its constructor takes a {@link Connection} instance, which must be opened and closed by the

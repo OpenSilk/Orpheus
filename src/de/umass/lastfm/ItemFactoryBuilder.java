@@ -43,15 +43,7 @@ final class ItemFactoryBuilder {
     private ItemFactoryBuilder() {
         // register default factories
         addItemFactory(Album.class, Album.FACTORY);
-        addItemFactory(Track.class, Track.FACTORY);
         addItemFactory(Artist.class, Artist.FACTORY);
-        addItemFactory(Tag.class, Tag.FACTORY);
-        addItemFactory(Image.class, Image.FACTORY);
-        addItemFactory(User.class, User.FACTORY);
-        addItemFactory(Event.class, Event.FACTORY);
-        addItemFactory(Venue.class, Venue.FACTORY);
-        addItemFactory(Shout.class, Shout.FACTORY);
-        addItemFactory(Playlist.class, Playlist.FACTORY);
     }
 
     /**

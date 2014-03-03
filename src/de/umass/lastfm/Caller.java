@@ -26,27 +26,44 @@
 
 package de.umass.lastfm;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.Proxy;
-import java.net.URL;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import android.content.Context;
+import android.util.Log;
 
-import de.umass.lastfm.Result.Status;
-import de.umass.lastfm.cache.Cache;
-import de.umass.lastfm.cache.FileSystemCache;
+import com.andrew.apollo.BuildConfig;
+import com.andrew.apollo.Config;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static de.umass.util.StringUtilities.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import de.umass.lastfm.Result.Status;
+import de.umass.lastfm.cache.Cache;
+import de.umass.lastfm.cache.FileSystemCache;
+
+import static de.umass.util.StringUtilities.encode;
+import static de.umass.util.StringUtilities.map;
+import static de.umass.util.StringUtilities.md5;
 
 /**
  * The <code>Caller</code> class handles the low-level communication between the client and last.fm.<br/>
@@ -58,35 +75,40 @@ import static de.umass.util.StringUtilities.*;
  * @author Janni Kovacs
  */
 public class Caller {
+    private static final String TAG = Caller.class.getSimpleName();
+    private static final boolean D = !BuildConfig.DEBUG
 
     private static final String PARAM_API_KEY = "api_key";
     private static final String PARAM_METHOD = "method";
 
     private static final String DEFAULT_API_ROOT = "http://ws.audioscrobbler.com/2.0/";
-    private static final Caller instance = new Caller();
-    
-    private final Logger log = Logger.getLogger("de.umass.lastfm.Caller");
-    
+    private static Caller instance;
+
     private String apiRootUrl = DEFAULT_API_ROOT;
 
     private Proxy proxy;
     private String userAgent = "tst";
 
-    private boolean debugMode = false;
-
     private Cache cache;
     private Result lastResult;
 
-    private Caller() {
-        cache = new FileSystemCache();
+    /**
+     * @param context The {@link android.content.Context} to use
+     */
+    private Caller(final Context context) {
+        cache = new FileSystemCache(context);
     }
 
     /**
      * Returns the single instance of the <code>Caller</code> class.
      *
-     * @return a <code>Caller</code>
+     * @param context The {@link android.content.Context} to use
+     * @return A new instance of this class
      */
-    public static Caller getInstance() {
+    public final static synchronized Caller getInstance(final Context context) {
+        if (instance == null) {
+            instance = new Caller(context.getApplicationContext());
+        }
         return instance;
     }
 
@@ -145,33 +167,6 @@ public class Caller {
     }
 
     /**
-     * Sets the <code>debugMode</code> property. If <code>debugMode</code> is <code>true</code> all call() methods
-     * will print debug information and error messages on failure to stdout and stderr respectively.<br/>
-     * Default is <code>false</code>. Set this to <code>true</code> while in development and for troubleshooting.
-     *
-     * @see de.umass.lastfm.Caller#getLogger()
-     * @param debugMode <code>true</code> to enable debug mode   
-     * @deprecated Use the Logger instead
-     */
-    public void setDebugMode(boolean debugMode) {
-        this.debugMode = debugMode;
-        log.setLevel(debugMode ? Level.ALL : Level.OFF);
-    }
-
-    /**
-     * @see de.umass.lastfm.Caller#getLogger()
-     * @return the debugMode property
-     * @deprecated Use the Logger instead
-     */
-    public boolean isDebugMode() {
-        return debugMode;
-    }
-
-    public Logger getLogger() {
-        return log;
-    }
-
-    /**
      * Returns the {@link Result} of the last operation, or <code>null</code> if no call operation has been
      * performed yet.
      *
@@ -181,20 +176,12 @@ public class Caller {
         return lastResult;
     }
 
-    public Result call(String method, String apiKey, String... params) throws CallException {
-        return call(method, apiKey, map(params));
+    public Result call(String method, String... params) throws CallException {
+        return call(method, map(params));
     }
 
-    public Result call(String method, String apiKey, Map<String, String> params) throws CallException {
-        return call(method, apiKey, params, null);
-    }
-
-    public Result call(String method, Session session, String... params) {
-        return call(method, session.getApiKey(), map(params), session);
-    }
-
-    public Result call(String method, Session session, Map<String, String> params) {
-        return call(method, session.getApiKey(), params, session);
+    public Result call(String method, Map<String, String> params) throws CallException {
+        return call(method, Config.LASTFM_API_KEY, params);
     }
 
     /**
@@ -208,13 +195,13 @@ public class Caller {
      * @param session A Session instance or <code>null</code>
      * @return the result of the operation
      */
-    private Result call(String method, String apiKey, Map<String, String> params, Session session) {
+    private Result call(String method, String apiKey, Map<String, String> params) {
         params = new HashMap<String, String>(params); // create new Map in case params is an immutable Map
         InputStream inputStream = null;
         
         // try to load from cache
         String cacheEntryName = Cache.createCacheEntryName(method, params);
-        if (session == null && cache != null) {
+        if (cache != null) {
             inputStream = getStreamFromCache(cacheEntryName);
         }
         
@@ -222,10 +209,6 @@ public class Caller {
         if (inputStream == null) {
             // fill parameter map with apiKey and session info
             params.put(PARAM_API_KEY, apiKey);
-            if (session != null) {
-                params.put("sk", session.getKey());
-                params.put("api_sig", Authenticator.createSignature(method, params, session.getSecret()));
-            }
             try {
                 HttpURLConnection urlConnection = openPostConnection(method, params);
                 inputStream = getInputStreamFromConnection(urlConnection);
@@ -255,7 +238,7 @@ public class Caller {
         try {
             Result result = createResultFromInputStream(inputStream);
             if (!result.isSuccessful()) {
-                log.warning(String.format("API call failed with result: %s%n", result));
+                Log.w(TAG, String.format("API call failed with result: %s%n", result));
                 if (cache != null) {
                     cache.remove(cacheEntryName);
                 }
@@ -284,7 +267,7 @@ public class Caller {
      * @throws IOException if an I/O exception occurs.
      */
     public HttpURLConnection openConnection(String url) throws IOException {
-        log.info("Open connection: " + url);
+        if (D) Log.i(TAG, "Open connection: " + url);
         URL u = new URL(url);
         HttpURLConnection urlConnection;
         if (proxy != null)
@@ -302,7 +285,7 @@ public class Caller {
         OutputStream outputStream = urlConnection.getOutputStream();
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
         String post = buildPostBody(method, params);
-        log.info("Post body: " + post);
+        if (D) Log.i(TAG, "Post body: " + post);
         writer.write(post);
         writer.close();
         return urlConnection;

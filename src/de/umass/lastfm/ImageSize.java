@@ -30,14 +30,10 @@ package de.umass.lastfm;
  * @author Janni Kovacs
  */
 public enum ImageSize {
-
-    SMALL,
-    MEDIUM,
-    LARGE,
-    LARGESQUARE,
-    HUGE,
-    EXTRALARGE,
     MEGA,
-    ORIGINAL
-
+    EXTRALARGE,
+    LARGE,
+    MEDIUM,
+    SMALL,
+    UNKNOWN
 }

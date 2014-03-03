@@ -57,21 +57,9 @@ public class DefaultExpirationPolicy implements ExpirationPolicy {
     static {
         // similar data
         ONE_WEEK_METHODS.add("artist.getsimilar");
-        ONE_WEEK_METHODS.add("tag.getsimilar");
-        ONE_WEEK_METHODS.add("track.getsimilar");
-        // top chart data
-        ONE_WEEK_METHODS.add("artist.gettopalbums");
-        ONE_WEEK_METHODS.add("artist.gettoptracks");
-        ONE_WEEK_METHODS.add("geo.gettopartists");
-        ONE_WEEK_METHODS.add("geo.gettoptracks");
-        ONE_WEEK_METHODS.add("tag.gettopalbums");
-        ONE_WEEK_METHODS.add("tag.gettopartists");
-        ONE_WEEK_METHODS.add("tag.gettoptags");
-        ONE_WEEK_METHODS.add("tag.gettoptracks");
-        ONE_WEEK_METHODS.add("user.gettopalbums");
-        ONE_WEEK_METHODS.add("user.gettopartists");
-        ONE_WEEK_METHODS.add("user.gettoptracks");
-        ONE_WEEK_METHODS.add("user.gettoptags");
+        // artist / album info
+        ONE_WEEK_METHODS.add("artist.getInfo");
+        ONE_WEEK_METHODS.add("album.getInfo");
     }
 
     /**

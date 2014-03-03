@@ -26,7 +26,11 @@
 
 package de.umass.lastfm;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import de.umass.xml.DomElement;
 
@@ -64,7 +68,7 @@ public abstract class ImageHolder {
             String attribute = image.getAttribute("size");
             ImageSize size = null;
             if (attribute == null) {
-                size = ImageSize.MEDIUM; // workaround for image responses without size attr.
+                size = ImageSize.UNKNOWN; // workaround for image responses without size attr.
             } else {
                 try {
                     size = ImageSize.valueOf(attribute.toUpperCase(Locale.ENGLISH));
