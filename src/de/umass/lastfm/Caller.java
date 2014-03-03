@@ -76,7 +76,7 @@ import static de.umass.util.StringUtilities.md5;
  */
 public class Caller {
     private static final String TAG = Caller.class.getSimpleName();
-    private static final boolean D = !BuildConfig.DEBUG
+    private static final boolean D = BuildConfig.DEBUG;
 
     private static final String PARAM_API_KEY = "api_key";
     private static final String PARAM_METHOD = "method";

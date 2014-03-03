@@ -77,7 +77,9 @@ public class FileSystemCache extends Cache {
             return false;
         try {
             Properties p = new Properties();
-            p.load(new FileInputStream(f));
+            FileInputStream fis = new FileInputStream(f);
+            p.load(fis);
+            fis.close();
             long expirationDate = Long.valueOf(p.getProperty("expiration-date"));
             return expirationDate < System.currentTimeMillis();
         } catch (IOException e) {
@@ -117,7 +119,9 @@ public class FileSystemCache extends Cache {
             File fm = new File(cacheDir, cacheEntryName + ".meta");
             Properties p = new Properties();
             p.setProperty("expiration-date", Long.toString(expirationDate));
-            p.store(new FileOutputStream(fm), null);
+            FileOutputStream fos = new FileOutputStream(fm);
+            p.store(fos, null);
+            fos.close();
         } catch (IOException e) {
             // we ignore the exception. if something went wrong we just don't cache it.
         }
