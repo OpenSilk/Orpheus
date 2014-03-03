@@ -19,10 +19,6 @@ import android.widget.ImageView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.lastfm.Album;
-import com.andrew.apollo.lastfm.Artist;
-import com.andrew.apollo.lastfm.ImageSize;
-import com.andrew.apollo.lastfm.MusicEntry;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 
@@ -34,6 +30,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import de.umass.lastfm.Album;
+import de.umass.lastfm.Artist;
+import de.umass.lastfm.ImageSize;
+import de.umass.lastfm.MusicEntry;
 
 /**
  * A subclass of {@link ImageWorker} that fetches images from a URL.
