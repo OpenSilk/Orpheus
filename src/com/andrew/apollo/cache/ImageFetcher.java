@@ -15,12 +15,15 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+
+import org.opensilk.util.coverartarchive.CoverArtFetcher;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -93,7 +96,16 @@ public class ImageFetcher extends ImageWorker {
         return null;
     }
 
-    private static String getBestImage(MusicEntry e) {
+    private String getBestImage(MusicEntry e) {
+        // For albums first try the coverartarchive, they seem to have higher quality images
+        if (e instanceof Album) {
+            if (!TextUtils.isEmpty(e.getMbid())) {
+                String url = CoverArtFetcher.getInstance(mContext).getFrontCoverUrl(e.getMbid());
+                if (url != null) {
+                    return url;
+                }
+            }
+        }
         for (ImageSize q : ImageSize.values()) {
             String url = e.getImageURL(q);
             if (url != null) {
