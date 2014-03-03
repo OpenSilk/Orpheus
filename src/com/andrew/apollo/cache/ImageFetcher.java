@@ -18,6 +18,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.utils.MusicUtils;
@@ -43,6 +44,9 @@ import de.umass.lastfm.MusicEntry;
  * A subclass of {@link ImageWorker} that fetches images from a URL.
  */
 public class ImageFetcher extends ImageWorker {
+
+    private static final String TAG = ImageFetcher.class.getSimpleName();
+    private static final boolean D = BuildConfig.DEBUG;
 
     public static final int IO_BUFFER_SIZE_BYTES = 1024;
 
@@ -102,6 +106,7 @@ public class ImageFetcher extends ImageWorker {
             if (!TextUtils.isEmpty(e.getMbid())) {
                 String url = CoverArtFetcher.getInstance(mContext).getFrontCoverUrl(e.getMbid());
                 if (url != null) {
+                    if (D) Log.i(TAG, "Found coverartarchive url for " + e.getName());
                     return url;
                 }
             }
@@ -109,6 +114,7 @@ public class ImageFetcher extends ImageWorker {
         for (ImageSize q : ImageSize.values()) {
             String url = e.getImageURL(q);
             if (url != null) {
+                if (D) Log.i(TAG, "Found " + q.toString() + " url for " + e.getName());
                 return url;
             }
         }
@@ -125,6 +131,7 @@ public class ImageFetcher extends ImageWorker {
             case ARTIST:
                 if (!TextUtils.isEmpty(artistName)) {
                     if (PreferenceUtils.getInstance(mContext).downloadMissingArtistImages()) {
+                        if (D) Log.i(TAG, "Fetching artist info for " + artistName);
                         final Artist artist = Artist.getInfo(mContext, artistName);
                         if (artist != null) {
                             return getBestImage(artist);
@@ -135,6 +142,7 @@ public class ImageFetcher extends ImageWorker {
             case ALBUM:
                 if (!TextUtils.isEmpty(artistName) && !TextUtils.isEmpty(albumName)) {
                     if (PreferenceUtils.getInstance(mContext).downloadMissingArtwork()) {
+                        if (D) Log.i(TAG, "Fetching album info for " + albumName);
                         final Artist correction = Artist.getCorrection(mContext, artistName);
                         if (correction != null) {
                             final Album album = Album.getInfo(mContext, correction.getName(),
