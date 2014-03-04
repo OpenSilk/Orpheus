@@ -62,16 +62,16 @@ public class FileSystemCache extends Cache {
         this.cacheDir = cacheDir;
     }
 
-    public boolean contains(String cacheEntryName) {
+    public synchronized boolean contains(String cacheEntryName) {
         return new File(cacheDir, cacheEntryName + ".xml").exists();
     }
 
-    public void remove(String cacheEntryName) {
+    public synchronized void remove(String cacheEntryName) {
         new File(cacheDir, cacheEntryName + ".xml").delete();
         new File(cacheDir, cacheEntryName + ".meta").delete();
     }
 
-    public boolean isExpired(String cacheEntryName) {
+    public synchronized boolean isExpired(String cacheEntryName) {
         File f = new File(cacheDir, cacheEntryName + ".meta");
         if (!f.exists())
             return false;
@@ -89,7 +89,7 @@ public class FileSystemCache extends Cache {
         }
     }
 
-    public void clear() {
+    public synchronized  void clear() {
         for (File file : cacheDir.listFiles()) {
             if (file.isFile()) {
                 file.delete();
@@ -97,7 +97,7 @@ public class FileSystemCache extends Cache {
         }
     }
 
-    public InputStream load(String cacheEntryName) {
+    public synchronized InputStream load(String cacheEntryName) {
         try {
             return new FileInputStream(new File(cacheDir, cacheEntryName + ".xml"));
         } catch (FileNotFoundException e) {
@@ -105,7 +105,7 @@ public class FileSystemCache extends Cache {
         }
     }
 
-    public void store(String cacheEntryName, InputStream inputStream, long expirationDate) {
+    public synchronized void store(String cacheEntryName, InputStream inputStream, long expirationDate) {
         createCache();
         File f = new File(cacheDir, cacheEntryName + ".xml");
         try {
@@ -129,7 +129,7 @@ public class FileSystemCache extends Cache {
         }
     }
 
-    private void createCache() {
+    private synchronized void createCache() {
         if (!cacheDir.exists()) {
             cacheDir.mkdirs();
             if (!cacheDir.isDirectory()) {
