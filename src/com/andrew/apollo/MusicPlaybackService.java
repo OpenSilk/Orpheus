@@ -992,20 +992,18 @@ public class MusicPlaybackService extends Service {
 
     private void stopRemote(final boolean goToIdle) {
         try {
+            mCurrentMediaInfo = null;
+            mRemoteMediaNeedsReload = true;
             if (goToIdle) {
-                mCastManager.stopApplication();
+                mCastManager.stop();
             } else {
                 mCastManager.pause();
-                mRemoteMediaNeedsReload = true;
-                mCurrentMediaInfo = null;
             }
         } catch (CastException e) {
             e.printStackTrace();
         } catch (TransientNetworkDisconnectionException e) {
             e.printStackTrace();
         } catch (NoConnectionException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
         stopLocal(goToIdle);

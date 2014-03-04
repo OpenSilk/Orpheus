@@ -827,6 +827,27 @@ public class CastManager extends BaseCastManager
     }
 
     /**
+     * Stops remote playback
+     */
+    public void stop() throws CastException, TransientNetworkDisconnectionException, NoConnectionException {
+        LOGD(TAG, "attempting to stop media");
+        checkConnectivity();
+        if (mRemoteMediaPlayer == null) {
+            LOGE(TAG, "Trying to stop media without an active media session");
+            throw new NoConnectionException();
+        }
+        try {
+            mRemoteMediaPlayer.stop(mApiClient);
+        } catch (IOException e) {
+            LOGE(TAG, "Failed to stop media ", e);
+            throw new CastException(mContext, R.string.failed_to_stop, e);
+        } catch (IllegalStateException e) {
+            LOGE(TAG, "Failed to stop media ", e);
+            throw new CastException(mContext, R.string.failed_to_stop, e);
+        }
+    }
+
+    /**
      * Seeks to the given point without changing the state of the player, i.e. after seek is
      * completed, it resumes what it was doing before the start of seek.
      *

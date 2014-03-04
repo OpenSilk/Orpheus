@@ -8,6 +8,7 @@
     <string name="failed_to_play">Failed to start the playback of media</string>
     <string name="failed_to_pause">Failed to pause the playback of media</string>
     <string name="failed_unknown">An unknown error was encountered</string>
+    <string name="failed_to_stop">Failed to stop the playback of media</string>
 
     <!-- Failures -->
     <string name="failed_to_connect">Could not connect to the device</string>
