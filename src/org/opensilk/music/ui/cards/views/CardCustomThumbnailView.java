@@ -31,8 +31,6 @@ import it.gmariotti.cardslib.library.view.component.CardThumbnailView;
  */
 public class CardCustomThumbnailView extends CardThumbnailView {
 
-    protected ImageFetcher mImageFetcher;
-
     public CardCustomThumbnailView(Context context) {
         super(context);
     }
@@ -48,7 +46,6 @@ public class CardCustomThumbnailView extends CardThumbnailView {
     @Override
     protected void init(AttributeSet attrs, int defStyle) {
         super.init(attrs, defStyle);
-        mImageFetcher = ImageFetcher.getInstance(getContext().getApplicationContext());
     }
 
     /**
@@ -66,6 +63,13 @@ public class CardCustomThumbnailView extends CardThumbnailView {
     @Override
     protected void setupInnerView() {
         super.setupInnerView();
+    }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        try {
+            ImageFetcher.getInstance(getContext()).cancelWork(mImageView);
+        } catch (Exception ignored) {} //Just dont explode we don't really care if this fails
     }
 }

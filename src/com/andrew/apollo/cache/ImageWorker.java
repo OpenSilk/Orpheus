@@ -20,6 +20,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.andrew.apollo.R;
@@ -35,6 +36,8 @@ import java.lang.ref.WeakReference;
  * placeholder image.
  */
 public abstract class ImageWorker {
+
+    private static final String TAG = ImageWorker.class.getSimpleName();
 
     /**
      * Default transition drawable fade time
@@ -298,7 +301,8 @@ public abstract class ImageWorker {
     public static final void cancelWork(final ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
         if (bitmapWorkerTask != null) {
-            bitmapWorkerTask.cancel(true);
+            bitmapWorkerTask.cancel(false);
+            Log.w(TAG, "cancelWork() " + bitmapWorkerTask.mKey);
         }
     }
 
