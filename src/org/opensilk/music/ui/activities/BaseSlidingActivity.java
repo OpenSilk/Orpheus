@@ -400,6 +400,26 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getBoolean("panel_open", false)) {
+                mPanelSlideListener.onPanelExpanded(null);
+                if (savedInstanceState.getBoolean("queue_showing", false)) {
+                    onQueueVisibilityChanged(true);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("panel_open", mSlidingPanel.isExpanded());
+        outState.putBoolean("queue_showing", mQueueShowing);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -808,9 +828,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 .add(R.id.panel_middle_content, new QueueFragment(), "queue")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
-        mArtBackground.setVisibility(View.INVISIBLE);
-        mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawableInverse);
-        mQueueShowing = true;
+        onQueueVisibilityChanged(true);
     }
 
     private void popQueueFragment() {
@@ -818,9 +836,19 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 .remove(getSupportFragmentManager().findFragmentByTag("queue"))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
-        mArtBackground.setVisibility(View.VISIBLE);
-        mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawable);
-        mQueueShowing = false;
+        onQueueVisibilityChanged(false);
+    }
+
+    private void onQueueVisibilityChanged(boolean visible) {
+        if (visible) {
+            mQueueShowing = true;
+            mArtBackground.setVisibility(View.INVISIBLE);
+            mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawableInverse);
+        } else {
+            mQueueShowing = false;
+            mArtBackground.setVisibility(View.VISIBLE);
+            mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawable);
+        }
     }
 
     /**
