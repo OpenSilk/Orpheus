@@ -1002,7 +1002,7 @@ public class MusicPlaybackService extends Service {
         } catch (CastException e) {
             e.printStackTrace();
         } catch (TransientNetworkDisconnectionException e) {
-            e.printStackTrace();
+            Log.w(TAG, "stopRemote(1) TransientNetworkDisconnection");
         } catch (NoConnectionException e) {
             e.printStackTrace();
         }
@@ -1978,7 +1978,7 @@ public class MusicPlaybackService extends Service {
                 mCastManager.seekAndPlay((int)position);
                 seekedTo = position;
             } catch (TransientNetworkDisconnectionException e) {
-                e.printStackTrace();
+                Log.w(TAG, "seekAndPlay(1) TransientNetworkDisconnection");
             } catch (NoConnectionException e) {
                 e.printStackTrace();
             }
@@ -2019,7 +2019,7 @@ public class MusicPlaybackService extends Service {
             notifyChange(POSITION_CHANGED);
             return position;
         } catch (TransientNetworkDisconnectionException e) {
-            e.printStackTrace();
+            Log.w(TAG, "seekRemote(1) TransientNetworkDisconnection");
         } catch (NoConnectionException e) {
             e.printStackTrace();
         }
@@ -2068,7 +2068,8 @@ public class MusicPlaybackService extends Service {
             }
             return position;
         } catch (TransientNetworkDisconnectionException e) {
-            e.printStackTrace();
+            Log.w(TAG, "positionRemote(1) TransientNetworkDisconnection");
+            return positionLocal(); // Cheat here, we will probably reconnect
         } catch (NoConnectionException e) {
             e.printStackTrace();
         }
@@ -2100,7 +2101,7 @@ public class MusicPlaybackService extends Service {
         try {
             return (long) mCastManager.getMediaDuration();
         } catch (TransientNetworkDisconnectionException e) {
-            e.printStackTrace();
+            Log.w(TAG, "durationRemote(1) TransientNetworkDisconnection");
         } catch (NoConnectionException e) {
             e.printStackTrace();
         }
@@ -2244,7 +2245,7 @@ public class MusicPlaybackService extends Service {
                 Log.e(TAG, "What should i do?");
             }
         } catch (TransientNetworkDisconnectionException e) {
-            e.printStackTrace();
+            Log.w(TAG, "playRemote(1) TransientNetworkDisconnection");
         } catch (NoConnectionException e) {
             e.printStackTrace();
         }
@@ -2307,7 +2308,7 @@ public class MusicPlaybackService extends Service {
             } catch (CastException e) {
                 e.printStackTrace();
             } catch (TransientNetworkDisconnectionException e) {
-                e.printStackTrace();
+                Log.w(TAG, "pauseRemote(1) TransientNetworkDisconnection");
             } catch (NoConnectionException e) {
                 e.printStackTrace();
             } finally {
@@ -2608,10 +2609,10 @@ public class MusicPlaybackService extends Service {
                 mCastManager.checkConnectivity();
                 return true;
             } catch (TransientNetworkDisconnectionException e) {
-                Log.e(TAG, "isRemotePlayback TransientNetworkDisconnection");
+                Log.w(TAG, "isRemotePlayback(1) TransientNetworkDisconnection");
                 return true; // At this point we don't really know
             } catch (NoConnectionException e) {
-                Log.e(TAG, "isRemotePlayback " + e.getMessage());
+                Log.e(TAG, "isRemotePlayback(2) " + e.getMessage());
             }
         }
         updatePlaybackLocation(PlaybackLocation.LOCAL);
@@ -2707,7 +2708,7 @@ public class MusicPlaybackService extends Service {
             mCastManager.loadMedia(info, autoplay, startPos);
             return true;
         } catch (TransientNetworkDisconnectionException e) {
-            e.printStackTrace();
+            Log.w(TAG, "loadRemote(1) TransientNetworkDisconnection");
         } catch (NoConnectionException e) {
             e.printStackTrace();
         }
@@ -2958,7 +2959,7 @@ public class MusicPlaybackService extends Service {
                         restoreRemoteVolumeLevel();
                     }
                 } catch (TransientNetworkDisconnectionException e) {
-                    e.printStackTrace();
+                    Log.w(TAG, "onConnectivityRecovered(1) TransientNetworkDisconnection");
                 } catch (NoConnectionException e) {
                     e.printStackTrace();
                 }
