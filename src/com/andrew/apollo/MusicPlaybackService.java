@@ -2609,6 +2609,7 @@ public class MusicPlaybackService extends Service {
                 return true;
             } catch (TransientNetworkDisconnectionException e) {
                 Log.e(TAG, "isRemotePlayback TransientNetworkDisconnection");
+                return true; // At this point we don't really know
             } catch (NoConnectionException e) {
                 Log.e(TAG, "isRemotePlayback " + e.getMessage());
             }
