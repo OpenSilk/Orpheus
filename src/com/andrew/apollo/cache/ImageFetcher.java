@@ -111,7 +111,7 @@ public class ImageFetcher extends ImageWorker {
         if (e instanceof Album) {
             if (!TextUtils.isEmpty(e.getMbid())) {
                 String url = CoverArtFetcher.getFrontCoverUrl(e.getMbid());
-                if (url != null) {
+                if (!TextUtils.isEmpty(url)) {
                     if (D) Log.i(TAG, "Found coverartarchive url for " + e.getName());
                     return url;
                 }
@@ -119,7 +119,7 @@ public class ImageFetcher extends ImageWorker {
         }
         for (ImageSize q : ImageSize.values()) {
             String url = e.getImageURL(q);
-            if (url != null) {
+            if (!TextUtils.isEmpty(url)) {
                 if (D) Log.i(TAG, "Found " + q.toString() + " url for " + e.getName());
                 return url;
             }
