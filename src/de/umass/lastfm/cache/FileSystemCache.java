@@ -84,6 +84,8 @@ public class FileSystemCache extends Cache {
             return expirationDate < System.currentTimeMillis();
         } catch (IOException e) {
             return false;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
