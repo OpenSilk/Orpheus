@@ -2947,7 +2947,7 @@ public class MusicPlaybackService extends Service {
             }
             if (mCastManager.isConnected()) {
                 try {
-                    if (mCastManager.isRemoteMediaLoaded() && mCastManager.isRemoteMoviePlaying()) {
+                    if (mCastManager.isRemoteMediaLoaded() && mCastManager.isRemoteMediaPlaying()) {
                         Log.d(TAG, "onConnectivityRecovered: remote media currently playing");
                         position();// force update the local position
                         if (!mRemoteProgressHandler.hasMessages(0)) {

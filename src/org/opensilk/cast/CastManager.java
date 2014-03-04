@@ -228,7 +228,7 @@ public class CastManager extends BaseCastManager
      * @throws TransientNetworkDisconnectionException If framework is still trying to recover from a
      *             possibly transient loss of network
      */
-    public String getRemoteMovieUrl() throws TransientNetworkDisconnectionException,
+    public String getRemoteMediaUrl() throws TransientNetworkDisconnectionException,
             NoConnectionException {
         checkConnectivity();
         if (null != mRemoteMediaPlayer && null != mRemoteMediaPlayer.getMediaInfo()) {
@@ -247,7 +247,7 @@ public class CastManager extends BaseCastManager
      * @throws NoConnectionException
      * @throws TransientNetworkDisconnectionException
      */
-    public boolean isRemoteMoviePlaying() throws TransientNetworkDisconnectionException,
+    public boolean isRemoteMediaPlaying() throws TransientNetworkDisconnectionException,
             NoConnectionException {
         checkConnectivity();
         return mState == MediaStatus.PLAYER_STATE_BUFFERING
@@ -262,7 +262,7 @@ public class CastManager extends BaseCastManager
      * @throws NoConnectionException
      * @throws TransientNetworkDisconnectionException
      */
-    public boolean isRemoteMoviePaused() throws TransientNetworkDisconnectionException,
+    public boolean isRemoteMediaPaused() throws TransientNetworkDisconnectionException,
             NoConnectionException {
         checkConnectivity();
         return mState == MediaStatus.PLAYER_STATE_PAUSED;
@@ -279,7 +279,7 @@ public class CastManager extends BaseCastManager
     public boolean isRemoteMediaLoaded() throws TransientNetworkDisconnectionException,
             NoConnectionException {
         checkConnectivity();
-        return isRemoteMoviePaused() || isRemoteMoviePlaying();
+        return isRemoteMediaPaused() || isRemoteMediaPlaying();
     }
 
     /**
@@ -921,7 +921,7 @@ public class CastManager extends BaseCastManager
     public void togglePlayback() throws CastException, TransientNetworkDisconnectionException,
             NoConnectionException {
         checkConnectivity();
-        boolean isPlaying = isRemoteMoviePlaying();
+        boolean isPlaying = isRemoteMediaPlaying();
         if (isPlaying) {
             pause();
         } else {
