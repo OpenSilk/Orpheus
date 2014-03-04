@@ -77,7 +77,7 @@ public class ImageFetcher extends ImageWorker {
      */
     @Override
     protected Bitmap processBitmap(final String url, String key) {
-        if (url == null || key == null) {
+        if (TextUtils.isEmpty(url) || TextUtils.isEmpty(key)) {
             return null;
         }
         File downloadDir = ImageCache.getDiskCacheDir(mContext, ImageCache.DOWNLOAD_CACHE_DIR);
