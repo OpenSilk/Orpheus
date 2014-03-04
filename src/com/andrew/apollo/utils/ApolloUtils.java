@@ -43,6 +43,8 @@ import com.andrew.apollo.ui.activities.ShortcutActivity;
 import com.andrew.apollo.widgets.ColorPickerView;
 import com.andrew.apollo.widgets.ColorSchemeDialog;
 
+import java.util.concurrent.RejectedExecutionException;
+
 /**
  * Mostly general and UI helpers.
  * 
@@ -121,7 +123,11 @@ public final class ApolloUtils {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB || forceSerial) {
             task.execute(args);
         } else {
-            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args);
+            try {
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args);
+            } catch (RejectedExecutionException e) {
+                e.printStackTrace();
+            }
         }
     }
 
