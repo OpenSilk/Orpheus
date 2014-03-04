@@ -103,7 +103,7 @@ import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
 @SuppressLint("NewApi")
 public class MusicPlaybackService extends Service {
     private static final String TAG = "MusicPlaybackService";
-    private static final boolean D = true;
+    private static final boolean D = BuildConfig.DEBUG;
 
     public static final String APOLLO_PACKAGE_NAME = BuildConfig.PACKAGE_NAME;
 
@@ -2661,7 +2661,7 @@ public class MusicPlaybackService extends Service {
     @DebugLog
     private void loadRemoteCurrent() {
         if (mCurrentMediaInfo == null) {
-            Log.e(TAG, "Tried to load null media");
+            Log.w(TAG, "Tried to load null media");
             return;
         }
         int startPos = 0;
@@ -2698,7 +2698,7 @@ public class MusicPlaybackService extends Service {
                 Log.e(TAG, "Failed to load remote media");
             }
         } else {
-            Log.e(TAG, "mNextMediaInfo was null");
+            Log.w(TAG, "mNextMediaInfo was null");
         }
     }
 
@@ -3054,7 +3054,7 @@ public class MusicPlaybackService extends Service {
 
         @Override
         public void handleMessage(Message msg) {
-            Log.d(TAG, "Fetching remote progress");
+            if (D) Log.d(TAG, "Fetching remote progress");
             if (mService.get().isRemotePlayback()) {
                 mService.get().positionRemote();
                 mService.get().mRemoteProgressHandler.sendEmptyMessageDelayed(0, 3000); //Might increase this
