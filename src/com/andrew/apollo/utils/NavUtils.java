@@ -78,6 +78,7 @@ public final class NavUtils {
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack("artist")
                 .commit();
+        ((BaseSlidingActivity) context).maybeClosePanel();
     }
 
     /**
@@ -114,6 +115,7 @@ public final class NavUtils {
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack("album")
                 .commit();
+        ((BaseSlidingActivity) context).maybeClosePanel();
     }
 
     /**

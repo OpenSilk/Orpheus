@@ -829,6 +829,12 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     }
 
+    public void maybeClosePanel() {
+        if (mSlidingPanel.isExpanded()) {
+            mSlidingPanel.collapsePane();
+        }
+    }
+
     private void pushQueueFragment() {
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.panel_middle_content, new QueueFragment(), "queue")
