@@ -2658,6 +2658,10 @@ public class MusicPlaybackService extends Service {
      */
     @DebugLog
     private void loadRemoteCurrent() {
+        if (mCurrentMediaInfo == null) {
+            Log.e(TAG, "Tried to load null media");
+            return;
+        }
         int startPos = 0;
         // if we are currently playing start where we left off
         if (mPlayer.isInitialized()) {
