@@ -51,7 +51,9 @@ public class CardAlbumList extends CardBaseList<Album> {
         mTitle = mData.mAlbumName;
         mSubTitle = mData.mArtistName;
         mSubTitleAlt = mData.mYear;
-        mExtraText = MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber);
+        if (mData.mSongNumber > 0) {
+            mExtraText = MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber);
+        }
 
         setOnClickListener(new OnCardClickListener() {
             @Override

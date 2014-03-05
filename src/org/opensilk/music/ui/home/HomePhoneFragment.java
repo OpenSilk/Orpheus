@@ -19,6 +19,7 @@ package org.opensilk.music.ui.home;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,6 +36,7 @@ import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.music.adapters.PagerAdapter;
 import org.opensilk.music.adapters.PagerAdapter.MusicFragments;
+import org.opensilk.music.ui.fragments.SearchFragment;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
@@ -102,7 +104,8 @@ public class HomePhoneFragment extends Fragment {
         // Disable home as up
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
         getActivity().getActionBar().setHomeButtonEnabled(false);
-        // set our title
+        // Display title
+        getActivity().getActionBar().setDisplayShowTitleEnabled(true);
         getActivity().getActionBar().setTitle(R.string.app_name);
         // Enable the options menu
         setHasOptionsMenu(true);
@@ -126,6 +129,8 @@ public class HomePhoneFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         // Shuffle all
         inflater.inflate(R.menu.shuffle, menu);
+        // search option
+        inflater.inflate(R.menu.search, menu);
         // Sort orders
         if (isRecentPage()) {
             inflater.inflate(R.menu.view_as, menu);
@@ -249,6 +254,13 @@ public class HomePhoneFragment extends Fragment {
                     mPreferences.setAlbumLayout("grid");
                 }
                 NavUtils.goHome(getActivity());
+                return true;
+            case R.id.menu_search:
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main, new SearchFragment(), "search")
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .addToBackStack("search")
+                        .commit();
                 return true;
             default:
                 break;

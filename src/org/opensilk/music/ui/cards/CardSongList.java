@@ -62,6 +62,13 @@ public class CardSongList extends CardBaseList<Song> {
     }
 
     @Override
+    protected void initThumbnail() {
+        if (mData.mAlbumId > 0) {
+            super.initThumbnail();
+        }
+    }
+
+    @Override
     protected void loadThumbnail(ImageFetcher fetcher, ImageView view) {
         fetcher.loadAlbumImage(mData.mArtistName, mData.mAlbumName, mData.mAlbumId, view);
     }
