@@ -20,6 +20,7 @@ package org.opensilk.music.ui.home;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -129,8 +130,6 @@ public class HomePhoneFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         // Shuffle all
         inflater.inflate(R.menu.shuffle, menu);
-        // search option
-        inflater.inflate(R.menu.search, menu);
         // Sort orders
         if (isRecentPage()) {
             inflater.inflate(R.menu.view_as, menu);
@@ -143,6 +142,8 @@ public class HomePhoneFragment extends Fragment {
         } else if (isSongPage()) {
             inflater.inflate(R.menu.song_sort_by, menu);
         }
+        // search option
+        inflater.inflate(R.menu.search, menu);
     }
 
     @Override

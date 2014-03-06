@@ -44,6 +44,7 @@
         <item name="android:selectableItemBackground">@drawable/selectable_background_blupheus</item>
         <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
         <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.Blupheus</item>
     </style>
 
     <!--OpenSilk-->
@@ -51,6 +52,10 @@
     <style name="Theme.Blupheus.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="ActionButton.Overflow.Blupheus" parent="@style/Widget.AppCompat.Base.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_menu_moreoverflow_holo_dark</item>
     </style>
 
     <!--end OpenSilk-->
@@ -94,12 +99,12 @@
     </style>
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Blupheus.Widget" parent="@style/Theme.AppCompat.Light">
+    <style name="Theme.Blupheus.Widget" parent="@style/Theme.AppCompat">
         <item name="android:popupMenuStyle">@style/PopupMenu.Blupheus</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Blupheus</item>
         <!--OpenSilk-->
-        <!-- This is a hack to make the mediarouter icon white -->
-        <item name="isLightTheme">false</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:listDivider">@drawable/list_divider_holo_light</item>
     </style>
 
     <!-- Generated with http://android-holo-colors.com -->

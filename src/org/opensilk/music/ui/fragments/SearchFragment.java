@@ -28,6 +28,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -117,17 +118,15 @@ public class SearchFragment extends Fragment implements
         menu.removeItem(R.id.media_route_menu_item);
 
         // Search view
-        MenuItem searchItem = menu.add(R.string.menu_search);
-        searchItem.setIcon(R.drawable.ic_action_search);
-        searchItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        mSearchView = new SearchView(getActivity());
+        inflater.inflate(R.menu.searchview, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_searchview);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setIconified(false);
         // Add voice search
         final SearchManager searchManager = (SearchManager)getActivity().getSystemService(Context.SEARCH_SERVICE);
         final SearchableInfo searchableInfo = searchManager.getSearchableInfo(getActivity().getComponentName());
         mSearchView.setSearchableInfo(searchableInfo);
-        searchItem.setActionView(mSearchView);
     }
 
     @Override

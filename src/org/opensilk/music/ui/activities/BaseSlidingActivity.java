@@ -275,21 +275,18 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-
         // Media router
-        if (mCastDeviceAvailable) {
-            getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
-            // init router button
-            MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
-            MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
-                    MenuItemCompat.getActionProvider(mediaRouteMenuItem);
-            mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
-            mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
-        }
+        getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
+        // init router button
+        MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
+        MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
+                MenuItemCompat.getActionProvider(mediaRouteMenuItem);
+        mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
+        mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
 
         // Settings
         getMenuInflater().inflate(R.menu.activity_base, menu);
-        //TODO add back search
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -1007,7 +1004,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             // Show the router buttons
             if (!router.getDefaultRoute().equals(route)) {
                 mCastDeviceAvailable = true;
-                invalidateOptionsMenu();
                 maybeShowHeaderMediaRouteButton();
             }
         }
@@ -1018,7 +1014,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             // Hide the router buttons
             if (!router.getDefaultRoute().equals(route)) {
                 mCastDeviceAvailable = false;
-                invalidateOptionsMenu();
                 maybeShowHeaderMediaRouteButton();
             }
         }
@@ -1030,7 +1025,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             // *this gets called alot
             if (!router.getDefaultRoute().equals(route)) {
                 mCastDeviceAvailable = true;
-                invalidateOptionsMenu();
                 maybeShowHeaderMediaRouteButton();
             }
         }
