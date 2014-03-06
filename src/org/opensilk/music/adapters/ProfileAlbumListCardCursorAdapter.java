@@ -37,7 +37,11 @@ public class ProfileAlbumListCardCursorAdapter extends CardCursorAdapter {
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardAlbumList(getContext(), CursorHelpers.makeAlbumFromCursor(cursor),
-                R.layout.card_list_thumb_inner_layout_extra);
+        CardAlbumList card = new CardAlbumList(getContext(),
+                CursorHelpers.makeAlbumFromCursor(cursor),
+                R.layout.card_list_inner_layout_extra);
+        card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large),
+                getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large));
+        return card;
     }
 }

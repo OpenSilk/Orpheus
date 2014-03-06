@@ -39,10 +39,10 @@ import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
 /**
  * Created by drew on 2/11/14.
  */
-public class CardRecentList extends CardBaseList<Album> {
+public class CardRecentList extends CardBaseListNoHeader<Album> {
 
     public CardRecentList(Context context, Album data) {
-        this(context, data, R.layout.card_list_thumb_inner_layout);
+        super(context, data);
     }
 
     public CardRecentList(Context context, Album data, int innerLayout) {

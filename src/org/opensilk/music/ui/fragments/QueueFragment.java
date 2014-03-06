@@ -121,7 +121,7 @@ public class QueueFragment extends Fragment implements
         }
         mAdapter = new CardArrayAdapter(getActivity(), cards);
         //We have to set this manually since we arent using CardListView
-        mAdapter.setRowLayoutId(R.layout.dragsort_card_list_thumb);
+        mAdapter.setRowLayoutId(R.layout.dragsort_card_list);
         // Set the data behind the list
         mListView.setAdapter(mAdapter);
         scrollToCurrentSong();

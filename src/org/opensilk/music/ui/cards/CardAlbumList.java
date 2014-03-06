@@ -36,10 +36,10 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 2/11/14.
  */
-public class CardAlbumList extends CardBaseList<Album> {
+public class CardAlbumList extends CardBaseListNoHeader<Album> {
 
     public CardAlbumList(Context context, Album data) {
-        this(context, data, R.layout.card_list_thumb_inner_layout);
+        super(context, data);
     }
 
     public CardAlbumList(Context context, Album data, int innerLayout) {

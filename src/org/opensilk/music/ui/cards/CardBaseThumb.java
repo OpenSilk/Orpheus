@@ -70,6 +70,15 @@ public abstract class CardBaseThumb<D> extends Card {
         return mData;
     }
 
+
+    protected int mThumbnailWidth = 0;
+    protected int mThumbnailHeight = 0;
+
+    public void setThumbSize(int width, int height) {
+        mThumbnailWidth = width;
+        mThumbnailHeight = height;
+    }
+
     /**
      * call appropriate method in ImageFetcher to load image
      * @param fetcher
@@ -88,6 +97,12 @@ public abstract class CardBaseThumb<D> extends Card {
 
         @Override
         public void setupInnerViewElements(ViewGroup parent, View viewImage) {
+            if (mThumbnailWidth > 0) {
+                viewImage.getLayoutParams().width = mThumbnailWidth;
+            }
+            if (mThumbnailHeight > 0) {
+                viewImage.getLayoutParams().height = mThumbnailHeight;
+            }
             /*
              * If your cardthumbnail uses external library you have to provide how to load the image.
              * If your cardthumbnail doesn't use an external library it will use a built-in method

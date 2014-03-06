@@ -52,6 +52,7 @@ import org.opensilk.music.ui.cards.CardSongList;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Created by drew on 3/4/14.
@@ -86,15 +87,12 @@ public class SearchFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         // Initialize the adapter
         mAdapter = new SearchAdapter(getActivity());
-        mAdapter.setRowLayoutId(R.layout.profile_card_list);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.profile_dragsort_listview, container, false);
-        mListView = (ListView) v.findViewById(android.R.id.list);
-        // not sortable
-        ((DragSortListView) mListView).setDragEnabled(false);
+        View v = inflater.inflate(R.layout.card_listview_topmargin, container, false);
+        mListView = (CardListView) v.findViewById(android.R.id.list);
         // set the adapter
         mListView.setAdapter(mAdapter);
         return v;
@@ -242,7 +240,10 @@ public class SearchFragment extends Fragment implements
                 // Build artist
                 final Artist artist = new Artist(id, name, songCount, albumCount);
                 // return artist list card
-                return new CardArtistList(getActivity(), artist);
+                CardArtistList card = new CardArtistList(getActivity(), artist);
+                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large),
+                        getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large));
+                return card;
             } else if (mimetype.equals("album")) {
                 // Get the Id of the album
                 final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
@@ -253,7 +254,10 @@ public class SearchFragment extends Fragment implements
                 // Build the album as best we can
                 final Album album = new Album(id, name, artist, 0, null);
                 // return album list card
-                return new CardAlbumList(getActivity(), album);
+                CardAlbumList card = new CardAlbumList(getActivity(), album);
+                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large),
+                        getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large));
+                return card;
             } else { /* audio */
                 // get id
                 final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));

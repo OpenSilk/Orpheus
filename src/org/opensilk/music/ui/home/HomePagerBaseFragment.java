@@ -81,7 +81,7 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
                              final Bundle savedInstanceState) {
         // The View for the fragment's UI
         if (isSimpleLayout()) {
-            mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_thumb, null);
+            mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_fastscroll, null);
             mListView = (ListView) mRootView.findViewById(android.R.id.list);
             mListView.setEmptyView(mRootView.findViewById(android.R.id.empty));
         } else {

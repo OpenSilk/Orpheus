@@ -18,35 +18,41 @@
   -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    android:layout_marginLeft="4dp">
+    android:layout_height="match_parent"
+    android:layout_marginLeft="4dp"
+    android:orientation="vertical">
 
+    <LinearLayout
+        android:id="@+id/inner_linear_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:orientation="vertical">
 
-    <!-- This is the base Inner View inside a Card.
-         You can customize it with your layout xml file and your Card.
-         You can popolate your element with Card#setupInnerViewElements() method -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/card_main_inner_simple_title"
+            android:textAppearance="?android:textAppearanceListItem" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/card_main_inner_sub_title_alt"
+            android:textAppearance="?android:textAppearanceListItemSmall"
+            style="@style/SingleLineTextView" />
+
+    </LinearLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/card_main_inner_simple_title"
-        android:textAppearance="?android:textAppearanceListItem"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/card_main_inner_sub_title"
-        android:layout_below="@id/card_main_inner_simple_title"
+        android:id="@+id/card_main_inner_extra_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="4dp"
         android:textAppearance="?android:textAppearanceListItemSmall"
-        style="@style/SingleLineTextView"/>
-
-    <!--<TextView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:id="@+id/card_main_inner_extra_text"-->
-        <!--android:layout_toRightOf="@id/card_main_inner_sub_title"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_alignBottom="@id/card_main_inner_sub_title"-->
-        <!--style="@style/Orpheus.Text.Card.Extra"/>-->
+        style="@style/SingleLineTextView" />
 
 </RelativeLayout>

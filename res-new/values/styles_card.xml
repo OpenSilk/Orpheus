@@ -23,4 +23,9 @@
         <item name="android:background">@drawable/card_background_orpheus</item>
     </style>
 
+    <!--Style for Content View-->
+    <style name="Orpheus.card.content_outer_layout" parent="card.content_outer_layout">
+        <item name="android:minHeight">?android:listPreferredItemHeight</item>
+    </style>
+
 </resources>

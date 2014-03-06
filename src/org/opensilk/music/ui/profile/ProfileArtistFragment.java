@@ -71,7 +71,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
                 .actionBarBackground(mActionBarBackground)
                 .headerLayout(R.layout.profile_header_image)
                 .headerOverlayLayout(R.layout.profile_header_overlay_artist)
-                .contentLayout(R.layout.profile_card_listview);
+                .contentLayout(R.layout.card_listview);
         View v = mFadingHelper.createView(inflater);
         mListView = (CardListView) v.findViewById(android.R.id.list);
         // set the adapter

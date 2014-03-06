@@ -19,4 +19,7 @@
     <dimen name="card_grid_columnwidth">175dp</dimen>
     <dimen name="card_grid_cardwidth">175dp</dimen>
     <dimen name="card_grid_thumbheight">100dp</dimen>
+
+    <dimen name="card_list_thumbnail">70dp</dimen>
+    <dimen name="card_list_thumbnail_large">150dp</dimen>
 </resources>

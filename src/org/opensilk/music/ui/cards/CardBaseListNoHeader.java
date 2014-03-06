@@ -26,17 +26,17 @@ import com.andrew.apollo.R;
 /**
  * Created by drew on 2/12/14.
  */
-public abstract class CardBaseList<D> extends CardBaseThumb<D> {
+public abstract class CardBaseListNoHeader<D> extends CardBaseThumb<D> {
 
     protected String mSubTitle;
     protected String mSubTitleAlt;
     protected String mExtraText;
 
-    public CardBaseList(Context context, D data) {
-        super(context, data);
+    public CardBaseListNoHeader(Context context, D data) {
+        this(context, data, R.layout.card_list_inner_layout);
     }
 
-    public CardBaseList(Context context, D data, int innerLayout) {
+    public CardBaseListNoHeader(Context context, D data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
@@ -71,9 +71,7 @@ public abstract class CardBaseList<D> extends CardBaseThumb<D> {
     }
 
     @Override
-    protected void initHeader() {
-
-    }
+    protected void initHeader() { }
 
     /**
      * @return Resource id of popup menu

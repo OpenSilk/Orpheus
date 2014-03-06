@@ -23,7 +23,7 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.ui.cards.CardBaseList;
+import org.opensilk.music.ui.cards.CardBaseListNoHeader;
 
 import it.gmariotti.cardslib.library.view.CardView;
 
@@ -63,8 +63,8 @@ public class CardViewNoHeader extends CardView {
             @Override
             public void onClick(View v) {
                 PopupMenu menu = new PopupMenu(v.getContext(), v);
-                menu.inflate(((CardBaseList) getCard()).getOverflowMenuId());
-                menu.setOnMenuItemClickListener(((CardBaseList) getCard()).getOverflowPopupMenuListener());
+                menu.inflate(((CardBaseListNoHeader) getCard()).getOverflowMenuId());
+                menu.setOnMenuItemClickListener(((CardBaseListNoHeader) getCard()).getOverflowPopupMenuListener());
                 menu.show();
             }
         });

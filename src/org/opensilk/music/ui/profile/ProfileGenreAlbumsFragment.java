@@ -53,20 +53,12 @@ public class ProfileGenreAlbumsFragment extends ProfileBaseFragment<Genre> {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mGenre = mBundleData;
-        //We have to set this manually since we arent using CardListView
-        // XXX: Remove for pager
-        ((ProfileAlbumListCardCursorAdapter) mAdapter).setRowLayoutId(R.layout.profile_card_list);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // For pager
-//        View v = inflater.inflate(R.layout.profile_card_listview, null);
-//        mListView = (CardListView) v.findViewById(android.R.id.list);
-        View v = inflater.inflate(R.layout.profile_dragsort_listview, container, false);
-        mListView = (ListView) v.findViewById(android.R.id.list);
-        // not sortable
-        ((DragSortListView) mListView).setDragEnabled(false);
+        View v = inflater.inflate(R.layout.card_listview_topmargin, container, false);
+        mListView = (CardListView) v.findViewById(android.R.id.list);
         // set the adapter
         mListView.setAdapter(mAdapter);
         return v;

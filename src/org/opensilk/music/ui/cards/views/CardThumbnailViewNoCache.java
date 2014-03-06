@@ -21,31 +21,26 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.ImageView;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
 
-import it.gmariotti.cardslib.library.R;
 import it.gmariotti.cardslib.library.view.component.CardThumbnailView;
 
 /**
  * Created by drew on 2/16/14.
  */
-public class CardCustomThumbnailView extends CardThumbnailView {
+public class CardThumbnailViewNoCache extends CardThumbnailView {
 
-    public CardCustomThumbnailView(Context context) {
+    public CardThumbnailViewNoCache(Context context) {
         super(context);
     }
 
-    public CardCustomThumbnailView(Context context, AttributeSet attrs) {
+    public CardThumbnailViewNoCache(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public CardCustomThumbnailView(Context context, AttributeSet attrs, int defStyle) {
+    public CardThumbnailViewNoCache(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
-
-    @Override
-    protected void init(AttributeSet attrs, int defStyle) {
-        super.init(attrs, defStyle);
     }
 
     /**
@@ -61,15 +56,11 @@ public class CardCustomThumbnailView extends CardThumbnailView {
     }
 
     @Override
-    protected void setupInnerView() {
-        super.setupInnerView();
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        // Cancel any pending work
         try {
-            ImageFetcher.getInstance(getContext()).cancelWork(mImageView);
+            ImageFetcher.cancelWork(mImageView);
         } catch (Exception ignored) {} //Just dont explode we don't really care if this fails
     }
 }

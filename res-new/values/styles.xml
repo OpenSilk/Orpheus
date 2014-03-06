@@ -50,6 +50,10 @@
 
     <!-- default style for all card lists -->
     <style name="ListView.Orpheus.Card" parent="@android:style/Widget.Holo.Light.ListView">
+
+    </style>
+
+    <style name="ListView.Orpheus.Card.FastScroll">
         <!--fastscroll-->
         <item name="android:scrollbarStyle">outsideInset</item>
         <item name="android:fastScrollEnabled">true</item>
@@ -78,16 +82,6 @@
 
     </style>
 
-    <!-- setup for the queue's dragsort list -->
-    <style name="DragSort.Orpheus.Queue">
-
-    </style>
-
-    <!-- profile dragsort list used in playlist profile -->
-    <style name="DragSort.Orpheus.Profile">
-
-    </style>
-
     <style name="PagerTabStrip">
         <!--<item name="android:textSize">@dimen/text_size_micro</item>-->
         <!--<item name="android:textColor">@color/app_color_orpheus</item>-->
@@ -99,27 +93,6 @@
         <item name="android:scaleType">centerCrop</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:gravity">center</item>
-    </style>
-
-    <style name="Orpheus.Thumbnail.GridCard">
-        <item name="android:layout_width">@dimen/card_grid_cardwidth</item>
-        <item name="android:layout_height">@dimen/card_grid_thumbheight</item>
-    </style>
-
-    <style name="Orpheus.Thumbnail.PanelHeader">
-        <item name="android:layout_width">@dimen/panel_header_thumbnail_size</item>
-        <item name="android:layout_height">@dimen/panel_header_thumbnail_size</item>
-        <item name="android:layout_margin">@dimen/panel_header_thumbnail_margin</item>
-    </style>
-
-    <style name="Orpheus.Thumbnail.ListCard">
-        <item name="android:layout_width">@dimen/card_list_thumbnail_size</item>
-        <item name="android:layout_height">@dimen/card_list_thumbnail_size</item>
-    </style>
-
-    <style name="Orpheus.Thumbnail.ProfileListCard">
-        <item name="android:layout_width">@dimen/card_grid_cardwidth</item>
-        <item name="android:layout_height">@dimen/card_grid_cardwidth</item>
     </style>
 
     <!-- List item text appearance -->

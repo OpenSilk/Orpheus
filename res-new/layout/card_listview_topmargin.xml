@@ -22,14 +22,16 @@
     android:orientation="vertical"
     android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    style="@style/Orpheus.ActionBarOverlay">
+    <!--^^^using ActionBarOverlay so need margin equal to height of actionBar-->
 
     <it.gmariotti.cardslib.library.view.CardListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         style="@style/ListView.Orpheus.Card"
-        card:list_card_layout_resourceID="@layout/card_list_thumb" />
+        card:list_card_layout_resourceID="@layout/card_list_noheader" />
 
     <ProgressBar
         android:id="@android:id/empty"

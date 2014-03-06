@@ -24,9 +24,10 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 2/13/14.
  */
-public class CardQueueList extends CardBaseList<Song> {
+public class CardQueueList extends CardBaseListNoHeader<Song> {
+
     public CardQueueList(Context context, Song data) {
-        this(context, data, R.layout.card_list_thumb_inner_layout);
+        super(context, data);
     }
 
     public CardQueueList(Context context, Song data, int innerLayout) {

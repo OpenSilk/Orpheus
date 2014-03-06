@@ -62,7 +62,10 @@
             <!-- album art thumb -->
             <ImageView
                 android:id="@+id/header_album_art"
-                style="@style/Orpheus.Thumbnail.PanelHeader"
+                android:layout_width="@dimen/panel_header_thumbnail_size"
+                android:layout_height="@dimen/panel_header_thumbnail_size"
+                android:layout_margin="@dimen/panel_header_thumbnail_margin"
+                style="@style/Orpheus.Thumbnail"
                 android:contentDescription="@null"/>
 
             <!-- Track title / artist

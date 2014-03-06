@@ -54,7 +54,7 @@ public class ProfileGenreSongsFragment extends ProfileBaseFragment<Genre> {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.card_listview_thumb, null);
+        View v = inflater.inflate(R.layout.card_listview_fastscroll, null);
         mListView = (CardListView) v.findViewById(android.R.id.list);
         // set the adapter
         mListView.setAdapter(mAdapter);

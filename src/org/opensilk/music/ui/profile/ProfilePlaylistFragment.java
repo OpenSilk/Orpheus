@@ -57,12 +57,12 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
         super.onCreate(savedInstanceState);
         mPlaylist = mBundleData;
         //We have to set this manually since we arent using CardListView
-        ((SongListCardCursorAdapter) mAdapter).setRowLayoutId(R.layout.dragsort_card_list_thumb);
+        ((SongListCardCursorAdapter) mAdapter).setRowLayoutId(R.layout.dragsort_card_list);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.profile_dragsort_listview, container, false);
+        View v = inflater.inflate(R.layout.dragsort_listview_topmargin, container, false);
         mListView = (ListView) v.findViewById(android.R.id.list);
         if (isLastAdded()) {
             // last added arent sortable
