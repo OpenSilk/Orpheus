@@ -19,7 +19,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
 
-import com.andrew.apollo.ui.activities.HomeActivity;
+import org.opensilk.music.ui.activities.HomeSlidingActivity;
 
 /**
  * Used to control headset playback. Single press: pause/resume. Double press:
@@ -51,7 +51,7 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
                     if (!mLaunched) {
                         final Context context = (Context)msg.obj;
                         final Intent i = new Intent();
-                        i.setClass(context, HomeActivity.class);
+                        i.setClass(context, HomeSlidingActivity.class);
                         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         context.startActivity(i);
                         mLaunched = true;

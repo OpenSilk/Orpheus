@@ -39,7 +39,6 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageCache;
 import com.andrew.apollo.cache.ImageFetcher;
-import com.andrew.apollo.ui.activities.ShortcutActivity;
 import com.andrew.apollo.widgets.ColorPickerView;
 import com.andrew.apollo.widgets.ColorSchemeDialog;
 
@@ -299,6 +298,7 @@ public final class ApolloUtils {
      */
     public static void createShortcutIntent(final String displayName, final String artistName,
             final Long id, final String mimeType, final Activity context) {
+        if (true) return; //XXX short circuit FIXME
         try {
             final ImageFetcher fetcher = getImageFetcher(context);
             Bitmap bitmap = null;
@@ -314,7 +314,7 @@ public final class ApolloUtils {
             }
 
             // Intent used when the icon is touched
-            final Intent shortcutIntent = new Intent(context, ShortcutActivity.class);
+            final Intent shortcutIntent = new Intent();//context, ShortcutActivity.class);
             shortcutIntent.setAction(Intent.ACTION_VIEW);
             shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

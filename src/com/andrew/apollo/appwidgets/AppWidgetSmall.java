@@ -24,9 +24,9 @@ import android.widget.RemoteViews;
 
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
-import com.andrew.apollo.ui.activities.AudioPlayerActivity;
-import com.andrew.apollo.ui.activities.HomeActivity;
 import com.andrew.apollo.utils.ApolloUtils;
+
+import org.opensilk.music.ui.activities.HomeSlidingActivity;
 
 /**
  * 4x1 App-Widget
@@ -168,17 +168,13 @@ public class AppWidgetSmall extends AppWidgetBase {
 
         // Now playing
         if (playerActive) {
-            action = new Intent(context, AudioPlayerActivity.class);
-            pendingIntent = PendingIntent.getActivity(context, 0, action, 0);
-            views.setOnClickPendingIntent(R.id.app_widget_small_info_container, pendingIntent);
-            views.setOnClickPendingIntent(R.id.app_widget_small_image, pendingIntent);
-        } else {
-            // Home
-            action = new Intent(context, HomeActivity.class);
-            pendingIntent = PendingIntent.getActivity(context, 0, action, 0);
-            views.setOnClickPendingIntent(R.id.app_widget_small_info_container, pendingIntent);
-            views.setOnClickPendingIntent(R.id.app_widget_small_image, pendingIntent);
+            //TODO new intent action or flag that opens the panel
         }
+        // Home
+        action = new Intent(context, HomeSlidingActivity.class);
+        pendingIntent = PendingIntent.getActivity(context, 0, action, 0);
+        views.setOnClickPendingIntent(R.id.app_widget_small_info_container, pendingIntent);
+        views.setOnClickPendingIntent(R.id.app_widget_small_image, pendingIntent);
 
         // Previous track
         pendingIntent = buildPendingIntent(context, MusicPlaybackService.PREVIOUS_ACTION, serviceName);

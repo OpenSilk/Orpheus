@@ -28,11 +28,9 @@ import android.widget.RemoteViews;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
-import com.andrew.apollo.ui.activities.AudioPlayerActivity;
-import com.andrew.apollo.ui.activities.HomeActivity;
-import com.andrew.apollo.ui.activities.ProfileActivity;
-import com.andrew.apollo.ui.activities.ShortcutActivity;
 import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.ui.activities.HomeSlidingActivity;
 
 /**
  * App-Widget used to display a list of recently listened albums.
@@ -126,17 +124,17 @@ public class RecentWidgetProvider extends AppWidgetBase {
     public void onReceive(final Context context, final Intent intent) {
         final String action = intent.getAction();
 
-        if (CLICK_ACTION.equals(action)) {
+        if (/*CLICK_ACTION*/"notanaction".equals(action)) { //XXX short circuit FIXME
             final long albumId = intent.getLongExtra(Config.ID, -1);
 
             if (intent.getStringExtra(SET_ACTION).equals(PLAY_ALBUM)) {
                 // Play the selected album
                 if (albumId != -1) {
-                    final Intent shortcutIntent = new Intent(context, ShortcutActivity.class);
+                    final Intent shortcutIntent = new Intent();//context, ShortcutActivity.class);
                     shortcutIntent.setAction(Intent.ACTION_VIEW);
                     shortcutIntent.putExtra(Config.ID, albumId);
                     shortcutIntent.putExtra(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
-                    shortcutIntent.putExtra(ShortcutActivity.OPEN_AUDIO_PLAYER, false);
+//                    shortcutIntent.putExtra(ShortcutActivity.OPEN_AUDIO_PLAYER, false);
                     shortcutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     shortcutIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     context.startActivity(shortcutIntent);
@@ -153,7 +151,7 @@ public class RecentWidgetProvider extends AppWidgetBase {
                 bundle.putLong(Config.ID, albumId);
 
                 // Open the album profile
-                final Intent profileIntent = new Intent(context, ProfileActivity.class);
+                final Intent profileIntent = new Intent();//context, ProfileActivity.class);
                 profileIntent.putExtras(bundle);
                 profileIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 profileIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -257,15 +255,12 @@ public class RecentWidgetProvider extends AppWidgetBase {
 
         // Now playing
         if (playerActive) {
-            action = new Intent(context, AudioPlayerActivity.class);
-            pendingIntent = PendingIntent.getActivity(context, 0, action, 0);
-            views.setOnClickPendingIntent(R.id.app_widget_recents_action_bar, pendingIntent);
-        } else {
-            // Home
-            action = new Intent(context, HomeActivity.class);
-            pendingIntent = PendingIntent.getActivity(context, 0, action, 0);
-            views.setOnClickPendingIntent(R.id.app_widget_recents_action_bar, pendingIntent);
+            //TODO intent action or flag that opens the panel
         }
+        // Home
+        action = new Intent(context, HomeSlidingActivity.class);
+        pendingIntent = PendingIntent.getActivity(context, 0, action, 0);
+        views.setOnClickPendingIntent(R.id.app_widget_recents_action_bar, pendingIntent);
 
         // Previous track
         pendingIntent = buildPendingIntent(context, MusicPlaybackService.PREVIOUS_ACTION, serviceName);

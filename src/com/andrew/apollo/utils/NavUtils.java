@@ -27,8 +27,6 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
-import com.andrew.apollo.ui.activities.AudioPlayerActivity;
-import com.andrew.apollo.ui.activities.SearchActivity;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
@@ -140,9 +138,9 @@ public final class NavUtils {
      * 
      * @param activity The {@link Activity} to use.
      */
+    @Deprecated
     public static void openSettings(final Activity activity) {
-        final Intent intent = new Intent(activity, SettingsActivity.class);
-        activity.startActivity(intent);
+
     }
 
     /**
@@ -150,13 +148,9 @@ public final class NavUtils {
      * 
      * @param activity The {@link Activity} to use.
      */
+    @Deprecated
     public static void openAudioPlayer(final Activity activity) {
-        final Intent intent = new Intent(activity, AudioPlayerActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        activity.startActivity(intent);
-        activity.finish();
+
     }
 
     /**
@@ -165,12 +159,9 @@ public final class NavUtils {
      * @param activity The {@link Activity} to use.
      * @param query The search query.
      */
+    @Deprecated
     public static void openSearch(final Activity activity, final String query) {
-        final Bundle bundle = new Bundle();
-        final Intent intent = new Intent(activity, SearchActivity.class);
-        intent.putExtra(SearchManager.QUERY, query);
-        intent.putExtras(bundle);
-        activity.startActivity(intent);
+
     }
 
     /**

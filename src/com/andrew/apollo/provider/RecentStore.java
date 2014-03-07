@@ -20,8 +20,6 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
-import com.andrew.apollo.ui.activities.ProfileActivity;
-
 import hugo.weaving.DebugLog;
 
 /**

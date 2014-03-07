@@ -17,13 +17,6 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.ui.fragments.AlbumFragment;
-import com.andrew.apollo.ui.fragments.ArtistFragment;
-import com.andrew.apollo.ui.fragments.SongFragment;
-import com.andrew.apollo.ui.fragments.phone.MusicBrowserPhoneFragment;
-import com.andrew.apollo.ui.fragments.profile.AlbumSongFragment;
-import com.andrew.apollo.ui.fragments.profile.ArtistAlbumFragment;
-import com.andrew.apollo.ui.fragments.profile.ArtistSongFragment;
 
 /**
  * A collection of helpers designed to get and set various preferences across
