@@ -277,32 +277,8 @@ public class ThemeUtils {
     }
 
     /**
-     * Sets the {@link MenuItem} icon for the shop action.
-     * 
-     * @param context The {@link Context} to use.
-     * @param search The Menu used to find the "menu_shop" action.
-     */
-    public void setShopIcon(final Menu search) {
-        final MenuItem shopAction = search.findItem(R.id.menu_shop);
-        final String shopIconId = "ic_action_shop";
-        setMenuItemColor(shopAction, "shop_action", shopIconId);
-    }
-
-    /**
-     * Sets the {@link MenuItem} icon for the add to Home screen action.
-     * 
-     * @param context The {@link Context} to use.
-     * @param search The Menu used to find the "add_to_homescreen" item.
-     */
-    public void setAddToHomeScreenIcon(final Menu search) {
-        final MenuItem pinnAction = search.findItem(R.id.menu_add_to_homescreen);
-        final String pinnIconId = "ic_action_pinn_to_home";
-        setMenuItemColor(pinnAction, "pinn_to_action", pinnIconId);
-    }
-
-    /**
      * Used to search the Play Store for "Apollo Themes".
-     * 
+     *
      * @param context The {@link Context} to use.
      */
     public void shopFor(final Context context) {
@@ -315,7 +291,7 @@ public class ThemeUtils {
 
     /**
      * Used to search the Play Store for a specific app.
-     * 
+     *
      * @param context The {@link Context} to use.
      * @param themeName The theme name to search for.
      */
