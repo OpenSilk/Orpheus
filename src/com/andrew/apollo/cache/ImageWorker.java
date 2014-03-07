@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.ThemeUtils;
@@ -38,6 +39,7 @@ import java.lang.ref.WeakReference;
 public abstract class ImageWorker {
 
     private static final String TAG = ImageWorker.class.getSimpleName();
+    private static final boolean D = BuildConfig.DEBUG;
 
     /**
      * Default transition drawable fade time
@@ -138,9 +140,9 @@ public abstract class ImageWorker {
      * @param data The key used to store the image
      * @param bitmap The {@link Bitmap} to cache
      */
-    public void addBitmapToCache(final String key, final Bitmap bitmap) {
+    public void addBitmapToCache(final String key, final Bitmap bitmap, final boolean isThumbnail) {
         if (mImageCache != null) {
-            mImageCache.addBitmapToCache(key, bitmap);
+            mImageCache.addBitmapToCache(key, bitmap, isThumbnail);
         }
     }
 
@@ -215,10 +217,12 @@ public abstract class ImageWorker {
             // The result
             Bitmap bitmap = null;
 
+            boolean useThumbnails = Boolean.parseBoolean(params[4]);
+
             // First, check the disk cache for the image
             if (mKey != null && mImageCache != null && !isCancelled()
                     && getAttachedImageView() != null) {
-                bitmap = mImageCache.getCachedBitmap(mKey);
+                bitmap = mImageCache.getCachedBitmap(mKey, useThumbnails);
             }
 
             // Define the album id now
@@ -228,7 +232,7 @@ public abstract class ImageWorker {
             if (bitmap == null && mImageType.equals(ImageType.ALBUM) && mAlbumId >= 0
                     && mKey != null && !isCancelled() && getAttachedImageView() != null
                     && mImageCache != null) {
-                bitmap = mImageCache.getCachedArtwork(mContext, mKey, mAlbumId);
+                bitmap = mImageCache.getCachedArtwork(mContext, mKey, mAlbumId, useThumbnails);
             }
 
             // Third, by now we need to download the image
@@ -239,13 +243,13 @@ public abstract class ImageWorker {
                 mAlbumName = params[2];
                 mUrl = processImageUrl(mArtistName, mAlbumName, mImageType);
                 if (mUrl != null) {
-                    bitmap = processBitmap(mUrl, mKey);
+                    bitmap = processBitmap(mUrl, mKey, useThumbnails);
                 }
             }
 
             // Fourth, add the new image to the cache
             if (bitmap != null && mKey != null && mImageCache != null) {
-                addBitmapToCache(mKey, bitmap);
+                addBitmapToCache(mKey, bitmap, useThumbnails);
             }
 
             // Add the second layer to the transiation drawable
@@ -302,7 +306,7 @@ public abstract class ImageWorker {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
         if (bitmapWorkerTask != null) {
             bitmapWorkerTask.cancel(false);
-            Log.w(TAG, "cancelWork() " + bitmapWorkerTask.mKey);
+            if (D) Log.w(TAG, "cancelWork() " + bitmapWorkerTask.mKey);
         }
     }
 
@@ -372,6 +376,11 @@ public abstract class ImageWorker {
         }
     }
 
+    protected void loadImage(final String key, final String artistName, final String albumName,
+                             final long albumId, final ImageView imageView, final ImageType imageType) {
+        loadImage(key, artistName, albumName, albumId, imageView, imageType, true);
+    }
+
     /**
      * Called to fetch the artist or ablum art.
      *
@@ -384,12 +393,12 @@ public abstract class ImageWorker {
      * @param imageType The type of image URL to fetch for.
      */
     protected void loadImage(final String key, final String artistName, final String albumName,
-            final long albumId, final ImageView imageView, final ImageType imageType) {
+            final long albumId, final ImageView imageView, final ImageType imageType, boolean useThumbnails) {
         if (key == null || mImageCache == null || imageView == null) {
             return;
         }
         // First, check the memory for the image
-        final Bitmap lruBitmap = mImageCache.getBitmapFromMemCache(key);
+        final Bitmap lruBitmap = mImageCache.getBitmapFromMemCache(key, useThumbnails);
         if (lruBitmap != null && imageView != null) {
             // Bitmap found in memory cache
             imageView.setImageBitmap(lruBitmap);
@@ -401,7 +410,7 @@ public abstract class ImageWorker {
                     bitmapWorkerTask);
             imageView.setImageDrawable(asyncDrawable);
             ApolloUtils.execute(false, bitmapWorkerTask, key,
-                    artistName, albumName, String.valueOf(albumId));
+                    artistName, albumName, String.valueOf(albumId), String.valueOf(useThumbnails));
         }
     }
 
@@ -414,7 +423,7 @@ public abstract class ImageWorker {
      *            {@link ImageWorker#loadImage(mKey, ImageView)}
      * @return The processed {@link Bitmap}.
      */
-    protected abstract Bitmap processBitmap(String url, String key);
+    protected abstract Bitmap processBitmap(String url, String key, boolean isThumbnail);
 
     /**
      * Subclasses should override this to define any processing or work that

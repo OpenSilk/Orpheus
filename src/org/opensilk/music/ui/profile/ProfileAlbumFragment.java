@@ -88,7 +88,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-        ApolloUtils.getImageFetcher(getActivity()).loadArtistImage(mAlbum.mArtistName, mHeaderImage);
+        ApolloUtils.getImageFetcher(getActivity()).loadLargeArtistImage(mAlbum.mArtistName, mHeaderImage);
         ApolloUtils.getImageFetcher(getActivity()).loadAlbumImage(
                 mAlbum.mArtistName, mAlbum.mAlbumName, mAlbum.mAlbumId, mHeaderThumb);
         // Load header text

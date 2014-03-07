@@ -44,10 +44,6 @@ public class ImageFetcher extends ImageWorker {
     private static final String TAG = ImageFetcher.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
-    public static final int IO_BUFFER_SIZE_BYTES = 1024;
-
-    private static final String DEFAULT_HTTP_CACHE_DIR = "http"; //$NON-NLS-1$
-
     private static ImageFetcher sInstance = null;
 
     /**
@@ -72,11 +68,13 @@ public class ImageFetcher extends ImageWorker {
         return sInstance;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+    @Deprecated
     protected Bitmap processBitmap(final String url, String key) {
+        return processBitmap(url, key, true);
+    }
+
+    @Override
+    protected Bitmap processBitmap(final String url, String key, final boolean isThumbnail) {
         if (TextUtils.isEmpty(url) || TextUtils.isEmpty(key)) {
             return null;
         }
@@ -89,8 +87,14 @@ public class ImageFetcher extends ImageWorker {
             temp = File.createTempFile("temp", null, downloadDir);
             if (CoverArtFetcher.downloadFile(url, temp) && temp.exists() && temp.length() > 0) {
                 // Return a sampled down version
-                final Bitmap bitmap = ImageCache.decodeSampledBitmapFromFile(temp.toString(),
-                        mImageCache.mDefaultMaxImageWidth, mImageCache.mDefaultMaxImageHeight);
+                final Bitmap bitmap;
+                if (isThumbnail) {
+                    bitmap = ImageCache.decodeSampledBitmapFromFile(temp.toString(),
+                            mImageCache.mDefaultThumbnailSizePx, mImageCache.mDefaultThumbnailSizePx);
+                } else {
+                    bitmap = ImageCache.decodeSampledBitmapFromFile(temp.toString(),
+                            mImageCache.mDefaultMaxImageWidth, mImageCache.mDefaultMaxImageHeight);
+                }
                 if (bitmap != null) {
                     // Move the file to its real location so we can find it later
                     temp.renameTo(new File(downloadDir, ImageCache.hashKeyForDisk(key)));
@@ -185,10 +189,26 @@ public class ImageFetcher extends ImageWorker {
     }
 
     /**
+     * Used to fetch the current artwork.
+     */
+    public void loadCurrentLargeArtwork(final ImageView imageView) {
+        loadImage(generateAlbumCacheKey(MusicUtils.getAlbumName(), MusicUtils.getArtistName()),
+                MusicUtils.getArtistName(), MusicUtils.getAlbumName(), MusicUtils.getCurrentAlbumId(),
+                imageView, ImageType.ALBUM, false);
+    }
+
+    /**
      * Used to fetch artist images.
      */
     public void loadArtistImage(final String key, final ImageView imageView) {
         loadImage(key, key, null, -1, imageView, ImageType.ARTIST);
+    }
+
+    /**
+     * Used to fetch artist images.
+     */
+    public void loadLargeArtistImage(final String key, final ImageView imageView) {
+        loadImage(key, key, null, -1, imageView, ImageType.ARTIST, false);
     }
 
     /**
@@ -295,6 +315,8 @@ public class ImageFetcher extends ImageWorker {
     /**
      * Used in {@link MusicPlaybackService}
      * to set the current album art in the notification and lock screen
+     * we intentionally dont hit the memcache here so we dont inflate our
+     * memory usage since the service is run in a separate process
      *
      * @param albumName The name of the current album
      * @param albumId The ID of the current album

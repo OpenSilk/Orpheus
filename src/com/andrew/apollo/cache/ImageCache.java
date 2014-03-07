@@ -33,6 +33,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 
@@ -51,6 +52,7 @@ import java.security.NoSuchAlgorithmException;
 public final class ImageCache {
 
     private static final String TAG = ImageCache.class.getSimpleName();
+    private static final boolean D = BuildConfig.DEBUG;
 
     /**
      * The {@link Uri} used to retrieve album art
@@ -60,7 +62,12 @@ public final class ImageCache {
     /**
      * Default memory cache size as a percent of device memory class
      */
-    private static final float MEM_CACHE_DIVIDER = 0.25f;
+    private static final float THUMB_MEM_CACHE_DIVIDER = 0.25f;
+
+    /**
+     * Default memory cache size as a percent of device memory class
+     */
+    private static final float LA_MEM_CACHE_DIVIDER = 0.08f;
 
     /**
      * Default disk cache size 10MB
@@ -110,6 +117,11 @@ public final class ImageCache {
     private MemoryCache mThumbnailMemCache;
 
     /**
+     * LRU cache for fullscreen art
+     */
+    private MemoryCache mLargeArtMemCache;
+
+    /**
      * Disk LRU cache
      */
     private DiskLruCache mThumbnailDiskCache;
@@ -135,7 +147,7 @@ public final class ImageCache {
         mContext = context;
         mDefaultMaxImageHeight = mDefaultMaxImageWidth = getMaxDisplaySize(context);
         mDefaultThumbnailSizePx = convertDpToPx(context, DEFAULT_THUMBNAIL_SIZE_DP);
-        Log.e("XXX", "mx=" + mDefaultMaxImageWidth + " my=" + mDefaultMaxImageHeight + " mt=" + mDefaultThumbnailSizePx);
+        if (D) Log.d(TAG, "mx=" + mDefaultMaxImageWidth + " my=" + mDefaultMaxImageHeight + " mt=" + mDefaultThumbnailSizePx);
         init(context);
     }
 
@@ -210,9 +222,12 @@ public final class ImageCache {
                 .getSystemService(Context.ACTIVITY_SERVICE);
         int memClass = context.getResources().getBoolean(R.bool.config_largeHeap) ?
                 activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
-        final int lruCacheSize = Math.round(MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
-        mThumbnailMemCache = new MemoryCache(lruCacheSize);
-
+        final int lruThumbCacheSize = Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
+        // Large art use max of 4mb since we dont use it for very many things
+        final int lruLACacheSize = Math.min(Math.round(LA_MEM_CACHE_DIVIDER * memClass * 1024 * 1024), (6*1024*1024));
+        if (D) Log.d(TAG, "thumbcache=" + ((float)lruThumbCacheSize/1024/1024) + "MB largeartcache=" + ((float)lruLACacheSize/1024/1024) + "MB");
+        mThumbnailMemCache = new MemoryCache(lruThumbCacheSize);
+        mLargeArtMemCache = new MemoryCache(lruLACacheSize);
         // Release some memory as needed
         context.registerComponentCallbacks(new ComponentCallbacks2() {
 
@@ -225,6 +240,7 @@ public final class ImageCache {
                     evictAll();
                 } else if (level >= TRIM_MEMORY_BACKGROUND) {
                     mThumbnailMemCache.trimToSize(mThumbnailMemCache.size() / 2);
+                    mLargeArtMemCache.trimToSize(-1); //Nuke it
                 }
             }
 
@@ -292,22 +308,31 @@ public final class ImageCache {
         return retainFragment;
     }
 
+    @Deprecated
+    public void addBitmapToCache(final String data, final Bitmap bitmap) {
+        addBitmapToCache(data, bitmap, true);
+    }
+
     /**
      * Adds a new image to the memory and disk caches
      *
      * @param data The key used to store the image
      * @param bitmap The {@link Bitmap} to cache
      */
-    public void addBitmapToCache(final String data, final Bitmap bitmap) {
+    public void addBitmapToCache(final String data, final Bitmap bitmap, final boolean isThumbnail) {
         if (data == null || bitmap == null) {
             return;
         }
 
         // Add to memory cache
-        addBitmapToMemCache(data, bitmap);
+        addBitmapToMemCache(data, bitmap, isThumbnail);
+
+        if (!isThumbnail) {
+            return; //Large art has no diskcache
+        }
 
         // Add to disk cache
-        if (mThumbnailDiskCache != null) {
+        if (mThumbnailDiskCache != null && !mThumbnailDiskCache.isClosed()) {
             final String key = hashKeyForDisk(data);
             OutputStream out = null;
             try {
@@ -341,20 +366,36 @@ public final class ImageCache {
         }
     }
 
+    @Deprecated
+    public void addBitmapToMemCache(final String data, final Bitmap bitmap) {
+        addBitmapToMemCache(data, bitmap, true);
+    }
+
     /**
      * Called to add a new image to the memory cache
      *
      * @param data The key identifier
      * @param bitmap The {@link Bitmap} to cache
      */
-    public void addBitmapToMemCache(final String data, final Bitmap bitmap) {
+    public void addBitmapToMemCache(final String data, final Bitmap bitmap, boolean isThumbnail) {
         if (data == null || bitmap == null) {
             return;
         }
         // Add to memory cache
-        if (getBitmapFromMemCache(data) == null) {
-            mThumbnailMemCache.put(data, bitmap);
+        if (getBitmapFromMemCache(data, isThumbnail) == null) {
+            if (isThumbnail) {
+                mThumbnailMemCache.put(data, bitmap);
+                if (D) Log.d(TAG, "ThumbCache: " + mThumbnailMemCache.toString());
+            } else {
+                mLargeArtMemCache.put(data, bitmap);
+                if (D) Log.e(TAG, "LargeArtCache: " + mLargeArtMemCache.toString());
+            }
         }
+    }
+
+    @Deprecated
+    public final Bitmap getBitmapFromMemCache(final String data) {
+        return getBitmapFromMemCache(data, true);
     }
 
     /**
@@ -363,16 +404,26 @@ public final class ImageCache {
      * @param data Unique identifier for which item to get
      * @return The {@link Bitmap} if found in cache, null otherwise
      */
-    public final Bitmap getBitmapFromMemCache(final String data) {
+    public final Bitmap getBitmapFromMemCache(final String data, final boolean isThumbnail) {
         if (data == null) {
             return null;
         }
-        if (mThumbnailMemCache != null) {
-            final Bitmap lruBitmap = mThumbnailMemCache.get(data);
-            if (lruBitmap != null) {
-                return lruBitmap;
+        if (isThumbnail) {
+            if (mThumbnailMemCache != null) {
+                final Bitmap lruBitmap = mThumbnailMemCache.get(data);
+                if (lruBitmap != null) {
+                    return lruBitmap;
+                }
+            }
+        } else {
+            if (mLargeArtMemCache != null) {
+                final Bitmap lruBitmap = mLargeArtMemCache.get(data);
+                if (lruBitmap != null) {
+                    return lruBitmap;
+                }
             }
         }
+
         return null;
     }
 
@@ -395,7 +446,7 @@ public final class ImageCache {
 
         waitUntilUnpaused();
         final String key = hashKeyForDisk(data);
-        if (mThumbnailDiskCache != null) {
+        if (mThumbnailDiskCache != null && !mThumbnailDiskCache.isClosed()) {
             InputStream inputStream = null;
             try {
                 final DiskLruCache.Snapshot snapshot = mThumbnailDiskCache.get(key);
@@ -422,6 +473,11 @@ public final class ImageCache {
         return null;
     }
 
+    @Deprecated
+    public final Bitmap getCachedBitmap(final String data) {
+        return getCachedBitmap(data, true);
+    }
+
     /**
      * Tries to return a cached image from memory cache before fetching from the
      * disk cache
@@ -429,19 +485,28 @@ public final class ImageCache {
      * @param data Unique identifier for which item to get
      * @return The {@link Bitmap} if found in cache, null otherwise
      */
-    public final Bitmap getCachedBitmap(final String data) {
+    public final Bitmap getCachedBitmap(final String data, boolean isThumbnail) {
         if (data == null) {
             return null;
         }
-        Bitmap cachedImage = getBitmapFromMemCache(data);
+        Bitmap cachedImage = getBitmapFromMemCache(data, isThumbnail);
         if (cachedImage == null) {
-            cachedImage = getBitmapFromDiskCache(data);
+            if (isThumbnail) {
+                cachedImage = getBitmapFromDiskCache(data);
+            } else {
+                cachedImage = getLargeArtworkFromDownloadCache(data);
+            }
         }
         if (cachedImage != null) {
-            addBitmapToMemCache(data, cachedImage);
+            addBitmapToMemCache(data, cachedImage, isThumbnail);
             return cachedImage;
         }
         return null;
+    }
+
+    @Deprecated
+    public final Bitmap getCachedArtwork(final Context context, final String key, final long id) {
+        return getCachedArtwork(context, key, id, true);
     }
 
     /**
@@ -453,11 +518,11 @@ public final class ImageCache {
      * @param id The ID of the album to find artwork for
      * @return The artwork for an album
      */
-    public final Bitmap getCachedArtwork(final Context context, final String key, final long id) {
+    public final Bitmap getCachedArtwork(final Context context, final String key, final long id, final boolean isThubmnail) {
         if (context == null || key == null) {
             return null;
         }
-        Bitmap cachedImage = getCachedBitmap(key);
+        Bitmap cachedImage = getCachedBitmap(key, isThubmnail);
         if (cachedImage != null) {
             return cachedImage;
         }
@@ -465,10 +530,14 @@ public final class ImageCache {
             cachedImage = getArtworkFromMediaStore(context, id);
         }
         if (cachedImage == null) {
-            cachedImage = getArtworkFromDownloadCache(key);
+            if (isThubmnail) {
+                cachedImage = getArtworkFromDownloadCache(key);
+            } else {
+                cachedImage = getLargeArtworkFromDownloadCache(key);
+            }
         }
         if (cachedImage != null) {
-            addBitmapToMemCache(key, cachedImage);
+            addBitmapToMemCache(key, cachedImage, isThubmnail);
             return cachedImage;
         }
         return null;
@@ -642,6 +711,13 @@ public final class ImageCache {
 
             @Override
             protected Void doInBackground(final Void... unused) {
+                // Clear download cache
+                File downloadCache = getDiskCacheDir(mContext, DOWNLOAD_CACHE_DIR);
+                if (downloadCache != null && downloadCache.exists() && downloadCache.isDirectory()) {
+                    for (File f: downloadCache.listFiles()) {
+                        f.delete();
+                    }
+                }
                 // Clear the disk cache
                 try {
                     if (mThumbnailDiskCache != null) {
@@ -650,6 +726,8 @@ public final class ImageCache {
                     }
                 } catch (final IOException e) {
                     Log.e(TAG, "clearCaches - " + e);
+                } finally {
+                    initDiskCache(mContext);
                 }
                 // Clear the memory cache
                 evictAll();
@@ -690,6 +768,9 @@ public final class ImageCache {
     public void evictAll() {
         if (mThumbnailMemCache != null) {
             mThumbnailMemCache.evictAll();
+        }
+        if (mLargeArtMemCache != null) {
+            mLargeArtMemCache.evictAll();
         }
         System.gc();
     }

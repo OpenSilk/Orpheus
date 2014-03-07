@@ -87,7 +87,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-        ApolloUtils.getImageFetcher(getActivity()).loadArtistImage(mArtist.mArtistName, mHeaderImage);
+        ApolloUtils.getImageFetcher(getActivity()).loadLargeArtistImage(mArtist.mArtistName, mHeaderImage);
         // Load header text
         mInfoTitle.setText(mArtist.mArtistName);
         mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.mAlbumNumber));

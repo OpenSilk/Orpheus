@@ -600,7 +600,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Set the total time
         mFooterTotalTime.setText(MusicUtils.makeTimeString(this, MusicUtils.duration() / 1000));
         // Set the album art
-        ApolloUtils.getImageFetcher(this).loadCurrentArtwork(mArtBackground);
+        ApolloUtils.getImageFetcher(this).loadCurrentLargeArtwork(mArtBackground);
         // Update the current time
         queueNextRefresh(1);
     }

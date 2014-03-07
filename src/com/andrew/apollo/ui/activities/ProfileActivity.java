@@ -533,7 +533,7 @@ public class ProfileActivity extends BaseActivity implements OnPageChangeListene
                     }
 
                     final Bitmap bitmap = ImageCache.decodeSampledBitmapFromFile(picturePath, 1024, 1024);
-                    mImageFetcher.addBitmapToCache(key, bitmap);
+                    mImageFetcher.addBitmapToCache(key, bitmap, true);
                     if (isAlbum()) {
                         mTabCarousel.getAlbumArt().setImageBitmap(bitmap);
                     } else {
