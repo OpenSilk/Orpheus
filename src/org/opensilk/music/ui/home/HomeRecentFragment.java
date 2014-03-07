@@ -20,6 +20,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.widget.CursorAdapter;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
@@ -50,12 +51,13 @@ public class HomeRecentFragment extends HomePagerBaseCursorFragment {
         super.onLoadFinished(loader, data);
         if (data == null || data.isClosed() || data.getCount() <= 0) {
             // Set the empty text
-            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
-            empty.setText(getString(R.string.empty_recent));
+            final FrameLayout emptyView = (FrameLayout) mRootView.findViewById(R.id.empty);
+            final TextView emptyText = (TextView)mRootView.findViewById(R.id.empty_text);
+            emptyText.setText(getString(R.string.empty_recent));
             if (isSimpleLayout()) {
-                mListView.setEmptyView(empty);
+                mListView.setEmptyView(emptyView);
             } else {
-                mGridView.setEmptyView(empty);
+                mGridView.setEmptyView(emptyView);
             }
         }
     }

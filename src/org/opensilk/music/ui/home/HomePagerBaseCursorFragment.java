@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.andrew.apollo.MusicStateListener;
@@ -148,12 +149,13 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
             // hide the progress
             mLoadingEmpty.setVisibility(View.GONE);
             // Set the empty text
-            final TextView empty = (TextView)mRootView.findViewById(R.id.empty);
-            empty.setText(getString(R.string.empty_music));
+            final FrameLayout emptyView = (FrameLayout) mRootView.findViewById(R.id.empty);
+            final TextView emptyText = (TextView)mRootView.findViewById(R.id.empty_text);
+            emptyText.setText(getString(R.string.empty_music));
             if (isSimpleLayout()) {
-                mListView.setEmptyView(empty);
+                mListView.setEmptyView(emptyView);
             } else {
-                mGridView.setEmptyView(empty);
+                mGridView.setEmptyView(emptyView);
             }
         }
         mAdapter.swapCursor(data);
