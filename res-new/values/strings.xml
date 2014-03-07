@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!-- ################ SETTINGS ################ -->
+
+    <!-- Main settings screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_interface_title">Interface</string>
+    <string name="settings_storage_title">Storage</string>
+    <string name="settings_data_title">Data</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_cast_title">Cast</string>
+
+    <!-- Subcategories -->
+    <string name="settings_about_about_category">About</string>
+    <string name="settings_about_legal_category">Legal</string>
+    <string name="settings_interface_theme_category">Theme</string>
+    <string name="settings_data_download_category">Download</string>
+    <string name="settings_data_storage_category">Storage</string>
+
+    <!-- Preference titles and summaries -->
+    <string name="settings_about_author_title">Created by OpenSilk Productions LLC</string>
+    <string name="settings_about_version_title">Version</string>
+    <string name="settings_about_licenses_title">Open source licenses</string>
+    <string name="settings_about_thanks_title">Special thanks</string>
+    <string name="settings_about_thanks_lfm">Last.fm</string>
+    <string name="settings_about_thanks_lfm_desc">For coverart and artist images</string>
+    <string name="settings_about_thanks_lfm_url">http://last.fm/</string>
+    <string name="settings_about_thanks_caa">coverartarchive.org</string>
+    <string name="settings_about_thanks_caa_desc">For coverart</string>
+    <string name="settings_about_thanks_caa_url">http://coverartarchive.org/</string>
+    <string name="settings_about_thanks_an">Andrew Neal</string>
+    <string name="settings_about_thanks_an_desc">For Apollo</string>
+    <string name="settings_about_thanks_ac">Alex Cruz</string>
+    <string name="settings_about_thanks_ac_desc">For banner and icon design</string>
+    <string name="settings_interface_use_theme_title">Use accent themes</string>
+    <string name="settings_interface_theme_title">Select a theme</string>
+    <string name="settings_data_wifi_only_title">Download via Wi-Fi only</string>
+    <string name="settings_data_wifi_only_summary">To reduce carrier charges, don\'t download over mobile networks</string>
+    <string name="settings_data_missing_album_title">Download missing album art</string>
+    <string name="settings_data_missing_artist_title">Download missing artist image</string>
+    <string name="settings_data_low_resolution_title">Use lower resolution art work</string>
+    <string name="settings_data_low_resolution_summary">Enable to reduce image size and bandwidth used</string>
+    <string name="settings_data_delete_cache_title">Delete cache</string>
+    <string name="settings_data_delete_cache_summary">Remove all cached images</string>
+
+    <string name="settings_cast_enable_title">Enable Google Cast</string>
+
+    <!-- Interface -->
+    <string name="settings_interface_restart_app">Orpheus will now restart to apply the new theme.</string>
+
+    <!-- Miscellaneous -->
+    <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
+
+    <!-- Themes -->
+    <string name="theme_orpheus">Orpheus</string>
+    <string name="theme_repheus">Repheus</string>
+    <string name="theme_purpheus">Purpheus</string>
+    <string name="theme_blupheus">Blupheus</string>
+    <string name="theme_grepheus">Grepheus</string>
+</resources>

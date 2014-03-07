@@ -30,7 +30,7 @@ public class ThemeHelper {
 
     private final Context mContext;
     private final PreferenceUtils mPreferences;
-    private final ThemeStyle mActiveTheme;
+    private ThemeStyle mActiveTheme;
 
     public static ThemeHelper getInstance(Context context) {
         if (sThemeHelper == null) {
@@ -42,6 +42,10 @@ public class ThemeHelper {
     private ThemeHelper(Context context) {
         mContext = context.getApplicationContext();
         mPreferences = PreferenceUtils.getInstance(mContext);
+        mActiveTheme = mPreferences.getThemeStyle();
+    }
+
+    public void reloadTheme() {
         mActiveTheme = mPreferences.getThemeStyle();
     }
 
@@ -86,10 +90,17 @@ public class ThemeHelper {
     }
 
     /**
-     * @return theme color
+     * @return current theme color
      */
     public final int getThemeColor() {
-        switch (mActiveTheme) {
+        return getThemeColor(mActiveTheme);
+    }
+
+    /**
+     * @return theme color for style
+     */
+    public final int getThemeColor(ThemeStyle style) {
+        switch (style) {
             case ORPHEUS:
                 return mContext.getResources().getColor(R.color.app_color_orpheus);
             case BLUPHEUS:
@@ -102,6 +113,13 @@ public class ThemeHelper {
                 return mContext.getResources().getColor(R.color.app_color_purpheus);
         }
         return -1;
+    }
+
+    /**
+     * @return theme name
+     */
+    public final String getThemeName() {
+        return mActiveTheme.name();
     }
 
     /**

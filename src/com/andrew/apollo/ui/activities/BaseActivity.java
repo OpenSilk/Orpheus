@@ -181,7 +181,7 @@ public abstract class BaseActivity extends FragmentActivity implements ServiceCo
         // Search view
         getMenuInflater().inflate(R.menu.search, menu);
         // Settings
-        getMenuInflater().inflate(R.menu.activity_base, menu);
+        getMenuInflater().inflate(R.menu.settings, menu);
         // Theme the search icon
         mResources.setSearchIcon(menu);
 

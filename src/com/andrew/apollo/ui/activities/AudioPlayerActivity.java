@@ -332,7 +332,7 @@ public class AudioPlayerActivity extends FragmentActivity implements ServiceConn
         // Share, ringtone, and equalizer
         getMenuInflater().inflate(R.menu.audio_player, menu);
         // Settings
-        getMenuInflater().inflate(R.menu.activity_base, menu);
+        getMenuInflater().inflate(R.menu.settings, menu);
         return true;
     }
 

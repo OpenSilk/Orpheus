@@ -69,6 +69,7 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
@@ -284,27 +285,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
         mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
 
-        // Settings
-        getMenuInflater().inflate(R.menu.activity_base, menu);
-
         return super.onCreateOptionsMenu(menu);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_settings:
-                // Settings
-                NavUtils.openSettings(this);
-                return true;
-
-            default:
-                break;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -314,8 +295,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     protected void onResume() {
         super.onResume();
         // Start scanning for routes
-        mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
-                MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
+        if (PreferenceUtils.getInstance(this).isCastEnabled()) {
+            mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
+                    MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
+        }
         // Set the playback drawables
         updatePlaybackControls();
         // Current info

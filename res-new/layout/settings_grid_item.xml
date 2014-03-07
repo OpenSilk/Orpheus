@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/card_grid_cardwidth"
+    android:layout_height="@dimen/card_grid_cardwidth"
+    android:orientation="vertical"
+    android:background="@drawable/drop_shadow"
+    android:gravity="center">
+    
+        <ImageView
+            android:id="@+id/grid_item_icon"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/grid_item_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="4dp"
+            style="@android:style/TextAppearance.Holo.Large" />
+
+</LinearLayout>

@@ -78,7 +78,14 @@ public final class PreferenceUtils {
     // Key used to set the overall theme color
     public static final String DEFAULT_THEME_COLOR = "default_theme_color";
 
+    // Key used to set current theme
     public static final String THEME_STYLE = "theme_style";
+
+    // Key used to determine if casting should be enabled
+    public static final String KEY_CAST_ENABLED = "pref_cast_enabled";
+
+    // Key to decide whether we prefer high quality art
+    public static final String USE_LOW_RESOLUTION_ART = "pref_low_resolution";
 
     private static PreferenceUtils sInstance;
 
@@ -139,16 +146,9 @@ public final class PreferenceUtils {
      * @param themeStyle
      */
     public void setThemeStyle(final ThemeStyle themeStyle) {
-        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(final Void... unused) {
-                final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putString(THEME_STYLE, themeStyle.toString());
-                editor.apply();
-
-                return null;
-            }
-        }, (Void[])null);
+        final SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(THEME_STYLE, themeStyle.toString());
+        editor.commit();
     }
 
     /**
@@ -411,6 +411,20 @@ public final class PreferenceUtils {
         final String grid = "grid";
         final String defaultValue = "simple";
         return mPreferences.getString(which, defaultValue).equals(grid);
+    }
+
+    /**
+     * @return true if casting is enabled
+     */
+    public boolean isCastEnabled() {
+        return mPreferences.getBoolean(KEY_CAST_ENABLED, true);
+    }
+
+    /**
+     * @return true if we want mega sized art
+     */
+    public boolean wantHighResolutionArt() {
+        return !mPreferences.getBoolean(USE_LOW_RESOLUTION_ART, false);
     }
 
 }

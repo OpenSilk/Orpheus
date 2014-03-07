@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/settings_data_download_category">
+
+        <CheckBoxPreference
+            android:key="only_on_wifi"
+            android:title="@string/settings_data_wifi_only_title"
+            android:summary="@string/settings_data_wifi_only_summary"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="download_missing_artwork"
+            android:title="@string/settings_data_missing_album_title"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="download_missing_artist_images"
+            android:title="@string/settings_data_missing_artist_title"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="pref_low_resolution"
+            android:title="@string/settings_data_low_resolution_title"
+            android:summary="@string/settings_data_low_resolution_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_data_storage_category">
+
+        <Preference
+            android:key="pref_delete_cache"
+            android:title="@string/settings_data_delete_cache_title"
+            android:summary="@string/settings_data_delete_cache_summary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

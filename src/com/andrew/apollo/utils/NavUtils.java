@@ -29,12 +29,12 @@ import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.ui.activities.AudioPlayerActivity;
 import com.andrew.apollo.ui.activities.SearchActivity;
-import com.andrew.apollo.ui.activities.SettingsActivity;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.profile.ProfileAlbumFragment;
 import org.opensilk.music.ui.profile.ProfileArtistFragment;
+import org.opensilk.music.ui.settings.SettingsActivity;
 
 /**
  * Various navigation helpers.

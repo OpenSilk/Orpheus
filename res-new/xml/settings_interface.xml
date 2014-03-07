@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/settings_interface_theme_category">
+
+        <!--<CheckBoxPreference-->
+            <!--android:key="pref_use_theme"-->
+            <!--android:title="@string/settings_interface_use_theme_title"/>-->
+
+        <org.opensilk.music.ui.settings.ThemeListPreference
+            android:key="pref_theme"
+            android:title="@string/settings_interface_theme_title"
+            android:entries="@array/theme_list_names"
+            android:entryValues="@array/theme_list_values"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

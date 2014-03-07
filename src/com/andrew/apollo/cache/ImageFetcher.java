@@ -113,7 +113,7 @@ public class ImageFetcher extends ImageWorker {
     private String getBestImage(MusicEntry e) {
         // For albums first try the coverartarchive, they seem to have higher quality images
         if (e instanceof Album) {
-            if (!TextUtils.isEmpty(e.getMbid())) {
+            if (!TextUtils.isEmpty(e.getMbid()) && PreferenceUtils.getInstance(mContext).wantHighResolutionArt()) {
                 String url = CoverArtFetcher.getFrontCoverUrl(e.getMbid());
                 if (!TextUtils.isEmpty(url)) {
                     if (D) Log.i(TAG, "Found coverartarchive url for " + e.getName());
@@ -122,6 +122,9 @@ public class ImageFetcher extends ImageWorker {
             }
         }
         for (ImageSize q : ImageSize.values()) {
+            if (q.equals(ImageSize.MEGA) && !PreferenceUtils.getInstance(mContext).wantHighResolutionArt()) {
+                continue;
+            }
             String url = e.getImageURL(q);
             if (!TextUtils.isEmpty(url)) {
                 if (D) Log.i(TAG, "Found " + q.toString() + " url for " + e.getName());

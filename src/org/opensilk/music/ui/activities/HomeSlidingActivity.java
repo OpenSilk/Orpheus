@@ -17,16 +17,21 @@
 
 package org.opensilk.music.ui.activities;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.andrew.apollo.R;
 
 import org.opensilk.music.ui.fragments.SearchFragment;
 import org.opensilk.music.ui.home.HomePhoneFragment;
+import org.opensilk.music.ui.settings.SettingsActivity;
 
 import static android.app.SearchManager.QUERY;
 
@@ -38,9 +43,8 @@ import static android.app.SearchManager.QUERY;
  */
 public class HomeSlidingActivity extends BaseSlidingActivity {
 
-    /**
-     * {@inheritDoc}
-     */
+    public static final int RESULT_RESTART_APP = RESULT_FIRST_USER << 1;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +67,36 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
             }
         }
         super.onNewIntent(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Settings
+        getMenuInflater().inflate(R.menu.settings, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_settings:
+                startActivityForResult(new Intent(this, SettingsActivity.class), 0);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0 && resultCode == RESULT_RESTART_APP) {
+            // Hack to force a refresh for our activity for eg theme change
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            PendingIntent pi = PendingIntent.getActivity(this, 0,
+                    getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName()),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
+            finish();
+        }
     }
 
 }

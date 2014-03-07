@@ -147,12 +147,8 @@
 
         <!-- Used to set options -->
         <activity
-            android:name=".ui.activities.SettingsActivity"
+            android:name="org.opensilk.music.ui.settings.SettingsActivity"
             android:label="@string/menu_settings" />
-        <!-- Themes Activity -->
-        <activity
-            android:name=".ui.activities.ThemesActivity"
-            android:excludeFromRecents="true" />
 
         <!-- Local Content Provider-->
         <provider
