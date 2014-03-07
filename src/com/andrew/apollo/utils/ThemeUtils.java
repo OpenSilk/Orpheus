@@ -97,11 +97,6 @@ public class ThemeUtils {
     private final PackageManager mPackageManager;
 
     /**
-     * Custom action bar layout
-     */
-    private final View mActionBarLayout;
-
-    /**
      * The theme resources.
      */
     private Resources mResources;
@@ -130,8 +125,6 @@ public class ThemeUtils {
         }
         // Get the current theme color
         mCurrentThemeColor = PreferenceUtils.getInstance(context).getDefaultThemeColor(context);
-        // Inflate the custom layout
-        mActionBarLayout = LayoutInflater.from(context).inflate(R.layout.action_bar, null);
     }
 
     /**
@@ -305,63 +298,6 @@ public class ThemeUtils {
         final MenuItem pinnAction = search.findItem(R.id.menu_add_to_homescreen);
         final String pinnIconId = "ic_action_pinn_to_home";
         setMenuItemColor(pinnAction, "pinn_to_action", pinnIconId);
-    }
-
-    /**
-     * Builds a custom layout and applies it to the action bar, then themes the
-     * background, title, and subtitle.
-     * 
-     * @param actionBar The {@link ActionBar} to use.
-     * @param resources The {@link ThemeUtils} used to theme the background,
-     *            title, and subtitle.
-     * @param title The title for the action bar
-     * @param subtitle The subtitle for the action bar.
-     */
-    public void themeActionBar(final ActionBar actionBar, final String title) {
-        // Set the custom layout
-        actionBar.setCustomView(mActionBarLayout);
-        actionBar.setDisplayShowCustomEnabled(true);
-        actionBar.setDisplayShowTitleEnabled(false);
-
-        // Theme the action bar background
-        actionBar.setBackgroundDrawable(getDrawable("action_bar"));
-
-        // Theme the title
-        setTitle(title);
-    }
-
-    /**
-     * Themes the action bar subtitle
-     * 
-     * @param subtitle The subtitle to use
-     */
-    public void setTitle(final String title) {
-        if (!TextUtils.isEmpty(title)) {
-            // Get the title text view
-            final TextView actionBarTitle = (TextView)mActionBarLayout
-                    .findViewById(R.id.action_bar_title);
-            // Theme the title
-            actionBarTitle.setTextColor(getColor("action_bar_title"));
-            // Set the title
-            actionBarTitle.setText(title);
-        }
-    }
-
-    /**
-     * Themes the action bar subtitle
-     * 
-     * @param subtitle The subtitle to use
-     */
-    public void setSubtitle(final String subtitle) {
-        if (!TextUtils.isEmpty(subtitle)) {
-            final TextView actionBarSubtitle = (TextView)mActionBarLayout
-                    .findViewById(R.id.action_bar_subtitle);
-            actionBarSubtitle.setVisibility(View.VISIBLE);
-            // Theme the subtitle
-            actionBarSubtitle.setTextColor(getColor("action_bar_subtitle"));
-            // Set the subtitle
-            actionBarSubtitle.setText(subtitle);
-        }
     }
 
     /**

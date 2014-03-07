@@ -39,8 +39,6 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageCache;
 import com.andrew.apollo.cache.ImageFetcher;
-import com.andrew.apollo.widgets.ColorPickerView;
-import com.andrew.apollo.widgets.ColorSchemeDialog;
 
 import java.util.concurrent.RejectedExecutionException;
 
@@ -339,27 +337,6 @@ public final class ApolloUtils {
                     context.getString(R.string.could_not_be_pinned_to_home_screen, displayName),
                     Toast.LENGTH_LONG).show();
         }
-    }
-
-    /**
-     * Shows the {@link ColorPickerView}
-     * 
-     * @param context The {@link Context} to use.
-     */
-    public static void showColorPicker(final Context context) {
-        final ColorSchemeDialog colorPickerView = new ColorSchemeDialog(context);
-        colorPickerView.setButton(AlertDialog.BUTTON_POSITIVE,
-                context.getString(android.R.string.ok), new OnClickListener() {
-
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int which) {
-                        PreferenceUtils.getInstance(context).setDefaultThemeColor(
-                                colorPickerView.getColor());
-                    }
-                });
-        colorPickerView.setButton(AlertDialog.BUTTON_NEGATIVE,
-                context.getString(R.string.cancel), (OnClickListener) null);
-        colorPickerView.show();
     }
 
     /**
