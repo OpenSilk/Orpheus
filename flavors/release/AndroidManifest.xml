@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.andrew.apollo">
+
+    <application>
+        <!-- Local Content Provider-->
+        <provider
+            android:authorities="org.opensilk.music.provider"
+            android:name="com.andrew.apollo.provider.MusicProvider"
+            android:multiprocess="true"
+            android:exported="false"/>
+    </application>
+
+</manifest>

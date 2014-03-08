@@ -26,6 +26,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
+import com.andrew.apollo.BuildConfig;
+
 import org.opensilk.music.loaders.Projections;
 
 import java.util.HashSet;
@@ -36,7 +38,7 @@ import java.util.List;
  */
 public class MusicProvider extends ContentProvider {
 
-    private static final String AUTHORITY = "com.andrew.apollo.provider";
+    private static final String AUTHORITY = BuildConfig.FLAVORED_AUTHORITY;
     private static final UriMatcher sUriMatcher;
 
     /** Uri for recents store */

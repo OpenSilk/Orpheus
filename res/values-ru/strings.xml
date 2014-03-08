@@ -15,7 +15,6 @@
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="app_name">Orpheus</string>
 
     <!-- Page titles -->
     <string name="page_recent">Недавние</string>

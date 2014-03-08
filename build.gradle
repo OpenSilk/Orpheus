@@ -14,15 +14,28 @@ repositories {
     mavenCentral()
 }
 
+def versionMajor = 0
+def versionMinor = 1
+def versionPatch = 00
+def versionBuild = 0 // bump for dogfood builds, public betas, etc.
+
+def gitSha() {
+    return '-'+'git rev-parse --short HEAD'.execute().text.trim()
+}
+
 android {
     compileSdkVersion 19
     buildToolsVersion "19.0.1"
 
+    lintOptions {
+        abortOnError false
+    }
+
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
-        versionCode 1
-        versionName "0.1"
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
         packageName "org.opensilk.music"
     }
 
@@ -36,11 +49,37 @@ android {
             res.srcDirs = ['res','res-new']
             assets.srcDirs = ['assets']
         }
+        debug {
+            manifest.srcFile 'flavors/debug/AndroidManifest.xml'
+            res.srcDirs = ['flavors/debug/res']
+        }
+        release {
+            manifest.srcFile 'flavors/release/AndroidManifest.xml'
+        }
+    }
+
+    signingConfigs {
+        release {
+            def Properties keyProps = new Properties()
+            keyProps.load(new FileInputStream(file('../KeyStore/release.properties')))
+            storeFile file(keyProps["store"])
+            keyAlias keyProps["alias"]
+            storePassword keyProps["storePass"]
+            keyPassword keyProps["pass"]
+        }
     }
 
     buildTypes {
         debug {
             packageNameSuffix ".debug"
+            versionNameSuffix "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
+            buildConfigField "String", "FLAVORED_AUTHORITY", "\"org.opensilk.music.provider.debug\""
+        }
+        release {
+            buildConfigField "String", "FLAVORED_AUTHORITY", "\"org.opensilk.music.provider\""
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
         }
     }
 }

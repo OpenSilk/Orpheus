@@ -15,7 +15,6 @@
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="app_name">Orpheus</string>
     <string name="page_recent">Recent</string>
     <string name="page_artists">Artistes</string>
     <string name="page_albums">Àlbums</string>
