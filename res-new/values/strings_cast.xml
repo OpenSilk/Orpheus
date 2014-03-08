@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+
     <string name="media_route_menu_title">Play on&#8230;</string>
     <!-- Used in Router Contrller Dialog -->
     <string name="no_media_info">No media information available</string>
@@ -21,4 +23,5 @@
     <string name="failed_load">Failed to load media on the cast device</string>
     <string name="failed_seek">Failed to seek to the new position on the cast device</string>
     <string name="failed_receiver_player_error">Receiver player has encountered a sever error</string>
+
 </resources>

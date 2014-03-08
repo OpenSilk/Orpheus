@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
 
-    <string name="app_name">Orpheus</string>
-    <string name="app_name_label">Orpheus</string>
+    <string name="app_name" translatable="false">Orpheus</string>
+    <string name="app_name_label" translatable="false">Orpheus</string>
 
 <!-- ################ SETTINGS ################ -->
 
     <!-- Main settings screen -->
     <string name="settings_title">Settings</string>
-    <string name="settings_interface_title">Interface</string>
-    <string name="settings_storage_title">Storage</string>
-    <string name="settings_data_title">Data</string>
-    <string name="settings_about_title">About</string>
     <string name="settings_cast_title">Cast</string>
 
     <!-- Subcategories -->
@@ -25,7 +22,6 @@
     <string name="settings_about_author_title">Created by OpenSilk Productions LLC</string>
     <string name="settings_about_version_title">Version</string>
     <string name="settings_about_licenses_title">Open source licenses</string>
-    <string name="settings_about_thanks_title">Special thanks</string>
     <string name="settings_about_thanks_lfm">Last.fm</string>
     <string name="settings_about_thanks_lfm_desc">For coverart and artist images</string>
     <string name="settings_about_thanks_lfm_url">http://last.fm/</string>

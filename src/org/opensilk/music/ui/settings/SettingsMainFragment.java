@@ -64,13 +64,13 @@ public class SettingsMainFragment extends Fragment {
             mContext = context;
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFragments.add(new Holder(SettingsInterfaceFragment.class.getName(),
-                    getString(R.string.settings_interface_title),
+                    getString(R.string.settings_ui_category),
                     R.drawable.ic_settings_interface));
             mFragments.add(new Holder(SettingsDataFragment.class.getName(),
-                    getString(R.string.settings_data_title),
+                    getString(R.string.settings_data_category),
                     R.drawable.ic_settings_data));
             mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
-                    getString(R.string.settings_about_title),
+                    getString(R.string.settings_about_category),
                     R.drawable.ic_settings_about));
             mFragments.add(new Holder(SettingsCastFragment.class.getName(),
                     getString(R.string.settings_cast_title),

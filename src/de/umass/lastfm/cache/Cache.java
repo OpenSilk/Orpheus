@@ -27,6 +27,7 @@
 package de.umass.lastfm.cache;
 
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -156,7 +157,7 @@ public abstract class Cache {
             params = new TreeMap<String, String>(params);
         }
         StringBuilder b = new StringBuilder(100);
-        b.append(method.toLowerCase());
+        b.append(method.toLowerCase(Locale.US));
         b.append('.');
         for (Map.Entry<String, String> e : params.entrySet()) {
             b.append(e.getKey());

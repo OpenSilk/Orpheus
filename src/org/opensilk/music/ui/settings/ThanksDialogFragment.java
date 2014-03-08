@@ -71,7 +71,7 @@ public class ThanksDialogFragment extends DialogFragment {
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.settings_thanks_listview);
-            setTitle(R.string.settings_about_thanks_title);
+            setTitle(R.string.settings_special_thanks);
             List<Thankee> thankees = new ArrayList<Thankee>(3);
             thankees.add(new Thankee(null, getResources().getDrawable(R.drawable.lastfm_logo),
                     getString(R.string.settings_about_thanks_lfm_desc),

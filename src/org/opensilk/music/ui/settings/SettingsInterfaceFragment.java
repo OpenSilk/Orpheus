@@ -42,7 +42,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements Prefe
             String newTheme = (String) newValue;
             String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName();
             if (!newTheme.equalsIgnoreCase(currentTheme)) {
-                doRestart(ThemeStyle.valueOf(newTheme.toUpperCase()));
+                doRestart(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
             }
             return true;
         }

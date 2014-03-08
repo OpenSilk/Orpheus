@@ -129,7 +129,7 @@ public final class NavUtils {
             context.startActivityForResult(effects, 0);
         } catch (final ActivityNotFoundException notFound) {
             Toast.makeText(context, context.getString(R.string.no_effects_for_you),
-                    Toast.LENGTH_LONG);
+                    Toast.LENGTH_LONG).show();
         }
     }
 

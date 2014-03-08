@@ -20,16 +20,16 @@ def versionPatch = 00
 def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
 def gitSha() {
-    return '-'+'git rev-parse --short HEAD'.execute().text.trim()
+    return 'git rev-parse --short HEAD'.execute().text.trim()
 }
 
 android {
     compileSdkVersion 19
     buildToolsVersion "19.0.1"
 
-    lintOptions {
-        abortOnError false
-    }
+//    lintOptions {
+//        abortOnError false
+//    }
 
     defaultConfig {
         minSdkVersion 14

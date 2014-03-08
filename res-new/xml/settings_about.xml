@@ -28,7 +28,7 @@
 
         <Preference
             android:key="pref_thanks"
-            android:title="@string/settings_about_thanks_title"/>
+            android:title="@string/settings_special_thanks"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

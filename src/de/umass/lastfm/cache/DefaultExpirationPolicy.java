@@ -27,6 +27,7 @@
 package de.umass.lastfm.cache;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,7 +77,7 @@ public class DefaultExpirationPolicy implements ExpirationPolicy {
     protected long cacheRecentWeeklyCharts = ONE_WEEK;
 
     public long getExpirationTime(String method, Map<String, String> params) {
-        method = method.toLowerCase();
+        method = method.toLowerCase(Locale.US);
         if (method.contains("weekly")) {
             if (!method.contains("list"))
                 return params.containsKey("to") && params.containsKey("from") ? Long.MAX_VALUE : cacheRecentWeeklyCharts;
