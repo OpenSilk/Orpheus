@@ -100,7 +100,6 @@ import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
  * A backbround {@link Service} used to keep music playing between activities
  * and when the user moves Apollo into the background.
  */
-@SuppressLint("NewApi")
 public class MusicPlaybackService extends Service {
     private static final String TAG = "MusicPlaybackService";
     private static final boolean D = BuildConfig.DEBUG;
@@ -1138,7 +1137,7 @@ public class MusicPlaybackService extends Service {
     private Cursor openCursorAndGoToFirst(Uri uri, String[] projection,
             String selection, String[] selectionArgs) {
         Cursor c = getContentResolver().query(uri, projection,
-                selection, selectionArgs, null, null);
+                selection, selectionArgs, null);
         if (c == null) {
             return null;
         }

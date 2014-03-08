@@ -54,7 +54,7 @@ public class CastUtils {
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 MusicPlaybackService.PROJECTION,
                 "_id=" + id,
-                null, null, null);
+                null, null);
         if (c == null) {
             return null;
         }
