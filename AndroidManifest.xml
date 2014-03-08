@@ -38,7 +38,7 @@
     <!-- Used to set the devices's ringtone -->
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <!-- Used to create launcher shortcuts -->
-    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <!--<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />-->
     <!-- Used to check if the app is in the background -->
     <!--<uses-permission android:name="android.permission.GET_TASKS" />-->
     <!-- Used to get ip address for casting -->
