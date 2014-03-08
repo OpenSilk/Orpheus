@@ -16,10 +16,9 @@
 #   public *;
 #}
 
--keep public class * extends android.app,backup.BackupAgent
-
--keep public class android.support.** {
+-keep public class android.support.v7.** {
     <init>(...);
+    public <methods>;
 }
 
 -dontobfuscate
