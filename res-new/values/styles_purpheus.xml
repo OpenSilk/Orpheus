@@ -62,7 +62,7 @@
 
     <style name="ActionBar.Solid.Purpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@drawable/ab_solid_purpheus</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_purpheus</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_purpheus</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Purpheus</item>
     </style>
@@ -73,7 +73,7 @@
     </style>
 
     <style name="PopupMenu.Purpheus" parent="@style/Widget.AppCompat.PopupMenu">	
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_purpheus</item>	
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>
     </style>
 	
     <style name="DropDownListView.Purpheus" parent="@style/Widget.AppCompat.ListView.DropDown">
@@ -86,7 +86,7 @@
 	
     <style name="DropDownNav.Purpheus" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
         <item name="android:background">@drawable/spinner_background_ab_purpheus</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_purpheus</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>
         <item name="android:dropDownSelector">@drawable/selectable_background_purpheus</item>
     </style>
     
