@@ -22,6 +22,8 @@
     <style name="Theme.AppCompat.Light.Panel" parent="@style/Theme.AppCompat.Light">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+        <!--needed to override actionbar icon from launcher icon -->
+        <item name="android:icon">@drawable/ic_actionbar</item>
     </style>
 
     <style name="Orpheus">
