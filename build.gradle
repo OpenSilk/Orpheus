@@ -86,12 +86,14 @@ android {
             packageNameSuffix ".debug"
             versionNameSuffix "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
             buildConfigField "String", "FLAVORED_AUTHORITY", "\"org.opensilk.music.provider.debug\""
+            buildConfigField "String", "CAST_ID", "\"25A19AAC\""
             runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.debug
         }
         release {
             buildConfigField "String", "FLAVORED_AUTHORITY", "\"org.opensilk.music.provider\""
+            buildConfigField "String", "CAST_ID", "\"FBF2F70D\"";
             runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release

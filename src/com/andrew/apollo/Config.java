@@ -30,7 +30,7 @@ public final class Config {
     /**
      * Cast application id
      */
-    public static final String CAST_APPLICATION_ID = "25A19AAC";
+    public static final String CAST_APPLICATION_ID = BuildConfig.CAST_ID;
 
     /**
      * Used to distinguish album art from artist images
