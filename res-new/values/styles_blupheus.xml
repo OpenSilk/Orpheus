@@ -65,11 +65,17 @@
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_blupheus</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Blupheus</item>
+        <!--OpenSilk-->
+        <!--needed to override actionbar icon from launcher icon -->
+        <item name="android:icon">@drawable/ic_actionbar</item>
     </style>
 
     <style name="ActionBar.Transparent.Blupheus" parent="@style/Widget.AppCompat.ActionBar">
         <item name="android:background">@drawable/ab_transparent_blupheus</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Blupheus</item>
+        <!--OpenSilk-->
+        <!--needed to override actionbar icon from launcher icon -->
+        <item name="android:icon">@drawable/ic_actionbar</item>
     </style>
 	
     <style name="PopupMenu.Blupheus" parent="@style/Widget.AppCompat.PopupMenu">	
