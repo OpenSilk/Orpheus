@@ -50,12 +50,12 @@ public class FileSystemCache extends Cache {
 
     private static final String SUBMISSIONS_FILE = "submissions.txt";
 
-    private static final String CACHE_DIR = "/lastfm-cache";
+    private static final String CACHE_DIR = "LastFMCache";
 
     private File cacheDir;
 
     public FileSystemCache(Context context) {
-        this (new File(context.getExternalCacheDir()+CACHE_DIR));
+        this (new File(context.getExternalCacheDir(),CACHE_DIR));
     }
 
     public FileSystemCache(File cacheDir) {
