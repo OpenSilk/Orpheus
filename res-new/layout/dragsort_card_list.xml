@@ -23,4 +23,4 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     card:card_layout_resourceID="@layout/card_list_noheader_layout"
-    style="@style/list_card.thumbnail" />
+    style="@style/Orpheus.list_card" />
