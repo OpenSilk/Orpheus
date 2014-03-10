@@ -19,8 +19,11 @@ package org.opensilk.music.ui.profile;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.ImageView;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
 
@@ -40,6 +43,13 @@ public abstract class ProfileFadingBaseFragment<D extends Parcelable> extends Pr
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mActionBarBackground = ThemeHelper.getInstance(getActivity()).getActionBarBackground();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Remove the overflow
+        menu.removeItem(R.id.menu_settings);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
