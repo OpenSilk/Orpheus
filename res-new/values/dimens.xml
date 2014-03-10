@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="card_grid_columnwidth">125dp</dimen>
-    <dimen name="card_grid_cardwidth">125dp</dimen>
-    <dimen name="card_grid_thumbheight">80dp</dimen>
+    <!--fastscroll i think is 24dp so this is
+        140*2 + 4*4 + 24 = 320 -->
+    <dimen name="card_grid_columnwidth">140dp</dimen>
+    <dimen name="card_grid_cardwidth">140dp</dimen>
+    <dimen name="card_grid_thumbheight">84dp</dimen>
+
+    <!-- 2dp here but we caluculate our cardwidth for 4dp-->
     <dimen name="card_grid_horizontal_spacing">2dp</dimen>
-    <dimen name="card_grid_vertical_spacing">3dp</dimen>
+    <dimen name="card_grid_vertical_spacing">4dp</dimen>
 
     <dimen name="card_list_thumbnail">60dp</dimen>
     <dimen name="card_list_thumbnail_large">125dp</dimen>

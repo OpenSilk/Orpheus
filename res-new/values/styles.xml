@@ -42,19 +42,16 @@
         <item name="android:layout_marginTop">?attr/actionBarSize</item>
     </style>
 
-    <!-- default style for all card grids -->
+    <!-- default style for all grids -->
     <style name="GridView.Orpheus.Card" parent="@android:style/Widget.Holo.Light.GridView">
+
+    </style>
+
+    <style name="GridView.Orpheus.Card.FastScroll" parent="@android:style/Widget.Holo.Light.GridView">
         <!--fastscroll-->
         <item name="android:scrollbarStyle">outsideInset</item>
         <item name="android:fastScrollEnabled">true</item>
         <item name="android:fastScrollAlwaysVisible">true</item>
-        <!--dimens-->
-        <item name="android:columnWidth">@dimen/card_grid_columnwidth</item>
-        <item name="android:numColumns">auto_fit</item>
-        <item name="android:verticalSpacing">@dimen/card_grid_vertical_spacing</item>
-        <item name="android:horizontalSpacing">@dimen/card_grid_horizontal_spacing</item>
-        <item name="android:stretchMode">columnWidth</item>
-        <item name="android:gravity">center</item>
     </style>
 
     <!-- default style for all card lists -->

@@ -16,9 +16,11 @@
   -->
 
 <resources>
-    <dimen name="card_grid_columnwidth">175dp</dimen>
-    <dimen name="card_grid_cardwidth">175dp</dimen>
-    <dimen name="card_grid_thumbheight">100dp</dimen>
+    <!--fastscroll i think is 24dp so this is
+        170*2 + 4*4 + 24 = 380 -->
+    <dimen name="card_grid_columnwidth">170dp</dimen>
+    <dimen name="card_grid_cardwidth">170dp</dimen>
+    <dimen name="card_grid_thumbheight">110dp</dimen>
 
     <dimen name="card_list_thumbnail">70dp</dimen>
     <dimen name="card_list_thumbnail_large">150dp</dimen>
