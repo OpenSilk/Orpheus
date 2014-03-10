@@ -21,6 +21,7 @@
         <CheckBoxPreference
             android:key="pref_cast_enabled"
             android:title="@string/settings_cast_enable_title"
+            android:summary="@string/settings_cast_enable_summary"
             android:defaultValue="true"/>
 
 </PreferenceScreen>

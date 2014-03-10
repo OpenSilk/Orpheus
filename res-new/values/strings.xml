@@ -43,8 +43,8 @@
     <string name="settings_data_delete_cache_title">Delete cache</string>
     <string name="settings_data_delete_cache_summary">Remove all cached images</string>
 
-    <string name="settings_cast_enable_title">Enable Google Cast</string>
-
+    <string name="settings_cast_enable_title">Enable casting</string>
+    <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
     <!-- Interface -->
     <string name="settings_interface_restart_app">Orpheus will now restart to apply the new theme.</string>
 
