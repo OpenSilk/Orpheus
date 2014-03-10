@@ -97,6 +97,11 @@
 
             </LinearLayout>
 
+            <org.opensilk.music.widgets.RepeatingImageButton
+                android:id="@+id/header_action_button_previous"
+                style="@style/Orpheus.MenuButton"
+                android:contentDescription="@string/accessibility_prev"/>
+
             <org.opensilk.music.widgets.PlayPauseButton
                 android:id="@+id/header_action_button_play"
                 style="@style/Orpheus.MenuButton"

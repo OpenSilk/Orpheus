@@ -123,6 +123,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     /** Panel Header */
     private ViewGroup mPanelHeader;
+    // Previous button
+    private RepeatingImageButton mHeaderPrevButton;
     //play/pause
     private PlayPauseButton mHeaderPlayPauseButton;
     // Next button
@@ -488,6 +490,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Background art
         mArtBackground = (ImageView) findViewById(R.id.panel_background_art);
 
+        // Previous button
+        mHeaderPrevButton = (RepeatingImageButton) findViewById(R.id.header_action_button_previous);
+        // Set the repeat listener for the previous button
+        mHeaderPrevButton.setRepeatListener(mRewindListener);
         // Play and pause button
         mHeaderPlayPauseButton = (PlayPauseButton)findViewById(R.id.header_action_button_play);
         // Next button
@@ -910,6 +916,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mHeaderQueueButton.setVisibility(View.VISIBLE);
             mHeaderOverflow.setVisibility(View.VISIBLE);
             maybeShowHeaderMediaRouteButton();
+            mHeaderPrevButton.setVisibility(View.GONE);
             mHeaderPlayPauseButton.setVisibility(View.GONE);
             mHeaderNextButton.setVisibility(View.GONE);
             mPanelHeader.setBackgroundResource(R.color.app_background_light_transparent);
@@ -922,6 +929,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mHeaderQueueButton.setVisibility(View.GONE);
             mHeaderOverflow.setVisibility(View.GONE);
             mHeaderMediaRouteButton.setVisibility(View.GONE);
+            mHeaderPrevButton.setVisibility(View.VISIBLE);
             mHeaderPlayPauseButton.setVisibility(View.VISIBLE);
             mHeaderNextButton.setVisibility(View.VISIBLE);
             if (mQueueShowing) {
