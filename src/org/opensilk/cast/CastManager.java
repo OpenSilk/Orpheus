@@ -709,20 +709,10 @@ public class CastManager extends BaseCastManager
      * @throws NoConnectionException
      * @throws TransientNetworkDisconnectionException
      */
-    public void loadMedia(MediaInfo media, boolean autoPlay, int position, JSONObject customData)
+    public boolean loadMedia(MediaInfo media, boolean autoPlay, int position, JSONObject customData)
             throws TransientNetworkDisconnectionException, NoConnectionException {
-        LOGD(TAG, "loadMedia: " + media);
-        checkConnectivity();
-        if (media == null) {
-            return;
-        }
-        if (mRemoteMediaPlayer == null) {
-            LOGE(TAG, "Trying to load media with no active media session");
-            throw new NoConnectionException();
-        }
-
-        mRemoteMediaPlayer.load(mApiClient, media, autoPlay, position, customData)
-                .setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+        return loadMedia(media, autoPlay, position, customData,
+                new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 
                     @Override
                     public void onResult(MediaChannelResult result) {
@@ -732,6 +722,23 @@ public class CastManager extends BaseCastManager
 
                     }
                 });
+    }
+
+    public boolean loadMedia(MediaInfo media, boolean autoPlay, int position, JSONObject customData,
+                             ResultCallback<MediaChannelResult> callback)
+            throws TransientNetworkDisconnectionException, NoConnectionException {
+        LOGD(TAG, "loadMedia: " + media);
+        checkConnectivity();
+        if (media == null) {
+            return false;
+        }
+        if (mRemoteMediaPlayer == null) {
+            LOGE(TAG, "Trying to load media with no active media session");
+            throw new NoConnectionException();
+        }
+
+        mRemoteMediaPlayer.load(mApiClient, media, autoPlay, position, customData).setResultCallback(callback);
+        return true;
     }
 
     /**

@@ -17,7 +17,6 @@
 
 package com.andrew.apollo;
 
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -69,7 +68,9 @@ import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
+import com.google.android.gms.cast.RemoteMediaPlayer;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.ResultCallback;
 
 import org.opensilk.cast.BaseCastManager;
 import org.opensilk.cast.CastManager;
@@ -542,6 +543,11 @@ public class MusicPlaybackService extends Service {
      */
     private boolean mRemoteMediaNeedsReload = false;
 
+    /**
+     * Whether there remote media is currently being loaded
+     *  used to prevent next/prev requests
+     */
+    private boolean mRemoteMediaLoading = false;
 
     /**
      * Fetches remote progress while we are in background
@@ -2336,6 +2342,10 @@ public class MusicPlaybackService extends Service {
      */
     public void gotoNext(final boolean force) {
         if (D) Log.d(TAG, "Going to next track");
+        if (isRemotePlayback() && mRemoteMediaLoading) {
+            Log.d(TAG, "Remote media is loading ignoring next() request");
+            return; //Ignore request
+        }
         synchronized (this) {
             if (mPlayListLen <= 0) {
                 if (D) Log.d(TAG, "No play queue");
@@ -2366,6 +2376,10 @@ public class MusicPlaybackService extends Service {
     @DebugLog
     public void prev() {
         if (D) Log.d(TAG, "Going to previous track");
+        if (isRemotePlayback() && mRemoteMediaLoading) {
+            Log.w(TAG, "Remote media is loading ignoring prev() request");
+            return; //Ignore request
+        }
         synchronized (this) {
             if (mShuffleMode == SHUFFLE_NORMAL) {
                 // Go to previously-played track and remove it from the history
@@ -2609,7 +2623,9 @@ public class MusicPlaybackService extends Service {
                 return true;
             } catch (TransientNetworkDisconnectionException e) {
                 Log.w(TAG, "isRemotePlayback(1) TransientNetworkDisconnection");
-                return true; // At this point we don't really know
+                // At this point the framework still considers us
+                // connected but we cannot communicate with the cast device
+                return true; //TODO how to handle this better?
             } catch (NoConnectionException e) {
                 Log.e(TAG, "isRemotePlayback(2) " + e.getMessage());
             }
@@ -2704,7 +2720,16 @@ public class MusicPlaybackService extends Service {
     @DebugLog
     private boolean loadRemote(MediaInfo info, boolean autoplay, int startPos) {
         try {
-            mCastManager.loadMedia(info, autoplay, startPos);
+            mRemoteMediaLoading = mCastManager.loadMedia(info, autoplay, startPos, null,
+                    new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+                        @Override
+                        public void onResult(RemoteMediaPlayer.MediaChannelResult result) {
+                            mRemoteMediaLoading = false;
+                            if (!result.getStatus().isSuccess()) {
+                               mCastManager.onFailed(R.string.failed_load, result.getStatus().getStatusCode());
+                            }
+                        }
+                    });
             return true;
         } catch (TransientNetworkDisconnectionException e) {
             Log.w(TAG, "loadRemote(1) TransientNetworkDisconnection");
