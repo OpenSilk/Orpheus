@@ -83,7 +83,7 @@ public class CoverArtFetcher {
 
     @DebugLog
     public static boolean downloadFile(String urlString, File outFile) {
-        if (D) Log.i(TAG, "Fetching " + urlString);
+        if (D) Log.i(TAG, "Fetching " + urlString + " from " + Thread.currentThread().toString());
         ReadableByteChannel in = null;
         FileChannel out = null;
         try {
@@ -94,13 +94,19 @@ public class CoverArtFetcher {
                 outFile.getParentFile().mkdirs();
             }
             // create file
-            outFile.createNewFile();
+            //outFile.createNewFile();
             // open url
             in = Channels.newChannel(url.openStream());
             // open our file channel
             out = new FileOutputStream(outFile).getChannel();
+            if (in == null || out == null) {
+                throw new IOException("in or out was null");
+            }
+            if (!in.isOpen() || !out.isOpen()) {
+                throw new IOException("in or out was closed");
+            }
             // write the file (Use a loop instead of transferFrom() so we don't need to get the size)
-            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            ByteBuffer buffer = ByteBuffer.allocate(1024*8);
             int bytes;
             do {
                 bytes = in.read(buffer);
