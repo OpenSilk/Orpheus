@@ -63,7 +63,10 @@ public final class StringUtilities {
      */
     public static String md5(String s) {
         try {
-            byte[] bytes = digest.digest(s.getBytes("UTF-8"));
+            byte[] bytes;
+            synchronized (StringUtilities.class) {
+                bytes = digest.digest(s.getBytes("UTF-8"));
+            }
             StringBuilder b = new StringBuilder(32);
             for (byte aByte : bytes) {
                 String hex = Integer.toHexString((int) aByte & 0xFF);

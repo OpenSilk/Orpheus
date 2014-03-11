@@ -46,6 +46,8 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import de.umass.util.StringUtilities;
+
 /**
  * This class holds the memory and disk bitmap caches.
  */
@@ -889,34 +891,7 @@ public final class ImageCache {
      * @param key The key used to store the file
      */
     public static final String hashKeyForDisk(final String key) {
-        String cacheKey;
-        try {
-            final MessageDigest digest = MessageDigest.getInstance("MD5");
-            digest.update(key.getBytes());
-            cacheKey = bytesToHexString(digest.digest());
-        } catch (final NoSuchAlgorithmException e) {
-            cacheKey = String.valueOf(key.hashCode());
-        }
-        return cacheKey;
-    }
-
-    /**
-     * http://stackoverflow.com/questions/332079
-     *
-     * @param bytes The bytes to convert.
-     * @return A {@link String} converted from the bytes of a hashable key used
-     *         to store a filename on the disk, to hex digits.
-     */
-    private static final String bytesToHexString(final byte[] bytes) {
-        final StringBuilder builder = new StringBuilder();
-        for (final byte b : bytes) {
-            final String hex = Integer.toHexString(0xFF & b);
-            if (hex.length() == 1) {
-                builder.append('0');
-            }
-            builder.append(hex);
-        }
-        return builder.toString();
+        return StringUtilities.md5(key);
     }
 
     /**
