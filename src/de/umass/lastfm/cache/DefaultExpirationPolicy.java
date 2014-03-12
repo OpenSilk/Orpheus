@@ -61,6 +61,8 @@ public class DefaultExpirationPolicy implements ExpirationPolicy {
         // artist / album info
         ONE_WEEK_METHODS.add("artist.getInfo");
         ONE_WEEK_METHODS.add("album.getInfo");
+        // corrections
+        ONE_WEEK_METHODS.add("artist.getCorrection");
     }
 
     /**
