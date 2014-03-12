@@ -31,6 +31,7 @@ import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.Config;
+import com.andrew.apollo.provider.LastFMRequestCache;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -96,7 +97,7 @@ public class Caller {
      * @param context The {@link android.content.Context} to use
      */
     private Caller(final Context context) {
-        cache = new FileSystemCache(context);
+        cache = LastFMRequestCache.getInstance(context);
     }
 
     /**
