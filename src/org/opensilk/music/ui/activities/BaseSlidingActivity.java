@@ -60,6 +60,7 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
+import com.andrew.apollo.cache.ImageCache;
 import com.andrew.apollo.loaders.NowPlayingCursor;
 import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.menu.CreateNewPlaylist;
@@ -398,6 +399,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mMusicStateListener.clear();
         // Kill the visualizer
         mVisualizer.release();
+
+        //Free cache
+        ImageCache.getInstance(this).evictAll();
     }
 
     @Override
