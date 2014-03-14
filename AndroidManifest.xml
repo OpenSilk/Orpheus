@@ -191,6 +191,7 @@
         </receiver>
         <!-- Resizable recently listened App Widget -->
         <receiver
+            android:enabled="false"
             android:name="com.andrew.apollo.appwidgets.RecentWidgetProvider"
             android:exported="false"
             android:label="@string/app_widget_recent" >
