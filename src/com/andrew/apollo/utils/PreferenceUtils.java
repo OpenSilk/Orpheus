@@ -80,6 +80,9 @@ public final class PreferenceUtils {
     // Key to decide whether we prefer high quality art
     public static final String USE_LOW_RESOLUTION_ART = "pref_low_resolution";
 
+    //Key whether or not to show visualizations.
+    public static final String SHOW_VISUALIZATIONS = "pref_visualizations";
+
     private static PreferenceUtils sInstance;
 
     private final SharedPreferences mPreferences;
@@ -418,6 +421,13 @@ public final class PreferenceUtils {
      */
     public boolean wantHighResolutionArt() {
         return !mPreferences.getBoolean(USE_LOW_RESOLUTION_ART, false);
+    }
+
+    /**
+     * @return true if we want to show visualizations
+     */
+    public boolean showVisualizations() {
+        return mPreferences.getBoolean(SHOW_VISUALIZATIONS, true);
     }
 
 }

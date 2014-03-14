@@ -44,6 +44,9 @@
     <!-- Used to get ip address for casting -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!-- Used for the Visualizer -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Casting is currently only supported over wifi -->
     <uses-feature android:name="android.hardware.wifi"/>
 

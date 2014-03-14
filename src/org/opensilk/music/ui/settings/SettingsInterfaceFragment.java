@@ -33,7 +33,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements Prefe
         mPrefSet = getPreferenceScreen();
         mThemeList = (ThemeListPreference) mPrefSet.findPreference(PREF_THEME);
         mThemeList.setOnPreferenceChangeListener(this);
-        updateThemIcon(ThemeHelper.getInstance(getActivity()).getThemeName());
+        updateThemeIcon(ThemeHelper.getInstance(getActivity()).getThemeName());
     }
 
     @Override
@@ -68,7 +68,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements Prefe
                 .show();
     }
 
-    private void updateThemIcon(String name) {
+    private void updateThemeIcon(String name) {
         mThemeList.setIcon(new ColorDrawable(ThemeHelper.getInstance(getActivity())
                 .getThemeColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US)))));
     }

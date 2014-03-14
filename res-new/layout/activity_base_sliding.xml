@@ -50,85 +50,95 @@
             android:contentDescription="@null"/>
 
         <!-- header -->
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/panel_header"
             android:layout_width="match_parent"
             android:layout_height="@dimen/panel_header_height"
             android:layout_gravity="top"
             android:layout_alignParentTop="true"
-            android:orientation="horizontal"
             android:background="@color/app_background_light">
 
-            <!-- album art thumb -->
-            <ImageView
-                android:id="@+id/header_album_art"
-                android:layout_width="@dimen/panel_header_thumbnail_size"
-                android:layout_height="@dimen/panel_header_thumbnail_size"
-                android:layout_margin="@dimen/panel_header_thumbnail_margin"
-                style="@style/Orpheus.Thumbnail"
-                android:contentDescription="@null"/>
+            <org.opensilk.music.widgets.AudioVisualizationView
+                android:id="@+id/visualizer_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-            <!-- Track title / artist
-            this is the anchor for sliding -->
             <LinearLayout
-                android:id="@+id/track_artist_info"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="left|center_vertical"
-                android:clickable="true"
-                android:orientation="vertical"
-                android:layout_weight="1">
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/header_track_info"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:textAppearance="@style/TextAppearancePanelHeader.Title"
-                    android:background="@color/transparent"
-                    style="@style/SingleLineTextView"/>
+                <!-- album art thumb -->
+                <ImageView
+                    android:id="@+id/header_album_art"
+                    android:layout_width="@dimen/panel_header_thumbnail_size"
+                    android:layout_height="@dimen/panel_header_thumbnail_size"
+                    android:layout_margin="@dimen/panel_header_thumbnail_margin"
+                    style="@style/Orpheus.Thumbnail"
+                    android:contentDescription="@null"/>
 
-                <TextView
-                    android:id="@+id/header_artist_info"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:background="@color/transparent"
-                    android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
-                    style="@style/SingleLineTextView"/>
+                <!-- Track title / artist
+                this is the anchor for sliding -->
+                <LinearLayout
+                    android:id="@+id/track_artist_info"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="left|center_vertical"
+                    android:clickable="true"
+                    android:orientation="vertical"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/header_track_info"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:textAppearance="@style/TextAppearancePanelHeader.Title"
+                        android:background="@color/transparent"
+                        style="@style/SingleLineTextView"/>
+
+                    <TextView
+                        android:id="@+id/header_artist_info"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:background="@color/transparent"
+                        android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
+                        style="@style/SingleLineTextView"/>
+
+                </LinearLayout>
+
+                <org.opensilk.music.widgets.RepeatingImageButton
+                    android:id="@+id/header_action_button_previous"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@string/accessibility_prev"/>
+
+                <org.opensilk.music.widgets.PlayPauseButton
+                    android:id="@+id/header_action_button_play"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@string/accessibility_play"/>
+
+                <org.opensilk.music.widgets.RepeatingImageButton
+                    android:id="@+id/header_action_button_next"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@string/accessibility_next"/>
+
+                <android.support.v7.app.MediaRouteButton
+                    style="@style/Orpheus.MenuButton.MediaRouter"
+                    app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+                    android:id="@+id/panel_mediarouter"/>
+
+                <ImageButton
+                    android:id="@+id/header_switch_queue"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@null"/>
+
+                <ImageButton android:id="@+id/header_overflow"
+                    style="@style/Orpheus.MenuButton"
+                    android:src="@drawable/ic_menu_moreoverflow_holo_light"
+                    android:contentDescription="@null" />
 
             </LinearLayout>
 
-            <org.opensilk.music.widgets.RepeatingImageButton
-                android:id="@+id/header_action_button_previous"
-                style="@style/Orpheus.MenuButton"
-                android:contentDescription="@string/accessibility_prev"/>
-
-            <org.opensilk.music.widgets.PlayPauseButton
-                android:id="@+id/header_action_button_play"
-                style="@style/Orpheus.MenuButton"
-                android:contentDescription="@string/accessibility_play"/>
-
-            <org.opensilk.music.widgets.RepeatingImageButton
-                android:id="@+id/header_action_button_next"
-                style="@style/Orpheus.MenuButton"
-                android:contentDescription="@string/accessibility_next"/>
-
-            <android.support.v7.app.MediaRouteButton
-                style="@style/Orpheus.MenuButton.MediaRouter"
-                app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-                android:id="@+id/panel_mediarouter"/>
-
-            <ImageButton
-                android:id="@+id/header_switch_queue"
-                style="@style/Orpheus.MenuButton"
-                android:contentDescription="@null"/>
-
-            <ImageButton android:id="@+id/header_overflow"
-                style="@style/Orpheus.MenuButton"
-                android:src="@drawable/ic_menu_moreoverflow_holo_light"
-                android:contentDescription="@null" />
-
-        </LinearLayout>
-
+        </FrameLayout>
         <!-- footer -->
          <LinearLayout
             android:id="@+id/panel_footer"

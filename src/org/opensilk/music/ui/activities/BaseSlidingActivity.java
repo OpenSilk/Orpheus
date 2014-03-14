@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -78,6 +79,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import org.opensilk.cast.CastManagerCallback;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.QueueFragment;
+import org.opensilk.music.widgets.AudioVisualizationView;
 import org.opensilk.music.widgets.PlayPauseButton;
 import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
@@ -88,6 +90,7 @@ import java.util.ArrayList;
 
 import hugo.weaving.DebugLog;
 
+import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
 import static com.andrew.apollo.utils.MusicUtils.sService;
 
 /**
@@ -123,6 +126,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     /** Panel Header */
     private ViewGroup mPanelHeader;
+    //Visualizer object
+    private Visualizer mVisualizer;
+    //Visualization view
+    private AudioVisualizationView mVisualizerView;
     // Previous button
     private RepeatingImageButton mHeaderPrevButton;
     //play/pause
@@ -263,6 +270,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         updateNowPlayingInfo();
         // Update the favorites icon
         invalidateOptionsMenu();
+
+        // Setup visualizer
+        initVisualizer();
     }
 
     /**
@@ -271,6 +281,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     public void onServiceDisconnected(final ComponentName name) {
         sService = null;
+        mVisualizer.release();
     }
 
     /**
@@ -312,6 +323,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 && getSupportActionBar().isShowing()) {
             getSupportActionBar().hide();
         }
+        // update visualizer
+        updateVisualizerState();
     }
 
     @Override
@@ -319,6 +332,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         super.onPause();
         // stop scanning for routes
         mMediaRouter.removeCallback(mMediaRouterCallback);
+        //Disable visualizer
+        if (mVisualizer != null) {
+            mVisualizer.setEnabled(false);
+        }
     }
 
     /**
@@ -379,7 +396,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         // Remove any music status listeners
         mMusicStateListener.clear();
-
+        // Kill the visualizer
+        mVisualizer.release();
     }
 
     @Override
@@ -490,6 +508,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Background art
         mArtBackground = (ImageView) findViewById(R.id.panel_background_art);
 
+        //Visualizer view
+        mVisualizerView = (AudioVisualizationView) findViewById(R.id.visualizer_view);
+
         // Previous button
         mHeaderPrevButton = (RepeatingImageButton) findViewById(R.id.header_action_button_previous);
         // Set the repeat listener for the previous button
@@ -563,6 +584,41 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mFooterProgress = (SeekBar)findViewById(android.R.id.progress);
         // Update the progress
         mFooterProgress.setOnSeekBarChangeListener(this);
+    }
+
+    /**
+     * Initializes visualizer
+     */
+    private void initVisualizer() {
+        if (MusicUtils.getAudioSessionId() != ERROR_BAD_VALUE) {
+            mVisualizer = new Visualizer(MusicUtils.getAudioSessionId());
+            mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+            mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+                public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) {
+                    mVisualizerView.updateVisualizer(bytes);
+                    //Log.d("VisualizerView", "Visualizer bytes:" + bytes.toString());
+                }
+
+                public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) { }
+            }, Visualizer.getMaxCaptureRate() / 2, true, false);
+            updateVisualizerState();
+        } //else wait for service bind
+    }
+
+    /**
+     * Enables or disables visualizer depending on playback state
+     */
+    private void updateVisualizerState() {
+        if (mVisualizer != null && mVisualizerView != null) {
+            if (MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
+                    PreferenceUtils.getInstance(this).showVisualizations()) {
+                mVisualizer.setEnabled(true);
+                mVisualizerView.setVisibility(View.VISIBLE);
+            } else {
+                mVisualizer.setEnabled(false);
+                mVisualizerView.setVisibility(View.INVISIBLE);
+            }
+        } //else wait for create and service bind
     }
 
     /**
@@ -910,7 +966,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             }
         }
 
-        @DebugLog
         @Override
         public void onPanelExpanded(View panel) {
             mHeaderQueueButton.setVisibility(View.VISIBLE);
@@ -922,7 +977,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mPanelHeader.setBackgroundResource(R.color.app_background_light_transparent);
         }
 
-        @DebugLog
         @Override
         public void onPanelCollapsed(View panel) {
             Log.i(TAG, "onPanelCollapsed");
@@ -1241,6 +1295,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 mReference.get().mFooterPlayPauseButton.updateState();
                 // Refresh the queue
                 mReference.get().refreshQueue();
+                // update visualizer
+                mReference.get().updateVisualizerState();
             } else if (action.equals(MusicPlaybackService.REFRESH)) {
                 // Let the listener know to update a list
                 for (final MusicStateListener listener : mReference.get().mMusicStateListener) {

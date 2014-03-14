@@ -15,6 +15,7 @@
     <string name="settings_about_about_category">About</string>
     <string name="settings_about_legal_category">Legal</string>
     <string name="settings_interface_theme_category">Theme</string>
+    <string name="settings_interface_visualizations_category">Visualizations</string>
     <string name="settings_data_download_category">Download</string>
     <string name="settings_data_storage_category">Storage</string>
 
@@ -34,6 +35,8 @@
     <string name="settings_about_thanks_ac_desc">Banner and icon design</string>
     <string name="settings_interface_use_theme_title">Use accent themes</string>
     <string name="settings_interface_theme_title">Select a theme</string>
+    <string name="settings_interface_visualizations_title">Enable visualizations</string>
+    <string name="settings_interface_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
     <string name="settings_data_wifi_only_title">Download via Wi-Fi only</string>
     <string name="settings_data_wifi_only_summary">To reduce carrier charges, don\'t download over mobile networks</string>
     <string name="settings_data_missing_album_title">Download missing album art</string>
