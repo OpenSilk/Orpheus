@@ -2225,8 +2225,8 @@ public class MusicPlaybackService extends Service {
             // If we just skipped forward the remote device
             // will still be loaded with the old track
             if (mRemoteMediaNeedsReload) {
-                mRemoteMediaNeedsReload = false;
                 loadRemoteCurrent();
+                mRemoteMediaNeedsReload = false;
             } else if (mCastManager.isRemoteMediaLoaded()) {
                 final double duration = duration();
                 final double position = mCastManager.getCurrentMediaPosition();
@@ -2681,7 +2681,7 @@ public class MusicPlaybackService extends Service {
         }
         int startPos = 0;
         // if we are currently playing start where we left off
-        if (mPlayer.isInitialized()) {
+        if (mPlayer.isInitialized() && !mRemoteMediaNeedsReload) {
             startPos = (int) mPlayer.position();
         }
         if (loadRemote(mCurrentMediaInfo, true, startPos)) {
