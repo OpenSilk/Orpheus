@@ -136,7 +136,7 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     protected CursorAdapter createAdapter() {
-        return new SongListCardCursorAdapter(getActivity());
+        return new SongListCardCursorAdapter(getActivity(), false);
     }
 
     @Override

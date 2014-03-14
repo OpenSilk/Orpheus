@@ -38,8 +38,15 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class CardSongList extends CardBaseListNoHeader<Song> {
 
+    private boolean mAllowDelete = true;
+
     public CardSongList(Context context, Song data) {
         super(context, data);
+    }
+
+    public CardSongList(Context context, Song data, boolean allowDelete) {
+        super(context, data);
+        mAllowDelete = allowDelete;
     }
 
     public CardSongList(Context context, Song data, int innerLayout) {
@@ -75,7 +82,8 @@ public class CardSongList extends CardBaseListNoHeader<Song> {
 
     @Override
     public int getOverflowMenuId() {
-        return R.menu.card_song;
+        int menuRes = mAllowDelete ? R.menu.card_song : R.menu.card_song_no_delete;
+        return menuRes;
     }
 
     @Override

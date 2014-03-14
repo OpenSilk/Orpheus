@@ -17,7 +17,7 @@ repositories {
 def versionMajor = 0
 def versionMinor = 1
 def versionPatch = 0
-def versionBuild = 4 // bump for dogfood builds, public betas, etc.
+def versionBuild = 5 // bump for dogfood builds, public betas, etc.
 
 assert(versionMinor < 10) // Single digit
 assert(versionPatch < 100) // Double digits

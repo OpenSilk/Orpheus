@@ -29,13 +29,20 @@ import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
  */
 public class SongListCardCursorAdapter extends CardCursorAdapter {
 
+    private boolean mAllowDelete = true;
+
     public SongListCardCursorAdapter(Context context) {
         super(context);
     }
 
+    public SongListCardCursorAdapter(Context context, boolean allowDelete) {
+        super(context);
+        mAllowDelete = allowDelete;
+    }
+
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardSongList(getContext(), CursorHelpers.makeSongFromCursor(cursor));
+        return new CardSongList(getContext(), CursorHelpers.makeSongFromCursor(cursor), mAllowDelete);
     }
 
 }
