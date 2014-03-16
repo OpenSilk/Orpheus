@@ -41,6 +41,9 @@
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheusdark</item>
         <!--<item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>-->
         <!--<item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>-->
+
+        <!--Sliding pane shadow-->
+        <item name="shadowDrawable">@drawable/bottom_shadow_light</item>
     </style>
 
     <!--OpenSilk-->
