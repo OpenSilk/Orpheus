@@ -17,6 +17,12 @@
 package com.andrew.apollo.utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.andrew.apollo.R;
@@ -126,99 +132,50 @@ public class ThemeHelper {
      * @return drawable used for action bar background
      */
     public final Drawable getActionBarBackground() {
-        switch (mActiveTheme) {
-            case ORPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_orpheus);
-            case BLUPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_blupheus);
-            case REPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_repheus);
-            case GREPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_grepheus);
-            case PURPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_purpheus);
-        }
-        return null;
+        return themeDrawable(R.drawable.ab_solid_orpheus);
     }
 
     public final Drawable getShuffleButtonDrawable() {
-        switch (mActiveTheme) {
-            case ORPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_orange);
-            case BLUPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_blue_dark);
-            case REPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_red_dark);
-            case GREPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_green_dark);
-            case PURPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_schuffle_purple_dark);
-        }
-        return null;
+        return themeDrawable(R.drawable.ic_action_playback_shuffle_black);
     }
 
     public final Drawable getRepeatButtonDrawable() {
-        switch (mActiveTheme) {
-            case ORPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_orange);
-            case BLUPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_blue_dark);
-            case REPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_red_dark);
-            case GREPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_green_dark);
-            case PURPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_purple_dark);
-        }
-        return null;
+        return themeDrawable(R.drawable.ic_action_playback_repeat_black);
     }
 
     public final Drawable getRepeatOneButtonDrawable() {
-        switch (mActiveTheme) {
-            case ORPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_orange);
-            case BLUPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_blue_dark);
-            case REPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_red_dark);
-            case GREPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_green_dark);
-            case PURPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.ic_action_playback_repeat_1_purple_dark);
-        }
-        return null;
+        return themeDrawable(R.drawable.ic_action_playback_repeat_1_black);
     }
 
     public final Drawable getQueueButtonDrawable() {
-        switch (mActiveTheme) {
-            case ORPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_orange);
-            case BLUPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_blue_dark);
-            case REPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_red_dark);
-            case GREPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_green_dark);
-            case PURPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_purple_dark);
-        }
-        return null;
+        return mContext.getResources().getDrawable(R.drawable.ic_action_queue_holo_light);
     }
 
     public final Drawable getQueueButtonInverseDrawable() {
-        switch (mActiveTheme) {
-            case ORPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_orange_inverse);
-            case BLUPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_blue_dark_inverse);
-            case REPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_red_dark_inverse);
-            case GREPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_green_dark_inverse);
-            case PURPHEUS:
-                return mContext.getResources().getDrawable(R.drawable.list_2_purple_dark_inverse);
+        return themeDrawable(R.drawable.ic_action_queue_dark);
+    }
+
+    public final Drawable themeDrawable(int resId) {
+        final Drawable maskDrawable = mContext.getResources().getDrawable(resId);
+        if (!(maskDrawable instanceof BitmapDrawable)) {
+            return null;
         }
-        return null;
+
+        final Bitmap maskBitmap = ((BitmapDrawable) maskDrawable).getBitmap();
+        final int width = maskBitmap.getWidth();
+        final int height = maskBitmap.getHeight();
+
+        final Bitmap outBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(outBitmap);
+        canvas.drawBitmap(maskBitmap, 0, 0, null);
+
+        final Paint maskedPaint = new Paint();
+        maskedPaint.setColor(getThemeColor());
+        maskedPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+
+        canvas.drawRect(0, 0, width, height, maskedPaint);
+
+        return new BitmapDrawable(mContext.getResources(), outBitmap);
     }
 
 }
