@@ -37,7 +37,6 @@ import android.media.MediaPlayer;
 import android.media.RemoteControlClient;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -65,24 +64,21 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.google.android.gms.cast.ApplicationMetadata;
-import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.RemoteMediaPlayer;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.ResultCallback;
 
-import org.opensilk.cast.BaseCastManager;
-import org.opensilk.cast.CastManager;
-import org.opensilk.cast.CastManagerCallback;
-import org.opensilk.cast.CastManagerFactory;
-import org.opensilk.cast.CastRouteListener;
-import org.opensilk.cast.ICastManager;
-import org.opensilk.cast.callbacks.CastConsumerImpl;
-import org.opensilk.cast.callbacks.ICastConsumer;
+import org.opensilk.cast.callbacks.IMediaCastConsumer;
+import org.opensilk.cast.callbacks.IMediaCastConsumerImpl;
 import org.opensilk.cast.exceptions.CastException;
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
+import org.opensilk.cast.helpers.CastServiceConnectionCallback;
+import org.opensilk.cast.helpers.LocalCastServiceManager;
+import org.opensilk.cast.manager.BaseCastManager;
+import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
@@ -501,14 +497,14 @@ public class MusicPlaybackService extends Service {
     private FavoritesStore mFavoritesCache;
 
     /**
-     * Cast manager
+     * Cast Service helper
      */
-    private CastManager mCastManager;
+    private LocalCastServiceManager mCastServiceHelper;
 
     /**
-     * aidl front end for CastManager used by activity
+     * Cast manager
      */
-    private CastManagerInterface mCastManagerInterface;
+    private MediaCastManager mCastManager;
 
     /**
      * Http server for service cast devices
@@ -654,12 +650,10 @@ public class MusicPlaybackService extends Service {
         mPlayer = new MultiPlayer(this);
         mPlayer.setHandler(mPlayerHandler);
 
-        // Initialize the cast manager
-        mCastManager = CastManagerFactory.getCastManager(this);
-        mCastManager.addCastConsumer(mCastConsumer);
-
-        // Initialize the cast manager interface for activity
-        mCastManagerInterface = new CastManagerInterface(mCastManager);
+        // Bind to the cast service
+        mCastServiceHelper = new LocalCastServiceManager(this);
+        mCastServiceHelper.setCallback(mCastServiceConnectionCallback);
+        mCastServiceHelper.bind();
 
         // Initialize the remote progress updater task
         mRemoteProgressHandler = new RemoteProgressHandler(this);
@@ -785,6 +779,10 @@ public class MusicPlaybackService extends Service {
 
         // Unregister with cast manager
         mCastManager.removeCastConsumer(mCastConsumer);
+        mCastManager = null;
+
+        // Unbind cast service
+        mCastServiceHelper.unbind();
 
         // Stop http server
         stopCastServer();
@@ -807,15 +805,14 @@ public class MusicPlaybackService extends Service {
             if (intent.hasExtra(NOW_IN_FOREGROUND)) {
                 mAnyActivityInForeground = intent.getBooleanExtra(NOW_IN_FOREGROUND, false);
                 updateNotification();
-                if (mAnyActivityInForeground) {
-                    // look and see if we were just disconnected
+                      // look and see if we were just disconnected
 //                    mCastManager.reconnectSessionIfPossible(this, false, 2);
-                    mCastManager.incrementUiCounter();
-                    mRemoteProgressHandler.removeMessages(0);
-                } else {
-                    mCastManager.decrementUiCounter();
-                    mRemoteProgressHandler.sendEmptyMessage(0);
-                }
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateCastManagerUiCounter(mAnyActivityInForeground);
+                    }
+                });
             }
 
             if (SHUTDOWN.equals(action)) {
@@ -831,6 +828,26 @@ public class MusicPlaybackService extends Service {
         // just started but not bound to and nothing is playing
         scheduleDelayedShutdown();
         return START_STICKY;
+    }
+
+    private void updateCastManagerUiCounter(final boolean visible) {
+        if (mCastManager != null) {
+            if (visible) {
+                mCastManager.incrementUiCounter();
+                mRemoteProgressHandler.removeMessages(0);
+            } else {
+                mCastManager.decrementUiCounter();
+                mRemoteProgressHandler.sendEmptyMessage(0);
+            }
+        } else {
+            // if we haven't bound to the cast service yet we will wait a little and try again.
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    updateCastManagerUiCounter(visible);
+                }
+            }, 100);
+        }
     }
 
     private void releaseServiceUiAndStop() {
@@ -996,6 +1013,9 @@ public class MusicPlaybackService extends Service {
     }
 
     private void stopRemote(final boolean goToIdle) {
+        if (mCastManager == null) {
+            return;
+        }
         try {
             mCurrentMediaInfo = null;
             mRemoteMediaNeedsReload = true;
@@ -1978,6 +1998,9 @@ public class MusicPlaybackService extends Service {
      */
     public long seekAndPlay(long position) {
         long seekedTo = -1;
+        if (mCastManager == null) {
+            return seekedTo;
+        }
         if (isRemotePlayback()) {
             try {
                 mCastManager.seekAndPlay((int)position);
@@ -2011,6 +2034,9 @@ public class MusicPlaybackService extends Service {
 
     @DebugLog
     private long seekRemote(long position) {
+        if (mCastManager == null) {
+            return -1;
+        }
         try {
             if (position < 0) {
                 position = 0;
@@ -2059,6 +2085,9 @@ public class MusicPlaybackService extends Service {
     }
 
     private long positionRemote() {
+        if (mCastManager == null) {
+            return -1;
+        }
         try {
             long position = (long) mCastManager.getCurrentMediaPosition();
             // We seek the local player so we dont have to keep
@@ -2103,6 +2132,9 @@ public class MusicPlaybackService extends Service {
     }
 
     public long durationRemote() {
+        if (mCastManager == null) {
+            return -1;
+        }
         try {
             return (long) mCastManager.getMediaDuration();
         } catch (TransientNetworkDisconnectionException e) {
@@ -2217,6 +2249,9 @@ public class MusicPlaybackService extends Service {
 
     @DebugLog
     private void playRemote() {
+        if (mCastManager == null) {
+            return;
+        }
         mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
@@ -2307,6 +2342,9 @@ public class MusicPlaybackService extends Service {
     }
 
     private void pauseRemote() {
+        if (mCastManager == null) {
+            return;
+        }
         if (mIsSupposedToBePlaying) {
             try {
                 mCastManager.pause();
@@ -2617,6 +2655,9 @@ public class MusicPlaybackService extends Service {
      * @return
      */
     public boolean isRemotePlayback() {
+        if (mCastManager == null) {
+            return false;
+        }
         if (mPlaybackLocation == PlaybackLocation.REMOTE) {
             try {
                 mCastManager.checkConnectivity();
@@ -2803,100 +2844,9 @@ public class MusicPlaybackService extends Service {
     };
 
     /**
-     * Front end for activity to communicate with the cast mananger
-     */
-    private static class CastManagerInterface extends ICastManager.Stub {
-        private final WeakReference<CastManager> mCastManager;
-
-        CastManagerInterface(CastManager castManager) {
-            mCastManager = new WeakReference<CastManager>(castManager);
-        }
-
-
-        @DebugLog
-        @Override
-        public void changeVolume(double increment) throws RemoteException {
-            try {
-                mCastManager.get().incrementVolume(increment);
-            } catch (Exception ignored) {
-            }
-        }
-
-        @DebugLog
-        @Override
-        public int getReconnectionStatus() throws RemoteException {
-            return mCastManager.get().getReconnectionStatus();
-        }
-
-        @DebugLog
-        @Override
-        public void setReconnectionStatus(int status) throws RemoteException {
-            mCastManager.get().setReconnectionStatus(status);
-        }
-
-        @DebugLog
-        @Override
-        public CastRouteListener getRouteListener() throws RemoteException {
-            return mListener;
-        }
-
-        @DebugLog
-        @Override
-        public void registerListener(CastManagerCallback cb) throws RemoteException {
-            mCastManager.get().registerListener(cb);
-        }
-
-        @DebugLog
-        @Override
-        public void unregisterListener(CastManagerCallback cb) throws RemoteException {
-            mCastManager.get().unregisterListener(cb);
-        }
-
-        private final CastRouteListener mListener = new CastRouteListener.Stub() {
-            /**
-             * The user has selected a device, we won't receive a callback from
-             * the mediarouter so the activity has told us to connect manually
-             * @param castDevice bundle representation of cast device
-             * @throws RemoteException
-             */
-            @DebugLog
-            @Override
-            public void onRouteSelected(Bundle castDevice) throws RemoteException {
-                final CastDevice device = CastDevice.getFromBundle(castDevice);
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCastManager.get().selectDevice(device);
-                    }
-                });
-            }
-
-            /**
-             * The user has disconnected from the device, again we won't be receiving
-             * a callback from the mediarouter so they have informed us to stop the app
-             * @throws RemoteException
-             */
-            @DebugLog
-            @Override
-            public void onRouteUnselected() throws RemoteException {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            mCastManager.get().stopApplication();
-                        } catch (Exception e) {
-                            Log.e(TAG, "Failed to stop application: " + e.getMessage());
-                        }
-                    }
-                });
-            }
-        };
-    }
-
-    /**
      * Callback handler for cast manager
      */
-    private final ICastConsumer mCastConsumer = new CastConsumerImpl() {
+    private final IMediaCastConsumer mCastConsumer = new IMediaCastConsumerImpl() {
 
         @Override
         @DebugLog
@@ -2924,8 +2874,8 @@ public class MusicPlaybackService extends Service {
 
         @Override
         @DebugLog
-        public boolean onApplicationConnectionFailed(int errorCode) {
-            return false; //Nothing for us to do, the user must manually try again
+        public void onApplicationConnectionFailed(int errorCode) {
+            //Nothing for us to do, the user must manually try again
         }
 
         @Override
@@ -3040,8 +2990,8 @@ public class MusicPlaybackService extends Service {
 
         @Override
         @DebugLog
-        public boolean onConnectionFailed(ConnectionResult result) {
-            return false;
+        public void onConnectionFailed(ConnectionResult result) {
+
         }
 
         @Override
@@ -3060,6 +3010,23 @@ public class MusicPlaybackService extends Service {
                     pauseLocal();
                     break;
             }
+        }
+    };
+
+    /**
+     * Service connection callback handler for cast service
+     */
+    private final CastServiceConnectionCallback mCastServiceConnectionCallback = new CastServiceConnectionCallback() {
+        @Override
+        public void onCastServiceConnected() {
+            // Initialize the cast manager
+            mCastManager = mCastServiceHelper.getService().getCastManager();
+            mCastManager.addCastConsumer(mCastConsumer);
+        }
+
+        @Override
+        public void onCastServiceDisconnected() {
+            mCastManager = null;
         }
     };
 
@@ -3782,10 +3749,6 @@ public class MusicPlaybackService extends Service {
             return mService.get().isRemotePlayback();
         }
 
-        @Override
-        public ICastManager getCastManagerInterface() throws RemoteException {
-            return mService.get().mCastManagerInterface;
-        }
     }
 
 }

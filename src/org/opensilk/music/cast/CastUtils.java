@@ -19,19 +19,20 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.support.v7.media.MediaRouter;
 
-import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.Config;
 import com.andrew.apollo.MusicPlaybackService;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 
-import org.opensilk.cast.CastManager;
-
-import org.opensilk.music.cast.CastWebServer;
+import org.opensilk.cast.ICastService;
+import org.opensilk.cast.manager.BaseCastManager;
+import org.opensilk.cast.manager.ReconnectionStatus;
+import org.opensilk.cast.util.Utils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -43,6 +44,58 @@ public class CastUtils {
 
     private CastUtils() {
         //static
+    }
+
+    public static ICastService sCastService;
+
+    /**
+     * Increments volume on remote device by delta
+     * @param increment delta
+     */
+    public static void changeRemoteVolume(double increment) {
+        if (sCastService != null) {
+            try {
+                sCastService.getCastManager().changeVolume(increment);
+            } catch (final RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Called when user selects a device with the cast icon, we do some stuff then
+     * notify the service so it can instruct the cast manager to connect
+     * @param context
+     * @param info
+     * @return true if we notified the service, false if we failed
+     */
+    public static boolean notifyRouteSelected(Context context, MediaRouter.RouteInfo info) {
+        if (sCastService != null) {
+            try {
+                if (sCastService.getCastManager().getReconnectionStatus() == ReconnectionStatus.FINALIZE) {
+                    sCastService.getCastManager().setReconnectionStatus(ReconnectionStatus.INACTIVE);
+                    return true;
+                }
+                Utils.saveStringToPreference(context, BaseCastManager.PREFS_KEY_ROUTE_ID, info.getId());
+                sCastService.getCastManager().getRouteListener().onRouteSelected(info.getExtras());
+                return true;
+            } catch (final RemoteException ignored) {
+
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tell the service we just disconnected from the remote device
+     */
+    public static void notifyRouteUnselected() {
+        if (sCastService != null) {
+            try {
+                sCastService.getCastManager().getRouteListener().onRouteUnselected();
+            } catch (final RemoteException ignored) {
+
+            }
+        }
     }
 
     public static Cursor getSingleTrackCursor(Context context, long id) {

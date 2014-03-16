@@ -217,7 +217,9 @@
         <!-- Music service -->
         <service
             android:name=".MusicPlaybackService"
-            android:label="@string/app_name"
+            android:process=":service"/>
+        <!-- Cast Service -->
+        <service android:name="org.opensilk.cast.SilkCastService"
             android:process=":service"/>
     </application>
 

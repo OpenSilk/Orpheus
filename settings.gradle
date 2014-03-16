@@ -1,3 +1,4 @@
 include ':AndroidSlidingUpPanel'
 include ':drag-sort-listview'
 include ':FadingActionBar'
+include ':../SilkCastService:library'

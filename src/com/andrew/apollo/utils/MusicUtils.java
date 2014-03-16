@@ -34,7 +34,6 @@ import android.provider.MediaStore.Audio.Playlists;
 import android.provider.MediaStore.Audio.PlaylistsColumns;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
-import android.support.v7.media.MediaRouter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.SubMenu;
@@ -54,10 +53,6 @@ import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
 
-import org.opensilk.cast.BaseCastManager;
-import org.opensilk.cast.CastManagerCallback;
-import org.opensilk.cast.ReconnectionStatus;
-import org.opensilk.cast.util.Utils;
 import org.opensilk.music.adapters.CursorHelpers;
 import org.opensilk.music.loaders.Projections;
 
@@ -528,86 +523,6 @@ public final class MusicUtils {
             }
         }
         return false;
-    }
-
-    /**
-     * Increments volume on remote device by delta
-     * @param increment delta
-     */
-    public static void changeRemoteVolume(double increment) {
-        if (sService != null) {
-            try {
-                sService.getCastManagerInterface().changeVolume(increment);
-            } catch (final RemoteException ignored) {
-            }
-        }
-    }
-
-    /**
-     * Called when user selects a device with the cast icon, we do some stuff then
-     * notify the service so it can instruct the cast manager to connect
-     * @param context
-     * @param info
-     * @return true if we notified the service, false if we failed
-     */
-    public static boolean notifyRouteSelected(Context context, MediaRouter.RouteInfo info) {
-        if (sService != null) {
-            try {
-                if (sService.getCastManagerInterface().getReconnectionStatus() == ReconnectionStatus.FINALIZE) {
-                    sService.getCastManagerInterface().setReconnectionStatus(ReconnectionStatus.INACTIVE);
-                    return true;
-                }
-                Utils.saveStringToPreference(context, BaseCastManager.PREFS_KEY_ROUTE_ID, info.getId());
-                sService.getCastManagerInterface().getRouteListener().onRouteSelected(info.getExtras());
-                return true;
-            } catch (final RemoteException ignored) {
-
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Tell the service we just disconnected from the remote device
-     */
-    public static void notifyRouteUnselected() {
-        if (sService != null) {
-            try {
-                sService.getCastManagerInterface().getRouteListener().onRouteUnselected();
-            } catch (final RemoteException ignored) {
-
-            }
-        }
-    }
-
-    /**
-     * Registers callback with castmanager
-     * @param cb
-     */
-    public static void registerCastManagerCallback(CastManagerCallback cb) {
-        if (sService != null) {
-            try {
-                sService.getCastManagerInterface().registerListener(cb);
-            } catch (RemoteException ignored) {
-
-            }
-        }
-    }
-
-    /**
-     * unregisters callback with castmanager
-     * @param cb
-     */
-    public static void unRegisterCastManagerCallback(CastManagerCallback cb) {
-        if (sService != null) {
-            try {
-                sService.getCastManagerInterface().unregisterListener(cb);
-            } catch (RemoteException ignored) {
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     /**

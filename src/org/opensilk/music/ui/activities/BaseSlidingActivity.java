@@ -31,7 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.RemoteException;
+import android.os.Messenger;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
@@ -77,7 +77,9 @@ import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import org.opensilk.cast.CastManagerCallback;
+import org.opensilk.cast.helpers.CastServiceConnectionCallback;
+import org.opensilk.cast.helpers.RemoteCastServiceManager;
+import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.AudioVisualizationView;
@@ -88,11 +90,14 @@ import org.opensilk.music.widgets.ShuffleButton;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import hugo.weaving.DebugLog;
 
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
 import static com.andrew.apollo.utils.MusicUtils.sService;
+import static org.opensilk.cast.CastMessage.*;
+import static org.opensilk.music.cast.CastUtils.sCastService;
 
 /**
  * A base {@link FragmentActivity} used to update the bottom bar and
@@ -192,6 +197,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private MediaRouteSelector mMediaRouteSelector;
     /** Determines whether the cast buttons should be shown */
     private boolean mCastDeviceAvailable = false;
+    private RemoteCastServiceManager mCastServiceHelper;
+    private boolean mTransientNetworkDisconnection = false;
 
     // Theme resourses
     private ThemeHelper mThemeHelper;
@@ -229,10 +236,15 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Initialize the handler used to update the current time
         mTimeHandler = new TimeHandler(this);
 
+        // Bind cast service
+        mCastServiceHelper = new RemoteCastServiceManager(this, new Messenger(mCastManagerCallbackHandler));
+        mCastServiceHelper.setCallback(mCastServiceConnectionCallback);
+        mCastServiceHelper.bind();
+
         // Initialize the media router
         mMediaRouter = MediaRouter.getInstance(this);
         mMediaRouteSelector = new MediaRouteSelector.Builder()
-                .addControlCategory(CastMediaControlIntent.categoryForCast(Config.CAST_APPLICATION_ID))
+                .addControlCategory(CastMediaControlIntent.categoryForCast(getString(R.string.cast_id)))
                 //.addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
                 .build();
 
@@ -261,8 +273,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
         sService = IApolloService.Stub.asInterface(service);
-        // register for callbacks
-        MusicUtils.registerCastManagerCallback(mCastManagerCallback);
 
         startPlayback();
         // Set the playback drawables
@@ -383,12 +393,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mTimeHandler.removeMessages(REFRESH_TIME);
         // Unbind from the service
         if (mToken != null) {
-            // unregister with castmanager
-            MusicUtils.unRegisterCastManagerCallback(mCastManagerCallback);
 
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }
+
+        //Unbind from cast service
+        mCastServiceHelper.unbind();
+        sCastService = null;
 
         // Unregister the receiver
         try {
@@ -450,7 +462,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 increment = -0.05;
             }
             if (increment != 0) {
-                MusicUtils.changeRemoteVolume(increment);
+                CastUtils.changeRemoteVolume(increment);
                 return true;
             }
         }
@@ -1032,12 +1044,16 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     };
 
+    /**
+     * Handle mediarouter callbacks, responsible for keeping our mediarouter instance
+     * in sync with the cast managers instance.
+     */
     private final MediaRouter.Callback mMediaRouterCallback = new MediaRouter.Callback() {
 
         @DebugLog
         @Override
         public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
-            if (!MusicUtils.notifyRouteSelected(BaseSlidingActivity.this, route)) {
+            if (!CastUtils.notifyRouteSelected(BaseSlidingActivity.this, route)) {
                 // If we couldnt notify the service we need to reset the router so
                 // the user can try again
                 router.selectRoute(router.getDefaultRoute());
@@ -1052,7 +1068,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 if (MusicUtils.isPlaying()) {
                     MusicUtils.playOrPause();
                 }
-                MusicUtils.notifyRouteUnselected();
+                CastUtils.notifyRouteUnselected();
             }
         }
 
@@ -1089,93 +1105,66 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     };
 
-    private boolean mTransientNetworkDisconnection = false;
-
     /**
-     * Remote callbacks received from the CastManager
-     * these all pertain to notifying the user of changes and making sure
-     * the mediarouter buttons are reset when the service is no longer casting
+     * Handle messages sent from CastService notifying of CastManager events
      */
-    private final CastManagerCallback mCastManagerCallback = new CastManagerCallback.Stub() {
-
-        @DebugLog
+    private final Handler mCastManagerCallbackHandler = new Handler() {
         @Override
-        public void onApplicationConnectionFailed(int errorCode) throws RemoteException {
-            final String errorMsg;
-            switch (errorCode) {
-                case CastStatusCodes.APPLICATION_NOT_FOUND:
-                    errorMsg = "ERROR_APPLICATION_NOT_FOUND";
-                    break;
-                case CastStatusCodes.TIMEOUT:
-                    errorMsg = "ERROR_TIMEOUT";
-                    break;
-                default:
-                    errorMsg = "UNKNOWN ERROR: " + errorCode;
-                    break;
-            }
-            Log.d(TAG, "onApplicationConnectionFailed(): failed due to: " + errorMsg);
-            resetDefaultMediaRoute();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case CAST_APPLICATION_CONNECTION_FAILED:
+                    final String errorMsg;
+                    switch (msg.arg1) {
+                        case CastStatusCodes.APPLICATION_NOT_FOUND:
+                            errorMsg = "ERROR_APPLICATION_NOT_FOUND";
+                            break;
+                        case CastStatusCodes.TIMEOUT:
+                            errorMsg = "ERROR_TIMEOUT";
+                            break;
+                        default:
+                            errorMsg = "UNKNOWN ERROR: " + msg.arg1;
+                            break;
+                    }
+                    Log.d(TAG, "onApplicationConnectionFailed(): failed due to: " + errorMsg);
+                    resetDefaultMediaRoute();
                     // notify if possible
                     if (MusicUtils.isForeground()) {
                         new AlertDialog.Builder(BaseSlidingActivity.this)
-                                .setTitle("Cast Error")
-                                .setMessage("Failed to connect to cast device " + errorMsg)
+                                .setTitle(R.string.cast_error)
+                                .setMessage(String.format(Locale.getDefault(),
+                                        getString(R.string.cast_failed_to_connect), errorMsg))
                                 .setNeutralButton(android.R.string.ok, null)
                                 .show();
                     }
-                }
-            });
-        }
-
-        @DebugLog
-        @Override
-        public void onApplicationDisconnected(int errorCode) throws RemoteException {
-            // This is just in case
-            resetDefaultMediaRoute();
-        }
-
-        @DebugLog
-        @Override
-        public void onConnectionSuspended(int cause) throws RemoteException {
-            mTransientNetworkDisconnection = true;
-        }
-
-        @DebugLog
-        @Override
-        public void onConnectivityRecovered() throws RemoteException {
-            mTransientNetworkDisconnection = false;
-        }
-
-        @DebugLog
-        @Override
-        public void onDisconnected() throws RemoteException {
-            mTransientNetworkDisconnection = false;
-        }
-
-        @Override
-        public void onFailed(int resourceId, int statusCode) throws RemoteException {
-            final int error = resourceId;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+                    break;
+                case CAST_APPLICATION_DISCONNECTED:
+                    // This is just in case
+                    resetDefaultMediaRoute();
+                    break;
+                case CAST_CONNECTION_SUSPENDED:
+                    mTransientNetworkDisconnection = true;
+                    break;
+                case CAST_CONNECTIVITY_RECOVERED:
+                    mTransientNetworkDisconnection = false;
+                    break;
+                case CAST_DISCONNECTED:
+                    mTransientNetworkDisconnection = false;
+                    break;
+                case CAST_FAILED:
                     // notify if possible
                     if (MusicUtils.isForeground()) {
-                        switch (error) {
+                        switch (msg.arg1) {
                             case (R.string.failed_load):
                                 new AlertDialog.Builder(BaseSlidingActivity.this)
-                                        .setTitle("Cast Error")
+                                        .setTitle(R.string.cast_error)
                                         .setMessage(R.string.failed_load)
                                         .setNeutralButton(android.R.string.ok, null)
                                         .show();
                                 break;
                         }
-
                     }
-                }
-            });
+                    break;
+            }
         }
 
         /**
@@ -1183,13 +1172,23 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
          * will have already done this, but our buttons dont know about it
          */
         private void resetDefaultMediaRoute() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // Reset the route
-                    mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
-                }
-            });
+            // Reset the route
+            mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
+        }
+    };
+
+    /**
+     * Service connection listener for cast service bind
+     */
+    private final CastServiceConnectionCallback mCastServiceConnectionCallback = new CastServiceConnectionCallback() {
+        @Override
+        public void onCastServiceConnected() {
+            sCastService = mCastServiceHelper.getService();
+        }
+
+        @Override
+        public void onCastServiceDisconnected() {
+            sCastService = null;
         }
     };
 
