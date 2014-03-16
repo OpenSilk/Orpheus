@@ -249,7 +249,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 .build();
 
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        mSlidingPanel.setShadowDrawable(getResources().getDrawable(R.drawable.above_shadow));
         mSlidingPanel.setDragView(findViewById(R.id.track_artist_info));
         mSlidingPanel.setPanelSlideListener(mPanelSlideListener);
 

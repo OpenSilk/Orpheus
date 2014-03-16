@@ -45,6 +45,9 @@
         <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
         <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.Blupheus</item>
+
+        <!--Sliding pane shadow-->
+        <item name="shadowDrawable">@drawable/bottom_shadow</item>
     </style>
 
     <!--OpenSilk-->
