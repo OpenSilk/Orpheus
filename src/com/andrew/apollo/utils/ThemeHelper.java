@@ -62,7 +62,7 @@ public class ThemeHelper {
         //Set theme
         switch (mActiveTheme) {
             case ORPHEUS:
-                return R.style.Theme_Orpheus_Panel;
+                return R.style.Theme_Orpheusdark_Panel;
             case BLUPHEUS:
                 return R.style.Theme_Blupheus_Panel;
             case REPHEUS:

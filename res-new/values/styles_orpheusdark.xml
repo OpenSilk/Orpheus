@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- File created by the Android Action Bar Style Generator
+
+     Copyright (C) 2011 The Android Open Source Project
+     Copyright (C) 2012 readyState Software Ltd
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+
+    <style name="Theme.Orpheusdark" parent="@style/Theme.AppCompat">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheusdark</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Orpheusdark</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheusdark</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Orpheusdark</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Orpheusdark</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Transparent.Orpheusdark</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_orpheusdark</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_orpheusdark</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheusdark</item>
+
+        <!-- Generated with http://android-holo-colors.com -->
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheusdark</item>
+        <item name="android:seekBarStyle">@style/SeekBarOrpheusdark</item>
+        <item name="android:fastScrollThumbDrawable">@drawable/orpheusdark_fastscroll_thumb_default_holo</item>
+
+        <!--OpenSilk-->
+
+        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
+        <item name="android:selectableItemBackground">@drawable/selectable_background_orpheusdark</item>
+        <!--<item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>-->
+        <!--<item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>-->
+    </style>
+
+    <!--OpenSilk-->
+    <!-- base theme for activites using the sliding up panel -->
+    <style name="Theme.Orpheusdark.Panel">
+        <!--needed to allow sliding up pane-->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <!--end OpenSilk-->
+
+    <style name="ActionBar.Solid.Orpheusdark" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="android:background">@drawable/ab_solid_orpheusdark</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheusdark</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_orpheusdark</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Orpheusdark</item>
+        <!--OpenSilk-->
+        <!--needed to override actionbar icon from launcher icon -->
+        <item name="android:icon">@drawable/ic_launcher</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Orpheusdark" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_orpheusdark</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Orpheusdark</item>
+        <!--OpenSilk-->
+        <!--needed to override actionbar icon from launcher icon -->
+        <item name="android:icon">@drawable/ic_launcher</item>
+    </style>
+	
+    <style name="PopupMenu.Orpheusdark" parent="@style/Widget.AppCompat.PopupMenu">	
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheusdark</item>	
+    </style>
+	
+    <style name="DropDownListView.Orpheusdark" parent="@style/Widget.AppCompat.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_orpheusdark</item>
+    </style>
+
+    <style name="ActionBarTabStyle.Orpheusdark" parent="@style/Widget.AppCompat.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_orpheusdark</item>
+    </style>
+	
+    <style name="DropDownNav.Orpheusdark" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
+        <item name="android:background">@drawable/spinner_background_ab_orpheusdark</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheusdark</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_orpheusdark</item>
+    </style>
+    
+    <style name="ProgressBar.Orpheusdark" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_orpheusdark</item>
+    </style>
+    
+    <style name="ActionButton.CloseMode.Orpheusdark" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_orpheusdark</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Orpheusdark.Widget" parent="@style/Theme.AppCompat">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Orpheusdark</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheusdark</item>
+    </style>
+
+    <!-- Generated with http://android-holo-colors.com -->
+    <style name="ProgressBarOrpheusdark" parent="android:Widget.Holo.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/orpheusdark_progress_horizontal_holo_dark</item>
+        <item name="android:indeterminateDrawable">@drawable/orpheusdark_progress_indeterminate_horizontal_holo_dark</item>
+    </style>
+
+    <style name="SeekBarOrpheusdark" parent="android:Widget.Holo.SeekBar">
+        <item name="android:progressDrawable">@drawable/orpheusdark_scrubber_progress_horizontal_holo_dark</item>
+        <item name="android:indeterminateDrawable">@drawable/orpheusdark_scrubber_progress_horizontal_holo_dark</item>
+        <item name="android:thumb">@drawable/orpheusdark_scrubber_control_selector_holo_dark</item>
+    </style>
+
+</resources>
