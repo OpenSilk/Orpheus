@@ -16,8 +16,8 @@ repositories {
 
 def versionMajor = 0
 def versionMinor = 1
-def versionPatch = 0
-def versionBuild = 6 // bump for dogfood builds, public betas, etc.
+def versionPatch = 1
+def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
 assert(versionMinor < 10) // Single digit
 assert(versionPatch < 100) // Double digits
@@ -39,7 +39,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 19
         versionCode versionMajor * 100000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
-        versionName String.format("%d.%d.%02d", versionMajor, versionMinor, versionPatch)
+        versionName String.format("%d.%d.%d", versionMajor, versionMinor, versionPatch)
         packageName "org.opensilk.music"
     }
 

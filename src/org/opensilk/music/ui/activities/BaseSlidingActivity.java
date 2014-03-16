@@ -282,7 +282,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     public void onServiceDisconnected(final ComponentName name) {
         sService = null;
-        mVisualizer.release();
+        if (mVisualizer != null) {
+            mVisualizer.release();
+        }
     }
 
     /**
@@ -398,7 +400,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Remove any music status listeners
         mMusicStateListener.clear();
         // Kill the visualizer
-        mVisualizer.release();
+        if (mVisualizer != null) {
+            mVisualizer.release();
+        }
 
         //Free cache
         ImageCache.getInstance(this).evictAll();
@@ -595,17 +599,22 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     private void initVisualizer() {
         if (MusicUtils.getAudioSessionId() != ERROR_BAD_VALUE) {
-            mVisualizer = new Visualizer(MusicUtils.getAudioSessionId());
-            mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-            mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-                public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) {
-                    mVisualizerView.updateVisualizer(bytes);
-                    //Log.d("VisualizerView", "Visualizer bytes:" + bytes.toString());
-                }
+            try {
+                mVisualizer = new Visualizer(MusicUtils.getAudioSessionId());
+                mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+                mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+                    public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) {
+                        mVisualizerView.updateVisualizer(bytes);
+                        //Log.d("VisualizerView", "Visualizer bytes:" + bytes.toString());
+                    }
 
-                public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) { }
-            }, Visualizer.getMaxCaptureRate() / 2, true, false);
-            updateVisualizerState();
+                    public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) { }
+                }, Visualizer.getMaxCaptureRate() / 2, true, false);
+                updateVisualizerState();
+            } catch (RuntimeException e) {
+                // Go without.
+                e.printStackTrace();
+            }
         } //else wait for service bind
     }
 

@@ -1632,7 +1632,7 @@ public class MusicPlaybackService extends Service {
             }
             mPlayPos = pos;
             updateCursor(mPlayList[mPlayPos]);
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 SystemClock.sleep(3000);
                 updateCursor(mPlayList[mPlayPos]);
             }
@@ -1719,7 +1719,7 @@ public class MusicPlaybackService extends Service {
             }
 
             // If mCursor is null, try to associate path with a database cursor
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 final ContentResolver resolver = getContentResolver();
                 Uri uri;
                 String where;
@@ -1853,7 +1853,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getPath() {
         synchronized (this) {
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
             return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.DATA));
@@ -1867,7 +1867,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getAlbumName() {
         synchronized (this) {
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
             return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.ALBUM));
@@ -1881,7 +1881,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getTrackName() {
         synchronized (this) {
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
             return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.TITLE));
@@ -1895,7 +1895,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getArtistName() {
         synchronized (this) {
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
             return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.ARTIST));
@@ -1909,7 +1909,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getAlbumArtistName() {
         synchronized (this) {
-            if (mAlbumCursor == null) {
+            if (mAlbumCursor == null || mCursor.isClosed()) {
                 return null;
             }
             return mAlbumCursor.getString(mAlbumCursor.getColumnIndexOrThrow(AlbumColumns.ARTIST));
@@ -1923,7 +1923,7 @@ public class MusicPlaybackService extends Service {
      */
     public long getAlbumId() {
         synchronized (this) {
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return -1;
             }
             return mCursor.getLong(mCursor.getColumnIndexOrThrow(AudioColumns.ALBUM_ID));
@@ -1937,7 +1937,7 @@ public class MusicPlaybackService extends Service {
      */
     public long getArtistId() {
         synchronized (this) {
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return -1;
             }
             return mCursor.getLong(mCursor.getColumnIndexOrThrow(AudioColumns.ARTIST_ID));
@@ -1965,7 +1965,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getMimeType() {
         synchronized (this) {
-            if (mCursor == null) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
             return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.MIME_TYPE));
@@ -3335,7 +3335,15 @@ public class MusicPlaybackService extends Service {
             mNextMediaPlayer.setWakeMode(mService.get(), PowerManager.PARTIAL_WAKE_LOCK);
             mNextMediaPlayer.setAudioSessionId(getAudioSessionId());
             if (setDataSourceImpl(mNextMediaPlayer, path)) {
-                mCurrentMediaPlayer.setNextMediaPlayer(mNextMediaPlayer);
+                try {
+                    mCurrentMediaPlayer.setNextMediaPlayer(mNextMediaPlayer);
+                } catch (IllegalArgumentException|IllegalStateException e) {
+                    Log.e(TAG, "" + e.getClass().getSimpleName() + " " + e.getMessage());
+                    if (mNextMediaPlayer != null) {
+                        mNextMediaPlayer.release();
+                        mNextMediaPlayer = null;
+                    }
+                }
             } else {
                 if (mNextMediaPlayer != null) {
                     mNextMediaPlayer.release();
