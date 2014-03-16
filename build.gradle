@@ -43,6 +43,11 @@ android {
         packageName "org.opensilk.music"
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
