@@ -42,24 +42,14 @@
         <item name="android:layout_marginTop">?attr/actionBarSize</item>
     </style>
 
-    <!-- default style for all grids -->
-    <style name="GridView.Orpheus.Card" parent="@android:style/Widget.Holo.Light.GridView">
-
-    </style>
-
-    <style name="GridView.Orpheus.Card.FastScroll" parent="@android:style/Widget.Holo.Light.GridView">
+    <style name="FastScrollGrid">
         <!--fastscroll-->
         <item name="android:scrollbarStyle">outsideInset</item>
         <item name="android:fastScrollEnabled">true</item>
         <item name="android:fastScrollAlwaysVisible">true</item>
     </style>
 
-    <!-- default style for all card lists -->
-    <style name="ListView.Orpheus.Card" parent="@android:style/Widget.Holo.Light.ListView">
-
-    </style>
-
-    <style name="ListView.Orpheus.Card.FastScroll">
+    <style name="FastScrollList">
         <!--fastscroll-->
         <item name="android:scrollbarStyle">outsideInset</item>
         <item name="android:fastScrollEnabled">true</item>
@@ -67,7 +57,7 @@
     </style>
 
     <!-- common dragsort options -->
-    <style name="DragSort.Orpheus" parent="@android:style/Widget.Holo.Light.ListView">
+    <style name="DragSortList">
         <!--fastscroll-->
         <!--<item name="android:scrollbarStyle">outsideInset</item>-->
         <!--<item name="android:fastScrollEnabled">true</item>-->

@@ -34,7 +34,7 @@
         android:horizontalSpacing="@dimen/card_grid_horizontal_spacing"
         android:stretchMode="spacingWidthUniform"
         android:gravity="center"
-        style="@style/GridView.Orpheus.Card.FastScroll"
+        style="@style/FastScrollGrid"
         card:list_card_layout_resourceID="@layout/card_grid_item" />
 
     <ProgressBar
