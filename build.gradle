@@ -56,7 +56,7 @@ android {
             resources.srcDirs = ['src']
             aidl.srcDirs = ['src']
             renderscript.srcDirs = ['src']
-            res.srcDirs = ['res','res-new']
+            res.srcDirs = ['res','res-new-themes','res-new']
             assets.srcDirs = ['assets']
         }
         debug {

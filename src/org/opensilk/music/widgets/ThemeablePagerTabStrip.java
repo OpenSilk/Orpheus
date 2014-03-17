@@ -36,7 +36,7 @@ public class ThemeablePagerTabStrip extends PagerTabStrip {
         if (isLightTheme) {
             setBackgroundResource(R.drawable.ab_stacked_solid_orpheus);
         } else {
-            setBackgroundResource(R.drawable.ab_stacked_solid_orpheusdark);
+            setBackgroundResource(R.drawable.ab_stacked_solid_orpheus_dark);
         }
         int color = ThemeHelper.getInstance(getContext()).getThemeColor();
         setTextColor(color);
