@@ -42,7 +42,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements Prefe
             String newTheme = (String) newValue;
             String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName();
             if (!newTheme.equalsIgnoreCase(currentTheme)) {
-                doRestart(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
+                doRestart(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US).replaceAll(" ","")));
             }
             return true;
         }
@@ -70,6 +70,6 @@ public class SettingsInterfaceFragment extends SettingsFragment implements Prefe
 
     private void updateThemeIcon(String name) {
         mThemeList.setIcon(new ColorDrawable(ThemeHelper.getInstance(getActivity())
-                .getThemeColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US)))));
+                .getThemeColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US).replaceAll(" ","")))));
     }
 }

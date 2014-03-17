@@ -60,4 +60,10 @@
     <string name="theme_purpheus">Purpheus</string>
     <string name="theme_blupheus">Blupheus</string>
     <string name="theme_grepheus">Grepheus</string>
+
+    <string name="theme_orpheus_dark">Orpheus Dark</string>
+    <string name="theme_repheus_dark">Repheus Dark</string>
+    <string name="theme_purpheus_dark">Purpheus Dark</string>
+    <string name="theme_blupheus_dark">Blupheus Dark</string>
+    <string name="theme_grepheus_dark">Grepheus Dark</string>
 </resources>

@@ -30,5 +30,15 @@ public enum ThemeStyle {
     GREPHEUS,
     /** Purple */
     PURPHEUS,
+    /** Orange Dark*/
+    ORPHEUSDARK,
+    /** Blue Dark*/
+    BLUPHEUSDARK,
+    /** Red Dark*/
+    REPHEUSDARK,
+    /** Green Dark*/
+    GREPHEUSDARK,
+    /** Purple Dark*/
+    PURPHEUSDARK,
 
 }

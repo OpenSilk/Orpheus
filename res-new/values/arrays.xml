@@ -3,18 +3,28 @@
 
     <string-array name="theme_list_names" translatable="false">
         <item>@string/theme_orpheus</item>
+        <item>@string/theme_orpheus_dark</item>
         <item>@string/theme_purpheus</item>
+        <item>@string/theme_purpheus_dark</item>
         <item>@string/theme_grepheus</item>
+        <item>@string/theme_grepheus_dark</item>
         <item>@string/theme_repheus</item>
+        <item>@string/theme_repheus_dark</item>
         <item>@string/theme_blupheus</item>
+        <item>@string/theme_blupheus_dark</item>
     </string-array>
 
     <string-array name="theme_list_values" translatable="false">
         <item>@string/theme_orpheus</item>
+        <item>@string/theme_orpheus_dark</item>
         <item>@string/theme_purpheus</item>
+        <item>@string/theme_purpheus_dark</item>
         <item>@string/theme_grepheus</item>
+        <item>@string/theme_grepheus_dark</item>
         <item>@string/theme_repheus</item>
+        <item>@string/theme_repheus_dark</item>
         <item>@string/theme_blupheus</item>
+        <item>@string/theme_blupheus_dark</item>
     </string-array>
 
 </resources>
