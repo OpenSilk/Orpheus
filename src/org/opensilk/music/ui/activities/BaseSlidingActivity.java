@@ -83,7 +83,10 @@ import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.AudioVisualizationView;
+import org.opensilk.music.widgets.HeaderOverflowButton;
+import org.opensilk.music.widgets.PanelHeaderLayout;
 import org.opensilk.music.widgets.PlayPauseButton;
+import org.opensilk.music.widgets.QueueButton;
 import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
@@ -131,7 +134,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private ImageView mArtBackground;
 
     /** Panel Header */
-    private ViewGroup mPanelHeader;
+    private PanelHeaderLayout mPanelHeader;
     //Visualizer object
     private Visualizer mVisualizer;
     //Visualization view
@@ -145,13 +148,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     // Album art
     private ImageView mHeaderAlbumArt;
     // queue switch button
-    private ImageButton mHeaderQueueButton;
-    // queue button drawable
-    private Drawable mHeaderQueueDrawable;
-    // queue button drawable inversed
-    private Drawable mHeaderQueueDrawableInverse;
+    private QueueButton mHeaderQueueButton;
     // overflow btn
-    private ImageButton mHeaderOverflow;
+    private HeaderOverflowButton mHeaderOverflow;
     // Track name
     private TextView mHeaderTrackName;
     // Artist name
@@ -522,7 +521,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     private void initPanel() {
         //Header
-        mPanelHeader = (ViewGroup) findViewById(R.id.panel_header);
+        mPanelHeader = (PanelHeaderLayout) findViewById(R.id.panel_header);
 
         // Background art
         mArtBackground = (ImageView) findViewById(R.id.panel_background_art);
@@ -549,17 +548,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Open to the currently playing album profile
         mHeaderAlbumArt.setOnClickListener(mOpenCurrentAlbumProfile);
         // Used to show and hide the queue fragment
-        mHeaderQueueButton = (ImageButton) findViewById(R.id.header_switch_queue);
+        mHeaderQueueButton = (QueueButton) findViewById(R.id.header_switch_queue);
         mHeaderQueueButton.setOnClickListener(mToggleHiddenPanel);
-        // Cache queue button drawables
-        mHeaderQueueDrawable = mThemeHelper.getQueueButtonDrawable();
-        mHeaderQueueDrawableInverse = mThemeHelper.getQueueButtonInverseDrawable();
         // Set initial queue button drawable
-        mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawable);
+        mHeaderQueueButton.setQueueShowing(mQueueShowing);
 
 
         // overflow
-        mHeaderOverflow = (ImageButton) findViewById(R.id.header_overflow);
+        mHeaderOverflow = (HeaderOverflowButton) findViewById(R.id.header_overflow);
         mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -576,9 +572,12 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mHeaderMediaRouteButton.setDialogFactory(new StyledMediaRouteDialogFactory());
 
         if (!mSlidingPanel.isExpanded()) {
+            mPanelHeader.makeBackgroundSolid();
             mHeaderQueueButton.setVisibility(View.GONE);
             mHeaderOverflow.setVisibility(View.GONE);
             mHeaderMediaRouteButton.setVisibility(View.GONE);
+        } else {
+            mPanelHeader.makeBackgroundTransparent();
         }
 
         // Play and pause button
@@ -921,16 +920,15 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         if (visible) {
             mQueueShowing = true;
             mArtBackground.setVisibility(View.INVISIBLE);
-            mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawableInverse);
             mFooterCurrentTime.setVisibility(View.INVISIBLE);
             mFooterTotalTime.setVisibility(View.INVISIBLE);
         } else {
             mQueueShowing = false;
             mArtBackground.setVisibility(View.VISIBLE);
-            mHeaderQueueButton.setImageDrawable(mHeaderQueueDrawable);
             refreshCurrentTime();
             mFooterTotalTime.setVisibility(View.VISIBLE);
         }
+        mHeaderQueueButton.setQueueShowing(mQueueShowing);
     }
 
     /**
@@ -998,7 +996,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mHeaderPrevButton.setVisibility(View.GONE);
             mHeaderPlayPauseButton.setVisibility(View.GONE);
             mHeaderNextButton.setVisibility(View.GONE);
-            mPanelHeader.setBackgroundResource(R.color.app_background_light_transparent);
+            mPanelHeader.makeBackgroundTransparent();// .setBackgroundResource(R.color.app_background_light_transparent);
         }
 
         @Override
@@ -1013,7 +1011,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             if (mQueueShowing) {
                 popQueueFragment();
             }
-            mPanelHeader.setBackgroundResource(R.color.app_background_light);
+            mPanelHeader.makeBackgroundSolid();// .setBackgroundResource(R.color.app_background_light);
         }
 
         @Override

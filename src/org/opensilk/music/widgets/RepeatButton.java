@@ -40,6 +40,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 public class RepeatButton extends ImageButton implements OnClickListener, OnLongClickListener {
 
     private final Drawable mRepeatDrawable;
+    private final Drawable mRepeatAllDrawable;
     private final Drawable mRepeatOneDrawable;
 
     public RepeatButton(Context context) {
@@ -52,11 +53,18 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
 
     public RepeatButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        if (isLightTheme) {
+            mRepeatDrawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_black);
+        } else {
+            mRepeatDrawable = ThemeHelper.themeDrawable(getContext(),
+                    R.drawable.ic_action_playback_repeat_black, getResources().getColor(android.R.color.white));
+        }
+        ThemeHelper themeHelper = ThemeHelper.getInstance(getContext());
+        mRepeatAllDrawable = themeHelper.getRepeatButtonDrawable();
+        mRepeatOneDrawable = themeHelper.getRepeatOneButtonDrawable();
         setOnClickListener(this);
         setOnLongClickListener(this);
-        ThemeHelper themeHelper = ThemeHelper.getInstance(getContext());
-        mRepeatDrawable = themeHelper.getRepeatButtonDrawable();
-        mRepeatOneDrawable = themeHelper.getRepeatOneButtonDrawable();
         updateRepeatState();
     }
 
@@ -89,7 +97,7 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
         switch (MusicUtils.getRepeatMode()) {
             case MusicPlaybackService.REPEAT_ALL:
                 setContentDescription(getResources().getString(R.string.accessibility_repeat_all));
-                setImageDrawable(mRepeatDrawable);
+                setImageDrawable(mRepeatAllDrawable);
                 break;
             case MusicPlaybackService.REPEAT_CURRENT:
                 setContentDescription(getResources().getString(R.string.accessibility_repeat_one));
@@ -97,7 +105,7 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
                 break;
             case MusicPlaybackService.REPEAT_NONE:
                 setContentDescription(getResources().getString(R.string.accessibility_repeat));
-                setImageResource(R.drawable.ic_action_playback_repeat_black);
+                setImageDrawable(mRepeatDrawable);
                 break;
             default:
                 break;

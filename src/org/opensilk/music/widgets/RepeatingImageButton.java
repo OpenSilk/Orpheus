@@ -18,6 +18,7 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -29,6 +30,7 @@ import android.widget.ImageButton;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * A {@link ImageButton} that will repeatedly call a 'listener' method as long
@@ -37,12 +39,12 @@ import com.andrew.apollo.utils.MusicUtils;
  */
 public class RepeatingImageButton extends ImageButton implements OnClickListener {
 
+    private final Drawable mNextDrawable;
+    private final Drawable mPrevDrawable;
+
     private static final long sInterval = 400;
-
     private long mStartTime;
-
     private int mRepeatCount;
-
     private RepeatListener mListener;
 
     public RepeatingImageButton(Context context) {
@@ -55,6 +57,16 @@ public class RepeatingImageButton extends ImageButton implements OnClickListener
 
     public RepeatingImageButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        if (isLightTheme) {
+            mNextDrawable = getResources().getDrawable(R.drawable.ic_action_playback_next_black);
+            mPrevDrawable = getResources().getDrawable(R.drawable.ic_action_playback_prev_black);
+        } else {
+            mNextDrawable = ThemeHelper.themeDrawable(getContext(),
+                    R.drawable.ic_action_playback_next_black, getResources().getColor(android.R.color.white));
+            mPrevDrawable = ThemeHelper.themeDrawable(getContext(),
+                    R.drawable.ic_action_playback_prev_black, getResources().getColor(android.R.color.white));
+        }
         setFocusable(true);
         setLongClickable(true);
         setOnClickListener(this);
@@ -184,11 +196,11 @@ public class RepeatingImageButton extends ImageButton implements OnClickListener
         switch (getId()) {
             case R.id.header_action_button_next:
             case R.id.footer_action_button_next:
-                setImageResource(R.drawable.ic_action_playback_next_black);
+                setImageDrawable(mNextDrawable);
                 break;
             case R.id.header_action_button_previous:
             case R.id.footer_action_button_previous:
-                setImageResource(R.drawable.ic_action_playback_prev_black);
+                setImageDrawable(mPrevDrawable);
                 break;
             default:
                 break;

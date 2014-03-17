@@ -24,6 +24,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.TypedValue;
 
 import com.andrew.apollo.R;
 
@@ -148,15 +149,28 @@ public class ThemeHelper {
     }
 
     public final Drawable getQueueButtonDrawable() {
-        return mContext.getResources().getDrawable(R.drawable.ic_action_queue_holo_light);
+        return themeDrawable(R.drawable.ic_action_queue_black);
     }
 
-    public final Drawable getQueueButtonInverseDrawable() {
-        return themeDrawable(R.drawable.ic_action_queue_dark);
-    }
-
+    /**
+     * Themes drawable resource to current theme color
+     *
+     * @param resId
+     * @return
+     */
     public final Drawable themeDrawable(int resId) {
-        final Drawable maskDrawable = mContext.getResources().getDrawable(resId);
+        return themeDrawable(mContext, resId, getThemeColor());
+    }
+
+    /**
+     * Themes drawable resource to given color
+     *
+     * @param resId
+     * @param newColor
+     * @return
+     */
+    public static Drawable themeDrawable(Context context, int resId, int newColor) {
+        final Drawable maskDrawable = context.getResources().getDrawable(resId);
         if (!(maskDrawable instanceof BitmapDrawable)) {
             return null;
         }
@@ -170,12 +184,24 @@ public class ThemeHelper {
         canvas.drawBitmap(maskBitmap, 0, 0, null);
 
         final Paint maskedPaint = new Paint();
-        maskedPaint.setColor(getThemeColor());
+        maskedPaint.setColor(newColor);
         maskedPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
 
         canvas.drawRect(0, 0, width, height, maskedPaint);
 
-        return new BitmapDrawable(mContext.getResources(), outBitmap);
+        return new BitmapDrawable(context.getResources(), outBitmap);
+    }
+
+    /**
+     * Whether or not theme is light
+     *
+     * from AOSP see @MediaRouterThemeHelper.java
+     * @param context
+     * @return
+     */
+    public static boolean isLightTheme(Context context) {
+        TypedValue value = new TypedValue();
+        return context.getTheme().resolveAttribute(R.attr.isLightTheme, value, true) && value.data != 0;
     }
 
 }

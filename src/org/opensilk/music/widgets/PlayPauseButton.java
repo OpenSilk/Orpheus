@@ -18,6 +18,7 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -28,6 +29,7 @@ import android.widget.ImageButton;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * A custom {@link ImageButton} that represents the "play and pause" button.
@@ -35,6 +37,9 @@ import com.andrew.apollo.utils.MusicUtils;
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
 public class PlayPauseButton extends ImageButton implements OnClickListener, OnLongClickListener {
+
+    private final Drawable mPlayButton;
+    private final Drawable mPauseButton;
 
     public PlayPauseButton(Context context) {
         this(context, null);
@@ -46,6 +51,16 @@ public class PlayPauseButton extends ImageButton implements OnClickListener, OnL
 
     public PlayPauseButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        if (isLightTheme) {
+            mPlayButton = getResources().getDrawable(R.drawable.ic_action_playback_play_black);
+            mPauseButton = getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
+        } else {
+            mPlayButton = ThemeHelper.themeDrawable(getContext(),
+                    R.drawable.ic_action_playback_play_black, getResources().getColor(android.R.color.white));
+            mPauseButton = ThemeHelper.themeDrawable(getContext(),
+                    R.drawable.ic_action_playback_pause_black, getResources().getColor(android.R.color.white));
+        }
         setOnClickListener(this);
         setOnLongClickListener(this);
         updateState();
@@ -79,10 +94,10 @@ public class PlayPauseButton extends ImageButton implements OnClickListener, OnL
     public void updateState() {
         if (MusicUtils.isPlaying()) {
             setContentDescription(getResources().getString(R.string.accessibility_pause));
-            setImageResource(R.drawable.ic_action_playback_pause_black);
+            setImageDrawable(mPauseButton);
         } else {
             setContentDescription(getResources().getString(R.string.accessibility_play));
-            setImageResource(R.drawable.ic_action_playback_play_black);
+            setImageDrawable(mPlayButton);
         }
     }
 

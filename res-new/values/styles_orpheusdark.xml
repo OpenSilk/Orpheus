@@ -25,7 +25,7 @@
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Orpheusdark</item>
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Orpheusdark</item>
         <item name="android:actionDropDownStyle">@style/DropDownNav.Orpheusdark</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Transparent.Orpheusdark</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Orpheusdark</item>
         <item name="android:actionModeBackground">@drawable/cab_background_top_orpheusdark</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_orpheusdark</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orpheusdark</item>
@@ -39,8 +39,9 @@
 
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheusdark</item>
-        <!--<item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>-->
-        <!--<item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>-->
+        <!--<item name="android:textAppearanceListItem">@style/TextAppearanceListDark.Title</item>-->
+        <!--<item name="android:textAppearanceListItemSmall">@style/TextAppearanceListDark.SubTitle</item>-->
+        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.Orpheus</item>
 
         <!--Sliding pane shadow-->
         <item name="shadowDrawable">@drawable/bottom_shadow_light</item>

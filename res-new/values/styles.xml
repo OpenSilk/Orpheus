@@ -79,10 +79,7 @@
     </style>
 
     <style name="PagerTabStrip">
-        <!--<item name="android:textSize">@dimen/text_size_micro</item>-->
-        <!--<item name="android:textColor">@color/app_color_orpheus</item>-->
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:background">@drawable/ab_stacked_solid_orpheus</item>
     </style>
 
     <style name="Orpheus.Thumbnail">

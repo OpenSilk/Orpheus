@@ -7,4 +7,6 @@
     <color name="app_color_purpheus">#ff9933cc</color> <!--holo_purple_dark-->
     <color name="app_background_light">#ffffffff</color>
     <color name="app_background_light_transparent">#ccffffff</color>
+    <color name="app_background_dark">@color/black</color>
+    <color name="app_background_dark_transparent">@color/transparent_black</color>
 </resources>

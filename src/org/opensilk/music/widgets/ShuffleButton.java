@@ -38,6 +38,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 public class ShuffleButton extends ImageButton implements OnClickListener, OnLongClickListener {
 
     private final Drawable mShuffleDrawable;
+    private final Drawable mShuffleActiveDrawable;
 
     public ShuffleButton(Context context) {
         this(context, null);
@@ -49,9 +50,16 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
 
     public ShuffleButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        if (isLightTheme) {
+            mShuffleDrawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_black);
+        } else {
+            mShuffleDrawable = ThemeHelper.themeDrawable(getContext(),
+                    R.drawable.ic_action_playback_shuffle_black, getResources().getColor(android.R.color.white));
+        }
         setOnClickListener(this);
         setOnLongClickListener(this);
-        mShuffleDrawable = ThemeHelper.getInstance(getContext()).getShuffleButtonDrawable();
+        mShuffleActiveDrawable = ThemeHelper.getInstance(getContext()).getShuffleButtonDrawable();
     }
 
     /**
@@ -83,15 +91,15 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
         switch (MusicUtils.getShuffleMode()) {
             case MusicPlaybackService.SHUFFLE_NORMAL:
                 setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
-                setImageDrawable(mShuffleDrawable);
+                setImageDrawable(mShuffleActiveDrawable);
                 break;
             case MusicPlaybackService.SHUFFLE_AUTO:
                 setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
-                setImageDrawable(mShuffleDrawable);
+                setImageDrawable(mShuffleActiveDrawable);
                 break;
             case MusicPlaybackService.SHUFFLE_NONE:
                 setContentDescription(getResources().getString(R.string.accessibility_shuffle));
-                setImageResource(R.drawable.ic_action_playback_schuffle_black);
+                setImageDrawable(mShuffleDrawable);
                 break;
             default:
                 break;

@@ -49,10 +49,10 @@
 
         </LinearLayout>
 
-        <ImageButton android:id="@+id/profile_header_overflow"
+        <org.opensilk.music.widgets.HeaderOverflowButton
+            android:id="@+id/profile_header_overflow"
             android:gravity="right"
             style="@style/Orpheus.MenuButton"
-            android:src="@drawable/ic_menu_moreoverflow_holo_light"
             android:contentDescription="@null" />
 
     </LinearLayout>
