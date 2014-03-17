@@ -11,6 +11,7 @@ apply plugin: 'android'
 apply plugin: 'hugo'
 
 repositories {
+    maven { url "../m2/repository" }
     mavenCentral()
 }
 
@@ -107,13 +108,15 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:19.0.1'
-    compile project(':../external/AndroidSlidingUpPanel:library')
     compile 'com.github.gabrielemariotti.cards:library:1.3.0'
-    compile project(':../external/drag-sort-listview:library')
     compile 'com.android.support:appcompat-v7:19.0.1'
     compile 'com.android.support:mediarouter-v7:19.0.1'
     compile 'com.google.android.gms:play-services:4.2.+'
-    compile project(':../external/FadingActionBar:library')
-    compile project(':../external/FadingActionBar:extras/actionbarcompat')
+
+    compile 'com.sothree.slidinguppanel:library:1.0.0-SNAPSHOT'
+    compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT'
+    compile 'com.github.manuelpeinado.fadingactionbar:fadingactionbar:3.1.2-SNAPSHOT'
+    compile 'com.github.manuelpeinado.fadingactionbar:fadingactionbar-abc:3.1.2-SNAPSHOT'
+
     compile project(':../SilkCastService:library')
 }
