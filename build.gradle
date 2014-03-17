@@ -113,6 +113,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:19.0.1'
     compile 'com.android.support:mediarouter-v7:19.0.1'
     compile 'com.google.android.gms:play-services:4.2.+'
-    compile project(':FadingActionBar')
+    compile project(':../external/FadingActionBar:library')
+    compile project(':../external/FadingActionBar:extras/actionbarcompat')
     compile project(':../SilkCastService:library')
 }

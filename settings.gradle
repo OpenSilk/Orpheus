@@ -1,4 +1,5 @@
 include ':../external/AndroidSlidingUpPanel:library'
 include ':../external/drag-sort-listview:library'
-include ':FadingActionBar'
+include ':../external/FadingActionBar:library'
+include ':../external/FadingActionBar:extras/actionbarcompat'
 include ':../SilkCastService:library'

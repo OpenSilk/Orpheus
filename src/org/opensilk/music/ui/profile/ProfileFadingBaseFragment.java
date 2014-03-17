@@ -25,7 +25,7 @@ import android.widget.ImageView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
-import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
+import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 /**
  * Created by drew on 2/23/14.

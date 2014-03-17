@@ -32,7 +32,7 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.ApolloUtils;
-import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
+import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
