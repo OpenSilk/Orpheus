@@ -12,7 +12,6 @@
 package com.andrew.apollo.utils;
 
 import android.app.Activity;
-import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -108,10 +107,15 @@ public final class NavUtils {
         // We are making teh assumption that all contexts passed through were created
         // with getActivity()
         FragmentManager fm = ((BaseSlidingActivity) context).getSupportFragmentManager();
+        int lastIndex = fm.getBackStackEntryCount() -1;
+        if (lastIndex != -1) {
+            //If the currently loaded album is the same as the one requesting, don't do it!
+            if (fm.getBackStackEntryAt(lastIndex).getName().equals(album.mAlbumName)) { return; }
+        }
         fm.beginTransaction()
                 .replace(R.id.main, ProfileAlbumFragment.newInstance(b), "album")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack("album")
+                .addToBackStack(album.mAlbumName)
                 .commit();
         ((BaseSlidingActivity) context).maybeClosePanel();
     }
