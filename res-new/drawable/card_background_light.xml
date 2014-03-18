@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2014 OpenSilk Productions LLC
   ~
@@ -15,18 +16,10 @@
   ~ limitations under the License.
   -->
 
-<resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:exitFadeDuration="@android:integer/config_mediumAnimTime">
 
-    <!--Style for Content View-->
-    <style name="Orpheus.card.content_outer_layout" parent="card.content_outer_layout">
-        <item name="android:minHeight">?android:listPreferredItemHeight</item>
-    </style>
-
-    <style name="Orpheus.list_card">
-        <item name="android:paddingLeft">@dimen/list_card_padding_left</item>
-        <item name="android:paddingRight">@dimen/list_card_padding_right</item>
-        <item name="android:paddingBottom">@dimen/list_card_padding_bottom</item>
-        <item name="android:paddingTop">@dimen/list_card_padding_top</item>
-    </style>
-
-</resources>
+    <item android:state_activated="true" android:drawable="@drawable/list_focused_blupheus"/>
+    <item android:state_pressed="true" android:drawable="@drawable/list_pressed_orpheus"/>
+    <item android:drawable="@color/app_background_light"/>
+</selector>

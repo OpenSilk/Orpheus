@@ -26,7 +26,7 @@
     <LinearLayout
         android:id="@+id/card_main_layout"
         android:orientation="horizontal"
-        style="@style/Orpheus.card.main_layout"
+        style="@style/card.main_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >

@@ -23,6 +23,7 @@ import android.widget.ImageView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
+import com.andrew.apollo.utils.ThemeHelper;
 
 import it.gmariotti.cardslib.library.view.component.CardThumbnailView;
 
