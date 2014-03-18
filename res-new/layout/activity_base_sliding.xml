@@ -25,7 +25,8 @@
     android:layout_height="match_parent"
     android:gravity="bottom"
     sothree:collapsedHeight="@dimen/panel_header_height"
-    sothree:shadowHeight="@dimen/shadow_height">
+    sothree:shadowHeight="@dimen/shadow_height"
+    android:background="?android:attr/colorBackground">
 
     <!-- main content -->
     <FrameLayout
@@ -38,8 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:focusable="false"
-        android:background="?android:colorBackground">
+        android:focusable="false">
 
         <!--album art background -->
         <ImageView

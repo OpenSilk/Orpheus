@@ -25,6 +25,7 @@
         <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
 
+        <item name="android:colorBackground">@drawable/background_holo_light</item>
         <!--Sliding pane shadow-->
         <item name="shadowDrawable">@drawable/above_shadow</item>
     </style>
@@ -38,6 +39,7 @@
         <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
 
+        <item name="android:colorBackground">@drawable/background_holo_dark</item>
         <!--Sliding pane shadow-->
         <item name="shadowDrawable">@drawable/above_shadow_light</item>
     </style>
