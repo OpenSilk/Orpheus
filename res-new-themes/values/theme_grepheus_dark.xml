@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.GrepheusDark" parent="@style/Theme.AppCompat">
+    <style name="Theme.GrepheusDark" parent="@style/Theme.DarkBase">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.GrepheusDark</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.GrepheusDark</item>
@@ -35,17 +35,6 @@
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarGrepheusDark</item>
         <item name="android:seekBarStyle">@style/SeekBarGrepheusDark</item>
         <item name="android:fastScrollThumbDrawable">@drawable/grepheus_fastscroll_thumb_default_holo</item>
-
-        <!--OpenSilk-->
-
-        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
-        <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
-        <!--<item name="android:textAppearanceListItem">@style/TextAppearanceListDark.Title</item>-->
-        <!--<item name="android:textAppearanceListItemSmall">@style/TextAppearanceListDark.SubTitle</item>-->
-        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.Orpheus</item>
-
-        <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/above_shadow_light</item>
     </style>
 
     <!--OpenSilk-->

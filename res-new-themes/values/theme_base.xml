@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- placeholder theme, default theme in manifest, colored themes override in onCreate -->
+    <style name="Theme.AppCompat.Light.Panel" parent="@style/Theme.AppCompat.Light">
+        <!--needed to allow sliding up pane-->
+        <item name="windowActionBarOverlay">true</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Default</item>
+    </style>
+
+    <style name="ActionBar.Default" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+        <!--needed to override actionbar icon from launcher icon -->
+        <item name="android:icon">@drawable/ic_actionbar</item>
+        <!-- override the launcher name -->
+        <item name="android:title">@string/app_name</item>
+    </style>
+    <!-- end placeholder theme-->
+
+    <!--Common styles for light theme-->
+    <style name="Theme.LightBase" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
+        <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
+        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
+
+        <!--Sliding pane shadow-->
+        <item name="shadowDrawable">@drawable/above_shadow</item>
+    </style>
+
+    <!--Common styles for dark theme-->
+    <style name="Theme.DarkBase" parent="@style/Theme.AppCompat">
+
+        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
+        <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
+        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
+
+        <!--Sliding pane shadow-->
+        <item name="shadowDrawable">@drawable/above_shadow_light</item>
+    </style>
+
+    <!-- Use custom overflow icon -->
+    <style name="ActionButton.Overflow.CommonBase" parent="@style/Widget.AppCompat.Base.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_menu_moreoverflow_holo_dark</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.LightBase.Widget" parent="@style/Theme.AppCompat">
+        <!--OpenSilk-->
+        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:listDivider">@drawable/list_divider_holo_light</item>
+    </style>
+
+</resources>

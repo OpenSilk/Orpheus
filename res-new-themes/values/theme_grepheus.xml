@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.Grepheus" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.Grepheus" parent="@style/Theme.LightBase">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_grepheus</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Grepheus</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Grepheus</item>
@@ -37,17 +37,6 @@
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarGrepheus</item>
         <item name="android:seekBarStyle">@style/SeekBarGrepheus</item>
         <item name="android:fastScrollThumbDrawable">@drawable/grepheus_fastscroll_thumb_holo</item>
-
-        <!--OpenSilk-->
-
-        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
-        <item name="android:selectableItemBackground">@drawable/selectable_background_grepheus</item>
-        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
-        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
-        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.Grepheus</item>
-
-        <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/above_shadow</item>
     </style>
 
     <!--OpenSilk-->
@@ -55,10 +44,6 @@
     <style name="Theme.Grepheus.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
-    </style>
-
-    <style name="ActionButton.Overflow.Grepheus" parent="@style/Widget.AppCompat.Base.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_menu_moreoverflow_holo_dark</item>
     </style>
 
     <!--end OpenSilk-->
@@ -108,12 +93,9 @@
     </style>
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Grepheus.Widget" parent="@style/Theme.AppCompat">
+    <style name="Theme.Grepheus.Widget" parent="@style/Theme.LightBase.Widget">
         <item name="android:popupMenuStyle">@style/PopupMenu.Grepheus</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Grepheus</item>
-        <!--OpenSilk-->
-        <item name="android:textColor">@android:color/primary_text_light</item>
-        <item name="android:listDivider">@drawable/list_divider_holo_light</item>
     </style>
 
     <!-- Generated with http://android-holo-colors.com -->

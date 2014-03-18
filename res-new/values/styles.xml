@@ -18,21 +18,6 @@
 -->
 <resources>
 
-    <!-- placeholder theme, default theme in manifest, colored themes override in onCreate -->
-    <style name="Theme.AppCompat.Light.Panel" parent="@style/Theme.AppCompat.Light">
-        <!--needed to allow sliding up pane-->
-        <item name="windowActionBarOverlay">true</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Default</item>
-    </style>
-
-    <style name="ActionBar.Default" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
-        <!--needed to override actionbar icon from launcher icon -->
-        <item name="android:icon">@drawable/ic_actionbar</item>
-        <!-- override the launcher name -->
-        <item name="android:title">@string/app_name</item>
-    </style>
-    <!-- end placeholder theme-->
-
     <style name="Orpheus">
         <!--namespace-->
     </style>
