@@ -18,12 +18,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <org.opensilk.music.widgets.ProfileHeaderLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/app_background_light_transparent">
+        android:layout_alignParentBottom="true">
 
         <!-- Album title / artist -->
         <LinearLayout
@@ -56,7 +55,7 @@
             style="@style/Orpheus.MenuButton"
             android:contentDescription="@null" />
 
-    </LinearLayout>
+    </org.opensilk.music.widgets.ProfileHeaderLayout>
 
     <ImageView
         android:id="@+id/album_image_header"
