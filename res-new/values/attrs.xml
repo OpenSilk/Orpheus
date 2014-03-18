@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="ShadowView">
+        <attr name="shadowPosition">
+            <enum name="above" value="0" />
+            <enum name="below" value="1" />
+        </attr>
+    </declare-styleable>
 </resources>

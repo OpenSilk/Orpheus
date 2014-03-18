@@ -47,7 +47,7 @@
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.Purpheus</item>
 
         <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/bottom_shadow</item>
+        <item name="shadowDrawable">@drawable/above_shadow</item>
     </style>
 
     <!--OpenSilk-->

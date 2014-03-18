@@ -66,20 +66,20 @@
             android:layout_above="@id/panel_footer"/>
 
         <!-- header shadow -->
-        <ImageView
+        <org.opensilk.music.widgets.ShadowView
             android:layout_width="match_parent"
             android:layout_height="@dimen/shadow_height"
             android:layout_below="@id/panel_header"
-            android:contentDescription="@null"
-            android:src="@drawable/top_shadow" />
+            app:shadowPosition="below"
+            android:contentDescription="@null"/>
 
         <!-- footer shadow -->
-        <ImageView
+        <org.opensilk.music.widgets.ShadowView
             android:layout_width="match_parent"
             android:layout_height="@dimen/shadow_height"
             android:layout_above="@id/panel_footer"
-            android:contentDescription="@null"
-            android:src="@drawable/bottom_shadow" />
+            app:shadowPosition="above"
+            android:contentDescription="@null"/>
 
         <!-- Our scrubber height is 32dp making the seekbar view
              32dp so as a hack to get the bar to sit on the edge

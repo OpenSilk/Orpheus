@@ -63,6 +63,7 @@
     <it.gmariotti.cardslib.library.view.component.CardShadowView
         style="@style/card.shadow_outer_layout"
         android:id="@+id/card_shadow_layout"
+        card:card_shadow_layout_resourceID="@layout/card_shadow_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
