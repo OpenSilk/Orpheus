@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- push down outer layout to compensate for ActionBarOverlay-->
+    <style name="ActionBarOverlayTopMarginOuter">
+        <item name="android:layout_marginTop">?attr/actionBarSize</item>
+    </style>
+
+    <!--Don't apply top margin, outer layout does this-->
+    <style name="ActionBarOverlayTopMarginContent">
+        <!--<item name="android:layout_marginTop">?attr/actionBarSize</item>-->
+    </style>
+
+</resources>

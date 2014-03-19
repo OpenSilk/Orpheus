@@ -25,18 +25,19 @@
     android:layout_height="match_parent"
     android:gravity="bottom"
     sothree:collapsedHeight="@dimen/panel_header_height"
-    sothree:shadowHeight="@dimen/shadow_height"
-    android:background="?android:attr/colorBackground">
+    sothree:shadowHeight="@dimen/shadow_height">
 
     <FrameLayout
         android:layout_height="match_parent"
         android:layout_width="match_parent">
 
+        <!--Home pager-->
         <android.support.v4.view.ViewPager
             android:id="@+id/home_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            style="@style/Orpheus.ActionBarOverlay">
+            style="@style/ActionBarOverlayTopMarginContent">
+            <!--^^^using ActionBarOverlay so need margin equal to height of actionBar-->
 
             <org.opensilk.music.widgets.ThemeablePagerTabStrip
                 android:layout_width="match_parent"
@@ -55,7 +56,6 @@
             android:layout_height="match_parent" />
 
     </FrameLayout>
-
 
     <!-- Sliding content -->
     <RelativeLayout

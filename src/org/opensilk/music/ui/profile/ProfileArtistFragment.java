@@ -36,9 +36,10 @@ import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarH
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
 import org.opensilk.music.ui.cards.CardArtistList;
-import org.opensilk.music.util.ConfigHelper;
 
 import it.gmariotti.cardslib.library.view.CardListView;
+
+import static org.opensilk.music.util.ConfigHelper.isLargeLandscape;
 
 /**
  * Created by drew on 2/21/14.
@@ -105,8 +106,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
         // set the actionbar title
         setTitle(mArtist.mArtistName);
         // Init the fading action bar
-        if (ConfigHelper.isTablet(getActivity().getResources()) &&
-                !ConfigHelper.isPortrait(getActivity().getResources())) {
+        if (isLargeLandscape(getResources())) {
             mFadingHelper.fadeActionBar(false);
         }
         mFadingHelper.initActionBar(getActivity());

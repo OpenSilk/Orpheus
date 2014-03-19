@@ -37,6 +37,7 @@ import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
@@ -63,31 +64,7 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                final Bundle bundle = new Bundle();
-                String playlistName;
-                // Favorites list
-                if (mData.mPlaylistId == -1) {
-                    return;
-//                    playlistName = getContext().getString(R.string.playlist_favorites);
-//                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_favorites));
-                } else if (mData.mPlaylistId == -2) { // Last added
-                    playlistName = getContext().getString(R.string.playlist_last_added);
-                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_last_added));
-                } else { // User created
-                    playlistName = mData.mPlaylistName;
-                    bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
-                    bundle.putLong(Config.ID, mData.mPlaylistId);
-                }
-
-                bundle.putString(Config.NAME, playlistName);
-                bundle.putParcelable(Config.EXTRA_DATA, mData);
-
-                FragmentManager fm = ((BaseSlidingActivity) getContext()).getSupportFragmentManager();
-                fm.beginTransaction()
-                        .replace(R.id.main, ProfilePlaylistFragment.newInstance(bundle), "playlist")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .addToBackStack("playlist")
-                        .commit();
+                NavUtils.openPlaylistProfile(getContext(), mData);
             }
         });
     }

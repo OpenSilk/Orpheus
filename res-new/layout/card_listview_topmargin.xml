@@ -23,7 +23,7 @@
     android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    style="@style/Orpheus.ActionBarOverlay">
+    style="@style/ActionBarOverlayTopMarginContent">
     <!--^^^using ActionBarOverlay so need margin equal to height of actionBar-->
 
     <it.gmariotti.cardslib.library.view.CardListView

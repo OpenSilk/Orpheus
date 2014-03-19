@@ -15,6 +15,7 @@ public class ShadowView extends ImageView {
 
     private static final int UP = 0;
     private static final int DOWN = 1;
+    private static final int RIGHT = 2;
 
     public ShadowView(Context context) {
         this(context, null);
@@ -37,10 +38,18 @@ public class ShadowView extends ImageView {
         }
 
         boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-        if (isLightTheme) {
-            setImageResource((direction == UP) ? R.drawable.above_shadow : R.drawable.below_shadow);
-        } else {
-            setImageResource((direction == UP) ? R.drawable.above_shadow_light : R.drawable.below_shadow_light);
+        setImageResource(getShadowResource(direction, isLightTheme));
+    }
+
+    private static int getShadowResource(int direction, boolean isLightTheme) {
+        switch (direction) {
+            case UP:
+                return isLightTheme ? R.drawable.shadow_above : R.drawable.shadow_above_light;
+            case DOWN:
+                return isLightTheme ? R.drawable.shadow_below : R.drawable.shadow_below_light;
+            case RIGHT:
+                return isLightTheme ? R.drawable.shadow_right : R.drawable.shadow_right_light;
         }
+        return -1;
     }
 }

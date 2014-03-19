@@ -19,26 +19,20 @@ package org.opensilk.music.ui.cards;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.model.ArtInfo;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.loaders.Projections;
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
-import org.opensilk.music.ui.profile.ProfileGenreAlbumsFragment;
-import org.opensilk.music.ui.profile.ProfileGenreFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,19 +59,7 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                // Create a new bundle to transfer the genre info
-                final Bundle bundle = new Bundle();
-                bundle.putLong(Config.ID, mData.mGenreId);
-                bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Genres.CONTENT_TYPE);
-                bundle.putString(Config.NAME, mData.mGenreName);
-                bundle.putParcelable(Config.EXTRA_DATA, mData);
-
-                FragmentManager fm = ((BaseSlidingActivity) getContext()).getSupportFragmentManager();
-                fm.beginTransaction()
-                        .replace(R.id.main, ProfileGenreFragment.newInstance(bundle), "genre")
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                        .addToBackStack("genre")
-                        .commit();
+                NavUtils.openGenreProfile(getContext(), mData);
             }
         });
     }

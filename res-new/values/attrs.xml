@@ -4,6 +4,7 @@
         <attr name="shadowPosition">
             <enum name="above" value="0" />
             <enum name="below" value="1" />
+            <enum name="right" value="2" />
         </attr>
     </declare-styleable>
 </resources>

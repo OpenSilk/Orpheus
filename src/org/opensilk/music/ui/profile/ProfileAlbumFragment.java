@@ -19,7 +19,6 @@ package org.opensilk.music.ui.profile;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,13 +32,13 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.ApolloUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
 import org.opensilk.music.ui.cards.CardAlbumList;
-import org.opensilk.music.util.ConfigHelper;
+
+import static org.opensilk.music.util.ConfigHelper.isLargeLandscape;
 
 /**
  * Created by drew on 2/21/14.
@@ -111,8 +110,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
         // set the actionbar title
         setTitle(mAlbum.mAlbumName);
         // Init the fading action bar
-        if (ConfigHelper.isTablet(getActivity().getResources()) &&
-                !ConfigHelper.isPortrait(getActivity().getResources())) {
+        if (isLargeLandscape(getResources())) {
             mFadingHelper.fadeActionBar(false);
         }
         mFadingHelper.initActionBar(getActivity());

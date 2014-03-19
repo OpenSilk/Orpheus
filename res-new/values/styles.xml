@@ -23,7 +23,8 @@
     </style>
 
     <!-- push down main content area to compensate for ActionBarOverlay-->
-    <style name="Orpheus.ActionBarOverlay">
+    <!-- disabled in layout-land where ActionBarOverlayTopMarginOuter applies-->
+    <style name="ActionBarOverlayTopMarginContent">
         <item name="android:layout_marginTop">?attr/actionBarSize</item>
     </style>
 

@@ -23,37 +23,31 @@
     android:id="@+id/base_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    style="@style/ActionBarOverlayTopMarginOuter">
+    <!--^^^using ActionBarOverlay so need margin equal to height of actionBar-->
 
-    <FrameLayout
-        android:layout_height="match_parent"
+    <!-- Home pager-->
+    <android.support.v4.view.ViewPager
+        android:id="@+id/home_pager"
         android:layout_width="match_parent"
-        android:layout_weight="1"
-        style="@style/Orpheus.ActionBarOverlay">
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/home_pager"
+        <org.opensilk.music.widgets.ThemeablePagerTabStrip
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            style="@style/PagerTabStrip" />
 
-            <org.opensilk.music.widgets.ThemeablePagerTabStrip
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                style="@style/PagerTabStrip"
-                />
-
-        </android.support.v4.view.ViewPager>
-
-    </FrameLayout>
+    </android.support.v4.view.ViewPager>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        style="@style/Orpheus.ActionBarOverlay">
+        android:layout_weight="1">
 
         <!-- Sliding panel with profiles and other fragments -->
         <com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -157,10 +151,10 @@
 
         </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
-        <View
-            android:layout_width="15dp"
+        <org.opensilk.music.widgets.ShadowView
+            android:layout_width="12dp"
             android:layout_height="match_parent"
-            android:background="@drawable/left_shadow" />
+            app:shadowPosition="right"/>
 
     </FrameLayout>
 </LinearLayout>

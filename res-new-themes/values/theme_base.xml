@@ -25,7 +25,7 @@
 
         <item name="android:colorBackground">@drawable/background_holo_light</item>
         <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/above_shadow</item>
+        <item name="shadowDrawable">@drawable/shadow_above</item>
     </style>
 
     <!--Common styles for dark theme-->
@@ -39,7 +39,7 @@
 
         <item name="android:colorBackground">@drawable/background_holo_dark</item>
         <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/above_shadow_light</item>
+        <item name="shadowDrawable">@drawable/shadow_above_light</item>
     </style>
 
     <!-- Use custom overflow icon -->

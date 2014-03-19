@@ -18,20 +18,27 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
+import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.model.Playlist;
 
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
+import org.opensilk.music.ui.fragments.SearchFragment;
 import org.opensilk.music.ui.profile.ProfileAlbumFragment;
 import org.opensilk.music.ui.profile.ProfileArtistFragment;
-import org.opensilk.music.ui.settings.SettingsActivity;
+import org.opensilk.music.ui.profile.ProfileGenreAlbumsFragment;
+import org.opensilk.music.ui.profile.ProfileGenreFragment;
+import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
+
+import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
+
 
 /**
  * Various navigation helpers.
@@ -42,23 +49,11 @@ public final class NavUtils {
 
     /**
      * Opens the profile of an artist.
-     * 
-     * @param context The {@link Activity} to use.
-     * @param artistName The name of the artist
-     */
-    @Deprecated
-    public static void openArtistProfile(final Context context, final String artistName) {
-
-    }
-
-    /**
-     * Opens the profile of an artist.
      *
      * @param context The {@link Activity} to use.
      * @param artist The artist object
      */
     public static void openArtistProfile(final Context context, final Artist artist) {
-
         if (artist == null) {
             return;
         }
@@ -67,29 +62,7 @@ public final class NavUtils {
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, artist);
 
-        // We are making teh assumption that all contexts passed through were created
-        // with getActivity()
-        FragmentManager fm = ((BaseSlidingActivity) context).getSupportFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.main, ProfileArtistFragment.newInstance(b), "artist")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack("artist")
-                .commit();
-        ((BaseSlidingActivity) context).maybeClosePanel();
-    }
-
-    /**
-     * Opens the profile of an album.
-     * 
-     * @param context The {@link Activity} to use.
-     * @param albumName The name of the album
-     * @param artistName The name of the album artist
-     * @param albumId The id of the album
-     */
-    @Deprecated
-    public static void openAlbumProfile(final Context context,
-            final String albumName, final String artistName, final long albumId) {
-
+        replaceFragment(context, ProfileArtistFragment.newInstance(b), "artist");
     }
 
     /**
@@ -98,7 +71,6 @@ public final class NavUtils {
      * @param album
      */
     public static void openAlbumProfile(final Context context, final Album album) {
-
         // Create a new bundle to transfer the album info
         final Bundle b = new Bundle();
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
@@ -106,18 +78,86 @@ public final class NavUtils {
 
         // We are making teh assumption that all contexts passed through were created
         // with getActivity()
-        FragmentManager fm = ((BaseSlidingActivity) context).getSupportFragmentManager();
-        int lastIndex = fm.getBackStackEntryCount() -1;
-        if (lastIndex != -1) {
+        FragmentManager fm = ((HomeSlidingActivity) context).getSupportFragmentManager();
+        int lastIndex = fm.getBackStackEntryCount() - 1;
+        if (lastIndex != -1 && fm.getBackStackEntryAt(lastIndex).getName().equals(album.mAlbumName)) {
             //If the currently loaded album is the same as the one requesting, don't do it!
-            if (fm.getBackStackEntryAt(lastIndex).getName().equals(album.mAlbumName)) { return; }
+            return;
         }
+
+        replaceFragment(context, ProfileAlbumFragment.newInstance(b), album.mAlbumName);
+    }
+
+    /**
+     * Opens playlist fragment
+     * @param context
+     * @param playlist
+     */
+    public static void openPlaylistProfile(final Context context, final Playlist playlist) {
+        final Bundle bundle = new Bundle();
+        String playlistName;
+        if (playlist.mPlaylistId == -1) { // Favorites list
+            return;
+//                    playlistName = getContext().getString(R.string.playlist_favorites);
+//                    bundle.putString(Config.MIME_TYPE, getContext().getString(R.string.playlist_favorites));
+        } else if (playlist.mPlaylistId == -2) { // Last added
+            playlistName = context.getString(R.string.playlist_last_added);
+            bundle.putString(Config.MIME_TYPE, context.getString(R.string.playlist_last_added));
+        } else { // User created
+            playlistName = playlist.mPlaylistName;
+            bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
+            bundle.putLong(Config.ID, playlist.mPlaylistId);
+        }
+
+        bundle.putString(Config.NAME, playlistName);
+        bundle.putParcelable(Config.EXTRA_DATA, playlist);
+
+        replaceFragment(context, ProfilePlaylistFragment.newInstance(bundle), "playlist");
+    }
+
+    /**
+     * Opens genre fragment
+     * @param context
+     * @param genre
+     */
+    public static void openGenreProfile(final Context context, final Genre genre) {
+        // Create a new bundle to transfer the genre info
+        final Bundle bundle = new Bundle();
+        bundle.putLong(Config.ID, genre.mGenreId);
+        bundle.putString(Config.MIME_TYPE, MediaStore.Audio.Genres.CONTENT_TYPE);
+        bundle.putString(Config.NAME, genre.mGenreName);
+        bundle.putParcelable(Config.EXTRA_DATA, genre);
+
+        replaceFragment(context, ProfileGenreFragment.newInstance(bundle), "genre");
+        //replaceFragment(context, ProfileGenreAlbumsFragment.newInstance(bundle), "genre");
+    }
+
+    /**
+     * Opens to {@link SearchActivity}.
+     *
+     * @param context The {@link Activity} to use.
+     */
+    public static void openSearch(final Context context) {
+        replaceFragment(context, new SearchFragment(), "search");
+    }
+
+    /**
+     * Replace current fragment adding transaction to backstack
+     * @param context activity
+     * @param fragment new fragment
+     * @param name fragment and backstack entry name
+     */
+    private static void replaceFragment(final Context context, final Fragment fragment, final String name) {
+        // We are making teh assumption that all contexts passed through were created
+        // with getActivity()
+        ((HomeSlidingActivity) context).hidePager();
+        FragmentManager fm = ((HomeSlidingActivity) context).getSupportFragmentManager();
         fm.beginTransaction()
-                .replace(R.id.main, ProfileAlbumFragment.newInstance(b), "album")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(album.mAlbumName)
+                .replace(R.id.main, fragment, name)
+                .setTransition(TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack(name)
                 .commit();
-        ((BaseSlidingActivity) context).maybeClosePanel();
+        ((HomeSlidingActivity) context).maybeClosePanel();
     }
 
     /**
@@ -135,37 +175,6 @@ public final class NavUtils {
             Toast.makeText(context, context.getString(R.string.no_effects_for_you),
                     Toast.LENGTH_LONG).show();
         }
-    }
-
-    /**
-     * Opens to {@link SettingsActivity}.
-     * 
-     * @param activity The {@link Activity} to use.
-     */
-    @Deprecated
-    public static void openSettings(final Activity activity) {
-
-    }
-
-    /**
-     * Opens to {@link AudioPlayerActivity}.
-     * 
-     * @param activity The {@link Activity} to use.
-     */
-    @Deprecated
-    public static void openAudioPlayer(final Activity activity) {
-
-    }
-
-    /**
-     * Opens to {@link SearchActivity}.
-     * 
-     * @param activity The {@link Activity} to use.
-     * @param query The search query.
-     */
-    @Deprecated
-    public static void openSearch(final Activity activity, final String query) {
-
     }
 
     /**
