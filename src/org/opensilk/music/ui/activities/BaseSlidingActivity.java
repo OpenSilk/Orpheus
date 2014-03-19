@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.audiofx.Visualizer;
@@ -35,8 +37,10 @@ import android.os.Messenger;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
@@ -51,6 +55,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -79,9 +84,14 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
+import org.opensilk.music.adapters.PagerAdapter;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.QueueFragment;
+import org.opensilk.music.ui.home.HomeAlbumFragment;
+import org.opensilk.music.ui.home.HomeArtistFragment;
+import org.opensilk.music.ui.home.HomeSongFragment;
+import org.opensilk.music.util.ConfigHelper;
 import org.opensilk.music.widgets.AudioVisualizationView;
 import org.opensilk.music.widgets.HeaderOverflowButton;
 import org.opensilk.music.widgets.PanelHeaderLayout;
@@ -188,6 +198,15 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private long mLastShortSeekEventTime;
     private boolean mIsPaused = false;
     private boolean mFromTouch = false;
+    /**
+     * Pager
+     */
+    private ViewPager mViewPager;
+
+    /**
+     * VP's adapter
+     */
+    private PagerAdapter mPagerAdapter;
 
     /**
      * Cast stuff
@@ -219,6 +238,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Setup action bar
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
+        // Disable home as up
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setHomeButtonEnabled(false);
+        // Display title
+        getSupportActionBar().setTitle(R.string.app_name);
 
         // Fade it in
         //overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -250,6 +274,13 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         mSlidingPanel.setDragView(findViewById(R.id.track_artist_info));
         mSlidingPanel.setPanelSlideListener(mPanelSlideListener);
+
+        // Initialize the adapter
+        mPagerAdapter = new PagerAdapter(this, getSupportFragmentManager());
+        final PagerAdapter.MusicFragments[] mFragments = PagerAdapter.MusicFragments.values();
+        for (final PagerAdapter.MusicFragments mFragment : mFragments) {
+            mPagerAdapter.add(mFragment.getFragmentClass(), null);
+        }
 
         // Initialze the panel
         initPanel();
@@ -331,7 +362,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         refreshQueue();
         // Make sure we dont overlap the panel
         if (mSlidingPanel.isExpanded()
-                && getSupportActionBar().isShowing()) {
+                && getSupportActionBar().isShowing() && ConfigHelper.isPortrait(getResources())) {
             getSupportActionBar().hide();
         }
         // update visualizer
@@ -341,6 +372,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+        // Save the last page the use was on
+        PreferenceUtils.getInstance(this).setStartPage(mViewPager.getCurrentItem());
         // stop scanning for routes
         mMediaRouter.removeCallback(mMediaRouterCallback);
         //Disable visualizer
@@ -387,6 +420,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mViewPager = null;
         mIsPaused = false;
         mTimeHandler.removeMessages(REFRESH_TIME);
         // Unbind from the service
@@ -446,6 +480,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         if (mSlidingPanel.isExpanded()) {
             mSlidingPanel.collapsePane();
         } else {
+            //If we're coming back to home, reset the actionbar
+            if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                getSupportActionBar().setTitle(R.string.app_name);
+            }
             super.onBackPressed();
         }
     }
@@ -602,6 +641,15 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mFooterProgress = (SeekBar)findViewById(android.R.id.progress);
         // Update the progress
         mFooterProgress.setOnSeekBarChangeListener(this);
+
+        // Initialize the ViewPager
+        mViewPager = (ViewPager) findViewById(R.id.home_pager);
+        // Attch the adapter
+        mViewPager.setAdapter(mPagerAdapter);
+        // Offscreen pager loading limit
+        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
+        // Start on the last page the user was on
+        mViewPager.setCurrentItem(PreferenceUtils.getInstance(this).getStartPage());
     }
 
     /**
@@ -978,7 +1026,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @Override
         public void onPanelSlide(View panel, float slideOffset) {
             if (slideOffset < 0.2) {
-                if (getSupportActionBar().isShowing()) {
+                Resources res = getResources();
+                if (getSupportActionBar().isShowing() && !ConfigHelper.isTablet(res) ||
+                        (getSupportActionBar().isShowing() && ConfigHelper.isPortrait(res) &&
+                        ConfigHelper.isTablet(res))) {
                     getSupportActionBar().hide();
                 }
             } else {
@@ -1334,4 +1385,31 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     }
 
+    private boolean isArtistPage() {
+        return mViewPager.getCurrentItem() == 2;
+    }
+
+    private HomeArtistFragment getArtistFragment() {
+        return (HomeArtistFragment) mPagerAdapter.getFragment(2);
+    }
+
+    private boolean isAlbumPage() {
+        return mViewPager.getCurrentItem() == 3;
+    }
+
+    private HomeAlbumFragment getAlbumFragment() {
+        return (HomeAlbumFragment) mPagerAdapter.getFragment(3);
+    }
+
+    private boolean isSongPage() {
+        return mViewPager.getCurrentItem() == 4;
+    }
+
+    private HomeSongFragment getSongFragment() {
+        return (HomeSongFragment) mPagerAdapter.getFragment(4);
+    }
+
+    private boolean isRecentPage() {
+        return mViewPager.getCurrentItem() == 1;
+    }
 }

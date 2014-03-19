@@ -17,6 +17,7 @@
 package com.andrew.apollo.utils;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;

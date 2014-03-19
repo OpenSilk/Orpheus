@@ -20,7 +20,6 @@ package org.opensilk.music.ui.home;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -85,7 +84,7 @@ public class HomePhoneFragment extends Fragment {
 
         // The View for the fragment's UI
         final ViewGroup rootView = (ViewGroup)inflater.inflate(
-                R.layout.fragment_home_phone, container, false);
+                R.layout.profile_genre_pager, container, false);
 
         // Initialize the ViewPager
         mViewPager = (ViewPager)rootView.findViewById(R.id.home_pager);

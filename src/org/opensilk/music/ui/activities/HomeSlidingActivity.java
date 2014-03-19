@@ -20,7 +20,6 @@ package org.opensilk.music.ui.activities;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
@@ -30,7 +29,6 @@ import android.view.MenuItem;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.ui.fragments.SearchFragment;
-import org.opensilk.music.ui.home.HomePhoneFragment;
 import org.opensilk.music.ui.settings.SettingsActivity;
 
 import static android.app.SearchManager.QUERY;
@@ -44,16 +42,6 @@ import static android.app.SearchManager.QUERY;
 public class HomeSlidingActivity extends BaseSlidingActivity {
 
     public static final int RESULT_RESTART_APP = RESULT_FIRST_USER << 1;
-
-    @Override
-    protected void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Load the music browser fragment
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, new HomePhoneFragment()).commit();
-        }
-    }
 
     @Override
     public void onNewIntent(Intent intent) {

@@ -23,7 +23,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -37,6 +36,7 @@ import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarH
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
 import org.opensilk.music.ui.cards.CardArtistList;
+import org.opensilk.music.util.ConfigHelper;
 
 import it.gmariotti.cardslib.library.view.CardListView;
 
@@ -105,6 +105,10 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
         // set the actionbar title
         setTitle(mArtist.mArtistName);
         // Init the fading action bar
+        if (ConfigHelper.isTablet(getActivity().getResources()) &&
+                !ConfigHelper.isPortrait(getActivity().getResources())) {
+            mFadingHelper.fadeActionBar(false);
+        }
         mFadingHelper.initActionBar(getActivity());
     }
 

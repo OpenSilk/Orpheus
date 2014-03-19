@@ -28,11 +28,34 @@
     sothree:shadowHeight="@dimen/shadow_height"
     android:background="?android:attr/colorBackground">
 
-    <!-- main content -->
     <FrameLayout
-        android:id="@+id/main"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/home_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            style="@style/Orpheus.ActionBarOverlay">
+
+            <org.opensilk.music.widgets.ThemeablePagerTabStrip
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                style="@style/PagerTabStrip" />
+
+        </android.support.v4.view.ViewPager>
+
+        <!-- main content -->
+        <FrameLayout
+            android:id="@+id/main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
 
     <!-- Sliding content -->
     <RelativeLayout

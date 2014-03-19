@@ -74,9 +74,7 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
 
                 FragmentManager fm = ((BaseSlidingActivity) getContext()).getSupportFragmentManager();
                 fm.beginTransaction()
-                        // Doesnt work right
-                        //.replace(R.id.main, ProfileGenreFragment.newInstance(bundle), "genre")
-                        .replace(R.id.main, ProfileGenreAlbumsFragment.newInstance(bundle), "genre")
+                        .replace(R.id.main, ProfileGenreFragment.newInstance(bundle), "genre")
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .addToBackStack("genre")
                         .commit();

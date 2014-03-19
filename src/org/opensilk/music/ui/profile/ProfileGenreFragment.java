@@ -58,9 +58,9 @@ public class ProfileGenreFragment extends Fragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         // The View for the fragment's UI
-        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.fragment_home_phone, container, false);
+        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.profile_genre_pager, container, false);
         // Initialize the ViewPager
-        mViewPager = (ViewPager)rootView.findViewById(R.id.home_pager);
+        mViewPager = (ViewPager)rootView.findViewById(R.id.genre_pager);
         // Attach the adapter
         mViewPager.setAdapter(mPagerAdapter);
         return rootView;
