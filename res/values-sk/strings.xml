@@ -98,7 +98,7 @@
     <string name="settings_data_category">Údaje</string>
     <string name="settings_about_category">O programe</string>
     <string name="settings_author_title">Autor</string>
-    <string name="settings_about_apollo">O programe Orpheus</string>
+    <string name="settings_about">O programe Orpheus</string>
     <string name="settings_special_thanks">Špeciálne poďakovanie</string>
     <string name="settings_lopez_summary">Návrh ikony a banneru v obchode Play</string>
     <string name="settings_color_scheme_title">Zvoliť predvolenú farebnú schému pre program Orpheus</string>

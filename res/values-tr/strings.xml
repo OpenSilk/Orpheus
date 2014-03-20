@@ -98,7 +98,7 @@
     <string name="settings_data_category">Veri</string>
     <string name="settings_about_category">Hakkında</string>
     <string name="settings_author_title">Hazırlayan</string>
-    <string name="settings_about_apollo">Orpheus Hakkında</string>
+    <string name="settings_about">Orpheus Hakkında</string>
     <string name="settings_special_thanks">Özel teşekkürler</string>
     <string name="settings_lopez_summary">Simge ve Play Store banner tasarımı</string>
     <string name="settings_color_scheme_title">Orpheus\'nun varsayılan renk şemasını seç</string>

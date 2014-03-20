@@ -95,7 +95,7 @@
     <string name="settings_data_category">Dados</string>
     <string name="settings_about_category">Sobre</string>
     <string name="settings_author_title">Autor</string>
-    <string name="settings_about_apollo">Sobre Orpheus</string>
+    <string name="settings_about">Sobre Orpheus</string>
     <string name="settings_special_thanks">Agradecimentos especiais</string>
     <string name="settings_lopez_summary">Design do ícone banner do Play Store</string>
     <string name="settings_color_scheme_title">Escolher esquema de cor padrão para o Orpheus</string>

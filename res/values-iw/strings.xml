@@ -98,7 +98,7 @@
   <string name="settings_data_category">נתונים</string>
   <string name="settings_about_category">אודות</string>
   <string name="settings_author_title">יוצר</string>
-  <string name="settings_about_apollo">אודות אפולו</string>
+  <string name="settings_about">אודות אפולו</string>
   <string name="settings_special_thanks">תודות רבות</string>
   <string name="settings_lopez_summary">עיצוב סמל ודגל כחנות Play</string>
   <string name="settings_color_scheme_title">בחר ערכת צבעים של אפולו</string>

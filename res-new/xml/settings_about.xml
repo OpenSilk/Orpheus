@@ -3,7 +3,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/settings_about_about_category">
+        android:title="@string/settings_about">
 
         <Preference
             android:key="pref_author"
@@ -15,7 +15,7 @@
 
         <Preference
             android:key="pref_version"
-            android:title="@string/settings_about_version_title" />
+            android:title="@string/settings_version_title" />
 
     </PreferenceCategory>
 
@@ -24,7 +24,7 @@
 
         <Preference
             android:key="pref_licenses"
-            android:title="@string/settings_about_licenses_title"/>
+            android:title="@string/settings_open_source_licenses"/>
 
         <Preference
             android:key="pref_thanks"

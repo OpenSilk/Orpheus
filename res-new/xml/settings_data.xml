@@ -7,18 +7,18 @@
 
         <CheckBoxPreference
             android:key="only_on_wifi"
-            android:title="@string/settings_data_wifi_only_title"
-            android:summary="@string/settings_data_wifi_only_summary"
+            android:title="@string/settings_download_only_on_wifi_title"
+            android:summary="@string/settings_download_only_on_wifi_summary"
             android:defaultValue="true" />
 
         <CheckBoxPreference
             android:key="download_missing_artwork"
-            android:title="@string/settings_data_missing_album_title"
+            android:title="@string/settings_download_missing_artwork_title"
             android:defaultValue="true" />
 
         <CheckBoxPreference
             android:key="download_missing_artist_images"
-            android:title="@string/settings_data_missing_artist_title"
+            android:title="@string/settings_download_artist_images_title"
             android:defaultValue="true" />
 
         <CheckBoxPreference
@@ -33,8 +33,8 @@
 
         <!--<Preference-->
             <!--android:key="pref_delete_cache"-->
-            <!--android:title="@string/settings_data_delete_cache_title"-->
-            <!--android:summary="@string/settings_data_delete_cache_summary" />-->
+            <!--android:title="@string/settings_delete_cache_title"-->
+            <!--android:summary="@string/settings_delete_cache_summary" />-->
 
     <!--</PreferenceCategory>-->
 

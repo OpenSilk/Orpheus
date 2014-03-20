@@ -125,7 +125,7 @@
     <string name="settings_about_category">About</string>
     <string name="settings_author_title">Author</string>
 
-    <string name="settings_about_apollo">About Orpheus</string>
+    <string name="settings_about">About Orpheus</string>
     <string name="settings_special_thanks">Special thanks</string>
     <string name="settings_cyanogenmod_title" translatable="false">CyanogenMod</string>
     <string name="settings_self_title" translatable="false">Andrew Neal</string>

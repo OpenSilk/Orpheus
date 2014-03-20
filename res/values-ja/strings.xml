@@ -108,7 +108,7 @@
     <string name="settings_data_category">データ</string>
     <string name="settings_about_category">情報</string>
     <string name="settings_author_title">作者</string>
-    <string name="settings_about_apollo">Orpheusについて</string>
+    <string name="settings_about">Orpheusについて</string>
     <string name="settings_special_thanks">スペシャルサンクス</string>
     <string name="settings_lopez_summary">アイコンとプレイストアのバナーデザイン</string>
     <string name="settings_color_scheme_title">Orpheusのデフォルトカラースキームを選択</string>

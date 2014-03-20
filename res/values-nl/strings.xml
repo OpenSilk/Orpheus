@@ -100,7 +100,7 @@
     <string name="settings_data_category">Gegevens</string>
     <string name="settings_about_category">Over</string>
     <string name="settings_author_title">Auteur</string>
-    <string name="settings_about_apollo">Over Orpheus</string>
+    <string name="settings_about">Over Orpheus</string>
     <string name="settings_special_thanks">Speciale dank</string>
     <string name="settings_lopez_summary">Pictogram- en Play Store-bannerontwerp</string>
     <string name="settings_color_scheme_title">Standaardkleuren</string>
