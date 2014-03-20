@@ -53,17 +53,11 @@
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_grepheus</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Grepheus</item>
-        <!--OpenSilk-->
-        <!--needed to override actionbar icon from launcher icon -->
-        <item name="android:icon">@drawable/ic_actionbar</item>
     </style>
 
     <style name="ActionBar.Transparent.Grepheus" parent="@style/Widget.AppCompat.ActionBar">
         <item name="android:background">@drawable/ab_transparent_grepheus</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Grepheus</item>
-        <!--OpenSilk-->
-        <!--needed to override actionbar icon from launcher icon -->
-        <item name="android:icon">@drawable/ic_actionbar</item>
     </style>
 	
     <style name="PopupMenu.Grepheus" parent="@style/Widget.AppCompat.PopupMenu">	

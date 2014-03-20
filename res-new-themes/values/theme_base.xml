@@ -9,8 +9,6 @@
     </style>
 
     <style name="ActionBar.Default" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
-        <!--needed to override actionbar icon from launcher icon -->
-        <item name="android:icon">@drawable/ic_actionbar</item>
         <!-- override the launcher name -->
         <item name="android:title">@string/app_name</item>
     </style>
