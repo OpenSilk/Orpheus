@@ -114,6 +114,8 @@ public class SearchFragment extends Fragment implements
 
         // make room for search
         menu.removeItem(R.id.media_route_menu_item);
+        // remove old search item
+        menu.removeItem(R.id.menu_search);
 
         // Search view
         inflater.inflate(R.menu.searchview, menu);
