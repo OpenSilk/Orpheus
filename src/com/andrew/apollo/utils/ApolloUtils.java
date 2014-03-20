@@ -240,6 +240,21 @@ public final class ApolloUtils {
     }
 
     /**
+     * Shows changelog
+     * @param context
+     * @return
+     */
+    public static AlertDialog createChangesDialog(final Context context) {
+        final WebView webView = new WebView(context);
+        webView.loadUrl("file:///android_asset/changes.html");
+        return new AlertDialog.Builder(context)
+                .setTitle(R.string.settings_about_version_changes_title)
+                .setView(webView)
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+    }
+
+    /**
      * Calculate whether a color is light or dark, based on a commonly known
      * brightness formula.
      * 
