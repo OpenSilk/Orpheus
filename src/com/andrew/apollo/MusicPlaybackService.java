@@ -2802,8 +2802,15 @@ public class MusicPlaybackService extends Service {
      */
     private void restoreLocalState() {
         updatePlaybackLocation(PlaybackLocation.LOCAL);
-        pause(); //What to do?? this might not be best
         stopCastServer();
+        //Local should already be paused
+        //pause();
+        synchronized (this) {
+            //Do some stuff pause() does to notify the activity
+            scheduleDelayedShutdown();
+            mIsSupposedToBePlaying = false;
+            notifyChange(PLAYSTATE_CHANGED);
+        }
     }
 
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
