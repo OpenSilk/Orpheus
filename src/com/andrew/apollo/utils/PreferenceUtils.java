@@ -74,6 +74,9 @@ public final class PreferenceUtils {
     // Key used to set current theme
     public static final String THEME_STYLE = "theme_style";
 
+    // Boolean to use dark themes
+    public static final String PREF_DARK_THEME = "pref_dark_theme";
+
     // Key used to determine if casting should be enabled
     public static final String KEY_CAST_ENABLED = "pref_cast_enabled";
 
@@ -171,6 +174,10 @@ public final class PreferenceUtils {
                 return null;
             }
         }, (Void[])null);
+    }
+
+    public boolean wantDarkTheme() {
+        return mPreferences.getBoolean(PREF_DARK_THEME, false);
     }
 
     /**

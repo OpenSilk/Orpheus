@@ -35,7 +35,7 @@
     <string name="settings_about_thanks_ac" translatable="false">Alex Cruz</string>
     <string name="settings_about_thanks_ac_desc">Banner and icon design</string>
 
-    <string name="settings_interface_use_theme_title">Use accent themes</string>
+    <string name="settings_interface_use_theme_title">Use dark themes</string>
     <string name="settings_interface_theme_title">Select a theme</string>
     <string name="settings_interface_visualizations_title">Enable visualizations</string>
     <string name="settings_interface_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
@@ -60,11 +60,5 @@
     <string name="theme_purpheus">Purpheus</string>
     <string name="theme_blupheus">Blupheus</string>
     <string name="theme_grepheus">Grepheus</string>
-
-    <string name="theme_orpheus_dark">Orpheus Dark</string>
-    <string name="theme_repheus_dark">Repheus Dark</string>
-    <string name="theme_purpheus_dark">Purpheus Dark</string>
-    <string name="theme_blupheus_dark">Blupheus Dark</string>
-    <string name="theme_grepheus_dark">Grepheus Dark</string>
 
 </resources>

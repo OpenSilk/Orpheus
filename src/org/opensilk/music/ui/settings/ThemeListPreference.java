@@ -71,11 +71,11 @@ public class ThemeListPreference extends ListPreference {
 
             name.setText(mThemes[position]);
             icon.setImageDrawable(new ColorDrawable(ThemeHelper.getInstance(getContext())
-                    .getThemeColor(ThemeStyle.valueOf(mThemes[position].toString().replaceAll(" ","")
+                    .getThemeColor(ThemeStyle.valueOf(mThemes[position].toString()
                             .toUpperCase(Locale.US)))));
 
-            String currentTheme = ThemeHelper.getInstance(mContext).getThemeName();
-            if (currentTheme.equalsIgnoreCase(mThemes[position].toString().replaceAll(" ",""))) {
+            String currentTheme = ThemeHelper.getInstance(mContext).getThemeName().replaceAll("DARK","");
+            if (currentTheme.equalsIgnoreCase(mThemes[position].toString())) {
                 check.setVisibility(View.VISIBLE);
             } else {
                 check.setVisibility(View.INVISIBLE);

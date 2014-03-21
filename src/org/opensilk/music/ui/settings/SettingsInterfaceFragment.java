@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
-import android.preference.PreferenceScreen;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
@@ -27,7 +26,9 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         Preference.OnPreferenceChangeListener {
 
     private static final String PREF_THEME = "pref_theme";
+    private static final String PREF_DARK_THEME = "pref_dark_theme";
 
+    private CheckBoxPreference mDarkTheme;
     private ThemeListPreference mThemeList;
 
     @Override
@@ -35,6 +36,10 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings_interface);
         mPrefSet = getPreferenceScreen();
+
+        mDarkTheme = (CheckBoxPreference) mPrefSet.findPreference(PREF_DARK_THEME);
+        mDarkTheme.setOnPreferenceChangeListener(this);
+
         mThemeList = (ThemeListPreference) mPrefSet.findPreference(PREF_THEME);
         mThemeList.setOnPreferenceChangeListener(this);
         updateThemeIcon(ThemeHelper.getInstance(getActivity()).getThemeName());
@@ -46,9 +51,35 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         if (preference == mThemeList) {
             String newTheme = (String) newValue;
             String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName();
-            if (!newTheme.equalsIgnoreCase(currentTheme)) {
-                doRestart(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US).replaceAll(" ","")));
+            if (PreferenceUtils.getInstance(getActivity()).wantDarkTheme()) {
+                newTheme += "DARK"; //Chooser only has reg themes, so append dark
             }
+            if (!newTheme.equalsIgnoreCase(currentTheme)) {
+                updateThemeIcon(newTheme);
+                doRestart(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
+            }
+            return false; // We set preference
+        } else if (preference == mDarkTheme) {
+            String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName().toUpperCase(Locale.US);
+            ThemeStyle newTheme;
+            if ((Boolean) newValue) {
+                if (currentTheme.contains("DARK")) {
+                    //Already on dark theme use it
+                    newTheme = ThemeStyle.valueOf(currentTheme);
+                } else {
+                    //Convert to equivalent dark theme
+                    newTheme = ThemeStyle.valueOf(currentTheme+"DARK");
+                }
+            } else {
+                if (currentTheme.contains("DARK")) {
+                    //Convert ot equivalent light theme
+                    newTheme = ThemeStyle.valueOf(currentTheme.replace("DARK", ""));
+                } else {
+                    // Already on light theme use it
+                    newTheme = ThemeStyle.valueOf(currentTheme);
+                }
+            }
+            doRestart(newTheme);
             return true;
         }
         return false;
@@ -62,7 +93,8 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         // notify user of restart
         new AlertDialog.Builder(getActivity())
                 .setMessage(R.string.settings_interface_restart_app)
-                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Tells home activity is should initate a restart
@@ -75,7 +107,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
 
     private void updateThemeIcon(String name) {
         mThemeList.setIcon(new ColorDrawable(ThemeHelper.getInstance(getActivity())
-                .getThemeColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US).replaceAll(" ","")))));
+                .getThemeColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US)))));
     }
 
 }

@@ -5,9 +5,10 @@
     <PreferenceCategory
         android:title="@string/settings_interface_theme_category">
 
-        <!--<CheckBoxPreference-->
-            <!--android:key="pref_use_theme"-->
-            <!--android:title="@string/settings_interface_use_theme_title"/>-->
+        <CheckBoxPreference
+            android:key="pref_dark_theme"
+            android:title="@string/settings_interface_use_theme_title"
+            android:defaultValue="false"/>
 
         <org.opensilk.music.ui.settings.ThemeListPreference
             android:key="pref_theme"
