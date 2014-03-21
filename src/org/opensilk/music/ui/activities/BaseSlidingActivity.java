@@ -1220,10 +1220,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
                     }
                     return true;
-                case R.id.panel_menu_equalizer:
-                    // Sound effects
-                    NavUtils.openEffectsPanel(BaseSlidingActivity.this);
-                    return true;
                 case R.id.panel_menu_use_ringtone:
                     // Set the current track as a ringtone
                     MusicUtils.setRingtone(BaseSlidingActivity.this, MusicUtils.getCurrentAudioId());

@@ -17,6 +17,7 @@
     <string name="settings_interface_visualizations_category">Visualizations</string>
     <string name="settings_data_download_category">Download</string>
     <string name="settings_data_storage_category">Storage</string>
+    <string name="settings_general_category">General</string>
 
     <!-- Preference titles and summaries -->
     <string name="settings_about_author_title">Created by OpenSilk Productions LLC</string>
@@ -37,6 +38,7 @@
     <string name="settings_interface_theme_title">Select a theme</string>
     <string name="settings_interface_visualizations_title">Enable visualizations</string>
     <string name="settings_interface_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
+    <string name="settings_interface_equalizer_summary">Fine tune audio settings</string>
 
     <string name="settings_data_low_resolution_title">Use lower resolution art work</string>
     <string name="settings_data_low_resolution_summary">Enable to reduce image size and bandwidth used</string>
@@ -48,6 +50,8 @@
 
     <!-- Miscellaneous -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
+    <string name="error">Error</string>
+    <string name="no_audio_id">Could not get audio id. Please play a song and try again.</string>
 
     <!-- Themes -->
     <string name="theme_orpheus">Orpheus</string>
@@ -61,4 +65,5 @@
     <string name="theme_purpheus_dark">Purpheus Dark</string>
     <string name="theme_blupheus_dark">Blupheus Dark</string>
     <string name="theme_grepheus_dark">Grepheus Dark</string>
+
 </resources>
