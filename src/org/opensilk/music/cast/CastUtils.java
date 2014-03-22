@@ -37,6 +37,8 @@ import org.opensilk.cast.util.Utils;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Created by drew on 2/13/14.
  */
@@ -118,6 +120,7 @@ public class CastUtils {
         return c;
     }
 
+    @DebugLog
     public static MediaInfo buildMediaInfo(String trackTitle,
                                             String albumTitle,
                                             String artistName,
@@ -135,7 +138,7 @@ public class CastUtils {
         }
         return new MediaInfo.Builder(url)
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setContentType(mimeType)
+                .setContentType(mimeType.startsWith("audio") ? mimeType : "audio/*") // Workaround for application/ogg (vorbis)
                 .setMetadata(metadata)
                 .build();
     }
