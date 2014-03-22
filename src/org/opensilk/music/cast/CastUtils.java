@@ -130,8 +130,8 @@ public class CastUtils {
                                             String bigImageUrl) {
         MediaMetadata metadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
         metadata.putString(MediaMetadata.KEY_TITLE, trackTitle);
-        metadata.putString(MediaMetadata.KEY_SUBTITLE, albumTitle);
-        metadata.putString(MediaMetadata.KEY_STUDIO, artistName);
+        metadata.putString(MediaMetadata.KEY_ALBUM_TITLE, albumTitle);
+        metadata.putString(MediaMetadata.KEY_ARTIST, artistName);
         metadata.addImage(new WebImage(Uri.parse(imgUrl)));
         if (bigImageUrl != null) {
             metadata.addImage(new WebImage(Uri.parse(bigImageUrl)));
