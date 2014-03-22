@@ -65,6 +65,7 @@ android {
         }
         release {
             manifest.srcFile 'flavors/release/AndroidManifest.xml'
+            res.srcDirs = ['flavors/release/res']
         }
     }
 
