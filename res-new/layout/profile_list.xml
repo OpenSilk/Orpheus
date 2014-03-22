@@ -42,13 +42,12 @@
 
     </LinearLayout>
 
-
-    <ImageButton android:id="@+id/overflow_button"
+    <org.opensilk.music.widgets.CardOverflowButton
+        android:id="@+id/overflow_button"
         android:layout_width="48dp"
         android:layout_height="match_parent"
-        android:background="?android:selectableItemBackground"
-        android:src="@drawable/configure_item_overflow_default"
-        android:scaleType="fitXY"
+        android:paddingRight="20dp"
+        style="@style/Orpheus.MenuButton"
         android:contentDescription="@null" />
 
 </LinearLayout>
