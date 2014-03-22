@@ -128,8 +128,8 @@ public final class NavUtils {
         bundle.putString(Config.NAME, genre.mGenreName);
         bundle.putParcelable(Config.EXTRA_DATA, genre);
 
-        replaceFragment(context, ProfileGenreFragment.newInstance(bundle), "genre");
-        //replaceFragment(context, ProfileGenreAlbumsFragment.newInstance(bundle), "genre");
+        //replaceFragment(context, ProfileGenreFragment.newInstance(bundle), "genre");
+        replaceFragment(context, ProfileGenreAlbumsFragment.newInstance(bundle), "genre");
     }
 
     /**
