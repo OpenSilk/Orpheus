@@ -18,9 +18,15 @@ package org.opensilk.music.ui.home;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.CursorAdapter;
 
+import com.andrew.apollo.R;
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.music.adapters.AlbumGridCardCursorAdapter;
 import org.opensilk.music.adapters.AlbumListCardCursorAdapter;
@@ -32,6 +38,48 @@ import static com.andrew.apollo.utils.PreferenceUtils.ALBUM_LAYOUT;
  * Albums
  */
 public class HomeAlbumFragment extends HomePagerBaseCursorFragment {
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.album_sort_by, menu);
+        inflater.inflate(R.menu.view_as, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_sort_by_az:
+                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_A_Z);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_za:
+                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_Z_A);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_artist:
+                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_ARTIST);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_year:
+                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_YEAR);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_number_of_songs:
+                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                refresh();
+                return true;
+            case R.id.menu_view_as_simple:
+                mPreferences.setAlbumLayout("simple");
+                NavUtils.goHome(getActivity());
+                return true;
+            case R.id.menu_view_as_grid:
+                mPreferences.setAlbumLayout("grid");
+                NavUtils.goHome(getActivity());
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /*
      * Loader Callbacks

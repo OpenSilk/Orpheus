@@ -174,7 +174,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private TextView mFooterTotalTime;
 
     /** Sliding panel */
-    private SlidingUpPanelLayout mSlidingPanel;
+    protected SlidingUpPanelLayout mSlidingPanel;
 
     /** Whether the queue is showing */
     private boolean mQueueShowing;
@@ -688,7 +688,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     /**
      * Possibly shows media route button
      */
-    private void maybeShowHeaderMediaRouteButton(){
+    protected void maybeShowHeaderMediaRouteButton(){
         if (mCastDeviceAvailable && mSlidingPanel.isExpanded()) {
             mHeaderMediaRouteButton.setVisibility(View.VISIBLE);
         } else {
@@ -945,6 +945,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     }
 
+    @DebugLog
     public void maybeClosePanel() {
         if (mSlidingPanel.isExpanded()) {
             mSlidingPanel.collapsePane();

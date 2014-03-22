@@ -22,11 +22,14 @@ import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 
 import com.andrew.apollo.Config;
+import com.andrew.apollo.R;
 
 /**
  * Created by drew on 2/23/14.
@@ -70,6 +73,13 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
     public void onDestroyView() {
         super.onDestroyView();
         mListView = null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        // Remove the overflow
+        menu.removeItem(R.id.menu_settings);
     }
 
     @Override

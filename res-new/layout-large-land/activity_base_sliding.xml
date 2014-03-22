@@ -27,22 +27,12 @@
     style="@style/ActionBarOverlayTopMarginOuter">
     <!--^^^using ActionBarOverlay so need margin equal to height of actionBar-->
 
-    <!-- Home pager-->
-    <android.support.v4.view.ViewPager
-        android:id="@+id/home_pager"
+    <!-- main content -->
+    <FrameLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <org.opensilk.music.widgets.ThemeablePagerTabStrip
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            style="@style/PagerTabStrip" />
-
-    </android.support.v4.view.ViewPager>
+        android:layout_weight="1"/>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -58,9 +48,9 @@
             sothree:collapsedHeight="@dimen/panel_header_height"
             sothree:shadowHeight="@dimen/shadow_height">
 
-            <!-- main content -->
+            <!-- dummy content -->
             <FrameLayout
-                android:id="@+id/main"
+                android:id="@+id/landscape_dummy"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 

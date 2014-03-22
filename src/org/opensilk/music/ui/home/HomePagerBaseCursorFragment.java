@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
@@ -44,8 +45,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  * Created by drew on 2/22/14.
  */
 public abstract class HomePagerBaseCursorFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>,
-        MusicStateListener {
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     /**
      * LoaderCallbacks identifier
@@ -77,17 +77,20 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
      */
     protected CursorAdapter mAdapter;
 
+    /**
+     * Preferences
+     */
+    protected PreferenceUtils mPreferences;
 
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
-        // Register the music status listener //TODO dont want this anymore
-        ((BaseSlidingActivity)activity).setMusicStateListenerListener(this);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mPreferences = PreferenceUtils.getInstance(getActivity());
         mAdapter = createAdapter();
         // Start the loader
         getLoaderManager().initLoader(LOADER, null, this);
@@ -164,20 +167,6 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
-    }
-
-    /*
-     * MusicState Listener
-     */
-
-    @Override
-    public void restartLoader() {
-
-    }
-
-    @Override
-    public void onMetaChanged() {
-
     }
 
     /*

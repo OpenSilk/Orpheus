@@ -150,7 +150,6 @@ public final class NavUtils {
     private static void replaceFragment(final Context context, final Fragment fragment, final String name) {
         // We are making teh assumption that all contexts passed through were created
         // with getActivity()
-        ((HomeSlidingActivity) context).hidePager();
         FragmentManager fm = ((HomeSlidingActivity) context).getSupportFragmentManager();
         fm.beginTransaction()
                 .replace(R.id.main, fragment, name)

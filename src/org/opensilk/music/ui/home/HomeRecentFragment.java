@@ -19,11 +19,15 @@ package org.opensilk.music.ui.home;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.CursorAdapter;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.adapters.RecentGridCardCursorAdapter;
@@ -36,6 +40,27 @@ import static com.andrew.apollo.utils.PreferenceUtils.RECENT_LAYOUT;
  * Recents
  */
 public class HomeRecentFragment extends HomePagerBaseCursorFragment {
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.view_as, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_view_as_simple:
+                mPreferences.setRecentLayout("simple");
+                NavUtils.goHome(getActivity());
+                return true;
+            case R.id.menu_view_as_grid:
+                mPreferences.setRecentLayout("grid");
+                NavUtils.goHome(getActivity());
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /*
      * Loader Callbacks

@@ -19,7 +19,13 @@ package org.opensilk.music.ui.home;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.CursorAdapter;
+
+import com.andrew.apollo.R;
+import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.loaders.SongCursorLoader;
@@ -28,6 +34,47 @@ import org.opensilk.music.loaders.SongCursorLoader;
  * Songs
  */
 public class HomeSongFragment extends HomePagerBaseCursorFragment {
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.song_sort_by, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_sort_by_az:
+                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_za:
+                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_Z_A);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_artist:
+                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_ARTIST);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_album:
+                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_ALBUM);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_year:
+                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_YEAR);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_duration:
+                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_DURATION);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_filename:
+                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_FILENAME);
+                refresh();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /*
      * Loader Callbacks
