@@ -142,6 +142,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // search option
+        getMenuInflater().inflate(R.menu.search, menu);
         // Don't show pager items on profiles or search
         if (mViewPager.getVisibility() == View.VISIBLE) {
             // Shuffle all
@@ -158,11 +160,9 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
             } else if (isSongPage()) {
                 getMenuInflater().inflate(R.menu.song_sort_by, menu);
             }
+            // Settings
+            getMenuInflater().inflate(R.menu.settings, menu);
         }
-        // search option
-        getMenuInflater().inflate(R.menu.search, menu);
-        // Settings
-        getMenuInflater().inflate(R.menu.settings, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
