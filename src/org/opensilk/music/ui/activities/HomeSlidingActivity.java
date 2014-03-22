@@ -142,25 +142,27 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Shuffle all
-        getMenuInflater().inflate(R.menu.shuffle, menu);
-        // Sort orders
-        if (isRecentPage()) {
-            getMenuInflater().inflate(R.menu.view_as, menu);
-        } else if (isArtistPage()) {
-            getMenuInflater().inflate(R.menu.artist_sort_by, menu);
-            getMenuInflater().inflate(R.menu.view_as, menu);
-        } else if (isAlbumPage()) {
-            getMenuInflater().inflate(R.menu.album_sort_by, menu);
-            getMenuInflater().inflate(R.menu.view_as, menu);
-        } else if (isSongPage()) {
-            getMenuInflater().inflate(R.menu.song_sort_by, menu);
+        // Don't show pager items on profiles or search
+        if (mViewPager.getVisibility() == View.VISIBLE) {
+            // Shuffle all
+            getMenuInflater().inflate(R.menu.shuffle, menu);
+            // Sort orders
+            if (isRecentPage()) {
+                getMenuInflater().inflate(R.menu.view_as, menu);
+            } else if (isArtistPage()) {
+                getMenuInflater().inflate(R.menu.artist_sort_by, menu);
+                getMenuInflater().inflate(R.menu.view_as, menu);
+            } else if (isAlbumPage()) {
+                getMenuInflater().inflate(R.menu.album_sort_by, menu);
+                getMenuInflater().inflate(R.menu.view_as, menu);
+            } else if (isSongPage()) {
+                getMenuInflater().inflate(R.menu.song_sort_by, menu);
+            }
         }
         // search option
         getMenuInflater().inflate(R.menu.search, menu);
         // Settings
         getMenuInflater().inflate(R.menu.settings, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
