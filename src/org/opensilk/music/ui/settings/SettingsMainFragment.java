@@ -51,7 +51,7 @@ public class SettingsMainFragment extends Fragment {
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getActivity().getActionBar().setTitle(R.string.settings_title);
-        getActivity().getActionBar().setIcon(R.drawable.ic_action_gear_black);
+        getActivity().getActionBar().setIcon(R.drawable.ic_settings);
     }
 
     private class SettingsAdapter extends BaseAdapter {
