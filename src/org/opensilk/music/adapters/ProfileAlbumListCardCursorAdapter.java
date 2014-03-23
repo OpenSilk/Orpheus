@@ -40,8 +40,8 @@ public class ProfileAlbumListCardCursorAdapter extends CardCursorAdapter {
         CardAlbumList card = new CardAlbumList(getContext(),
                 CursorHelpers.makeAlbumFromCursor(cursor),
                 R.layout.card_list_inner_layout_extra);
-        card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large),
-                getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large));
+        card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
+                getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
         return card;
     }
 }

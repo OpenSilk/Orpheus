@@ -15,13 +15,16 @@
   ~ limitations under the License.
   -->
 
+<!--Nexus 7-->
 <resources>
-    <!--fastscroll i think is 24dp so this is
-        170*2 + 4*4 + 24 = 380 -->
-    <dimen name="card_grid_columnwidth">170dp</dimen>
-    <dimen name="card_grid_cardwidth">170dp</dimen>
-    <dimen name="card_grid_thumbheight">110dp</dimen>
+    <!--600 - 24 - 6*4 = 552
+        552/3 - 54 = 130 -->
+    <dimen name="grid_card_thumbheight">130dp</dimen>
 
-    <dimen name="card_list_thumbnail">70dp</dimen>
-    <dimen name="card_list_thumbnail_large">150dp</dimen>
+    <!-- 70% of sw -->
+    <dimen name="profile_header_height">420dp</dimen>
+
+    <!-- Settings grid-->
+    <dimen name="settings_grid_width">184dp</dimen>
+    <dimen name="settings_grid_height">184dp</dimen>
 </resources>

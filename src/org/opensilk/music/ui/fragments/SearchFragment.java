@@ -44,7 +44,6 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Song;
-import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.music.ui.cards.CardAlbumList;
 import org.opensilk.music.ui.cards.CardArtistList;
@@ -243,8 +242,8 @@ public class SearchFragment extends Fragment implements
                 final Artist artist = new Artist(id, name, songCount, albumCount);
                 // return artist list card
                 CardArtistList card = new CardArtistList(getActivity(), artist);
-                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large),
-                        getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large));
+                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
+                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
                 return card;
             } else if (mimetype.equals("album")) {
                 // Get the Id of the album
@@ -257,8 +256,8 @@ public class SearchFragment extends Fragment implements
                 final Album album = new Album(id, name, artist, 0, null);
                 // return album list card
                 CardAlbumList card = new CardAlbumList(getActivity(), album);
-                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large),
-                        getContext().getResources().getDimensionPixelSize(R.dimen.card_list_thumbnail_large));
+                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
+                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
                 return card;
             } else { /* audio */
                 // get id

@@ -19,6 +19,6 @@
 <ImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/card_thumbnail_image"
-    android:layout_width="@dimen/card_grid_cardwidth"
-    android:layout_height="@dimen/card_grid_thumbheight"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/grid_card_thumbheight"
     style="@style/Orpheus.Thumbnail"/>

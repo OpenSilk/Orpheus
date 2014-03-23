@@ -13,8 +13,9 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:stretchMode="spacingWidthUniform"
-            android:columnWidth="@dimen/card_grid_columnwidth"
+            android:columnWidth="@dimen/settings_grid_width"
             android:verticalSpacing="8dp"
+            android:horizontalSpacing="3dp"
             android:numColumns="auto_fit"/>
 
 </LinearLayout>

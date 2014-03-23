@@ -30,20 +30,19 @@
     <!-- main content -->
     <FrameLayout
         android:id="@+id/main"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"/>
 
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
 
         <!-- Sliding panel with profiles and other fragments -->
         <com.sothree.slidinguppanel.SlidingUpPanelLayout
             android:id="@+id/sliding_layout"
             android:layout_height="match_parent"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/panel_width"
             android:gravity="bottom"
             sothree:collapsedHeight="@dimen/panel_header_height"
             sothree:shadowHeight="@dimen/shadow_height">
