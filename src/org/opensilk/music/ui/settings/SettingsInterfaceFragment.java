@@ -24,14 +24,11 @@ import static org.opensilk.music.ui.activities.HomeSlidingActivity.RESULT_RESTAR
  * Created by andrew on 3/1/14.
  */
 public class SettingsInterfaceFragment extends SettingsFragment implements
-        Preference.OnPreferenceClickListener,
         Preference.OnPreferenceChangeListener {
 
     private static final String PREF_THEME = "pref_theme";
-    private static final String PREF_EQUALIZER = "pref_equalizer";
 
     private ThemeListPreference mThemeList;
-    private Preference mEqualizer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,8 +39,6 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         mThemeList.setOnPreferenceChangeListener(this);
         updateThemeIcon(ThemeHelper.getInstance(getActivity()).getThemeName());
 
-        mEqualizer = mPrefSet.findPreference(PREF_EQUALIZER);
-        mEqualizer.setOnPreferenceClickListener(this);
     }
 
     @Override
@@ -53,23 +48,6 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
             String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName();
             if (!newTheme.equalsIgnoreCase(currentTheme)) {
                 doRestart(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US).replaceAll(" ","")));
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        if (preference == mEqualizer) {
-            if (MusicUtils.getAudioSessionId() == ERROR_BAD_VALUE) {
-                new AlertDialog.Builder(getActivity())
-                        .setTitle(R.string.error)
-                        .setMessage(R.string.no_audio_id)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-            } else {
-                NavUtils.openEffectsPanel(getActivity());
             }
             return true;
         }
@@ -99,6 +77,5 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         mThemeList.setIcon(new ColorDrawable(ThemeHelper.getInstance(getActivity())
                 .getThemeColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US).replaceAll(" ","")))));
     }
-
 
 }

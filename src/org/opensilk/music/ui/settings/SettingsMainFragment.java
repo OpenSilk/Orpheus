@@ -72,9 +72,9 @@ public class SettingsMainFragment extends Fragment {
             mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
                     getString(R.string.settings_about_category),
                     R.drawable.ic_settings_about));
-            mFragments.add(new Holder(SettingsCastFragment.class.getName(),
-                    getString(R.string.settings_cast_title),
-                    R.drawable.ic_settings_cast));
+            mFragments.add(new Holder(SettingsAudioFragment.class.getName(),
+                    getString(R.string.settings_audio_title),
+                    R.drawable.ic_settings_audio));
         }
 
         @Override

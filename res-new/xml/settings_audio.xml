@@ -18,10 +18,25 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <PreferenceCategory
+        android:title="@string/settings_general_category">
+
+        <Preference
+            android:key="pref_equalizer"
+            android:title="@string/menu_equalizer"
+            android:summary="@string/settings_interface_equalizer_summary"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_cast_category">
+
         <CheckBoxPreference
             android:key="pref_cast_enabled"
             android:title="@string/settings_cast_enable_title"
             android:summary="@string/settings_cast_enable_summary"
             android:defaultValue="true"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
