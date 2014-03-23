@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.profile;
+package org.opensilk.music.widgets;
 
 import android.content.Context;
 import android.graphics.Matrix;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 
 /**
  * Created by andrew on 2/26/14.
  */
-public class ProfileHeaderImage extends ImageView {
+public class BottomCropArtworkImageView extends FullScreenArtworkImageView {
 
-        public ProfileHeaderImage(Context context) {
+        public BottomCropArtworkImageView(Context context) {
             super(context);
             setup();
         }
 
-        public ProfileHeaderImage(Context context, AttributeSet attrs) {
+        public BottomCropArtworkImageView(Context context, AttributeSet attrs) {
             super(context, attrs);
             setup();
         }
 
-        public ProfileHeaderImage(Context context, AttributeSet attrs, int defStyle) {
+        public BottomCropArtworkImageView(Context context, AttributeSet attrs, int defStyle) {
             super(context, attrs, defStyle);
             setup();
         }
@@ -47,6 +46,15 @@ public class ProfileHeaderImage extends ImageView {
 
         @Override
         protected boolean setFrame(int l, int t, int r, int b) {
+            configureBounds(l, t,  r, b);
+            return super.setFrame(l, t, r, b);
+        }
+
+        private void configureBounds(int l, int t, int r, int b) {
+            if (getDrawable() == null || getImageMatrix() == null) {
+                return;
+            }
+
             float width = r - l;
             float height = b - t;
 
@@ -63,8 +71,6 @@ public class ProfileHeaderImage extends ImageView {
 
             matrix.setScale(scaleFactor, scaleFactor, 0, 0);
             setImageMatrix(matrix);
-
-            return super.setFrame(l, t, r, b);
         }
 
 }

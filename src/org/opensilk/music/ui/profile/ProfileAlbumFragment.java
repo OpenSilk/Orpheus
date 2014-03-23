@@ -35,8 +35,11 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
 import org.opensilk.music.ui.cards.CardAlbumList;
+import org.opensilk.music.widgets.BottomCropArtworkImageView;
+import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 
 import static org.opensilk.music.util.ConfigHelper.isLargeLandscape;
 
@@ -47,7 +50,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
 
 
     /* header overlay stuff */
-    protected ImageView mHeaderThumb;
+    protected ThumbnailArtworkImageView mHeaderThumb;
     protected TextView mInfoTitle;
     protected TextView mInfoSubTitle;
     protected View mOverflowButton;
@@ -78,8 +81,8 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
         mListView = (ListView) v.findViewById(android.R.id.list);
         // set the adapter
         mListView.setAdapter(mAdapter);
-        mHeaderImage = (ProfileHeaderImage) v.findViewById(R.id.artist_image_header);
-        mHeaderThumb = (ImageView) v.findViewById(R.id.album_image_header);
+        mHeaderImage = (BottomCropArtworkImageView) v.findViewById(R.id.artist_image_header);
+        mHeaderThumb = (ThumbnailArtworkImageView) v.findViewById(R.id.album_image_header);
         mInfoTitle = (TextView) v.findViewById(R.id.info_title);
         mInfoSubTitle = (TextView) v.findViewById(R.id.info_subtitle);
         mOverflowButton = v.findViewById(R.id.profile_header_overflow);
@@ -90,9 +93,9 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-        ApolloUtils.getImageFetcher(getActivity()).loadLargeArtistImage(mAlbum.mArtistName, mHeaderImage);
-        ApolloUtils.getImageFetcher(getActivity()).loadAlbumImage(
-                mAlbum.mArtistName, mAlbum.mAlbumName, mAlbum.mAlbumId, mHeaderThumb);
+        ArtworkManager.loadArtistImage(mAlbum.mArtistName, mHeaderImage);
+        ArtworkManager.loadAlbumImage(mAlbum.mArtistName, mAlbum.mAlbumName,
+                mAlbum.mAlbumId, mHeaderThumb);
         // Load header text
         mInfoTitle.setText(mAlbum.mAlbumName);
         mInfoSubTitle.setText(mAlbum.mArtistName);

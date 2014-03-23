@@ -437,4 +437,12 @@ public final class PreferenceUtils {
         return mPreferences.getBoolean(SHOW_VISUALIZATIONS, true);
     }
 
+    public boolean isOldCacheDeleted() {
+        return mPreferences.getBoolean("old_cache_removed", false);
+    }
+
+    public void setOldCacheDeleted() {
+        mPreferences.edit().putBoolean("old_cache_removed", true).apply();
+    }
+
 }

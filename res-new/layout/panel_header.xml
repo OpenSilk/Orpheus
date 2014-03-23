@@ -35,7 +35,7 @@
         android:orientation="horizontal">
 
         <!-- album art thumb -->
-        <ImageView
+        <org.opensilk.music.widgets.ThumbnailArtworkImageView
             android:id="@+id/header_album_art"
             android:layout_width="@dimen/panel_header_thumbnail_size"
             android:layout_height="@dimen/panel_header_thumbnail_size"

@@ -16,6 +16,8 @@ import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
@@ -51,8 +53,8 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
     }
 
     @Override
-    protected void loadThumbnail(ImageFetcher fetcher, ImageView view) {
-        fetcher.loadAlbumImage(mData.mArtistName, mData.mAlbumName, mData.mAlbumId, view);
+    protected void loadThumbnail(ArtworkImageView view) {
+        ArtworkManager.loadAlbumImage(mData.mArtistName, mData.mAlbumName, mData.mAlbumId, view);
     }
 
     @Override

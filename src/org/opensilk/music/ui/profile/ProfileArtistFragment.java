@@ -34,8 +34,10 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
 import org.opensilk.music.ui.cards.CardArtistList;
+import org.opensilk.music.widgets.BottomCropArtworkImageView;
 
 import it.gmariotti.cardslib.library.view.CardListView;
 
@@ -77,7 +79,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
         mListView = (CardListView) v.findViewById(android.R.id.list);
         // set the adapter
         mListView.setAdapter(mAdapter);
-        mHeaderImage = (ProfileHeaderImage) v.findViewById(R.id.artist_image_header);
+        mHeaderImage = (BottomCropArtworkImageView) v.findViewById(R.id.artist_image_header);
         mInfoTitle = (TextView) v.findViewById(R.id.info_title);
         mInfoSubTitle = (TextView) v.findViewById(R.id.info_subtitle);
         mOverflowButton = v.findViewById(R.id.profile_header_overflow);
@@ -88,7 +90,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-        ApolloUtils.getImageFetcher(getActivity()).loadLargeArtistImage(mArtist.mArtistName, mHeaderImage);
+        ArtworkManager.loadArtistImage(mArtist.mArtistName, mHeaderImage);
         // Load header text
         mInfoTitle.setText(mArtist.mArtistName);
         mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.mAlbumNumber));

@@ -71,7 +71,7 @@ public class HomeFragment extends Fragment {
         // Attch the adapter
         mViewPager.setAdapter(mPagerAdapter);
         // Offscreen pager loading limit
-        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
+//        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
         // Start on the last page the user was on
         mViewPager.setCurrentItem(mPreferences.getStartPage());
 

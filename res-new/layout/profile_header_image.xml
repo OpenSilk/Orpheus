@@ -18,7 +18,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.opensilk.music.ui.profile.ProfileHeaderImage
+    <org.opensilk.music.widgets.BottomCropArtworkImageView
         android:id="@+id/artist_image_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/profile_header_height"

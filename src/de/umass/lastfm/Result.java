@@ -59,17 +59,17 @@ public class Result {
         this.errorMessage = errorMessage;
     }
 
-    static Result createOkResult(Document resultDocument) {
+    public static Result createOkResult(Document resultDocument) {
         return new Result(resultDocument);
     }
 
-    static Result createHttpErrorResult(int httpErrorCode, String errorMessage) {
+    public static Result createHttpErrorResult(int httpErrorCode, String errorMessage) {
         Result r = new Result(errorMessage);
         r.httpErrorCode = httpErrorCode;
         return r;
     }
 
-    static Result createRestErrorResult(int errorCode, String errorMessage) {
+    public static Result createRestErrorResult(int errorCode, String errorMessage) {
         Result r = new Result(errorMessage);
         r.errorCode = errorCode;
         return r;

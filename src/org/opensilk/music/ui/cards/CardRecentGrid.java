@@ -28,6 +28,8 @@ import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -71,8 +73,8 @@ public class CardRecentGrid extends CardBaseThumb<Album> {
     }
 
     @Override
-    protected void loadThumbnail(ImageFetcher fetcher, ImageView view) {
-        fetcher.loadAlbumImage(mData.mArtistName, mData.mAlbumName, mData.mAlbumId, view);
+    protected void loadThumbnail(ArtworkImageView view) {
+        ArtworkManager.loadAlbumImage(mData.mArtistName, mData.mAlbumName, mData.mAlbumId, view);
     }
 
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {

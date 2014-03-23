@@ -47,7 +47,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -62,7 +61,6 @@ import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.Album;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
@@ -75,10 +73,12 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.QueueFragment;
 import org.opensilk.music.widgets.AudioVisualizationView;
+import org.opensilk.music.widgets.FullScreenArtworkImageView;
 import org.opensilk.music.widgets.HeaderOverflowButton;
 import org.opensilk.music.widgets.PanelHeaderLayout;
 import org.opensilk.music.widgets.PlayPauseButton;
@@ -86,6 +86,7 @@ import org.opensilk.music.widgets.QueueButton;
 import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
+import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -128,7 +129,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private TimeHandler mTimeHandler;
 
     // Background art
-    private ImageView mArtBackground;
+    private FullScreenArtworkImageView mArtBackground;
 
     /** Panel Header */
     private PanelHeaderLayout mPanelHeader;
@@ -143,7 +144,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     // Next button
     private RepeatingImageButton mHeaderNextButton;
     // Album art
-    private ImageView mHeaderAlbumArt;
+    private ThumbnailArtworkImageView mHeaderAlbumArt;
     // queue switch button
     private QueueButton mHeaderQueueButton;
     // overflow btn
@@ -565,7 +566,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mPanelHeader = (PanelHeaderLayout) findViewById(R.id.panel_header);
 
         // Background art
-        mArtBackground = (ImageView) findViewById(R.id.panel_background_art);
+        mArtBackground = (FullScreenArtworkImageView) findViewById(R.id.panel_background_art);
 
         //Visualizer view
         mVisualizerView = (AudioVisualizationView) findViewById(R.id.visualizer_view);
@@ -585,7 +586,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Artist name
         mHeaderArtistName = (TextView)findViewById(R.id.header_artist_info);
         // Album art
-        mHeaderAlbumArt = (ImageView)findViewById(R.id.header_album_art);
+        mHeaderAlbumArt = (ThumbnailArtworkImageView) findViewById(R.id.header_album_art);
         // Open to the currently playing album profile
         mHeaderAlbumArt.setOnClickListener(mOpenCurrentAlbumProfile);
         // Used to show and hide the queue fragment
@@ -715,11 +716,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Set the artist name
         mHeaderArtistName.setText(MusicUtils.getArtistName());
         // Set the album art
-        ApolloUtils.getImageFetcher(this).loadCurrentArtwork(mHeaderAlbumArt);
+        ArtworkManager.loadCurrentArtwork(mHeaderAlbumArt);
         // Set the total time
         mFooterTotalTime.setText(MusicUtils.makeTimeString(this, MusicUtils.duration() / 1000));
         // Set the album art
-        ApolloUtils.getImageFetcher(this).loadCurrentLargeArtwork(mArtBackground);
+        ArtworkManager.loadCurrentArtwork(mArtBackground);
         // Update the current time
         queueNextRefresh(1);
     }

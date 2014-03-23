@@ -32,6 +32,8 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.Projections;
 
 import java.util.ArrayList;
@@ -75,9 +77,9 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
     }
 
     @Override
-    protected void loadThumbnail(ImageFetcher fetcher, ImageView view) {
+    protected void loadThumbnail(ArtworkImageView view) {
         // Wrap call in a async task since we are hitting the mediastore
-        ApolloUtils.execute(false, new ArtLoaderTask(fetcher, view, mData.mGenreId));
+        ApolloUtils.execute(false, new ArtLoaderTask(view, mData.mGenreId));
     }
 
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
@@ -97,12 +99,10 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
     }
 
     private class ArtLoaderTask extends AsyncTask<Void, Void, List<ArtInfo>> {
-        final ImageFetcher fetcher;
-        final ImageView view;
+        final ArtworkImageView view;
         final long genreId;
 
-        ArtLoaderTask(ImageFetcher fetcher, ImageView view, long genreId) {
-            this.fetcher = fetcher;
+        ArtLoaderTask(ArtworkImageView view, long genreId) {
             this.view = view;
             this.genreId = genreId;
         }
@@ -131,7 +131,7 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
         @Override
         protected void onPostExecute(List<ArtInfo> artInfos) {
             for (ArtInfo info: artInfos) {
-                fetcher.loadAlbumImage(info.mArtistName, info.mAlbumName, info.mAlbumId, view);
+                ArtworkManager.loadAlbumImage(info.mArtistName, info.mAlbumName, info.mAlbumId, view);
                 break;// only loading the first
             }
         }

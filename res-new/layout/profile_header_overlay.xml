@@ -57,7 +57,7 @@
 
     </org.opensilk.music.widgets.ProfileHeaderLayout>
 
-    <ImageView
+    <org.opensilk.music.widgets.ThumbnailArtworkImageView
         android:id="@+id/album_image_header"
         android:layout_width="80dp"
         android:layout_height="80dp"

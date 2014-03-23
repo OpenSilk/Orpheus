@@ -227,6 +227,8 @@
         <!-- Cast Service -->
         <service android:name="org.opensilk.cast.SilkCastService"
             android:process=":service"/>
+        <!--Artwork service runs in activity process-->
+        <service android:name="org.opensilk.music.artwork.remote.ArtworkService"/>
     </application>
 
 </manifest>

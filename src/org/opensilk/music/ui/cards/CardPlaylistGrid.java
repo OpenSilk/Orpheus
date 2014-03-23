@@ -39,6 +39,8 @@ import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
 
@@ -80,11 +82,11 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
     }
 
     @Override
-    protected void loadThumbnail(ImageFetcher fetcher, ImageView view) {
+    protected void loadThumbnail(ArtworkImageView view) {
         if (mData.mSongs.size() > 0) {
             // for now just load the first songs art //TODO stacked art like gmusic
             Song song = mData.mSongs.get(0);
-            fetcher.loadAlbumImage(song.mArtistName, song.mAlbumName, song.mAlbumId, view);
+            ArtworkManager.loadAlbumImage(song.mArtistName, song.mAlbumName, song.mAlbumId, view);
         }
     }
 

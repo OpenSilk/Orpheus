@@ -24,6 +24,8 @@ import android.widget.ImageView;
 import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.utils.ApolloUtils;
 
+import org.opensilk.music.artwork.ArtworkImageView;
+
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 
@@ -81,10 +83,9 @@ public abstract class CardBaseThumb<D> extends Card {
 
     /**
      * call appropriate method in ImageFetcher to load image
-     * @param fetcher
      * @param view
      */
-    protected abstract void loadThumbnail(ImageFetcher fetcher, ImageView view);
+    protected abstract void loadThumbnail(ArtworkImageView view);
 
     /**
      * Wrapper class to allow dynamic loading of images from the ImageFetcher Instance
@@ -107,8 +108,9 @@ public abstract class CardBaseThumb<D> extends Card {
              * If your cardthumbnail uses external library you have to provide how to load the image.
              * If your cardthumbnail doesn't use an external library it will use a built-in method
              */
-            final ImageFetcher imageFetcher = ApolloUtils.getImageFetcher((FragmentActivity) getContext());
-            loadThumbnail(imageFetcher, (ImageView) viewImage);
+//            final ImageFetcher imageFetcher = ApolloUtils.getImageFetcher((FragmentActivity) getContext());
+//            loadThumbnail(imageFetcher, (ImageView) viewImage);
+            loadThumbnail((ArtworkImageView) viewImage);
         }
     }
 }

@@ -56,8 +56,6 @@ import com.andrew.apollo.appwidgets.AppWidgetLarge;
 import com.andrew.apollo.appwidgets.AppWidgetLargeAlternate;
 import com.andrew.apollo.appwidgets.AppWidgetSmall;
 import com.andrew.apollo.appwidgets.RecentWidgetProvider;
-import com.andrew.apollo.cache.ImageCache;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.ApolloUtils;
@@ -80,6 +78,7 @@ import org.opensilk.cast.helpers.LocalCastServiceManager;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
+import org.opensilk.music.artwork.remote.ArtworkServiceHelper;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 
@@ -484,7 +483,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Image cache
      */
-    private ImageFetcher mImageFetcher;
+    private ArtworkServiceHelper mArtworkServiceHelper;
 
     /**
      * Used to build the notification
@@ -614,10 +613,9 @@ public class MusicPlaybackService extends Service {
         // Initialize the notification helper
         mNotificationHelper = new NotificationHelper(this);
 
-        // Initialize the image fetcher
-        mImageFetcher = ImageFetcher.getInstance(this);
-        // Initialize the image cache
-        mImageFetcher.setImageCache(ImageCache.getInstance(this));
+        // Get our ArtService connection
+        mArtworkServiceHelper = new ArtworkServiceHelper(this);
+        mArtworkServiceHelper.bind();
 
         // Start up the thread running the service. Note that we create a
         // separate thread because the service normally runs in the process's
@@ -771,6 +769,9 @@ public class MusicPlaybackService extends Service {
             unregisterReceiver(mUnmountReceiver);
             mUnmountReceiver = null;
         }
+
+        //Unbind from artservice
+        mArtworkServiceHelper.unbind();
 
         // kill the remote app.
         try {
@@ -1532,6 +1533,7 @@ public class MusicPlaybackService extends Service {
                 }
                 albumArt = albumArt.copy(config, false);
             }
+
             mRemoteControlClient
                     .editMetadata(true)
                     .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName())
@@ -2632,9 +2634,7 @@ public class MusicPlaybackService extends Service {
      */
     public Bitmap getAlbumArt() {
         // Return the cached artwork
-        final Bitmap bitmap = mImageFetcher.getLargeArtwork(getAlbumName(),
-                getAlbumId(), getArtistName());
-        return bitmap;
+        return mArtworkServiceHelper.getArtwork(getArtistName(), getAlbumName(), getAlbumId());
     }
 
     /**

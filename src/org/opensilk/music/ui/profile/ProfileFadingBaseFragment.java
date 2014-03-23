@@ -23,6 +23,8 @@ import android.os.Parcelable;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
+import org.opensilk.music.widgets.BottomCropArtworkImageView;
+
 /**
  * Created by drew on 2/23/14.
  */
@@ -31,7 +33,7 @@ public abstract class ProfileFadingBaseFragment<D extends Parcelable> extends Pr
     /* Manages our views */
     protected FadingActionBarHelper mFadingHelper;
     /* header image */
-    protected ProfileHeaderImage mHeaderImage;
+    protected BottomCropArtworkImageView mHeaderImage;
 
     protected Drawable mActionBarBackground;
 
