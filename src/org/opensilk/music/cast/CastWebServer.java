@@ -58,7 +58,7 @@ public class CastWebServer extends NanoHTTPD {
      */
     public static final String MIME_DEFAULT_BINARY = "application/octet-stream";
 
-    public static final int PORT = 8080;
+    public static final int PORT = 50989;
 
     private static final String TAG = CastWebServer.class.getSimpleName();
 
