@@ -147,9 +147,15 @@
 
         <!-- Used to set options -->
         <activity
-            android:name="org.opensilk.music.ui.settings.SettingsActivity"
-            android:label="@string/menu_settings" />
-        
+            android:name="org.opensilk.music.ui.settings.SettingsPhoneActivity"
+            android:label="@string/menu_settings"
+            android:icon="@drawable/ic_settings" />
+
+        <activity
+            android:name="org.opensilk.music.ui.settings.SettingsTabletActivity"
+            android:label="@string/menu_settings"
+            android:icon="@drawable/ic_settings" />
+
         <!-- 4x1 App Widget -->
         <receiver
             android:name="com.andrew.apollo.appwidgets.AppWidgetSmall"

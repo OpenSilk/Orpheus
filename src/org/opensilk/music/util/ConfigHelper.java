@@ -7,6 +7,7 @@ import android.util.Log;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.SCREENLAYOUT_SIZE_LARGE;
 import static android.content.res.Configuration.SCREENLAYOUT_SIZE_MASK;
+import static android.content.res.Configuration.SCREENLAYOUT_SIZE_XLARGE;
 
 /**
  * Created by andrew on 3/18/14.
@@ -21,6 +22,10 @@ public class ConfigHelper {
 
     public static boolean isLargeScreen(Resources res) {
         return (res.getConfiguration().screenLayout & SCREENLAYOUT_SIZE_MASK) >= SCREENLAYOUT_SIZE_LARGE;
+    }
+
+    public static boolean isXLargeScreen(Resources res) {
+        return (res.getConfiguration().screenLayout & SCREENLAYOUT_SIZE_MASK) >= SCREENLAYOUT_SIZE_XLARGE;
     }
 
     public static boolean isLargeLandscape(Resources res) {

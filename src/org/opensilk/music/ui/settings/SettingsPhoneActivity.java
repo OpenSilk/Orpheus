@@ -9,7 +9,7 @@ import com.andrew.apollo.R;
 /**
  * Created by andrew on 2/28/14.
  */
-public class SettingsActivity extends Activity {
+public class SettingsPhoneActivity extends Activity {
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {

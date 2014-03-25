@@ -27,10 +27,13 @@ public abstract class SettingsFragment extends PreferenceFragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getActivity().getActionBar().setTitle(mTitle);
-        getActivity().getActionBar().setIcon(mIconRes);
+        if (mTitle != null && mIconRes != 0) {
+            getActivity().getActionBar().setTitle(mTitle);
+            getActivity().getActionBar().setIcon(mIconRes);
+        }
     }
 
     protected String getTitle() { return mTitle; }
     protected int getIconRes() { return mIconRes; }
+
 }

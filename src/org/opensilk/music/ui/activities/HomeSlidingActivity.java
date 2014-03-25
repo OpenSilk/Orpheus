@@ -34,7 +34,9 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout.SlideState;
 
 import org.opensilk.music.ui.fragments.SearchFragment;
 import org.opensilk.music.ui.home.HomeFragment;
-import org.opensilk.music.ui.settings.SettingsActivity;
+import org.opensilk.music.ui.settings.SettingsPhoneActivity;
+import org.opensilk.music.ui.settings.SettingsTabletActivity;
+import org.opensilk.music.util.ConfigHelper;
 
 import static android.app.SearchManager.QUERY;
 
@@ -130,7 +132,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                startActivityForResult(new Intent(this, SettingsActivity.class), 0);
+                startActivityForResult(new Intent(this, ConfigHelper.isLargeScreen(getResources()) ?
+                        SettingsTabletActivity.class : SettingsPhoneActivity.class), 0);
                 return true;
             case R.id.menu_search:
                 NavUtils.openSearch(this);
