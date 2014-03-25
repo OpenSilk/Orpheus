@@ -778,8 +778,10 @@ public class MusicPlaybackService extends Service {
         } catch (Exception ignored) { /*pass*/ }
 
         // Unregister with cast manager
-        mCastManager.removeCastConsumer(mCastConsumer);
-        mCastManager = null;
+        if (mCastManager != null) {
+            mCastManager.removeCastConsumer(mCastConsumer);
+            mCastManager = null;
+        }
 
         // Unbind cast service
         mCastServiceHelper.unbind();
