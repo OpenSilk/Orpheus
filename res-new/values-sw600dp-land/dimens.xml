@@ -20,6 +20,8 @@
         512/3 - 54 = 116 -->
     <dimen name="grid_card_thumbheight">116dp</dimen>
 
+    <dimen name="list_card_thumbnail_large">144dp</dimen>
+
     <!-- 40% sw -->
     <dimen name="profile_header_height">240dp</dimen>
 

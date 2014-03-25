@@ -21,6 +21,9 @@
         552/3 - 54 = 130 -->
     <dimen name="grid_card_thumbheight">130dp</dimen>
 
+    <dimen name="list_card_thumbnail">72dp</dimen>
+    <dimen name="list_card_thumbnail_large">152dp</dimen>
+
     <!-- 70% of sw -->
     <dimen name="profile_header_height">420dp</dimen>
 
