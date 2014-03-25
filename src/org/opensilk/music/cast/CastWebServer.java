@@ -58,6 +58,8 @@ public class CastWebServer extends NanoHTTPD {
      */
     public static final String MIME_DEFAULT_BINARY = "application/octet-stream";
 
+    public static final String MIME_DEFAULT_AUDIO = "audio/*";
+
     public static final int PORT = 50989;
 
     private static final String TAG = CastWebServer.class.getSimpleName();
@@ -221,8 +223,8 @@ public class CastWebServer extends NanoHTTPD {
         if (TextUtils.isEmpty(filePath)) {
             return notFoundResponse();
         }
-        if (TextUtils.isEmpty(mime)) {
-            mime = MIME_DEFAULT_BINARY;
+        if (TextUtils.isEmpty(mime) || !mime.startsWith("audio")) {
+            mime = MIME_DEFAULT_AUDIO;
         }
         File file = new File(filePath);
         return serveFile(file, mime, headers);
