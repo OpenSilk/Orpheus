@@ -78,6 +78,15 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         return mDiskCache.getDirectory();
     }
 
+    public DiskLruCache.Snapshot get(String url) {
+        try {
+            return mDiskCache.get(CacheUtil.md5(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /*
      * Implement ImageCache interface
      */

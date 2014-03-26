@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class MusicProvider extends ContentProvider {
 
-    private static final String AUTHORITY = BuildConfig.FLAVORED_AUTHORITY;
+    private static final String AUTHORITY = BuildConfig.MUSIC_AUTHORITY;
     private static final UriMatcher sUriMatcher;
 
     /** Uri for recents store */

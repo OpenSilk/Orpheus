@@ -9,6 +9,14 @@
             android:name="com.andrew.apollo.provider.MusicProvider"
             android:multiprocess="true"
             android:exported="false"/>
+
+        <provider
+            android:name="org.opensilk.music.artwork.ArtworkProvider"
+            android:authorities="org.opensilk.music.artwork.provider"
+            android:enabled="true"
+            android:exported="false"
+            android:grantUriPermissions="true"/>
+
     </application>
 
 </manifest>
