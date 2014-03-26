@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.artwork.remote;
+package org.opensilk.music.artwork;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-
-import org.opensilk.music.artwork.ArtworkLoader;
-import org.opensilk.music.artwork.ArtworkManager;
 
 /**
  * Proxy for remote processes to access the ArtworkManager

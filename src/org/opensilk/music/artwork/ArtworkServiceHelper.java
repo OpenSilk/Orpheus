@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.artwork.remote;
+package org.opensilk.music.artwork;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -32,7 +32,10 @@ import android.util.Log;
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 
+import org.opensilk.music.artwork.ArtworkService;
+import org.opensilk.music.artwork.IArtworkServiceImpl;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
+import org.opensilk.music.artwork.remote.IArtworkService;
 
 import java.io.IOException;
 

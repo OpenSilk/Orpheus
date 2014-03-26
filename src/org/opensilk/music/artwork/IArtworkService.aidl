@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.artwork.remote;
+package org.opensilk.music.artwork;
 
 import android.os.ParcelFileDescriptor;
 

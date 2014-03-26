@@ -96,53 +96,12 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         }
     }
 
-    /**
-     * Returns a ParcelFileDescriptor for the file backing the entry
-     * specified by url, This is probably a very stupid idea but
-     * saves a bunch of copying to temp files
-     * @param url
-     * @return
-     */
-    @DebugLog
-    public synchronized ParcelFileDescriptor getParcelFileDescriptor(String url) {
-        DiskLruCache.Snapshot snapshot = null;
-        DiskLruCache.Editor editor = null;
-        try {
-            snapshot = mDiskCache.get(CacheUtil.md5(url));
-            if (snapshot != null) {
-                editor = snapshot.edit();
-                if (editor != null) {
-                    File f = editor.getFile(0);
-                    if (f != null && f.exists()) {
-                        return ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (editor != null) {
-                try {
-                    // must recommit to mark the entry as clean
-                    editor.commit();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                editor.abortUnlessCommitted();
-            }
-            if (snapshot != null) {
-                snapshot.close();
-            }
-        }
-        return null;
-    }
-
     /*
      * Implement ImageCache interface
      */
 
     @Override
-    public synchronized void putBitmap(String url, Bitmap data) {
+    public void putBitmap(String url, Bitmap data) {
         DiskLruCache.Editor editor = null;
         try {
             editor = mDiskCache.edit(CacheUtil.md5(url));
@@ -167,7 +126,7 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
     }
 
     @Override
-    public synchronized Bitmap getBitmap(String url) {
+    public Bitmap getBitmap(String url) {
         Bitmap bitmap = null;
         DiskLruCache.Snapshot snapshot = null;
         try {

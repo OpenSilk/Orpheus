@@ -33,9 +33,6 @@ import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 
-import org.opensilk.music.artwork.remote.ArtworkService;
-import org.opensilk.music.artwork.remote.IArtworkServiceImpl;
-
 import java.io.FileNotFoundException;
 
 import hugo.weaving.DebugLog;

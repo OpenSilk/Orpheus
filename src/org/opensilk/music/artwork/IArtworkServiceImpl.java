@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.artwork.remote;
+package org.opensilk.music.artwork;
 
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -27,6 +27,8 @@ import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.music.artwork.ArtworkLoader;
+import org.opensilk.music.artwork.ArtworkService;
+import org.opensilk.music.artwork.remote.IArtworkService;
 
 import java.io.IOException;
 import java.io.OutputStream;
