@@ -33,6 +33,7 @@ import org.opensilk.music.artwork.cache.CacheUtil;
 import org.opensilk.volley.RequestQueueManager;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Singleton class used to manager everything related to loading/fetching
@@ -163,6 +164,13 @@ public class ArtworkManager {
         return mL2Cache;
     }
 
+    /**
+     * @return The BitmapDiskLruCache instance
+     */
+    /*package*/ BitmapDiskLruCache getDiskCache() {
+        return mL2Cache;
+    }
+
     public PreferenceUtils getPreferences() {
         return mPreferences;
     }
@@ -183,19 +191,34 @@ public class ArtworkManager {
             if (!mPreferences.isOldCacheDeleted()) {
                 File oldCache = CacheUtil.getCacheDir(mContext, OLD_DOWNLOAD_CACHE);
                 if (oldCache != null && oldCache.exists() && oldCache.isDirectory()) {
-                    for (File f : oldCache.listFiles()) {
-                        if (f != null) f.delete();
-                    }
+                    deleteContents(oldCache);
                 }
                 oldCache = CacheUtil.getCacheDir(mContext, OLD_IMAGE_CACHE);
                 if (oldCache != null && oldCache.exists() && oldCache.isDirectory()) {
-                    for (File f : oldCache.listFiles()) {
-                        if (f != null) f.delete();
-                    }
+                    deleteContents(oldCache);
                 }
                 mPreferences.setOldCacheDeleted();
             }
         } catch (Exception ignored) {}
+    }
+
+    /**
+     * Deletes the contents of {@code dir}. Throws an IOException if any file
+     * could not be deleted, or if {@code dir} is not a readable directory.
+     */
+    private static void deleteContents(File dir) throws IOException {
+        File[] files = dir.listFiles();
+        if (files == null) {
+            throw new IOException("not a readable directory: " + dir);
+        }
+        for (File file : files) {
+            if (file.isDirectory()) {
+                deleteContents(file);
+            }
+            if (!file.delete()) {
+                throw new IOException("failed to delete file: " + file);
+            }
+        }
     }
 
 }
