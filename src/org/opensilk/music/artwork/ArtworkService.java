@@ -19,6 +19,9 @@ package org.opensilk.music.artwork;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
+
+import com.andrew.apollo.BuildConfig;
 
 /**
  * Proxy for remote processes to access the ArtworkManager
@@ -29,13 +32,15 @@ import android.os.IBinder;
  * Created by drew on 3/23/14.
  */
 public class ArtworkService extends Service {
+    private static final String TAG = ArtworkService.class.getSimpleName();
+    private static final boolean D = BuildConfig.DEBUG;
 
-    IArtworkServiceImpl mBinder;
+    IArtworkServiceImpl mRemoteBinder;
     ArtworkManager mManager;
 
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        return mRemoteBinder;
     }
 
     @Override
@@ -51,7 +56,7 @@ public class ArtworkService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mBinder = new IArtworkServiceImpl(this);
+        mRemoteBinder = new IArtworkServiceImpl(this);
         mManager = ArtworkManager.getInstance(getApplicationContext());
     }
 
@@ -63,7 +68,9 @@ public class ArtworkService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mBinder = null;
+        mRemoteBinder = null;
+        mManager = null;
+        ArtworkManager.destroy();
     }
 
 }

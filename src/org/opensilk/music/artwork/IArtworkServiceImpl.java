@@ -26,9 +26,6 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
-import org.opensilk.music.artwork.ArtworkLoader;
-import org.opensilk.music.artwork.ArtworkService;
-import org.opensilk.music.artwork.remote.IArtworkService;
 
 import java.io.IOException;
 import java.io.OutputStream;

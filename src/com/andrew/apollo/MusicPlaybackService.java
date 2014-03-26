@@ -81,7 +81,6 @@ import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.artwork.ArtworkProvider;
-import org.opensilk.music.artwork.ArtworkServiceHelper;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 
@@ -485,11 +484,6 @@ public class MusicPlaybackService extends Service {
     private BroadcastReceiver mUnmountReceiver = null;
 
     /**
-     * Image cache
-     */
-    private ArtworkServiceHelper mArtworkServiceHelper;
-
-    /**
      * Used to build the notification
      */
     private NotificationHelper mNotificationHelper;
@@ -616,10 +610,6 @@ public class MusicPlaybackService extends Service {
 
         // Initialize the notification helper
         mNotificationHelper = new NotificationHelper(this);
-
-        // Get our ArtService connection
-        mArtworkServiceHelper = new ArtworkServiceHelper(this);
-        mArtworkServiceHelper.bind();
 
         // Start up the thread running the service. Note that we create a
         // separate thread because the service normally runs in the process's
@@ -773,9 +763,6 @@ public class MusicPlaybackService extends Service {
             unregisterReceiver(mUnmountReceiver);
             mUnmountReceiver = null;
         }
-
-        //Unbind from artservice
-        mArtworkServiceHelper.unbind();
 
         // kill the remote app.
         try {
@@ -2639,7 +2626,6 @@ public class MusicPlaybackService extends Service {
     @DebugLog
     public Bitmap getAlbumArt() {
         // Return the cached artwork
-//        return mArtworkServiceHelper.getArtwork(getArtistName(), getAlbumName(), getAlbumId());
         ParcelFileDescriptor pfd = null;
         try {
             pfd = getContentResolver().openFileDescriptor(ArtworkProvider.createArtworkUri(getAlbumId()), "r");

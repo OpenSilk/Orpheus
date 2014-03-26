@@ -23,11 +23,7 @@ import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.andrew.apollo.utils.PreferenceUtils;
-
-import org.opensilk.music.artwork.ArtworkLoader;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.volley.RequestQueueManager;
 
 /**
  * Use to initilaze singletons and global static variables that require context
@@ -61,18 +57,11 @@ public class ApolloApplication extends Application {
         /*
          * Init singletons
          */
-        // preferences
-//        PreferenceUtils.create(getApplicationContext());
-//        // volley's request queue
-//        RequestQueueManager.create(getApplicationContext());
-//        // art loader
-//        ArtworkLoader.create(getApplicationContext());
         ArtworkManager.create(getApplicationContext());
 
         /*
          * Debugging
          */
-
         // Enable strict mode logging
         enableStrictMode();
     }

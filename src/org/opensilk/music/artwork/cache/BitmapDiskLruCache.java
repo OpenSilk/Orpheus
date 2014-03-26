@@ -3,8 +3,6 @@ package org.opensilk.music.artwork.cache;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 
@@ -13,12 +11,9 @@ import org.opensilk.music.artwork.ArtworkLoader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import hugo.weaving.DebugLog;
 
 /**
  * Implementation of DiskLruCache by Jake Wharton
@@ -40,6 +35,17 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
             mCompressQuality = quality;
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Closes the diskcache
+     */
+    public void close() {
+        if (!mDiskCache.isClosed()) {
+            try {
+                mDiskCache.close();
+            } catch (IOException ignored) { }
         }
     }
 

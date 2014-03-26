@@ -44,7 +44,7 @@ public class RequestQueueManager {
     private static final String DEFAULT_CACHE_DIR = "volley";
 
     /** Defualt size for disk cache */
-    private static final int DEFAULT_CACHE_SIZE = (BuildConfig.DEBUG ? 30 : 12) * 1024 * 1024;
+    private static final int DEFAULT_CACHE_SIZE = 25 * 1024 * 1024;
 
     /** Queue instance */
     private static RequestQueue sRequestQueue = null;
@@ -81,6 +81,16 @@ public class RequestQueueManager {
             create(context);
         }
         return sRequestQueue;
+    }
+
+    /**
+     * Stops the queue and clears the singleton
+     */
+    public static void destroy() {
+        if (sRequestQueue != null) {
+            sRequestQueue.stop();
+            sRequestQueue = null;
+        }
     }
 
     /**

@@ -17,14 +17,18 @@
 package org.opensilk.music.artwork;
 
 import android.app.ActivityManager;
+import android.content.ContentUris;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
@@ -55,15 +59,26 @@ public class ArtworkManager {
     private static final float THUMB_MEM_CACHE_DIVIDER = 0.20f;
 
     private static final String DISK_CACHE_DIRECTORY = "artworkcache";
-    private static final int DISK_CACHE_SIZE = 35 * 1024 * 1024;
+    private static final int DISK_CACHE_SIZE = 40 * 1024 * 1024;
 
-    private final Context mContext;
-    private final RequestQueue mRequestQueue;
-    private ArtworkLoader mLoader;
-    private BitmapLruCache mL1Cache;
-    private BitmapDiskLruCache mL2Cache;
-    private final PreferenceUtils mPreferences;
+    /**
+     * Uri for album thumbs
+     */
+    static final Uri sArtworkUri;
+    static {
+        sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+    }
 
+    final Context mContext;
+    final RequestQueue mRequestQueue;
+    final ArtworkLoader mLoader;
+    final BitmapLruCache mL1Cache;
+    final BitmapDiskLruCache mL2Cache;
+    final PreferenceUtils mPreferences;
+
+    /**
+     * Singleton instance
+     */
     private static ArtworkManager sArtworkManager;
 
     /**
@@ -100,19 +115,7 @@ public class ArtworkManager {
         mContext = context.getApplicationContext();
         mRequestQueue = RequestQueueManager.getQueue(context);
         mPreferences = PreferenceUtils.getInstance(context);
-        // Don't block create
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                initCaches();
-            }
-        }).start();
-    }
-
-    /**
-     * Setups L1 and L2 caches
-     */
-    private void initCaches() {
+        //Init caches
         final ActivityManager activityManager = (ActivityManager)mContext.getSystemService(Context.ACTIVITY_SERVICE);
         int memClass = mContext.getResources().getBoolean(R.bool.config_largeHeap) ?
                 activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
@@ -120,9 +123,22 @@ public class ArtworkManager {
         if (D) Log.d(TAG, "thumbcache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");
         mL1Cache = new BitmapLruCache(lruThumbCacheSize);
         mLoader = new ArtworkLoader(mL1Cache);
+
         mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
                 DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
         cleanupOldCache();
+    }
+
+    /**
+     * Cleans up caches, stops the volley queue, and clears the singleton
+     */
+    /*package*/ static void destroy() {
+        if (sArtworkManager != null) {
+            sArtworkManager.mL1Cache.evictAll();
+            sArtworkManager.mL2Cache.close();
+            RequestQueueManager.destroy();
+            sArtworkManager = null;
+        }
     }
 
     /**
@@ -154,6 +170,16 @@ public class ArtworkManager {
     public static boolean loadCurrentArtwork(final ArtworkImageView imageView) {
         return loadAlbumImage(MusicUtils.getArtistName(), MusicUtils.getAlbumName(),
                 MusicUtils.getCurrentAlbumId(), imageView);
+    }
+
+    public static Bitmap getAlbumImageFromMediaStore(long albumId, boolean isThumbnail) {
+        if (sArtworkManager == null) {
+            return null;
+        }
+        return MediaStore.Images.Thumbnails.getThumbnail(sArtworkManager.mContext.getContentResolver(),
+                albumId,
+                isThumbnail ? MediaStore.Images.Thumbnails.MINI_KIND : MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,
+                null);
     }
 
     /**
