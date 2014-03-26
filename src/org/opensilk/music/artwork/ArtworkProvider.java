@@ -115,6 +115,9 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
     @Override
     @DebugLog
     public synchronized ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
+        if (!"r".equals(mode)) {
+            throw new IllegalArgumentException("Provider is read only");
+        }
         switch (sUriMatcher.match(uri)) {
             case 1:
                 try {

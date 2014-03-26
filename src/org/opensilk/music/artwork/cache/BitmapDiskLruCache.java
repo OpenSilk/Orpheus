@@ -83,6 +83,10 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         return mDiskCache.getDirectory();
     }
 
+    /**
+     * @param url
+     * @return raw snapshot of given url
+     */
     public DiskLruCache.Snapshot get(String url) {
         try {
             return mDiskCache.get(CacheUtil.md5(url));
@@ -109,15 +113,10 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
                 editor = snapshot.edit();
                 if (editor != null) {
                     File f = editor.getFile(0);
-                    Log.d("BDLRU", (f != null) ? f.toString() : "null");
                     if (f != null && f.exists()) {
                         return ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
                     }
-                } else {
-                    Log.d("BDLRU", "editor was null");
                 }
-            } else {
-                Log.d("BDLRU", "snapshot was null");
             }
         } catch (IOException e) {
             e.printStackTrace();
