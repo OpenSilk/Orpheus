@@ -144,7 +144,8 @@ public class ArtworkServiceHelper {
      * Generates a cache key for local  L1Cache
      */
     private String makeCacheKey(String artistName, String albumName, long albumId) {
-        return new StringBuilder(artistName.length() + albumName.length() + 1)
+        return new StringBuilder((artistName != null ? artistName.length() : 4)
+                + (albumName != null ? albumName.length() : 4) + 1)
                 .append(artistName)
                 .append(albumName)
                 .append(albumId)
