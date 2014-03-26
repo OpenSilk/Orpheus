@@ -339,8 +339,13 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // stop scanning for routes
         mMediaRouter.removeCallback(mMediaRouterCallback);
         //Disable visualizer
-        if (mVisualizer != null) {
-            mVisualizer.setEnabled(false);
+        if (mVisualizer != null && mVisualizer.getEnabled()) {
+            try {
+                mVisualizer.setEnabled(false);
+            } catch (IllegalStateException e) {
+                mVisualizer = null;
+                e.printStackTrace();
+            }
         }
     }
 
@@ -677,10 +682,25 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         if (mVisualizer != null && mVisualizerView != null) {
             if (MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
                     PreferenceUtils.getInstance(this).showVisualizations()) {
-                mVisualizer.setEnabled(true);
-                mVisualizerView.setVisibility(View.VISIBLE);
+                try {
+                    if (!mVisualizer.getEnabled()) {
+                        mVisualizer.setEnabled(true);
+                    }
+                    mVisualizerView.setVisibility(View.VISIBLE);
+                } catch (IllegalStateException e) {
+                    mVisualizer = null;
+                    e.printStackTrace();
+                }
+
             } else {
-                mVisualizer.setEnabled(false);
+                try {
+                    if (mVisualizer.getEnabled()) {
+                        mVisualizer.setEnabled(false);
+                    }
+                } catch (IllegalStateException e) {
+                    mVisualizer = null;
+                    e.printStackTrace();
+                }
                 mVisualizerView.setVisibility(View.INVISIBLE);
             }
         } //else wait for create and service bind
