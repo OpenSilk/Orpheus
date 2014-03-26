@@ -3,6 +3,8 @@ package org.opensilk.music.artwork.cache;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 
@@ -11,9 +13,12 @@ import org.opensilk.music.artwork.ArtworkLoader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Implementation of DiskLruCache by Jake Wharton
@@ -87,12 +92,58 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         }
     }
 
+    /**
+     * Returns a ParcelFileDescriptor for the file backing the entry
+     * specified by url, This is probably a very stupid idea but
+     * saves a bunch of copying to temp files
+     * @param url
+     * @return
+     */
+    @DebugLog
+    public synchronized ParcelFileDescriptor getParcelFileDescriptor(String url) {
+        DiskLruCache.Snapshot snapshot = null;
+        DiskLruCache.Editor editor = null;
+        try {
+            snapshot = mDiskCache.get(CacheUtil.md5(url));
+            if (snapshot != null) {
+                editor = snapshot.edit();
+                if (editor != null) {
+                    File f = editor.getFile(0);
+                    Log.d("BDLRU", (f != null) ? f.toString() : "null");
+                    if (f != null && f.exists()) {
+                        return ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
+                    }
+                } else {
+                    Log.d("BDLRU", "editor was null");
+                }
+            } else {
+                Log.d("BDLRU", "snapshot was null");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (editor != null) {
+                try {
+                    // must recommit to mark the entry as clean
+                    editor.commit();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                editor.abortUnlessCommitted();
+            }
+            if (snapshot != null) {
+                snapshot.close();
+            }
+        }
+        return null;
+    }
+
     /*
      * Implement ImageCache interface
      */
 
     @Override
-    public void putBitmap(String url, Bitmap data) {
+    public synchronized void putBitmap(String url, Bitmap data) {
         DiskLruCache.Editor editor = null;
         try {
             editor = mDiskCache.edit(CacheUtil.md5(url));
@@ -117,7 +168,7 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
     }
 
     @Override
-    public Bitmap getBitmap(String url) {
+    public synchronized Bitmap getBitmap(String url) {
         Bitmap bitmap = null;
         DiskLruCache.Snapshot snapshot = null;
         try {

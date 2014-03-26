@@ -16,9 +16,12 @@
 
 package org.opensilk.music.artwork.remote;
 
+import android.os.ParcelFileDescriptor;
+
 /**
  * Created by drew on 3/23/14.
  */
 interface IArtworkService {
-    String getCurrentArtwork();
+    ParcelFileDescriptor getCurrentArtwork();
+    ParcelFileDescriptor getArtwork(long id);
 }

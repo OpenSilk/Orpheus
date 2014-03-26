@@ -12,7 +12,7 @@
 
         <provider
             android:name="org.opensilk.music.artwork.ArtworkProvider"
-            android:authorities="org.opensilk.music.artwork.provider"
+            android:authorities="org.opensilk.music.artwork.provider.debug"
             android:enabled="true"
             android:exported="false"
             android:grantUriPermissions="true"/>

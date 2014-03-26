@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
@@ -42,6 +43,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
@@ -78,10 +80,12 @@ import org.opensilk.cast.helpers.LocalCastServiceManager;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
+import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.artwork.remote.ArtworkServiceHelper;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
@@ -2632,9 +2636,34 @@ public class MusicPlaybackService extends Service {
     /**
      * @return The album art for the current album.
      */
+    @DebugLog
     public Bitmap getAlbumArt() {
         // Return the cached artwork
-        return mArtworkServiceHelper.getArtwork(getArtistName(), getAlbumName(), getAlbumId());
+//        return mArtworkServiceHelper.getArtwork(getArtistName(), getAlbumName(), getAlbumId());
+        ParcelFileDescriptor pfd = null;
+        try {
+            pfd = getContentResolver().openFileDescriptor(ArtworkProvider.createArtworkUri(getAlbumId()), "r");
+            if (pfd != null) {
+                Bitmap bitmap;
+                bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                return bitmap;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (pfd != null) {
+                try {
+                    pfd.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 
     /**

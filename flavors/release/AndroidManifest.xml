@@ -15,9 +15,7 @@
             android:authorities="org.opensilk.music.artwork.provider"
             android:enabled="true"
             android:exported="false"
-            android:grantUriPermissions="true">
-
-        </provider>
+            android:grantUriPermissions="true"/>
 
     </application>
 

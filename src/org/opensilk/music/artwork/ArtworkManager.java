@@ -156,10 +156,16 @@ public class ArtworkManager {
                 MusicUtils.getCurrentAlbumId(), imageView);
     }
 
+    /**
+     * @return Memory cache interface
+     */
     public ArtworkLoader.ImageCache getL1Cache() {
         return mL1Cache;
     }
 
+    /**
+     * @return Diskcache interface
+     */
     public ArtworkLoader.ImageCache getL2Cache() {
         return mL2Cache;
     }
@@ -167,7 +173,7 @@ public class ArtworkManager {
     /**
      * @return The BitmapDiskLruCache instance
      */
-    /*package*/ BitmapDiskLruCache getDiskCache() {
+    public BitmapDiskLruCache getDiskCache() {
         return mL2Cache;
     }
 
@@ -188,7 +194,7 @@ public class ArtworkManager {
     private static final String OLD_IMAGE_CACHE = "ThumbnailCache";
     private void cleanupOldCache() {
         try {
-            if (!mPreferences.isOldCacheDeleted()) {
+//            if (!mPreferences.isOldCacheDeleted()) {
                 File oldCache = CacheUtil.getCacheDir(mContext, OLD_DOWNLOAD_CACHE);
                 if (oldCache != null && oldCache.exists() && oldCache.isDirectory()) {
                     deleteContents(oldCache);
@@ -198,7 +204,7 @@ public class ArtworkManager {
                     deleteContents(oldCache);
                 }
                 mPreferences.setOldCacheDeleted();
-            }
+//            }
         } catch (Exception ignored) {}
     }
 

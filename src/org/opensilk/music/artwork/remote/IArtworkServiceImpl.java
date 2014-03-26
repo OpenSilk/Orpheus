@@ -16,9 +16,8 @@
 
 package org.opensilk.music.artwork.remote;
 
-import android.graphics.Bitmap;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
@@ -26,11 +25,7 @@ import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.artwork.ArtworkLoader;
-import org.opensilk.music.artwork.cache.CacheUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import hugo.weaving.DebugLog;
@@ -47,57 +42,44 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
     private static final boolean D = BuildConfig.DEBUG;
 
     private WeakReference<ArtworkService> mService;
-    private File mTempDir;
 
     public IArtworkServiceImpl(ArtworkService service) {
         mService = new WeakReference<>(service);
-        mTempDir =  CacheUtil.getCacheDir(service.getContext(), "tmp-artproxy");
-        if (mTempDir != null && !mTempDir.exists()) {
-            mTempDir.mkdirs();
-        }
     }
 
+    /**
+     * @return ParcelFileDescriptor to the cache file for currently playing album
+     * @throws RemoteException
+     */
     @Override
     @DebugLog
-    public String getCurrentArtwork() throws RemoteException {
+    public ParcelFileDescriptor getCurrentArtwork() throws RemoteException {
+        return getArtwork(MusicUtils.getCurrentAlbumId());
+    }
+
+    /**
+     * @param id album id
+     * @return ParcelFileDescriptor to the cache file
+     * @throws RemoteException
+     */
+    @Override
+    @DebugLog //TODO add method to fetch either large or thumbnails
+    public ParcelFileDescriptor getArtwork(long id) throws RemoteException {
         ArtworkService service = mService.get();
         if (service != null) {
-            Album album = MusicUtils.getCurrentAlbum(service.getContext());
+            Album album = MusicUtils.makeAlbum(service.getApplicationContext(), id);
             if (album != null) {
                 String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, sDefaultMaxImageWidthPx, 0);
-                if (D) Log.d(TAG, "Checking caches for " + cacheKey);
-                Bitmap bitmap =  service.getL1Cache().getBitmap(cacheKey);
-                if (bitmap == null) {
-                    bitmap = service.getL2Cache().getBitmap(cacheKey);
+                if (D) Log.d(TAG, "Checking DiskCache for " + cacheKey);
+                try {
+                    return service.mManager.getDiskCache().getParcelFileDescriptor(cacheKey);
+                } catch (Exception e) { //NPE, InvalidState, etc.
+                    e.printStackTrace();
                 }
-                if (bitmap != null) {
-                    FileOutputStream os = null;
-                    File tempFile = null;
-                    try {
-                        // Create tempfile
-                        tempFile = File.createTempFile("tmp-", ".img", mTempDir);
-                        // Write the bitmap to the temp file
-                        os = new FileOutputStream(tempFile);
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
-                        os.close();
-                        // return the file path TODO pass FileDescriptor instead
-                        String path = tempFile.getCanonicalPath();
-                        if (!TextUtils.isEmpty(path)) {
-                            return path;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        if (tempFile != null && tempFile.exists()) {
-                            try {
-                                tempFile.delete();
-                            } catch (Exception ignored) { }
-                        }
-                    }
-                }
-                Log.e(TAG, "Requested image not in the cache! " + cacheKey);
+                //TODO send request to volley so it will be there next time
             }
         }
-        return "";
+        return null;
     }
 
 

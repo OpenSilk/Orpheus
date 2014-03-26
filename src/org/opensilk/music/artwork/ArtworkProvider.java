@@ -16,38 +16,35 @@
 
 package org.opensilk.music.artwork;
 
+import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.*;
-import android.os.Process;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
-import android.support.v4.util.LruCache;
-import android.text.TextUtils;
+import android.os.CancellationSignal;
+import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
+import android.util.Log;
 
-import com.andrew.apollo.ApolloApplication;
 import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.model.Album;
-import com.jakewharton.disklrucache.DiskLruCache;
 
-import org.apache.commons.io.IOUtils;
-import org.opensilk.music.artwork.cache.CacheUtil;
+import org.opensilk.music.artwork.remote.ArtworkService;
+import org.opensilk.music.artwork.remote.IArtworkServiceImpl;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.Socket;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 3/25/14.
  */
-public class ArtworkProvider extends ContentProvider {
+public class ArtworkProvider extends ContentProvider implements ServiceConnection {
+    private static final String TAG = ArtworkProvider.class.getSimpleName();
 
     private static final String AUTHORITY = BuildConfig.ARTWORK_AUTHORITY;
     private static final UriMatcher sUriMatcher;
@@ -70,15 +67,14 @@ public class ArtworkProvider extends ContentProvider {
         return ARTWORK_URI.buildUpon().appendPath(String.valueOf(albumId)).build();
     }
 
-    private int mScreenWidth;
-    private File mCacheDir;
-    private Handler mHandler;
+    /**
+     * Artwork service connection, we proxy requests to the image cache through here
+     */
+    private IArtworkServiceImpl mArtworkService;
 
     @Override
     public boolean onCreate() {
-        mScreenWidth = ApolloApplication.getMinDisplayWidth(getContext());
-        mCacheDir = CacheUtil.getCacheDir(getContext(), "artworkprovidercache");
-        mHandler = new Handler();
+        doBindService();
         return true;
     }
 
@@ -91,7 +87,7 @@ public class ArtworkProvider extends ContentProvider {
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case 1:
-                break;
+                return "image/*";
         }
         return null;
     }
@@ -117,72 +113,59 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     @Override
-    public ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
+    @DebugLog
+    public synchronized ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
         switch (sUriMatcher.match(uri)) {
             case 1:
-                FileOutputStream fos = null;
-                DiskLruCache.Snapshot snapshot = null;
-                File temp = null;
                 try {
-                    final String cacheKey = getCacheKey(Long.decode(uri.getLastPathSegment()));
-                    snapshot = ArtworkManager.getInstance(getContext()).getDiskCache().get(cacheKey);
-                    temp = File.createTempFile("img", null, mCacheDir);
-                    fos = new FileOutputStream(temp);
-                    IOUtils.copy(snapshot.getInputStream(0), fos);
-                    return ParcelFileDescriptor.open(temp, ParcelFileDescriptor.MODE_READ_ONLY,
-                            mHandler, new ParcelFileDescriptor.OnCloseListener() {
-                                @Override
-                                public void onClose(IOException e) {
-
-                                }
-                            });
-                } catch (NullPointerException|IOException e) {
-                    if (temp != null && temp.exists()) {
-                        temp.delete();
+                    final long id = Long.decode(uri.getLastPathSegment());
+                    if (mArtworkService == null) {
+                        long start = System.currentTimeMillis();
+                        // We were called too soon after onCreate, give the service some time
+                        // to spin up, This is run in a binder thread so it shouldn't be a big deal
+                        // to block it.
+                        wait(500);
+                        Log.i(TAG, "Waited for " + (System.currentTimeMillis() - start) + "ms");
                     }
-                    e.printStackTrace();
-                    throw new FileNotFoundException();
-                } finally {
-                    IOUtils.closeQuietly(fos);
-                    if (snapshot != null) {
-                        snapshot.close();
+                    if (mArtworkService == null) {
+                        throw new FileNotFoundException("Service not bound");
                     }
+                    final ParcelFileDescriptor pfd = mArtworkService.getArtwork(id);
+                    if (pfd == null) {
+                        throw new FileNotFoundException("Parcel was null");
+                    }
+                    return pfd;
+                } catch (InterruptedException|RemoteException e) {
+                    throw new FileNotFoundException("" + e.getClass().getName() + " " + e.getMessage());
                 }
         }
         return null;
     }
 
-    private final LruCache<Long, String> cacheKeyCache = new LruCache<>(100);
-
-    public String getCacheKey(long albumId) {
-        String cacheKey = cacheKeyCache.get(albumId);
-        if (!TextUtils.isEmpty(cacheKey)) {
-            return cacheKey;
+    /**
+     * Tries to bind to the artwork service
+     */
+    private void doBindService() {
+        final Context ctx = getContext();
+        if (ctx != null) {
+            ctx.bindService(new Intent(ctx, ArtworkService.class), this, Context.BIND_AUTO_CREATE);
         }
-        Cursor c = getContext().getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                new String[] {
-                        /* 0 */
-                        BaseColumns._ID,
-                        /* 1 */
-                        MediaStore.Audio.AlbumColumns.ALBUM,
-                        /* 2 */
-                        MediaStore.Audio.AlbumColumns.ARTIST,
-                },
-                BaseColumns._ID + "=?",
-                new String[]{ String.valueOf(albumId) },
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-        if (c != null && c.moveToFirst()) {
-            cacheKey = ArtworkLoader.getCacheKey(
-                    c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM)),
-                    c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ARTIST)),
-                    mScreenWidth, 0);
-        }
-        if (c != null) {
-            c.close();
-        }
-        if (!TextUtils.isEmpty(cacheKey)) {
-            cacheKeyCache.put(albumId, cacheKey);
-        }
-        return cacheKey;
     }
+
+    /*
+     * Implement ServiceConnection interface
+     */
+
+    @Override
+    public synchronized void onServiceConnected(ComponentName name, IBinder service) {
+        mArtworkService = (IArtworkServiceImpl) IArtworkServiceImpl.asInterface(service);
+        notifyAll();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        mArtworkService = null;
+        doBindService();
+    }
+
 }

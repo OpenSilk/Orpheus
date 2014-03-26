@@ -25,8 +25,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
@@ -34,7 +34,7 @@ import com.andrew.apollo.R;
 
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
-import java.io.File;
+import java.io.IOException;
 
 import hugo.weaving.DebugLog;
 
@@ -50,8 +50,16 @@ public class ArtworkServiceHelper {
     /**
      * Default memory cache size as a percent of device memory class
      */
-    private static final float THUMB_MEM_CACHE_DIVIDER = 0.10f;
+    private static final float THUMB_MEM_CACHE_DIVIDER = 0.08f;
 
+    public interface ConnectionListener {
+        void onServiceConnected();
+        void onServiceDisconnected();
+    }
+
+    /**
+     * Context
+     */
     private Context mContext;
 
     /**
@@ -64,8 +72,18 @@ public class ArtworkServiceHelper {
      */
     private BitmapLruCache mL1Cache;
 
+    /**
+     * Callback for service connect/disconnect
+     */
+    private ConnectionListener mListener;
+
     public ArtworkServiceHelper(Context context) {
+        this(context, null);
+    }
+
+    public ArtworkServiceHelper(Context context, ConnectionListener callback) {
         mContext = context;
+        mListener = callback;
         initCache();
     }
 
@@ -105,26 +123,27 @@ public class ArtworkServiceHelper {
         String cacheKey = makeCacheKey(artistName, albumName, albumId);
         Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
         if (bitmap == null && mService != null) {
+            ParcelFileDescriptor pfd = null;
             try {
-                final String path = mService.getCurrentArtwork();
-                if (!TextUtils.isEmpty(path)) {
+                pfd = mService.getArtwork(albumId);
+                if (pfd != null) {
                     // Parse the file
-                    bitmap = BitmapFactory.decodeFile(path);
-                    // Remove the file in the background;
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                new File(path).delete();
-                            } catch (Exception ignored) {
-                            }
-                        }
-                    }).start();
+                    bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
                     if (bitmap != null) {
                         mL1Cache.putBitmap(cacheKey, bitmap);
                     }
                 }
-            } catch (RemoteException ignored) { }
+            } catch (RemoteException ignored) {
+                ignored.printStackTrace();
+            } finally {
+                if (pfd != null) {
+                    try {
+                        pfd.close();
+                    } catch (IOException ignored) {
+                        ignored.printStackTrace();
+                    }
+                }
+            }
         }
         if (bitmap == null) {
             //TODO mediastore
@@ -152,15 +171,24 @@ public class ArtworkServiceHelper {
                 .toString();
     }
 
+    /**
+     * Service connection
+     */
     private final ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = IArtworkServiceImpl.asInterface(service);
+            if (mListener != null) {
+                mListener.onServiceConnected();
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mService = null;
+            if (mListener != null) {
+                mListener.onServiceDisconnected();
+            }
         }
     };
 }

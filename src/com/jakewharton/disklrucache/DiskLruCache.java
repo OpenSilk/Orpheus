@@ -16,6 +16,8 @@
 
 package com.jakewharton.disklrucache;
 
+import android.util.Log;
+
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.EOFException;
@@ -40,6 +42,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import hugo.weaving.DebugLog;
 
 /**
  * A cache that uses a bounded amount of space on a filesystem. Each cache
@@ -401,6 +405,7 @@ public final class DiskLruCache implements Closeable {
    * exist is not currently readable. If a value is returned, it is moved to
    * the head of the LRU queue.
    */
+  @DebugLog
   public synchronized Snapshot get(String key) throws IOException {
     checkNotClosed();
     validateKey(key);
@@ -450,6 +455,7 @@ public final class DiskLruCache implements Closeable {
     return edit(key, ANY_SEQUENCE_NUMBER);
   }
 
+    @DebugLog
   private synchronized Editor edit(String key, long expectedSequenceNumber) throws IOException {
     checkNotClosed();
     validateKey(key);
@@ -505,6 +511,7 @@ public final class DiskLruCache implements Closeable {
     return size;
   }
 
+    @DebugLog
   private synchronized void completeEdit(Editor editor, boolean success) throws IOException {
     Entry entry = editor.entry;
     if (entry.currentEditor != editor) {
@@ -513,12 +520,16 @@ public final class DiskLruCache implements Closeable {
 
     // If this edit is creating the entry for the first time, every index must have a value.
     if (success && !entry.readable) {
+      Log.d("LRU", "completeEdit(1) " + entry.key);
       for (int i = 0; i < valueCount; i++) {
+        Log.d("LRU", "completeEdit(2) " + entry.key);
         if (!editor.written[i]) {
+          Log.d("LRU", "completeEdit(3) " + entry.key);
           editor.abort();
           throw new IllegalStateException("Newly created entry didn't create value for index " + i);
         }
         if (!entry.getDirtyFile(i).exists()) {
+          Log.d("LRU", "completeEdit(4) " + entry.key);
           editor.abort();
           return;
         }
@@ -526,9 +537,12 @@ public final class DiskLruCache implements Closeable {
     }
 
     for (int i = 0; i < valueCount; i++) {
+      Log.d("LRU", "completeEdit(5) " + entry.key);
       File dirty = entry.getDirtyFile(i);
       if (success) {
+        Log.d("LRU", "completeEdit(6) " + entry.key);
         if (dirty.exists()) {
+          Log.d("LRU", "completeEdit(7) " + entry.key);
           File clean = entry.getCleanFile(i);
           dirty.renameTo(clean);
           long oldLength = entry.lengths[i];
@@ -544,12 +558,16 @@ public final class DiskLruCache implements Closeable {
     redundantOpCount++;
     entry.currentEditor = null;
     if (entry.readable | success) {
+      Log.d("LRU", "completeEdit(8) " + entry.key);
       entry.readable = true;
       journalWriter.write(CLEAN + ' ' + entry.key + entry.getLengths() + '\n');
+      Log.d("LRU", entry.key + " marked as clean");
       if (success) {
+        Log.d("LRU", "completeEdit(9) " + entry.key);
         entry.sequenceNumber = nextSequenceNumber++;
       }
     } else {
+      Log.d("LRU", "completeEdit(10) " + entry.key);
       lruEntries.remove(entry.key);
       journalWriter.write(REMOVE + ' ' + entry.key + '\n');
     }
@@ -749,6 +767,20 @@ public final class DiskLruCache implements Closeable {
       }
     }
 
+    @DebugLog
+    public File getFile(int index) {
+        synchronized (DiskLruCache.this) {
+            if (entry.currentEditor != this) {
+                throw new IllegalStateException();
+            }
+            if (!entry.readable) {
+                Log.e("LRU", "entry not readable");
+                return null;
+            }
+            return entry.getCleanFile(index);
+        }
+    }
+
     /**
      * Returns the last committed value as a string, or null if no value
      * has been committed.
@@ -806,6 +838,7 @@ public final class DiskLruCache implements Closeable {
      * Commits this edit so it is visible to readers.  This releases the
      * edit lock so another edit may be started on the same key.
      */
+    @DebugLog
     public void commit() throws IOException {
       if (hasErrors) {
         completeEdit(this, false);
@@ -820,10 +853,12 @@ public final class DiskLruCache implements Closeable {
      * Aborts this edit. This releases the edit lock so another edit may be
      * started on the same key.
      */
+    @DebugLog
     public void abort() throws IOException {
       completeEdit(this, false);
     }
 
+      @DebugLog
     public void abortUnlessCommitted() {
       if (!committed) {
         try {

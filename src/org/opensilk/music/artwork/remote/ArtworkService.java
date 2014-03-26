@@ -61,7 +61,7 @@ public class ArtworkService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        throw new RuntimeException("ArtworkService is bind only");
+        throw new UnsupportedOperationException("ArtworkService is bind only");
     }
 
     @Override
@@ -70,15 +70,4 @@ public class ArtworkService extends Service {
         mBinder = null;
     }
 
-    Context getContext() {
-        return getApplicationContext();
-    }
-
-    ArtworkLoader.ImageCache getL1Cache() {
-        return mManager.getL1Cache();
-    }
-
-    ArtworkLoader.ImageCache getL2Cache() {
-        return mManager.getL2Cache();
-    }
 }
