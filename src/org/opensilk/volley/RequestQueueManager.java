@@ -24,6 +24,7 @@ import android.os.Build;
 
 import com.andrew.apollo.BuildConfig;
 import com.android.volley.Network;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
@@ -88,6 +89,12 @@ public class RequestQueueManager {
      */
     public static void destroy() {
         if (sRequestQueue != null) {
+            sRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true; //Everyone gets the ax
+                }
+            });
             sRequestQueue.stop();
             sRequestQueue = null;
         }
