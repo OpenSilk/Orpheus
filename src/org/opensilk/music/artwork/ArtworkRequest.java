@@ -126,7 +126,9 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 // Add to the cache
-                mManager.mL2Cache.putBitmap(mCacheKey, response);
+                if (!mManager.mL2Cache.containsKey(mCacheKey)) {
+                    mManager.mL2Cache.putBitmap(mCacheKey, response);
+                }
                 // if this is a thumbnail check if the fullscreen is in the cache
                 // if not add it to the background request queue
                 if (mMaxWidth == sDefaultThumbnailWidthPx) {
