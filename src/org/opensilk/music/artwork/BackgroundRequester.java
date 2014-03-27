@@ -17,13 +17,16 @@
 package org.opensilk.music.artwork;
 
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.andrew.apollo.BuildConfig;
 import com.android.volley.toolbox.RequestFuture;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import hugo.weaving.DebugLog;
 
@@ -38,11 +41,13 @@ import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
  * Created by drew on 3/26/14.
  */
 public class BackgroundRequester {
+    private static final String TAG = "BGR";
+    private static final boolean D = BuildConfig.DEBUG;
 
-    final ExecutorService mExecutor;
+    final ThreadPoolExecutor mExecutor;
 
     BackgroundRequester() {
-        mExecutor = Executors.newSingleThreadExecutor();
+        mExecutor = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
     public enum ImageType {
@@ -52,19 +57,29 @@ public class BackgroundRequester {
 
     @DebugLog
     public void add(ArtworkRequest request) {
-        mExecutor.submit(new BackgroundRequest(
+        BackgroundRequest newRequest = new BackgroundRequest(
                 request.mArtistName,
                 request.mAlbumName,
                 -1, //TODO
                 sDefaultThumbnailWidthPx == request.mMaxWidth ? ImageType.THUMBNAIL : ImageType.FULLSCREEN
-        ));
+        );
+        if (mExecutor.getQueue().contains(newRequest)) {
+            if (D) Log.d(TAG, "Rejecting '" + newRequest.toString() + "' already in queue");
+            return;
+        }
+        mExecutor.execute(newRequest);
     }
 
     @DebugLog
     public void add(String artist, String album, long albumId, ImageType type) {
-        mExecutor.submit(new BackgroundRequest(
+        BackgroundRequest newRequest = new BackgroundRequest(
                 artist, album, albumId, type
-        ));
+        );
+        if (mExecutor.getQueue().contains(newRequest)) {
+            if (D) Log.d(TAG, "Rejecting '" + newRequest.toString() + "' already in queue");
+            return;
+        }
+        mExecutor.execute(newRequest);
     }
 
     static class BackgroundRequest implements Runnable {
@@ -96,7 +111,39 @@ public class BackgroundRequester {
                 future.get();
             } catch (InterruptedException|ExecutionException ignored) {
             }
-            Log.d("BGR", "Request " + cacheKey + " took " + (System.currentTimeMillis() - start) + "ms");
+            if (D) Log.d(TAG, "Request " + cacheKey + " took " + (System.currentTimeMillis() - start) + "ms");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            if (o == null) {
+                return false;
+            }
+            if (!(o instanceof BackgroundRequest)) {
+                return false;
+            }
+            BackgroundRequest r = (BackgroundRequest)o;
+            if (!TextUtils.equals(artist, r.artist)) {
+                return false;
+            }
+            if (!TextUtils.equals(album, r.album)) {
+                return false;
+            }
+            if (albumId != r.albumId) {
+                return false;
+            }
+            if (!type.equals(r.type)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return ""+artist+":"+album+":"+albumId+":"+type;
         }
     }
 
