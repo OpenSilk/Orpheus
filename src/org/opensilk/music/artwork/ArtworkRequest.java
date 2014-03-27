@@ -118,7 +118,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                mManager.getL2Cache().putBitmap(mCacheKey, response);
+                mManager.mL2Cache.putBitmap(mCacheKey, response);
             }
         }).start();
     }
@@ -162,20 +162,20 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                 } else {
                     if (!TextUtils.isEmpty(mArtistName)) {
                         if (!TextUtils.isEmpty(mAlbumName)) {
-                            if (mManager.getPreferences() != null
-                                && mManager.getPreferences().downloadMissingArtwork()) {
+                            if (mManager.mPreferences != null
+                                    && mManager.mPreferences.downloadMissingArtwork()) {
                                 // Fetch our album info TODO mediastore
                                 mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener());
-                                mManager.getQueue().add(mCurrentRequest);
+                                mManager.mRequestQueue.add(mCurrentRequest);
                             } else {
-                                mImageErrorListener.onErrorResponse(new VolleyError("Cover art downlading is disabled"));
+                                mImageErrorListener.onErrorResponse(new VolleyError("Album art downloading is disabled"));
                             }
                         } else { //Assuming they meant to download artist images
-                            if (mManager.getPreferences() != null
-                                    && mManager.getPreferences().downloadMissingArtistImages()) {
+                            if (mManager.mPreferences != null
+                                    && mManager.mPreferences.downloadMissingArtistImages()) {
                                 // Fetch our artist info
                                 mCurrentRequest = Fetch.artistInfo(mArtistName, new ArtistResponseListener());
-                                mManager.getQueue().add(mCurrentRequest);
+                                mManager.mRequestQueue.add(mCurrentRequest);
                             } else {
                                 mImageErrorListener.onErrorResponse(new VolleyError("Artist image downloading disabled"));
                             }
@@ -197,17 +197,17 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         @Override
         @DebugLog
         public void onResponse(Album response) {
-            if (mManager.getPreferences() != null && mManager.getPreferences().wantHighResolutionArt()) {
+            if (mManager.mPreferences != null && mManager.mPreferences.wantHighResolutionArt()) {
                 // Check coverart archive
                 mCurrentRequest = new CoverArtArchiveRequest(response.getMbid(), ArtworkRequest.this,
                         mMaxWidth,mMaxHeight, mConfig, new CoverArtArchiveErrorListener(response));
-                mManager.getQueue().add(mCurrentRequest);
+                mManager.mRequestQueue.add(mCurrentRequest);
             } else {
                 String url = getBestImage(response, false);
                 if (!TextUtils.isEmpty(url)) {
                     mCurrentRequest = new HiPriImageRequest(url, ArtworkRequest.this, mMaxWidth,
                             mMaxHeight, mConfig, mImageErrorListener);
-                    mManager.getQueue().add(mCurrentRequest);
+                    mManager.mRequestQueue.add(mCurrentRequest);
                 } else {
                     mImageErrorListener.onErrorResponse(new VolleyError("No image urls for " + response.toString()));
                 }
@@ -230,11 +230,11 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         @Override
         @DebugLog
         public void onResponse(Artist response) {
-            String url = getBestImage(response, mManager.getPreferences() == null || mManager.getPreferences().wantHighResolutionArt());
+            String url = getBestImage(response, mManager.mPreferences == null || mManager.mPreferences.wantHighResolutionArt());
             if (!TextUtils.isEmpty(url)) {
                 mCurrentRequest = new HiPriImageRequest(url, ArtworkRequest.this, mMaxWidth,
                         mMaxHeight, mConfig, mImageErrorListener);
-                mManager.getQueue().add(mCurrentRequest);
+                mManager.mRequestQueue.add(mCurrentRequest);
             } else {
                 mImageErrorListener.onErrorResponse(new VolleyError("No image urls for " + response.toString()));
             }
@@ -300,7 +300,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
             if (!TextUtils.isEmpty(url)) {
                 mCurrentRequest = new HiPriImageRequest(url, ArtworkRequest.this, mMaxWidth,
                         mMaxHeight, mConfig, mImageErrorListener);
-                mManager.getQueue().add(mCurrentRequest);
+                mManager.mRequestQueue.add(mCurrentRequest);
             } else {
                 mImageErrorListener.onErrorResponse(error);
             }
