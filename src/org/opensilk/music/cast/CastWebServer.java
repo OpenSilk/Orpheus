@@ -18,17 +18,19 @@ package org.opensilk.music.cast;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.wifi.WifiManager;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.cache.ImageCache;
-import com.andrew.apollo.cache.ImageFetcher;
-import com.andrew.apollo.model.Album;
-import com.andrew.apollo.utils.MusicUtils;
 
+import org.apache.commons.io.IOUtils;
+import org.opensilk.music.artwork.ArtworkProvider;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,6 +55,8 @@ import hugo.weaving.DebugLog;
  * Created by drew on 2/14/14.
  */
 public class CastWebServer extends NanoHTTPD {
+    private static final String TAG = CastWebServer.class.getSimpleName();
+
     /**
      * Common mime type for dynamic content: binary
      */
@@ -62,21 +66,22 @@ public class CastWebServer extends NanoHTTPD {
 
     public static final int PORT = 50989;
 
-    private static final String TAG = CastWebServer.class.getSimpleName();
+    private static final String[] TRACK_PROJECTION;
 
-    /**
-     * The columns used to retrieve any info from the current track
-     */
-    private static final String[] PROJECTION = new String[] {
-            "audio._id AS _id", MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.MIME_TYPE, MediaStore.Audio.Media.ALBUM_ID,
-            MediaStore.Audio.Media.ARTIST_ID
-    };
+    static {
+        TRACK_PROJECTION = new String[] {
+                MediaStore.Audio.Media.DATA,
+                MediaStore.Audio.Media.MIME_TYPE,
+        };
+    }
+
+    static class TrackInfo {
+        String path;
+        String mime;
+    }
 
     private final boolean quiet = !BuildConfig.DEBUG;
     private final Context mContext;
-    private final ImageFetcher mImageFetcher;
     private final WifiManager.WifiLock mWifiLock;
     private final LruCache<String, String> mEtagCache;
 
@@ -87,13 +92,10 @@ public class CastWebServer extends NanoHTTPD {
     public CastWebServer(Context context, String host, int port) {
         super(host, port);
         mContext = context;
-        // Initialize the image fetcher
-        mImageFetcher = ImageFetcher.getInstance(context);
-        mImageFetcher.setImageCache(ImageCache.getInstance(context));
         // get the lock
         mWifiLock = ((WifiManager) mContext.getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "CastServer");
         // arbitrary size might increase as needed;
-        mEtagCache = new LruCache<String, String>(20);
+        mEtagCache = new LruCache<>(20);
     }
 
     @Override
@@ -167,6 +169,9 @@ public class CastWebServer extends NanoHTTPD {
     @DebugLog
     private Response serveArt(String uri, Map<String, String> headers) {
         String id = parseId(uri);
+        if (TextUtils.isEmpty(id)) {
+            return notFoundResponse();
+        }
         String reqEtag = headers.get("if-none-match");
         Log.d(TAG, "requested Art etag " + reqEtag);
         // Check our cache if we served up this etag for this url already
@@ -182,24 +187,31 @@ public class CastWebServer extends NanoHTTPD {
             }
         }
         // We've got get get the art
-        Album album = MusicUtils.makeAlbum(mContext, Integer.valueOf(id));
-        if (album == null) {
-            return notFoundResponse();
-        }
-        File file = null;
-        synchronized (mImageFetcher) {
-            file = mImageFetcher.getLargeArtworkFile(album.mAlbumName, album.mAlbumId, album.mArtistName);
-        }
-        if (file != null) {
-            // Calculate etag
-            String etag = Integer.toHexString((file.getAbsolutePath() + file.lastModified() + "" + file.length()).hashCode());
-            // Cache the art etag
+        InputStream parcelIn = null;
+        ByteArrayOutputStream tmpOut = null;
+        try {
+            final ParcelFileDescriptor pfd = mContext.getContentResolver()
+                    .openFileDescriptor(ArtworkProvider.createArtworkUri(Long.decode(id)), "r");
+            //Hackish but hopefully will yield unique etags (at least for this session)
+            String etag = Integer.toHexString(pfd.hashCode());
+            Log.d(TAG, "Created etag " + etag + " for " + uri);
             synchronized (mEtagCache) {
                 mEtagCache.put(etag, uri);
             }
-            return serveFile(file, MIME_ART, headers);
+            // pipes dont perform well over the network and tend to get broken
+            // so copy the image into memory and send the copy
+            parcelIn = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+            tmpOut = new ByteArrayOutputStream();
+            IOUtils.copy(parcelIn, tmpOut);
+            Response res = createResponse(Response.Status.OK, MIME_ART, new ByteArrayInputStream(tmpOut.toByteArray()));
+            res.addHeader("ETag", etag);
+            return res;
+        } catch (NullPointerException|IOException e) {
+            return notFoundResponse();
+        } finally {
+            IOUtils.closeQuietly(tmpOut);
+            IOUtils.closeQuietly(parcelIn);
         }
-        return notFoundResponse();
     }
 
     /**
@@ -211,23 +223,21 @@ public class CastWebServer extends NanoHTTPD {
      */
     @DebugLog
     private Response serveSong(String uri, Map<String,String> headers) {
-        Response res;
         String id = parseId(uri);
-        Cursor c = CastUtils.getSingleTrackCursor(mContext, id);
-        if (c == null) {
+        if (TextUtils.isEmpty(id)) {
             return notFoundResponse();
         }
-        String filePath = getPath(c);
-        String mime = getMimeType(c);
-        c.close();
-        if (TextUtils.isEmpty(filePath)) {
+        TrackInfo info = getTrackInfo(mContext, id);
+        if (info == null) {
             return notFoundResponse();
         }
-        if (TextUtils.isEmpty(mime) || !mime.startsWith("audio")) {
-            mime = MIME_DEFAULT_AUDIO;
+        if (TextUtils.isEmpty(info.path)) {
+            return notFoundResponse();
         }
-        File file = new File(filePath);
-        return serveFile(file, mime, headers);
+        if (TextUtils.isEmpty(info.mime) || !info.mime.startsWith("audio")) {
+            info.mime = MIME_DEFAULT_AUDIO;
+        }
+        return serveFile(new File(info.path), info.mime, headers);
     }
 
     /* See @SimpleWebServer#serveFile
@@ -308,9 +318,34 @@ public class CastWebServer extends NanoHTTPD {
      * @param uri
      * @return track id from url
      */
-    private String parseId(String uri) {
+    private static String parseId(String uri) {
         int start = uri.lastIndexOf("/");
         return uri.substring(start+1);
+    }
+
+    private static TrackInfo getTrackInfo(final Context context, final String id) {
+        Cursor c = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                TRACK_PROJECTION,
+                "audio._id=?",
+                new String[] {id}, null);
+        if (c == null) {
+            return null;
+        }
+        if (!c.moveToFirst()) {
+            c.close();
+            return null;
+        }
+        try {
+            TrackInfo info = new TrackInfo();
+            info.path = getPath(c);
+            info.mime = getMimeType(c);
+            return info;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            c.close();
+        }
     }
 
     /**
@@ -318,34 +353,6 @@ public class CastWebServer extends NanoHTTPD {
      */
     public static String getPath(Cursor c) {
         return c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DATA));
-    }
-
-    /**
-     * @return The current song album Name
-     */
-    public static String getAlbumName(Cursor c) {
-        return c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
-    }
-
-    /**
-     * @return The current song name
-     */
-    public static String getTrackName(Cursor c) {
-        return c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
-    }
-
-    /**
-     * @return The current song artist name
-     */
-    public static String getArtistName(Cursor c) {
-        return c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
-    }
-
-    /**
-     * @return The current song album ID
-     */
-    public static long getAlbumId(Cursor c) {
-        return c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
     }
 
     /**
