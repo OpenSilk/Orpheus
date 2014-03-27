@@ -31,8 +31,6 @@ import com.android.volley.VolleyError;
 import org.opensilk.music.artwork.ArtworkLoader.ImageContainer;
 import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
 
-import hugo.weaving.DebugLog;
-
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
  * associated request.

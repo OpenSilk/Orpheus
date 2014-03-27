@@ -77,7 +77,7 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
                 try {
                     final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
                     final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
-                    final DiskLruCache.Snapshot snapshot = service.mManager.getDiskCache().get(cacheKey);
+                    final DiskLruCache.Snapshot snapshot = service.mManager.mL2Cache.get(cacheKey);
                     if (snapshot != null && snapshot.getInputStream(0) != null) {
                         new Thread(new PipeRunnable(snapshot, out)).start();
                         return pipe[0];
@@ -88,7 +88,9 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                //TODO send request to volley so it will be there next time
+                //Add to background request queue so we will have it next time
+                service.mManager.mBackgroundRequester.add(album.mArtistName, album.mAlbumName,
+                        album.mAlbumId, BackgroundRequester.ImageType.FULLSCREEN);
             }
         }
         return null;
@@ -109,6 +111,7 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
 
         @Override
         public void run() {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             try {
                 IOUtils.copy(snapshot.getInputStream(0), out);
             } catch (IOException e) {

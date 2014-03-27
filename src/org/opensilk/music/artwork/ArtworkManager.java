@@ -17,7 +17,6 @@
 package org.opensilk.music.artwork;
 
 import android.app.ActivityManager;
-import android.content.ContentUris;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -28,7 +27,6 @@ import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
@@ -75,6 +73,7 @@ public class ArtworkManager {
     final BitmapLruCache mL1Cache;
     final BitmapDiskLruCache mL2Cache;
     final PreferenceUtils mPreferences;
+    final BackgroundRequester mBackgroundRequester;
 
     /**
      * Singleton instance
@@ -123,10 +122,17 @@ public class ArtworkManager {
         if (D) Log.d(TAG, "thumbcache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");
         mL1Cache = new BitmapLruCache(lruThumbCacheSize);
         mLoader = new ArtworkLoader(mL1Cache);
-
+        //TODO maybe do this in the background
         mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
                 DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
-        cleanupOldCache();
+        mBackgroundRequester = new BackgroundRequester();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                cleanupOldCache();
+            }
+        });
     }
 
     /**
@@ -134,6 +140,7 @@ public class ArtworkManager {
      */
     /*package*/ static void destroy() {
         if (sArtworkManager != null) {
+            sArtworkManager.mBackgroundRequester.mExecutor.shutdownNow();
             sArtworkManager.mL1Cache.evictAll();
             sArtworkManager.mL2Cache.close();
             RequestQueueManager.destroy();

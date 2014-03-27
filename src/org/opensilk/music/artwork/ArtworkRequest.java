@@ -41,6 +41,9 @@ import de.umass.lastfm.opensilk.Fetch;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import hugo.weaving.DebugLog;
 
+import static com.andrew.apollo.ApolloApplication.sDefaultMaxImageWidthPx;
+import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
+
 /**
  * A wrapper class for a volley request that acts as an interface
  * for real volley requests that are chained together using this
@@ -57,21 +60,21 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     private static final boolean D = BuildConfig.DEBUG;
 
     // stuff needed to build the requests
-    private final String mArtistName;
-    private final String mAlbumName;
-    private final String mCacheKey;
-    private final int mMaxWidth;
-    private final int mMaxHeight;
-    private final Bitmap.Config mConfig;
-    private final Listener<Bitmap> mImageListener;
-    private final ErrorListener mImageErrorListener;
+    final String mArtistName;
+    final String mAlbumName;
+    final String mCacheKey;
+    final int mMaxWidth;
+    final int mMaxHeight;
+    final Bitmap.Config mConfig;
+    final Listener<Bitmap> mImageListener;
+    final ErrorListener mImageErrorListener;
 
     // true if current request has been canceled
     private boolean mCanceled = false;
     // currently active request
     private Request<?> mCurrentRequest;
     // art manager, holds all our context stuff
-    private ArtworkManager mManager;
+    private final ArtworkManager mManager;
 
     public ArtworkRequest(String artistName, String albumName, String cacheKey,
                           Listener<Bitmap> listener,
@@ -102,10 +105,13 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
      * Cancels whichever request is currently active
      */
     @Override
+    @DebugLog
     public void cancel() {
         mCanceled = true;
         if (mCurrentRequest != null) {
             mCurrentRequest.cancel();
+            // Readd this request to the background request queue
+            mManager.mBackgroundRequester.add(this);
         }
     }
 
@@ -118,9 +124,27 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         new Thread(new Runnable() {
             @Override
             public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                // Add to the cache
                 mManager.mL2Cache.putBitmap(mCacheKey, response);
+                // if this is a thumbnail check if the fullscreen is in the cache
+                // if not add it to the background request queue
+                if (mMaxWidth == sDefaultThumbnailWidthPx) {
+                    final String altKey = ArtworkLoader.getCacheKey(mArtistName, mAlbumName,
+                            sDefaultMaxImageWidthPx, 0);
+                    if (!mManager.mL2Cache.containsKey(altKey)) {
+                        mManager.mBackgroundRequester.add(mArtistName, mAlbumName, -1,
+                                BackgroundRequester.ImageType.FULLSCREEN);
+                    }
+                }
             }
         }).start();
+    }
+
+    private void notifyError(VolleyError error) {
+        if (mImageErrorListener != null) {
+            mImageErrorListener.onErrorResponse(error);
+        }
     }
 
     /**
@@ -168,7 +192,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                                 mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener());
                                 mManager.mRequestQueue.add(mCurrentRequest);
                             } else {
-                                mImageErrorListener.onErrorResponse(new VolleyError("Album art downloading is disabled"));
+                                notifyError(new VolleyError("Album art downloading is disabled"));
                             }
                         } else { //Assuming they meant to download artist images
                             if (mManager.mPreferences != null
@@ -177,15 +201,15 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                                 mCurrentRequest = Fetch.artistInfo(mArtistName, new ArtistResponseListener());
                                 mManager.mRequestQueue.add(mCurrentRequest);
                             } else {
-                                mImageErrorListener.onErrorResponse(new VolleyError("Artist image downloading disabled"));
+                                notifyError(new VolleyError("Artist image downloading disabled"));
                             }
                         }
                     } else {
-                        mImageErrorListener.onErrorResponse(new VolleyError("Artist name was null"));
+                        notifyError(new VolleyError("Artist name was null"));
                     }
                 }
             } else {
-                mImageErrorListener.onErrorResponse(new VolleyError("Request was canceled"));
+                notifyError(new VolleyError("Request was canceled"));
             }
         }
     }
@@ -209,7 +233,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                             mMaxHeight, mConfig, mImageErrorListener);
                     mManager.mRequestQueue.add(mCurrentRequest);
                 } else {
-                    mImageErrorListener.onErrorResponse(new VolleyError("No image urls for " + response.toString()));
+                    notifyError(new VolleyError("No image urls for " + response.toString()));
                 }
             }
         }
@@ -217,7 +241,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         @Override
         @DebugLog
         public void onErrorResponse(VolleyError error) {
-            mImageErrorListener.onErrorResponse(error);
+            notifyError(error);
         }
 
     }
@@ -236,14 +260,14 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                         mMaxHeight, mConfig, mImageErrorListener);
                 mManager.mRequestQueue.add(mCurrentRequest);
             } else {
-                mImageErrorListener.onErrorResponse(new VolleyError("No image urls for " + response.toString()));
+                notifyError(new VolleyError("No image urls for " + response.toString()));
             }
         }
 
         @Override
         @DebugLog
         public void onErrorResponse(VolleyError error) {
-            mImageErrorListener.onErrorResponse(error);
+            notifyError(error);
         }
 
     }
@@ -302,7 +326,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                         mMaxHeight, mConfig, mImageErrorListener);
                 mManager.mRequestQueue.add(mCurrentRequest);
             } else {
-                mImageErrorListener.onErrorResponse(error);
+                notifyError(error);
             }
         }
     }

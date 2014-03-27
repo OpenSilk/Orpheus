@@ -65,7 +65,7 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         boolean contained = false;
         DiskLruCache.Snapshot snapshot = null;
         try {
-            snapshot = mDiskCache.get(key);
+            snapshot = mDiskCache.get(CacheUtil.md5(key));
             contained = snapshot != null;
         } catch (IOException e) {
             e.printStackTrace();
