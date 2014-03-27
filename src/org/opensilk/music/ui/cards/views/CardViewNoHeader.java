@@ -22,11 +22,8 @@ import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.ui.cards.CardBaseListNoHeader;
-
-import it.gmariotti.cardslib.library.view.CardView;
 
 /**
  * Created by drew on 2/22/14.

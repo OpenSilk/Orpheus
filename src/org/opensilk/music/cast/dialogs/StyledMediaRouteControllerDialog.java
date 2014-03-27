@@ -28,8 +28,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 
 /**
  * A custom {@link MediaRouteControllerDialog} that provides an album art, a play/pause button and
@@ -39,7 +41,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
 
     private static final String TAG = StyledMediaRouteControllerDialog.class.getSimpleName();
 
-    private ImageView mIcon;
+    private ThumbnailArtworkImageView mIcon;
     private ImageView mPausePlay;
     private TextView mTitle;
     private TextView mSubTitle;
@@ -88,7 +90,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     private void updateMetadata() {
         mTitle.setText(MusicUtils.getTrackName());
         mSubTitle.setText(MusicUtils.getArtistName());
-        ImageFetcher.getInstance(getContext()).loadCurrentArtwork(mIcon);
+        ArtworkManager.loadCurrentArtwork(mIcon);
     }
 
     private void updatePlayPauseState() {
@@ -158,7 +160,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     }
 
     private void loadViews(View controls) {
-        mIcon = (ImageView) controls.findViewById(R.id.iconView);
+        mIcon = (ThumbnailArtworkImageView) controls.findViewById(R.id.iconView);
         mIconContainer = controls.findViewById(R.id.iconContainer);
         mPausePlay = (ImageView) controls.findViewById(R.id.playPauseView);
         mTitle = (TextView) controls.findViewById(R.id.titleView);

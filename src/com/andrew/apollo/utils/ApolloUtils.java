@@ -37,8 +37,6 @@ import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageCache;
-import com.andrew.apollo.cache.ImageFetcher;
 
 import java.util.concurrent.RejectedExecutionException;
 
@@ -289,18 +287,6 @@ public final class ApolloUtils {
     }
 
     /**
-     * Creates a new instance of the {@link ImageCache} and {@link ImageFetcher}
-     * 
-     * @param activity The {@link Activity} to use.
-     * @return A new {@link ImageFetcher} used to fetch images asynchronously.
-     */
-    public static final ImageFetcher getImageFetcher(final Activity activity) {
-        final ImageFetcher imageFetcher = ImageFetcher.getInstance(activity);
-        imageFetcher.setImageCache(ImageCache.findOrCreateCache(activity));
-        return imageFetcher;
-    }
-
-    /**
      * Used to create shortcuts for an artist, album, or playlist that is then
      * placed on the default launcher homescreen
      * 
@@ -313,13 +299,13 @@ public final class ApolloUtils {
             final Long id, final String mimeType, final Activity context) {
         if (true) return; //XXX short circuit FIXME
         try {
-            final ImageFetcher fetcher = getImageFetcher(context);
+//            final ImageFetcher fetcher = getImageFetcher(context);
             Bitmap bitmap = null;
             if (mimeType.equals(MediaStore.Audio.Albums.CONTENT_TYPE)) {
-                bitmap = fetcher.getCachedBitmap(
-                        ImageFetcher.generateAlbumCacheKey(displayName, artistName));
+//                bitmap = fetcher.getCachedBitmap(
+//                        ImageFetcher.generateAlbumCacheKey(displayName, artistName));
             } else {
-                bitmap = fetcher.getCachedBitmap(displayName);
+//                bitmap = fetcher.getCachedBitmap(displayName);
             }
             if (bitmap == null) {
                 bitmap = BitmapFactory.decodeResource(context.getResources(),

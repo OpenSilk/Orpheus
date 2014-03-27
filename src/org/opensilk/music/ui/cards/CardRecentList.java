@@ -19,11 +19,9 @@ import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.provider.RecentStore;
@@ -102,7 +100,7 @@ public class CardRecentList extends CardBaseListNoHeader<Album> {
                     case R.id.card_menu_delete:
                         final String album = mData.mAlbumName;
                         DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId),
-                                ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName))
+                                /*ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName)*/ null) //TODO
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }

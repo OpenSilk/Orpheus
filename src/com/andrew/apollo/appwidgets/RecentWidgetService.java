@@ -22,8 +22,6 @@ import android.widget.RemoteViewsService;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageCache;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.provider.RecentStore.RecentStoreColumns;
 
@@ -62,7 +60,7 @@ public class RecentWidgetService extends RemoteViewsService {
         /**
          * Image cache
          */
-        private final ImageFetcher mFetcher;
+//        private final ImageFetcher mFetcher;
 
         /**
          * Recents db
@@ -88,8 +86,8 @@ public class RecentWidgetService extends RemoteViewsService {
             // Get the context
             mContext = context;
             // Initialze the image cache
-            mFetcher = ImageFetcher.getInstance(context);
-            mFetcher.setImageCache(ImageCache.getInstance(context));
+//            mFetcher = ImageFetcher.getInstance(context);
+//            mFetcher.setImageCache(ImageCache.getInstance(context));
             // Initialze the recents store
             mRecentsStore = RecentStore.getInstance(context);
         }
@@ -141,7 +139,7 @@ public class RecentWidgetService extends RemoteViewsService {
             // Set the artist names
             mViews.setTextViewText(R.id.app_widget_recents_line_two, artist);
             // Set the album art
-            Bitmap bitmap = mFetcher.getCachedArtwork(albumName, artist, id);
+            Bitmap bitmap = null;//mFetcher.getCachedArtwork(albumName, artist, id);
             if (bitmap != null) {
                 mViews.setImageViewBitmap(R.id.app_widget_recents_base_image, bitmap);
             } else {

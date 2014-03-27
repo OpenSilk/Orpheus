@@ -10,7 +10,7 @@
         android:background="@color/black"
         android:layout_alignParentLeft="true">
 
-        <ImageView
+        <org.opensilk.music.widgets.ThumbnailArtworkImageView
             android:id="@+id/iconView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

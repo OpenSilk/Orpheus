@@ -22,10 +22,8 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.model.ArtInfo;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.ApolloUtils;

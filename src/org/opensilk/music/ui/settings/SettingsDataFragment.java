@@ -33,7 +33,7 @@ public class SettingsDataFragment extends SettingsFragment {
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(final DialogInterface dialog, final int which) {
-                                    ApolloUtils.getImageFetcher(getActivity()).clearCaches();
+//                                    ApolloUtils.getImageFetcher(getActivity()).clearCaches();
                                 }
                             })
                             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

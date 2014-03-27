@@ -21,18 +21,12 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
-import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 
-import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageFetcher;
 import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
@@ -41,8 +35,6 @@ import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
-import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;

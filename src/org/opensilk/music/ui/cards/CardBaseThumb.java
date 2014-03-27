@@ -16,13 +16,8 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-
-import com.andrew.apollo.cache.ImageFetcher;
-import com.andrew.apollo.utils.ApolloUtils;
 
 import org.opensilk.music.artwork.ArtworkImageView;
 

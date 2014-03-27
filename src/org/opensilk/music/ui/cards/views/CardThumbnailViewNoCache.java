@@ -22,8 +22,6 @@ import android.view.LayoutInflater;
 import android.widget.ImageView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.cache.ImageFetcher;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import it.gmariotti.cardslib.library.view.component.CardThumbnailView;
 
@@ -56,12 +54,4 @@ public class CardThumbnailViewNoCache extends CardThumbnailView {
         mImageView= (ImageView) findViewById(R.id.card_thumbnail_image);
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        // Cancel any pending work
-        try {
-            ImageFetcher.cancelWork(mImageView);
-        } catch (Exception ignored) {} //Just dont explode we don't really care if this fails
-    }
 }
