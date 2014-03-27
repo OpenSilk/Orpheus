@@ -175,7 +175,7 @@ public class ArtworkManager {
      * Initiates loading of current album image into view;
      */
     public static boolean loadCurrentArtwork(final ArtworkImageView imageView) {
-        return loadAlbumImage(MusicUtils.getArtistName(), MusicUtils.getAlbumName(),
+        return loadAlbumImage(MusicUtils.getAlbumArtistName(), MusicUtils.getAlbumName(),
                 MusicUtils.getCurrentAlbumId(), imageView);
     }
 

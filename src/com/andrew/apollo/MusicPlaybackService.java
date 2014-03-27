@@ -1148,7 +1148,7 @@ public class MusicPlaybackService extends Service {
         long albumId = getAlbumId();
         if (albumId >= 0) {
             mAlbumCursor = openCursorAndGoToFirst(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                    ALBUM_PROJECTION, "_id=" + albumId, null);
+                    ALBUM_PROJECTION, "_id=?", new String[] {String.valueOf(albumId)});
         } else {
             mAlbumCursor = null;
         }
@@ -3699,6 +3699,11 @@ public class MusicPlaybackService extends Service {
         @Override
         public String getAlbumName() throws RemoteException {
             return mService.get().getAlbumName();
+        }
+
+        @Override
+        public String getAlbumArtistName() throws RemoteException {
+            return mService.get().getAlbumArtistName();
         }
 
         /**

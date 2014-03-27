@@ -30,6 +30,7 @@ interface IApolloService
     String getArtistName();
     String getTrackName();
     String getAlbumName();
+    String getAlbumArtistName();
     String getPath();
     int getQueuePosition();
     int getShuffleMode();

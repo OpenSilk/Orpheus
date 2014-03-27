@@ -392,6 +392,19 @@ public final class MusicUtils {
     }
 
     /**
+     * @return Name of artist associated with album of currently playing song
+     */
+    public static String getAlbumArtistName() {
+        if (sService != null) {
+            try {
+                return sService.getAlbumArtistName();
+            } catch (final RemoteException ignored) {
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return The current album Id.
      */
     public static final long getCurrentAlbumId() {
