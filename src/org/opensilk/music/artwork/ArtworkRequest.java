@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.utils.ApolloUtils;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -287,6 +288,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                                  int maxWidth, int maxHeight,
                                  Bitmap.Config decodeConfig, ErrorListener errorListener) {
             super(url, listener, maxWidth, maxHeight, decodeConfig, errorListener);
+            setRetryPolicy(new DefaultRetryPolicy(2500, 2, 1.6f));
         }
 
         @Override
