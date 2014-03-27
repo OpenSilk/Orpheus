@@ -25,6 +25,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
+import com.andrew.apollo.R;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.music.artwork.ArtworkProvider;
@@ -207,7 +208,8 @@ public class CastWebServer extends NanoHTTPD {
             res.addHeader("ETag", etag);
             return res;
         } catch (NullPointerException|IOException e) {
-            return notFoundResponse();
+            // Serve up the default art
+            return createResponse(Response.Status.OK, MIME_ART,mContext.getResources().openRawResource(R.drawable.default_artwork));
         } finally {
             IOUtils.closeQuietly(tmpOut);
             IOUtils.closeQuietly(parcelIn);
