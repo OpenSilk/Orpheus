@@ -184,6 +184,10 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                     if (D) Log.d(TAG, "L2Cache hit: " + mCacheKey);
                     mImageListener.onResponse(bitmap);
                 } else {
+                    if (!ApolloUtils.isOnline(mManager.mContext)) {
+                        notifyError(new VolleyError("No network connection"));
+                        return;
+                    }
                     if (!TextUtils.isEmpty(mArtistName)) {
                         if (!TextUtils.isEmpty(mAlbumName)) {
                             if (mManager.mPreferences != null
