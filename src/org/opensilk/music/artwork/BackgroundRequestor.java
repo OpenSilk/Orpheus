@@ -43,9 +43,13 @@ public class BackgroundRequestor {
     private static final String TAG = "BGR";
     private static final boolean D = BuildConfig.DEBUG;
 
-    final ThreadPoolExecutor mExecutor;
+    ThreadPoolExecutor mExecutor;
 
     BackgroundRequestor() {
+        initExecutor();
+    }
+
+    void initExecutor() {
         mExecutor = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 

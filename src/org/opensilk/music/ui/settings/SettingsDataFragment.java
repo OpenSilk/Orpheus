@@ -4,9 +4,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.widget.Toast;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
+
+import org.opensilk.music.artwork.ArtworkManager;
 
 /**
  * Created by andrew on 3/1/14.
@@ -33,7 +36,12 @@ public class SettingsDataFragment extends SettingsFragment {
                             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(final DialogInterface dialog, final int which) {
-//                                    ApolloUtils.getImageFetcher(getActivity()).clearCaches();
+                                    dialog.dismiss();
+                                    if (ArtworkManager.clearCaches()) {
+                                        Toast.makeText(getActivity(), "Caches cleared", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(getActivity(), "Failed to clear caches", Toast.LENGTH_LONG).show();
+                                    }
                                 }
                             })
                             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

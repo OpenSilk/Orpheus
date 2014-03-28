@@ -28,14 +28,14 @@
 
     </PreferenceCategory>
 
-    <!--<PreferenceCategory-->
-        <!--android:title="@string/settings_data_storage_category">-->
+    <PreferenceCategory
+        android:title="@string/settings_data_storage_category">
 
-        <!--<Preference-->
-            <!--android:key="pref_delete_cache"-->
-            <!--android:title="@string/settings_delete_cache_title"-->
-            <!--android:summary="@string/settings_delete_cache_summary" />-->
+        <Preference
+            android:key="pref_delete_cache"
+            android:title="@string/settings_delete_cache_title"
+            android:summary="@string/settings_delete_cache_summary" />
 
-    <!--</PreferenceCategory>-->
+    </PreferenceCategory>
 
 </PreferenceScreen>

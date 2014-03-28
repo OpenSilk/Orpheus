@@ -27,6 +27,7 @@ import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 
 import org.apache.commons.io.FileUtils;
@@ -35,6 +36,8 @@ import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
 
 import java.io.File;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Singleton class used to manager everything related to loading/fetching
@@ -108,8 +111,7 @@ public class ArtworkManager {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
-                mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
-                        DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
+                initDiskCache();
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 cleanupOldCache();
             }
@@ -125,6 +127,12 @@ public class ArtworkManager {
         mImageQueue = RequestQueueFactory.newImageQueue(context);
         // init background requestor
         mBackgroundRequestor = new BackgroundRequestor();
+    }
+
+    @DebugLog
+    private void initDiskCache() {
+        mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
+                DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
     }
 
     private static int getL1CacheSize(Context context) {
@@ -187,6 +195,33 @@ public class ArtworkManager {
                 albumId,
                 isThumbnail ? MediaStore.Images.Thumbnails.MINI_KIND : MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,
                 null);
+    }
+
+    @DebugLog
+    public static synchronized boolean clearCaches() {
+        if (sArtworkManager != null) {
+            sArtworkManager.mBackgroundRequestor.mExecutor.shutdownNow();
+            sArtworkManager.mBackgroundRequestor.initExecutor();
+            sArtworkManager.mApiQueue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
+            // Not clearing api cache
+            sArtworkManager.mImageQueue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override
+                public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
+            sArtworkManager.mImageQueue.getCache().clear();
+            sArtworkManager.mL2Cache.clearCache();
+            sArtworkManager.initDiskCache();
+            sArtworkManager.mL1Cache.evictAll();
+            return true;
+        }
+        return false;
     }
 
     //TODO remove in 0.4
