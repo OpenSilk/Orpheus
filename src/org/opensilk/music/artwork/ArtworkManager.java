@@ -32,7 +32,6 @@ import com.android.volley.RequestQueue;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
-import org.opensilk.volley.RequestQueueManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class ArtworkManager {
     final RequestQueue mRequestQueue;
     final ArtworkLoader mLoader;
     final BitmapLruCache mL1Cache;
-    final BitmapDiskLruCache mL2Cache;
+    BitmapDiskLruCache mL2Cache;
     final PreferenceUtils mPreferences;
     final BackgroundRequester mBackgroundRequester;
 
@@ -112,7 +111,7 @@ public class ArtworkManager {
 
     private ArtworkManager(Context context) {
         mContext = context.getApplicationContext();
-        mRequestQueue = RequestQueueManager.getQueue(context);
+        mRequestQueue = RequestQueueFactory.getQueue(context);
         mPreferences = PreferenceUtils.getInstance(context);
         //Init caches
         final ActivityManager activityManager = (ActivityManager)mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -122,13 +121,12 @@ public class ArtworkManager {
         if (D) Log.d(TAG, "thumbcache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");
         mL1Cache = new BitmapLruCache(lruThumbCacheSize);
         mLoader = new ArtworkLoader(mL1Cache);
-        //TODO maybe do this in the background
-        mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
-                DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
         mBackgroundRequester = new BackgroundRequester();
         new Thread(new Runnable() {
             @Override
             public void run() {
+                mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
+                        DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 cleanupOldCache();
             }
@@ -143,7 +141,7 @@ public class ArtworkManager {
             sArtworkManager.mBackgroundRequester.mExecutor.shutdownNow();
             sArtworkManager.mL1Cache.evictAll();
             sArtworkManager.mL2Cache.close();
-            RequestQueueManager.destroy();
+            RequestQueueFactory.destroy();
             sArtworkManager = null;
         }
     }

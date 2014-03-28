@@ -23,7 +23,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.andrew.apollo.BuildConfig;
-import com.android.volley.Request;
+//import com.android.volley.Request;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
@@ -96,35 +96,6 @@ public class ArtworkLoader {
     }
 
     /**
-     * The default implementation of ImageListener which handles basic functionality
-     * of showing a default image until the network response is received, at which point
-     * it will switch to either the actual image or the error image.
-     * @param imageView The imageView that the listener is associated with.
-     * @param defaultImageResId Default image resource ID to use, or 0 if it doesn't exist.
-     * @param errorImageResId Error image resource ID to use, or 0 if it doesn't exist.
-     */
-    public static ImageListener getImageListener(final ImageView view,
-                                                 final int defaultImageResId, final int errorImageResId) {
-        return new ImageListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                if (errorImageResId != 0) {
-                    view.setImageResource(errorImageResId);
-                }
-            }
-
-            @Override
-            public void onResponse(ImageContainer response, boolean isImmediate) {
-                if (response.getBitmap() != null) {
-                    view.setImageBitmap(response.getBitmap());
-                } else if (defaultImageResId != 0) {
-                    view.setImageResource(defaultImageResId);
-                }
-            }
-        };
-    }
-
-    /**
      * Interface for the response handlers on image requests.
      *
      * The call flow is this:
@@ -150,34 +121,6 @@ public class ArtworkLoader {
          */
         public void onResponse(ImageContainer response, boolean isImmediate);
     }
-
-    /**
-     * Checks if the item is available in the cache.
-     * @param requestUrl The url of the remote image
-     * @param maxWidth The maximum width of the returned image.
-     * @param maxHeight The maximum height of the returned image.
-     * @return True if the item exists in cache, false otherwise.
-     */
-//    public boolean isCached(String requestUrl, int maxWidth, int maxHeight) {
-//        throwIfNotOnMainThread();
-//
-//        String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight);
-//        return mCache.getBitmap(cacheKey) != null;
-//    }
-
-    /**
-     * Returns an ImageContainer for the requested URL.
-     *
-     * The ImageContainer will contain either the specified default bitmap or the loaded bitmap.
-     * If the default was returned, the {@link ImageLoader} will be invoked when the
-     * request is fulfilled.
-     *
-     * @param requestUrl The URL of the image to be loaded.
-     * @param defaultImage Optional default image to return until the actual image is loaded.
-     */
-//    public ImageContainer get(String requestUrl, final ImageListener listener) {
-//        return get(requestUrl, listener, 0, 0);
-//    }
 
     /**
      * Issues a bitmap request with the given URL if that image is not available
@@ -226,7 +169,7 @@ public class ArtworkLoader {
 
         // The request is not already in flight. Send the new request to the network and
         // track it.
-        Request<?> newRequest =
+        IArtworkRequest newRequest =
                 new ArtworkRequest(artistName, albumName, cacheKey, new Listener<Bitmap>() {
                     @Override
                     public void onResponse(Bitmap response) {
@@ -241,6 +184,7 @@ public class ArtworkLoader {
                 });
 
 //        mRequestQueue.add(newRequest);
+        newRequest.start();
         mInFlightRequests.put(cacheKey,
                 new BatchedImageRequest(newRequest, imageContainer));
         return imageContainer;
@@ -381,7 +325,7 @@ public class ArtworkLoader {
      */
     private class BatchedImageRequest {
         /** The request being tracked */
-        private final Request<?> mRequest;
+        private final IArtworkRequest mRequest;
 
         /** The result of the request being tracked by this item */
         private Bitmap mResponseBitmap;
@@ -397,7 +341,7 @@ public class ArtworkLoader {
          * @param request The request being tracked
          * @param container The ImageContainer of the person who initiated the request.
          */
-        public BatchedImageRequest(Request<?> request, ImageContainer container) {
+        public BatchedImageRequest(IArtworkRequest request, ImageContainer container) {
             mRequest = request;
             mContainers.add(container);
         }

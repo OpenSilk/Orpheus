@@ -19,8 +19,6 @@ package de.umass.lastfm.opensilk;
 import com.andrew.apollo.Config;
 import com.android.volley.Request;
 
-import org.opensilk.volley.RequestQueueManager;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Locale;
@@ -47,7 +45,9 @@ public class Fetch {
      * @param listener
      * @return new Volley request
      */
-    public static Request<Artist> artistInfo(String artistName, MusicEntryResponseCallback<Artist> listener) {
+    public static Request<Artist> artistInfo(String artistName,
+                                             MusicEntryResponseCallback<Artist> listener,
+                                             Request.Priority priority) {
         StringBuilder fetchUrl = baseUrl();
         fetchUrl.append("artist.getInfo")
                 .append("&")
@@ -55,7 +55,9 @@ public class Fetch {
                 .append("&")
                 .append("lang").append("=").append(Locale.getDefault().getLanguage());
 
-        return new ArtistRequest(fetchUrl.toString(), listener);
+        final ArtistRequest request = new ArtistRequest(fetchUrl.toString(), listener);
+        request.setPriority(priority);
+        return request;
     }
 
     /**
@@ -64,7 +66,9 @@ public class Fetch {
      * @param listener
      * @return new Volley request
      */
-    public static Request<Album> albumInfo(String artistName, String albumName, MusicEntryResponseCallback<Album> listener) {
+    public static Request<Album> albumInfo(String artistName, String albumName,
+                                           MusicEntryResponseCallback<Album> listener,
+                                           Request.Priority priority) {
         StringBuilder fetchUrl = baseUrl();
         fetchUrl.append("album.getInfo")
                 .append("&")
@@ -72,7 +76,9 @@ public class Fetch {
                 .append("&")
                 .append(PARAM_ALBUM).append("=").append(encode(albumName));
 
-        return new AlbumRequest(fetchUrl.toString(), listener);
+        final AlbumRequest request = new AlbumRequest(fetchUrl.toString(), listener);
+        request.setPriority(priority);
+        return request;
     }
 
     /**

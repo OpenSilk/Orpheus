@@ -16,8 +16,11 @@
 
 package org.opensilk.music.artwork;
 
+import android.app.DownloadManager;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -39,6 +42,7 @@ import de.umass.lastfm.Artist;
 import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.MusicEntry;
 import de.umass.lastfm.opensilk.Fetch;
+import de.umass.lastfm.opensilk.MusicEntryRequest;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import hugo.weaving.DebugLog;
 
@@ -56,7 +60,7 @@ import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
  *
  * Created by drew on 3/23/14.
  */
-public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> {
+public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
     private static final String TAG = ArtworkRequest.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
@@ -70,6 +74,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     final Listener<Bitmap> mImageListener;
     final ErrorListener mImageErrorListener;
 
+    private Request.Priority mPriority = Request.Priority.NORMAL;
     // true if current request has been canceled
     private boolean mCanceled = false;
     // currently active request
@@ -81,7 +86,6 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                           Listener<Bitmap> listener,
                           int maxWidth, int maxHeight, Bitmap.Config config,
                           ErrorListener errorListener) {
-        super(null, null);//dont care we will never be added to the queue
         mArtistName = artistName;
         mAlbumName = albumName;
         mCacheKey = cacheKey;
@@ -92,14 +96,24 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         mImageErrorListener = errorListener;
 
         mManager = ArtworkManager.getInstance();
-        if (mManager != null) {
-            doRequest();
-        }
     }
 
-    // Initiates the request
-    private void doRequest() {
-        ApolloUtils.execute(false, new DiskCacheTask());
+    /**
+     * Starts the request
+     */
+    public void start() {
+        if (mManager != null) {
+            ApolloUtils.execute(false, new DiskCacheTask());
+        } else {
+            // Defer posting error until after ArtworkLoader returns from get()
+            // This will probably never even be used
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyError(new VolleyError("Unable to get ArtworkManager instance"));
+                }
+            });
+        }
     }
 
     /**
@@ -116,17 +130,27 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         }
     }
 
+    @Override
+    public void setPriority(Request.Priority newPriority) {
+        mPriority = newPriority;
+    }
+
     /**
      * Wrapper for mImageListener so we can add the bitmap to the diskcache
      */
     @Override
     public void onResponse(final Bitmap response) {
-        mImageListener.onResponse(response);
+        if (mImageListener != null && !mCanceled) {
+            mImageListener.onResponse(response);
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 // Add to the cache
+                if (mManager.mL2Cache == null) {
+                    return;
+                }
                 if (!mManager.mL2Cache.containsKey(mCacheKey)) {
                     mManager.mL2Cache.putBitmap(mCacheKey, response);
                 }
@@ -144,8 +168,12 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
         }).start();
     }
 
+    /**
+     * Calls onErrorResponse for the ImageListener
+     * @param error
+     */
     private void notifyError(VolleyError error) {
-        if (mImageErrorListener != null) {
+        if (mImageErrorListener != null && !mCanceled) {
             mImageErrorListener.onErrorResponse(error);
         }
     }
@@ -170,12 +198,12 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     /**
      * Async task to check our disk cache, if not present we call into volley
      */
-    private class DiskCacheTask extends AsyncTask<Void, Void, Bitmap> {
+    class DiskCacheTask extends AsyncTask<Void, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(Void... params) {
             // Check our diskcache
-            if (mManager.getL2Cache() != null) {
-                return mManager.getL2Cache().getBitmap(mCacheKey);
+            if (mManager.mL2Cache != null) {
+                return mManager.mL2Cache.getBitmap(mCacheKey);
             }
             return null;
         }
@@ -185,7 +213,11 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
             if (!mCanceled) {
                 if (bitmap != null) {
                     if (D) Log.d(TAG, "L2Cache hit: " + mCacheKey);
-                    mImageListener.onResponse(bitmap);
+                    //This response goes straight to the listener since it was
+                    // already in the cache
+                    if (mImageListener != null) {
+                        mImageListener.onResponse(bitmap);
+                    }
                 } else {
                     if (!ApolloUtils.isOnline(mManager.mContext)) {
                         notifyError(new VolleyError("No network connection"));
@@ -196,7 +228,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                             if (mManager.mPreferences != null
                                     && mManager.mPreferences.downloadMissingArtwork()) {
                                 // Fetch our album info TODO mediastore
-                                mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener());
+                                mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener(), mPriority);
                                 mManager.mRequestQueue.add(mCurrentRequest);
                             } else {
                                 notifyError(new VolleyError("Album art downloading is disabled"));
@@ -205,7 +237,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                             if (mManager.mPreferences != null
                                     && mManager.mPreferences.downloadMissingArtistImages()) {
                                 // Fetch our artist info
-                                mCurrentRequest = Fetch.artistInfo(mArtistName, new ArtistResponseListener());
+                                mCurrentRequest = Fetch.artistInfo(mArtistName, new ArtistResponseListener(), mPriority);
                                 mManager.mRequestQueue.add(mCurrentRequest);
                             } else {
                                 notifyError(new VolleyError("Artist image downloading disabled"));
@@ -215,8 +247,6 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                         notifyError(new VolleyError("Artist name was null"));
                     }
                 }
-            } else {
-                notifyError(new VolleyError("Request was canceled"));
             }
         }
     }
@@ -224,7 +254,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     /**
      * Response listener for Fetch.albumInfo
      */
-    private class AlbumResponseListener implements MusicEntryResponseCallback<Album> {
+    class AlbumResponseListener implements MusicEntryResponseCallback<Album> {
         @Override
         @DebugLog
         public void onResponse(Album response) {
@@ -256,7 +286,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     /**
      * Response listener for Fetch.artistInfo
      */
-    private class ArtistResponseListener implements MusicEntryResponseCallback<Artist> {
+    class ArtistResponseListener implements MusicEntryResponseCallback<Artist> {
 
         @Override
         @DebugLog
@@ -282,7 +312,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     /**
      * ImageRequest with high priority so it jumps in front of the lastfm calls
      */
-    private static class HiPriImageRequest extends ImageRequest {
+    static class HiPriImageRequest extends ImageRequest {
 
         public HiPriImageRequest(String url, Listener<Bitmap> listener,
                                  int maxWidth, int maxHeight,
@@ -300,7 +330,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     /**
      * coverartarchive request, wraps imagerequest so we can build the url
      */
-    private static class CoverArtArchiveRequest extends HiPriImageRequest {
+    static class CoverArtArchiveRequest extends HiPriImageRequest {
         private static final String API_ROOT = "http://coverartarchive.org/release/";
         private static final String FRONT_COVER_URL = API_ROOT+"%s/front";
 
@@ -318,7 +348,7 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
     /**
      * Error listener for coverartarchive requests, on errore we fall back to lastfm art urls
      */
-    private class CoverArtArchiveErrorListener implements ErrorListener {
+    class CoverArtArchiveErrorListener implements ErrorListener {
         private Album mAlbum;
 
         CoverArtArchiveErrorListener(Album album) {
@@ -337,21 +367,6 @@ public class ArtworkRequest extends Request<Bitmap> implements Listener<Bitmap> 
                 notifyError(error);
             }
         }
-    }
-
-
-    /*
-     * Abstract Methods for Request, we are never added to queue so will not need these.
-     */
-
-    @Override
-    protected Response<Bitmap> parseNetworkResponse(NetworkResponse response) {
-        return null;
-    }
-
-    @Override
-    protected void deliverResponse(Bitmap response) {
-
     }
 
 }

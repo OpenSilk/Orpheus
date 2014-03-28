@@ -16,7 +16,6 @@
 
 package de.umass.lastfm.opensilk;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
@@ -32,8 +31,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Locale;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,6 +48,7 @@ import hugo.weaving.DebugLog;
 public abstract class MusicEntryRequest<T> extends Request<T> {
 
     private final Response.Listener<T> mListener;
+    private Priority mPriority = Priority.NORMAL;
 
     public MusicEntryRequest(String url, MusicEntryResponseCallback<T> listener) {
         super(Method.GET, url, listener);
@@ -86,10 +84,22 @@ public abstract class MusicEntryRequest<T> extends Request<T> {
     }
 
     /**
+     * Override default priority
+     * @param newPriority
+     */
+    public void setPriority(Priority newPriority) {
+        mPriority = newPriority;
+    }
+
+    @Override
+    public Priority getPriority() {
+        return mPriority;
+    }
+
+    /**
      * Creates object T from Result
      */
     protected abstract T buildEntry(Result result);
-
 
     /**
      * Builds LastFM result

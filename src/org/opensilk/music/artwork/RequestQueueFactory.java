@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.volley;
+package org.opensilk.music.artwork;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -32,6 +32,8 @@ import com.android.volley.toolbox.HttpClientStack;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
 
+import org.opensilk.music.artwork.cache.CacheUtil;
+
 import java.io.File;
 
 /**
@@ -39,18 +41,23 @@ import java.io.File;
  *
  * Created by drew on 3/12/14.
  */
-public class RequestQueueManager {
+public class RequestQueueFactory {
 
     /** Default on-disk cache directory. */
-    private static final String DEFAULT_CACHE_DIR = "volley";
+    private static final String DEFAULT_API_CACHE_DIR = "volley_api_cache";
+    private static final String DEFAULT_IMAGE_CACHE_DIR = "volley_image_cache";
 
-    /** Defualt size for disk cache */
-    private static final int DEFAULT_CACHE_SIZE = 25 * 1024 * 1024;
+    // Way to big, make sure to cache everything, to help avoid rate limiting
+    private static final int DEFAULT_API_CACHE_SIZE = 20 * 1024 * 1024;
+    // On the small side, image requests arent done with our api key so dont risk hitting rate limit
+    private static final int DEFAULT_IMAGE_CACHE_SIZE = 8 * 1024 * 1024;
 
     /** Queue instance */
-    private static RequestQueue sRequestQueue = null;
+    private static RequestQueue sApiQueue = null;
+    private static RequestQueue sImageQueue = null;
+    private static RequestQueue sBackgroundQueue = null;
 
-    private RequestQueueManager() {
+    private RequestQueueFactory() {
         /*never instantiate*/
     }
 
@@ -59,15 +66,16 @@ public class RequestQueueManager {
      * @param context
      */
     public static synchronized void create(Context context) {
-        sRequestQueue = newRequestQueue(context.getApplicationContext(), null, DEFAULT_CACHE_SIZE);
+        sApiQueue = newRequestQueue(context.getApplicationContext(), DEFAULT_API_CACHE_SIZE, DEFAULT_API_CACHE_DIR, 2);
+        sImageQueue = newRequestQueue(context.getApplicationContext(), DEFAULT_IMAGE_CACHE_SIZE, DEFAULT_API_CACHE_DIR, 4);
     }
 
     /**
      * @return The request queue
      */
     public static RequestQueue getQueue() {
-        if (sRequestQueue != null) {
-            return sRequestQueue;
+        if (sApiQueue != null) {
+            return sApiQueue;
         }
         throw new RuntimeException("Must call RequestQueueManager.create()");
     }
@@ -78,25 +86,25 @@ public class RequestQueueManager {
      * @return
      */
     public static RequestQueue getQueue(Context context) {
-        if (sRequestQueue == null) {
+        if (sApiQueue == null) {
             create(context);
         }
-        return sRequestQueue;
+        return sApiQueue;
     }
 
     /**
      * Stops the queue and clears the singleton
      */
     public static void destroy() {
-        if (sRequestQueue != null) {
-            sRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
+        if (sApiQueue != null) {
+            sApiQueue.cancelAll(new RequestQueue.RequestFilter() {
                 @Override
                 public boolean apply(Request<?> request) {
                     return true; //Everyone gets the ax
                 }
             });
-            sRequestQueue.stop();
-            sRequestQueue = null;
+            sApiQueue.stop();
+            sApiQueue = null;
         }
     }
 
@@ -109,32 +117,11 @@ public class RequestQueueManager {
      * @param stack An {@link com.android.volley.toolbox.HttpStack} to use for the network, or null for default.
      * @return A started {@link RequestQueue} instance.
      */
-    public static RequestQueue newRequestQueue(Context context, HttpStack stack, int cacheSize) {
-        File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
-
-        String userAgent = "volley/0";
-        try {
-            String packageName = context.getPackageName();
-            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
-            userAgent = packageName + "/" + info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-        }
-
-        if (stack == null) {
-            if (Build.VERSION.SDK_INT >= 9) {
-                stack = new HurlStack();
-            } else {
-                // Prior to Gingerbread, HttpUrlConnection was unreliable.
-                // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html
-                stack = new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
-            }
-        }
-
-        Network network = new BasicNetwork(stack);
-
-        RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir, cacheSize), network);
+    public static RequestQueue newRequestQueue(Context context, int cacheSize, String cacheSubDir, int poolSize) {
+        File cacheDir = CacheUtil.getCacheDir(context, cacheSubDir);
+        Network network = new BasicNetwork(new HurlStack());
+        RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir, cacheSize), network, poolSize);
         queue.start();
-
         return queue;
     }
 }
