@@ -73,6 +73,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.QueueFragment;
@@ -225,6 +226,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         // Bind Apollo's service
         mToken = MusicUtils.bindToService(this, this);
+
+        //Cancel any pending clear cache requests
+        startService(new Intent(this, ArtworkService.class));
 
         // Initialize the broadcast receiver
         mPlaybackStatus = new PlaybackStatus(this);
@@ -394,6 +398,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }
+
+        //Send request to clear cache
+        startService(new Intent(ArtworkService.ACTION_CLEAR_CACHE,
+                null, this, ArtworkService.class));
 
         //Unbind from cast service
         mCastServiceHelper.unbind();

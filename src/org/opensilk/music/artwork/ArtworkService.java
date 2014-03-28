@@ -18,7 +18,9 @@ package org.opensilk.music.artwork;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 
@@ -36,8 +38,12 @@ public class ArtworkService extends Service {
     private static final String TAG = ArtworkService.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
+    public static final String ACTION_CLEAR_CACHE = "clear_cache";
+    private static final int TWO_MINUTES = 2 * 60 * 1000;
+
     IArtworkServiceImpl mRemoteBinder;
     ArtworkManager mManager;
+    Handler mHandler;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -60,11 +66,19 @@ public class ArtworkService extends Service {
         super.onCreate();
         mRemoteBinder = new IArtworkServiceImpl(this);
         mManager = ArtworkManager.getInstance(getApplicationContext());
+        mHandler = new Handler();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        throw new UnsupportedOperationException("ArtworkService is bind only");
+        if (intent.getAction() != null && ACTION_CLEAR_CACHE.equals(intent.getAction())) {
+            if (D) Log.d(TAG, "Queueing request to clear mem cache");
+            mHandler.postDelayed(mClearCacheTask, TWO_MINUTES);
+        } else {
+            if (D) Log.d(TAG, "Canceling request to clear mem cache");
+            mHandler.removeCallbacks(mClearCacheTask);
+        }
+        return START_STICKY;
     }
 
     @Override
@@ -74,5 +88,15 @@ public class ArtworkService extends Service {
         mManager = null;
         ArtworkManager.destroy();
     }
+
+    private final Runnable mClearCacheTask = new Runnable() {
+        @Override
+        public void run() {
+            if (mManager != null) {
+                Log.d(TAG, "Clearing mem cache");
+                mManager.mL1Cache.evictAll();
+            }
+        }
+    };
 
 }
