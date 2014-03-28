@@ -36,8 +36,8 @@ import java.io.File;
 public class RequestQueueFactory {
 
     /** Default on-disk cache directory. */
-    private static final String DEFAULT_API_CACHE_DIR = "volley_api_cache";
-    private static final String DEFAULT_IMAGE_CACHE_DIR = "volley_image_cache";
+    private static final String DEFAULT_API_CACHE_DIR = "0";
+    private static final String DEFAULT_IMAGE_CACHE_DIR = "1";
 
     // Way to big, make sure to cache everything, to help avoid rate limiting
     private static final int DEFAULT_API_CACHE_SIZE = 16 * 1024 * 1024;
@@ -53,7 +53,7 @@ public class RequestQueueFactory {
     }
 
     static RequestQueue newImageQueue(Context context) {
-        return newRequestQueue(context.getApplicationContext(), DEFAULT_IMAGE_CACHE_SIZE, DEFAULT_IMAGE_CACHE_DIR, 3);
+        return newRequestQueue(context.getApplicationContext(), DEFAULT_IMAGE_CACHE_SIZE, DEFAULT_IMAGE_CACHE_DIR, 4);
     }
 
     /**
@@ -70,7 +70,7 @@ public class RequestQueueFactory {
     }
 
     public static RequestQueue newRequestQueue(Context context, int cacheSize, String cacheSubDir, int poolSize) {
-        File cacheDir = CacheUtil.getCacheDir(context, cacheSubDir);
+        File cacheDir = new File(CacheUtil.getCacheDir(context, "volley"), cacheSubDir);
         Network network = new BasicNetwork(new HurlStack());
         RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir, cacheSize), network, poolSize);
         queue.start();
