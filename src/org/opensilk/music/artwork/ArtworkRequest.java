@@ -16,7 +16,9 @@
 
 package org.opensilk.music.artwork;
 
+import android.content.ContentUris;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,12 +28,19 @@ import android.util.Log;
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 
 import de.umass.lastfm.Album;
@@ -51,18 +60,22 @@ import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
  * class to return a bitmap from a series of network calls and
  * disk access.
  *
- * This class should never be added to the request queue
- * it will add its own requests to the queue and manage the responses
- *
  * Created by drew on 3/23/14.
  */
 public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
     private static final String TAG = ArtworkRequest.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
+    private static final Uri sArtworkUri;
+
+    static {
+        sArtworkUri = Uri.parse("content://media/external/audio/albumart");
+    }
+
     // stuff needed to build the requests
     final String mArtistName;
     final String mAlbumName;
+    final long mAlbumId;
     final String mCacheKey;
     final int mMaxWidth;
     final int mMaxHeight;
@@ -78,12 +91,13 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
     // art manager, holds all our context stuff
     private final ArtworkManager mManager;
 
-    public ArtworkRequest(String artistName, String albumName, String cacheKey,
+    public ArtworkRequest(String artistName, String albumName, long albumId, String cacheKey,
                           Listener<Bitmap> listener,
                           int maxWidth, int maxHeight, Bitmap.Config config,
                           ErrorListener errorListener) {
         mArtistName = artistName;
         mAlbumName = albumName;
+        mAlbumId = albumId;
         mCacheKey = cacheKey;
         mMaxWidth = maxWidth;
         mMaxHeight = maxHeight;
@@ -155,7 +169,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                     final String altKey = ArtworkLoader.getCacheKey(mArtistName, mAlbumName,
                             sDefaultMaxImageWidthPx, 0);
                     if (!mManager.mL2Cache.containsKey(altKey)) {
-                        mManager.mBackgroundRequestor.add(mArtistName, mAlbumName, -1,
+                        mManager.mBackgroundRequestor.add(mArtistName, mAlbumName, mAlbumId,
                                 BackgroundRequestor.ImageType.FULLSCREEN);
                     }
                 }
@@ -220,13 +234,12 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                     }
                     if (!TextUtils.isEmpty(mArtistName)) {
                         if (!TextUtils.isEmpty(mAlbumName)) {
-                            if (mManager.mPreferences != null
-                                    && mManager.mPreferences.downloadMissingArtwork()) {
-                                // Fetch our album info TODO mediastore
-                                mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener(), mPriority);
-                                mManager.mApiQueue.add(mCurrentRequest);
+                            final boolean preferNetwork = true; //TODO setting
+                            if (preferNetwork) {
+                                Log.d(TAG, "Trying network for " + mAlbumName);
+                                queueAlbumRequest(true);
                             } else {
-                                notifyError(new VolleyError("Album art downloading is disabled"));
+                                ApolloUtils.execute(false, new MediaStoreTask(true));
                             }
                         } else { //Assuming they meant to download artist images
                             if (mManager.mPreferences != null
@@ -246,36 +259,120 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
         }
     }
 
+    private void queueAlbumRequest(boolean tryMediaStore) {
+        Log.d(TAG, "Building album request for " + mAlbumName);
+        if (mManager.mPreferences != null
+                && mManager.mPreferences.downloadMissingArtwork()) {
+            // Fetch our album info
+            mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener(tryMediaStore), mPriority);
+            mManager.mApiQueue.add(mCurrentRequest);
+        } else if (tryMediaStore) {
+            ApolloUtils.execute(false, new MediaStoreTask(false));
+        } else {
+            notifyError(new VolleyError("Album art downloading is disabled"));
+        }
+    }
+
+    class MediaStoreTask extends AsyncTask<Void, Void, Response<Bitmap>> {
+        final boolean tryNetwork;
+        final PriorityImageRequest fauxRequest;
+
+        MediaStoreTask(boolean tryNetwork) {
+            this.tryNetwork = tryNetwork;
+            fauxRequest = new PriorityImageRequest("mediastore"+mAlbumId, ArtworkRequest.this,
+                    mMaxWidth, mMaxHeight, mConfig, mImageErrorListener);
+        }
+
+        /**
+         * We create a faux ImageRequest and feed it a fake response
+         * with data from the mediastore,
+         * this lets the imagerequest class process the bitmap serially
+         * and saves copying all that code into here.
+         * @param params
+         * @return
+         */
+        @Override
+        protected Response<Bitmap> doInBackground(Void... params) {
+            Log.d(TAG, "Searching mediastore for " + mAlbumName);
+            InputStream in = null;
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try {
+                final Uri uri = ContentUris.withAppendedId(sArtworkUri, mAlbumId);
+                in = mManager.mContext.getContentResolver().openInputStream(uri);
+                IOUtils.copy(in, out);
+                final NetworkResponse response = new NetworkResponse(out.toByteArray());
+                return fauxRequest.parseNetworkResponse(response);
+            } catch (IOException|IllegalStateException e) {
+                return Response.error(new VolleyError(e));
+            } finally {
+                IOUtils.closeQuietly(in);
+                IOUtils.closeQuietly(out);
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Response<Bitmap> response) {
+            if (response.isSuccess()) {
+                fauxRequest.deliverResponse(response.result);
+            } else {
+                Log.d(TAG, "No artwork for " + mAlbumName + " in mediastore");
+                if (tryNetwork) {
+                    queueAlbumRequest(false);
+                } else {
+                    fauxRequest.deliverError(response.error);
+//                    notifyError(new VolleyError("Artwork not in mediastore"));
+                }
+            }
+
+        }
+    }
+
     /**
      * Response listener for Fetch.albumInfo
      */
     class AlbumResponseListener implements MusicEntryResponseCallback<Album> {
+        final boolean tryMediaStore;
+
+        AlbumResponseListener(boolean tryMediaStore) {
+            this.tryMediaStore = tryMediaStore;
+        }
+
         @Override
         @DebugLog
         public void onResponse(Album response) {
-            if (mManager.mPreferences != null && mManager.mPreferences.wantHighResolutionArt()) {
-                // Check coverart archive
-                mCurrentRequest = new CoverArtArchiveRequest(response.getMbid(), ArtworkRequest.this,
-                        mMaxWidth,mMaxHeight, mConfig, new CoverArtArchiveErrorListener(response));
-                ((CoverArtArchiveRequest) mCurrentRequest).setPriority(mPriority);
-                mManager.mImageQueue.add(mCurrentRequest);
-            } else {
-                String url = getBestImage(response, false);
-                if (!TextUtils.isEmpty(url)) {
-                    mCurrentRequest = new PriorityImageRequest(url, ArtworkRequest.this, mMaxWidth,
-                            mMaxHeight, mConfig, mImageErrorListener);
-                    ((PriorityImageRequest) mCurrentRequest).setPriority(mPriority);
+            if (!TextUtils.isEmpty(response.getMbid())) {
+                if (mManager.mPreferences != null && mManager.mPreferences.wantHighResolutionArt()) {
+                    // Check coverart archive
+                    mCurrentRequest = new CoverArtArchiveRequest(response.getMbid(), ArtworkRequest.this,
+                            mMaxWidth,mMaxHeight, mConfig, new CoverArtArchiveErrorListener(response));
+                    ((CoverArtArchiveRequest) mCurrentRequest).setPriority(mPriority);
                     mManager.mImageQueue.add(mCurrentRequest);
                 } else {
-                    notifyError(new VolleyError("No image urls for " + response.toString()));
+                    String url = getBestImage(response, false);
+                    if (!TextUtils.isEmpty(url)) {
+                        mCurrentRequest = new PriorityImageRequest(url, ArtworkRequest.this, mMaxWidth,
+                                mMaxHeight, mConfig, mImageErrorListener);
+                        ((PriorityImageRequest) mCurrentRequest).setPriority(mPriority);
+                        mManager.mImageQueue.add(mCurrentRequest);
+                    } else {
+                        notifyError(new VolleyError("No image urls for " + response.toString()));
+                    }
                 }
+            } else if (tryMediaStore) {
+                ApolloUtils.execute(false, new MediaStoreTask(false));
+            } else {
+                notifyError(new VolleyError("Unknown mbid"));
             }
         }
 
         @Override
         @DebugLog
         public void onErrorResponse(VolleyError error) {
-            notifyError(error);
+            if (tryMediaStore) {
+                ApolloUtils.execute(false, new MediaStoreTask(false));
+            } else {
+                notifyError(error);
+            }
         }
     }
 
@@ -326,6 +423,16 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
         @Override
         public Priority getPriority() {
             return mPriority;
+        }
+
+        @Override
+        public Response<Bitmap> parseNetworkResponse(NetworkResponse response) {
+            return super.parseNetworkResponse(response);
+        }
+
+        @Override
+        public void deliverResponse(Bitmap response) {
+            super.deliverResponse(response);
         }
     }
 

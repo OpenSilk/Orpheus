@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
@@ -163,7 +162,7 @@ public class ArtworkManager {
         if (sArtworkManager == null) {
             return false;
         }
-        imageView.setImageInfo(artistName, null, sArtworkManager.mLoader);
+        imageView.setImageInfo(artistName, null, -1, sArtworkManager.mLoader);
         return true;
     }
 
@@ -175,7 +174,7 @@ public class ArtworkManager {
         if (sArtworkManager == null) {
             return false;
         }
-        imageView.setImageInfo(artistName, albumName, sArtworkManager.mLoader);
+        imageView.setImageInfo(artistName, albumName, albumId, sArtworkManager.mLoader);
         return true;
     }
 
@@ -185,16 +184,6 @@ public class ArtworkManager {
     public static boolean loadCurrentArtwork(final ArtworkImageView imageView) {
         return loadAlbumImage(MusicUtils.getAlbumArtistName(), MusicUtils.getAlbumName(),
                 MusicUtils.getCurrentAlbumId(), imageView);
-    }
-
-    public static Bitmap getAlbumImageFromMediaStore(long albumId, boolean isThumbnail) {
-        if (sArtworkManager == null) {
-            return null;
-        }
-        return MediaStore.Images.Thumbnails.getThumbnail(sArtworkManager.mContext.getContentResolver(),
-                albumId,
-                isThumbnail ? MediaStore.Images.Thumbnails.MINI_KIND : MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,
-                null);
     }
 
     @DebugLog

@@ -135,7 +135,7 @@ public class ArtworkLoader {
      * @return A container object that contains all of the properties of the request, as well as
      *     the currently available image (default if remote is not loaded).
      */
-    public ImageContainer get(String artistName, String albumName,
+    public ImageContainer get(String artistName, String albumName, long albumId,
                               ImageListener imageListener,
                               int maxWidth, int maxHeight) {
         // only fulfill requests that were initiated from the main thread.
@@ -148,14 +148,14 @@ public class ArtworkLoader {
         if (cachedBitmap != null) {
             if (D) Log.d(TAG, "L1Cache hit: " + cacheKey);
             // Return the cached bitmap.
-            ImageContainer container = new ImageContainer(cachedBitmap, artistName, albumName, null, null);
+            ImageContainer container = new ImageContainer(cachedBitmap, artistName, albumName, albumId, null, null);
             imageListener.onResponse(container, true);
             return container;
         }
 
         // The bitmap did not exist in the cache, fetch it!
         ImageContainer imageContainer =
-                new ImageContainer(null, artistName, albumName, cacheKey, imageListener);
+                new ImageContainer(null, artistName, albumName, albumId, cacheKey, imageListener);
 
         // Update the caller to let them know that they should use the default bitmap.
         imageListener.onResponse(imageContainer, true);
@@ -171,7 +171,7 @@ public class ArtworkLoader {
         // The request is not already in flight. Send the new request to the network and
         // track it.
         IArtworkRequest newRequest =
-                new ArtworkRequest(artistName, albumName, cacheKey, new Listener<Bitmap>() {
+                new ArtworkRequest(artistName, albumName, albumId, cacheKey, new Listener<Bitmap>() {
                     @Override
                     public void onResponse(Bitmap response) {
                         onGetImageSuccess(cacheKey, response);
@@ -258,17 +258,20 @@ public class ArtworkLoader {
 
         private final String mAlbumName;
 
+        private final long mAlbumId;
+
         /**
          * Constructs a BitmapContainer object.
          * @param bitmap The final bitmap (if it exists).
          * @param requestUrl The requested URL for this container.
          * @param cacheKey The cache key that identifies the requested URL for this container.
          */
-        public ImageContainer(Bitmap bitmap, String artistName, String albumName,
+        public ImageContainer(Bitmap bitmap, String artistName, String albumName, long albumId,
                               String cacheKey, ImageListener listener) {
             mBitmap = bitmap;
             mArtistName = artistName;
             mAlbumName = albumName;
+            mAlbumId = albumId;
             mCacheKey = cacheKey;
             mListener = listener;
         }

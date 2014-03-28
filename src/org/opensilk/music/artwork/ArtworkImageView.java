@@ -43,6 +43,8 @@ public class ArtworkImageView extends ImageView {
 
     private String mAlbumName;
 
+    private long mAlbumId;
+
     /** Maximum width of image for downsampling downloaded bitmap */
     private int mRequestedWidthPx = 0;
 
@@ -89,9 +91,10 @@ public class ArtworkImageView extends ImageView {
      * @param url The URL that should be loaded into this ImageView.
      * @param imageLoader ImageLoader that will be used to make the request.
      */
-    public void setImageInfo(String artistName, String albumName, ArtworkLoader imageLoader) {
+    public void setImageInfo(String artistName, String albumName, long albumId, ArtworkLoader imageLoader) {
         mArtistName = artistName;
         mAlbumName = albumName;
+        mAlbumId = albumId;
         mImageLoader = imageLoader;
         // reinitialize the first layer
         mDrawables[0] = new ColorDrawable(getResources().getColor(R.color.transparent));
@@ -172,7 +175,7 @@ public class ArtworkImageView extends ImageView {
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
-        ImageContainer newContainer = mImageLoader.get(mArtistName, mAlbumName,
+        ImageContainer newContainer = mImageLoader.get(mArtistName, mAlbumName, mAlbumId,
                 new ImageListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {

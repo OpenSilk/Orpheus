@@ -62,7 +62,7 @@ public class BackgroundRequestor {
         BackgroundRequest newRequest = new BackgroundRequest(
                 request.mArtistName,
                 request.mAlbumName,
-                -1, //TODO
+                request.mAlbumId,
                 sDefaultThumbnailWidthPx == request.mMaxWidth ? ImageType.THUMBNAIL : ImageType.FULLSCREEN
         );
         if (mExecutor.getQueue().contains(newRequest)) {
@@ -106,7 +106,7 @@ public class BackgroundRequestor {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             int size = type.equals(ImageType.THUMBNAIL) ? sDefaultThumbnailWidthPx : sDefaultMaxImageWidthPx;
             final String cacheKey = ArtworkLoader.getCacheKey(artist, album, size, 0);
-            final ArtworkRequest request = new ArtworkRequest(artist, album,
+            final ArtworkRequest request = new ArtworkRequest(artist, album, albumId,
                     cacheKey, this, size, 0, Bitmap.Config.RGB_565, this);
             request.setPriority(Request.Priority.LOW);
             request.start();
