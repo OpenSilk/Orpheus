@@ -50,7 +50,7 @@ public class BackgroundRequestor {
     }
 
     void initExecutor() {
-        mExecutor = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        mExecutor = new ThreadPoolExecutor(0, 2, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
     public enum ImageType {
@@ -91,6 +91,7 @@ public class BackgroundRequestor {
         final String album;
         final long albumId;
         final ImageType type;
+        boolean requestReceived;
 
 
         BackgroundRequest(String artist, String album, long albumId, ImageType type) {
@@ -101,7 +102,7 @@ public class BackgroundRequestor {
         }
 
         @Override
-        public void run() {
+        public synchronized void run() {
             long start = System.currentTimeMillis();
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             int size = type.equals(ImageType.THUMBNAIL) ? sDefaultThumbnailWidthPx : sDefaultMaxImageWidthPx;
@@ -111,25 +112,23 @@ public class BackgroundRequestor {
             request.setPriority(Request.Priority.LOW);
             request.start();
             try {
-                synchronized (this) {
-                    wait();
+                while (!requestReceived) {
+                    wait(0);
                 }
             } catch (Exception ignored) { }
             if (D) Log.d(TAG, "Request " + cacheKey + " took " + (System.currentTimeMillis() - start) + "ms");
         }
 
         @Override
-        public void onErrorResponse(VolleyError error) {
-            synchronized (this) {
-                notifyAll();
-            }
+        public synchronized void onErrorResponse(VolleyError error) {
+            requestReceived = true;
+            notifyAll();
         }
 
         @Override
-        public void onResponse(Bitmap response) {
-            synchronized (this) {
-                notifyAll();
-            }
+        public synchronized void onResponse(Bitmap response) {
+            requestReceived = true;
+            notifyAll();
         }
 
         @Override
