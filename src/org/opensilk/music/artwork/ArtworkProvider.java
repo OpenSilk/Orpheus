@@ -70,6 +70,7 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
     private IArtworkServiceImpl mArtworkService;
 
     @Override
+    @DebugLog
     public boolean onCreate() {
         doBindService();
         return true;

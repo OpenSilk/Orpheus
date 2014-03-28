@@ -29,12 +29,12 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.android.volley.RequestQueue;
 
+import org.apache.commons.io.FileUtils;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Singleton class used to manager everything related to loading/fetching
@@ -67,12 +67,13 @@ public class ArtworkManager {
     }
 
     final Context mContext;
-    final RequestQueue mRequestQueue;
     final ArtworkLoader mLoader;
     final BitmapLruCache mL1Cache;
     BitmapDiskLruCache mL2Cache;
+    final RequestQueue mApiQueue;
+    final RequestQueue mImageQueue;
     final PreferenceUtils mPreferences;
-    final BackgroundRequester mBackgroundRequester;
+    final BackgroundRequestor mBackgroundRequestor;
 
     /**
      * Singleton instance
@@ -80,68 +81,69 @@ public class ArtworkManager {
     private static ArtworkManager sArtworkManager;
 
     /**
-     * Call in Application.OnCreate()
-     * @param context ApplicationContext
-     */
-    public static synchronized void create(Context context) {
-        if (sArtworkManager == null) {
-            sArtworkManager = new ArtworkManager(context);
-        }
-    }
-
-    /**
      * @return ArtworkManager instance
      */
-    public static ArtworkManager getInstance() {
+    public static synchronized ArtworkManager getInstance() {
         return sArtworkManager;
     }
 
     /**
-     * Returns ArtworkManager instance creating it if needed,
-     * used my ArtworkService to insure we dont get a null reference
+     * Our ArtworkService uses this to create the instance, it is started
+     * by the ArtworkProvider very early so we can be relatively sure it
+     * will be available when the ArtworkRequest calls getInstance();
      * @param context
      * @return
      */
-    public static ArtworkManager getInstance(Context context) {
+    public static synchronized ArtworkManager getInstance(Context context) {
         if (sArtworkManager == null) {
-            create(context);
+            sArtworkManager = new ArtworkManager(context);
         }
         return sArtworkManager;
     }
 
     private ArtworkManager(Context context) {
         mContext = context.getApplicationContext();
-        mRequestQueue = RequestQueueFactory.getQueue(context);
-        mPreferences = PreferenceUtils.getInstance(context);
-        //Init caches
-        final ActivityManager activityManager = (ActivityManager)mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        int memClass = mContext.getResources().getBoolean(R.bool.config_largeHeap) ?
-                activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
-        final int lruThumbCacheSize = Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
-        if (D) Log.d(TAG, "thumbcache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");
-        mL1Cache = new BitmapLruCache(lruThumbCacheSize);
-        mLoader = new ArtworkLoader(mL1Cache);
-        mBackgroundRequester = new BackgroundRequester();
+        // Fire off l2 init early
         new Thread(new Runnable() {
             @Override
             public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
                 mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
                         DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 cleanupOldCache();
             }
-        });
+        }).start();
+        mPreferences = PreferenceUtils.getInstance(context);
+        // Init mem cache
+        final int lruThumbCacheSize = getL1CacheSize(context);
+        if (D) Log.d(TAG, "L1Cache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");
+        mL1Cache = new BitmapLruCache(lruThumbCacheSize);
+        mLoader = new ArtworkLoader(mL1Cache);
+        // init queues
+        mApiQueue = RequestQueueFactory.newApiQueue(context);
+        mImageQueue = RequestQueueFactory.newImageQueue(context);
+        // init background requestor
+        mBackgroundRequestor = new BackgroundRequestor();
+    }
+
+    private static int getL1CacheSize(Context context) {
+        final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        final int memClass = context.getResources().getBoolean(R.bool.config_largeHeap) ?
+                activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
+        return Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
     }
 
     /**
      * Cleans up caches, stops the volley queue, and clears the singleton
      */
-    /*package*/ static void destroy() {
+    /*package*/ static synchronized void destroy() {
         if (sArtworkManager != null) {
-            sArtworkManager.mBackgroundRequester.mExecutor.shutdownNow();
+            RequestQueueFactory.destroy(sArtworkManager.mApiQueue);
+            RequestQueueFactory.destroy(sArtworkManager.mImageQueue);
+            sArtworkManager.mBackgroundRequestor.mExecutor.shutdownNow();
             sArtworkManager.mL1Cache.evictAll();
             sArtworkManager.mL2Cache.close();
-            RequestQueueFactory.destroy();
             sArtworkManager = null;
         }
     }
@@ -153,7 +155,7 @@ public class ArtworkManager {
         if (sArtworkManager == null) {
             return false;
         }
-        imageView.setImageInfo(artistName, null, sArtworkManager.getLoader());
+        imageView.setImageInfo(artistName, null, sArtworkManager.mLoader);
         return true;
     }
 
@@ -165,7 +167,7 @@ public class ArtworkManager {
         if (sArtworkManager == null) {
             return false;
         }
-        imageView.setImageInfo(artistName, albumName, sArtworkManager.getLoader());
+        imageView.setImageInfo(artistName, albumName, sArtworkManager.mLoader);
         return true;
     }
 
@@ -187,75 +189,23 @@ public class ArtworkManager {
                 null);
     }
 
-    /**
-     * @return Memory cache interface
-     */
-    public ArtworkLoader.ImageCache getL1Cache() {
-        return mL1Cache;
-    }
-
-    /**
-     * @return Diskcache interface
-     */
-    public ArtworkLoader.ImageCache getL2Cache() {
-        return mL2Cache;
-    }
-
-    /**
-     * @return The BitmapDiskLruCache instance
-     */
-    public BitmapDiskLruCache getDiskCache() {
-        return mL2Cache;
-    }
-
-    public PreferenceUtils getPreferences() {
-        return mPreferences;
-    }
-
-    public RequestQueue getQueue() {
-        return mRequestQueue;
-    }
-
-    public ArtworkLoader getLoader() {
-        return mLoader;
-    }
-
     //TODO remove in 0.4
     private static final String OLD_DOWNLOAD_CACHE = "DownloadCache";
     private static final String OLD_IMAGE_CACHE = "ThumbnailCache";
     private void cleanupOldCache() {
         try {
-//            if (!mPreferences.isOldCacheDeleted()) {
+            if (!mPreferences.isOldCacheDeleted()) {
                 File oldCache = CacheUtil.getCacheDir(mContext, OLD_DOWNLOAD_CACHE);
                 if (oldCache != null && oldCache.exists() && oldCache.isDirectory()) {
-                    deleteContents(oldCache);
+                    FileUtils.deleteDirectory(oldCache);
                 }
                 oldCache = CacheUtil.getCacheDir(mContext, OLD_IMAGE_CACHE);
                 if (oldCache != null && oldCache.exists() && oldCache.isDirectory()) {
-                    deleteContents(oldCache);
+                    FileUtils.deleteDirectory(oldCache);
                 }
                 mPreferences.setOldCacheDeleted();
-//            }
+            }
         } catch (Exception ignored) {}
-    }
-
-    /**
-     * Deletes the contents of {@code dir}. Throws an IOException if any file
-     * could not be deleted, or if {@code dir} is not a readable directory.
-     */
-    private static void deleteContents(File dir) throws IOException {
-        File[] files = dir.listFiles();
-        if (files == null) {
-            throw new IOException("not a readable directory: " + dir);
-        }
-        for (File file : files) {
-            if (file.isDirectory()) {
-                deleteContents(file);
-            }
-            if (!file.delete()) {
-                throw new IOException("failed to delete file: " + file);
-            }
-        }
     }
 
 }

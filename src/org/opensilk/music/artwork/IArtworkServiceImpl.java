@@ -75,6 +75,9 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
                 String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, sDefaultMaxImageWidthPx, 0);
                 if (D) Log.d(TAG, "Checking DiskCache for " + cacheKey);
                 try {
+                    if (service.mManager.mL2Cache == null) {
+                        throw new IOException("Unable to obtain cache instance");
+                    }
                     final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
                     final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
                     final DiskLruCache.Snapshot snapshot = service.mManager.mL2Cache.get(cacheKey);
@@ -89,8 +92,8 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
                     e.printStackTrace();
                 }
                 //Add to background request queue so we will have it next time
-                service.mManager.mBackgroundRequester.add(album.mArtistName, album.mAlbumName,
-                        album.mAlbumId, BackgroundRequester.ImageType.FULLSCREEN);
+                service.mManager.mBackgroundRequestor.add(album.mArtistName, album.mAlbumName,
+                        album.mAlbumId, BackgroundRequestor.ImageType.FULLSCREEN);
             }
         }
         return null;

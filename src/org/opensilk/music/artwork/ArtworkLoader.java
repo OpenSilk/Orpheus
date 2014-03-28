@@ -23,7 +23,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.andrew.apollo.BuildConfig;
-//import com.android.volley.Request;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
@@ -32,6 +31,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import hugo.weaving.DebugLog;
+
+//import com.android.volley.Request;
 
 /**
  * Helper that handles loading and caching images from remote URLs.

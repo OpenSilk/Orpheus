@@ -16,7 +16,6 @@
 
 package org.opensilk.music.artwork;
 
-import android.app.DownloadManager;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -27,9 +26,7 @@ import android.util.Log;
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
@@ -42,7 +39,6 @@ import de.umass.lastfm.Artist;
 import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.MusicEntry;
 import de.umass.lastfm.opensilk.Fetch;
-import de.umass.lastfm.opensilk.MusicEntryRequest;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import hugo.weaving.DebugLog;
 
@@ -94,7 +90,6 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
         mConfig = config;
         mImageListener = listener;
         mImageErrorListener = errorListener;
-
         mManager = ArtworkManager.getInstance();
     }
 
@@ -126,7 +121,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
         if (mCurrentRequest != null) {
             mCurrentRequest.cancel();
             // Readd this request to the background request queue
-            mManager.mBackgroundRequester.add(this);
+            mManager.mBackgroundRequestor.add(this);
         }
     }
 
@@ -160,8 +155,8 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                     final String altKey = ArtworkLoader.getCacheKey(mArtistName, mAlbumName,
                             sDefaultMaxImageWidthPx, 0);
                     if (!mManager.mL2Cache.containsKey(altKey)) {
-                        mManager.mBackgroundRequester.add(mArtistName, mAlbumName, -1,
-                                BackgroundRequester.ImageType.FULLSCREEN);
+                        mManager.mBackgroundRequestor.add(mArtistName, mAlbumName, -1,
+                                BackgroundRequestor.ImageType.FULLSCREEN);
                     }
                 }
             }
@@ -229,7 +224,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                                     && mManager.mPreferences.downloadMissingArtwork()) {
                                 // Fetch our album info TODO mediastore
                                 mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener(), mPriority);
-                                mManager.mRequestQueue.add(mCurrentRequest);
+                                mManager.mApiQueue.add(mCurrentRequest);
                             } else {
                                 notifyError(new VolleyError("Album art downloading is disabled"));
                             }
@@ -238,7 +233,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                                     && mManager.mPreferences.downloadMissingArtistImages()) {
                                 // Fetch our artist info
                                 mCurrentRequest = Fetch.artistInfo(mArtistName, new ArtistResponseListener(), mPriority);
-                                mManager.mRequestQueue.add(mCurrentRequest);
+                                mManager.mApiQueue.add(mCurrentRequest);
                             } else {
                                 notifyError(new VolleyError("Artist image downloading disabled"));
                             }
@@ -262,13 +257,15 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                 // Check coverart archive
                 mCurrentRequest = new CoverArtArchiveRequest(response.getMbid(), ArtworkRequest.this,
                         mMaxWidth,mMaxHeight, mConfig, new CoverArtArchiveErrorListener(response));
-                mManager.mRequestQueue.add(mCurrentRequest);
+                ((CoverArtArchiveRequest) mCurrentRequest).setPriority(mPriority);
+                mManager.mImageQueue.add(mCurrentRequest);
             } else {
                 String url = getBestImage(response, false);
                 if (!TextUtils.isEmpty(url)) {
-                    mCurrentRequest = new HiPriImageRequest(url, ArtworkRequest.this, mMaxWidth,
+                    mCurrentRequest = new PriorityImageRequest(url, ArtworkRequest.this, mMaxWidth,
                             mMaxHeight, mConfig, mImageErrorListener);
-                    mManager.mRequestQueue.add(mCurrentRequest);
+                    ((PriorityImageRequest) mCurrentRequest).setPriority(mPriority);
+                    mManager.mImageQueue.add(mCurrentRequest);
                 } else {
                     notifyError(new VolleyError("No image urls for " + response.toString()));
                 }
@@ -280,7 +277,6 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
         public void onErrorResponse(VolleyError error) {
             notifyError(error);
         }
-
     }
 
     /**
@@ -293,9 +289,10 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
         public void onResponse(Artist response) {
             String url = getBestImage(response, mManager.mPreferences == null || mManager.mPreferences.wantHighResolutionArt());
             if (!TextUtils.isEmpty(url)) {
-                mCurrentRequest = new HiPriImageRequest(url, ArtworkRequest.this, mMaxWidth,
+                mCurrentRequest = new PriorityImageRequest(url, ArtworkRequest.this, mMaxWidth,
                         mMaxHeight, mConfig, mImageErrorListener);
-                mManager.mRequestQueue.add(mCurrentRequest);
+                ((PriorityImageRequest) mCurrentRequest).setPriority(mPriority);
+                mManager.mImageQueue.add(mCurrentRequest);
             } else {
                 notifyError(new VolleyError("No image urls for " + response.toString()));
             }
@@ -312,25 +309,30 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
     /**
      * ImageRequest with high priority so it jumps in front of the lastfm calls
      */
-    static class HiPriImageRequest extends ImageRequest {
+    static class PriorityImageRequest extends ImageRequest {
+        private Priority mPriority;
 
-        public HiPriImageRequest(String url, Listener<Bitmap> listener,
-                                 int maxWidth, int maxHeight,
-                                 Bitmap.Config decodeConfig, ErrorListener errorListener) {
+        public PriorityImageRequest(String url, Listener<Bitmap> listener,
+                                    int maxWidth, int maxHeight,
+                                    Bitmap.Config decodeConfig, ErrorListener errorListener) {
             super(url, listener, maxWidth, maxHeight, decodeConfig, errorListener);
             setRetryPolicy(new DefaultRetryPolicy(2500, 2, 1.6f));
         }
 
+        public void setPriority(Priority newPriority) {
+            mPriority = newPriority;
+        }
+
         @Override
         public Priority getPriority() {
-            return Priority.HIGH;
+            return mPriority;
         }
     }
 
     /**
      * coverartarchive request, wraps imagerequest so we can build the url
      */
-    static class CoverArtArchiveRequest extends HiPriImageRequest {
+    static class CoverArtArchiveRequest extends PriorityImageRequest {
         private static final String API_ROOT = "http://coverartarchive.org/release/";
         private static final String FRONT_COVER_URL = API_ROOT+"%s/front";
 
@@ -360,9 +362,10 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
         public void onErrorResponse(VolleyError error) {
             String url = getBestImage(mAlbum, true);
             if (!TextUtils.isEmpty(url)) {
-                mCurrentRequest = new HiPriImageRequest(url, ArtworkRequest.this, mMaxWidth,
+                mCurrentRequest = new PriorityImageRequest(url, ArtworkRequest.this, mMaxWidth,
                         mMaxHeight, mConfig, mImageErrorListener);
-                mManager.mRequestQueue.add(mCurrentRequest);
+                ((PriorityImageRequest) mCurrentRequest).setPriority(mPriority);
+                mManager.mImageQueue.add(mCurrentRequest);
             } else {
                 notifyError(error);
             }

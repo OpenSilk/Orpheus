@@ -23,7 +23,7 @@ import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import org.opensilk.music.artwork.ArtworkManager;
+import hugo.weaving.DebugLog;
 
 /**
  * Use to initilaze singletons and global static variables that require context
@@ -47,6 +47,7 @@ public class ApolloApplication extends Application {
     public static int sDefaultThumbnailWidthPx;
 
     @Override
+    @DebugLog
     public void onCreate() {
         /*
          * Init global static variables
@@ -55,9 +56,8 @@ public class ApolloApplication extends Application {
         sDefaultThumbnailWidthPx = convertDpToPx(getApplicationContext(), DEFAULT_THUMBNAIL_SIZE_DP);
 
         /*
-         * Init singletons
+         * XXXX Note to future drew. DO NOT INIT SINGLETONS HERE. They will be created twice!
          */
-        ArtworkManager.create(getApplicationContext());
 
         /*
          * Debugging

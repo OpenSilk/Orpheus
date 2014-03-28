@@ -21,14 +21,13 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
-import com.android.volley.toolbox.RequestFuture;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import hugo.weaving.DebugLog;
 
 import static com.andrew.apollo.ApolloApplication.sDefaultMaxImageWidthPx;
 import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
@@ -40,13 +39,13 @@ import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
  *
  * Created by drew on 3/26/14.
  */
-public class BackgroundRequester {
+public class BackgroundRequestor {
     private static final String TAG = "BGR";
     private static final boolean D = BuildConfig.DEBUG;
 
     final ThreadPoolExecutor mExecutor;
 
-    BackgroundRequester() {
+    BackgroundRequestor() {
         mExecutor = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
@@ -55,7 +54,6 @@ public class BackgroundRequester {
         FULLSCREEN,
     }
 
-    @DebugLog
     public void add(ArtworkRequest request) {
         BackgroundRequest newRequest = new BackgroundRequest(
                 request.mArtistName,
@@ -67,10 +65,10 @@ public class BackgroundRequester {
             if (D) Log.d(TAG, "Rejecting '" + newRequest.toString() + "' already in queue");
             return;
         }
+        if (D) Log.d(TAG, "Adding '" + newRequest.toString() + "'");
         mExecutor.execute(newRequest);
     }
 
-    @DebugLog
     public void add(String artist, String album, long albumId, ImageType type) {
         BackgroundRequest newRequest = new BackgroundRequest(
                 artist, album, albumId, type
@@ -79,10 +77,11 @@ public class BackgroundRequester {
             if (D) Log.d(TAG, "Rejecting '" + newRequest.toString() + "' already in queue");
             return;
         }
+        if (D) Log.d(TAG, "Adding '" + newRequest.toString() + "'");
         mExecutor.execute(newRequest);
     }
 
-    static class BackgroundRequest implements Runnable {
+    static class BackgroundRequest implements Runnable, Response.Listener<Bitmap>, Response.ErrorListener {
 
         final String artist;
         final String album;
@@ -102,16 +101,31 @@ public class BackgroundRequester {
             long start = System.currentTimeMillis();
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
             int size = type.equals(ImageType.THUMBNAIL) ? sDefaultThumbnailWidthPx : sDefaultMaxImageWidthPx;
-            final RequestFuture<Bitmap> future = RequestFuture.newFuture();
             final String cacheKey = ArtworkLoader.getCacheKey(artist, album, size, 0);
             final ArtworkRequest request = new ArtworkRequest(artist, album,
-                    cacheKey, future, size, 0, Bitmap.Config.RGB_565, future);
-            future.setRequest(request);
+                    cacheKey, this, size, 0, Bitmap.Config.RGB_565, this);
+            request.setPriority(Request.Priority.LOW);
+            request.start();
             try {
-                future.get();
-            } catch (InterruptedException|ExecutionException ignored) {
-            }
+                synchronized (this) {
+                    wait();
+                }
+            } catch (Exception ignored) { }
             if (D) Log.d(TAG, "Request " + cacheKey + " took " + (System.currentTimeMillis() - start) + "ms");
+        }
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            synchronized (this) {
+                notifyAll();
+            }
+        }
+
+        @Override
+        public void onResponse(Bitmap response) {
+            synchronized (this) {
+                notifyAll();
+            }
         }
 
         @Override
@@ -145,6 +159,7 @@ public class BackgroundRequester {
         public String toString() {
             return ""+artist+":"+album+":"+albumId+":"+type;
         }
+
     }
 
 }

@@ -22,6 +22,8 @@ import android.os.IBinder;
 
 import com.andrew.apollo.BuildConfig;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Proxy for remote processes to access the ArtworkManager
  *
@@ -53,6 +55,7 @@ public class ArtworkService extends Service {
     }
 
     @Override
+    @DebugLog
     public void onCreate() {
         super.onCreate();
         mRemoteBinder = new IArtworkServiceImpl(this);
