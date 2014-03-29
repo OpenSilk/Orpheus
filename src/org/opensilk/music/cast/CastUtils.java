@@ -154,19 +154,23 @@ public class CastUtils {
     }
 
     public static MediaInfo buildMediaInfo(Context context, Cursor c) {
-        if (c != null) {
-            MediaInfo info = buildMediaInfo(
-                    c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
-                    c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM)),
-                    c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),
-                    c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),
-                    buildMusicUrl(c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)),
-                            getWifiIpAddress(context)),
-                    buildArtUrl(c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID)),
-                            getWifiIpAddress(context)),
-                    null
-            );
-            return info;
+        if (c != null && !c.isClosed()) {
+            try {
+                final String ipAddr = getWifiIpAddress(context);
+                return buildMediaInfo(
+                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
+                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM)),
+                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),
+                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),
+                        buildMusicUrl(c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)),
+                                ipAddr),
+                        buildArtUrl(c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID)),
+                                ipAddr),
+                        null
+                );
+            } catch (UnknownHostException|IllegalArgumentException ignored) {
+                // fall
+            }
         }
         return null;
     }
@@ -183,8 +187,7 @@ public class CastUtils {
      * Returns the wifi ip addr ** only supports ipv4
      * TODO Look into Settings Utils.getWifiIpAddresses() which uses hidden methods and classes.
      */
-    public static String getWifiIpAddress(Context context) {
-        String addr = "0.0.0.0";
+    public static String getWifiIpAddress(Context context) throws UnknownHostException {
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         int hostAddress = wm.getConnectionInfo().getIpAddress();
         // from AOSP.. see NetworkUtils.intToInetAddress();
@@ -192,10 +195,9 @@ public class CastUtils {
                 (byte)(0xff & (hostAddress >> 8)),
                 (byte)(0xff & (hostAddress >> 16)),
                 (byte)(0xff & (hostAddress >> 24)) };
-        try {
-            addr = InetAddress.getByAddress(addressBytes).getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
+        final String addr = InetAddress.getByAddress(addressBytes).getHostAddress();
+        if ("0.0.0.0".equals(addr)) {
+            throw new UnknownHostException();
         }
         return addr;
     }

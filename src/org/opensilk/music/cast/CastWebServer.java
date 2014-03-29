@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -86,7 +87,7 @@ public class CastWebServer extends NanoHTTPD {
     private final WifiManager.WifiLock mWifiLock;
     private final LruCache<String, String> mEtagCache;
 
-    public CastWebServer(Context context) {
+    public CastWebServer(Context context) throws UnknownHostException {
         this(context, CastUtils.getWifiIpAddress(context), PORT);
     }
 

@@ -84,6 +84,7 @@ import org.opensilk.music.cast.CastWebServer;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.TreeSet;
@@ -2649,7 +2650,11 @@ public class MusicPlaybackService extends Service {
     @DebugLog
     private boolean startCastServer() {
         if (mCastServer == null) {
-            mCastServer = new CastWebServer(this);
+            try {
+                mCastServer = new CastWebServer(this);
+            } catch (UnknownHostException e) {
+                return false;
+            }
         }
         try {
             mCastServer.start();
@@ -2849,13 +2854,23 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
-            if (isPlaying()) {
-                pause();
+            if (startCastServer()) {
+                // If wifi was off when the song started mCurrentMediaInfo will be null
+                if (mCurrentMediaInfo == null) {
+                    mCurrentMediaInfo = CastUtils.buildMediaInfo(MusicPlaybackService.this, mCursor);
+                    setNextTrack();
+                }
+                if (isPlaying()) {
+                    pause();
+                }
+                updatePlaybackLocation(PlaybackLocation.REMOTE);
+                loadRemoteCurrent(); //TODO check failure
+                restoreRemoteVolumeLevel();
+            } else {
+                //TODO what to do?
+                // Just disconnect for now. They will have to start over.
+                mCastManager.selectDevice(null);
             }
-            updatePlaybackLocation(PlaybackLocation.REMOTE);
-            startCastServer();
-            loadRemoteCurrent();
-            restoreRemoteVolumeLevel();
         }
 
         @Override
