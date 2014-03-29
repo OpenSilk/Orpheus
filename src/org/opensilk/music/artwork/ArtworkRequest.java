@@ -234,9 +234,8 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                     }
                     if (!TextUtils.isEmpty(mArtistName)) {
                         if (!TextUtils.isEmpty(mAlbumName)) {
-                            final boolean preferNetwork = true; //TODO setting
-                            if (preferNetwork) {
-                                if (D) Log.d(TAG, "Trying network for " + mAlbumName);
+                            if (mManager.mPreferences != null
+                                    && mManager.mPreferences.preferDownloadArtwork()) {
                                 queueAlbumRequest(true);
                             } else {
                                 ApolloUtils.execute(false, new MediaStoreTask(true));
@@ -319,11 +318,10 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                 if (tryNetwork) {
                     queueAlbumRequest(false);
                 } else {
-                    fauxRequest.deliverError(response.error);
-//                    notifyError(new VolleyError("Artwork not in mediastore"));
+//                    fauxRequest.deliverError(response.error);
+                    notifyError(response.error);
                 }
             }
-
         }
     }
 

@@ -65,6 +65,9 @@ public final class PreferenceUtils {
     // Key that gives permissions to download missing album covers
     public static final String DOWNLOAD_MISSING_ARTWORK = "download_missing_artwork";
 
+    // Key to determine whether to try the network before local storage
+    public static final String PREFER_DOWNLOAD_ARTWORK = "prefer_download_artwork";
+
     // Key that gives permissions to download missing artist images
     public static final String DOWNLOAD_MISSING_ARTIST_IMAGES = "download_missing_artist_images";
 
@@ -206,6 +209,14 @@ public final class PreferenceUtils {
      */
     public final boolean downloadMissingArtwork() {
         return mPreferences.getBoolean(DOWNLOAD_MISSING_ARTWORK, true);
+    }
+
+    /**
+     * @return True if user has checked to try network first before local storage,
+     *         false if they want to try local first
+     */
+    public final boolean preferDownloadArtwork() {
+        return mPreferences.getBoolean(PREFER_DOWNLOAD_ARTWORK, false);
     }
 
     /**

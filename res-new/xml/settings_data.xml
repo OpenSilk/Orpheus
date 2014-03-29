@@ -17,6 +17,13 @@
             android:defaultValue="true" />
 
         <CheckBoxPreference
+            android:key="prefer_download_artwork"
+            android:title="@string/settings_download_prefer_network"
+            android:summary="@string/settings_download_prefer_network_summary"
+            android:dependency="download_missing_artwork"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
             android:key="download_missing_artist_images"
             android:title="@string/settings_download_artist_images_title"
             android:defaultValue="true" />

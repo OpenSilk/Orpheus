@@ -41,6 +41,8 @@
     <string name="settings_interface_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
     <string name="settings_interface_equalizer_summary">Fine tune audio settings</string>
 
+    <string name="settings_download_prefer_network">Prefer downloading artwork</string>
+    <string name="settings_download_prefer_network_summary">Tries to download album art before checking device storage</string>
     <string name="settings_data_low_resolution_title">Use lower resolution art work</string>
     <string name="settings_data_low_resolution_summary">Enable to reduce image size and bandwidth used</string>
 
