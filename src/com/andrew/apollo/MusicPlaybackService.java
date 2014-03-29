@@ -1012,9 +1012,6 @@ public class MusicPlaybackService extends Service {
     }
 
     private void stopRemote(final boolean goToIdle) {
-        if (mCastManager == null) {
-            return;
-        }
         try {
             mCurrentMediaInfo = null;
             mRemoteMediaNeedsReload = true;
@@ -1023,12 +1020,10 @@ public class MusicPlaybackService extends Service {
             } else {
                 mCastManager.pause();
             }
-        } catch (CastException e) {
-            e.printStackTrace();
+        } catch (CastException|NoConnectionException e) {
+            handleCastError(e);
         } catch (TransientNetworkDisconnectionException e) {
             Log.w(TAG, "stopRemote(1) TransientNetworkDisconnection");
-        } catch (NoConnectionException e) {
-            e.printStackTrace();
         }
         stopLocal(goToIdle);
     }
@@ -1997,9 +1992,6 @@ public class MusicPlaybackService extends Service {
      */
     public long seekAndPlay(long position) {
         long seekedTo = -1;
-        if (mCastManager == null) {
-            return seekedTo;
-        }
         if (isRemotePlayback()) {
             try {
                 mCastManager.seekAndPlay((int)position);
@@ -2007,7 +1999,7 @@ public class MusicPlaybackService extends Service {
             } catch (TransientNetworkDisconnectionException e) {
                 Log.w(TAG, "seekAndPlay(1) TransientNetworkDisconnection");
             } catch (NoConnectionException e) {
-                e.printStackTrace();
+                handleCastError(e);
             }
         } else {
             seekedTo = seekLocal(position);
@@ -2033,9 +2025,6 @@ public class MusicPlaybackService extends Service {
 
     @DebugLog
     private long seekRemote(long position) {
-        if (mCastManager == null) {
-            return -1;
-        }
         try {
             if (position < 0) {
                 position = 0;
@@ -2051,7 +2040,7 @@ public class MusicPlaybackService extends Service {
         } catch (TransientNetworkDisconnectionException e) {
             Log.w(TAG, "seekRemote(1) TransientNetworkDisconnection");
         } catch (NoConnectionException e) {
-            e.printStackTrace();
+            handleCastError(e);
         }
         return -1;
     }
@@ -2084,9 +2073,6 @@ public class MusicPlaybackService extends Service {
     }
 
     private long positionRemote() {
-        if (mCastManager == null) {
-            return -1;
-        }
         try {
             long position = (long) mCastManager.getCurrentMediaPosition();
             // We seek the local player so we dont have to keep
@@ -2248,9 +2234,6 @@ public class MusicPlaybackService extends Service {
 
     @DebugLog
     private void playRemote() {
-        if (mCastManager == null) {
-            return;
-        }
         mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
@@ -2281,12 +2264,12 @@ public class MusicPlaybackService extends Service {
             } else if (mPlayListLen <= 0) {
                 setShuffleMode(SHUFFLE_AUTO);
             } else {
-                Log.e(TAG, "What should i do?");
+                Log.w(TAG, "playRemote() What should i do?");
             }
         } catch (TransientNetworkDisconnectionException e) {
             Log.w(TAG, "playRemote(1) TransientNetworkDisconnection");
         } catch (NoConnectionException e) {
-            e.printStackTrace();
+            handleCastError(e);
         }
 
     }
@@ -2326,6 +2309,8 @@ public class MusicPlaybackService extends Service {
             updateNotification();
         } else if (mPlayListLen <= 0) {
             setShuffleMode(SHUFFLE_AUTO);
+        } else {
+            Log.w(TAG, "playLocal() What should I do?");
         }
     }
 
@@ -2341,18 +2326,13 @@ public class MusicPlaybackService extends Service {
     }
 
     private void pauseRemote() {
-        if (mCastManager == null) {
-            return;
-        }
         if (mIsSupposedToBePlaying) {
             try {
                 mCastManager.pause();
-            } catch (CastException e) {
-                e.printStackTrace();
+            } catch (CastException|NoConnectionException e) {
+                handleCastError(e);
             } catch (TransientNetworkDisconnectionException e) {
                 Log.w(TAG, "pauseRemote(1) TransientNetworkDisconnection");
-            } catch (NoConnectionException e) {
-                e.printStackTrace();
             } finally {
                 scheduleDelayedShutdown();
                 mIsSupposedToBePlaying = false;
@@ -2659,24 +2639,7 @@ public class MusicPlaybackService extends Service {
      * @return
      */
     public boolean isRemotePlayback() {
-        if (mCastManager == null) {
-            return false;
-        }
-        if (mPlaybackLocation == PlaybackLocation.REMOTE) {
-            try {
-                mCastManager.checkConnectivity();
-                return true;
-            } catch (TransientNetworkDisconnectionException e) {
-                Log.w(TAG, "isRemotePlayback(1) TransientNetworkDisconnection");
-                // At this point the framework still considers us
-                // connected but we cannot communicate with the cast device
-                return true; //TODO how to handle this better?
-            } catch (NoConnectionException e) {
-                Log.e(TAG, "isRemotePlayback(2) " + e.getMessage());
-            }
-        }
-        updatePlaybackLocation(PlaybackLocation.LOCAL);
-        return false;
+        return mCastManager != null && mPlaybackLocation == PlaybackLocation.REMOTE;
     }
 
     /**
@@ -2799,6 +2762,18 @@ public class MusicPlaybackService extends Service {
             }
         } catch (Exception ignored) {
         }
+    }
+
+    /**
+     * Handles CastError or NoConnectionException
+     * only called if the service thinks its still connected but isn't
+     * eg if we were in transient disconnect and the framework failed
+     * to notify after giving up on reconnecting
+     */
+    private void handleCastError(Throwable c) {
+        Log.w(TAG, "Disconnected from cast device " + c.getClass().getName());
+        // Will initiate reset of mediarouter and restore local state
+        mCastManager.selectDevice(null);
     }
 
     /**
@@ -3017,7 +2992,9 @@ public class MusicPlaybackService extends Service {
             Log.e(TAG, "onFailed " + getString(resourceId));
             switch (resourceId) {
                 case R.string.failed_load:
-                    pauseRemote();
+                    if (mCastManager != null) {
+                        pauseRemote();
+                    }
                     pauseLocal();
                     break;
             }
@@ -3051,17 +3028,24 @@ public class MusicPlaybackService extends Service {
 
         public RemoteProgressHandler(MusicPlaybackService service) {
             super();
-            mService = new WeakReference<MusicPlaybackService>(service);
+            mService = new WeakReference<>(service);
         }
 
         @Override
         public void handleMessage(Message msg) {
             if (D) Log.d(TAG, "Fetching remote progress");
-            if (mService.get().isRemotePlayback()) {
-                mService.get().positionRemote();
-                mService.get().mRemoteProgressHandler.sendEmptyMessageDelayed(0, 3000); //Might increase this
-            } else {
-                mService.get().mRemoteProgressHandler.removeMessages(0);
+            MusicPlaybackService service = mService.get();
+            if (service != null) {
+                if (service.isRemotePlayback()) {
+                    try {
+                        //Check first so we dont fill up the log with TransientDisconnects
+                        service.mCastManager.checkConnectivity();
+                        service.positionRemote();
+                    } catch (TransientNetworkDisconnectionException|NoConnectionException ignored) { }
+                    service.mRemoteProgressHandler.sendEmptyMessageDelayed(0, 3000); //Might increase this
+                } else {
+                    service.mRemoteProgressHandler.removeMessages(0);
+                }
             }
         }
     }
