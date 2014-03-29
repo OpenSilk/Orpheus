@@ -236,7 +236,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
                         if (!TextUtils.isEmpty(mAlbumName)) {
                             final boolean preferNetwork = true; //TODO setting
                             if (preferNetwork) {
-                                Log.d(TAG, "Trying network for " + mAlbumName);
+                                if (D) Log.d(TAG, "Trying network for " + mAlbumName);
                                 queueAlbumRequest(true);
                             } else {
                                 ApolloUtils.execute(false, new MediaStoreTask(true));
@@ -260,7 +260,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
     }
 
     private void queueAlbumRequest(boolean tryMediaStore) {
-        Log.d(TAG, "Building album request for " + mAlbumName);
+        if (D) Log.d(TAG, "Building album request for " + mAlbumName);
         if (mManager.mPreferences != null
                 && mManager.mPreferences.downloadMissingArtwork()) {
             // Fetch our album info
@@ -293,7 +293,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
          */
         @Override
         protected Response<Bitmap> doInBackground(Void... params) {
-            Log.d(TAG, "Searching mediastore for " + mAlbumName);
+            if (D) Log.d(TAG, "Searching mediastore for " + mAlbumName);
             InputStream in = null;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
@@ -315,7 +315,7 @@ public class ArtworkRequest implements IArtworkRequest, Listener<Bitmap> {
             if (response.isSuccess()) {
                 fauxRequest.deliverResponse(response.result);
             } else {
-                Log.d(TAG, "No artwork for " + mAlbumName + " in mediastore");
+                if (D) Log.d(TAG, "No artwork for " + mAlbumName + " in mediastore");
                 if (tryNetwork) {
                     queueAlbumRequest(false);
                 } else {
