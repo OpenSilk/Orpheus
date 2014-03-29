@@ -3270,11 +3270,7 @@ public class MusicPlaybackService extends Service {
                 }
                 player.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 player.prepare();
-            } catch (final IOException todo) {
-                // TODO: notify the user why the file couldn't be opened
-                return false;
-            } catch (final IllegalArgumentException todo) {
-                // TODO: notify the user why the file couldn't be opened
+            } catch (IOException|IllegalArgumentException|SecurityException|IllegalStateException todo) {
                 return false;
             }
             player.setOnCompletionListener(this);
@@ -3349,8 +3345,13 @@ public class MusicPlaybackService extends Service {
         /**
          * Starts or resumes playback.
          */
-        public void start() {
-            mCurrentMediaPlayer.start();
+        public boolean start() {
+            try {
+                mCurrentMediaPlayer.start();
+                return true;
+            } catch (IllegalStateException e) {
+                return false;
+            }
         }
 
         /**
@@ -3372,8 +3373,13 @@ public class MusicPlaybackService extends Service {
         /**
          * Pauses playback. Call start() to resume.
          */
-        public void pause() {
-            mCurrentMediaPlayer.pause();
+        public boolean pause() {
+            try {
+                mCurrentMediaPlayer.pause();
+                return true;
+            } catch (IllegalStateException e) {
+                return false;
+            }
         }
 
         /**
@@ -3382,7 +3388,11 @@ public class MusicPlaybackService extends Service {
          * @return The duration in milliseconds
          */
         public long duration() {
-            return mCurrentMediaPlayer.getDuration();
+            try {
+                return mCurrentMediaPlayer.getDuration();
+            } catch (IllegalStateException e) {
+                return -1;
+            }
         }
 
         /**
@@ -3391,7 +3401,11 @@ public class MusicPlaybackService extends Service {
          * @return The current position in milliseconds
          */
         public long position() {
-            return mCurrentMediaPlayer.getCurrentPosition();
+            try {
+                return mCurrentMediaPlayer.getCurrentPosition();
+            } catch (IllegalStateException e) {
+                return -1;
+            }
         }
 
         /**
@@ -3401,8 +3415,12 @@ public class MusicPlaybackService extends Service {
          * @return The offset in milliseconds from the start to seek to
          */
         public long seek(final long whereto) {
-            mCurrentMediaPlayer.seekTo((int)whereto);
-            return whereto;
+            try {
+                mCurrentMediaPlayer.seekTo((int)whereto);
+                return whereto;
+            } catch (IllegalStateException e) {
+                return -1;
+            }
         }
 
         /**
@@ -3410,8 +3428,13 @@ public class MusicPlaybackService extends Service {
          *
          * @param vol Left and right volume scalar
          */
-        public void setVolume(final float vol) {
-            mCurrentMediaPlayer.setVolume(vol, vol);
+        public boolean setVolume(final float vol) {
+            try {
+                mCurrentMediaPlayer.setVolume(vol, vol);
+                return true;
+            } catch (IllegalStateException e) {
+                return false;
+            }
         }
 
         /**
@@ -3419,8 +3442,13 @@ public class MusicPlaybackService extends Service {
          *
          * @param sessionId The audio session ID
          */
-        public void setAudioSessionId(final int sessionId) {
-            mCurrentMediaPlayer.setAudioSessionId(sessionId);
+        public boolean setAudioSessionId(final int sessionId) {
+            try {
+                mCurrentMediaPlayer.setAudioSessionId(sessionId);
+                return true;
+            } catch (IllegalArgumentException|IllegalStateException e) {
+                return false;
+            }
         }
 
         /**
