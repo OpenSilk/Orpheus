@@ -120,16 +120,17 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
             case 1:
                 try {
                     final long id = Long.decode(uri.getLastPathSegment());
-                    if (mArtworkService == null) {
-                        long start = System.currentTimeMillis();
+                    long waitTime = 0;
+                    while (mArtworkService == null) {
+                        // Don' block for more than a second
+                        if (waitTime > 1000) throw new FileNotFoundException("Could not bind service");
+                        Log.i(TAG, "Waiting on service");
                         // We were called too soon after onCreate, give the service some time
                         // to spin up, This is run in a binder thread so it shouldn't be a big deal
                         // to block it.
-                        wait(500);
-                        Log.i(TAG, "Waited for " + (System.currentTimeMillis() - start) + "ms");
-                    }
-                    if (mArtworkService == null) {
-                        throw new FileNotFoundException("Service not bound");
+                        long start = System.currentTimeMillis();
+                        wait(100);
+                        Log.i(TAG, "Waited for " + (waitTime += (System.currentTimeMillis() - start)) + "ms");
                     }
                     final ParcelFileDescriptor pfd = mArtworkService.getArtwork(id);
                     if (pfd == null) {
@@ -140,7 +141,7 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
                     throw new FileNotFoundException("" + e.getClass().getName() + " " + e.getMessage());
                 }
         }
-        return null;
+        throw new FileNotFoundException();
     }
 
     /**
@@ -166,6 +167,7 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
     @Override
     public void onServiceDisconnected(ComponentName name) {
         mArtworkService = null;
+        notifyAll();
         doBindService();
     }
 
