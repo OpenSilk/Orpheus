@@ -45,8 +45,6 @@ public class MusicProvider extends ContentProvider {
     public static final Uri RECENTS_URI;
     /** Wrapper uri to query genres */
     public static final Uri GENRES_URI;
-    /** Uri for lastfm request store */
-    public static final Uri LFMREQ_URI;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -59,9 +57,6 @@ public class MusicProvider extends ContentProvider {
 
         // Genre albums
         sUriMatcher.addURI(AUTHORITY, "genre/#/albums", 3);
-
-        LFMREQ_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("lfmreq").build();
-        sUriMatcher.addURI(AUTHORITY, "lfmreq", 4);
     }
 
     /** Generate a uri to query albums in a genre */
@@ -72,12 +67,10 @@ public class MusicProvider extends ContentProvider {
 
     /** Reference to our recents store instance */
     private static RecentStore sRecents;
-    private static LastFMRequestStore sLastFMStore;
 
     @Override
     public boolean onCreate() {
         sRecents = RecentStore.getInstance(getContext());
-        sLastFMStore = LastFMRequestStore.getInstance(getContext());
         return true;
     }
 
@@ -187,10 +180,6 @@ public class MusicProvider extends ContentProvider {
                     c.setNotificationUri(getContext().getContentResolver(), MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI);
                 }
                 return c;
-            case 4: //Lastfm store
-                c = sLastFMStore.getWritableDatabase().query(LastFMRequestStore.TABLE_NAME,
-                        projection, selection, selectionArgs, null, null, sortOrder);
-                break;
         }
         if (c != null) {
             c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -229,9 +218,6 @@ public class MusicProvider extends ContentProvider {
                 break;
             case 3:
                 break;
-            case 4: //LastFm store
-                sLastFMStore.getWritableDatabase().insert(LastFMRequestStore.TABLE_NAME, null, values);
-                break;
         }
         if (ret != null) {
             getContext().getContentResolver().notifyChange(uri, null);
@@ -249,9 +235,6 @@ public class MusicProvider extends ContentProvider {
             case 2:
                 break;
             case 3:
-                break;
-            case 4: //LastFm store
-                ret = sLastFMStore.getWritableDatabase().delete(LastFMRequestStore.TABLE_NAME, selection, selectionArgs);
                 break;
         }
         if (ret != 0) {
