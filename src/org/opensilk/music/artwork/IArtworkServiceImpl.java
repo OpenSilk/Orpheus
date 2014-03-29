@@ -34,6 +34,7 @@ import java.lang.ref.WeakReference;
 import hugo.weaving.DebugLog;
 
 import static com.andrew.apollo.ApolloApplication.sDefaultMaxImageWidthPx;
+import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
 
 /**
  * IArtworkService implementation
@@ -51,50 +52,75 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
     }
 
     /**
-     * @return ParcelFileDescriptor to the cache file for currently playing album
+     * @param id album id
+     * @return ParcelFileDescriptor pipe to disk cache snapshot of image
      * @throws RemoteException
      */
     @Override
     @DebugLog
-    public ParcelFileDescriptor getCurrentArtwork() throws RemoteException {
-        return getArtwork(MusicUtils.getCurrentAlbumId());
-    }
-
-    /**
-     * @param id album id
-     * @return ParcelFileDescriptor to the cache file
-     * @throws RemoteException
-     */
-    @Override
-    @DebugLog //TODO add method to fetch either large or thumbnails
     public ParcelFileDescriptor getArtwork(long id) throws RemoteException {
         ArtworkService service = mService.get();
         if (service != null) {
             Album album = MusicUtils.makeAlbum(service.getApplicationContext(), id);
             if (album != null) {
-                String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, sDefaultMaxImageWidthPx, 0);
-                if (D) Log.d(TAG, "Checking DiskCache for " + cacheKey);
-                try {
-                    if (service.mManager.mL2Cache == null) {
-                        throw new IOException("Unable to obtain cache instance");
-                    }
-                    final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
-                    final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
-                    final DiskLruCache.Snapshot snapshot = service.mManager.mL2Cache.get(cacheKey);
-                    if (snapshot != null && snapshot.getInputStream(0) != null) {
-                        new Thread(new PipeRunnable(snapshot, out)).start();
-                        return pipe[0];
-                    } else {
-                        pipe[0].close();
-                        out.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName,
+                        sDefaultMaxImageWidthPx, 0);
+                final ParcelFileDescriptor pfd = pullSnapshot(service, cacheKey);
+                if (pfd != null) {
+                    return pfd;
                 }
                 //Add to background request queue so we will have it next time
                 service.mManager.mBackgroundRequestor.add(album.mArtistName, album.mAlbumName,
                         album.mAlbumId, BackgroundRequestor.ImageType.FULLSCREEN);
             }
+        }
+        return null;
+    }
+
+    /**
+     * @param id album id
+     * @return ParcelFileDescriptor pipe to disk cache snapshot of thumbnail
+     * @throws RemoteException
+     */
+    @Override
+    @DebugLog
+    public ParcelFileDescriptor getArtworkThumbnail(long id) throws RemoteException {
+        ArtworkService service = mService.get();
+        if (service != null) {
+            Album album = MusicUtils.makeAlbum(service, id);
+            if (album != null) {
+                String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName,
+                        sDefaultThumbnailWidthPx, 0);
+                final ParcelFileDescriptor pfd = pullSnapshot(service, cacheKey);
+                if (pfd != null) {
+                    return pfd;
+                }
+                //Add to background request queue so we will have it next time
+                service.mManager.mBackgroundRequestor.add(album.mArtistName, album.mAlbumName,
+                        album.mAlbumId, BackgroundRequestor.ImageType.THUMBNAIL);
+            }
+        }
+        return null;
+    }
+
+    private static ParcelFileDescriptor pullSnapshot(ArtworkService service, String cacheKey) {
+        if (D) Log.d(TAG, "Checking DiskCache for " + cacheKey);
+        try {
+            if (service.mManager.mL2Cache == null) {
+                throw new IOException("Unable to obtain cache instance");
+            }
+            final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+            final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
+            final DiskLruCache.Snapshot snapshot = service.mManager.mL2Cache.get(cacheKey);
+            if (snapshot != null && snapshot.getInputStream(0) != null) {
+                new Thread(new PipeRunnable(snapshot, out)).start();
+                return pipe[0];
+            } else {
+                pipe[0].close();
+                out.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }

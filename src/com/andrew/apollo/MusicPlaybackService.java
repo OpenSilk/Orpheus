@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
@@ -43,7 +42,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
@@ -80,11 +78,10 @@ import org.opensilk.cast.helpers.LocalCastServiceManager;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
-import org.opensilk.music.artwork.ArtworkProvider;
+import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
@@ -494,6 +491,11 @@ public class MusicPlaybackService extends Service {
     private FavoritesStore mFavoritesCache;
 
     /**
+     * Proxy for artwork provider
+     */
+    private ArtworkProviderUtil mArtworkUtil;
+
+    /**
      * Cast Service helper
      */
     private LocalCastServiceManager mCastServiceHelper;
@@ -610,6 +612,9 @@ public class MusicPlaybackService extends Service {
 
         // Initialize the notification helper
         mNotificationHelper = new NotificationHelper(this);
+
+        // Create artwork cache
+        mArtworkUtil = new ArtworkProviderUtil(this);
 
         // Start up the thread running the service. Note that we create a
         // separate thread because the service normally runs in the process's
@@ -906,7 +911,7 @@ public class MusicPlaybackService extends Service {
     private void updateNotification() {
         if (!mAnyActivityInForeground && isPlaying()) {
             mNotificationHelper.buildNotification(getAlbumName(), getArtistName(),
-                    getTrackName(), getAlbumId(), getAlbumArt(), isPlaying());
+                    getTrackName(), getAlbumId(), getAlbumArtThumbnail(), isPlaying());
         } else if (mAnyActivityInForeground) {
             mNotificationHelper.killNotification();
         }
@@ -1520,7 +1525,7 @@ public class MusicPlaybackService extends Service {
                 // to make sure not to hand out our cache copy
                 Bitmap.Config config = albumArt.getConfig();
                 if (config == null) {
-                    config = Bitmap.Config.ARGB_8888;
+                    config = Bitmap.Config.RGB_565;
                 }
                 albumArt = albumArt.copy(config, false);
             }
@@ -1528,8 +1533,7 @@ public class MusicPlaybackService extends Service {
             mRemoteControlClient
                     .editMetadata(true)
                     .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName())
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
-                            getAlbumArtistName())
+                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, getAlbumArtistName())
                     .putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, getAlbumName())
                     .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName())
                     .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, duration())
@@ -2625,31 +2629,14 @@ public class MusicPlaybackService extends Service {
      */
     @DebugLog
     public Bitmap getAlbumArt() {
-        // Return the cached artwork
-        ParcelFileDescriptor pfd = null;
-        try {
-            pfd = getContentResolver().openFileDescriptor(ArtworkProvider.createArtworkUri(getAlbumId()), "r");
-            if (pfd != null) {
-                Bitmap bitmap;
-                bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
-                return bitmap;
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (pfd != null) {
-                try {
-                    pfd.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return null;
+        return mArtworkUtil.getArtwork(getAlbumArtistName(), getAlbumName(), getAlbumId());
+    }
+
+    /**
+     * @return thumbnail for the current album.
+     */
+    public Bitmap getAlbumArtThumbnail() {
+        return mArtworkUtil.getArtworkThumbnail(getAlbumArtistName(), getAlbumName(), getAlbumId());
     }
 
     /**

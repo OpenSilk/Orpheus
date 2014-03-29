@@ -22,6 +22,6 @@ import android.os.ParcelFileDescriptor;
  * Created by drew on 3/23/14.
  */
 interface IArtworkService {
-    ParcelFileDescriptor getCurrentArtwork();
     ParcelFileDescriptor getArtwork(long id);
+    ParcelFileDescriptor getArtworkThumbnail(long id);
 }

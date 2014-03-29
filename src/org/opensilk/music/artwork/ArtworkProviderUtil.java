@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -47,6 +48,8 @@ public class ArtworkProviderUtil {
      */
     private static final float THUMB_MEM_CACHE_DIVIDER = 0.08f;
 
+    private final Object decodeLock = new Object();
+
     /**
      * Context
      */
@@ -71,27 +74,60 @@ public class ArtworkProviderUtil {
     }
 
     /**
-     * Wrapper method for getting artwork for the service
-     * Checks its local cache first, then calls to the ArtService (which checks
-     * its cache), and as last resort loads the default art.
+     * Fetches artwork from the ArtworkProvider, attempts to get fullscreen
+     * artwork first, on failure tries to get a thumbnail
+     *
+     * @param artistName
+     * @param albumName
+     * @param albumId
+     * @return Bitmap if found else null
      */
     @DebugLog
     public Bitmap getArtwork(String artistName, String albumName, long albumId) {
-        String cacheKey = makeCacheKey(artistName, albumName, albumId);
+        final String cacheKey = makeCacheKey(artistName, albumName, albumId, "LARGE");
+        final Uri artworkUri = ArtworkProvider.createArtworkUri(albumId);
+        Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
+        if (bitmap == null) {
+            // Fullscreen not available try the thumbnail for a temp fix
+            bitmap = getArtworkThumbnail(artistName, albumName, albumId);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Fetches thumbnail from the ArtworkProvider
+     * @param artistName
+     * @param albumName
+     * @param albumId
+     * @return
+     */
+    @DebugLog
+    public Bitmap getArtworkThumbnail(String artistName, String albumName, long albumId) {
+        final String cacheKey = makeCacheKey(artistName, albumName, albumId, "THUMB");
+        final Uri artworkUri = ArtworkProvider.createArtworkThumbnailUri(albumId);
+        return queryArtworkProvider(artworkUri, cacheKey);
+    }
+
+    /**
+     * Queries ArtworkProvider for given uri, first checking local cache
+     * @param artworkUri
+     * @param cacheKey
+     * @return Decoded bitmap
+     */
+    public Bitmap queryArtworkProvider(Uri artworkUri, String cacheKey) {
         Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
         if (bitmap == null) {
             ParcelFileDescriptor pfd = null;
             try {
-                pfd = mContext.getContentResolver().openFileDescriptor(ArtworkProvider.createArtworkUri(albumId), "r");
+                pfd = mContext.getContentResolver().openFileDescriptor(artworkUri, "r");
                 if (pfd != null) {
-                    bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                    synchronized (decodeLock) {
+                        bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                    }
                     if (bitmap != null) {
                         mL1Cache.putBitmap(cacheKey, bitmap);
                     }
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                bitmap = null;
             } catch (Exception e) {
                 e.printStackTrace();
                 bitmap = null;
@@ -99,35 +135,25 @@ public class ArtworkProviderUtil {
                 if (pfd != null) {
                     try {
                         pfd.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } catch (IOException ignored) {
                     }
                 }
             }
         }
-//        if (bitmap == null) {
-//            //TODO mediastore
-//            // Couldn't get it from ArtService, load the default
-//            if (mContext.getResources() != null) {
-//                BitmapDrawable drawable =
-//                        (BitmapDrawable) mContext.getResources().getDrawable(R.drawable.default_artwork);
-//                if (drawable != null) {
-//                    bitmap = drawable.getBitmap();
-//                }
-//            }
-//        }
         return bitmap;
     }
 
     /**
      * Generates a cache key for local  L1Cache
      */
-    private String makeCacheKey(String artistName, String albumName, long albumId) {
+    private static String makeCacheKey(String artistName, String albumName, long albumId, String size) {
         return new StringBuilder((artistName != null ? artistName.length() : 4)
-                + (albumName != null ? albumName.length() : 4) + 1)
+                + (albumName != null ? albumName.length() : 4) + 1
+                + (size != null ? size.length() : 4))
                 .append(artistName)
                 .append(albumName)
                 .append(albumId)
+                .append(size)
                 .toString();
     }
 }

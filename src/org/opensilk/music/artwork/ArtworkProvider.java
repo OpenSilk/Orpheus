@@ -47,21 +47,32 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
     private static final UriMatcher sUriMatcher;
 
     public static final Uri ARTWORK_URI;
+    public static final Uri ARTWORK_THUMB_URI;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         ARTWORK_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("artwork").build();
         sUriMatcher.addURI(AUTHORITY, "artwork/#", 1);
+
+        ARTWORK_THUMB_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("thumbnail").build();
+        sUriMatcher.addURI(AUTHORITY, "thumbnail/#", 2);
     }
 
     /**
-     * Creates an artwork uri to retrieve album art for specified albumId
      * @param albumId
-     * @return
+     * @return Uri to retrieve large (fullscreen) artwork for specified albumId
      */
     public static Uri createArtworkUri(final long albumId) {
         return ARTWORK_URI.buildUpon().appendPath(String.valueOf(albumId)).build();
+    }
+
+    /**
+     * @param albumId
+     * @return Uri to retrieve thumbnail for specified albumId
+     */
+    public static Uri createArtworkThumbnailUri(final long albumId) {
+        return ARTWORK_THUMB_URI.buildUpon().appendPath(String.valueOf(albumId)).build();
     }
 
     /**
@@ -112,36 +123,63 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
 
     @Override
     @DebugLog
-    public synchronized ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
+    public ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
         if (!"r".equals(mode)) {
             throw new IllegalArgumentException("Provider is read only");
         }
+        if (mArtworkService == null) {
+            waitForService();
+        }
         switch (sUriMatcher.match(uri)) {
-            case 1:
+            case 1: //Fullscreen
                 try {
                     final long id = Long.decode(uri.getLastPathSegment());
-                    long waitTime = 0;
-                    while (mArtworkService == null) {
-                        // Don' block for more than a second
-                        if (waitTime > 1000) throw new FileNotFoundException("Could not bind service");
-                        Log.i(TAG, "Waiting on service");
-                        // We were called too soon after onCreate, give the service some time
-                        // to spin up, This is run in a binder thread so it shouldn't be a big deal
-                        // to block it.
-                        long start = System.currentTimeMillis();
-                        wait(100);
-                        Log.i(TAG, "Waited for " + (waitTime += (System.currentTimeMillis() - start)) + "ms");
-                    }
                     final ParcelFileDescriptor pfd = mArtworkService.getArtwork(id);
-                    if (pfd == null) {
-                        throw new FileNotFoundException("Parcel was null");
+                    if (pfd != null) {
+                        return pfd;
                     }
-                    return pfd;
-                } catch (InterruptedException|RemoteException e) {
+                } catch (RemoteException e) {
                     throw new FileNotFoundException("" + e.getClass().getName() + " " + e.getMessage());
                 }
+                break;
+            case 2: //Thumbnail
+                try {
+                    final long id = Long.decode(uri.getLastPathSegment());
+                    final ParcelFileDescriptor pfd = mArtworkService.getArtworkThumbnail(id);
+                    if (pfd != null) {
+                        return pfd;
+                    }
+                } catch (RemoteException e) {
+                    throw new FileNotFoundException("" + e.getClass().getName() + " " + e.getMessage());
+                }
+                break;
         }
-        throw new FileNotFoundException();
+        throw new FileNotFoundException("Could not obtain image from cache");
+    }
+
+    /**
+     * Waits for service to bind
+     * @throws FileNotFoundException
+     */
+    private synchronized void waitForService() throws FileNotFoundException {
+        try {
+            long waitTime = 0;
+            while (mArtworkService == null) {
+                // Don' block for more than a second
+                if (waitTime > 1000) throw new FileNotFoundException("Could not bind service");
+                Log.i(TAG, "Waiting on service");
+                // We were called too soon after onCreate, give the service some time
+                // to spin up, This is run in a binder thread so it shouldn't be a big deal
+                // to block it.
+                long start = System.currentTimeMillis();
+                synchronized (this) {
+                    wait(100);
+                }
+                Log.i(TAG, "Waited for " + (waitTime += (System.currentTimeMillis() - start)) + "ms");
+            }
+        } catch (InterruptedException e) {
+            throw new FileNotFoundException(""+e.getClass().getName() + " " + e.getMessage());
+        }
     }
 
     /**
@@ -165,7 +203,7 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
     }
 
     @Override
-    public void onServiceDisconnected(ComponentName name) {
+    public synchronized void onServiceDisconnected(ComponentName name) {
         mArtworkService = null;
         notifyAll();
         doBindService();
