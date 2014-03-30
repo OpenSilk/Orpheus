@@ -71,7 +71,7 @@ public class ArtworkService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction() != null && ACTION_CLEAR_CACHE.equals(intent.getAction())) {
+        if (intent != null && ACTION_CLEAR_CACHE.equals(intent.getAction())) {
             if (D) Log.d(TAG, "Queueing request to clear mem cache");
             mHandler.postDelayed(mClearCacheTask, TWO_MINUTES);
         } else {
