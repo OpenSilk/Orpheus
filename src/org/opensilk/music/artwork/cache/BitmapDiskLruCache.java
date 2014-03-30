@@ -61,22 +61,6 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         }
     }
 
-    public boolean containsKey(String key) {
-        boolean contained = false;
-        DiskLruCache.Snapshot snapshot = null;
-        try {
-            snapshot = mDiskCache.get(CacheUtil.md5(key));
-            contained = snapshot != null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (snapshot != null) {
-                snapshot.close();
-            }
-        }
-        return contained;
-    }
-
     public void clearCache() {
         try {
             mDiskCache.delete();
@@ -155,6 +139,22 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
             }
         }
         return bitmap;
+    }
+
+    public boolean containsKey(String key) {
+        boolean contained = false;
+        DiskLruCache.Snapshot snapshot = null;
+        try {
+            snapshot = mDiskCache.get(CacheUtil.md5(key));
+            contained = snapshot != null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (snapshot != null) {
+                snapshot.close();
+            }
+        }
+        return contained;
     }
 
 }

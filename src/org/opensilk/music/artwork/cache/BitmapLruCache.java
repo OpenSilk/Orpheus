@@ -56,4 +56,8 @@ public class BitmapLruCache extends LruCache<String, Bitmap> implements ArtworkL
         put(CacheUtil.md5(url), bitmap);
     }
 
+    @Override
+    public boolean containsKey(String url) {
+        return get(CacheUtil.md5(url)) != null;
+    }
 }

@@ -22,8 +22,7 @@ import android.util.AttributeSet;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
-
-import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
+import org.opensilk.music.artwork.ArtworkType;
 
 /**
  * Created by drew on 3/12/14.
@@ -40,7 +39,7 @@ public class ThumbnailArtworkImageView extends ArtworkImageView {
 
     public ThumbnailArtworkImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        setRequestedWidth(sDefaultThumbnailWidthPx);
+        setImageType(ArtworkType.THUMBNAIL);
         setDefaultImageResId(R.drawable.default_artwork);
     }
 

@@ -28,7 +28,6 @@ import com.andrew.apollo.BuildConfig;
 
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import hugo.weaving.DebugLog;

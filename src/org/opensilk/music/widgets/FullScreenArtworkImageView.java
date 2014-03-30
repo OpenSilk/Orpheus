@@ -22,8 +22,7 @@ import android.util.AttributeSet;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
-
-import static com.andrew.apollo.ApolloApplication.sDefaultMaxImageWidthPx;
+import org.opensilk.music.artwork.ArtworkType;
 
 /**
  * Created by drew on 3/12/14.
@@ -40,7 +39,7 @@ public class FullScreenArtworkImageView extends ArtworkImageView {
 
     public FullScreenArtworkImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        setRequestedWidth(sDefaultMaxImageWidthPx);
+        setImageType(ArtworkType.LARGE);
         setDefaultImageResId(R.drawable.default_artwork);
     }
 }

@@ -75,7 +75,6 @@ public class ArtworkManager {
     final RequestQueue mApiQueue;
     final RequestQueue mImageQueue;
     final PreferenceUtils mPreferences;
-    final BackgroundRequestor mBackgroundRequestor;
 
     /**
      * Singleton instance
@@ -124,8 +123,6 @@ public class ArtworkManager {
         // init queues
         mApiQueue = RequestQueueFactory.newApiQueue(context);
         mImageQueue = RequestQueueFactory.newImageQueue(context);
-        // init background requestor
-        mBackgroundRequestor = new BackgroundRequestor();
     }
 
     @DebugLog
@@ -148,7 +145,7 @@ public class ArtworkManager {
         if (sArtworkManager != null) {
             RequestQueueFactory.destroy(sArtworkManager.mApiQueue);
             RequestQueueFactory.destroy(sArtworkManager.mImageQueue);
-            sArtworkManager.mBackgroundRequestor.mExecutor.shutdownNow();
+            BackgroundRequestor.EXECUTOR.shutdownNow();
             sArtworkManager.mL1Cache.evictAll();
             sArtworkManager.mL2Cache.close();
             sArtworkManager = null;
@@ -189,8 +186,8 @@ public class ArtworkManager {
     @DebugLog
     public static synchronized boolean clearCaches() {
         if (sArtworkManager != null) {
-            sArtworkManager.mBackgroundRequestor.mExecutor.shutdownNow();
-            sArtworkManager.mBackgroundRequestor.initExecutor();
+            BackgroundRequestor.EXECUTOR.shutdownNow();
+            BackgroundRequestor.initExecutor();
             sArtworkManager.mApiQueue.cancelAll(new RequestQueue.RequestFilter() {
                 @Override
                 public boolean apply(Request<?> request) {

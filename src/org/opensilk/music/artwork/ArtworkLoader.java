@@ -16,7 +16,6 @@
 package org.opensilk.music.artwork;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -31,8 +30,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import hugo.weaving.DebugLog;
-
-//import com.android.volley.Request;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
@@ -49,9 +46,6 @@ import hugo.weaving.DebugLog;
 public class ArtworkLoader {
     private static final String TAG = ArtworkLoader.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
-
-    /** RequestQueue for dispatching ImageRequests onto. */
-//    private final RequestQueue mRequestQueue;
 
     /** Amount of time to wait after first response arrives before delivering all responses. */
     private int mBatchResponseDelayMs = 100;
@@ -84,15 +78,14 @@ public class ArtworkLoader {
     public interface ImageCache {
         public Bitmap getBitmap(String url);
         public void putBitmap(String url, Bitmap bitmap);
+        public boolean containsKey(String url);
     }
 
     /**
      * Constructs a new ImageLoader.
-     * @param queue The RequestQueue to use for making image requests.
      * @param imageCache The cache to use as an L1 cache.
      */
-    public ArtworkLoader(/*RequestQueue queue,*/ ImageCache imageCache) {
-//        mRequestQueue = queue;
+    public ArtworkLoader(ImageCache imageCache) {
         mCache = imageCache;
     }
 
@@ -128,20 +121,20 @@ public class ArtworkLoader {
      * in the cache, and returns a bitmap container that contains all of the data
      * relating to the request (as well as the default image if the requested
      * image is not available).
-     * @param requestUrl The url of the remote image
+     * @param artistName
+     * @param albumName
+     * @param albumId
      * @param imageListener The listener to call when the remote image is loaded
-     * @param maxWidth The maximum width of the returned image.
-     * @param maxHeight The maximum height of the returned image.
+     * @param imageType
      * @return A container object that contains all of the properties of the request, as well as
      *     the currently available image (default if remote is not loaded).
      */
     public ImageContainer get(String artistName, String albumName, long albumId,
-                              ImageListener imageListener,
-                              int maxWidth, int maxHeight) {
+                              ImageListener imageListener, ArtworkType imageType) {
         // only fulfill requests that were initiated from the main thread.
         throwIfNotOnMainThread();
 
-        final String cacheKey = getCacheKey(artistName, albumName, maxWidth, maxHeight);
+        final String cacheKey = getCacheKey(artistName, albumName, imageType);
 
         // Try to look up the request in the cache of remote images.
         Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
@@ -176,15 +169,13 @@ public class ArtworkLoader {
                     public void onResponse(Bitmap response) {
                         onGetImageSuccess(cacheKey, response);
                     }
-                }, maxWidth, maxHeight,
-                        Config.RGB_565, new ErrorListener() {
+                }, imageType, new ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         onGetImageError(cacheKey, error);
                     }
                 });
 
-//        mRequestQueue.add(newRequest);
         newRequest.start();
         mInFlightRequests.put(cacheKey,
                 new BatchedImageRequest(newRequest, imageContainer));
@@ -263,8 +254,11 @@ public class ArtworkLoader {
         /**
          * Constructs a BitmapContainer object.
          * @param bitmap The final bitmap (if it exists).
-         * @param requestUrl The requested URL for this container.
-         * @param cacheKey The cache key that identifies the requested URL for this container.
+         * @param artistName
+         * @param albumName
+         * @param albumId
+         * @param cacheKey
+         * @param listener
          */
         public ImageContainer(Bitmap bitmap, String artistName, String albumName, long albumId,
                               String cacheKey, ImageListener listener) {
@@ -392,7 +386,6 @@ public class ArtworkLoader {
      * Starts the runnable for batched delivery of responses if it is not already started.
      * @param cacheKey The cacheKey of the response being delivered.
      * @param request The BatchedImageRequest to be delivered.
-     * @param error The volley error associated with the request (if applicable).
      */
     private void batchResponse(String cacheKey, BatchedImageRequest request) {
         mBatchedResponses.put(cacheKey, request);
@@ -436,19 +429,11 @@ public class ArtworkLoader {
 
     /**
      * Creates a cache key for use with the L1 cache.
-     * @param url The URL of the request.
-     * @param maxWidth The max-width of the output.
-     * @param maxHeight The max-height of the output.
      */
-//    private static String getCacheKey(String url, int maxWidth, int maxHeight) {
-//        return new StringBuilder(url.length() + 12).append("#W").append(maxWidth)
-//                .append("#H").append(maxHeight).append(url).toString();
-//    }
-    public static String getCacheKey(String artistName, String albumName, int maxWidth, int maxHeight) {
+    public static String getCacheKey(String artistName, String albumName, ArtworkType imageType) {
         return new StringBuilder(artistName.length() + (albumName != null ? albumName.length() : 4) + 12)
-                .append("#W").append(maxWidth)
-                .append("#H").append(maxHeight)
-                .append(artistName)
+                .append("#").append(imageType).append("#")
+                .append(artistName).append("#")
                 .append(albumName)
                 .toString();
     }

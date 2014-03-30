@@ -33,9 +33,6 @@ import java.lang.ref.WeakReference;
 
 import hugo.weaving.DebugLog;
 
-import static com.andrew.apollo.ApolloApplication.sDefaultMaxImageWidthPx;
-import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
-
 /**
  * IArtworkService implementation
  *
@@ -63,15 +60,14 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
         if (service != null) {
             Album album = MusicUtils.makeAlbum(service.getApplicationContext(), id);
             if (album != null) {
-                String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName,
-                        sDefaultMaxImageWidthPx, 0);
+                String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, ArtworkType.LARGE);
                 final ParcelFileDescriptor pfd = pullSnapshot(service, cacheKey);
                 if (pfd != null) {
                     return pfd;
                 }
                 //Add to background request queue so we will have it next time
-                service.mManager.mBackgroundRequestor.add(album.mArtistName, album.mAlbumName,
-                        album.mAlbumId, BackgroundRequestor.ImageType.FULLSCREEN);
+                BackgroundRequestor.add(album.mArtistName, album.mAlbumName,
+                        album.mAlbumId, ArtworkType.LARGE);
             }
         }
         return null;
@@ -89,15 +85,14 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
         if (service != null) {
             Album album = MusicUtils.makeAlbum(service, id);
             if (album != null) {
-                String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName,
-                        sDefaultThumbnailWidthPx, 0);
+                String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, ArtworkType.THUMBNAIL);
                 final ParcelFileDescriptor pfd = pullSnapshot(service, cacheKey);
                 if (pfd != null) {
                     return pfd;
                 }
                 //Add to background request queue so we will have it next time
-                service.mManager.mBackgroundRequestor.add(album.mArtistName, album.mAlbumName,
-                        album.mAlbumId, BackgroundRequestor.ImageType.THUMBNAIL);
+                BackgroundRequestor.add(album.mArtistName, album.mAlbumName,
+                        album.mAlbumId, ArtworkType.THUMBNAIL);
             }
         }
         return null;

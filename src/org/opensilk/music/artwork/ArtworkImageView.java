@@ -45,8 +45,7 @@ public class ArtworkImageView extends ImageView {
 
     private long mAlbumId;
 
-    /** Maximum width of image for downsampling downloaded bitmap */
-    private int mRequestedWidthPx = 0;
+    private ArtworkType mImageType;
 
     /** Array used in transition drawable */
     private Drawable[] mDrawables = new Drawable[2];
@@ -106,15 +105,15 @@ public class ArtworkImageView extends ImageView {
      * Sets maximum width in pixels we expect the image to be displayed, the imagefetcher will
      * downsample the fetched bitmap as needed to reduce size/ memory consumption.
      */
-    public void setRequestedWidth(int maxWidth) {
-        mRequestedWidthPx = maxWidth;
+    public void setImageType(ArtworkType imageType) {
+        mImageType = imageType;
     }
 
     /**
      * @return requested bitmap width
      */
-    public int getRequestedWidth() {
-        return mRequestedWidthPx;
+    public ArtworkType getImageType() {
+        return mImageType;
     }
 
     /**
@@ -163,7 +162,7 @@ public class ArtworkImageView extends ImageView {
 
         // if there was an old request in this view, check if it needs to be canceled.
         if (mImageContainer != null && mImageContainer.getCacheKey() != null) {
-            if (mImageContainer.getCacheKey().equals(ArtworkLoader.getCacheKey(mArtistName, mAlbumName, mRequestedWidthPx, 0))) {
+            if (mImageContainer.getCacheKey().equals(ArtworkLoader.getCacheKey(mArtistName, mAlbumName, mImageType))) {
                 // if the request is from the same URL, return.
                 return;
             } else {
@@ -222,7 +221,7 @@ public class ArtworkImageView extends ImageView {
 //                            setImageResource(mDefaultImageId);
                         }
                     }
-                }, mRequestedWidthPx, 0);
+                }, mImageType);
 
         // update the ImageContainer to be the new bitmap container.
         mImageContainer = newContainer;
