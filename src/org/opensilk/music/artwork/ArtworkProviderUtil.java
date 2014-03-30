@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 
+import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
 import java.io.IOException;
@@ -46,8 +47,6 @@ public class ArtworkProviderUtil {
      * Default memory cache size as a percent of device memory class
      */
     private static final float THUMB_MEM_CACHE_DIVIDER = 0.08f;
-
-    private final Object decodeLock = new Object();
 
     /**
      * Context
@@ -120,8 +119,13 @@ public class ArtworkProviderUtil {
             try {
                 pfd = mContext.getContentResolver().openFileDescriptor(artworkUri, "r");
                 if (pfd != null) {
-                    synchronized (decodeLock) {
-                        bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                    //Synchronize on the disk cache lock to better prevent OOMs
+                    synchronized (BitmapDiskLruCache.sDecodeLock) {
+                        try {
+                            bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                        } catch (OutOfMemoryError e) {
+                            bitmap = null;
+                        }
                     }
                     if (bitmap != null) {
                         mL1Cache.putBitmap(cacheKey, bitmap);

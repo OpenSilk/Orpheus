@@ -28,6 +28,8 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
 
+    public static final Object sDecodeLock = new Object();
+
     public BitmapDiskLruCache(File diskCacheDir, int diskCacheSize, Bitmap.CompressFormat compressFormat, int quality) {
         try {
             mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
@@ -127,9 +129,16 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
             }
             final InputStream in = snapshot.getInputStream(0);
             if (in != null) {
-                final BufferedInputStream buffIn =
-                        new BufferedInputStream(in, IO_BUFFER_SIZE);
-                bitmap = BitmapFactory.decodeStream(buffIn);
+                synchronized (sDecodeLock) {
+                    try {
+                        final BufferedInputStream buffIn =
+                                new BufferedInputStream(in, IO_BUFFER_SIZE);
+                        bitmap = BitmapFactory.decodeStream(buffIn);
+                    } catch (OutOfMemoryError e) {
+                        bitmap = null;
+                    }
+                }
+
             }
         } catch (IOException e) {
             e.printStackTrace();
