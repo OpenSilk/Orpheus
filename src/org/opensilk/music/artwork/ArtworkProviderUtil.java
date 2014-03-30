@@ -132,7 +132,7 @@ public class ArtworkProviderUtil {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.d(TAG, "" + e.getClass().getName() + " " + e.getMessage());
                 bitmap = null;
             } finally {
                 if (pfd != null) {
