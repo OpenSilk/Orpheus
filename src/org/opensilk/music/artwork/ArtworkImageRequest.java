@@ -25,6 +25,8 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.ImageRequest;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Volley ImageRequest with support for variable priority
  * and public response methods so we can use them in
@@ -67,11 +69,13 @@ public class ArtworkImageRequest extends ImageRequest {
      * volley will attach it to this and dispatch when this one finishes
      * Hence setBackground takes no arguments;
      */
+    @DebugLog
     public void setBackground() {
         mPriority = Priority.LOW;
         mInBackground = true;
     }
 
+    @DebugLog
     public boolean isInBackground() {
         return mInBackground;
     }

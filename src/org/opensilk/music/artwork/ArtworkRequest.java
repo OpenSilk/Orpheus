@@ -74,8 +74,8 @@ public class ArtworkRequest implements IArtworkRequest {
     final long mAlbumId;
     final String mCacheKey;
     final ArtworkType mImageType;
-    final WeakReference<Listener<Bitmap>> mImageListener;
-    final WeakReference<ErrorListener> mImageErrorListener;
+    final Listener<Bitmap> mImageListener;
+    final ErrorListener mImageErrorListener;
 
     private Request.Priority mPriority = Request.Priority.NORMAL;
     // true if current request has been canceled
@@ -94,10 +94,8 @@ public class ArtworkRequest implements IArtworkRequest {
         mAlbumId = albumId;
         mCacheKey = cacheKey;
         mImageType = imageType;
-        // These are kept as weak references so we dont accidently
-        // hold on to them after the view has been destroyed or recycled
-        mImageListener = new WeakReference<>(listener);
-        mImageErrorListener = new WeakReference<>(errorListener);
+        mImageListener = listener;
+        mImageErrorListener = errorListener;
         mManager = ArtworkManager.getInstance();
     }
 
@@ -129,6 +127,7 @@ public class ArtworkRequest implements IArtworkRequest {
             if (mCurrentRequest instanceof ArtworkImageRequest) {
                 // push into background our ImageResponse listener will make sure
                 // its not delivered
+                if (D) Log.d(TAG, "Setting background priority on " + mCurrentRequest.getCacheKey());
                 ArtworkImageRequest req = (ArtworkImageRequest) mCurrentRequest;
                 req.setBackground();
             }
@@ -190,11 +189,8 @@ public class ArtworkRequest implements IArtworkRequest {
      * @param error
      */
     private void notifyError(VolleyError error) {
-        if (!mCanceled) {
-            ErrorListener errorListener = mImageErrorListener.get();
-            if (errorListener != null) {
-                errorListener.onErrorResponse(error);
-            }
+        if (!mCanceled && mImageErrorListener != null) {
+            mImageErrorListener.onErrorResponse(error);
         }
     }
 
@@ -224,16 +220,16 @@ public class ArtworkRequest implements IArtworkRequest {
         private ArtworkImageRequest imageRequest;
         private final String cacheKey;
         private final ArtworkLoader.ImageCache diskCache;
-        private final WeakReference<Listener<Bitmap>> listener;
-        private final WeakReference<ErrorListener> errorListener;
+        private final Listener<Bitmap> listener;
+        private final ErrorListener errorListener;
 
         ImageResponseListener(String cacheKey,
                               ArtworkLoader.ImageCache diskCache,
                               Listener<Bitmap> listener, ErrorListener errorListener) {
             this.cacheKey = cacheKey;
             this.diskCache = diskCache;
-            this.listener = new WeakReference<>(listener);
-            this.errorListener = new WeakReference<>(errorListener);
+            this.listener = listener;
+            this.errorListener = errorListener;
         }
 
         public void setImageRequest(ArtworkImageRequest imageRequest) {
@@ -248,9 +244,8 @@ public class ArtworkRequest implements IArtworkRequest {
         public void onErrorResponse(VolleyError error) {
             if (!imageRequest.isCanceled() && !imageRequest.isInBackground()) {
                 // Request hasnt been canceled, notify the listener
-                ErrorListener l = errorListener.get();
-                if (l != null) {
-                    l.onErrorResponse(error);
+                if (errorListener != null) {
+                    errorListener.onErrorResponse(error);
                 }
             }
         }
@@ -259,9 +254,8 @@ public class ArtworkRequest implements IArtworkRequest {
         public void onResponse(Bitmap response) {
             if (!imageRequest.isCanceled() && !imageRequest.isInBackground()) {
                 // Request hasnt been canceled, notify the listener
-                Listener<Bitmap> l = listener.get();
-                if (l != null) {
-                    l.onResponse(response);
+                if (listener != null) {
+                    listener.onResponse(response);
                 }
             }
             // Add to the disk cache
@@ -290,9 +284,8 @@ public class ArtworkRequest implements IArtworkRequest {
             if (!mCanceled) {
                 if (bitmap != null) {
                     if (D) Log.d(TAG, "L2Cache hit: " + mCacheKey);
-                    Listener<Bitmap> imageListener = mImageListener.get();
-                    if (imageListener != null) {
-                        imageListener.onResponse(bitmap);
+                    if (mImageListener != null) {
+                        mImageListener.onResponse(bitmap);
                     }
                 } else {
                     if (!TextUtils.isEmpty(mArtistName)) {
@@ -311,7 +304,11 @@ public class ArtworkRequest implements IArtworkRequest {
                                 ApolloUtils.execute(false, new MediaStoreTask(false));
                             }
                         } else { //Assume they meant to download artist images
-                            queueArtistRequest();
+                            if (ApolloUtils.isOnline(mManager.mContext)) {
+                                queueArtistRequest();
+                            } else {
+                                notifyError(new VolleyError("No network connection"));
+                            }
                         }
                     } else {
                         notifyError(new VolleyError("Artist name was null"));
@@ -332,10 +329,11 @@ public class ArtworkRequest implements IArtworkRequest {
         MediaStoreTask(boolean tryNetwork) {
             this.tryNetwork = tryNetwork;
             ImageResponseListener listener = new ImageResponseListener(mCacheKey,
-                    mManager.mL2Cache, mImageListener.get(), mImageErrorListener.get());
+                    mManager.mL2Cache, mImageListener, mImageErrorListener);
             fauxRequest = new ArtworkImageRequest("mediastore#"+mAlbumId,
                     listener, mImageType, listener);
             listener.setImageRequest(fauxRequest);
+            mCurrentRequest = fauxRequest;
         }
 
         /**
@@ -407,16 +405,15 @@ public class ArtworkRequest implements IArtworkRequest {
         @Override
         protected void onPostExecute(Boolean addLargeRequest) {
             ImageResponseListener listener = new ImageResponseListener(mCacheKey,
-                    mManager.mL2Cache, mImageListener.get(), mImageErrorListener.get());
+                    mManager.mL2Cache, mImageListener, mImageErrorListener);
             ArtworkImageRequest request = new ArtworkImageRequest(url, listener, mImageType, listener);
+            listener.setImageRequest(request);
             if (mCanceled) {
                 request.isInBackground();
-                // No need to set mCurrentRequest if canceled
             } else {
                 request.setPriority(mPriority);
-                mCurrentRequest = request;
             }
-            listener.setImageRequest(request);
+            mCurrentRequest = request;
             mManager.mImageQueue.add(request);
             if (addLargeRequest) {
                 // We are requesting a thumbnail and the corresponding fullscreen image
@@ -427,6 +424,7 @@ public class ArtworkRequest implements IArtworkRequest {
                         = new ImageResponseListener(mCacheKey, mManager.mL2Cache, null, null);
                 ArtworkImageRequest largeRequest = new ArtworkImageRequest(url,
                         bglistener, mImageType, bglistener);
+                bglistener.setImageRequest(request);
                 mManager.mImageQueue.add(largeRequest);
             }
         }
@@ -449,16 +447,17 @@ public class ArtworkRequest implements IArtworkRequest {
                 if (mManager.mPreferences.wantHighResolutionArt()) {
                     // Check coverart archive
                     ImageResponseListener listener = new ImageResponseListener(mCacheKey,
-                            mManager.mL2Cache, mImageListener.get(),
+                            mManager.mL2Cache, mImageListener,
                             new CoverArtArchiveErrorListener(response));
                     CoverArtArchiveRequest request = new CoverArtArchiveRequest(response.getMbid(),
                             listener, mImageType, listener);
+                    listener.setImageRequest(request);
                     if (mCanceled) {
                         request.setBackground();
                     } else {
                         request.setPriority(mPriority);
-                        mCurrentRequest = request;
                     }
+                    mCurrentRequest = request;
                     mManager.mImageQueue.add(request);
                 } else {
                     String url = getBestImage(response, false);
