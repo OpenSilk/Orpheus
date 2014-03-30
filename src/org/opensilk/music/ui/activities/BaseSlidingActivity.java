@@ -538,28 +538,18 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     }
 
     @Override
+    @DebugLog
     public void onPanelExpanded(View panel) {
-        mHeaderQueueButton.setVisibility(View.VISIBLE);
-        mHeaderOverflow.setVisibility(View.VISIBLE);
-        maybeShowHeaderMediaRouteButton();
-        mHeaderPrevButton.setVisibility(View.GONE);
-        mHeaderPlayPauseButton.setVisibility(View.GONE);
-        mHeaderNextButton.setVisibility(View.GONE);
-        mPanelHeader.makeBackgroundTransparent();
+        mPanelHeader.transitionToOpen();
     }
 
     @Override
+    @DebugLog
     public void onPanelCollapsed(View panel) {
-        mHeaderQueueButton.setVisibility(View.GONE);
-        mHeaderOverflow.setVisibility(View.GONE);
-        mHeaderMediaRouteButton.setVisibility(View.GONE);
-        mHeaderPrevButton.setVisibility(View.VISIBLE);
-        mHeaderPlayPauseButton.setVisibility(View.VISIBLE);
-        mHeaderNextButton.setVisibility(View.VISIBLE);
         if (mQueueShowing) {
             popQueueFragment();
         }
-        mPanelHeader.makeBackgroundSolid();
+        mPanelHeader.transitionToClosed();
     }
 
     @Override
@@ -621,15 +611,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mHeaderMediaRouteButton = (MediaRouteButton) findViewById(R.id.panel_mediarouter);
         mHeaderMediaRouteButton.setRouteSelector(mMediaRouteSelector);
         mHeaderMediaRouteButton.setDialogFactory(new StyledMediaRouteDialogFactory());
-
-        if (!mSlidingPanel.isExpanded()) {
-            mPanelHeader.makeBackgroundSolid();
-            mHeaderQueueButton.setVisibility(View.GONE);
-            mHeaderOverflow.setVisibility(View.GONE);
-            mHeaderMediaRouteButton.setVisibility(View.GONE);
-        } else {
-            mPanelHeader.makeBackgroundTransparent();
-        }
+        mHeaderMediaRouteButton.setVisibility(View.GONE);
 
         // Play and pause button
         mFooterPlayPauseButton = (PlayPauseButton)findViewById(R.id.footer_action_button_play);

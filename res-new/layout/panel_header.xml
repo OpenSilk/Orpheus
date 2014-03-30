@@ -72,35 +72,55 @@
 
         </LinearLayout>
 
-        <org.opensilk.music.widgets.RepeatingImageButton
-            android:id="@+id/header_action_button_previous"
-            style="@style/Orpheus.MenuButton"
-            android:contentDescription="@string/accessibility_prev"/>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
 
-        <org.opensilk.music.widgets.PlayPauseButton
-            android:id="@+id/header_action_button_play"
-            style="@style/Orpheus.MenuButton"
-            android:contentDescription="@string/accessibility_play"/>
+            <LinearLayout
+                android:id="@+id/header_closed_button_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
 
-        <org.opensilk.music.widgets.RepeatingImageButton
-            android:id="@+id/header_action_button_next"
-            style="@style/Orpheus.MenuButton"
-            android:contentDescription="@string/accessibility_next"/>
+                <org.opensilk.music.widgets.RepeatingImageButton
+                    android:id="@+id/header_action_button_previous"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@string/accessibility_prev"/>
 
-        <android.support.v7.app.MediaRouteButton
-            style="@style/Orpheus.MenuButton.MediaRouter"
-            mediarouter:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-            android:id="@+id/panel_mediarouter"/>
+                <org.opensilk.music.widgets.PlayPauseButton
+                    android:id="@+id/header_action_button_play"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@string/accessibility_play"/>
 
-        <org.opensilk.music.widgets.QueueButton
-            android:id="@+id/header_switch_queue"
-            style="@style/Orpheus.MenuButton"
-            android:contentDescription="@null"/>
+                <org.opensilk.music.widgets.RepeatingImageButton
+                    android:id="@+id/header_action_button_next"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@string/accessibility_next"/>
 
-        <org.opensilk.music.widgets.HeaderOverflowButton
-            android:id="@+id/header_overflow"
-            style="@style/Orpheus.MenuButton"
-            android:contentDescription="@null" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/header_open_button_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+
+                <android.support.v7.app.MediaRouteButton
+                    style="@style/Orpheus.MenuButton.MediaRouter"
+                    mediarouter:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+                    android:id="@+id/panel_mediarouter"/>
+
+                <org.opensilk.music.widgets.QueueButton
+                    android:id="@+id/header_switch_queue"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@null"/>
+
+                <org.opensilk.music.widgets.HeaderOverflowButton
+                    android:id="@+id/header_overflow"
+                    style="@style/Orpheus.MenuButton"
+                    android:contentDescription="@null" />
+
+            </LinearLayout>
+
+        </FrameLayout>
 
     </LinearLayout>
 
