@@ -17,6 +17,7 @@
 package org.opensilk.music.artwork;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 import com.android.volley.Request;
@@ -68,6 +69,7 @@ public class BackgroundRequestor {
         @Override
         public void run() {
             if (cache != null && !cache.containsKey(key)) {
+                if (D) Log.d(TAG, "run() adding to cache " + key);
                 cache.putBitmap(key, bitmap);
             }
         }

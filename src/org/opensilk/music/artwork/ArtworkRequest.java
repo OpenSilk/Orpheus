@@ -39,14 +39,12 @@ import org.apache.commons.io.IOUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
 import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.MusicEntry;
 import de.umass.lastfm.opensilk.Fetch;
-import de.umass.lastfm.opensilk.MusicEntryRequest;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import hugo.weaving.DebugLog;
 
@@ -386,15 +384,17 @@ public class ArtworkRequest implements IArtworkRequest {
      */
     class QueueImageRequestTask extends AsyncTask<Void, Void, Boolean> {
         final String url;
+        final String altKey;
 
         QueueImageRequestTask(final String url) {
             this.url = url;
+            this.altKey = ArtworkLoader.getCacheKey(mArtistName, mAlbumName, ArtworkType.LARGE);
+
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             if (mImageType.equals(ArtworkType.THUMBNAIL)) {
-                final String altKey = ArtworkLoader.getCacheKey(mArtistName, mAlbumName, ArtworkType.LARGE);
                 if (mManager.mL2Cache != null && !mManager.mL2Cache.containsKey(altKey)) {
                     return true; // Wasn't in the cache
                 }
@@ -416,14 +416,15 @@ public class ArtworkRequest implements IArtworkRequest {
             mCurrentRequest = request;
             mManager.mImageQueue.add(request);
             if (addLargeRequest) {
+                if (D) Log.d(TAG, "Adding request for " + altKey);
                 // We are requesting a thumbnail and the corresponding fullscreen image
                 // isnt in the disk cache yet, so post a request for it.
                 // Note: volley will not queue this instead it is attached to the previous request
                 // we just queued and dispatched once that one comes in
                 ImageResponseListener bglistener
-                        = new ImageResponseListener(mCacheKey, mManager.mL2Cache, null, null);
+                        = new ImageResponseListener(altKey, mManager.mL2Cache, null, null);
                 ArtworkImageRequest largeRequest = new ArtworkImageRequest(url,
-                        bglistener, mImageType, bglistener);
+                        bglistener, ArtworkType.LARGE, bglistener);
                 bglistener.setImageRequest(request);
                 mManager.mImageQueue.add(largeRequest);
             }
