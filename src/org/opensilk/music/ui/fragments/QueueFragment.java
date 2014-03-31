@@ -24,6 +24,11 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.LayoutAnimationController;
+import android.view.animation.TranslateAnimation;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.QueueLoader;
@@ -76,13 +81,29 @@ public class QueueFragment extends Fragment implements
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
         // The View for the fragment's UI
-        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.dragsort_listview, null);
+        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.dragsort_listview, container, false);
         // Initialize the list
         mListView = (DragSortListView)rootView.findViewById(android.R.id.list);
         // Set the drop listener
         mListView.setDropListener(this);
         // Set the swipe to remove listener
         mListView.setRemoveListener(this);
+
+        AnimationSet set = new AnimationSet(true);
+
+        Animation animation = new AlphaAnimation(0.0f, 1.0f);
+        animation.setDuration(50);
+        set.addAnimation(animation);
+
+        animation = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 0.0f,
+                Animation.RELATIVE_TO_SELF, -1.0f,Animation.RELATIVE_TO_SELF, 0.0f
+        );
+        animation.setDuration(140);
+        set.addAnimation(animation);
+
+        LayoutAnimationController controller = new LayoutAnimationController(set, 0.5f);
+        mListView.setLayoutAnimation(controller);
         return rootView;
     }
 

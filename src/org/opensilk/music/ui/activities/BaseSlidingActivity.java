@@ -969,7 +969,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private void pushQueueFragment() {
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.panel_middle_content, new QueueFragment(), "queue")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
         onQueueVisibilityChanged(true);
     }
@@ -977,7 +977,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private void popQueueFragment() {
         getSupportFragmentManager().beginTransaction()
                 .remove(getSupportFragmentManager().findFragmentByTag("queue"))
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
                 .commit();
         onQueueVisibilityChanged(false);
     }
@@ -985,12 +985,13 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private void onQueueVisibilityChanged(boolean visible) {
         if (visible) {
             mQueueShowing = true;
-            mArtBackground.setVisibility(View.INVISIBLE);
+            //TODO any reason to set visiblity GONE?
+            mArtBackground.animate().alpha(0.0f).setDuration(500).start();
             mFooterCurrentTime.setVisibility(View.INVISIBLE);
             mFooterTotalTime.setVisibility(View.INVISIBLE);
         } else {
             mQueueShowing = false;
-            mArtBackground.setVisibility(View.VISIBLE);
+            mArtBackground.animate().alpha(1.0f).setDuration(500).start();
             refreshCurrentTime();
             mFooterTotalTime.setVisibility(View.VISIBLE);
         }
