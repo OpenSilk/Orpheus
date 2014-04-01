@@ -20,12 +20,16 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.utils.MusicUtils;
 
 /**
  * Created by drew on 2/28/14.
@@ -76,6 +80,25 @@ public class ProfileGenreFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mViewPager = null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.card_genre, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.card_menu_play:
+                MusicUtils.playAll(getActivity(), MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId), 0, false);
+                return true;
+            case R.id.card_menu_add_queue:
+                MusicUtils.addToQueue(getActivity(), MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId));
+                return true;
+        }
+        return false;
     }
 
 }
