@@ -33,7 +33,6 @@ import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.fragments.SearchFragment;
 import org.opensilk.music.ui.profile.ProfileAlbumFragment;
 import org.opensilk.music.ui.profile.ProfileArtistFragment;
-import org.opensilk.music.ui.profile.ProfileGenreAlbumsFragment;
 import org.opensilk.music.ui.profile.ProfileGenreFragment;
 import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
 
@@ -128,8 +127,7 @@ public final class NavUtils {
         bundle.putString(Config.NAME, genre.mGenreName);
         bundle.putParcelable(Config.EXTRA_DATA, genre);
 
-        //replaceFragment(context, ProfileGenreFragment.newInstance(bundle), "genre");
-        replaceFragment(context, ProfileGenreAlbumsFragment.newInstance(bundle), "genre");
+        replaceFragment(context, ProfileGenreFragment.newInstance(bundle), "genre");
     }
 
     /**

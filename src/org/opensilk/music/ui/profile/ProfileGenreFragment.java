@@ -16,20 +16,16 @@
 
 package org.opensilk.music.ui.profile;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.Lists;
-
-import java.util.List;
+import com.andrew.apollo.model.Genre;
 
 /**
  * Created by drew on 2/28/14.
@@ -37,7 +33,9 @@ import java.util.List;
 public class ProfileGenreFragment extends Fragment {
 
     private ViewPager mViewPager;
-    private GenrePagerAdapter mPagerAdapter;
+    private ProfileGenrePagerAdapter mPagerAdapter;
+
+    private Genre mGenre;
 
     public static ProfileGenreFragment newInstance(Bundle args) {
         ProfileGenreFragment f = new ProfileGenreFragment();
@@ -49,10 +47,9 @@ public class ProfileGenreFragment extends Fragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
+        mGenre = args.getParcelable(Config.EXTRA_DATA);
         // Initialize the adapter
-        mPagerAdapter = new GenrePagerAdapter(getActivity(), getChildFragmentManager());
-        mPagerAdapter.add(ProfileGenreAlbumsFragment.class.getName(), args);
-        mPagerAdapter.add(ProfileGenreSongsFragment.class.getName(), args);
+        mPagerAdapter = new ProfileGenrePagerAdapter(this, mGenre);
     }
 
     @Override
@@ -71,6 +68,8 @@ public class ProfileGenreFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         // Enable the options menu
         setHasOptionsMenu(true);
+        // set actionbar title
+        getActivity().getActionBar().setTitle(mGenre.mGenreName);
     }
 
     @Override
@@ -79,45 +78,4 @@ public class ProfileGenreFragment extends Fragment {
         mViewPager = null;
     }
 
-    private class GenrePagerAdapter extends FragmentPagerAdapter {
-
-        private final Context mContext;
-        private final List<Holder> mHolderList = Lists.newArrayList();
-
-        public GenrePagerAdapter(Context context, FragmentManager fm) {
-            super(fm);
-            mContext = context;
-        }
-
-        String[] mPageTitles = new String[] {"Albums", "Songs"};
-
-        public void add(String className, Bundle args) {
-            final Holder holder = new Holder();
-            holder.className = className;
-            holder.args = args;
-            mHolderList.add(holder);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            final Holder holder = mHolderList.get(position);
-            final Fragment f = Fragment.instantiate(mContext, holder.className, holder.args);
-            return f;
-        }
-
-        @Override
-        public int getCount() {
-            return mHolderList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mPageTitles[position];
-        }
-
-        private final class Holder {
-            String className;
-            Bundle args;
-        }
-    }
 }
