@@ -95,11 +95,16 @@ public final class MusicUtils {
      */
     public static final ServiceToken bindToService(final Context context,
             final ServiceConnection callback) {
-        Activity realActivity = ((Activity)context).getParent();
-        if (realActivity == null) {
-            realActivity = (Activity)context;
+        final ContextWrapper contextWrapper;
+        if (context instanceof Activity) {
+            Activity realActivity = ((Activity)context).getParent();
+            if (realActivity == null) {
+                realActivity = (Activity) context;
+            }
+            contextWrapper = new ContextWrapper(realActivity);
+        } else {
+            contextWrapper = new ContextWrapper(context);
         }
-        final ContextWrapper contextWrapper = new ContextWrapper(realActivity);
         contextWrapper.startService(new Intent(contextWrapper, MusicPlaybackService.class));
         final ServiceBinder binder = new ServiceBinder(callback);
         if (contextWrapper.bindService(
