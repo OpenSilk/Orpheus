@@ -497,7 +497,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Favorites database
      */
-    private FavoritesStore mFavoritesCache;
+//    private FavoritesStore mFavoritesCache;
 
     /**
      * Proxy for artwork provider
@@ -617,7 +617,7 @@ public class MusicPlaybackService extends Service {
         super.onCreate();
 
         // Initialize the favorites and recents databases
-        mFavoritesCache = FavoritesStore.getInstance(this);
+//        mFavoritesCache = FavoritesStore.getInstance(this);
 
         // Initialize the notification helper
         mNotificationHelper = new NotificationHelper(this);
@@ -1477,10 +1477,10 @@ public class MusicPlaybackService extends Service {
 
         if (what.equals(META_CHANGED)) {
             // Increase the play count for favorite songs.
-            if (mFavoritesCache.getSongId(getAudioId()) != null) {
-                mFavoritesCache.addSongId(getAudioId(), getTrackName(), getAlbumName(),
-                        getArtistName());
-            }
+//            if (mFavoritesCache.getSongId(getAudioId()) != null) {
+//                mFavoritesCache.addSongId(getAudioId(), getTrackName(), getAlbumName(),
+//                        getArtistName());
+//            }
             // Add the track to the recently played list.
             Cursor c = getContentResolver().query(RECENTS_URI,
                     RECENTS_PROJECTION, RecentStore.RecentStoreColumns._ID+"=?",
@@ -2188,12 +2188,12 @@ public class MusicPlaybackService extends Service {
      * True if the current track is a "favorite", false otherwise
      */
     public boolean isFavorite() {
-        if (mFavoritesCache != null) {
-            synchronized (this) {
-                final Long id = mFavoritesCache.getSongId(getAudioId());
-                return id != null ? true : false;
-            }
-        }
+//        if (mFavoritesCache != null) {
+//            synchronized (this) {
+//                final Long id = mFavoritesCache.getSongId(getAudioId());
+//                return id != null ? true : false;
+//            }
+//        }
         return false;
     }
 
@@ -2457,12 +2457,12 @@ public class MusicPlaybackService extends Service {
      * Toggles the current song as a favorite.
      */
     public void toggleFavorite() {
-        if (mFavoritesCache != null) {
-            synchronized (this) {
-                mFavoritesCache.toggleSong(getAudioId(), getTrackName(), getAlbumName(),
-                        getArtistName());
-            }
-        }
+//        if (mFavoritesCache != null) {
+//            synchronized (this) {
+//                mFavoritesCache.toggleSong(getAudioId(), getTrackName(), getAlbumName(),
+//                        getArtistName());
+//            }
+//        }
     }
 
     /**
