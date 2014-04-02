@@ -23,6 +23,16 @@ import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import com.andrew.apollo.provider.RecentStore;
+import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.PreferenceUtils;
+import com.andrew.apollo.utils.ThemeHelper;
+
+import org.opensilk.cast.manager.MediaCastManager;
+import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
+import org.opensilk.music.ui.activities.HomeSlidingActivity;
+
 import hugo.weaving.DebugLog;
 
 /**
@@ -68,13 +78,25 @@ public class ApolloApplication extends Application {
 
     private void enableStrictMode() {
         if (DEBUG) {
-            final StrictMode.ThreadPolicy.Builder threadPolicyBuilder = new StrictMode.ThreadPolicy.Builder()
-                    .detectAll().penaltyLog();
-            final StrictMode.VmPolicy.Builder vmPolicyBuilder = new StrictMode.VmPolicy.Builder()
-                    .detectAll().penaltyLog();
-
-            threadPolicyBuilder.penaltyFlashScreen();
+            final StrictMode.ThreadPolicy.Builder threadPolicyBuilder
+                    = new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyFlashScreen();
             StrictMode.setThreadPolicy(threadPolicyBuilder.build());
+
+            final StrictMode.VmPolicy.Builder vmPolicyBuilder
+                    = new StrictMode.VmPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .setClassInstanceLimit(MusicUtils.class, 1)
+                    .setClassInstanceLimit(RecentStore.class, 1)
+                    .setClassInstanceLimit(PreferenceUtils.class, 1)
+                    .setClassInstanceLimit(ThemeHelper.class, 1)
+                    .setClassInstanceLimit(MediaCastManager.class, 1)
+                    .setClassInstanceLimit(BitmapDiskLruCache.class, 1)
+                    .setClassInstanceLimit(ArtworkManager.class, 1)
+                    .setClassInstanceLimit(HomeSlidingActivity.class, 1);
             StrictMode.setVmPolicy(vmPolicyBuilder.build());
         }
     }
