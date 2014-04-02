@@ -107,33 +107,33 @@ public class MusicPlaybackService extends Service {
     /**
      * Indicates that the music has paused or resumed
      */
-    public static final String PLAYSTATE_CHANGED = APOLLO_PACKAGE_NAME+".playstatechanged";
+    public static final String PLAYSTATE_CHANGED = APOLLO_PACKAGE_NAME+".PLAY_STATE_CHANGED";
 
     /**
      * Indicates that music playback position within
      * a title was changed
      */
-    public static final String POSITION_CHANGED = APOLLO_PACKAGE_NAME+".positionchanged";
+    public static final String POSITION_CHANGED = APOLLO_PACKAGE_NAME+".POSITION_CHANGED";
 
     /**
      * Indicates the meta data has changed in some way, like a track change
      */
-    public static final String META_CHANGED = APOLLO_PACKAGE_NAME+".metachanged";
+    public static final String META_CHANGED = APOLLO_PACKAGE_NAME+".META_CHANGED";
 
     /**
      * Indicates the queue has been updated
      */
-    public static final String QUEUE_CHANGED = APOLLO_PACKAGE_NAME+".queuechanged";
+    public static final String QUEUE_CHANGED = APOLLO_PACKAGE_NAME+".QUEUE_CHANGED";
 
     /**
      * Indicates the repeat mode chaned
      */
-    public static final String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".repeatmodechanged";
+    public static final String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".REPEATE_CHANGED";
 
     /**
      * Indicates the shuffle mode chaned
      */
-    public static final String SHUFFLEMODE_CHANGED = APOLLO_PACKAGE_NAME+".shufflemodechanged";
+    public static final String SHUFFLEMODE_CHANGED = APOLLO_PACKAGE_NAME+".SHUFFLE_CHANGED";
 
     /**
      * For backwards compatibility reasons, also provide sticky
@@ -684,6 +684,7 @@ public class MusicPlaybackService extends Service {
         filter.addAction(PREVIOUS_ACTION);
         filter.addAction(REPEAT_ACTION);
         filter.addAction(SHUFFLE_ACTION);
+        filter.addAction("org.opensilk.music.debug.FORCE_UPDATE");
         // Attach the broadcast listener
         registerReceiver(mIntentReceiver, filter);
 
@@ -1474,6 +1475,7 @@ public class MusicPlaybackService extends Service {
 
         final Intent intent = new Intent(what);
         intent.putExtra("id", getAudioId());
+        intent.putExtra("album_id", getAlbumId());
         intent.putExtra("artist", getArtistName());
         intent.putExtra("album", getAlbumName());
         intent.putExtra("track", getTrackName());
@@ -2851,6 +2853,17 @@ public class MusicPlaybackService extends Service {
             } else if (RecentWidgetProvider.CMDAPPWIDGETUPDATE.equals(command)) {
                 final int[] recent = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
                 mRecentWidgetProvider.performUpdate(MusicPlaybackService.this, recent);
+            } else if (intent.getAction().equals("org.opensilk.music.debug.FORCE_UPDATE")) {
+                Log.d(TAG, "Received forceUpdate!!");
+                final Intent forceIntent = new Intent(META_CHANGED);
+                forceIntent.putExtra("id", getAudioId());
+                forceIntent.putExtra("album_id", getAlbumId());
+                forceIntent.putExtra("artist", getArtistName());
+                forceIntent.putExtra("album", getAlbumName());
+                forceIntent.putExtra("track", getTrackName());
+                forceIntent.putExtra("playing", isPlaying());
+                forceIntent.putExtra("isfavorite", isFavorite());
+                sendStickyBroadcast(forceIntent);
             } else {
                 handleCommandIntent(intent);
             }

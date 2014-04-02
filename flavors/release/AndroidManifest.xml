@@ -17,6 +17,82 @@
             android:exported="false"
             android:grantUriPermissions="true"/>
 
+        <!-- 2x2 Ultra-mini widget -->
+        <receiver
+            android:name="org.opensilk.music.appwidgets.MusicWidgetUltraMini"
+            android:exported="false"
+            android:label="@string/widget_mini_ultra_label" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.opensilk.music.QUERY_RESPONSE" />
+                <action android:name="org.opensilk.music.PLAY_STATE_CHANGED" />
+                <action android:name="org.opensilk.music.POSITION_CHANGED" />
+                <action android:name="org.opensilk.music.META_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_widget_ultra_mini" />
+        </receiver>
+
+        <!-- 2x2 Mini widget -->
+        <receiver
+            android:name="org.opensilk.music.appwidgets.MusicWidgetMini"
+            android:exported="false"
+            android:label="@string/widget_mini_label" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.opensilk.music.QUERY_RESPONSE" />
+                <action android:name="org.opensilk.music.PLAY_STATE_CHANGED" />
+                <action android:name="org.opensilk.music.POSITION_CHANGED" />
+                <action android:name="org.opensilk.music.META_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_widget_mini" />
+        </receiver>
+
+        <!-- 4x1 Small widget -->
+        <receiver
+            android:name="org.opensilk.music.appwidgets.MusicWidgetSmall"
+            android:exported="false"
+            android:label="@string/widget_small_label" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.opensilk.music.QUERY_RESPONSE" />
+                <action android:name="org.opensilk.music.PLAY_STATE_CHANGED" />
+                <action android:name="org.opensilk.music.POSITION_CHANGED" />
+                <action android:name="org.opensilk.music.META_CHANGED" />
+                <action android:name="org.opensilk.music.REPEATE_CHANGED" />
+                <action android:name="org.opensilk.music.SHUFFLE_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_widget_small" />
+        </receiver>
+
+        <!-- 4x2+ Large widget -->
+        <receiver
+            android:name="org.opensilk.music.appwidgets.MusicWidgetLarge"
+            android:exported="false"
+            android:label="@string/widget_large_label" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.opensilk.music.QUERY_RESPONSE" />
+                <action android:name="org.opensilk.music.PLAY_STATE_CHANGED" />
+                <action android:name="org.opensilk.music.POSITION_CHANGED" />
+                <action android:name="org.opensilk.music.META_CHANGED" />
+                <action android:name="org.opensilk.music.REPEATE_CHANGED" />
+                <action android:name="org.opensilk.music.SHUFFLE_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_widget_large" />
+        </receiver>
+
     </application>
 
 </manifest>

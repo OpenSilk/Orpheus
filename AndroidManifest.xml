@@ -229,6 +229,10 @@
             android:process=":service"/>
         <!--Artwork service runs in activity process-->
         <service android:name="org.opensilk.music.artwork.ArtworkService"/>
+        <!-- Music service -->
+        <service
+            android:name="org.opensilk.music.appwidgets.MusicWidgetService"
+            android:process=":service"/>
     </application>
 
 </manifest>

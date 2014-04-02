@@ -1,0 +1,107 @@
+package org.opensilk.music.appwidgets;
+
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.util.Log;
+import android.widget.RemoteViews;
+
+import com.andrew.apollo.MusicPlaybackService;
+import com.andrew.apollo.R;
+
+import org.opensilk.music.artwork.ArtworkProviderUtil;
+
+import hugo.weaving.DebugLog;
+
+/**
+ * Created by andrew on 3/30/14.
+ */
+public class MusicWidgetLarge extends MusicWidgetBase {
+
+    @DebugLog
+    @Override
+    public void onReceive(Context context, Intent intent){
+        super.onReceive(context, intent);
+
+        if (intent.getAction().equals(MusicWidgetService.QUERY_RESPONSE)) {
+            mAlbumId = intent.getLongExtra("album_id", -1);
+            mAlbumName = intent.getStringExtra("album");
+            mArtistName = intent.getStringExtra("artist");
+            mIsPlaying = intent.getBooleanExtra("playing", false);
+            mTrackName = intent.getStringExtra("track");
+            mShuffleMode = intent.getIntExtra("shuffle", -1);
+            mRepeateMode = intent.getIntExtra("repeat", -1);
+            updateWidget(context, getClass());
+        } else {
+            Intent queryIntent = new Intent(MusicWidgetService.QUERY_MUSIC,
+                    null, context, MusicWidgetService.class);
+            context.startService(queryIntent);
+        }
+    }
+
+    @Override
+    public RemoteViews createView(Context context) {
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.music_widget_large);
+        ArtworkProviderUtil util = new ArtworkProviderUtil(context);
+        Bitmap artwork = util.getArtwork(mArtistName, mAlbumName, mAlbumId);
+        ComponentName serviceName = new ComponentName(context, MusicPlaybackService.class);
+        PendingIntent pendingIntent;
+
+        /* Artist name and song title */
+        views.setTextViewText(R.id.widget_large_artist_name, mArtistName);
+        views.setTextViewText(R.id.widget_large_song_title, mTrackName);
+
+        /* Album artwork */
+        views.setImageViewBitmap(R.id.widget_large_album_art, artwork);
+
+        /* Pause / Play */
+        pendingIntent = buildPendingIntent(context, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
+        views.setOnClickPendingIntent(R.id.widget_large_play, pendingIntent);
+        views.setImageViewResource(R.id.widget_large_play, mIsPlaying ? R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
+
+        /* Next / Prev */
+        pendingIntent = buildPendingIntent(context, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
+        views.setOnClickPendingIntent(R.id.widget_large_previous, pendingIntent);
+        pendingIntent = buildPendingIntent(context, MusicPlaybackService.NEXT_ACTION, serviceName);
+        views.setOnClickPendingIntent(R.id.widget_large_next, pendingIntent);
+
+        /* Shuffle / Repeat */
+        pendingIntent = buildPendingIntent(context, MusicPlaybackService.SHUFFLE_ACTION, serviceName);
+        views.setOnClickPendingIntent(R.id.widget_large_shuffle, pendingIntent);
+        pendingIntent = buildPendingIntent(context, MusicPlaybackService.REPEAT_ACTION, serviceName);
+        views.setOnClickPendingIntent(R.id.widget_large_repeat, pendingIntent);
+
+        int resId = -1;
+
+        switch (mShuffleMode) {
+            case MusicPlaybackService.SHUFFLE_NONE:
+                resId = R.drawable.btn_playback_shuffle;
+                break;
+            case MusicPlaybackService.SHUFFLE_AUTO:
+                resId = R.drawable.btn_playback_shuffle_all;
+                break;
+            default:
+                resId = R.drawable.btn_playback_shuffle_all;
+                break;
+        }
+        views.setImageViewResource(R.id.widget_large_shuffle, resId);
+
+        switch (mRepeateMode) {
+            case MusicPlaybackService.REPEAT_ALL:
+                resId = R.drawable.btn_playback_repeat_all;
+                break;
+            case MusicPlaybackService.REPEAT_CURRENT:
+                resId = R.drawable.btn_playback_repeat_one;
+                break;
+            default:
+                resId = R.drawable.btn_playback_repeat;
+                break;
+        }
+        views.setImageViewResource(R.id.widget_large_repeat, resId);
+
+        return views;
+    }
+}

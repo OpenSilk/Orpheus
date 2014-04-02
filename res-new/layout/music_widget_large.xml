@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2014 OpenSilk Productions LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/drop_shadow">
+
+    <ImageView
+        android:id="@+id/widget_large_album_art"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_height="match_parent"
+            android:layout_width="@dimen/music_widget_large_button_bar_width"
+            android:orientation="vertical"
+            android:background="#96000000">
+
+            <ImageButton
+                android:id="@+id/widget_large_previous"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true"
+                android:contentDescription="@string/accessibility_prev"
+                android:src="@drawable/btn_playback_previous" />
+
+            <ImageButton
+                android:id="@+id/widget_large_play"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true"
+                android:contentDescription="@string/accessibility_play"
+                android:src="@drawable/btn_playback_play" />
+
+            <ImageButton
+                android:id="@+id/widget_large_next"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true"
+                android:contentDescription="@string/accessibility_next"
+                android:src="@drawable/btn_playback_next" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/music_widget_mini_button_bar_height"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:background="#96000000">
+
+            <TextView
+                android:id="@+id/widget_large_artist_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_large_song_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_height="match_parent"
+            android:layout_width="@dimen/music_widget_large_button_bar_width"
+            android:layout_gravity="right"
+            android:orientation="vertical"
+            android:background="#96000000">
+
+            <ImageButton
+                android:id="@+id/widget_large_shuffle"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true"
+                android:contentDescription="@string/accessibility_shuffle"
+                android:src="@drawable/btn_playback_shuffle" />
+
+            <!-- Dummy for now -->
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@null" />
+
+            <ImageButton
+                android:id="@+id/widget_large_repeat"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:focusable="true"
+                android:contentDescription="@string/accessibility_repeat"
+                android:src="@drawable/btn_playback_repeat" />
+
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

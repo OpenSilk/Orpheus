@@ -68,4 +68,9 @@
     <string name="theme_blupheus">Blupheus</string>
     <string name="theme_grepheus">Grepheus</string>
 
+    <!-- Widgets -->
+    <string name="widget_ultra_mini_label">Orpheus Ultra-Mini (1x1)</string>
+    <string name="widget_mini_label">Orpheus Mini (2x2)</string>
+    <string name="widget_small_label">Orpheus Small (4x1)</string>
+    <string name="widget_large_label">Orpheus Large (4x2+)</string>
 </resources>
