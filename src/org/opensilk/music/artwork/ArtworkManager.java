@@ -57,8 +57,7 @@ public class ArtworkManager {
      */
     private static final float THUMB_MEM_CACHE_DIVIDER = 0.20f;
 
-    private static final String DISK_CACHE_DIRECTORY = "artworkcache";
-    private static final int DISK_CACHE_SIZE = 40 * 1024 * 1024;
+    public static final String DISK_CACHE_DIRECTORY = "artworkcache";
 
     /**
      * Uri for album thumbs
@@ -104,6 +103,7 @@ public class ArtworkManager {
 
     private ArtworkManager(Context context) {
         mContext = context.getApplicationContext();
+        mPreferences = PreferenceUtils.getInstance(context);
         // Fire off l2 init early
         new Thread(new Runnable() {
             @Override
@@ -114,7 +114,6 @@ public class ArtworkManager {
                 cleanupOldCache();
             }
         }).start();
-        mPreferences = PreferenceUtils.getInstance(context);
         // Init mem cache
         final int lruThumbCacheSize = getL1CacheSize(context);
         if (D) Log.d(TAG, "L1Cache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");
@@ -127,8 +126,10 @@ public class ArtworkManager {
 
     @DebugLog
     private void initDiskCache() {
+        final int size = mPreferences.imageCacheSizeBytes();
+        if (D) Log.d(TAG, "L2Cache=" + (size / 1024 / 1024) + "MB");
         mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
-                DISK_CACHE_SIZE, Bitmap.CompressFormat.PNG, 100);
+                size, Bitmap.CompressFormat.PNG, 100);
     }
 
     private static int getL1CacheSize(Context context) {

@@ -45,6 +45,11 @@
     <string name="settings_download_prefer_network_summary">Tries to download album art before checking device storage</string>
     <string name="settings_data_low_resolution_title">Use lower resolution art work</string>
     <string name="settings_data_low_resolution_summary">Enable to reduce image size and bandwidth used</string>
+    <string name="settings_data_cache_size">Set image cache limit</string>
+    <string name="settings_data_cache_size_20">20MB</string>
+    <string name="settings_data_cache_size_40">40MB</string>
+    <string name="settings_data_cache_size_60">60MB</string>
+    <string name="settings_data_cache_size_80">80MB</string>
 
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>

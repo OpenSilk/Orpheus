@@ -38,6 +38,13 @@
     <PreferenceCategory
         android:title="@string/settings_data_storage_category">
 
+        <ListPreference
+            android:key="pref_cache_size"
+            android:title="@string/settings_data_cache_size"
+            android:entries="@array/cache_size"
+            android:entryValues="@array/cache_size_values"
+            android:defaultValue="60" />
+
         <Preference
             android:key="pref_delete_cache"
             android:title="@string/settings_delete_cache_title"

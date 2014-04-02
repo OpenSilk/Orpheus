@@ -71,6 +71,9 @@ public final class PreferenceUtils {
     // Key that gives permissions to download missing artist images
     public static final String DOWNLOAD_MISSING_ARTIST_IMAGES = "download_missing_artist_images";
 
+    // Key used to set image cache size
+    public static final String PREF_CACHE_SIZE = "pref_cache_size";
+
     // Key used to set the overall theme color
     public static final String DEFAULT_THEME_COLOR = "default_theme_color";
 
@@ -225,6 +228,14 @@ public final class PreferenceUtils {
      */
     public final boolean downloadMissingArtistImages() {
         return mPreferences.getBoolean(DOWNLOAD_MISSING_ARTIST_IMAGES, true);
+    }
+
+    /**
+     * @return Prefered upper limit of image cache in bytes
+     */
+    public final int imageCacheSizeBytes() {
+        String size = mPreferences.getString(PREF_CACHE_SIZE, "60");
+        return Integer.decode(size) * 1024 * 1024;
     }
 
     /**
