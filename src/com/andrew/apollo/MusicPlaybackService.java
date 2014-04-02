@@ -24,6 +24,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -328,6 +329,13 @@ public class MusicPlaybackService extends Service {
     public static final String[] ALBUM_PROJECTION = new String[] {
             MediaStore.Audio.Albums.ALBUM, MediaStore.Audio.Albums.ARTIST,
             MediaStore.Audio.Albums.LAST_YEAR
+    };
+
+    /**
+     * Used to check existence of item in recents store
+     */
+    private static String[] RECENTS_PROJECTION = new String[] {
+            RecentStore.RecentStoreColumns._ID
     };
 
     /**
@@ -1474,11 +1482,26 @@ public class MusicPlaybackService extends Service {
                         getArtistName());
             }
             // Add the track to the recently played list.
-            getContentResolver().insert(RECENTS_URI,
-                    RecentStore.createAlbumContentValues( //TODO make method to get current album object
-                            getAlbumId(), getAlbumName(), getArtistName(),
-                            MusicUtils.getSongCountForAlbum(this, getAlbumId()),
-                            MusicUtils.getReleaseDateForAlbum(this, getAlbumId())));
+            Cursor c = getContentResolver().query(RECENTS_URI,
+                    RECENTS_PROJECTION, RecentStore.RecentStoreColumns._ID+"=?",
+                    new String[] {String.valueOf(getAlbumId())},
+                    null);
+            if (c != null && c.getCount() > 0) {
+                ContentValues values = new ContentValues(1);
+                values.put(RecentStore.RecentStoreColumns.TIMEPLAYED, System.currentTimeMillis());
+                getContentResolver().update(RECENTS_URI,
+                        values, RecentStore.RecentStoreColumns._ID+"=?",
+                        new String[]{String.valueOf(getAlbumId())});
+            } else {
+                getContentResolver().insert(RECENTS_URI,
+                        RecentStore.createAlbumContentValues(
+                                getAlbumId(), getAlbumName(), getAlbumArtistName(),
+                                MusicUtils.getSongCountForAlbum(this, getAlbumId()),
+                                MusicUtils.getReleaseDateForAlbum(this, getAlbumId())));
+            }
+            if (c != null && !c.isClosed()) {
+                c.close();
+            }
         } else if (what.equals(QUEUE_CHANGED)) {
             saveQueue(true);
             if (isPlaying()) {

@@ -79,8 +79,12 @@ public class MusicProvider extends ContentProvider {
         Cursor c = null;
         switch (sUriMatcher.match(uri)) {
             case 1: // Recents
-                c = sRecents.getWritableDatabase().query(RecentStore.RecentStoreColumns.NAME,
-                        projection, selection, selectionArgs, null, null, sortOrder);
+                SQLiteDatabase db = sRecents.getWritableDatabase();
+                if (db != null) {
+                    c = db.query(RecentStore.RecentStoreColumns.NAME,
+                            projection, selection, selectionArgs, null, null, sortOrder);
+//                    db.close();
+                }
                 break;
             case 2: // Genres
                 // Pull list of all genres
@@ -201,18 +205,11 @@ public class MusicProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case 1:
                 SQLiteDatabase db = sRecents.getWritableDatabase();
-                db.beginTransaction();
-                // Todo update playcount instead
-                db.delete(RecentStore.RecentStoreColumns.NAME,
-                        BaseColumns._ID + " = ?",
-                        new String[] {
-                            String.valueOf(values.get(BaseColumns._ID))
-                        }
-                );
-                db.insert(RecentStore.RecentStoreColumns.NAME, null, values);
-                db.setTransactionSuccessful();
-                db.endTransaction();
-                ret = RECENTS_URI.buildUpon().appendPath(values.getAsString(BaseColumns._ID)).build();
+                if (db != null) {
+                    db.insert(RecentStore.RecentStoreColumns.NAME, null, values);
+//                    db.close();
+                    ret = RECENTS_URI.buildUpon().appendPath(values.getAsString(BaseColumns._ID)).build();
+                }
                 break;
             case 2:
                 break;
@@ -230,7 +227,11 @@ public class MusicProvider extends ContentProvider {
         int ret = 0;
         switch (sUriMatcher.match(uri)) {
             case 1:
-                ret = sRecents.getWritableDatabase().delete(RecentStore.RecentStoreColumns.NAME, selection, selectionArgs);
+                SQLiteDatabase db = sRecents.getWritableDatabase();
+                if (db != null) {
+                    ret = db.delete(RecentStore.RecentStoreColumns.NAME, selection, selectionArgs);
+//                    db.close();
+                }
                 break;
             case 2:
                 break;
@@ -244,7 +245,24 @@ public class MusicProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+    public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        int ret = 0;
+        switch (sUriMatcher.match(uri)) {
+            case 1:
+                SQLiteDatabase db = sRecents.getWritableDatabase();
+                if (db != null) {
+                    ret = db.update(RecentStore.RecentStoreColumns.NAME, values, selection, selectionArgs);
+//                    db.close();
+                }
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+        }
+        if (ret != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return ret;
     }
 }
