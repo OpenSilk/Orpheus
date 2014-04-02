@@ -18,6 +18,7 @@ package org.opensilk.music.artwork;
 
 import android.content.Context;
 
+import com.andrew.apollo.BuildConfig;
 import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -39,8 +40,8 @@ public class RequestQueueFactory {
     private static final String DEFAULT_API_CACHE_DIR = "0";
     private static final String DEFAULT_IMAGE_CACHE_DIR = "1";
 
-    // Way to big, make sure to cache everything, to help avoid rate limiting
-    private static final int DEFAULT_API_CACHE_SIZE = 16 * 1024 * 1024;
+    // We want to cache all api calls until they expire, to help avoid rate limiting
+    private static final int DEFAULT_API_CACHE_SIZE = 5 * 1024 * 1024;
     // On the small side, image requests arent done with our api key so dont risk hitting rate limit
     private static final int DEFAULT_IMAGE_CACHE_SIZE = 8 * 1024 * 1024;
 
