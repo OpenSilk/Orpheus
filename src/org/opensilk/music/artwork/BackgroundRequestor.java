@@ -55,6 +55,40 @@ public class BackgroundRequestor {
         // Should be ok to discard our reference to request since its inner classes will hold their own
     }
 
+    /**
+     * Checks cache for existence of item, if its
+     * not in the cache a background request is queued
+     */
+    static class CheckCacheRunnable implements Runnable {
+        final ArtworkLoader.ImageCache cache;
+        final String artist;
+        final String album;
+        final long albumId;
+        final ArtworkType artworkType;
+
+        CheckCacheRunnable(ArtworkLoader.ImageCache cache,
+                              String artist, String album, long albumId,
+                              ArtworkType artworkType) {
+            this.artist = artist;
+            this.album = album;
+            this.albumId = albumId;
+            this.cache = cache;
+            this.artworkType = artworkType;
+        }
+
+        @Override
+        public void run() {
+            final String cacheKey = ArtworkLoader.getCacheKey(artist, album, artworkType);
+            if (cache != null && !cache.containsKey(cacheKey)) {
+                if (D) Log.d(TAG, "MediaStoreAltRunnable: run() queuing bgrequest for " + cacheKey);
+                BackgroundRequestor.add(artist, album, albumId, artworkType);
+            }
+        }
+    }
+
+    /**
+     * Adds bitmap to cache if its not in there yet
+     */
     static class AddToCacheRunnable implements Runnable {
         final ArtworkLoader.ImageCache cache;
         final String key;
@@ -69,7 +103,7 @@ public class BackgroundRequestor {
         @Override
         public void run() {
             if (cache != null && !cache.containsKey(key)) {
-                if (D) Log.d(TAG, "run() adding to cache " + key);
+                if (D) Log.d(TAG, "AddToCacheRunnable: run() adding to cache " + key);
                 cache.putBitmap(key, bitmap);
             }
         }

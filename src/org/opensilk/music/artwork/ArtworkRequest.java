@@ -365,6 +365,12 @@ public class ArtworkRequest implements IArtworkRequest {
         protected void onPostExecute(Response<Bitmap> response) {
             if (response.isSuccess()) {
                 fauxRequest.deliverResponse(response.result);
+                if (mImageType.equals(ArtworkType.THUMBNAIL)) {
+                    // Check if LARGE type exists in cache
+                    BackgroundRequestor.EXECUTOR.execute(new BackgroundRequestor.CheckCacheRunnable(
+                            mManager.mL2Cache, mArtistName, mAlbumName, mAlbumId, ArtworkType.LARGE
+                    ));
+                }
             } else {
                 if (D) Log.d(TAG, "No artwork for " + mAlbumName + " in mediastore");
                 if (tryNetwork) {
@@ -416,7 +422,7 @@ public class ArtworkRequest implements IArtworkRequest {
             mCurrentRequest = request;
             mManager.mImageQueue.add(request);
             if (addLargeRequest) {
-                if (D) Log.d(TAG, "Adding request for " + altKey);
+                if (D) Log.d(TAG, "Adding additional request for " + altKey);
                 // We are requesting a thumbnail and the corresponding fullscreen image
                 // isnt in the disk cache yet, so post a request for it.
                 // Note: volley will not queue this instead it is attached to the previous request
