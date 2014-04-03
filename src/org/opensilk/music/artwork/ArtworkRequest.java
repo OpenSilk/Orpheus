@@ -344,7 +344,7 @@ public class ArtworkRequest implements IArtworkRequest {
          */
         @Override
         protected Response<Bitmap> doInBackground(Void... params) {
-            if (D) Log.d(TAG, "Searching mediastore for " + mAlbumName);
+            if (D) Log.d(TAG, "Searching mediastore for " + mCacheKey);
             InputStream in = null;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
@@ -471,13 +471,11 @@ public class ArtworkRequest implements IArtworkRequest {
                     if (!TextUtils.isEmpty(url)) {
                         queueImageRequest(url);
                     } else {
-                        notifyError(new VolleyError("No image urls for " + response.toString()));
+                        onErrorResponse(new VolleyError("No image urls for " + response.toString()));
                     }
                 }
-            } else if (tryMediaStore) {
-                ApolloUtils.execute(false, new MediaStoreTask(false));
             } else {
-                notifyError(new VolleyError("Unknown mbid"));
+                onErrorResponse(new VolleyError("Unknown mbid"));
             }
         }
 
@@ -504,7 +502,7 @@ public class ArtworkRequest implements IArtworkRequest {
             if (!TextUtils.isEmpty(url)) {
                 queueImageRequest(url);
             } else {
-                notifyError(new VolleyError("No image urls for " + response.toString()));
+                onErrorResponse(new VolleyError("No image urls for " + response.toString()));
             }
         }
 
