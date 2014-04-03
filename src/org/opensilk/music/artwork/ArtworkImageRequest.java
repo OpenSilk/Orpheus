@@ -39,8 +39,9 @@ public class ArtworkImageRequest extends ImageRequest {
 
     private final ArtworkType mImageType;
 
-    private Priority mPriority = Priority.NORMAL;
-    private boolean mInBackground = false;
+    // These are only set on main thread but read from main and executor threads
+    private volatile Priority mPriority = Priority.NORMAL;
+    private volatile boolean mInBackground = false;
 
     public ArtworkImageRequest(String url, Listener<Bitmap> listener,
                                 ArtworkType imageType, ErrorListener errorListener) {
