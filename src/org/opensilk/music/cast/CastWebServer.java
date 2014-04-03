@@ -26,6 +26,8 @@ import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
+import com.android.volley.toolbox.ByteArrayPool;
+import com.android.volley.toolbox.PoolingByteArrayOutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.music.artwork.ArtworkProvider;
@@ -86,6 +88,7 @@ public class CastWebServer extends NanoHTTPD {
     private final Context mContext;
     private final WifiManager.WifiLock mWifiLock;
     private final LruCache<String, String> mEtagCache;
+    private final ByteArrayPool mBytePool;
 
     public CastWebServer(Context context) throws UnknownHostException {
         this(context, CastUtils.getWifiIpAddress(context), PORT);
@@ -98,6 +101,7 @@ public class CastWebServer extends NanoHTTPD {
         mWifiLock = ((WifiManager) mContext.getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "CastServer");
         // arbitrary size might increase as needed;
         mEtagCache = new LruCache<>(20);
+        mBytePool = new ByteArrayPool(2*1024*1024);
     }
 
     @Override
@@ -175,7 +179,7 @@ public class CastWebServer extends NanoHTTPD {
             return notFoundResponse();
         }
         String reqEtag = headers.get("if-none-match");
-        Log.d(TAG, "requested Art etag " + reqEtag);
+        if (!quiet) Log.d(TAG, "requested Art etag " + reqEtag);
         // Check our cache if we served up this etag for this url already
         // we can just return and save ourselfs a lot of expensive db/disk queries
         if (!TextUtils.isEmpty(reqEtag)) {
@@ -196,15 +200,16 @@ public class CastWebServer extends NanoHTTPD {
                     .openFileDescriptor(ArtworkProvider.createArtworkUri(Long.decode(id)), "r");
             //Hackish but hopefully will yield unique etags (at least for this session)
             String etag = Integer.toHexString(pfd.hashCode());
-            Log.d(TAG, "Created etag " + etag + " for " + uri);
+            if (!quiet) Log.d(TAG, "Created etag " + etag + " for " + uri);
             synchronized (mEtagCache) {
                 mEtagCache.put(etag, uri);
             }
             // pipes dont perform well over the network and tend to get broken
             // so copy the image into memory and send the copy
             parcelIn = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-            tmpOut = new ByteArrayOutputStream();
+            tmpOut = new PoolingByteArrayOutputStream(mBytePool, 512*1024);
             IOUtils.copy(parcelIn, tmpOut);
+            if (!quiet) Log.d(TAG, "image size=" + tmpOut.size()/1024.0 + "k");
             Response res = createResponse(Response.Status.OK, MIME_ART, new ByteArrayInputStream(tmpOut.toByteArray()));
             res.addHeader("ETag", etag);
             return res;
