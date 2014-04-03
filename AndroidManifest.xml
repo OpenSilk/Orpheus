@@ -156,63 +156,6 @@
             android:label="@string/menu_settings"
             android:icon="@drawable/ic_settings" />
 
-        <!-- 4x1 App Widget -->
-        <receiver
-            android:name="com.andrew.apollo.appwidgets.AppWidgetSmall"
-            android:exported="false"
-            android:label="@string/app_widget_small" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/app_widget_small" />
-        </receiver>
-        <!-- 4x2  App Widget -->
-        <receiver
-            android:name="com.andrew.apollo.appwidgets.AppWidgetLarge"
-            android:exported="false"
-            android:label="@string/app_widget_large" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/app_widget_large" />
-        </receiver>
-        <!-- 4x2 alternate App Widget -->
-        <receiver
-            android:name="com.andrew.apollo.appwidgets.AppWidgetLargeAlternate"
-            android:exported="false"
-            android:label="@string/app_widget_large_alt" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/app_widget_large_alternate" />
-        </receiver>
-        <!-- Resizable recently listened App Widget -->
-        <receiver
-            android:enabled="false"
-            android:name="com.andrew.apollo.appwidgets.RecentWidgetProvider"
-            android:exported="false"
-            android:label="@string/app_widget_recent" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <!-- This specifies the widget provider info -->
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/app_widget_recents" />
-        </receiver>
-        <!-- The service serving the RemoteViews to the recently listened App Widget -->
-        <service
-            android:name="com.andrew.apollo.appwidgets.RecentWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
         <!-- Media button receiver -->
         <receiver android:name=".MediaButtonIntentReceiver" >
             <intent-filter>
