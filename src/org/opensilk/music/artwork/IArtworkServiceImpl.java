@@ -58,6 +58,7 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
     public ParcelFileDescriptor getArtwork(long id) throws RemoteException {
         ArtworkService service = mService.get();
         if (service != null) {
+            maybeWaitForCache(service);
             Album album = MusicUtils.makeAlbum(service.getApplicationContext(), id);
             if (album != null) {
                 String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, ArtworkType.LARGE);
@@ -83,6 +84,7 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
     public ParcelFileDescriptor getArtworkThumbnail(long id) throws RemoteException {
         ArtworkService service = mService.get();
         if (service != null) {
+            maybeWaitForCache(service);
             Album album = MusicUtils.makeAlbum(service, id);
             if (album != null) {
                 String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, ArtworkType.THUMBNAIL);
@@ -96,6 +98,25 @@ public class IArtworkServiceImpl extends IArtworkService.Stub {
             }
         }
         return null;
+    }
+
+    private synchronized void maybeWaitForCache(ArtworkService service) {
+        int waitTime = 0;
+        while (service.mManager.mL2Cache == null) {
+            try {
+                // Don' block for too long
+                if (waitTime >= 500) {
+                    return;
+                }
+                Log.i(TAG, "Waiting on cache init");
+                // The cache hasn't initialized yet, block until its ready
+                long start = System.currentTimeMillis();
+                // small increments, we will not be interrupted so don't block
+                // unnecessarily long
+                wait(10);
+                Log.i(TAG, "Waited for " + (waitTime += (System.currentTimeMillis() - start)) + "ms");
+            } catch (InterruptedException ignored) { }
+        }
     }
 
     private static ParcelFileDescriptor pullSnapshot(ArtworkService service, String cacheKey) {
