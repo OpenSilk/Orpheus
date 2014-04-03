@@ -172,9 +172,7 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
                 // to spin up, This is run in a binder thread so it shouldn't be a big deal
                 // to block it.
                 long start = System.currentTimeMillis();
-                synchronized (this) {
-                    wait(100);
-                }
+                wait(100);
                 Log.i(TAG, "Waited for " + (waitTime += (System.currentTimeMillis() - start)) + "ms");
             }
         } catch (InterruptedException e) {
