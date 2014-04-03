@@ -51,7 +51,6 @@ import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
@@ -271,8 +270,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
-        sService = IApolloService.Stub.asInterface(service);
-
         startPlayback();
         // Set the playback drawables
         updatePlaybackControls();
@@ -290,7 +287,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        sService = null;
         if (mVisualizer != null) {
             mVisualizer.release();
         }
