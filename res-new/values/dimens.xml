@@ -37,17 +37,12 @@
     <dimen name="settings_grid_height">150dp</dimen>
 
     <!-- Widgets -->
-    <dimen name="music_widget_large_min_width">250dp</dimen>
-    <dimen name="music_widget_large_min_height">110dp</dimen>
+    <dimen name="music_widget_min_width">40dp</dimen>
+    <dimen name="music_widget_min_height">40dp</dimen>
 
-    <dimen name="music_widget_ultra_mini_min_width">56dp</dimen>
-    <dimen name="music_widget_ultra_mini_min_height">56dp</dimen>
+    <dimen name="music_widget_default_min_width">250dp</dimen>
+    <dimen name="music_widget_default_min_height">110dp</dimen>
 
-    <dimen name="music_widget_mini_min_width">110dp</dimen>
-    <dimen name="music_widget_mini_min_height">110dp</dimen>
-
-    <dimen name="music_widget_small_min_width">250dp</dimen>
-    <dimen name="music_widget_small_min_height">56dp</dimen>
     <dimen name="music_widget_small_artwork_size">56dp</dimen>
 
     <dimen name="music_widget_mini_button_bar_height">48.0dip</dimen>

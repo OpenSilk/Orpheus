@@ -17,52 +17,13 @@
             android:exported="false"
             android:grantUriPermissions="true"/>
 
-        <!-- 1x1 Ultra-mini widget -->
+        <!-- widget -->
         <receiver
-            android:name="org.opensilk.music.appwidgets.MusicWidgetUltraMini"
-            android:exported="false"
-            android:label="@string/widget_ultra_mini_label" >
+            android:name="org.opensilk.music.appwidgets.MusicWidget"
+            android:label="@string/widget_label" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="org.opensilk.music.debug.QUERY_RESPONSE" />
                 <action android:name="org.opensilk.music.debug.PLAY_STATE_CHANGED" />
-                <action android:name="org.opensilk.music.debug.POSITION_CHANGED" />
-                <action android:name="org.opensilk.music.debug.META_CHANGED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/music_widget_ultra_mini" />
-        </receiver>
-
-        <!-- 2x2 Mini widget -->
-        <receiver
-            android:name="org.opensilk.music.appwidgets.MusicWidgetMini"
-            android:exported="false"
-            android:label="@string/widget_mini_label" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="org.opensilk.music.debug.QUERY_RESPONSE" />
-                <action android:name="org.opensilk.music.debug.PLAY_STATE_CHANGED" />
-                <action android:name="org.opensilk.music.debug.POSITION_CHANGED" />
-                <action android:name="org.opensilk.music.debug.META_CHANGED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/music_widget_mini" />
-        </receiver>
-
-        <!-- 4x1 Small widget -->
-        <receiver
-            android:name="org.opensilk.music.appwidgets.MusicWidgetSmall"
-            android:exported="false"
-            android:label="@string/widget_small_label" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="org.opensilk.music.debug.QUERY_RESPONSE" />
-                <action android:name="org.opensilk.music.debug.PLAY_STATE_CHANGED" />
-                <action android:name="org.opensilk.music.debug.POSITION_CHANGED" />
                 <action android:name="org.opensilk.music.debug.META_CHANGED" />
                 <action android:name="org.opensilk.music.debug.REPEATE_CHANGED" />
                 <action android:name="org.opensilk.music.debug.SHUFFLE_CHANGED" />
@@ -70,27 +31,7 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/music_widget_small" />
-        </receiver>
-
-        <!-- 4x2+ Large widget -->
-        <receiver
-            android:name="org.opensilk.music.appwidgets.MusicWidgetLarge"
-            android:exported="false"
-            android:label="@string/widget_large_label" >
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="org.opensilk.music.debug.QUERY_RESPONSE" />
-                <action android:name="org.opensilk.music.debug.PLAY_STATE_CHANGED" />
-                <action android:name="org.opensilk.music.debug.POSITION_CHANGED" />
-                <action android:name="org.opensilk.music.debug.META_CHANGED" />
-                <action android:name="org.opensilk.music.debug.REPEATE_CHANGED" />
-                <action android:name="org.opensilk.music.debug.SHUFFLE_CHANGED" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/music_widget_large" />
+                android:resource="@xml/music_widget" />
         </receiver>
 
     </application>

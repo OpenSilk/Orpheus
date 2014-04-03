@@ -684,7 +684,6 @@ public class MusicPlaybackService extends Service {
         filter.addAction(PREVIOUS_ACTION);
         filter.addAction(REPEAT_ACTION);
         filter.addAction(SHUFFLE_ACTION);
-        filter.addAction("org.opensilk.music.debug.FORCE_UPDATE");
         // Attach the broadcast listener
         registerReceiver(mIntentReceiver, filter);
 
@@ -1475,7 +1474,6 @@ public class MusicPlaybackService extends Service {
 
         final Intent intent = new Intent(what);
         intent.putExtra("id", getAudioId());
-        intent.putExtra("album_id", getAlbumId());
         intent.putExtra("artist", getArtistName());
         intent.putExtra("album", getAlbumName());
         intent.putExtra("track", getTrackName());
@@ -2853,17 +2851,6 @@ public class MusicPlaybackService extends Service {
             } else if (RecentWidgetProvider.CMDAPPWIDGETUPDATE.equals(command)) {
                 final int[] recent = intent.getIntArrayExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS);
                 mRecentWidgetProvider.performUpdate(MusicPlaybackService.this, recent);
-            } else if (intent.getAction().equals("org.opensilk.music.debug.FORCE_UPDATE")) {
-                Log.d(TAG, "Received forceUpdate!!");
-                final Intent forceIntent = new Intent(META_CHANGED);
-                forceIntent.putExtra("id", getAudioId());
-                forceIntent.putExtra("album_id", getAlbumId());
-                forceIntent.putExtra("artist", getArtistName());
-                forceIntent.putExtra("album", getAlbumName());
-                forceIntent.putExtra("track", getTrackName());
-                forceIntent.putExtra("playing", isPlaying());
-                forceIntent.putExtra("isfavorite", isFavorite());
-                sendStickyBroadcast(forceIntent);
             } else {
                 handleCommandIntent(intent);
             }
