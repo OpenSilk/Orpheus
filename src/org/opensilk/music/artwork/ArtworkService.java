@@ -86,6 +86,7 @@ public class ArtworkService extends Service {
         super.onDestroy();
         mRemoteBinder = null;
         mManager = null;
+        mHandler.removeCallbacks(mClearCacheTask);
         ArtworkManager.destroy();
     }
 
