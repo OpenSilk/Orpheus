@@ -304,6 +304,16 @@ public class MusicPlaybackService extends Service {
     private static final int FADEUP = 7;
 
     /**
+     * Update notification async
+     */
+    private static final int UPDATE_NOTIFICATION = 200;
+
+    /**
+     * Update remotecontrol client async
+     */
+    private static final int UPDATE_REMOTECONTROL_CLIENT = 201;
+
+    /**
      * Idle time before stopping the foreground notfication (1 minute)
      */
     private static final int IDLE_DELAY = 60000;
@@ -812,7 +822,7 @@ public class MusicPlaybackService extends Service {
 
             if (intent.hasExtra(NOW_IN_FOREGROUND)) {
                 mAnyActivityInForeground = intent.getBooleanExtra(NOW_IN_FOREGROUND, false);
-                updateNotification();
+                mPlayerHandler.sendEmptyMessage(UPDATE_NOTIFICATION);
                       // look and see if we were just disconnected
 //                    mCastManager.reconnectSessionIfPossible(this, false, 2);
                 new Handler().post(new Runnable() {
@@ -1456,7 +1466,7 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "notifyChange: what = " + what);
 
         // Update the lockscreen controls
-        updateRemoteControlClient(what);
+        mPlayerHandler.sendMessage(mPlayerHandler.obtainMessage(UPDATE_REMOTECONTROL_CLIENT, what));
 
         if (what.equals(POSITION_CHANGED)) {
             return;
@@ -2284,7 +2294,7 @@ public class MusicPlaybackService extends Service {
                 }
 
                 cancelShutdown();
-                updateNotification();
+                mPlayerHandler.sendEmptyMessage(UPDATE_NOTIFICATION);
             } else if (mPlayListLen <= 0) {
                 setShuffleMode(SHUFFLE_AUTO);
             } else {
@@ -2330,7 +2340,7 @@ public class MusicPlaybackService extends Service {
             }
 
             cancelShutdown();
-            updateNotification();
+            mPlayerHandler.sendEmptyMessage(UPDATE_NOTIFICATION);
         } else if (mPlayListLen <= 0) {
             setShuffleMode(SHUFFLE_AUTO);
         } else {
@@ -2730,7 +2740,7 @@ public class MusicPlaybackService extends Service {
                 notifyChange(PLAYSTATE_CHANGED);
             }
             cancelShutdown();
-            updateNotification();
+            mPlayerHandler.sendEmptyMessage(UPDATE_NOTIFICATION);
         } else {
             Log.e(TAG, "Failed to load remote media");
         }
@@ -3188,6 +3198,12 @@ public class MusicPlaybackService extends Service {
                             break;
                         default:
                     }
+                    break;
+                case UPDATE_NOTIFICATION:
+                    service.updateNotification();
+                    break;
+                case UPDATE_REMOTECONTROL_CLIENT:
+                    service.updateRemoteControlClient((String) msg.obj);
                     break;
                 default:
                     break;
