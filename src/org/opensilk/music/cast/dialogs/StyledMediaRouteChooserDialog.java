@@ -21,6 +21,7 @@ import android.support.v7.app.MediaRouteChooserDialog;
 import android.support.v7.media.MediaRouter;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * This class implements the route chooser dialog for {@link MediaRouter}.
@@ -34,7 +35,7 @@ import com.andrew.apollo.R;
 public class StyledMediaRouteChooserDialog extends MediaRouteChooserDialog {
 
     public StyledMediaRouteChooserDialog(Context context) {
-        this(context, R.style.Orpheus_CastDialog);
+        this(context, ThemeHelper.isLightTheme(context) ? R.style.CastDialogLight : R.style.CastDialogDark);
     }
 
     public StyledMediaRouteChooserDialog(Context context, int theme) {

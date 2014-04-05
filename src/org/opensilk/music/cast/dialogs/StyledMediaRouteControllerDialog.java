@@ -17,7 +17,10 @@
 
 package org.opensilk.music.cast.dialogs;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.MediaRouteControllerDialog;
@@ -27,8 +30,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
@@ -54,7 +59,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     private boolean mIsRemotePlayback;
 
     public StyledMediaRouteControllerDialog(Context context) {
-        this(context, R.style.Orpheus_CastDialog);
+        this(context, ThemeHelper.isLightTheme(context) ? R.style.CastDialogLight : R.style.CastDialogDark);
     }
 
     /**
@@ -63,14 +68,31 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     public StyledMediaRouteControllerDialog(Context context, int theme) {
         super(context, theme);
         mIsRemotePlayback = MusicUtils.isRemotePlayback();
-        //TODO listen for changes in remote playback
-        mPauseDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
-        mPlayDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_play_black);
+        if (ThemeHelper.isLightTheme(context)) {
+            mPauseDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
+            mPlayDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_play_black);
+        } else {
+            mPauseDrawable = ThemeHelper.themeDrawable(context, R.drawable.ic_action_playback_pause_black,
+                    getContext().getResources().getColor(android.R.color.white));
+            mPlayDrawable = ThemeHelper.themeDrawable(context, R.drawable.ic_action_playback_play_black,
+                    getContext().getResources().getColor(android.R.color.white));
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
+        filter.addAction(MusicPlaybackService.META_CHANGED);
+        getContext().registerReceiver(mReceiver, filter);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        getContext().unregisterReceiver(mReceiver);
     }
 
     /*
@@ -98,17 +120,11 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
             if (MusicUtils.isPlaying()) {
                 mPausePlay.setVisibility(View.VISIBLE);
                 mPausePlay.setImageDrawable(mPauseDrawable);
-                setLoadingVisibility(false);
             } else {
                 mPausePlay.setVisibility(View.VISIBLE);
                 mPausePlay.setImageDrawable(mPlayDrawable);
-                setLoadingVisibility(false);
             }
         }
-    }
-
-    private void setLoadingVisibility(boolean show) {
-        mLoading.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -124,11 +140,8 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
         mIsRemotePlayback = MusicUtils.isRemotePlayback();
         if (mIsRemotePlayback) {
             LayoutInflater inflater = getLayoutInflater();
-            View controls = inflater.inflate(R.layout.cast_mediarouter_controller_controls,
-                    null);
-
+            View controls = inflater.inflate(R.layout.cast_mediarouter_controller_controls, null);
             loadViews(controls);
-
             updatePlayPauseState();
             updateMetadata();
             setupCallbacks();
@@ -139,24 +152,14 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     }
 
     private void setupCallbacks() {
-
         mPausePlay.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 MusicUtils.playOrPause();
-//                setLoadingVisibility(true);
                 updatePlayPauseState();
             }
         });
-
-//        mIcon.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                getContext().startActivity(new Intent("org.opensilk.music.AUDIO_PLAYER"));
-//            }
-//        });
     }
 
     private void loadViews(View controls) {
@@ -168,4 +171,12 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
         mLoading = (ProgressBar) controls.findViewById(R.id.loadingView);
         mEmptyText = (TextView) controls.findViewById(R.id.emptyView);
     }
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateMetadata();
+            updatePlayPauseState();
+        }
+    };
 }
