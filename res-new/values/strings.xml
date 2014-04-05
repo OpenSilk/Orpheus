@@ -86,4 +86,7 @@
     <string name="widget_large_style_one">Style one</string>
     <string name="widget_large_style_two">Style two</string>
 
+    <!--Daydream-->
+    <string name="dream_settings_alt_dream">Alternate Dream</string>
+
 </resources>

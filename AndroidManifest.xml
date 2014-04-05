@@ -230,9 +230,19 @@
                 <action android:name="android.service.dreams.DreamService" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <!--<meta-data android:name="android.service.dream"-->
-            <!--android:resource="@xml/fuzzy_dreams"/>-->
+            <meta-data android:name="android.service.dream"
+                    android:resource="@xml/daydream"/>
         </service>
+        <!--Daydream settings-->
+        <activity android:name="org.opensilk.music.dream.DreamSettings"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:theme="@android:style/Theme.Holo">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+            </intent-filter>
+         </activity>
         <!-- Music service -->
         <service
             android:name=".MusicPlaybackService"

@@ -108,10 +108,16 @@ public class DayDreamService extends DreamService {
      * Performs bind on alt dream service
      */
     private void bindAltDream() {
-        Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
-        intent.setComponent(new ComponentName("org.opensilk.fuzzyclock.debug","org.opensilk.fuzzyclock.FuzzyDreams"));
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        bindService(intent, mAltDreamConnection, BIND_AUTO_CREATE);
+        ComponentName altDream = AlternateDreamFragment.getAltDreamComponent(this);
+        if (altDream != null) {
+            Intent intent = new Intent(DreamService.SERVICE_INTERFACE)
+                    .setComponent(altDream)
+                    .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            bindService(intent, mAltDreamConnection, BIND_AUTO_CREATE);
+        } else {
+            Log.w(TAG, "Alternate dream not set");
+            setupSaverView();
+        }
     }
 
     /**
