@@ -16,12 +16,19 @@
 
 package org.opensilk.music.ui.profile;
 
+import android.app.AlertDialog;
+import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -29,8 +36,10 @@ import android.widget.ListView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
+import com.andrew.apollo.utils.MusicUtils;
 import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.music.adapters.SongListCardCursorAdapter;
@@ -88,6 +97,69 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.card_playlist, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.card_menu_play:
+                if (mPlaylist.mPlaylistId == -1) {
+                    MusicUtils.playFavorites(getActivity());
+                } else if (mPlaylist.mPlaylistId == -2) {
+                    MusicUtils.playLastAdded(getActivity());
+                } else {
+                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId);
+                }
+                return true;
+            case R.id.card_menu_add_queue:
+                //TODO we have the songs already just get the list from them.
+                long[] list = null;
+                if (mPlaylist.mPlaylistId == -1) {
+                    list = MusicUtils.getSongListForFavorites(getActivity());
+                } else if (mPlaylist.mPlaylistId == -2) {
+                    list = MusicUtils.getSongListForLastAdded(getActivity());
+                } else {
+                    list = MusicUtils.getSongListForPlaylist(getActivity(),
+                            mPlaylist.mPlaylistId);
+                }
+                MusicUtils.addToQueue(getActivity(), list);
+                return true;
+            case R.id.card_menu_rename:
+                RenamePlaylist.getInstance(mPlaylist.mPlaylistId).show(
+                        ((FragmentActivity) getActivity()).getSupportFragmentManager(),
+                        "RenameDialog");
+                return true;
+            case R.id.card_menu_delete:
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(getActivity().getString(R.string.delete_dialog_title, mPlaylist.mPlaylistName))
+                        .setPositiveButton(R.string.context_menu_delete, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(final DialogInterface dialog, final int which) {
+                                final Uri mUri = ContentUris.withAppendedId(
+                                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                                        mPlaylist.mPlaylistId);
+                                getActivity().getContentResolver().delete(mUri, null, null);
+                                MusicUtils.refresh();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(final DialogInterface dialog, final int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setMessage(R.string.cannot_be_undone)
+                        .create()
+                        .show();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private boolean isFavorites() {
