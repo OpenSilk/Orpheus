@@ -17,10 +17,7 @@
 
 package org.opensilk.music.cast.dialogs;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.MediaRouteControllerDialog;
@@ -30,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
@@ -78,21 +74,6 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
                     getContext().getResources().getColor(android.R.color.white));
         }
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-        filter.addAction(MusicPlaybackService.META_CHANGED);
-        getContext().registerReceiver(mReceiver, filter);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getContext().unregisterReceiver(mReceiver);
     }
 
     /*
@@ -172,11 +153,4 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
         mEmptyText = (TextView) controls.findViewById(R.id.emptyView);
     }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateMetadata();
-            updatePlayPauseState();
-        }
-    };
 }
