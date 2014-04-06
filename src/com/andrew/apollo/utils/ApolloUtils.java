@@ -30,6 +30,7 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.webkit.WebView;
@@ -243,11 +244,11 @@ public final class ApolloUtils {
      * @return
      */
     public static AlertDialog createChangesDialog(final Context context) {
-        final WebView webView = new WebView(context);
-        webView.loadUrl("file:///android_asset/changes.html");
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(R.layout.changes_dialog, null);
         return new AlertDialog.Builder(context)
                 .setTitle(R.string.settings_about_version_changes_title)
-                .setView(webView)
+                .setView(v)
                 .setPositiveButton(android.R.string.ok, null)
                 .create();
     }

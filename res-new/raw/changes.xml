@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<changelog bulletedList="true">
+
+    <changelogversion versionName="0.3.0">
+        <changelogtext>Brand new widgets with 4 sizes to choose from.</changelogtext>
+        <changelogtext>Brand new artwork backend. [b]NOTE:[/b] All existing artwork will be redownloaded and old caches cleared</changelogtext>
+        <changelogtext>New setting to delete image cache</changelogtext>
+        <changelogtext>New setting to prefer downloading album art over art from device</changelogtext>
+        <changelogtext>New setting to specify image cache size (larger cache recommended for better performance)</changelogtext>
+        <changelogtext>Added some animation to now playing panel</changelogtext>
+        <changelogtext>Genres profile now shows albums and songs</changelogtext>
+        <changelogtext>Bug fixes (reported crashes / casting)</changelogtext>
+    </changelogversion>
+
+    <changelogversion versionName="0.2.0">
+        <changelogtext>Tablet (landscape) layout</changelogtext>
+        <changelogtext>Add dark themes</changelogtext>
+        <changelogtext>Fix casting ogg (vorbis) media</changelogtext>
+        <changelogtext>Add album and artist info to casting</changelogtext>
+    </changelogversion>
+
+    <changelogversion versionName="0.1.1">
+        <changelogtext>Address a couple crashes.</changelogtext>
+    </changelogversion>
+
+    <changelogversion versionName="0.1.0">
+        <changelogtext>Initial release.</changelogtext>
+    </changelogversion>
+
+</changelog>
