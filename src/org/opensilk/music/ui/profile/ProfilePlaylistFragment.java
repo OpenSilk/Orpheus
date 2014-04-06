@@ -110,11 +110,20 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
         switch (item.getItemId()) {
             case R.id.card_menu_play:
                 if (mPlaylist.mPlaylistId == -1) {
-                    MusicUtils.playFavorites(getActivity());
+                    MusicUtils.playFavorites(getActivity(), false);
                 } else if (mPlaylist.mPlaylistId == -2) {
-                    MusicUtils.playLastAdded(getActivity());
+                    MusicUtils.playLastAdded(getActivity(), false);
                 } else {
-                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId);
+                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, false);
+                }
+                return true;
+            case R.id.card_menu_shuffle:
+                if (mPlaylist.mPlaylistId == -1) {
+                    MusicUtils.playFavorites(getActivity(), false);
+                } else if (mPlaylist.mPlaylistId == -2) {
+                    MusicUtils.playLastAdded(getActivity(), false);
+                } else {
+                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, false);
                 }
                 return true;
             case R.id.card_menu_add_queue:

@@ -74,6 +74,9 @@ public class CardArtistList extends CardBaseListNoHeader<Artist> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.card_menu_play:
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, false);
+                        break;
+                    case R.id.card_menu_shuffle:
                         MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, true);
                         break;
                     case R.id.card_menu_add_queue:

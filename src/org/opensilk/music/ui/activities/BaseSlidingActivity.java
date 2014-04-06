@@ -772,7 +772,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 }
             }
             if (id >= 0) {
-                MusicUtils.playPlaylist(this, id);
+                MusicUtils.playPlaylist(this, id, false);
                 handled = true;
             }
         }

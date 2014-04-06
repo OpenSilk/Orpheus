@@ -22,6 +22,9 @@
         android:id="@+id/card_menu_play"
         android:title="@string/menu_play_all"/>
     <item
+        android:id="@+id/card_menu_shuffle"
+        android:title="@string/menu_shuffle"/>
+    <item
         android:id="@+id/card_menu_add_queue"
         android:title="@string/add_to_queue"/>
     <item

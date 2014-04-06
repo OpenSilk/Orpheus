@@ -1155,10 +1155,10 @@ public final class MusicUtils {
      * @param context The {@link Context} to use.
      * @param playlistId The playlist Id.
      */
-    public static void playPlaylist(final Context context, final long playlistId) {
+    public static void playPlaylist(final Context context, final long playlistId, final boolean forceShuffle) {
         final long[] playlistList = getSongListForPlaylist(context, playlistId);
         if (playlistList != null) {
-            playAll(context, playlistList, -1, false);
+            playAll(context, playlistList, -1, forceShuffle);
         }
     }
 
@@ -1208,8 +1208,8 @@ public final class MusicUtils {
      *
      * @param context The {@link Context} to use
      */
-    public static void playFavorites(final Context context) {
-        playAll(context, getSongListForFavorites(context), 0, false);
+    public static void playFavorites(final Context context, final boolean forceShuffle) {
+        playAll(context, getSongListForFavorites(context), 0, forceShuffle);
     }
 
     /**
@@ -1235,8 +1235,8 @@ public final class MusicUtils {
      *
      * @param context The {@link Context} to use
      */
-    public static void playLastAdded(final Context context) {
-        playAll(context, getSongListForLastAdded(context), 0, false);
+    public static void playLastAdded(final Context context, final boolean forceShuffle) {
+        playAll(context, getSongListForLastAdded(context), 0, forceShuffle);
     }
 
     /**

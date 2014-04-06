@@ -78,6 +78,9 @@ public class CardArtistGrid extends CardBaseThumb<Artist> {
             public void onMenuItemClick(BaseCard baseCard, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.card_menu_play:
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, false);
+                        break;
+                    case R.id.card_menu_shuffle:
                         MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, true);
                         break;
                     case R.id.card_menu_add_queue:

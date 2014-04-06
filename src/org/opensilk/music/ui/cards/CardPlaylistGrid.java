@@ -89,11 +89,20 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
                 switch (menuItem.getItemId()) {
                     case R.id.card_menu_play:
                         if (mData.mPlaylistId == -1) {
-                            MusicUtils.playFavorites(getContext());
+                            MusicUtils.playFavorites(getContext(), false);
                         } else if (mData.mPlaylistId == -2) {
-                            MusicUtils.playLastAdded(getContext());
+                            MusicUtils.playLastAdded(getContext(), false);
                         } else {
-                            MusicUtils.playPlaylist(getContext(), mData.mPlaylistId);
+                            MusicUtils.playPlaylist(getContext(), mData.mPlaylistId, false);
+                        }
+                        break;
+                    case R.id.card_menu_shuffle:
+                        if (mData.mPlaylistId == -1) {
+                            MusicUtils.playFavorites(getContext(), true);
+                        } else if (mData.mPlaylistId == -2) {
+                            MusicUtils.playLastAdded(getContext(), true);
+                        } else {
+                            MusicUtils.playPlaylist(getContext(), mData.mPlaylistId, true);
                         }
                         break;
                     case R.id.card_menu_add_queue:

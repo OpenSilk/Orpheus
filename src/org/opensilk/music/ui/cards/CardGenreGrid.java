@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -32,6 +33,7 @@ import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.loaders.Projections;
 
 import java.util.ArrayList;
@@ -88,8 +90,15 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
                     case R.id.card_menu_play:
                         MusicUtils.playAll(getContext(), MusicUtils.getSongListForGenre(getContext(), mData.mGenreId), 0, false);
                         break;
+                    case R.id.card_menu_shuffle:
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForGenre(getContext(), mData.mGenreId), 0, true);
+                        break;
                     case R.id.card_menu_add_queue:
                         MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForGenre(getContext(), mData.mGenreId));
+                        break;
+                    case R.id.card_menu_add_playlist:
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForGenre(getContext(), mData.mGenreId))
+                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                 }
             }

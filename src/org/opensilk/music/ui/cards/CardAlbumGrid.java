@@ -79,6 +79,9 @@ public class CardAlbumGrid extends CardBaseThumb<Album> {
                     case R.id.card_menu_play:
                         MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId), 0, false);
                         break;
+                    case R.id.card_menu_shuffle:
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId), 0, true);
+                        break;
                     case R.id.card_menu_add_queue:
                         MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId));
                         break;

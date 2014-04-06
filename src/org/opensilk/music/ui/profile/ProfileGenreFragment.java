@@ -18,6 +18,7 @@ package org.opensilk.music.ui.profile;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,6 +31,8 @@ import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
 
 /**
  * Created by drew on 2/28/14.
@@ -94,8 +97,15 @@ public class ProfileGenreFragment extends Fragment {
             case R.id.card_menu_play:
                 MusicUtils.playAll(getActivity(), MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId), 0, false);
                 return true;
+            case R.id.card_menu_shuffle:
+                MusicUtils.playAll(getActivity(), MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId), 0, true);
+                return true;
             case R.id.card_menu_add_queue:
                 MusicUtils.addToQueue(getActivity(), MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId));
+                return true;
+            case R.id.card_menu_add_playlist:
+                AddToPlaylistDialog.newInstance(MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId))
+                        .show(((FragmentActivity) getActivity()).getSupportFragmentManager(), "AddToPlaylistDialog");
                 return true;
         }
         return false;
