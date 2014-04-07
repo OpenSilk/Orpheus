@@ -22,7 +22,7 @@
     android:background="@drawable/drop_shadow">
 
     <ImageView
-        android:id="@+id/widget_large_album_art"
+        android:id="@+id/widget_large_style_one_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"/>
@@ -39,7 +39,7 @@
             android:background="#96000000">
 
             <ImageButton
-                android:id="@+id/widget_large_previous"
+                android:id="@+id/widget_large_style_one_previous"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -49,7 +49,7 @@
                 android:src="@drawable/btn_playback_previous" />
 
             <ImageButton
-                android:id="@+id/widget_large_play"
+                android:id="@+id/widget_large_style_one_play"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -59,7 +59,7 @@
                 android:src="@drawable/btn_playback_play" />
 
             <ImageButton
-                android:id="@+id/widget_large_next"
+                android:id="@+id/widget_large_style_one_next"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -79,13 +79,13 @@
             android:background="#96000000">
 
             <TextView
-                android:id="@+id/widget_large_artist_name"
+                android:id="@+id/widget_large_style_one_artist_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/widget_large_song_title"
+                android:id="@+id/widget_large_style_one_song_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
@@ -99,7 +99,7 @@
             android:background="#96000000">
 
             <ImageButton
-                android:id="@+id/widget_large_shuffle"
+                android:id="@+id/widget_large_style_one_shuffle"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -108,15 +108,16 @@
                 android:contentDescription="@string/accessibility_shuffle"
                 android:src="@drawable/btn_playback_shuffle" />
 
-            <!-- Dummy for now -->
+            <!-- TODO: Configure button (Needs to move above shuffle) -->
             <ImageButton
+                android:id="@+id/widget_large_style_one_configure"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@null" />
 
             <ImageButton
-                android:id="@+id/widget_large_repeat"
+                android:id="@+id/widget_large_style_one_repeat"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"

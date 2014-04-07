@@ -47,6 +47,17 @@ import hugo.weaving.DebugLog;
  */
 public class MusicWidgetService extends Service implements ServiceConnection {
 
+    public static final String WIDGET_SIZE = "widget_size";
+    public static final String WIDGET_STYLE = "widget_style";
+
+    public static final int ULTRA_MINI = 1;
+    public static final int MINI = 2;
+    public static final int SMALL = 3;
+    public static final int LARGE = 4;
+
+    public static final int STYLE_LARGE_ONE = 0;
+    public static final int STYLE_LARGE_TWO = 1;
+
     private Looper mUpdateLooper;
     private Handler mUpdateHandler;
     private Deque<Runnable> mPendingUpdates = new ArrayDeque<>(4);
@@ -56,6 +67,13 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
     private AppWidgetManager mAppWidgetManager;
     private ArtworkProviderUtil mArtworkProvider;
+
+    private String mArtistName;
+    private String mTrackName;
+    private int mShuffleMode;
+    private int mRepeatMode;
+    private boolean mIsPlaying;
+    private Bitmap mArtwork;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -77,7 +95,9 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         // if we call into the ArtworkProvider /from/ the main thread we will prevent
         // the ArtworkService from starting.
         mUpdateLooper = thread.getLooper();
-        mUpdateHandler = new Handler(mUpdateLooper);
+        if (mUpdateLooper != null) {
+            mUpdateHandler = new Handler(mUpdateLooper);
+        }
     }
 
     @Override
@@ -93,12 +113,13 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     public synchronized int onStartCommand(Intent intent, int flags, final int startId) {
         if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
             final int appId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-            final int appCategory = intent.getIntExtra("widget_category", -1);
-            if (appId != -1 && appCategory != -1) {
+            final int widgetSize = intent.getIntExtra(WIDGET_SIZE, -1);
+            final int widgetStyle = intent.getIntExtra(WIDGET_STYLE, STYLE_LARGE_ONE);
+            if (appId != -1 && widgetSize != -1) {
                 final Runnable update = new Runnable() {
                     @Override
                     public void run() {
-                        updateWidget(appId, appCategory, startId);
+                        updateWidget(appId, startId, widgetSize, widgetStyle);
                     }
                 };
                 if (isBound) {
@@ -112,22 +133,22 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     }
 
     @DebugLog
-    private void updateWidget(int appId, int appCategory, int startId) {
-        RemoteViews views = null;
-        switch (appCategory) {
-            case MusicWidget.ULTRA_MINI:
-                views = createUltraMiniView();
-                break;
-            case MusicWidget.MINI:
-                views = createMiniView();
-                break;
-            case MusicWidget.SMALL:
-                views = createSmallView();
-                break;
-            case MusicWidget.LARGE:
-                views = createLargeView();
-                break;
+    private void updateWidget(int appId, int startId, int widgetSize, int widgetStyle) {
+        String albumName = MusicUtils.getAlbumName();
+        String albumArtistName = MusicUtils.getAlbumArtistName();
+        long albumId = MusicUtils.getCurrentAlbumId();
+        mArtistName = MusicUtils.getArtistName();
+        mTrackName = MusicUtils.getTrackName();
+        mShuffleMode = MusicUtils.getShuffleMode();
+        mRepeatMode = MusicUtils.getRepeatMode();
+        mIsPlaying = MusicUtils.isPlaying();
+
+        /* Only query the artwork for the first startId, it'll be cached until the last id is done */
+        if (startId == 1) {
+            mArtwork = mArtworkProvider.getArtworkThumbnail(albumArtistName, albumName, albumId);
         }
+
+        RemoteViews views = createView(widgetSize, widgetStyle);
         if (views != null) {
             mAppWidgetManager.updateAppWidget(appId, views);
         }
@@ -135,170 +156,106 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     }
 
     /*
-     * Views
+     * Create views depending on size, and style
+     * TODO: FIX WHEN OTHER LARGE WIDGETS ARE ADDED
      */
+    public RemoteViews createView(int widgetSize, int widgetStyle) {
+        int layoutId = -1;
+        String idInfix = "";
+        switch (widgetSize) {
+            case ULTRA_MINI:
+                layoutId = R.layout.music_widget_ultra_mini;
+                idInfix = "ultra_mini";
+                break;
+            case MINI:
+                layoutId = R.layout.music_widget_mini;
+                idInfix = "mini";
+                break;
+            case SMALL:
+                layoutId = R.layout.music_widget_small;
+                idInfix = "small";
+                break;
+            case LARGE:
+                if (widgetStyle == STYLE_LARGE_ONE) {
+                    layoutId = R.layout.music_widget_large_style_one;
+                    idInfix = "large_style_one";
+                } else if (widgetStyle == STYLE_LARGE_TWO) {
+                    layoutId = R.layout.music_widget_large_style_two;
+                    idInfix = "large_style_two";
+                }
+        }
 
-    public RemoteViews createUltraMiniView() {
-        String mAlbumName = MusicUtils.getAlbumName();
-        String mAlbumArtistName = MusicUtils.getAlbumArtistName();
-        String mArtistName = MusicUtils.getArtistName();
-        String mTrackName = MusicUtils.getTrackName();
-        int mShuffleMode = MusicUtils.getShuffleMode();
-        int mRepeateMode = MusicUtils.getRepeatMode();
-        long mAlbumId = MusicUtils.getCurrentAlbumId();
-        boolean mIsPlaying = MusicUtils.isPlaying();
-
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.music_widget_ultra_mini);
-        Bitmap artwork = mArtworkProvider.getArtworkThumbnail(mArtistName, mAlbumName, mAlbumId);
+        RemoteViews views = new RemoteViews(getPackageName(), layoutId);
         ComponentName serviceName = new ComponentName(this, MusicPlaybackService.class);
         PendingIntent pendingIntent;
 
-        /* Album artwork */
-        views.setImageViewBitmap(R.id.widget_ultra_mini_album_art, artwork);
+        /* Album artwork -- set for all widgets */
+        if (mArtwork != null) {
+            views.setImageViewBitmap(getId(idInfix, "album_art"), mArtwork);
+        } else {
+            views.setImageViewResource(getId(idInfix, "album_art"), R.drawable.default_artwork);
+        }
 
-        /* Pause / Play */
-        views.setImageViewResource(R.id.widget_ultra_mini_play, mIsPlaying ? R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
+        /* Pause / Play -- set for all widgets */
+        views.setImageViewResource(getId(idInfix, "play"), mIsPlaying ?
+                R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
         pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_ultra_mini_mask, pendingIntent);
+        views.setOnClickPendingIntent(getId(idInfix, "play"), pendingIntent);
 
-        return views;
-    }
-
-    public RemoteViews createMiniView() {
-        String mAlbumName = MusicUtils.getAlbumName();
-        String mAlbumArtistName = MusicUtils.getAlbumArtistName();
-        String mArtistName = MusicUtils.getArtistName();
-        String mTrackName = MusicUtils.getTrackName();
-        int mShuffleMode = MusicUtils.getShuffleMode();
-        int mRepeateMode = MusicUtils.getRepeatMode();
-        long mAlbumId = MusicUtils.getCurrentAlbumId();
-        boolean mIsPlaying = MusicUtils.isPlaying();
-
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.music_widget_mini);
-        Bitmap artwork = mArtworkProvider.getArtworkThumbnail(mAlbumArtistName, mAlbumName, mAlbumId);
-        ComponentName serviceName = new ComponentName(this, MusicPlaybackService.class);
-        PendingIntent pendingIntent;
-
-        // Album artwork
-        views.setImageViewBitmap(R.id.widget_mini_album_art, artwork);
-
-        // Pause / Play
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_mini_play, pendingIntent);
-        views.setImageViewResource(R.id.widget_mini_play, mIsPlaying ? R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
-
-        // Next / Prev
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_mini_previous, pendingIntent);
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.NEXT_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_mini_next, pendingIntent);
-
-        return views;
-    }
-
-    public RemoteViews createSmallView() {
-        String mAlbumName = MusicUtils.getAlbumName();
-        String mAlbumArtistName = MusicUtils.getAlbumArtistName();
-        String mArtistName = MusicUtils.getArtistName();
-        String mTrackName = MusicUtils.getTrackName();
-        int mShuffleMode = MusicUtils.getShuffleMode();
-        int mRepeateMode = MusicUtils.getRepeatMode();
-        long mAlbumId = MusicUtils.getCurrentAlbumId();
-        boolean mIsPlaying = MusicUtils.isPlaying();
-
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.music_widget_small);
-        Bitmap artwork = mArtworkProvider.getArtwork(mAlbumArtistName, mAlbumName, mAlbumId);
-        ComponentName serviceName = new ComponentName(this, MusicPlaybackService.class);
-        PendingIntent pendingIntent;
-
-        /* Artist name and song title */
-        views.setTextViewText(R.id.widget_small_artist_name, mArtistName);
-        views.setTextViewText(R.id.widget_small_song_title, mTrackName);
-
-        /* Album artwork */
-        views.setImageViewBitmap(R.id.widget_small_album_art, artwork);
-
-        /* Pause / Play */
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_small_play, pendingIntent);
-        views.setImageViewResource(R.id.widget_small_play, mIsPlaying ? R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
+        if (widgetSize == ULTRA_MINI) { // Ultra Mini only
+            views.setOnClickPendingIntent(getId(idInfix, "mask"), pendingIntent);
+        }
 
         /* Next / Prev */
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_small_previous, pendingIntent);
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.NEXT_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_small_next, pendingIntent);
-
-
-        return views;
-    }
-
-    public RemoteViews createLargeView() {
-        String mAlbumName = MusicUtils.getAlbumName();
-        String mAlbumArtistName = MusicUtils.getAlbumArtistName();
-        String mArtistName = MusicUtils.getArtistName();
-        String mTrackName = MusicUtils.getTrackName();
-        int mShuffleMode = MusicUtils.getShuffleMode();
-        int mRepeateMode = MusicUtils.getRepeatMode();
-        long mAlbumId = MusicUtils.getCurrentAlbumId();
-        boolean mIsPlaying = MusicUtils.isPlaying();
-
-        RemoteViews views = new RemoteViews(getPackageName(), R.layout.music_widget_large);
-        Bitmap artwork = mArtworkProvider.getArtwork(mAlbumArtistName, mAlbumName, mAlbumId);
-        ComponentName serviceName = new ComponentName(this, MusicPlaybackService.class);
-        PendingIntent pendingIntent;
+        if (widgetSize >= MINI) { // Mini, Small, Large
+            pendingIntent = buildPendingIntent(this, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
+            views.setOnClickPendingIntent(getId(idInfix, "previous"), pendingIntent);
+            pendingIntent = buildPendingIntent(this, MusicPlaybackService.NEXT_ACTION, serviceName);
+            views.setOnClickPendingIntent(getId(idInfix, "next"), pendingIntent);
+        }
 
         /* Artist name and song title */
-        views.setTextViewText(R.id.widget_large_artist_name, mArtistName);
-        views.setTextViewText(R.id.widget_large_song_title, mTrackName);
+        if (widgetSize >= SMALL) { //Small, Large
 
-        /* Album artwork */
-        views.setImageViewBitmap(R.id.widget_large_album_art, artwork);
-
-        /* Pause / Play */
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_large_play, pendingIntent);
-        views.setImageViewResource(R.id.widget_large_play, mIsPlaying ? R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
-
-        /* Next / Prev */
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_large_previous, pendingIntent);
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.NEXT_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_large_next, pendingIntent);
+            views.setTextViewText(getId(idInfix, "artist_name"), mArtistName);
+            views.setTextViewText(getId(idInfix, "song_title"), mTrackName);
+        }
 
         /* Shuffle / Repeat */
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.SHUFFLE_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_large_shuffle, pendingIntent);
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.REPEAT_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_large_repeat, pendingIntent);
+        if (widgetSize == LARGE) {
+            pendingIntent = buildPendingIntent(this, MusicPlaybackService.SHUFFLE_ACTION, serviceName);
+            views.setOnClickPendingIntent(getId(idInfix, "shuffle"), pendingIntent);
+            pendingIntent = buildPendingIntent(this, MusicPlaybackService.REPEAT_ACTION, serviceName);
+            views.setOnClickPendingIntent(getId(idInfix, "repeat"), pendingIntent);
 
-        int resId = -1;
+            int resId;
 
-        switch (mShuffleMode) {
-            case MusicPlaybackService.SHUFFLE_NONE:
-                resId = R.drawable.btn_playback_shuffle;
-                break;
-            case MusicPlaybackService.SHUFFLE_AUTO:
-                resId = R.drawable.btn_playback_shuffle_all;
-                break;
-            default:
-                resId = R.drawable.btn_playback_shuffle_all;
-                break;
+            switch (mShuffleMode) {
+                case MusicPlaybackService.SHUFFLE_NONE:
+                    resId = R.drawable.btn_playback_shuffle;
+                    break;
+                case MusicPlaybackService.SHUFFLE_AUTO:
+                    resId = R.drawable.btn_playback_shuffle_all;
+                    break;
+                default:
+                    resId = R.drawable.btn_playback_shuffle_all;
+                    break;
+            }
+            views.setImageViewResource(getId(idInfix, "shuffle"), resId);
+
+            switch (mRepeatMode) {
+                case MusicPlaybackService.REPEAT_ALL:
+                    resId = R.drawable.btn_playback_repeat_all;
+                    break;
+                case MusicPlaybackService.REPEAT_CURRENT:
+                    resId = R.drawable.btn_playback_repeat_one;
+                    break;
+                default:
+                    resId = R.drawable.btn_playback_repeat;
+                    break;
+            }
+            views.setImageViewResource(getId(idInfix, "repeat"), resId);
         }
-        views.setImageViewResource(R.id.widget_large_shuffle, resId);
-
-        switch (mRepeateMode) {
-            case MusicPlaybackService.REPEAT_ALL:
-                resId = R.drawable.btn_playback_repeat_all;
-                break;
-            case MusicPlaybackService.REPEAT_CURRENT:
-                resId = R.drawable.btn_playback_repeat_one;
-                break;
-            default:
-                resId = R.drawable.btn_playback_repeat;
-                break;
-        }
-        views.setImageViewResource(R.id.widget_large_repeat, resId);
 
         return views;
     }
@@ -306,6 +263,11 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     /*
      * Helpers
      */
+
+    private int getId(String infix, String suffix) {
+        return getResources().getIdentifier("widget_" + infix + "_" + suffix,
+                "id", getPackageName());
+    }
 
     protected PendingIntent buildPendingIntent(Context context, String action,
                                                ComponentName serviceName) {

@@ -5,7 +5,10 @@
     <string name="app_name" translatable="false">Orpheus</string>
     <string name="app_name_label" translatable="false">Orpheus</string>
 
-<!-- ################ SETTINGS ################ -->
+    <!-- ################ GENERAL ################ -->
+    <string name="okay">Okay</string>
+
+    <!-- ################ SETTINGS ################ -->
 
     <!-- Main settings screen -->
     <string name="settings_title">Settings</string>
@@ -69,5 +72,18 @@
     <string name="theme_grepheus">Grepheus</string>
 
     <!-- Widgets -->
-    <string name="widget_label">Orpheus Resizeable (1x1-4x4+)</string>
+
+    <string name="widget_settings_label">Configure widget</string>
+    <string name="widget_ultra_mini_label">Orpheus Ultra-Mini</string>
+    <string name="widget_mini_label">Orpheus Mini</string>
+    <string name="widget_small_label">Orpheus Small</string>
+    <string name="widget_large_label">Orpheus Large (Resizable)</string>
+
+    <string name="widget_settings_pick_label">Pick a style:</string>
+    <string name="widget_settings_preview_label">Preview</string>
+
+    <!-- Large Widget styles -->
+    <string name="widget_large_style_one">Style one</string>
+    <string name="widget_large_style_two">Style two</string>
+
 </resources>

@@ -122,7 +122,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Indicates the repeat mode chaned
      */
-    public static final String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".REPEATE_CHANGED";
+    public static final String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".REPEAT_CHANGED";
 
     /**
      * Indicates the shuffle mode chaned

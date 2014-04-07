@@ -17,11 +17,11 @@
   -->
 
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/music_widget_large"
-    android:minHeight="@dimen/music_widget_default_min_height"
-    android:minWidth="@dimen/music_widget_default_min_width"
-    android:minResizeHeight="@dimen/music_widget_min_height"
-    android:minResizeWidth="@dimen/music_widget_min_width"
+    android:initialLayout="@layout/music_widget_large_style_one"
+    android:previewImage="@drawable/widget_preview_large_one"
+    android:minHeight="@dimen/music_widget_large_min_height"
+    android:minWidth="@dimen/music_widget_large_min_width"
     android:updatePeriodMillis="0"
     android:widgetCategory="keyguard|home_screen"
-    android:resizeMode="horizontal|vertical"/>
+    android:resizeMode="horizontal|vertical"
+    android:configure="org.opensilk.music.appwidgets.MusicWidgetSettings" />
