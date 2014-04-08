@@ -54,8 +54,6 @@ public class SettingsTabletActivity extends PreferenceActivity {
 
     @Override
     public boolean onIsMultiPane() {
-        Resources res = getResources();
-        if (ConfigHelper.isPortrait(res) && !ConfigHelper.isXLargeScreen(res)) return false;
         return true;
     }
 }

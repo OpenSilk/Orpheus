@@ -132,7 +132,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                startActivityForResult(new Intent(this, ConfigHelper.isLargeScreen(getResources()) ?
+                startActivityForResult(new Intent(this, ConfigHelper.isXLargeScreen(getResources()) ?
                         SettingsTabletActivity.class : SettingsPhoneActivity.class), 0);
                 return true;
             case R.id.menu_search:
