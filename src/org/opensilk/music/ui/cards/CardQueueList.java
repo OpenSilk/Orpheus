@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
@@ -17,7 +18,7 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
+import org.opensilk.music.widgets.NowPlayingAnimation;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -26,8 +27,10 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class CardQueueList extends CardBaseListNoHeader<Song> {
 
+    protected NowPlayingAnimation mNowPlayingAnimation;
+
     public CardQueueList(Context context, Song data) {
-        super(context, data);
+        this(context, data, R.layout.card_list_inner_layout_queue);
     }
 
     public CardQueueList(Context context, Song data, int innerLayout) {
@@ -48,6 +51,13 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
                 MusicUtils.setQueuePosition(Integer.valueOf(getId()));
             }
         });
+    }
+
+    @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        super.setupInnerViewElements(parent, view);
+        mNowPlayingAnimation = (NowPlayingAnimation) view.findViewById(R.id.playing_indicator);
+        maybeStartPlayingIndicator();
     }
 
     @Override
@@ -74,7 +84,6 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
                         MusicUtils.playNext(new long[] {
                                 mData.mSongId
                         });
-                        ((BaseSlidingActivity) getContext()).refreshQueue();
                         break;
                     case R.id.card_menu_add_playlist:
                         AddToPlaylistDialog.newInstance(new long[]{
@@ -83,7 +92,6 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
                         break;
                     case R.id.card_menu_remove_queue:
                         MusicUtils.removeTrack(mData.mSongId);
-                        ((BaseSlidingActivity) getContext()).refreshQueue();
                         break;
                     case R.id.card_menu_more_by:
                         NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
@@ -101,6 +109,27 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
                 return false;
             }
         };
+    }
+
+    /**
+     * Conditionally starts playing indicator animation
+     */
+    protected void maybeStartPlayingIndicator() {
+        if (mNowPlayingAnimation != null) {
+            // Always set gone. else recycled views might end up with it showing
+            if (mNowPlayingAnimation.isAnimating()) {
+                mNowPlayingAnimation.stopAnimating();
+            } else {
+                mNowPlayingAnimation.setVisibility(View.GONE);
+            }
+            if (mData.mSongId == MusicUtils.getCurrentAudioId()) {
+                if (MusicUtils.isPlaying()) {
+                    mNowPlayingAnimation.startAnimating();
+                } else {
+                    mNowPlayingAnimation.setVisibility(View.VISIBLE);
+                }
+            }
+        }
     }
 
 }

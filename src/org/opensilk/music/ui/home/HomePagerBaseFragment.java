@@ -65,13 +65,6 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
     protected ListView mListView;
 
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-        // Register the music status listener
-        ((BaseSlidingActivity)activity).setMusicStateListenerListener(this);
-    }
-
-    @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -99,6 +92,19 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
         setHasOptionsMenu(true);
         // Start the loader
         getLoaderManager().initLoader(LOADER, null, this);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Register the music status listener
+        ((BaseSlidingActivity) getActivity()).addMusicStateListener(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        ((BaseSlidingActivity) getActivity()).removeMusicStateListener(this);
     }
 
     @Override
@@ -138,6 +144,16 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
     @Override
     public void onMetaChanged() {
         // Nothing to do
+    }
+
+    @Override
+    public void onPlaystateChanged() {
+        //pass
+    }
+
+    @Override
+    public void onQueueChanged() {
+        //pass
     }
 
     protected abstract boolean isSimpleLayout();

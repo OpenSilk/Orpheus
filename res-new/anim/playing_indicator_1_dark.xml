@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list android:oneshot="false"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_1_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_3_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_5_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_7_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_8_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_6_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_4_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_2_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_4_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_6_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_7_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_7_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_5_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_3_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_5_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_8_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_5_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_3_dark" />
+    <item android:duration="100" android:drawable="@drawable/playing_indicator_4_dark" />
+</animation-list>

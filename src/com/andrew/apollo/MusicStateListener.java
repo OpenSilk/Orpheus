@@ -16,4 +16,14 @@ public interface MusicStateListener {
      */
     public void onMetaChanged();
 
+    /**
+     * Called when {@link com.andrew.apollo.MusicPlaybackService#PLAYSTATE_CHANGED} is invoked
+     */
+    public void onPlaystateChanged();
+
+    /**
+     * Called when {@link com.andrew.apollo.MusicPlaybackService#QUEUE_CHANGED} is invoked
+     */
+    public void onQueueChanged();
+
 }

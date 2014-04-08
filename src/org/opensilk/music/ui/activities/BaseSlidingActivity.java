@@ -325,8 +325,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         updatePlaybackControls();
         // Current info
         updateNowPlayingInfo();
-        // Refresh the queue
-        refreshQueue();
         // Make sure we dont overlap the panel
         maybeHideActionBar();
         // update visualizer
@@ -360,6 +358,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         filter.addAction(MusicPlaybackService.META_CHANGED);
         // Update a list, probably the playlist fragment's
         filter.addAction(MusicPlaybackService.REFRESH);
+        // refresh queue
+        filter.addAction(MusicPlaybackService.QUEUE_CHANGED);
         registerReceiver(mPlaybackStatus, filter);
         // Refresh the current time
         final long next = refreshCurrentTime();
@@ -673,7 +673,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @DebugLog
     private void updateVisualizerState() {
         if (mVisualizer != null && mVisualizerView != null) {
-            if (MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
+            if (!mQueueShowing && MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
                     PreferenceUtils.getInstance(this).showVisualizations()) {
                 try {
                     if (!mVisualizer.getEnabled()) {
@@ -790,8 +790,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         if (handled) {
             // Make sure to process intent only once
             setIntent(new Intent());
-            // Refresh the queue
-            refreshQueue();
         }
     }
 
@@ -949,15 +947,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         return 500;
     }
 
-    public void refreshQueue() {
-        if (mQueueShowing) {
-            QueueFragment queue = (QueueFragment) getSupportFragmentManager().findFragmentByTag("queue");
-            if (queue != null) {
-                queue.refreshQueue();
-            }
-        }
-    }
-
     @DebugLog
     public void maybeClosePanel() {
         if (mSlidingPanel.isExpanded()) {
@@ -995,6 +984,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mArtBackground.animate().alpha(0.0f).setDuration(500).start();
             mFooterCurrentTime.setVisibility(View.INVISIBLE);
             mFooterTotalTime.setVisibility(View.INVISIBLE);
+
         } else {
             mQueueShowing = false;
             mArtBackground.animate().alpha(1.0f).setDuration(500).start();
@@ -1002,6 +992,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mFooterTotalTime.setVisibility(View.VISIBLE);
         }
         mHeaderQueueButton.setQueueShowing(mQueueShowing);
+        updateVisualizerState();
     }
 
     /**
@@ -1326,10 +1317,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 // Set the play and pause image
                 mReference.get().mHeaderPlayPauseButton.updateState();
                 mReference.get().mFooterPlayPauseButton.updateState();
-                // Refresh the queue
-                mReference.get().refreshQueue();
                 // update visualizer
                 mReference.get().updateVisualizerState();
+                // Let the listener know to the playstate chnaged
+                for (final MusicStateListener listener : mReference.get().mMusicStateListener) {
+                    if (listener != null) {
+                        listener.onPlaystateChanged();
+                    }
+                }
             } else if (action.equals(MusicPlaybackService.REFRESH)) {
                 // Let the listener know to update a list
                 for (final MusicStateListener listener : mReference.get().mMusicStateListener) {
@@ -1345,16 +1340,29 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 mReference.get().mFooterRepeatButton.updateRepeatState();
                 // Set the shuffle image
                 mReference.get().mFooterShuffleButton.updateShuffleState();
+            } else if (action.equals(MusicPlaybackService.QUEUE_CHANGED)) {
+                // Let the listener know to refresh the queue
+                for (final MusicStateListener listener : mReference.get().mMusicStateListener) {
+                    if (listener != null) {
+                        listener.onQueueChanged();
+                    }
+                }
             }
         }
     }
 
     /**
-     * @param status The {@link MusicStateListener} to use
+     * @param listener The {@link MusicStateListener} to use
      */
-    public void setMusicStateListenerListener(final MusicStateListener status) {
-        if (status != null) {
-            mMusicStateListener.add(status);
+    public void addMusicStateListener(final MusicStateListener listener) {
+        if (listener != null) {
+            mMusicStateListener.add(listener);
+        }
+    }
+
+    public void removeMusicStateListener(final MusicStateListener listener) {
+        if (listener != null) {
+            mMusicStateListener.remove(listener);
         }
     }
 
