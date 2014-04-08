@@ -21,11 +21,15 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
@@ -33,8 +37,9 @@ import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
-
 import java.lang.reflect.Field;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 4/4/14.
@@ -44,6 +49,8 @@ public class DayDreamService extends DreamService {
     private static final String TAG = DayDreamService.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
+
+    private View mContentView, mSaverView;
 
     // True if attached to window
     private boolean isAttached;
@@ -55,11 +62,19 @@ public class DayDreamService extends DreamService {
     // True if bount to alt dream service
     private boolean isBoundToAltDream;
 
+    private Handler mHandler = new Handler();
+
+    private ScreenSaverAnimation mMoveSaverRunnable = null;
+
+    @DebugLog
+    @Override
     public void onCreate() {
         super.onCreate();
         mMusicServiceToken = MusicUtils.bindToService(this, mMusicServiceConnection);
+        mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
     }
 
+    @DebugLog
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -73,6 +88,7 @@ public class DayDreamService extends DreamService {
         }
     }
 
+    @DebugLog
     @Override
     public void onAttachedToWindow() {
         isAttached = true;
@@ -81,32 +97,50 @@ public class DayDreamService extends DreamService {
             if (!MusicUtils.isPlaying()) {
                 bindAltDream();
             } else {
+                mHandler.removeCallbacks(mMoveSaverRunnable);
                 setupSaverView();
+                mHandler.post(mMoveSaverRunnable);
             }
         }
     }
 
+    @DebugLog
     @Override
     public void onDetachedFromWindow() {
         isAttached = false;
         super.onDetachedFromWindow();
+        mHandler.removeCallbacks(mMoveSaverRunnable);
     }
 
     /**
      * Init our dreams view
      */
+    @DebugLog
     private void setupSaverView() {
         setInteractive(false);
         setFullscreen(true);
         setScreenBright(false);
-        setContentView(R.layout.daydream);
-        ArtworkImageView artwork = (ArtworkImageView) findViewById(R.id.artwork);
+        setContentView(R.layout.daydream_container);
+
+        mSaverView = findViewById(R.id.content_wrapper);
+        mSaverView.setAlpha(0);
+        mContentView = (View) mSaverView.getParent();
+
+        LayoutInflater inflater = getWindow().getLayoutInflater();
+
+        //TODO: Settings for different views
+
+        inflater.inflate(R.layout.daydream_album_art_only, (LinearLayout) mSaverView, true);
+        ArtworkImageView artwork = (ArtworkImageView) findViewById(R.id.album_art_view);
         ArtworkManager.loadCurrentArtwork(artwork);
+
+        mMoveSaverRunnable.registerViews(mContentView, mSaverView);
     }
 
     /**
      * Performs bind on alt dream service
      */
+    @DebugLog
     private void bindAltDream() {
         ComponentName altDream = AlternateDreamFragment.getAltDreamComponent(this);
         if (altDream != null) {
