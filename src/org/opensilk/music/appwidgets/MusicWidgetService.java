@@ -110,7 +110,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
     @Override
     @DebugLog
-    public synchronized int onStartCommand(Intent intent, int flags, final int startId) {
+    public int onStartCommand(Intent intent, int flags, final int startId) {
         if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
             final int appId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
             final int widgetSize = intent.getIntExtra(WIDGET_SIZE, -1);
@@ -282,7 +282,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
      * Service Connection callbacks
      */
     @Override
-    public synchronized void onServiceConnected(ComponentName name, IBinder service) {
+    public void onServiceConnected(ComponentName name, IBinder service) {
         isBound = true;
         while (mPendingUpdates.peek() != null) {
             mUpdateHandler.post(mPendingUpdates.poll());
@@ -290,7 +290,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     }
 
     @Override
-    public synchronized void onServiceDisconnected(ComponentName name) {
+    public void onServiceDisconnected(ComponentName name) {
         isBound = false;
         mToken = null;
         //TODO maybe rebind
