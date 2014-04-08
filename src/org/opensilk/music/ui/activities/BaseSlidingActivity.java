@@ -72,6 +72,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
@@ -1221,6 +1222,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                         shareIntent.setAction(Intent.ACTION_SEND);
                         shareIntent.setType("text/plain");
                         shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+                        shareIntent.putExtra(Intent.EXTRA_STREAM,
+                                ArtworkProvider.createArtworkUri(MusicUtils.getCurrentAlbumId()));
                         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
                     }
                     return true;
