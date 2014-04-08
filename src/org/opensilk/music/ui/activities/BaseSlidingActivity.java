@@ -280,7 +280,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         invalidateOptionsMenu();
 
         // Setup visualizer
-        initVisualizer();
+        if (mVisualizer == null) {
+            initVisualizer();
+        }
     }
 
     /**
@@ -288,9 +290,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      */
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        if (mVisualizer != null) {
-            mVisualizer.release();
-        }
+        destroyVisualizer();
     }
 
     /**
@@ -330,7 +330,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Make sure we dont overlap the panel
         maybeHideActionBar();
         // update visualizer
-        updateVisualizerState();
+        if (mVisualizer == null) {
+            initVisualizer();
+        }
     }
 
     @Override
@@ -339,14 +341,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // stop scanning for routes
         mMediaRouter.removeCallback(mMediaRouterCallback);
         //Disable visualizer
-        if (mVisualizer != null && mVisualizer.getEnabled()) {
-            try {
-                mVisualizer.setEnabled(false);
-            } catch (IllegalStateException e) {
-                mVisualizer = null;
-                e.printStackTrace();
-            }
-        }
+        destroyVisualizer();
     }
 
     /**
@@ -413,10 +408,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         // Remove any music status listeners
         mMusicStateListener.clear();
-        // Kill the visualizer
-        if (mVisualizer != null) {
-            mVisualizer.release();
-        }
     }
 
     @Override
@@ -566,6 +557,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         //Visualizer view
         mVisualizerView = (AudioVisualizationView) findViewById(R.id.visualizer_view);
+        mVisualizerView.setVisibility(View.GONE);
 
         // Previous button
         mHeaderPrevButton = (RepeatingImageButton) findViewById(R.id.header_action_button_previous);
@@ -637,9 +629,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     /**
      * Initializes visualizer
      */
+    @DebugLog
     private void initVisualizer() {
         if (MusicUtils.getAudioSessionId() != ERROR_BAD_VALUE) {
             try {
+                if (mVisualizer != null) {
+                    Log.e(TAG, "initVisualizer() called with active visualizer");
+                    destroyVisualizer();
+                }
                 mVisualizer = new Visualizer(MusicUtils.getAudioSessionId());
                 mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
                 mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
@@ -649,18 +646,31 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                     }
 
                     public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) { }
-                }, Visualizer.getMaxCaptureRate() / 2, true, false);
+                }, Math.min(Visualizer.getMaxCaptureRate()/2, 7000), true, false);
                 updateVisualizerState();
             } catch (RuntimeException e) {
                 // Go without.
                 e.printStackTrace();
+                mVisualizer = null;
             }
         } //else wait for service bind
     }
 
     /**
+     * Releases the visualizer
+     */
+    @DebugLog
+    private void destroyVisualizer() {
+        if (mVisualizer != null) {
+            mVisualizer.release();
+            mVisualizer = null;
+        }
+    }
+
+    /**
      * Enables or disables visualizer depending on playback state
      */
+    @DebugLog
     private void updateVisualizerState() {
         if (mVisualizer != null && mVisualizerView != null) {
             if (MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
@@ -674,7 +684,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                     mVisualizer = null;
                     e.printStackTrace();
                 }
-
             } else {
                 try {
                     if (mVisualizer.getEnabled()) {
@@ -684,7 +693,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                     mVisualizer = null;
                     e.printStackTrace();
                 }
-                mVisualizerView.setVisibility(View.INVISIBLE);
+                mVisualizerView.setVisibility(View.GONE);
             }
         } //else wait for create and service bind
     }
