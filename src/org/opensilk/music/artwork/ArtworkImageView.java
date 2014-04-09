@@ -200,25 +200,31 @@ public class ArtworkImageView extends ImageView {
                         }
 
                         if (response.getBitmap() != null) {
-                            mDrawables[1] = new BitmapDrawable(getResources(), response.getBitmap());
-                            final TransitionDrawable result = new TransitionDrawable(mDrawables);
-                            result.setCrossFadeEnabled(true);
-                            result.startTransition(200);
-                            setImageDrawable(result);
-//                            setImageBitmap(response.getBitmap());
+                            if (isImmediate) {
+                                setImageBitmap(response.getBitmap());
+                            } else {
+                                mDrawables[1] = new BitmapDrawable(getResources(), response.getBitmap());
+                                final TransitionDrawable transitionDrawable = new TransitionDrawable(mDrawables);
+                                transitionDrawable.setCrossFadeEnabled(true);
+                                setImageDrawable(transitionDrawable);
+                                transitionDrawable.startTransition(200);
+                            }
                         } else if (mDefaultImageId != 0) {
                             // We missed the L1 cache set the default drawable as fist
                             // layer of transition drawable for smoother effect
                             mDrawables[0] = getResources().getDrawable(mDefaultImageId);
-                            // Fade in the default image
-                            Drawable[] drawables = new Drawable[2];
-                            drawables[0] = new ColorDrawable(getResources().getColor(R.color.transparent));
-                            drawables[1] = mDrawables[0];
-                            TransitionDrawable transitionDrawable = new TransitionDrawable(drawables);
-                            transitionDrawable.setCrossFadeEnabled(true);
-                            transitionDrawable.startTransition(200);
-                            setImageDrawable(transitionDrawable);
-//                            setImageResource(mDefaultImageId);
+                            if (isImmediate) {
+                                setImageResource(mDefaultImageId);
+                            } else {
+                                // Fade in the default image
+                                Drawable[] drawables = new Drawable[2];
+                                drawables[0] = new ColorDrawable(getResources().getColor(R.color.transparent));
+                                drawables[1] = mDrawables[0];
+                                TransitionDrawable transitionDrawable = new TransitionDrawable(drawables);
+                                transitionDrawable.setCrossFadeEnabled(true);
+                                setImageDrawable(transitionDrawable);
+                                transitionDrawable.startTransition(200);
+                            }
                         }
                     }
                 }, mImageType);
