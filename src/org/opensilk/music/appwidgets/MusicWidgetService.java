@@ -157,31 +157,24 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
     /*
      * Create views depending on size, and style
-     * TODO: FIX WHEN OTHER LARGE WIDGETS ARE ADDED
      */
     public RemoteViews createView(int widgetSize, int widgetStyle) {
         int layoutId = -1;
-        String idInfix = "";
         switch (widgetSize) {
             case ULTRA_MINI:
                 layoutId = R.layout.music_widget_ultra_mini;
-                idInfix = "ultra_mini";
                 break;
             case MINI:
                 layoutId = R.layout.music_widget_mini;
-                idInfix = "mini";
                 break;
             case SMALL:
                 layoutId = R.layout.music_widget_small;
-                idInfix = "small";
                 break;
             case LARGE:
                 if (widgetStyle == STYLE_LARGE_ONE) {
                     layoutId = R.layout.music_widget_large_style_one;
-                    idInfix = "large_style_one";
                 } else if (widgetStyle == STYLE_LARGE_TWO) {
                     layoutId = R.layout.music_widget_large_style_two;
-                    idInfix = "large_style_two";
                 }
         }
 
@@ -191,42 +184,42 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
         /* Album artwork -- set for all widgets */
         if (mArtwork != null) {
-            views.setImageViewBitmap(getId(idInfix, "album_art"), mArtwork);
+            views.setImageViewBitmap(R.id.widget_album_art, mArtwork);
         } else {
-            views.setImageViewResource(getId(idInfix, "album_art"), R.drawable.default_artwork);
+            views.setImageViewResource(R.id.widget_album_art, R.drawable.default_artwork);
         }
 
         /* Pause / Play -- set for all widgets */
-        views.setImageViewResource(getId(idInfix, "play"), mIsPlaying ?
+        views.setImageViewResource(R.id.widget_play, mIsPlaying ?
                 R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
         pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
-        views.setOnClickPendingIntent(getId(idInfix, "play"), pendingIntent);
+        views.setOnClickPendingIntent(R.id.widget_play, pendingIntent);
 
         if (widgetSize == ULTRA_MINI) { // Ultra Mini only
-            views.setOnClickPendingIntent(getId(idInfix, "mask"), pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_mask, pendingIntent);
         }
 
         /* Next / Prev */
         if (widgetSize >= MINI) { // Mini, Small, Large
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
-            views.setOnClickPendingIntent(getId(idInfix, "previous"), pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_previous, pendingIntent);
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.NEXT_ACTION, serviceName);
-            views.setOnClickPendingIntent(getId(idInfix, "next"), pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_next, pendingIntent);
         }
 
         /* Artist name and song title */
         if (widgetSize >= SMALL) { //Small, Large
 
-            views.setTextViewText(getId(idInfix, "artist_name"), mArtistName);
-            views.setTextViewText(getId(idInfix, "song_title"), mTrackName);
+            views.setTextViewText(R.id.widget_artist_name, mArtistName);
+            views.setTextViewText(R.id.widget_song_title, mTrackName);
         }
 
         /* Shuffle / Repeat */
         if (widgetSize == LARGE) {
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.SHUFFLE_ACTION, serviceName);
-            views.setOnClickPendingIntent(getId(idInfix, "shuffle"), pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_shuffle, pendingIntent);
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.REPEAT_ACTION, serviceName);
-            views.setOnClickPendingIntent(getId(idInfix, "repeat"), pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_repeat, pendingIntent);
 
             int resId;
 
@@ -241,7 +234,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
                     resId = R.drawable.btn_playback_shuffle_all;
                     break;
             }
-            views.setImageViewResource(getId(idInfix, "shuffle"), resId);
+            views.setImageViewResource(R.id.widget_shuffle, resId);
 
             switch (mRepeatMode) {
                 case MusicPlaybackService.REPEAT_ALL:
@@ -254,19 +247,10 @@ public class MusicWidgetService extends Service implements ServiceConnection {
                     resId = R.drawable.btn_playback_repeat;
                     break;
             }
-            views.setImageViewResource(getId(idInfix, "repeat"), resId);
+            views.setImageViewResource(R.id.widget_repeat, resId);
         }
 
         return views;
-    }
-
-    /*
-     * Helpers
-     */
-
-    private int getId(String infix, String suffix) {
-        return getResources().getIdentifier("widget_" + infix + "_" + suffix,
-                "id", getPackageName());
     }
 
     protected PendingIntent buildPendingIntent(Context context, String action,

@@ -23,7 +23,7 @@
     android:background="@drawable/drop_shadow">
 
     <ImageView
-        android:id="@+id/widget_small_album_art"
+        android:id="@+id/widget_album_art"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
@@ -44,7 +44,7 @@
             android:background="#CC000000">
 
             <ImageButton
-                android:id="@+id/widget_small_previous"
+                android:id="@+id/widget_previous"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -54,7 +54,7 @@
                 android:src="@drawable/btn_playback_previous" />
 
             <ImageButton
-                android:id="@+id/widget_small_play"
+                android:id="@+id/widget_play"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -64,7 +64,7 @@
                 android:src="@drawable/btn_playback_play" />
 
             <ImageButton
-                android:id="@+id/widget_small_next"
+                android:id="@+id/widget_next"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -83,17 +83,21 @@
             android:background="#CC000000">
 
             <TextView
-                android:id="@+id/widget_small_artist_name"
+                android:id="@+id/widget_artist_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:gravity="center" />
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="marquee" />
 
             <TextView
-                android:id="@+id/widget_small_song_title"
+                android:id="@+id/widget_song_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center" />
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="marquee" />
 
         </LinearLayout>
 

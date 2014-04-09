@@ -22,7 +22,7 @@
     android:background="@drawable/drop_shadow">
 
     <ImageView
-        android:id="@+id/widget_large_style_two_album_art"
+        android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY" />
@@ -40,21 +40,25 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/widget_large_style_two_artist_name"
+                android:id="@+id/widget_artist_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:gravity="center" />
+                android:gravity="center"
+                android:singleLine="true"
+                android:ellipsize="marquee" />
 
             <TextView
-                android:id="@+id/widget_large_style_two_song_title"
+                android:id="@+id/widget_song_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:singleLine="true"
+                android:ellipsize="marquee" />
 
         </LinearLayout>
 
@@ -65,7 +69,7 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/widget_large_style_two_shuffle"
+                android:id="@+id/widget_shuffle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -76,14 +80,14 @@
 
             <!-- TODO: Configure button (Needs to move to the right) -->
             <ImageButton
-                android:id="@+id/widget_large_style_two_configure"
+                android:id="@+id/widget_configure"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@null" />
 
             <ImageButton
-                android:id="@+id/widget_large_style_two_repeat"
+                android:id="@+id/widget_repeat"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -100,7 +104,7 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/widget_large_style_two_previous"
+                android:id="@+id/widget_previous"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -110,7 +114,7 @@
                 android:src="@drawable/btn_playback_previous" />
 
             <ImageButton
-                android:id="@+id/widget_large_style_two_play"
+                android:id="@+id/widget_play"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -120,7 +124,7 @@
                 android:src="@drawable/btn_playback_play" />
 
             <ImageButton
-                android:id="@+id/widget_large_style_two_next"
+                android:id="@+id/widget_next"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

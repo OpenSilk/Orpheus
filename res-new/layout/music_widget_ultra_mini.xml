@@ -22,13 +22,13 @@
     android:background="@drawable/drop_shadow">
 
     <ImageView
-        android:id="@+id/widget_ultra_mini_album_art"
+        android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"/>
 
     <ImageButton
-        android:id="@+id/widget_ultra_mini_play"
+        android:id="@+id/widget_play"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/accessibility_play"
@@ -36,7 +36,7 @@
         android:src="@drawable/btn_playback_play" />
 
     <FrameLayout
-        android:id="@+id/widget_ultra_mini_mask"
+        android:id="@+id/widget_mask"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?android:attr/selectableItemBackground" />

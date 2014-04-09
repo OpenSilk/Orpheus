@@ -22,7 +22,7 @@
     android:background="@drawable/drop_shadow">
 
     <ImageView
-        android:id="@+id/widget_large_style_one_album_art"
+        android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"/>
@@ -39,7 +39,7 @@
             android:background="#96000000">
 
             <ImageButton
-                android:id="@+id/widget_large_style_one_previous"
+                android:id="@+id/widget_previous"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -49,7 +49,7 @@
                 android:src="@drawable/btn_playback_previous" />
 
             <ImageButton
-                android:id="@+id/widget_large_style_one_play"
+                android:id="@+id/widget_play"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -59,7 +59,7 @@
                 android:src="@drawable/btn_playback_play" />
 
             <ImageButton
-                android:id="@+id/widget_large_style_one_next"
+                android:id="@+id/widget_next"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -79,15 +79,19 @@
             android:background="#96000000">
 
             <TextView
-                android:id="@+id/widget_large_style_one_artist_name"
+                android:id="@+id/widget_artist_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="marquee" />
 
             <TextView
-                android:id="@+id/widget_large_style_one_song_title"
+                android:id="@+id/widget_song_title"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="marquee" />
 
         </LinearLayout>
         
@@ -99,7 +103,7 @@
             android:background="#96000000">
 
             <ImageButton
-                android:id="@+id/widget_large_style_one_shuffle"
+                android:id="@+id/widget_shuffle"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -110,14 +114,14 @@
 
             <!-- TODO: Configure button (Needs to move above shuffle) -->
             <ImageButton
-                android:id="@+id/widget_large_style_one_configure"
+                android:id="@+id/widget_configure"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@null" />
 
             <ImageButton
-                android:id="@+id/widget_large_style_one_repeat"
+                android:id="@+id/widget_repeat"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"

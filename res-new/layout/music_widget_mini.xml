@@ -22,7 +22,7 @@
     android:background="@drawable/drop_shadow">
 
     <ImageView
-        android:id="@+id/widget_mini_album_art"
+        android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"/>
@@ -35,7 +35,7 @@
         android:background="#96000000">
 
         <ImageButton
-            android:id="@+id/widget_mini_previous"
+            android:id="@+id/widget_previous"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -45,7 +45,7 @@
             android:src="@drawable/btn_playback_previous" />
 
         <ImageButton
-            android:id="@+id/widget_mini_play"
+            android:id="@+id/widget_play"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -55,7 +55,7 @@
             android:src="@drawable/btn_playback_play" />
 
         <ImageButton
-            android:id="@+id/widget_mini_next"
+            android:id="@+id/widget_next"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
