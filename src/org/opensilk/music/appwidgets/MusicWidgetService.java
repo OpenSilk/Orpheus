@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -34,6 +36,7 @@ import android.widget.RemoteViews;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 
@@ -67,6 +70,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
     private AppWidgetManager mAppWidgetManager;
     private ArtworkProviderUtil mArtworkProvider;
+    private ThemeHelper mThemeHelper;
 
     private String mArtistName;
     private String mTrackName;
@@ -87,6 +91,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         mToken = MusicUtils.bindToService(this, this);
         mAppWidgetManager = AppWidgetManager.getInstance(this);
         mArtworkProvider = new ArtworkProviderUtil(this);
+        mThemeHelper = ThemeHelper.getInstance(this);
         HandlerThread thread = new HandlerThread("WidgetService", Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         // All widget updates are posted here to prevent blocking the main thread,
@@ -191,7 +196,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
         /* Pause / Play -- set for all widgets */
         views.setImageViewResource(R.id.widget_play, mIsPlaying ?
-                R.drawable.btn_playback_pause : R.drawable.btn_playback_play);
+                R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
         pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
         views.setOnClickPendingIntent(R.id.widget_play, pendingIntent);
 
@@ -221,33 +226,37 @@ public class MusicWidgetService extends Service implements ServiceConnection {
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.REPEAT_ACTION, serviceName);
             views.setOnClickPendingIntent(R.id.widget_repeat, pendingIntent);
 
-            int resId;
+            Drawable drawable;
 
             switch (mShuffleMode) {
                 case MusicPlaybackService.SHUFFLE_NONE:
-                    resId = R.drawable.btn_playback_shuffle;
+                    drawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_white);
                     break;
                 case MusicPlaybackService.SHUFFLE_AUTO:
-                    resId = R.drawable.btn_playback_shuffle_all;
-                    break;
                 default:
-                    resId = R.drawable.btn_playback_shuffle_all;
+                    drawable = mThemeHelper.getShuffleButtonDrawable();
                     break;
             }
-            views.setImageViewResource(R.id.widget_shuffle, resId);
+            if (drawable != null && drawable instanceof BitmapDrawable) {
+                views.setImageViewBitmap(R.id.widget_shuffle, ((BitmapDrawable) drawable).getBitmap());
+                drawable = null;
+            }
 
             switch (mRepeatMode) {
                 case MusicPlaybackService.REPEAT_ALL:
-                    resId = R.drawable.btn_playback_repeat_all;
+                    drawable = mThemeHelper.getRepeatButtonDrawable();
                     break;
                 case MusicPlaybackService.REPEAT_CURRENT:
-                    resId = R.drawable.btn_playback_repeat_one;
+                    drawable = mThemeHelper.getRepeatOneButtonDrawable();
                     break;
                 default:
-                    resId = R.drawable.btn_playback_repeat;
+                    drawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_white);
                     break;
             }
-            views.setImageViewResource(R.id.widget_repeat, resId);
+            if (drawable != null && drawable instanceof BitmapDrawable) {
+                views.setImageViewBitmap(R.id.widget_repeat, ((BitmapDrawable) drawable).getBitmap());
+                drawable = null;
+            }
         }
 
         return views;

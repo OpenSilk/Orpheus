@@ -42,7 +42,7 @@
             android:background="?android:attr/selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_prev"
-            android:src="@drawable/btn_playback_previous" />
+            android:src="@drawable/ic_action_playback_prev_white" />
 
         <ImageButton
             android:id="@+id/widget_play"
@@ -52,7 +52,7 @@
             android:background="?android:attr/selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_play"
-            android:src="@drawable/btn_playback_play" />
+            android:src="@drawable/ic_action_playback_play_white" />
 
         <ImageButton
             android:id="@+id/widget_next"
@@ -62,7 +62,7 @@
             android:background="?android:attr/selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_next"
-            android:src="@drawable/btn_playback_next" />
+            android:src="@drawable/ic_action_playback_next_white" />
 
     </LinearLayout>
 

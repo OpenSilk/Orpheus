@@ -57,8 +57,7 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
         if (isLightTheme) {
             mRepeatDrawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_black);
         } else {
-            mRepeatDrawable = ThemeHelper.themeDrawable(getContext(),
-                    R.drawable.ic_action_playback_repeat_black, getResources().getColor(android.R.color.white));
+            mRepeatDrawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_white);
         }
         ThemeHelper themeHelper = ThemeHelper.getInstance(getContext());
         mRepeatAllDrawable = themeHelper.getRepeatButtonDrawable();

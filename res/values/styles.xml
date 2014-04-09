@@ -55,18 +55,18 @@
     </style>
 
     <style name="NotificationAction.Previous" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/btn_playback_previous</item>
+        <item name="android:src">@drawable/ic_action_playback_prev_white</item>
         <item name="android:visibility">gone</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="NotificationAction.Play" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/btn_playback_play</item>
+        <item name="android:src">@drawable/ic_action_playback_play_white</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="NotificationAction.Next" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/btn_playback_next</item>
+        <item name="android:src">@drawable/ic_action_playback_next_white</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 

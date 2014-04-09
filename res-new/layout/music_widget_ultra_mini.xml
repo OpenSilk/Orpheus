@@ -33,7 +33,7 @@
         android:layout_height="match_parent"
         android:contentDescription="@string/accessibility_play"
         android:background="@null"
-        android:src="@drawable/btn_playback_play" />
+        android:src="@drawable/ic_action_playback_play_white" />
 
     <FrameLayout
         android:id="@+id/widget_mask"

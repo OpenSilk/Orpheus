@@ -62,10 +62,8 @@ public class RepeatingImageButton extends ImageButton implements OnClickListener
             mNextDrawable = getResources().getDrawable(R.drawable.ic_action_playback_next_black);
             mPrevDrawable = getResources().getDrawable(R.drawable.ic_action_playback_prev_black);
         } else {
-            mNextDrawable = ThemeHelper.themeDrawable(getContext(),
-                    R.drawable.ic_action_playback_next_black, getResources().getColor(android.R.color.white));
-            mPrevDrawable = ThemeHelper.themeDrawable(getContext(),
-                    R.drawable.ic_action_playback_prev_black, getResources().getColor(android.R.color.white));
+            mNextDrawable = getResources().getDrawable(R.drawable.ic_action_playback_next_white);
+            mPrevDrawable = getResources().getDrawable(R.drawable.ic_action_playback_prev_white);
         }
         setFocusable(true);
         setLongClickable(true);

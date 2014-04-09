@@ -76,7 +76,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_shuffle"
-                android:src="@drawable/btn_playback_shuffle" />
+                android:src="@drawable/ic_action_playback_shuffle_white" />
 
             <!-- TODO: Configure button (Needs to move to the right) -->
             <ImageButton
@@ -94,7 +94,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_repeat"
-                android:src="@drawable/btn_playback_repeat" />
+                android:src="@drawable/ic_action_playback_repeat_white" />
 
         </LinearLayout>
 
@@ -111,7 +111,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_prev"
-                android:src="@drawable/btn_playback_previous" />
+                android:src="@drawable/ic_action_playback_prev_white" />
 
             <ImageButton
                 android:id="@+id/widget_play"
@@ -121,7 +121,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_play"
-                android:src="@drawable/btn_playback_play" />
+                android:src="@drawable/ic_action_playback_play_white" />
 
             <ImageButton
                 android:id="@+id/widget_next"
@@ -131,7 +131,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_next"
-                android:src="@drawable/btn_playback_next" />
+                android:src="@drawable/ic_action_playback_next_white" />
 
         </LinearLayout>
     </LinearLayout>

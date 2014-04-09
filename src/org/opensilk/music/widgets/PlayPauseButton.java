@@ -56,10 +56,8 @@ public class PlayPauseButton extends ImageButton implements OnClickListener, OnL
             mPlayButton = getResources().getDrawable(R.drawable.ic_action_playback_play_black);
             mPauseButton = getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
         } else {
-            mPlayButton = ThemeHelper.themeDrawable(getContext(),
-                    R.drawable.ic_action_playback_play_black, getResources().getColor(android.R.color.white));
-            mPauseButton = ThemeHelper.themeDrawable(getContext(),
-                    R.drawable.ic_action_playback_pause_black, getResources().getColor(android.R.color.white));
+            mPlayButton = getResources().getDrawable(R.drawable.ic_action_playback_play_white);
+            mPauseButton = getResources().getDrawable(R.drawable.ic_action_playback_pause_white);
         }
         setOnClickListener(this);
         setOnLongClickListener(this);
