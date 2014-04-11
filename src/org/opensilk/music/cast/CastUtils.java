@@ -29,7 +29,6 @@ import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 
-import org.opensilk.cast.ICastService;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.ReconnectionStatus;
 import org.opensilk.cast.util.Utils;
@@ -39,6 +38,8 @@ import java.net.UnknownHostException;
 
 import hugo.weaving.DebugLog;
 
+import static org.opensilk.cast.helpers.RemoteCastServiceManager.sCastService;
+
 /**
  * Created by drew on 2/13/14.
  */
@@ -47,8 +48,6 @@ public class CastUtils {
     private CastUtils() {
         //static
     }
-
-    public static ICastService sCastService;
 
     /**
      * Increments volume on remote device by delta

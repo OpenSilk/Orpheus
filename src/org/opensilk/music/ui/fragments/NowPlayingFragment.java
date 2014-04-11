@@ -62,6 +62,8 @@ import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 
+import java.lang.ref.WeakReference;
+
 import hugo.weaving.DebugLog;
 
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
@@ -138,7 +140,6 @@ public class NowPlayingFragment extends Fragment implements
     private long mStartSeekPos = 0;
     private long mLastSeekEventTime;
     private long mLastShortSeekEventTime;
-    private boolean mIsPaused = false;
     private boolean mFromTouch = false;
 
     protected BaseSlidingActivity mActivity;
@@ -155,7 +156,7 @@ public class NowPlayingFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Initialize the handler used to update the current time
-        mTimeHandler = new TimeHandler();
+        mTimeHandler = new TimeHandler(this);
     }
 
     @Override
@@ -173,7 +174,6 @@ public class NowPlayingFragment extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
-        mIsPaused = false;
         // Refresh the current time
         final long next = refreshCurrentTime();
         queueNextRefresh(next);
@@ -190,7 +190,6 @@ public class NowPlayingFragment extends Fragment implements
     @Override
     public void onPause() {
         super.onPause();
-        mIsPaused = true;
         //Disable visualizer
         destroyVisualizer();
     }
@@ -678,7 +677,7 @@ public class NowPlayingFragment extends Fragment implements
      * @param delay When to update
      */
     private void queueNextRefresh(final long delay) {
-        if (!mIsPaused) {
+        if (isResumed()) {
             final Message message = mTimeHandler.obtainMessage(REFRESH_TIME);
             mTimeHandler.removeMessages(REFRESH_TIME);
             mTimeHandler.sendMessageDelayed(message, delay);
@@ -848,13 +847,23 @@ public class NowPlayingFragment extends Fragment implements
     /**
      * Used to update the current time string
      */
-    private final class TimeHandler extends Handler {
+    private static final class TimeHandler extends Handler {
+        private final WeakReference<NowPlayingFragment> reference;
+
+        private TimeHandler(NowPlayingFragment fragment) {
+            this.reference = new WeakReference<>(fragment);
+        }
+
         @Override
         public void handleMessage(final Message msg) {
+            NowPlayingFragment f = reference.get();
+            if (f == null) {
+                return;
+            }
             switch (msg.what) {
                 case REFRESH_TIME:
-                    final long next = refreshCurrentTime();
-                    queueNextRefresh(next);
+                    final long next = f.refreshCurrentTime();
+                    f.queueNextRefresh(next);
                     break;
                 default:
                     break;

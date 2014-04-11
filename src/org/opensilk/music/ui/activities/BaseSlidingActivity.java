@@ -61,13 +61,13 @@ import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Locale;
 
 import hugo.weaving.DebugLog;
 
 import static org.opensilk.cast.CastMessage.*;
-import static org.opensilk.music.cast.CastUtils.sCastService;
 
 /**
  * A base {@link FragmentActivity} used to update the bottom bar and
@@ -101,9 +101,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     /**
      * Cast stuff
      */
+    private RemoteCastServiceManager.ServiceToken mCastServiceToken;
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
-    private RemoteCastServiceManager mCastServiceHelper;
     private boolean mTransientNetworkDisconnection = false;
 
     // Theme resourses
@@ -137,9 +137,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         startService(new Intent(this, ArtworkService.class));
 
         // Bind cast service
-        mCastServiceHelper = new RemoteCastServiceManager(this, new Messenger(mCastManagerCallbackHandler));
-        mCastServiceHelper.setCallback(mCastServiceConnectionCallback);
-        mCastServiceHelper.bind();
+        mCastServiceToken = RemoteCastServiceManager.bindToService(this,
+                new Messenger(new CastManagerCallbackHandler(this)),
+                null);
 
         // Initialize the media router
         mMediaRouter = MediaRouter.getInstance(this);
@@ -265,8 +265,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 null, this, ArtworkService.class));
 
         //Unbind from cast service
-        mCastServiceHelper.unbind();
-        sCastService = null;
+        RemoteCastServiceManager.unbindFromService(mCastServiceToken);
 
         // Remove any music status listeners
         mMusicStateListener.clear();
@@ -427,9 +426,21 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     /**
      * Handle messages sent from CastService notifying of CastManager events
      */
-    private final Handler mCastManagerCallbackHandler = new Handler() {
+    private static final class CastManagerCallbackHandler extends Handler  {
+        private final WeakReference<BaseSlidingActivity> reference;
+
+        private CastManagerCallbackHandler(BaseSlidingActivity activity) {
+            reference = new WeakReference<>(activity);
+        }
+
         @Override
         public void handleMessage(Message msg) {
+            BaseSlidingActivity activity = reference.get();
+            if (activity == null) {
+                Log.e(TAG, "CastManagerCallbackHandler: activity was null");
+                return;
+            }
+
             switch (msg.what) {
                 case CAST_APPLICATION_CONNECTION_FAILED:
                     final String errorMsg;
@@ -445,36 +456,36 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                             break;
                     }
                     Log.d(TAG, "onApplicationConnectionFailed(): failed due to: " + errorMsg);
-                    resetDefaultMediaRoute();
+                    resetDefaultMediaRoute(activity);
                     // notify if possible
                     if (MusicUtils.isForeground()) {
-                        new AlertDialog.Builder(BaseSlidingActivity.this)
+                        new AlertDialog.Builder(activity)
                                 .setTitle(R.string.cast_error)
                                 .setMessage(String.format(Locale.getDefault(),
-                                        getString(R.string.cast_failed_to_connect), errorMsg))
+                                        activity.getString(R.string.cast_failed_to_connect), errorMsg))
                                 .setNeutralButton(android.R.string.ok, null)
                                 .show();
                     }
                     break;
                 case CAST_APPLICATION_DISCONNECTED:
                     // This is just in case
-                    resetDefaultMediaRoute();
+                    resetDefaultMediaRoute(activity);
                     break;
                 case CAST_CONNECTION_SUSPENDED:
-                    mTransientNetworkDisconnection = true;
+                    activity.mTransientNetworkDisconnection = true;
                     break;
                 case CAST_CONNECTIVITY_RECOVERED:
-                    mTransientNetworkDisconnection = false;
+                    activity.mTransientNetworkDisconnection = false;
                     break;
                 case CAST_DISCONNECTED:
-                    mTransientNetworkDisconnection = false;
+                    activity.mTransientNetworkDisconnection = false;
                     break;
                 case CAST_FAILED:
                     // notify if possible
                     if (MusicUtils.isForeground()) {
                         switch (msg.arg1) {
                             case (R.string.failed_load):
-                                new AlertDialog.Builder(BaseSlidingActivity.this)
+                                new AlertDialog.Builder(activity)
                                         .setTitle(R.string.cast_error)
                                         .setMessage(R.string.failed_load)
                                         .setNeutralButton(android.R.string.ok, null)
@@ -490,24 +501,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
          * We only do this to reset the mediarouter buttons, the cast manager
          * will have already done this, but our buttons dont know about it
          */
-        private void resetDefaultMediaRoute() {
+        private void resetDefaultMediaRoute(BaseSlidingActivity activity) {
             // Reset the route
-            mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
-        }
-    };
-
-    /**
-     * Service connection listener for cast service bind
-     */
-    private final CastServiceConnectionCallback mCastServiceConnectionCallback = new CastServiceConnectionCallback() {
-        @Override
-        public void onCastServiceConnected() {
-            sCastService = mCastServiceHelper.getService();
-        }
-
-        @Override
-        public void onCastServiceDisconnected() {
-            sCastService = null;
+            activity.mMediaRouter.selectRoute(activity.mMediaRouter.getDefaultRoute());
         }
     };
 

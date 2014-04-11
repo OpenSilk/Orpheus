@@ -70,6 +70,7 @@ import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.LocalCastServiceManager;
+import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
@@ -478,9 +479,9 @@ public class MusicPlaybackService extends Service {
     private ArtworkProviderUtil mArtworkUtil;
 
     /**
-     * Cast Service helper
+     * Token for SilkCastService
      */
-    private LocalCastServiceManager mCastServiceHelper;
+    private LocalCastServiceManager.ServiceToken mCastServiceToken;
 
     /**
      * Cast manager
@@ -630,9 +631,7 @@ public class MusicPlaybackService extends Service {
         mPlayer.setHandler(mPlayerHandler);
 
         // Bind to the cast service
-        mCastServiceHelper = new LocalCastServiceManager(this);
-        mCastServiceHelper.setCallback(mCastServiceConnectionCallback);
-        mCastServiceHelper.bind();
+        mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);
 
         // Initialize the remote progress updater task
         mRemoteProgressHandler = new RemoteProgressHandler(this);
@@ -763,7 +762,7 @@ public class MusicPlaybackService extends Service {
         }
 
         // Unbind cast service
-        mCastServiceHelper.unbind();
+        LocalCastServiceManager.unbindFromService(mCastServiceToken);
 
         // Stop http server
         stopCastServer();
@@ -2996,7 +2995,7 @@ public class MusicPlaybackService extends Service {
         @Override
         public void onCastServiceConnected() {
             // Initialize the cast manager
-            mCastManager = mCastServiceHelper.getService().getCastManager();
+            mCastManager = LocalCastServiceManager.sCastService.getCastManager();
             mCastManager.addCastConsumer(mCastConsumer);
         }
 
