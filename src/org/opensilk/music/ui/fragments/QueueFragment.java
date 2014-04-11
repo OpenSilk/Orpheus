@@ -259,4 +259,9 @@ public class QueueFragment extends Fragment implements
 //            getLoaderManager().restartLoader(LOADER, null, this);
 //        }
     }
+
+    @Override
+    public void onPlaybackModeChanged() {
+        //pass
+    }
 }

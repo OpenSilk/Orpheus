@@ -179,12 +179,4 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
         }
     }
 
-    @Override
-    protected void maybeShowHeaderMediaRouteButton() {
-        // Only show header mediarouter button on phones
-//disable pane mediarouter for now
-//        if (!mIsLargeLandscape) {
-//            super.maybeShowHeaderMediaRouteButton();
-//        }
-    }
 }

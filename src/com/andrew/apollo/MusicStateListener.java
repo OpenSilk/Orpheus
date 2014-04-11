@@ -26,4 +26,10 @@ public interface MusicStateListener {
      */
     public void onQueueChanged();
 
+    /**
+     * Called when {@link com.andrew.apollo.MusicPlaybackService#SHUFFLEMODE_CHANGED}
+     * or {@link com.andrew.apollo.MusicPlaybackService#REPEATMODE_CHANGED} is invoked
+     */
+    public void onPlaybackModeChanged();
+
 }

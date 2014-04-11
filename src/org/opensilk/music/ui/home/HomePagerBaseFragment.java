@@ -156,6 +156,11 @@ public abstract class HomePagerBaseFragment<D> extends Fragment implements
         //pass
     }
 
+    @Override
+    public void onPlaybackModeChanged() {
+        //pass
+    }
+
     protected abstract boolean isSimpleLayout();
 
     protected abstract boolean isDetailedLayout();

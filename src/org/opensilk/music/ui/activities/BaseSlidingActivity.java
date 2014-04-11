@@ -24,22 +24,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
-import android.media.audiofx.Visualizer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
-import android.support.v7.app.MediaRouteButton;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
@@ -47,22 +41,13 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.PopupMenu;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.NowPlayingCursor;
-import com.andrew.apollo.loaders.QueueLoader;
-import com.andrew.apollo.menu.CreateNewPlaylist;
-import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
-import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -71,31 +56,16 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
-import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
-import org.opensilk.music.ui.fragments.QueueFragment;
-import org.opensilk.music.widgets.AudioVisualizationView;
-import org.opensilk.music.widgets.FullScreenArtworkImageView;
-import org.opensilk.music.widgets.HeaderOverflowButton;
-import org.opensilk.music.widgets.PanelHeaderLayout;
-import org.opensilk.music.widgets.PlayPauseButton;
-import org.opensilk.music.widgets.QueueButton;
-import org.opensilk.music.widgets.RepeatButton;
-import org.opensilk.music.widgets.RepeatingImageButton;
-import org.opensilk.music.widgets.ShuffleButton;
-import org.opensilk.music.widgets.ThumbnailArtworkImageView;
+import org.opensilk.music.ui.fragments.NowPlayingFragment;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Locale;
 
 import hugo.weaving.DebugLog;
 
-import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
-import static com.andrew.apollo.utils.MusicUtils.sService;
 import static org.opensilk.cast.CastMessage.*;
 import static org.opensilk.music.cast.CastUtils.sCastService;
 
@@ -109,12 +79,9 @@ import static org.opensilk.music.cast.CastUtils.sCastService;
  */
 public abstract class BaseSlidingActivity extends ActionBarActivity implements
         ServiceConnection,
-        SeekBar.OnSeekBarChangeListener,
         SlidingUpPanelLayout.PanelSlideListener {
 
     private static final String TAG = BaseSlidingActivity.class.getSimpleName();
-    // Message to refresh the time
-    private static final int REFRESH_TIME = 1;
 
     /** Playstate and meta change listener */
     private final ArrayList<MusicStateListener> mMusicStateListener = Lists.newArrayList();
@@ -125,84 +92,23 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     /** Broadcast receiver */
     private PlaybackStatus mPlaybackStatus;
 
-    /** Handler used to update the current time */
-    private TimeHandler mTimeHandler;
-
-    // Background art
-    private FullScreenArtworkImageView mArtBackground;
-
-    /** Panel Header */
-    private PanelHeaderLayout mPanelHeader;
-    //Visualizer object
-    private Visualizer mVisualizer;
-    //Visualization view
-    private AudioVisualizationView mVisualizerView;
-    // Previous button
-    private RepeatingImageButton mHeaderPrevButton;
-    //play/pause
-    private PlayPauseButton mHeaderPlayPauseButton;
-    // Next button
-    private RepeatingImageButton mHeaderNextButton;
-    // Album art
-    private ThumbnailArtworkImageView mHeaderAlbumArt;
-    // queue switch button
-    private QueueButton mHeaderQueueButton;
-    // overflow btn
-    private HeaderOverflowButton mHeaderOverflow;
-    // Track name
-    private TextView mHeaderTrackName;
-    // Artist name
-    private TextView mHeaderArtistName;
-    //media router btn
-    private MediaRouteButton mHeaderMediaRouteButton;
-
-    /** Panel Footer */
-    // Play and pause button
-    private PlayPauseButton mFooterPlayPauseButton;
-    // Repeat button
-    private RepeatButton mFooterRepeatButton;
-    // Shuffle button
-    private ShuffleButton mFooterShuffleButton;
-    // Previous button
-    private RepeatingImageButton mFooterPreviousButton;
-    // Next button
-    private RepeatingImageButton mFooterNextButton;
-    // Progess
-    private SeekBar mFooterProgress;
-    // Current time
-    private TextView mFooterCurrentTime;
-    // Total time
-    private TextView mFooterTotalTime;
-
     /** Sliding panel */
     protected SlidingUpPanelLayout mSlidingPanel;
 
-    /** Whether the queue is showing */
-    private boolean mQueueShowing;
-
-    private long mPosOverride = -1;
-    private long mStartSeekPos = 0;
-    private long mLastSeekEventTime;
-    private long mLastShortSeekEventTime;
-    private boolean mIsPaused = false;
-    private boolean mFromTouch = false;
+    /** Sliding panel content */
+    protected NowPlayingFragment mNowPlayingFragment;
 
     /**
      * Cast stuff
      */
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
-    /** Determines whether the cast buttons should be shown */
-    private boolean mCastDeviceAvailable = false;
     private RemoteCastServiceManager mCastServiceHelper;
     private boolean mTransientNetworkDisconnection = false;
 
     // Theme resourses
     private ThemeHelper mThemeHelper;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,12 +136,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         //Cancel any pending clear cache requests
         startService(new Intent(this, ArtworkService.class));
 
-        // Initialize the broadcast receiver
-        mPlaybackStatus = new PlaybackStatus(this);
-
-        // Initialize the handler used to update the current time
-        mTimeHandler = new TimeHandler(this);
-
         // Bind cast service
         mCastServiceHelper = new RemoteCastServiceManager(this, new Messenger(mCastManagerCallbackHandler));
         mCastServiceHelper.setCallback(mCastServiceConnectionCallback);
@@ -248,54 +148,38 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 //.addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
                 .build();
 
+        // Initialize the sliding pane
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
         mSlidingPanel.setDragView(findViewById(R.id.track_artist_info));
         mSlidingPanel.setPanelSlideListener(this);
 
-        // Initialze the panel
-        initPanel();
-
+        // Get panel fragment reference
+        mNowPlayingFragment = (NowPlayingFragment) getSupportFragmentManager().findFragmentById(R.id.now_playing_fragment);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onNewIntent(Intent intent) {
         setIntent(intent);
-        startPlayback();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onServiceConnected(final ComponentName name, final IBinder service) {
-        startPlayback();
-        // Set the playback drawables
-        updatePlaybackControls();
-        // Current info
-        updateNowPlayingInfo();
-        // Update the favorites icon
-        invalidateOptionsMenu();
-
-        // Setup visualizer
-        if (mVisualizer == null) {
-            initVisualizer();
+        boolean handled = mNowPlayingFragment.startPlayback(intent);
+        if (handled) {
+            setIntent(null);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onServiceDisconnected(final ComponentName name) {
-        destroyVisualizer();
+    public void onServiceConnected(final ComponentName name, final IBinder service) {
+        boolean handled = mNowPlayingFragment.startPlayback(getIntent());
+        if (handled) {
+            setIntent(null);
+        }
+        mNowPlayingFragment.onServiceConnected();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public void onServiceDisconnected(final ComponentName name) {
+        mNowPlayingFragment.onServiceDisconnected();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Media router
@@ -310,9 +194,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         return super.onCreateOptionsMenu(menu);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -321,16 +202,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
                     MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
         }
-        // Set the playback drawables
-        updatePlaybackControls();
-        // Current info
-        updateNowPlayingInfo();
         // Make sure we dont overlap the panel
         maybeHideActionBar();
-        // update visualizer
-        if (mVisualizer == null) {
-            initVisualizer();
-        }
     }
 
     @Override
@@ -338,16 +211,13 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         super.onPause();
         // stop scanning for routes
         mMediaRouter.removeCallback(mMediaRouterCallback);
-        //Disable visualizer
-        destroyVisualizer();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void onStart() {
         super.onStart();
+        // Initialize the broadcast receiver
+        mPlaybackStatus = new PlaybackStatus();
         final IntentFilter filter = new IntentFilter();
         // Play and pause changes
         filter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
@@ -361,32 +231,31 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // refresh queue
         filter.addAction(MusicPlaybackService.QUEUE_CHANGED);
         registerReceiver(mPlaybackStatus, filter);
-        // Refresh the current time
-        final long next = refreshCurrentTime();
-        queueNextRefresh(next);
+
         MusicUtils.notifyForegroundStateChanged(this, true);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void onStop() {
         super.onStop();
+        // Unregister the receiver
+        try {
+            unregisterReceiver(mPlaybackStatus);
+        } catch (final Throwable ignored) {
+            //$FALL-THROUGH$
+        } finally {
+            mPlaybackStatus = null;
+        }
+
         MusicUtils.notifyForegroundStateChanged(this, false);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mIsPaused = false;
-        mTimeHandler.removeMessages(REFRESH_TIME);
+
         // Unbind from the service
         if (mToken != null) {
-
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }
@@ -399,13 +268,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         mCastServiceHelper.unbind();
         sCastService = null;
 
-        // Unregister the receiver
-        try {
-            unregisterReceiver(mPlaybackStatus);
-        } catch (final Throwable e) {
-            //$FALL-THROUGH$
-        }
-
         // Remove any music status listeners
         mMusicStateListener.clear();
     }
@@ -417,7 +279,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             if (savedInstanceState.getBoolean("panel_open", false)) {
                 onPanelExpanded(null);
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
-                    onQueueVisibilityChanged(true);
+                    mNowPlayingFragment.onQueueVisibilityChanged(true);
                 }
             }
         }
@@ -427,12 +289,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("panel_open", mSlidingPanel.isExpanded());
-        outState.putBoolean("queue_showing", mQueueShowing);
+        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onBackPressed() {
         if (mSlidingPanel.isExpanded()) {
@@ -459,55 +318,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         return super.onKeyDown(keyCode, event);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onProgressChanged(final SeekBar bar, final int progress, final boolean fromuser) {
-        if (!fromuser || sService == null) {
-            return;
-        }
-        final long now = SystemClock.elapsedRealtime();
-        if (now - mLastSeekEventTime > 250) {
-            mLastSeekEventTime = now;
-            mLastShortSeekEventTime = now;
-            mPosOverride = MusicUtils.duration() * progress / 1000;
-            MusicUtils.seek(mPosOverride);
-            if (!mFromTouch) {
-                // refreshCurrentTime();
-                mPosOverride = -1;
-            }
-        } else if (now - mLastShortSeekEventTime > 5) {
-            mLastShortSeekEventTime = now;
-            mPosOverride = MusicUtils.duration() * progress / 1000;
-            refreshCurrentTimeText(mPosOverride);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onStartTrackingTouch(final SeekBar bar) {
-        mLastSeekEventTime = 0;
-        mFromTouch = true;
-        if (!mQueueShowing) {
-            mFooterCurrentTime.setVisibility(View.VISIBLE);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onStopTrackingTouch(final SeekBar bar) {
-        if (mPosOverride != -1) {
-            MusicUtils.seek(mPosOverride);
-        }
-        mPosOverride = -1;
-        mFromTouch = false;
-    }
-
     /*
      * implement SlidingUpPanelLayout.PanelSlideListener
      */
@@ -528,423 +338,18 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     @DebugLog
     public void onPanelExpanded(View panel) {
-        mPanelHeader.transitionToOpen();
+        mNowPlayingFragment.onPanelExpanded();
     }
 
     @Override
     @DebugLog
     public void onPanelCollapsed(View panel) {
-        if (mQueueShowing) {
-            popQueueFragment();
-        }
-        mPanelHeader.transitionToClosed();
+        mNowPlayingFragment.onPanelCollapsed();
     }
 
     @Override
     public void onPanelAnchored(View panel) {
-
-    }
-
-    /**
-     * Initializes the items in sliding panel.
-     */
-    private void initPanel() {
-        //Header
-        mPanelHeader = (PanelHeaderLayout) findViewById(R.id.panel_header);
-
-        // Background art
-        mArtBackground = (FullScreenArtworkImageView) findViewById(R.id.panel_background_art);
-
-        //Visualizer view
-        mVisualizerView = (AudioVisualizationView) findViewById(R.id.visualizer_view);
-        mVisualizerView.setVisibility(View.GONE);
-
-        // Previous button
-        mHeaderPrevButton = (RepeatingImageButton) findViewById(R.id.header_action_button_previous);
-        // Set the repeat listener for the previous button
-        mHeaderPrevButton.setRepeatListener(mRewindListener);
-        // Play and pause button
-        mHeaderPlayPauseButton = (PlayPauseButton)findViewById(R.id.header_action_button_play);
-        // Next button
-        mHeaderNextButton = (RepeatingImageButton) findViewById(R.id.header_action_button_next);
-        // Set the repeat listner for the next button
-        mHeaderNextButton.setRepeatListener(mFastForwardListener);
-        // Track name
-        mHeaderTrackName = (TextView)findViewById(R.id.header_track_info);
-        // Artist name
-        mHeaderArtistName = (TextView)findViewById(R.id.header_artist_info);
-        // Album art
-        mHeaderAlbumArt = (ThumbnailArtworkImageView) findViewById(R.id.header_album_art);
-        // Open to the currently playing album profile
-        mHeaderAlbumArt.setOnClickListener(mOpenCurrentAlbumProfile);
-        // Used to show and hide the queue fragment
-        mHeaderQueueButton = (QueueButton) findViewById(R.id.header_switch_queue);
-        mHeaderQueueButton.setOnClickListener(mToggleHiddenPanel);
-        // Set initial queue button drawable
-        mHeaderQueueButton.setQueueShowing(mQueueShowing);
-
-
-        // overflow
-        mHeaderOverflow = (HeaderOverflowButton) findViewById(R.id.header_overflow);
-        mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(BaseSlidingActivity.this, mHeaderOverflow);
-                popupMenu.getMenuInflater().inflate(R.menu.panel, popupMenu.getMenu());
-                popupMenu.setOnMenuItemClickListener(mPanelOverflowMenuClickListener);
-                popupMenu.show();
-            }
-        });
-
-        // init router button
-        mHeaderMediaRouteButton = (MediaRouteButton) findViewById(R.id.panel_mediarouter);
-        mHeaderMediaRouteButton.setRouteSelector(mMediaRouteSelector);
-        mHeaderMediaRouteButton.setDialogFactory(new StyledMediaRouteDialogFactory());
-        mHeaderMediaRouteButton.setVisibility(View.GONE);
-
-        // Play and pause button
-        mFooterPlayPauseButton = (PlayPauseButton)findViewById(R.id.footer_action_button_play);
-        // Shuffle button
-        mFooterShuffleButton = (ShuffleButton)findViewById(R.id.footer_action_button_shuffle);
-        // Repeat button
-        mFooterRepeatButton = (RepeatButton)findViewById(R.id.footer_action_button_repeat);
-        // Previous button
-        mFooterPreviousButton = (RepeatingImageButton)findViewById(R.id.footer_action_button_previous);
-        // Set the repeat listner for the previous button
-        mFooterPreviousButton.setRepeatListener(mRewindListener);
-        // Next button
-        mFooterNextButton = (RepeatingImageButton)findViewById(R.id.footer_action_button_next);
-        // Set the repeat listner for the next button
-        mFooterNextButton.setRepeatListener(mFastForwardListener);
-        // Current time
-        mFooterCurrentTime = (TextView)findViewById(R.id.footer_player_current_time);
-        // Total time
-        mFooterTotalTime = (TextView)findViewById(R.id.footer_player_total_time);
-        // Progress
-        mFooterProgress = (SeekBar)findViewById(android.R.id.progress);
-        // Update the progress
-        mFooterProgress.setOnSeekBarChangeListener(this);
-    }
-
-    /**
-     * Initializes visualizer
-     */
-    @DebugLog
-    private void initVisualizer() {
-        if (MusicUtils.getAudioSessionId() != ERROR_BAD_VALUE) {
-            try {
-                if (mVisualizer != null) {
-                    Log.e(TAG, "initVisualizer() called with active visualizer");
-                    destroyVisualizer();
-                }
-                mVisualizer = new Visualizer(MusicUtils.getAudioSessionId());
-                mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-                mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-                    public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) {
-                        mVisualizerView.updateVisualizer(bytes);
-                        //Log.d("VisualizerView", "Visualizer bytes:" + bytes.toString());
-                    }
-
-                    public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) { }
-                }, Math.min(Visualizer.getMaxCaptureRate()/2, 7000), true, false);
-                updateVisualizerState();
-            } catch (RuntimeException e) {
-                // Go without.
-                e.printStackTrace();
-                mVisualizer = null;
-            }
-        } //else wait for service bind
-    }
-
-    /**
-     * Releases the visualizer
-     */
-    @DebugLog
-    private void destroyVisualizer() {
-        if (mVisualizer != null) {
-            mVisualizer.release();
-            mVisualizer = null;
-        }
-    }
-
-    /**
-     * Enables or disables visualizer depending on playback state
-     */
-    @DebugLog
-    private void updateVisualizerState() {
-        if (mVisualizer != null && mVisualizerView != null) {
-            if (!mQueueShowing && MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
-                    PreferenceUtils.getInstance(this).showVisualizations()) {
-                try {
-                    if (!mVisualizer.getEnabled()) {
-                        mVisualizer.setEnabled(true);
-                    }
-                    mVisualizerView.setVisibility(View.VISIBLE);
-                } catch (IllegalStateException e) {
-                    mVisualizer = null;
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    if (mVisualizer.getEnabled()) {
-                        mVisualizer.setEnabled(false);
-                    }
-                } catch (IllegalStateException e) {
-                    mVisualizer = null;
-                    e.printStackTrace();
-                }
-                mVisualizerView.setVisibility(View.GONE);
-            }
-        } //else wait for create and service bind
-    }
-
-    /**
-     * Possibly shows media route button
-     */
-    protected void maybeShowHeaderMediaRouteButton(){
-        if (mCastDeviceAvailable && mSlidingPanel.isExpanded()) {
-            mHeaderMediaRouteButton.setVisibility(View.VISIBLE);
-        } else {
-            mHeaderMediaRouteButton.setVisibility(View.GONE);
-        }
-    }
-
-    /**
-     * Hides action bar if panel is expanded
-     */
-    protected void maybeHideActionBar() {
-        if (mSlidingPanel.isExpanded()
-                && getSupportActionBar().isShowing()) {
-            getSupportActionBar().hide();
-        }
-    }
-
-    /**
-     * Sets the track name, album name, and album art.
-     */
-    private void updateNowPlayingInfo() {
-        // Set the track name
-        mHeaderTrackName.setText(MusicUtils.getTrackName());
-        // Set the artist name
-        mHeaderArtistName.setText(MusicUtils.getArtistName());
-        // Set the album art
-        ArtworkManager.loadCurrentArtwork(mHeaderAlbumArt);
-        // Set the total time
-        mFooterTotalTime.setText(MusicUtils.makeTimeString(this, MusicUtils.duration() / 1000));
-        // Set the album art
-        ArtworkManager.loadCurrentArtwork(mArtBackground);
-        // Update the current time
-        queueNextRefresh(1);
-    }
-
-    /**
-     * Sets the correct drawable states for the playback controls.
-     */
-    private void updatePlaybackControls() {
-        // Set the play and pause image
-        mHeaderPlayPauseButton.updateState();
-        // Set the play and pause image
-        mFooterPlayPauseButton.updateState();
-        // Set the shuffle image
-        mFooterShuffleButton.updateShuffleState();
-        // Set the repeat image
-        mFooterRepeatButton.updateRepeatState();
-    }
-
-    /**
-     * Checks whether the passed intent contains a playback request,
-     * and starts playback if that's the case
-     */
-    private void startPlayback() {
-        Intent intent = getIntent();
-
-        if (intent == null || sService == null) {
-            return;
-        }
-
-        Uri uri = intent.getData();
-        String mimeType = intent.getType();
-        boolean handled = false;
-
-        if (uri != null && uri.toString().length() > 0) {
-            MusicUtils.playFile(this, uri);
-            handled = true;
-        } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
-            long id = intent.getLongExtra("playlistId", -1);
-            if (id < 0) {
-                String idString = intent.getStringExtra("playlist");
-                if (idString != null) {
-                    try {
-                        id = Long.parseLong(idString);
-                    } catch (NumberFormatException e) {
-                        // ignore
-                    }
-                }
-            }
-            if (id >= 0) {
-                MusicUtils.playPlaylist(this, id, false);
-                handled = true;
-            }
-        }
-
-        if (handled) {
-            // Make sure to process intent only once
-            setIntent(new Intent());
-        }
-    }
-
-    /**
-     * @param delay When to update
-     */
-    private void queueNextRefresh(final long delay) {
-        if (!mIsPaused) {
-            final Message message = mTimeHandler.obtainMessage(REFRESH_TIME);
-            mTimeHandler.removeMessages(REFRESH_TIME);
-            mTimeHandler.sendMessageDelayed(message, delay);
-        }
-    }
-
-    /**
-     * Used to scan backwards in time through the curren track
-     *
-     * @param repcnt The repeat count
-     * @param delta The long press duration
-     */
-    private void scanBackward(final int repcnt, long delta) {
-        if (sService == null) {
-            return;
-        }
-        if (repcnt == 0) {
-            mStartSeekPos = MusicUtils.position();
-            mLastSeekEventTime = 0;
-        } else {
-            if (delta < 5000) {
-                // seek at 10x speed for the first 5 seconds
-                delta = delta * 10;
-            } else {
-                // seek at 40x after that
-                delta = 50000 + (delta - 5000) * 40;
-            }
-            long newpos = mStartSeekPos - delta;
-            if (newpos < 0) {
-                // move to previous track
-                MusicUtils.previous(this);
-                final long duration = MusicUtils.duration();
-                mStartSeekPos += duration;
-                newpos += duration;
-            }
-            if (delta - mLastSeekEventTime > 250 || repcnt < 0) {
-                MusicUtils.seek(newpos);
-                mLastSeekEventTime = delta;
-            }
-            if (repcnt >= 0) {
-                mPosOverride = newpos;
-            } else {
-                mPosOverride = -1;
-            }
-            refreshCurrentTime();
-        }
-    }
-
-    /**
-     * Used to scan forwards in time through the curren track
-     *
-     * @param repcnt The repeat count
-     * @param delta The long press duration
-     */
-    private void scanForward(final int repcnt, long delta) {
-        if (sService == null) {
-            return;
-        }
-        if (repcnt == 0) {
-            mStartSeekPos = MusicUtils.position();
-            mLastSeekEventTime = 0;
-        } else {
-            if (delta < 5000) {
-                // seek at 10x speed for the first 5 seconds
-                delta = delta * 10;
-            } else {
-                // seek at 40x after that
-                delta = 50000 + (delta - 5000) * 40;
-            }
-            long newpos = mStartSeekPos + delta;
-            final long duration = MusicUtils.duration();
-            if (newpos >= duration) {
-                // move to next track
-                MusicUtils.next();
-                mStartSeekPos -= duration; // is OK to go negative
-                newpos -= duration;
-            }
-            if (delta - mLastSeekEventTime > 250 || repcnt < 0) {
-                MusicUtils.seek(newpos);
-                mLastSeekEventTime = delta;
-            }
-            if (repcnt >= 0) {
-                mPosOverride = newpos;
-            } else {
-                mPosOverride = -1;
-            }
-            refreshCurrentTime();
-        }
-    }
-
-    private void refreshCurrentTimeText(final long pos) {
-        mFooterCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
-    }
-
-    /* Used to update the current time string */
-    private long refreshCurrentTime() {
-        if (sService == null) {
-            return 500;
-        }
-        try {
-            final long pos = mPosOverride < 0 ? MusicUtils.position() : mPosOverride;
-            if (pos >= 0 && MusicUtils.duration() > 0) {
-                refreshCurrentTimeText(pos);
-                final int progress = (int)(1000 * pos / MusicUtils.duration());
-                mFooterProgress.setProgress(progress);
-
-                if (mFromTouch) {
-                    return 500;
-                } else if (MusicUtils.isPlaying()) {
-                    if (!mQueueShowing) {
-                        mFooterCurrentTime.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    if (!mQueueShowing) {
-                        // blink the counter
-                        final int vis = mFooterCurrentTime.getVisibility();
-                        mFooterCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE
-                                : View.INVISIBLE);
-                        return 500;
-                    }
-                }
-            } else {
-                mFooterCurrentTime.setText("--:--");
-                mFooterProgress.setProgress(1000);
-            }
-            // calculate the number of milliseconds until the next full second,
-            // so
-            // the counter can be updated at just the right time
-            final long remaining = 1000 - pos % 1000;
-            // approximate how often we would need to refresh the slider to
-            // move it smoothly
-            int width = mFooterProgress.getWidth();
-            if (width == 0) {
-                width = 320;
-            }
-            final long smoothrefreshtime = MusicUtils.duration() / width;
-            if (smoothrefreshtime > remaining) {
-                return remaining;
-            }
-            if (smoothrefreshtime < 20) {
-                return 20;
-            }
-            return smoothrefreshtime;
-        } catch (final Exception ignored) {
-
-        }
-        return 500;
+        //not implemented
     }
 
     @DebugLog
@@ -961,102 +366,15 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         }
     }
 
-    private void pushQueueFragment() {
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.panel_middle_content, new QueueFragment(), "queue")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commit();
-        onQueueVisibilityChanged(true);
+    /**
+     * Hides action bar if panel is expanded
+     */
+    protected void maybeHideActionBar() {
+        if (mSlidingPanel.isExpanded()
+                && getSupportActionBar().isShowing()) {
+            getSupportActionBar().hide();
+        }
     }
-
-    private void popQueueFragment() {
-        getSupportFragmentManager().beginTransaction()
-                .remove(getSupportFragmentManager().findFragmentByTag("queue"))
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
-                .commit();
-        onQueueVisibilityChanged(false);
-    }
-
-    private void onQueueVisibilityChanged(boolean visible) {
-        if (visible) {
-            mQueueShowing = true;
-            //TODO any reason to set visiblity GONE?
-            mArtBackground.animate().alpha(0.0f).setDuration(500).start();
-            mFooterCurrentTime.setVisibility(View.INVISIBLE);
-            mFooterTotalTime.setVisibility(View.INVISIBLE);
-
-        } else {
-            mQueueShowing = false;
-            mArtBackground.animate().alpha(1.0f).setDuration(500).start();
-            refreshCurrentTime();
-            mFooterTotalTime.setVisibility(View.VISIBLE);
-        }
-        mHeaderQueueButton.setQueueShowing(mQueueShowing);
-        updateVisualizerState();
-    }
-
-    /**
-     * Used to scan backwards through the track
-     */
-    private final RepeatingImageButton.RepeatListener mRewindListener = new RepeatingImageButton.RepeatListener() {
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onRepeat(final View v, final long howlong, final int repcnt) {
-            scanBackward(repcnt, howlong);
-        }
-    };
-
-    /**
-     * Used to scan ahead through the track
-     */
-    private final RepeatingImageButton.RepeatListener mFastForwardListener = new RepeatingImageButton.RepeatListener() {
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onRepeat(final View v, final long howlong, final int repcnt) {
-            scanForward(repcnt, howlong);
-        }
-    };
-
-    /**
-     * Switches from the large album art screen to show the queue and lyric
-     * fragments, then back again
-     */
-    private final View.OnClickListener mToggleHiddenPanel = new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            if (!mQueueShowing) {
-                pushQueueFragment();
-            } else {
-                popQueueFragment();
-            }
-
-        }
-    };
-
-    /**
-     * Opens the album profile of the currently playing album
-     */
-    private final View.OnClickListener mOpenCurrentAlbumProfile = new View.OnClickListener() {
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onClick(final View v) {
-            if (MusicUtils.getCurrentAudioId() != -1) {
-                Album album = MusicUtils.getCurrentAlbum(BaseSlidingActivity.this);
-                if (album != null) {
-                    NavUtils.openAlbumProfile(BaseSlidingActivity.this, album);
-                }
-            } else {
-                MusicUtils.shuffleAll(BaseSlidingActivity.this);
-            }
-        }
-    };
 
     /**
      * Handle mediarouter callbacks, responsible for keeping our mediarouter instance
@@ -1089,32 +407,19 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         @DebugLog
         @Override
         public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-            // Show the router buttons
-            if (!router.getDefaultRoute().equals(route)) {
-                mCastDeviceAvailable = true;
-                maybeShowHeaderMediaRouteButton();
-            }
+
         }
 
         @DebugLog
         @Override
         public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-            // Hide the router buttons
-            if (!router.getDefaultRoute().equals(route)) {
-                mCastDeviceAvailable = false;
-                maybeShowHeaderMediaRouteButton();
-            }
+
         }
 
         @DebugLog
         @Override
         public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo route) {
-            // make sure the router buttons are showing
-            // *this gets called alot
-            if (!router.getDefaultRoute().equals(route)) {
-                mCastDeviceAvailable = true;
-                maybeShowHeaderMediaRouteButton();
-            }
+
         }
 
     };
@@ -1207,127 +512,31 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     };
 
     /**
-     * Handles panel overflow menu
-     */
-    private final PopupMenu.OnMenuItemClickListener mPanelOverflowMenuClickListener = new PopupMenu.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.panel_menu_share:
-                    // Share the current meta data
-                    if (MusicUtils.getTrackName() != null && MusicUtils.getArtistName() != null) {
-                        final Intent shareIntent = new Intent();
-                        final String shareMessage = getString(R.string.now_listening_to,
-                                MusicUtils.getTrackName(), MusicUtils.getArtistName());
-                        shareIntent.setAction(Intent.ACTION_SEND);
-                        shareIntent.setType("text/plain");
-                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
-                        shareIntent.putExtra(Intent.EXTRA_STREAM,
-                                ArtworkProvider.createArtworkUri(MusicUtils.getCurrentAlbumId()));
-                        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
-                    }
-                    return true;
-                case R.id.panel_menu_use_ringtone:
-                    // Set the current track as a ringtone
-                    MusicUtils.setRingtone(BaseSlidingActivity.this, MusicUtils.getCurrentAudioId());
-                    return true;
-                case R.id.panel_menu_delete:
-                    // Delete current song
-                    DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{
-                            MusicUtils.getCurrentAudioId()
-                    }, null).show(getSupportFragmentManager(), "DeleteDialog");
-                    return true;
-                case R.id.panel_menu_save_queue:
-                    NowPlayingCursor queue = (NowPlayingCursor) QueueLoader
-                            .makeQueueCursor(BaseSlidingActivity.this);
-                    CreateNewPlaylist.getInstance(MusicUtils.getSongListForCursor(queue)).show(
-                            getSupportFragmentManager(), "CreatePlaylist");
-                    queue.close();
-                    return true;
-                case R.id.panel_menu_clear_queue:
-                    MusicUtils.clearQueue();
-                    maybeClosePanel();
-                    return true;
-                default:
-                    break;
-            }
-            return false;
-        }
-    };
-
-    /**
-     * Used to update the current time string
-     */
-    private static final class TimeHandler extends Handler {
-
-        private final WeakReference<BaseSlidingActivity> mActivity;
-
-        /**
-         * Constructor of <code>TimeHandler</code>
-         */
-        public TimeHandler(final BaseSlidingActivity player) {
-            mActivity = new WeakReference<BaseSlidingActivity>(player);
-        }
-
-        @Override
-        public void handleMessage(final Message msg) {
-            switch (msg.what) {
-                case REFRESH_TIME:
-                    final long next = mActivity.get().refreshCurrentTime();
-                    mActivity.get().queueNextRefresh(next);
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-
-    /**
      * Used to monitor the state of playback
      */
-    private final static class PlaybackStatus extends BroadcastReceiver {
-
-        private final WeakReference<BaseSlidingActivity> mReference;
-
-        /**
-         * Constructor of <code>PlaybackStatus</code>
-         */
-        public PlaybackStatus(final BaseSlidingActivity activity) {
-            mReference = new WeakReference<BaseSlidingActivity>(activity);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
+    private final class PlaybackStatus extends BroadcastReceiver {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             final String action = intent.getAction();
-            if (action.equals(MusicPlaybackService.META_CHANGED)) {
-                // Current info
-                mReference.get().updateNowPlayingInfo();
-                // Update the favorites icon
-                mReference.get().invalidateOptionsMenu();
+            if (action == null) {
+                return;
+            } else if (action.equals(MusicPlaybackService.META_CHANGED)) {
                 // Let the listener know to the meta chnaged
-                for (final MusicStateListener listener : mReference.get().mMusicStateListener) {
+                for (final MusicStateListener listener : mMusicStateListener) {
                     if (listener != null) {
                         listener.onMetaChanged();
                     }
                 }
             } else if (action.equals(MusicPlaybackService.PLAYSTATE_CHANGED)) {
-                // Set the play and pause image
-                mReference.get().mHeaderPlayPauseButton.updateState();
-                mReference.get().mFooterPlayPauseButton.updateState();
-                // update visualizer
-                mReference.get().updateVisualizerState();
                 // Let the listener know to the playstate chnaged
-                for (final MusicStateListener listener : mReference.get().mMusicStateListener) {
+                for (final MusicStateListener listener : mMusicStateListener) {
                     if (listener != null) {
                         listener.onPlaystateChanged();
                     }
                 }
             } else if (action.equals(MusicPlaybackService.REFRESH)) {
                 // Let the listener know to update a list
-                for (final MusicStateListener listener : mReference.get().mMusicStateListener) {
+                for (final MusicStateListener listener : mMusicStateListener) {
                     if (listener != null) {
                         listener.restartLoader();
                     }
@@ -1336,13 +545,14 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                 context.removeStickyBroadcast(intent);
             } else if (action.equals(MusicPlaybackService.REPEATMODE_CHANGED)
                     || action.equals(MusicPlaybackService.SHUFFLEMODE_CHANGED)) {
-                // Set the repeat image
-                mReference.get().mFooterRepeatButton.updateRepeatState();
-                // Set the shuffle image
-                mReference.get().mFooterShuffleButton.updateShuffleState();
+                for (final MusicStateListener listener : mMusicStateListener) {
+                    if (listener != null) {
+                        listener.onPlaybackModeChanged();
+                    }
+                }
             } else if (action.equals(MusicPlaybackService.QUEUE_CHANGED)) {
                 // Let the listener know to refresh the queue
-                for (final MusicStateListener listener : mReference.get().mMusicStateListener) {
+                for (final MusicStateListener listener : mMusicStateListener) {
                     if (listener != null) {
                         listener.onQueueChanged();
                     }

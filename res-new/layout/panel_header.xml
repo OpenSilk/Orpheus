@@ -103,10 +103,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent">
 
-                <android.support.v7.app.MediaRouteButton
-                    style="@style/Orpheus.MenuButton.MediaRouter"
-                    mediarouter:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
-                    android:id="@+id/panel_mediarouter"/>
+                <!--<android.support.v7.app.MediaRouteButton-->
+                    <!--style="@style/Orpheus.MenuButton.MediaRouter"-->
+                    <!--mediarouter:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"-->
+                    <!--android:id="@+id/panel_mediarouter"/>-->
 
                 <org.opensilk.music.widgets.QueueButton
                     android:id="@+id/header_switch_queue"

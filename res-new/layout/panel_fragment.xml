@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="false">
+
+    <!--album art background -->
+    <org.opensilk.music.widgets.FullScreenArtworkImageView
+        android:id="@+id/panel_background_art"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null"/>
+
+    <!-- header -->
+    <include layout="@layout/panel_header"
+        android:id="@+id/panel_header"/>
+
+    <!-- footer -->
+    <include layout="@layout/panel_footer"
+        android:id="@+id/panel_footer"/>
+
+    <!-- Used to show/hide the QueueFragment -->
+    <FrameLayout
+        android:id="@+id/panel_middle_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/panel_header"
+        android:layout_above="@id/panel_footer"/>
+
+    <!-- header shadow -->
+    <org.opensilk.music.widgets.ShadowView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/shadow_height"
+        android:layout_below="@id/panel_header"
+        app:shadowPosition="below"
+        android:contentDescription="@null"/>
+
+    <!-- footer shadow -->
+    <org.opensilk.music.widgets.ShadowView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/shadow_height"
+        android:layout_above="@id/panel_footer"
+        app:shadowPosition="above"
+        android:contentDescription="@null"/>
+
+    <!-- Our scrubber height is 32dp making the seekbar view
+         32dp so as a hack to get the bar to sit on the edge
+         of the footer we set a negative bottom margin -->
+    <SeekBar
+        android:id="@android:id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/panel_footer"
+        android:layout_marginBottom="-16dp"
+        android:gravity="center_vertical"
+        android:padding="0dp"
+        android:max="1000" />
+
+    <!-- current playtime -->
+    <TextView
+        android:id="@+id/footer_player_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@android:id/progress"
+        android:layout_alignParentLeft="true"
+        android:gravity="left"
+        android:paddingLeft="16dp"
+        android:textAppearance="@style/TextAppearancePlayTime"/>
+
+    <!-- total playtime -->
+    <TextView
+        android:id="@+id/footer_player_total_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@android:id/progress"
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:paddingRight="16dp"
+        android:textAppearance="@style/TextAppearancePlayTime"/>
+
+</RelativeLayout>
