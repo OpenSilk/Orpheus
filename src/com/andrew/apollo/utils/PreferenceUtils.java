@@ -103,8 +103,8 @@ public final class PreferenceUtils {
      * @param context The {@link Context} to use.
      */
     public PreferenceUtils(final Context context) {
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         mContext = context.getApplicationContext();
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
     }
 
     /**
@@ -113,7 +113,7 @@ public final class PreferenceUtils {
      */
     public static final PreferenceUtils getInstance(final Context context) {
         if (sInstance == null) {
-            sInstance = new PreferenceUtils(context.getApplicationContext());
+            sInstance = new PreferenceUtils(context);
         }
         return sInstance;
     }
