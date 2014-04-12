@@ -123,11 +123,14 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
                     MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?",
                     new String[] {"1", "''"}, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
             if (genreSongs != null && genreSongs.moveToFirst()) {
-                // For now we only load one song
-                String artist = genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
-                String album = genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
-                long albumId = genreSongs.getLong(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
-                artInfos.add(new ArtInfo(artist, album, albumId));
+                do {
+                    String artist = genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+                    String album = genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+                    long albumId = genreSongs.getLong(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
+                    artInfos.add(new ArtInfo(artist, album, albumId));
+                    // For now we only load one song
+                    break;
+                } while (genreSongs.moveToNext());
             }
             if (genreSongs != null) {
                 genreSongs.close();

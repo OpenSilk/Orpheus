@@ -39,7 +39,7 @@ public class Playlist implements Parcelable {
     /**
      * Songs in playlist
      */
-    public List<Song> mSongs;
+    public int mSongNumber;
 
     /**
      * Constructor of <code>Playlist</code>
@@ -52,7 +52,7 @@ public class Playlist implements Parcelable {
         super();
         mPlaylistId = playlistId;
         mPlaylistName = playlistName;
-        mSongs = Lists.newArrayList();
+        mSongNumber = 0;
     }
 
     /**
@@ -61,11 +61,11 @@ public class Playlist implements Parcelable {
      * @param playlistId The Id of the playlist
      * @param playlistName The playlist name
      */
-    public Playlist(final long playlistId, final String playlistName, final List<Song> songs) {
+    public Playlist(final long playlistId, final String playlistName, final int songNumber) {
         super();
         mPlaylistId = playlistId;
         mPlaylistName = playlistName;
-        mSongs = songs;
+        mSongNumber = songNumber;
     }
 
     /**
@@ -77,6 +77,7 @@ public class Playlist implements Parcelable {
         int result = 1;
         result = prime * result + (int) mPlaylistId;
         result = prime * result + (mPlaylistName == null ? 0 : mPlaylistName.hashCode());
+        result = prime * result + mSongNumber;
         return result;
     }
 
@@ -96,6 +97,9 @@ public class Playlist implements Parcelable {
         }
         final Playlist other = (Playlist)obj;
         if (mPlaylistId != other.mPlaylistId) {
+            return false;
+        }
+        if (mSongNumber != other.mSongNumber) {
             return false;
         }
         return TextUtils.equals(mPlaylistName, other.mPlaylistName);
@@ -122,12 +126,13 @@ public class Playlist implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mPlaylistId);
         dest.writeString(mPlaylistName);
+        dest.writeInt(mSongNumber);
     }
 
     private Playlist(Parcel in) {
         mPlaylistId = in.readLong();
         mPlaylistName = in.readString();
-        mSongs = null;
+        mSongNumber = in.readInt();
     }
 
     public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {

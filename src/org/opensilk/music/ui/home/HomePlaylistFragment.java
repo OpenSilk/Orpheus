@@ -16,52 +16,35 @@
 
 package org.opensilk.music.ui.home;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.widget.CursorAdapter;
 
-import com.andrew.apollo.loaders.PlaylistLoader;
-import com.andrew.apollo.model.Playlist;
-
-import org.opensilk.music.ui.cards.CardPlaylistGrid;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
+import org.opensilk.music.adapters.PlaylistGridCardCursorAdapter;
+import org.opensilk.music.loaders.PlaylistCursorLoader;
 
 /**
- * This class is used to display all of the playlists on a user's device.
- * 
- * @author Andrew Neal (andrewdneal@gmail.com)
+ * Playlists
  */
-public class HomePlaylistFragment extends HomePagerBaseFragment<Playlist> {
+public class HomePlaylistFragment extends HomePagerBaseCursorFragment {
 
-    /**
-     * {@inheritDoc}
+    /*
+     * Loader Callbacks
      */
+
     @Override
-    public Loader<List<Playlist>> onCreateLoader(final int id, final Bundle args) {
-        return new PlaylistLoader(getActivity());
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new PlaylistCursorLoader(getActivity());
     }
 
-    /**
-     * {@inheritDoc}
+    /*
+     * Implement abstract methods
      */
-    @Override
-    public void onLoadFinished(final Loader<List<Playlist>> loader, final List<Playlist> data) {
-        // Check for any errors
-        if (data.isEmpty()) {
-            return;
-        }
 
-        ArrayList<Card> cards = new ArrayList<Card>();
-        for (final Playlist playlist: data) {
-            cards.add(new CardPlaylistGrid(getActivity(), playlist));
-        }
-        CardGridArrayAdapter adapter = new CardGridArrayAdapter(getActivity(), cards);
-        // Set the data behind the grid
-        mGridView.setAdapter(adapter);
+    @Override
+    protected CursorAdapter createAdapter() {
+        return new PlaylistGridCardCursorAdapter(getActivity());
     }
 
     @Override
@@ -69,9 +52,5 @@ public class HomePlaylistFragment extends HomePagerBaseFragment<Playlist> {
         return false; //Just grid for now.
     }
 
-    @Override
-    protected boolean isDetailedLayout() {
-        return false;
-    }
 
 }

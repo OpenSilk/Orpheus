@@ -23,6 +23,7 @@ import android.provider.MediaStore;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
 
 /**
@@ -102,6 +103,13 @@ public class CursorHelpers {
         final String name= c.getString(c.getColumnIndexOrThrow("name"));
         final int songNumber = c.getInt(c.getColumnIndexOrThrow("song_number"));
         return new Genre(id, name, songNumber);
+    }
+
+    public static Playlist makePlaylistFromCursor(final Cursor c) {
+        final long id = c.getLong(c.getColumnIndexOrThrow("_id"));
+        final String name = c.getString(c.getColumnIndexOrThrow("name"));
+        final int songNumber = c.getInt(c.getColumnIndexOrThrow("song_number"));
+        return new Playlist(id, name, songNumber);
     }
 
 }

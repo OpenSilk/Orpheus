@@ -35,8 +35,6 @@ import android.provider.MediaStore.Audio.PlaylistsColumns;
 import android.provider.MediaStore.MediaColumns;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.Menu;
-import android.view.SubMenu;
 import android.widget.Toast;
 
 import com.andrew.apollo.IApolloService;
@@ -44,9 +42,7 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.FavoritesLoader;
 import com.andrew.apollo.loaders.LastAddedLoader;
-import com.andrew.apollo.loaders.PlaylistLoader;
 import com.andrew.apollo.loaders.SongLoader;
-import com.andrew.apollo.menu.FragmentMenuItems;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.provider.FavoritesStore;
@@ -1237,43 +1233,6 @@ public final class MusicUtils {
      */
     public static void playLastAdded(final Context context, final boolean forceShuffle) {
         playAll(context, getSongListForLastAdded(context), 0, forceShuffle);
-    }
-
-    /**
-     * Creates a sub menu used to add items to a new playlist or an existsing
-     * one.
-     *
-     * @param context The {@link Context} to use.
-     * @param groupId The group Id of the menu.
-     * @param subMenu The {@link SubMenu} to add to.
-     * @param showFavorites True if we should show the option to add to the
-     *            Favorites cache.
-     */
-    public static void makePlaylistMenu(final Context context, final int groupId,
-            final SubMenu subMenu, final boolean showFavorites) {
-        subMenu.clear();
-        if (showFavorites) {
-            subMenu.add(groupId, FragmentMenuItems.ADD_TO_FAVORITES, Menu.NONE,
-                    R.string.add_to_favorites);
-        }
-        subMenu.add(groupId, FragmentMenuItems.NEW_PLAYLIST, Menu.NONE, R.string.new_playlist);
-        Cursor cursor = PlaylistLoader.makePlaylistCursor(context);
-        if (cursor != null && cursor.getCount() > 0 && cursor.moveToFirst()) {
-            while (!cursor.isAfterLast()) {
-                final Intent intent = new Intent();
-                String name = cursor.getString(1);
-                if (name != null) {
-                    intent.putExtra("playlist", getIdForPlaylist(context, name));
-                    subMenu.add(groupId, FragmentMenuItems.PLAYLIST_SELECTED, Menu.NONE,
-                            name).setIntent(intent);
-                }
-                cursor.moveToNext();
-            }
-        }
-        if (cursor != null) {
-            cursor.close();
-            cursor = null;
-        }
     }
 
     /**

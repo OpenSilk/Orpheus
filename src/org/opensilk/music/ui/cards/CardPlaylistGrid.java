@@ -20,21 +20,31 @@ import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.RenamePlaylist;
+import com.andrew.apollo.model.ArtInfo;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.loaders.Projections;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -68,17 +78,17 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
         final CardHeaderGrid header = new CardHeaderGrid(getContext());
         header.setButtonOverflowVisible(true);
         header.setTitle(mData.mPlaylistName);
-        header.setLineTwo(MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongs.size()));
-        header.setPopupMenu(R.menu.card_artist, getNewHeaderPopupMenuListener());
+        header.setLineTwo(MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber));
+        header.setPopupMenu(R.menu.card_playlist, getNewHeaderPopupMenuListener());
+        header.setPopupMenuPrepareListener(getNewOnPrepareListener());
         addCardHeader(header);
     }
 
     @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        if (mData.mSongs.size() > 0) {
-            // for now just load the first songs art //TODO stacked art like gmusic
-            Song song = mData.mSongs.get(0);
-            ArtworkManager.loadAlbumImage(song.mArtistName, song.mAlbumName, song.mAlbumId, view);
+        if (mData.mSongNumber > 0) {
+            // Wrap call in a async task since we are hitting the mediastore
+            ApolloUtils.execute(false, new ArtLoaderTask(view, mData.mPlaylistId));
         }
     }
 
@@ -106,7 +116,6 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
                         }
                         break;
                     case R.id.card_menu_add_queue:
-                        //TODO we have the songs already just get the list from them.
                         long[] list = null;
                         if (mData.mPlaylistId == -1) {
                             list = MusicUtils.getSongListForFavorites(getContext());
@@ -149,6 +158,76 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
                 }
             }
         };
+    }
+
+    protected CardHeader.OnPrepareCardHeaderPopupMenuListener getNewOnPrepareListener() {
+        return new CardHeader.OnPrepareCardHeaderPopupMenuListener() {
+            @Override
+            public boolean onPreparePopupMenu(BaseCard baseCard, PopupMenu popupMenu) {
+                if (mData.mPlaylistId == -2) {
+                    // cant rename or delete last added
+                    popupMenu.getMenu().removeItem(R.id.card_menu_rename);
+                    popupMenu.getMenu().removeItem(R.id.card_menu_delete);
+                }
+                return true;
+            }
+        };
+    }
+
+    private class ArtLoaderTask extends AsyncTask<Void, Void, List<ArtInfo>> {
+        final ArtworkImageView view;
+        final long playlistId;
+
+        ArtLoaderTask(ArtworkImageView view, long playlistId) {
+            this.view = view;
+            this.playlistId = playlistId;
+        }
+
+        @Override
+        protected List<ArtInfo> doInBackground(Void... params) {
+            List<ArtInfo> artInfos = new ArrayList<ArtInfo>(1);
+            // We have to query for the song count
+            final Cursor playlistSongs;
+            if (playlistId == -2) { //Last added
+                final int fourWeeks = 4 * 3600 * 24 * 7;
+                playlistSongs = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        Projections.SONG,
+                        MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE
+                                + "!=? AND " + MediaStore.Audio.Media.DATE_ADDED + ">?",
+                        new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)},
+                        MediaStore.Audio.Media.DATE_ADDED + " DESC");
+            } else { // user
+                playlistSongs = getContext().getContentResolver().query(
+                        MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
+                        Projections.SONG,
+                        MediaStore.Audio.Playlists.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Playlists.Members.TITLE + "!=?",
+                        new String[] {"1", "''"},
+                        MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER
+                );
+            }
+            if (playlistSongs != null && playlistSongs.moveToFirst()) {
+                do {
+                    String artist = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+                    String album = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+                    long albumId = playlistSongs.getLong(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
+                    artInfos.add(new ArtInfo(artist, album, albumId));
+                    // For now we only load one song
+                    break;
+                } while (playlistSongs.moveToNext());
+            }
+            if (playlistSongs != null) {
+                playlistSongs.close();
+            }
+            return artInfos;
+        }
+
+        @Override
+        protected void onPostExecute(List<ArtInfo> artInfos) {
+            for (ArtInfo info: artInfos) {
+                ArtworkManager.loadAlbumImage(info.mArtistName, info.mAlbumName, info.mAlbumId, view);
+                break;// only loading the first
+            }
+        }
     }
 
 }

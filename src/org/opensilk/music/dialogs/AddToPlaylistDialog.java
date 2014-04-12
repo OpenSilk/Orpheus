@@ -21,14 +21,14 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.widget.ListView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.PlaylistLoader;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.loaders.PlaylistCursorLoader;
 
 import java.util.List;
 
@@ -37,10 +37,8 @@ import java.util.List;
  */
 public class AddToPlaylistDialog extends DialogFragment implements DialogInterface.OnClickListener {
 
-    ListView mListView;
-
-    List<Playlist> mUserPlaylists;
-    long[] mSongIds;
+    protected List<Playlist> mUserPlaylists;
+    protected long[] mSongIds;
 
     public static AddToPlaylistDialog newInstance(long[] playlist) {
         Bundle b = new Bundle();
@@ -53,7 +51,7 @@ public class AddToPlaylistDialog extends DialogFragment implements DialogInterfa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUserPlaylists = PlaylistLoader.makeUserPlaylistList(getActivity());
+        mUserPlaylists = PlaylistCursorLoader.getUserPlaylists(getActivity());
         if (getArguments() != null) {
             mSongIds = getArguments().getLongArray("playlist_list");
         }

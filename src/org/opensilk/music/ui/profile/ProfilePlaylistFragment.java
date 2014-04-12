@@ -103,6 +103,11 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.card_playlist, menu);
+        if (mPlaylist.mPlaylistId == -2) {
+            // Cant rename or delete lastadded
+            menu.removeItem(R.id.card_menu_rename);
+            menu.removeItem(R.id.card_menu_delete);
+        }
     }
 
     @Override
@@ -119,15 +124,14 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
                 return true;
             case R.id.card_menu_shuffle:
                 if (mPlaylist.mPlaylistId == -1) {
-                    MusicUtils.playFavorites(getActivity(), false);
+                    MusicUtils.playFavorites(getActivity(), true);
                 } else if (mPlaylist.mPlaylistId == -2) {
-                    MusicUtils.playLastAdded(getActivity(), false);
+                    MusicUtils.playLastAdded(getActivity(), true);
                 } else {
-                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, false);
+                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, true);
                 }
                 return true;
             case R.id.card_menu_add_queue:
-                //TODO we have the songs already just get the list from them.
                 long[] list = null;
                 if (mPlaylist.mPlaylistId == -1) {
                     list = MusicUtils.getSongListForFavorites(getActivity());

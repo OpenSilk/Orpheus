@@ -27,6 +27,8 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
 import com.andrew.apollo.BuildConfig;
+import com.andrew.apollo.R;
+import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.loaders.Projections;
 
@@ -45,6 +47,8 @@ public class MusicProvider extends ContentProvider {
     public static final Uri RECENTS_URI;
     /** Wrapper uri to query genres */
     public static final Uri GENRES_URI;
+    /** Wrapper uri for playlists */
+    public static final Uri PLAYLIST_URI;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -57,6 +61,9 @@ public class MusicProvider extends ContentProvider {
 
         // Genre albums
         sUriMatcher.addURI(AUTHORITY, "genre/#/albums", 3);
+
+        PLAYLIST_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("playlists").build();
+        sUriMatcher.addURI(AUTHORITY, "playlists", 4);
     }
 
     /** Generate a uri to query albums in a genre */
@@ -181,8 +188,68 @@ public class MusicProvider extends ContentProvider {
 
                 if (c != null) {
                     // Set the notification uri on the albums uri not on our proxy uri
-                    c.setNotificationUri(getContext().getContentResolver(), MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI);
+                    c.setNotificationUri(getContext().getContentResolver(),
+                            MediaStore.Audio.Genres.Members.getContentUri("external", genreId));
                 }
+                return c;
+            case 4: //Playlists
+                c = new MatrixCursor(new String[] {"_id", "name", "song_number"});
+                //last added first
+                final int fourWeeks = 4 * 3600 * 24 * 7;
+                // Get the song count
+                final Cursor lastAdded = getContext().getContentResolver().query(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        new String[] { BaseColumns._ID },
+                        MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE
+                                + " !=? AND " + MediaStore.Audio.Media.DATE_ADDED + ">?",
+                        new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)},
+                        MediaStore.Audio.Media.DATE_ADDED + " DESC");
+                int lastAddedSongNum = 0;
+                if (lastAdded != null) {
+                    lastAddedSongNum = lastAdded.getCount();
+                    lastAdded.close();
+                }
+                // if there are songs add the lastadded playlist
+                if (lastAddedSongNum > 0) {
+                    ((MatrixCursor) c).addRow(new Object[] { -2,
+                            getContext().getResources().getString(R.string.playlist_last_added),
+                            lastAddedSongNum
+                    });
+                }
+                // User playlists next
+                // Pull all playlists
+                Cursor playlists = getContext().getContentResolver().query(
+                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                        new String[] { BaseColumns._ID, MediaStore.Audio.PlaylistsColumns.NAME},
+                        null, null, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
+                if (playlists != null && playlists.moveToFirst()) {
+                    do {
+                        // get playlist id
+                        final long id = playlists.getLong(playlists.getColumnIndexOrThrow(BaseColumns._ID));
+                        // get playlist name
+                        final String name = playlists.getString(playlists.getColumnIndexOrThrow(MediaStore.Audio.PlaylistsColumns.NAME));
+                        // We have to query for the song count
+                        final Cursor playlistSongs = getContext().getContentResolver().query(
+                                MediaStore.Audio.Playlists.Members.getContentUri("external", id),
+                                new String[] {MediaStore.Audio.AudioColumns.ALBUM_ID},
+                                MediaStore.Audio.Playlists.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Playlists.Members.TITLE + "!=?",
+                                new String[] {"1", "''"},
+                                MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER
+                        );
+                        int numSongs = 0;
+                        if (playlistSongs != null) {
+                            numSongs = playlistSongs.getCount();
+                            playlistSongs.close();
+                        }
+                        ((MatrixCursor) c).addRow(new Object[] {id, name, numSongs});
+                    } while (playlists.moveToNext());
+                }
+                if (playlists != null) {
+                    playlists.close();
+                }
+                // Set the notification on the playlist uri
+                c.setNotificationUri(getContext().getContentResolver(),MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI);
+                // return our matrix cursor
                 return c;
         }
         if (c != null) {
@@ -215,6 +282,8 @@ public class MusicProvider extends ContentProvider {
                 break;
             case 3:
                 break;
+            case 4:
+                break;
         }
         if (ret != null) {
             getContext().getContentResolver().notifyChange(uri, null);
@@ -237,6 +306,8 @@ public class MusicProvider extends ContentProvider {
                 break;
             case 3:
                 break;
+            case 4:
+                break;
         }
         if (ret != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
@@ -258,6 +329,8 @@ public class MusicProvider extends ContentProvider {
             case 2:
                 break;
             case 3:
+                break;
+            case 4:
                 break;
         }
         if (ret != 0) {
