@@ -107,13 +107,6 @@ public class ProfileGenreFragment extends Fragment implements LoaderManager.Load
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getLoaderManager().destroyLoader(ALBUM_LOADER);
-        getLoaderManager().destroyLoader(SONG_LOADER);
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.card_genre, menu);

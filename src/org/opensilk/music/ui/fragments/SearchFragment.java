@@ -127,7 +127,6 @@ public class SearchFragment extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         mAdapter = null;
-        getLoaderManager().destroyLoader(0);
     }
 
     @Override
