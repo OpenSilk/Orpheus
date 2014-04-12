@@ -20,8 +20,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -29,7 +27,6 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
@@ -42,6 +39,7 @@ public class PanelHeaderLayout extends FrameLayout {
     private static final int TRANSITION_DURATION = 250;
 
     private TransitionDrawable mBackground;
+    private boolean isOpen;
 
     public PanelHeaderLayout(Context context) {
         this(context, null);
@@ -73,16 +71,38 @@ public class PanelHeaderLayout extends FrameLayout {
         mButtonBarClosed = findViewById(R.id.header_closed_button_bar);
         mButtonBarOpen = findViewById(R.id.header_open_button_bar);
         mButtonBarOpen.setVisibility(GONE);
+        isOpen = false;
     }
 
     public void transitionToClosed() {
-        mBackground.reverseTransition(TRANSITION_DURATION*2);
-        flipit();
+        if (isOpen) {
+            mBackground.reverseTransition(TRANSITION_DURATION*2);
+            flipit();
+            isOpen = false;
+        }
     }
 
     public void transitionToOpen() {
-        mBackground.startTransition(TRANSITION_DURATION*2);
-        flipit();
+        if (!isOpen) {
+            mBackground.startTransition(TRANSITION_DURATION*2);
+            flipit();
+            isOpen = true;
+        }
+    }
+
+    public void makeClosed() {
+        mBackground.resetTransition();
+        mButtonBarOpen.setVisibility(GONE);
+        mButtonBarClosed.setVisibility(VISIBLE);
+        isOpen = false;
+    }
+
+    public void makeOpen() {
+        mBackground.resetTransition();
+        mBackground.startTransition(0);
+        mButtonBarOpen.setVisibility(VISIBLE);
+        mButtonBarClosed.setVisibility(GONE);
+        isOpen = true;
     }
 
     private Interpolator accelerator = new AccelerateInterpolator();

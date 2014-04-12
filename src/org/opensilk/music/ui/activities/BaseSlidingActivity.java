@@ -272,26 +272,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            if (savedInstanceState.getBoolean("panel_open", false)) {
-                onPanelExpanded(null);
-                if (savedInstanceState.getBoolean("queue_showing", false)) {
-                    mNowPlayingFragment.onQueueVisibilityChanged(true);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean("panel_open", mSlidingPanel.isExpanded());
-        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
-    }
-
-    @Override
     public void onBackPressed() {
         if (mSlidingPanel.isExpanded()) {
             maybeClosePanel();
@@ -335,13 +315,11 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     }
 
     @Override
-    @DebugLog
     public void onPanelExpanded(View panel) {
         mNowPlayingFragment.onPanelExpanded();
     }
 
     @Override
-    @DebugLog
     public void onPanelCollapsed(View panel) {
         mNowPlayingFragment.onPanelCollapsed();
     }
@@ -351,18 +329,24 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         //not implemented
     }
 
-    @DebugLog
     public void maybeClosePanel() {
         if (mSlidingPanel.isExpanded()) {
             mSlidingPanel.collapsePane();
         }
     }
 
-    @DebugLog
     public void maybeOpenPanel() {
         if (!mSlidingPanel.isExpanded()) {
             mSlidingPanel.expandPane();
         }
+    }
+
+    protected void setPanelExpanded() {
+        mNowPlayingFragment.panelIsExpanded();
+    }
+
+    protected void setPanelCollapsed() {
+        mNowPlayingFragment.panelIsCollapsed();
     }
 
     /**

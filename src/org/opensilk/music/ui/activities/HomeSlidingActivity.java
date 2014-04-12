@@ -38,6 +38,8 @@ import org.opensilk.music.ui.settings.SettingsPhoneActivity;
 import org.opensilk.music.ui.settings.SettingsTabletActivity;
 import org.opensilk.music.util.ConfigHelper;
 
+import hugo.weaving.DebugLog;
+
 import static android.app.SearchManager.QUERY;
 
 /**
@@ -58,7 +60,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
 
         mIsLargeLandscape = findViewById(R.id.landscape_dummy) != null;
         // Pinn the sliding pane open on landscape layouts
-        if (mIsLargeLandscape) {
+        if (mIsLargeLandscape && savedInstanceState == null) {
             mSlidingPanel.setSlidingEnabled(false);
             mSlidingPanel.setInitialState(SlideState.EXPANDED);
             onPanelExpanded(null);
@@ -88,6 +90,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putBoolean("panel_open", mSlidingPanel.isExpanded());
+        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
         outState.putBoolean("panel_needs_collapse", mIsLargeLandscape);
     }
 
@@ -97,12 +101,24 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
         if (savedInstanceState != null) {
             if (mIsLargeLandscape) {
                 // Coming from portrait, need to pin the panel open
+                mSlidingPanel.setSlidingEnabled(false);
                 mSlidingPanel.setInitialState(SlideState.EXPANDED);
-                onPanelExpanded(null);
+                setPanelExpanded();
+                if (savedInstanceState.getBoolean("queue_showing", false)) {
+                    mNowPlayingFragment.onQueueVisibilityChanged(true);
+                }
             } else if (savedInstanceState.getBoolean("panel_needs_collapse", false)) {
                 // Coming back from landscape we should collapse the panel
                 mSlidingPanel.setInitialState(SlideState.COLLAPSED);
-                onPanelCollapsed(null);
+                setPanelCollapsed();
+                if (savedInstanceState.getBoolean("queue_showing", false)) {
+                    mNowPlayingFragment.popQueueFragment();
+                }
+            } else if (savedInstanceState.getBoolean("panel_open", false)) {
+                setPanelExpanded();
+                if (savedInstanceState.getBoolean("queue_showing", false)) {
+                    mNowPlayingFragment.onQueueVisibilityChanged(true);
+                }
             }
         }
     }

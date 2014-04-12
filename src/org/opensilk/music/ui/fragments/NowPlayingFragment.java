@@ -309,6 +309,14 @@ public class NowPlayingFragment extends Fragment implements
         mPanelHeader.transitionToClosed();
     }
 
+    public void panelIsExpanded() {
+        mPanelHeader.makeOpen();
+    }
+
+    public void panelIsCollapsed() {
+        mPanelHeader.makeClosed();
+    }
+
     /*
      * ServiceConnection Callback
      */
@@ -479,7 +487,7 @@ public class NowPlayingFragment extends Fragment implements
         } //else wait for create and service bind
     }
 
-    private void pushQueueFragment() {
+    public void pushQueueFragment() {
         mActivity.getSupportFragmentManager().beginTransaction()
                 .add(R.id.panel_middle_content, new QueueFragment(), "queue")
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
@@ -487,7 +495,7 @@ public class NowPlayingFragment extends Fragment implements
         onQueueVisibilityChanged(true);
     }
 
-    private void popQueueFragment() {
+    public void popQueueFragment() {
         mActivity.getSupportFragmentManager().beginTransaction()
                 .remove(mActivity.getSupportFragmentManager().findFragmentByTag("queue"))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
