@@ -17,8 +17,11 @@
 
 package org.opensilk.music.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -29,11 +32,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.adapters.PagerAdapter;
-import org.opensilk.music.adapters.PagerAdapter.MusicFragments;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
@@ -42,7 +46,7 @@ import org.opensilk.music.adapters.PagerAdapter.MusicFragments;
 public class HomeFragment extends Fragment {
 
     private ViewPager mViewPager;
-    private PagerAdapter mPagerAdapter;
+    private HomePagerAdapter mPagerAdapter;
     private PreferenceUtils mPreferences;
 
     @Override
@@ -52,7 +56,7 @@ public class HomeFragment extends Fragment {
         mPreferences = PreferenceUtils.getInstance(getActivity());
 
         // Initialize the adapter
-        mPagerAdapter = new PagerAdapter(getActivity(), getChildFragmentManager());
+        mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
         final MusicFragments[] mFragments = MusicFragments.values();
         for (final MusicFragments mFragment : mFragments) {
             mPagerAdapter.add(mFragment.getFragmentClass(), null);
@@ -107,6 +111,12 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mPagerAdapter = null;
+    }
+
+    @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         // Shuffle all
@@ -124,6 +134,103 @@ public class HomeFragment extends Fragment {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public static final class HomePagerAdapter extends FragmentPagerAdapter {
+        private final Context context;
+        private final String[] pageTitles;
+        private final List<Holder> mHolderList = Lists.newArrayList();
+
+
+        public HomePagerAdapter(Context context, FragmentManager fm) {
+            super(fm);
+            this.context = context;
+            this.pageTitles = context.getResources().getStringArray(R.array.page_titles);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            Holder holder = mHolderList.get(position);
+            return Fragment.instantiate(context, holder.className, holder.params);
+        }
+
+        @Override
+        public int getCount() {
+            return mHolderList.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(final int position) {
+            return pageTitles[position].toUpperCase(Locale.getDefault());
+        }
+
+        public void add(final Class<? extends Fragment> className, final Bundle params) {
+            mHolderList.add(new Holder(className.getName(), params));
+//            notifyDataSetChanged();
+        }
+
+        /**
+         * A private class with information about fragment initialization
+         */
+        private final static class Holder {
+            String className;
+            Bundle params;
+            private Holder(String className, Bundle params) {
+                this.className = className;
+                this.params = params;
+            }
+        }
+    }
+
+    /**
+     * An enumeration of all the main fragments supported.
+     */
+    public enum MusicFragments {
+        /**
+         * The playlist fragment
+         */
+        PLAYLIST(HomePlaylistFragment.class),
+        /**
+         * The recent fragment
+         */
+        RECENT(HomeRecentFragment.class),
+        /**
+         * The artist fragment
+         */
+        ARTIST(HomeArtistFragment.class),
+        /**
+         * The album fragment
+         */
+        ALBUM(HomeAlbumFragment.class),
+        /**
+         * The song fragment
+         */
+        SONG(HomeSongFragment.class),
+        /**
+         * The genre fragment
+         */
+        GENRE(HomeGenreFragment.class);
+
+        private Class<? extends Fragment> mFragmentClass;
+
+        /**
+         * Constructor of <code>MusicFragments</code>
+         *
+         * @param fragmentClass The fragment class
+         */
+        private MusicFragments(final Class<? extends Fragment> fragmentClass) {
+            mFragmentClass = fragmentClass;
+        }
+
+        /**
+         * Method that returns the fragment class.
+         *
+         * @return Class<? extends Fragment> The fragment class.
+         */
+        public Class<? extends Fragment> getFragmentClass() {
+            return mFragmentClass;
+        }
+
     }
 
 }
