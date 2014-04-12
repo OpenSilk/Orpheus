@@ -87,6 +87,10 @@ public class SearchFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         // Initialize the adapter
         mAdapter = new SearchAdapter(getActivity());
+        if (savedInstanceState != null) {
+            mFilterString = savedInstanceState.getString("query");
+        }
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -105,7 +109,25 @@ public class SearchFragment extends Fragment implements
         ActionBarActivity activity = (ActionBarActivity) getActivity();
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getLoaderManager().initLoader(0, null, this);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mListView = null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("query", mFilterString);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mAdapter = null;
+        getLoaderManager().destroyLoader(0);
     }
 
     @Override
@@ -123,6 +145,9 @@ public class SearchFragment extends Fragment implements
         mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setIconified(false);
+        if (!TextUtils.isEmpty(mFilterString)) {
+            mSearchView.setQuery(mFilterString, false);
+        }
         // Add voice search
         final SearchManager searchManager = (SearchManager)getActivity().getSystemService(Context.SEARCH_SERVICE);
         final SearchableInfo searchableInfo = searchManager.getSearchableInfo(getActivity().getComponentName());
@@ -137,6 +162,12 @@ public class SearchFragment extends Fragment implements
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroyOptionsMenu() {
+        super.onDestroyOptionsMenu();
+        mSearchView = null;
     }
 
     /**
@@ -218,7 +249,7 @@ public class SearchFragment extends Fragment implements
         return true;
     }
 
-    private final class SearchAdapter extends CardCursorAdapter {
+    private static final class SearchAdapter extends CardCursorAdapter {
 
         public SearchAdapter(Context context) {
             super(context);
@@ -242,7 +273,7 @@ public class SearchFragment extends Fragment implements
                 // Build artist
                 final Artist artist = new Artist(id, name, songCount, albumCount);
                 // return artist list card
-                CardArtistList card = new CardArtistList(getActivity(), artist);
+                CardArtistList card = new CardArtistList(getContext(), artist);
                 card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
                         getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
                 return card;
@@ -256,7 +287,7 @@ public class SearchFragment extends Fragment implements
                 // Build the album as best we can
                 final Album album = new Album(id, name, artist, 0, null);
                 // return album list card
-                CardAlbumList card = new CardAlbumList(getActivity(), album);
+                CardAlbumList card = new CardAlbumList(getContext(), album);
                 card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
                         getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
                 return card;
@@ -272,7 +303,7 @@ public class SearchFragment extends Fragment implements
                 // build the song as best we can
                 final Song song = new Song(id, name, artist, album, 0, 0);
                 // return song list card
-                return new CardSongList(getActivity(), song);
+                return new CardSongList(getContext(), song);
             }
         }
     }
