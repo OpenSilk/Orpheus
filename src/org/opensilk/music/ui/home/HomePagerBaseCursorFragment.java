@@ -133,6 +133,12 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
         mGridView = null;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getLoaderManager().destroyLoader(LOADER);
+    }
+
     /**
      * Restarts the loader. Called when user updates the sort by option
      */
