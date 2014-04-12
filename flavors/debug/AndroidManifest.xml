@@ -21,11 +21,10 @@
             android:name="org.opensilk.music.appwidgets.MusicWidgetReceiver"
             android:enabled="false">
             <intent-filter>
-                <action android:name="org.opensilk.music.debug.PLAY_STATE_CHANGED" />
-                <action android:name="org.opensilk.music.debug.POSITION_CHANGED" />
-                <action android:name="org.opensilk.music.debug.META_CHANGED" />
-                <action android:name="org.opensilk.music.debug.REPEAT_CHANGED" />
-                <action android:name="org.opensilk.music.debug.SHUFFLE_CHANGED" />
+                <action android:name="org.opensilk.music.debug.playstatechanged" />
+                <action android:name="org.opensilk.music.debug.metachanged" />
+                <action android:name="org.opensilk.music.debug.repeatmodechanged" />
+                <action android:name="org.opensilk.music.debug.shufflemodechanged" />
                 <action android:name="org.opensilk.music.debug.QUERY_DISABLE" />
             </intent-filter>
         </receiver>

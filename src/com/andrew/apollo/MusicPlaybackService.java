@@ -102,33 +102,33 @@ public class MusicPlaybackService extends Service {
     /**
      * Indicates that the music has paused or resumed
      */
-    public static final String PLAYSTATE_CHANGED = APOLLO_PACKAGE_NAME+".PLAY_STATE_CHANGED";
+    public static final String PLAYSTATE_CHANGED = APOLLO_PACKAGE_NAME+".playstatechanged";
 
     /**
      * Indicates that music playback position within
      * a title was changed
      */
-    public static final String POSITION_CHANGED = APOLLO_PACKAGE_NAME+".POSITION_CHANGED";
+    public static final String POSITION_CHANGED = APOLLO_PACKAGE_NAME+".positionchanged";
 
     /**
      * Indicates the meta data has changed in some way, like a track change
      */
-    public static final String META_CHANGED = APOLLO_PACKAGE_NAME+".META_CHANGED";
+    public static final String META_CHANGED = APOLLO_PACKAGE_NAME+".metachanged";
 
     /**
      * Indicates the queue has been updated
      */
-    public static final String QUEUE_CHANGED = APOLLO_PACKAGE_NAME+".QUEUE_CHANGED";
+    public static final String QUEUE_CHANGED = APOLLO_PACKAGE_NAME+".queuechanged";
 
     /**
      * Indicates the repeat mode chaned
      */
-    public static final String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".REPEAT_CHANGED";
+    public static final String REPEATMODE_CHANGED = APOLLO_PACKAGE_NAME+".repeatmodechanged";
 
     /**
      * Indicates the shuffle mode chaned
      */
-    public static final String SHUFFLEMODE_CHANGED = APOLLO_PACKAGE_NAME+".SHUFFLE_CHANGED";
+    public static final String SHUFFLEMODE_CHANGED = APOLLO_PACKAGE_NAME+".shufflemodechanged";
 
     /**
      * For backwards compatibility reasons, also provide sticky
