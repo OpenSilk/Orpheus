@@ -22,14 +22,18 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
+import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.android.volley.VolleyError;
 
 import org.opensilk.music.artwork.ArtworkLoader.ImageContainer;
 import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
@@ -38,6 +42,8 @@ import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
  * Modified form volleys NetworkImageView to fetch album/artist images
  */
 public class ArtworkImageView extends ImageView {
+    private static final String TAG = ArtworkImageView.class.getSimpleName();
+    private static final boolean D = BuildConfig.DEBUG;
 
     private String mArtistName;
 
@@ -175,59 +181,7 @@ public class ArtworkImageView extends ImageView {
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
         ImageContainer newContainer = mImageLoader.get(mArtistName, mAlbumName, mAlbumId,
-                new ImageListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (mErrorImageId != 0) {
-                            setImageResource(mErrorImageId);
-                        }
-                    }
-
-                    @Override
-                    public void onResponse(final ImageContainer response, boolean isImmediate) {
-                        // If this was an immediate response that was delivered inside of a layout
-                        // pass do not set the image immediately as it will trigger a requestLayout
-                        // inside of a layout. Instead, defer setting the image by posting back to
-                        // the main thread.
-                        if (isImmediate && isInLayoutPass) {
-                            post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    onResponse(response, false);
-                                }
-                            });
-                            return;
-                        }
-
-                        if (response.getBitmap() != null) {
-                            if (isImmediate) {
-                                setImageBitmap(response.getBitmap());
-                            } else {
-                                mDrawables[1] = new BitmapDrawable(getResources(), response.getBitmap());
-                                final TransitionDrawable transitionDrawable = new TransitionDrawable(mDrawables);
-                                transitionDrawable.setCrossFadeEnabled(true);
-                                setImageDrawable(transitionDrawable);
-                                transitionDrawable.startTransition(200);
-                            }
-                        } else if (mDefaultImageId != 0) {
-                            // We missed the L1 cache set the default drawable as fist
-                            // layer of transition drawable for smoother effect
-                            mDrawables[0] = getResources().getDrawable(mDefaultImageId);
-                            if (isImmediate) {
-                                setImageResource(mDefaultImageId);
-                            } else {
-                                // Fade in the default image
-                                Drawable[] drawables = new Drawable[2];
-                                drawables[0] = new ColorDrawable(getResources().getColor(R.color.transparent));
-                                drawables[1] = mDrawables[0];
-                                TransitionDrawable transitionDrawable = new TransitionDrawable(drawables);
-                                transitionDrawable.setCrossFadeEnabled(true);
-                                setImageDrawable(transitionDrawable);
-                                transitionDrawable.startTransition(200);
-                            }
-                        }
-                    }
-                }, mImageType);
+                new ResponseListener(this, isInLayoutPass), mImageType);
 
         // update the ImageContainer to be the new bitmap container.
         mImageContainer = newContainer;
@@ -265,5 +219,79 @@ public class ArtworkImageView extends ImageView {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         invalidate();
+    }
+
+    private static class ResponseListener implements ImageListener {
+        private final WeakReference<ArtworkImageView> reference;
+        private boolean isInLayoutPass;
+
+        private ResponseListener(ArtworkImageView imageView, boolean isInLayoutPass) {
+            this.reference = new WeakReference<>(imageView);
+            this.isInLayoutPass = isInLayoutPass;
+        }
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            ArtworkImageView v = reference.get();
+            if (v == null) {
+                if (D) Log.d(TAG, "Reference was null");
+                return;
+            }
+            if (v.mErrorImageId != 0) {
+                v.setImageResource(v.mErrorImageId);
+            }
+        }
+
+        @Override
+        public void onResponse(final ImageContainer response, final boolean isImmediate) {
+            ArtworkImageView v = reference.get();
+            if (v == null) {
+                if (D) Log.d(TAG, "Reference was null");
+                return;
+            }
+            // If this was an immediate response that was delivered inside of a layout
+            // pass do not set the image immediately as it will trigger a requestLayout
+            // inside of a layout. Instead, defer setting the image by posting back to
+            // the main thread.
+            if (isImmediate && isInLayoutPass) {
+                if (D) Log.d(TAG, "isInLayoutPass... deferring");
+                isInLayoutPass = false;
+                v.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onResponse(response, isImmediate);
+                    }
+                });
+                return;
+            }
+
+            if (response.getBitmap() != null) {
+                if (isImmediate) {
+                    v.setImageBitmap(response.getBitmap());
+                } else {
+                    v.mDrawables[1] = new BitmapDrawable(v.getResources(), response.getBitmap());
+                    final TransitionDrawable transitionDrawable = new TransitionDrawable(v.mDrawables);
+                    transitionDrawable.setCrossFadeEnabled(true);
+                    v.setImageDrawable(transitionDrawable);
+                    transitionDrawable.startTransition(340);
+                }
+            } else if (v.mDefaultImageId != 0) {
+                // We missed the L1 cache set the default drawable as fist
+                // layer of transition drawable for smoother effect
+                v.mDrawables[0] = v.getResources().getDrawable(v.mDefaultImageId);
+                if (isImmediate) {
+                    v.setImageResource(v.mDefaultImageId);
+                } else {
+                    // Fade in the default image
+                    Drawable[] drawables = new Drawable[2];
+                    drawables[0] = new ColorDrawable(v.getResources().getColor(R.color.transparent));
+                    drawables[1] = v.mDrawables[0];
+                    TransitionDrawable transitionDrawable = new TransitionDrawable(drawables);
+                    transitionDrawable.setCrossFadeEnabled(true);
+                    v.setImageDrawable(transitionDrawable);
+                    transitionDrawable.startTransition(280);
+                }
+            }
+        }
     }
 }
