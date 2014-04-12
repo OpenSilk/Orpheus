@@ -16,75 +16,51 @@
 
 package org.opensilk.music.ui.profile;
 
-import android.os.Parcelable;
+import android.content.Context;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.PagerAdapter;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Genre;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
- * Total fucking hack job i had no idea what i was doing
- * DO NOT COPY THIS CLASS
  *
  * Created by drew on 3/31/14.
  */
-public class ProfileGenrePagerAdapter extends PagerAdapter {
+public class ProfileGenrePagerAdapter extends FragmentPagerAdapter {
 
     private static final int ALBUMS = 0;
     private static final int SONGS = 1;
     private static final int PAGE_COUNT = 2;
 
-    private ProfileGenreFragment mFragment;
-    private Genre mGenre;
+    private final List<ProfileGenrePageBase> mPages;
+    private final String[] mTitles;
 
-    private Set<ProfileGenrePageBase> mPages = new HashSet<>(2);
-
-    ProfileGenrePagerAdapter(ProfileGenreFragment fragment, Genre genre) {
-        mFragment = fragment;
-        mGenre = genre;
+    public ProfileGenrePagerAdapter(FragmentManager fm, Context context) {
+        super(fm);
+        mPages = new ArrayList<>(2);
+        mTitles = new String[] {
+                context.getString(R.string.page_albums).toUpperCase(Locale.getDefault()),
+                context.getString(R.string.page_songs).toUpperCase(Locale.getDefault())
+        };
     }
 
     @Override
-    public void startUpdate(ViewGroup container) {
-
-    }
-
-    @Override
-    public void finishUpdate(ViewGroup container) {
-
-    }
-
-    @Override
-    public Object instantiateItem(ViewGroup container, int position) {
-        final ProfileGenrePageBase obj;
-        switch (position) {
-            case ALBUMS:
-                obj = new ProfileGenreAlbumsPage(mFragment, mGenre, container);
-                break;
-            case SONGS:
-                obj = new ProfileGenreSongsPage(mFragment, mGenre, container);
-                break;
-            default:
-                obj = null;
+    public Fragment getItem(int position) {
+        ProfileGenrePageBase f = null;
+        if (ALBUMS == position) {
+            f = ProfileGenreAlbumsPage.newInstance();
+        } else if (SONGS == position) {
+            f = ProfileGenreSongsPage.newInstance();
         }
-        if (obj != null) {
-            mPages.add(obj);
+        if (f != null) {
+            mPages.add(position, f);
         }
-        return obj;
-    }
-
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        ProfileGenrePageBase obj = (ProfileGenrePageBase) object;
-        obj.finish();
-        mPages.remove(object);
+        return f;
     }
 
     @Override
@@ -93,30 +69,7 @@ public class ProfileGenrePagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
-        return ((ProfileGenrePageBase) object).getView() == view;
-    }
-
-    @Override
     public CharSequence getPageTitle(int position) {
-        switch (position) {
-            case ALBUMS:
-                return mFragment.getString(R.string.page_albums).toUpperCase(Locale.getDefault());
-            case SONGS:
-                return mFragment.getString(R.string.page_songs).toUpperCase(Locale.getDefault());
-            default:
-                return null;
-        }
+        return mTitles[position];
     }
-
-    @Override
-    public Parcelable saveState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Parcelable state, ClassLoader loader) {
-
-    }
-
 }

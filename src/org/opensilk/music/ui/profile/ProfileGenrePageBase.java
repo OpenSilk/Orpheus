@@ -16,47 +16,34 @@
 
 package org.opensilk.music.ui.profile;
 
-import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Genre;
 
 import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Created by drew on 4/1/14.
  */
-public abstract class ProfileGenrePageBase {
+public abstract class ProfileGenrePageBase extends Fragment {
 
-    // container
-    protected final View mContainer;
+    protected CardListView mListView;
 
-    // main content
-    protected final ListView mListView;
-
-    // context
-    protected final Fragment mHostFragment;
-
-    // data
-    protected final Genre mGenre;
-
-    ProfileGenrePageBase(ProfileGenreFragment fragment, Genre genre, ViewGroup container) {
-        mHostFragment = fragment;
-        mGenre = genre;
-        LayoutInflater inflater = (LayoutInflater) fragment.getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mContainer = inflater.inflate(R.layout.card_listview_topmargin, container, false);
-        container.addView(mContainer);
-        mListView = (CardListView) mContainer.findViewById(android.R.id.list);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.card_listview_topmargin, container, false);
+        mListView = (CardListView) v.findViewById(android.R.id.list);
+        return v;
     }
 
-    public View getView() {
-        return mContainer;
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mListView=null;
     }
 
-    public abstract void finish();
 }

@@ -16,9 +16,12 @@
 
 package org.opensilk.music.ui.profile;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -33,15 +36,25 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
+import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.loaders.GenreAlbumCursorLoader;
+import org.opensilk.music.loaders.GenreSongCursorLoader;
 
 /**
  * Created by drew on 2/28/14.
  */
-public class ProfileGenreFragment extends Fragment {
+public class ProfileGenreFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    protected static int ALBUM_LOADER = 1;
+    protected static int SONG_LOADER = 2;
 
     private ViewPager mViewPager;
     private ProfileGenrePagerAdapter mPagerAdapter;
+
+    protected ProfileAlbumListCardCursorAdapter mAlbumAdapter;
+    protected SongListCardCursorAdapter mSongAdapter;
 
     private Genre mGenre;
 
@@ -57,7 +70,13 @@ public class ProfileGenreFragment extends Fragment {
         final Bundle args = getArguments();
         mGenre = args.getParcelable(Config.EXTRA_DATA);
         // Initialize the adapter
-        mPagerAdapter = new ProfileGenrePagerAdapter(this, mGenre);
+        mPagerAdapter = new ProfileGenrePagerAdapter(getChildFragmentManager(), getActivity());
+        // Init page adapters
+        mAlbumAdapter = new ProfileAlbumListCardCursorAdapter(getActivity());
+        mSongAdapter = new SongListCardCursorAdapter(getActivity());
+        //start the loaders
+        getLoaderManager().initLoader(ALBUM_LOADER, createLoaderArgs(), this);
+        getLoaderManager().initLoader(SONG_LOADER, createLoaderArgs(), this);
     }
 
     @Override
@@ -88,6 +107,13 @@ public class ProfileGenreFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getLoaderManager().destroyLoader(ALBUM_LOADER);
+        getLoaderManager().destroyLoader(SONG_LOADER);
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.card_genre, menu);
@@ -113,4 +139,47 @@ public class ProfileGenreFragment extends Fragment {
         return false;
     }
 
+    protected Bundle createLoaderArgs() {
+        final Bundle b = new Bundle();
+        b.putLong(Config.ID, mGenre.mGenreId);
+        return b;
+    }
+
+    /*
+     * Implement LoaderCallbacks
+     * NOTE: We handle the loaders here instead of in the pager fragments
+     * because the child fragments somehow 'leak' the callbacks into
+     * the fragment an the top of the backstack when we exit here
+     * resetting its loader
+     */
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (id == ALBUM_LOADER) {
+            return new GenreAlbumCursorLoader(getActivity(), args.getLong(Config.ID));
+        } else if (id == SONG_LOADER) {
+            return new GenreSongCursorLoader(getActivity(), args.getLong(Config.ID));
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        final int id = loader.getId();
+        if (id == ALBUM_LOADER) {
+            mAlbumAdapter.swapCursor(data);
+        } else if (id == SONG_LOADER) {
+            mSongAdapter.swapCursor(data);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        final int id = loader.getId();
+        if (id == ALBUM_LOADER) {
+            mAlbumAdapter.swapCursor(null);
+        } else if (id == SONG_LOADER) {
+            mSongAdapter.swapCursor(null);
+        }
+    }
 }
