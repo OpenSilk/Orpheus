@@ -20,6 +20,7 @@ package org.opensilk.music.ui.home;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -82,11 +83,12 @@ public class HomeFragment extends Fragment {
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Disable home as up
-        getActivity().getActionBar().setDisplayHomeAsUpEnabled(false);
-        getActivity().getActionBar().setHomeButtonEnabled(false);
+        ActionBarActivity activity = (ActionBarActivity) getActivity();
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        activity.getSupportActionBar().setHomeButtonEnabled(false);
         // Display title
-        getActivity().getActionBar().setDisplayShowTitleEnabled(true);
-        getActivity().getActionBar().setTitle(R.string.app_name);
+        activity.getSupportActionBar().setDisplayShowTitleEnabled(true);
+        activity.getSupportActionBar().setTitle(R.string.app_name);
         // Enable the options menu
         setHasOptionsMenu(true);
     }

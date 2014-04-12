@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -76,7 +77,8 @@ public class ProfileGenreFragment extends Fragment {
         // Enable the options menu
         setHasOptionsMenu(true);
         // set actionbar title
-        getActivity().getActionBar().setTitle(mGenre.mGenreName);
+        ActionBarActivity activity = (ActionBarActivity) getActivity();
+        activity.getSupportActionBar().setTitle(mGenre.mGenreName);
     }
 
     @Override

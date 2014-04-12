@@ -22,6 +22,7 @@ import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -64,7 +65,8 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Set home as up
-        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBarActivity activity = (ActionBarActivity) getActivity();
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // Enable the options menu
         setHasOptionsMenu(true);
     }
@@ -108,7 +110,8 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
     }
 
     protected void setTitle(String title) {
-        getActivity().getActionBar().setTitle(title);
+        ActionBarActivity activity = (ActionBarActivity) getActivity();
+        activity.getSupportActionBar().setTitle(title);
     }
 
     /*
