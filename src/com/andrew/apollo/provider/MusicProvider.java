@@ -104,7 +104,7 @@ public class MusicProvider extends ContentProvider {
 
                 // Build our custom cursor
                 if (genres != null && genres.moveToFirst()) {
-                    c = new MatrixCursor(new String[] {"_id", "name", "song_number"});
+                    c = new MatrixCursor(new String[] {"_id", "name", "song_number", "album_number"});
                     do {
                         // Copy the genre id
                         final long id = genres.getLong(genres.getColumnIndexOrThrow(BaseColumns._ID));
@@ -116,7 +116,7 @@ public class MusicProvider extends ContentProvider {
                         // with genres without any songs
                         final Cursor genreSongs = getContext().getContentResolver().query(
                                 MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                                new String[] { BaseColumns._ID },
+                                new String[] { MediaStore.Audio.AudioColumns.ALBUM_ID },
                                 MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?",
                                 new String[] {"1", "''"}, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
 
@@ -131,10 +131,20 @@ public class MusicProvider extends ContentProvider {
                         // copy song count
                         final int songNum = genreSongs.getCount();
 
+                        // loop the songs and filter all the unique album ids
+                        final HashSet<String> albumIdsSet = new HashSet<String>();
+                        if (genreSongs.moveToFirst()) {
+                            do {
+                                albumIdsSet.add(genreSongs.getString(0));
+                            } while (genreSongs.moveToNext());
+                        }
+                        // copy album count
+                        final int numAlbums = albumIdsSet.size();
+
                         // close second cursor
                         genreSongs.close();
 
-                        ((MatrixCursor) c).addRow(new Object[] {id, name, songNum});
+                        ((MatrixCursor) c).addRow(new Object[] {id, name, songNum, numAlbums});
                     } while (genres.moveToNext());
                 }
                 if (genres != null) {

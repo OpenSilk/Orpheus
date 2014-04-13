@@ -42,6 +42,11 @@ public class Genre implements Parcelable {
     public int mSongNumber;
 
     /**
+     * Genre album count
+     */
+    public int mAlbumNumber;
+
+    /**
      * Constructor of <code>Genre</code>
      * 
      * @param genreId The Id of the genre
@@ -53,6 +58,7 @@ public class Genre implements Parcelable {
         mGenreId = genreId;
         mGenreName = genreName;
         mSongNumber = 0;
+        mAlbumNumber = 0;
     }
 
     /**
@@ -61,11 +67,12 @@ public class Genre implements Parcelable {
      * @param genreId The Id of the genre
      * @param genreName The genre name
      */
-    public Genre(final long genreId, final String genreName, final int songNumber) {
+    public Genre(final long genreId, final String genreName, final int songNumber, final int albumNumber) {
         super();
         mGenreId = genreId;
         mGenreName = genreName;
         mSongNumber = songNumber;
+        mAlbumNumber = albumNumber;
     }
 
     /**
@@ -77,6 +84,8 @@ public class Genre implements Parcelable {
         int result = 1;
         result = prime * result + (int) mGenreId;
         result = prime * result + (mGenreName == null ? 0 : mGenreName.hashCode());
+        result = prime * result + mSongNumber;
+        result = prime * result + mAlbumNumber;
         return result;
     }
 
@@ -96,6 +105,12 @@ public class Genre implements Parcelable {
         }
         final Genre other = (Genre)obj;
         if (mGenreId != other.mGenreId) {
+            return false;
+        }
+        if (mSongNumber != other.mSongNumber) {
+            return false;
+        }
+        if (mAlbumNumber != other.mAlbumNumber) {
             return false;
         }
         return TextUtils.equals(mGenreName, other.mGenreName);
@@ -123,12 +138,14 @@ public class Genre implements Parcelable {
         dest.writeLong(mGenreId);
         dest.writeString(mGenreName);
         dest.writeInt(mSongNumber);
+        dest.writeInt(mAlbumNumber);
     }
 
     private Genre(Parcel in) {
         mGenreId = in.readLong();
         mGenreName = in.readString();
         mSongNumber = in.readInt();
+        mAlbumNumber = in.readInt();
     }
 
     public static final Creator<Genre> CREATOR = new Creator<Genre>() {

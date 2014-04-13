@@ -107,7 +107,8 @@ public class CursorHelpers {
         final long id = c.getLong(c.getColumnIndexOrThrow("_id"));
         final String name= c.getString(c.getColumnIndexOrThrow("name"));
         final int songNumber = c.getInt(c.getColumnIndexOrThrow("song_number"));
-        return new Genre(id, name, songNumber);
+        final int albumNumber = c.getInt(c.getColumnIndexOrThrow("album_number"));
+        return new Genre(id, name, songNumber, albumNumber);
     }
 
     public static Playlist makePlaylistFromCursor(final Cursor c) {

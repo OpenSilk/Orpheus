@@ -71,7 +71,9 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
         final CardHeaderGrid header = new CardHeaderGrid(getContext());
         header.setButtonOverflowVisible(true);
         header.setTitle(mData.mGenreName);
-        header.setLineTwo(MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber));
+        String l2 = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber)
+                + ", " + MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber);
+        header.setLineTwo(l2);
         header.setPopupMenu(R.menu.card_genre, getNewHeaderPopupMenuListener());
         addCardHeader(header);
     }
