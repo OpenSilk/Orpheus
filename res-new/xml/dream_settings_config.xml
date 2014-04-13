@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2014 OpenSilk Productions LLC
   ~
@@ -15,11 +16,18 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <!-- Profile -->
-    <!-- 40% sw -->
-    <dimen name="profile_header_height">128dp</dimen>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Daydream -->
-    <dimen name="dream_art_size">200dp</dimen>
-</resources>
+    <CheckBoxPreference
+        android:key="daydream_nightmode"
+        android:defaultValue="true"
+        android:title="@string/dream_settings_night_mode"
+        android:summary="@string/dream_settings_night_mode_summary"/>
+
+    <CheckBoxPreference
+        android:key="daydream_fullscreen"
+        android:defaultValue="true"
+        android:title="@string/dream_settings_fullscreen"
+        android:summary="@string/dream_settings_fullscreen_summary"/>
+
+</PreferenceScreen>

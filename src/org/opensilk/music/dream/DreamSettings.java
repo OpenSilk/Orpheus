@@ -21,6 +21,9 @@ import android.preference.PreferenceActivity;
 import android.view.MenuItem;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.util.ConfigHelper;
 
 import java.util.List;
 
@@ -29,10 +32,29 @@ import java.util.List;
  */
 public class DreamSettings extends PreferenceActivity {
 
+    static final String[] VALID_FRAGMENTS;
+
+    static {
+        VALID_FRAGMENTS = new String[] {
+                AlternateDreamFragment.class.getName(),
+                ChooserFragment.class.getName(),
+                ConfigurationFragment.class.getName(),
+        };
+    }
+
+    private MusicUtils.ServiceToken mToken;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActionBar().setDisplayHomeAsUpEnabled(true);
+        mToken = MusicUtils.bindToService(this, null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MusicUtils.unbindFromService(mToken);
     }
 
     @Override
@@ -52,9 +74,16 @@ public class DreamSettings extends PreferenceActivity {
 
     @Override
     protected boolean isValidFragment(String fragmentName) {
-        if (fragmentName.equals(AlternateDreamFragment.class.getName())) {
-            return true;
+        for (String frag : VALID_FRAGMENTS) {
+            if (frag.equals(fragmentName)) {
+                return true;
+            }
         }
         return false;
+    }
+
+    @Override
+    public boolean isMultiPane() {
+        return ConfigHelper.isXLargeScreen(getResources());
     }
 }

@@ -7,6 +7,7 @@
 
     <!-- ################ GENERAL ################ -->
     <string name="okay">Okay</string>
+    <string name="accessibility_select">select</string>
 
     <!-- ################ SETTINGS ################ -->
 
@@ -87,6 +88,12 @@
     <string name="widget_large_style_two">Style two</string>
 
     <!--Daydream-->
-    <string name="dream_settings_alt_dream">Alternate Dream</string>
-
+    <string name="dream_settings_alt_dream">Alternate dream</string>
+    <string name="dream_settings_choose_dream">Style</string>
+    <string name="dream_settings_configure">Configure</string>
+    <string name="dream_settings_night_mode">Night mode</string>
+    <string name="dream_settings_night_mode_summary">Dim screen, suitable for dark rooms</string>
+    <string name="dream_settings_alt_dream_warning">The dream chosen here will display while music is not playing.\n\nWARN: This is experimental and may not function properly.</string>
+    <string name="dream_settings_fullscreen">Fullscreen mode</string>
+    <string name="dream_settings_fullscreen_summary">Hide status bar and blacks out navigation bar</string>
 </resources>

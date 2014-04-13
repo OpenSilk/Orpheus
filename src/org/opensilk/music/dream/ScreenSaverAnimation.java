@@ -26,8 +26,8 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 public class ScreenSaverAnimation implements Runnable {
-    static final long MOVE_DELAY = 15000; // DeskClock.SCREEN_SAVER_MOVE_DELAY;
-    static final long SLIDE_TIME = 10000;
+    static final long MOVE_DELAY = 60000; // DeskClock.SCREEN_SAVER_MOVE_DELAY;
+    static final long SLIDE_TIME = 80000;
     static final long FADE_TIME = 3000;
 
     static final boolean SLIDE = true;

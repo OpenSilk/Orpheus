@@ -16,6 +16,7 @@
 
 package org.opensilk.music.dream;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -52,7 +53,7 @@ public class AlternateDreamFragment extends PreferenceFragment implements
 
         addPreferencesFromResource(R.xml.dream_settings_altdream);
         // Pull saved dream
-        activeDream = getAltDreamComponent(getActivity());
+        activeDream = DreamPrefs.getAltDreamComponent(getActivity());
         // Pull list of available dreams
         dreamInfos = getDreamInfos();
         // Add all available dreams to preference screen
@@ -61,6 +62,19 @@ public class AlternateDreamFragment extends PreferenceFragment implements
             DreamPreference p = new DreamPreference(getActivity(), info);
             p.setOnPreferenceChangeListener(this);
             getPreferenceScreen().addPreference(p);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        if (!prefs.getBoolean("daydream_was_warned", false)) {
+            prefs.edit().putBoolean("daydream_was_warned", true).apply();
+            new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.dream_settings_alt_dream_warning)
+                    .setNeutralButton(android.R.string.ok, null)
+                    .show();
         }
     }
 
@@ -74,9 +88,9 @@ public class AlternateDreamFragment extends PreferenceFragment implements
                 dreamPreference.dreamInfo.isActive = isChecked;
                 // Store the new dream component
                 if (isChecked) {
-                    saveAltDreamComponent(getActivity(), dreamPreference.dreamInfo.componentName);
+                    DreamPrefs.saveAltDreamComponent(getActivity(), dreamPreference.dreamInfo.componentName);
                 } else {
-                    remoteAltDreamComponent(getActivity());
+                    DreamPrefs.removeAltDreamComponent(getActivity());
                 }
                 // update active dream
                 activeDream = dreamPreference.dreamInfo.componentName;
@@ -125,46 +139,6 @@ public class AlternateDreamFragment extends PreferenceFragment implements
         if (resolveInfo == null || resolveInfo.serviceInfo == null)
             return null;
         return new ComponentName(resolveInfo.serviceInfo.packageName, resolveInfo.serviceInfo.name);
-    }
-
-    /**
-     * Gets alt dream compontent info from shared prefs
-     * @param context
-     * @return
-     */
-    public static ComponentName getAltDreamComponent(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String altPkg = prefs.getString("alt_dream_package", null);
-        String altClz = prefs.getString("alt_dream_class", null);
-        if (altPkg != null && altClz != null) {
-            return new ComponentName(altPkg, altClz);
-        }
-        return null;
-    }
-
-    /**
-     * Stores alt dream component info in shared prefs
-     * @param context
-     * @param componentName
-     */
-    public static void saveAltDreamComponent(Context context, ComponentName componentName) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit()
-                .putString("alt_dream_package", componentName.getPackageName())
-                .putString("alt_dream_class", componentName.getClassName())
-                .apply();
-    }
-
-    /**
-     * Resets the alt dream shared pref
-     * @param context
-     */
-    public static void remoteAltDreamComponent(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit()
-                .remove("alt_dream_package")
-                .remove("alt_dream_class")
-                .apply();
     }
 
     /**

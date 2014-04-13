@@ -17,9 +17,13 @@
 package org.opensilk.music.dream;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,15 +33,17 @@ import android.service.dreams.IDreamService;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
 
 import com.andrew.apollo.BuildConfig;
+import com.andrew.apollo.MusicPlaybackService;
+import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 
-import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.artwork.ArtworkManager;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 import hugo.weaving.DebugLog;
 
@@ -49,8 +55,7 @@ public class DayDreamService extends DreamService {
     private static final String TAG = DayDreamService.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
-
-    private View mContentView, mSaverView;
+    private ViewGroup mContentView, mSaverView;
 
     // True if attached to window
     private boolean isAttached;
@@ -62,16 +67,34 @@ public class DayDreamService extends DreamService {
     // True if bount to alt dream service
     private boolean isBoundToAltDream;
 
-    private Handler mHandler = new Handler();
+    private final Handler mHandler;
+    private final ScreenSaverAnimation mMoveSaverRunnable;
 
-    private ScreenSaverAnimation mMoveSaverRunnable = null;
+    private final ArrayList<MusicStateListener> mMusicStateListener;
+    private final MusicStateReceiver mPlaybackReceiver;
+
+    public DayDreamService() {
+        mHandler = new Handler();
+        mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
+        mMusicStateListener = Lists.newArrayList();
+        mPlaybackReceiver = new MusicStateReceiver();
+    }
 
     @DebugLog
     @Override
     public void onCreate() {
         super.onCreate();
         mMusicServiceToken = MusicUtils.bindToService(this, mMusicServiceConnection);
-        mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
+
+        final IntentFilter filter = new IntentFilter();
+        // Play and pause changes
+        filter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
+        // Shuffle and repeat changes
+        filter.addAction(MusicPlaybackService.SHUFFLEMODE_CHANGED);
+        filter.addAction(MusicPlaybackService.REPEATMODE_CHANGED);
+        // Track changes
+        filter.addAction(MusicPlaybackService.META_CHANGED);
+        registerReceiver(mPlaybackReceiver, filter);
     }
 
     @DebugLog
@@ -86,6 +109,7 @@ public class DayDreamService extends DreamService {
             unbindService(mAltDreamConnection);
             isBoundToAltDream = false;
         }
+        unregisterReceiver(mPlaybackReceiver);
     }
 
     @DebugLog
@@ -97,9 +121,7 @@ public class DayDreamService extends DreamService {
             if (!MusicUtils.isPlaying()) {
                 bindAltDream();
             } else {
-                mHandler.removeCallbacks(mMoveSaverRunnable);
                 setupSaverView();
-                mHandler.post(mMoveSaverRunnable);
             }
         }
     }
@@ -110,6 +132,15 @@ public class DayDreamService extends DreamService {
         isAttached = false;
         super.onDetachedFromWindow();
         mHandler.removeCallbacks(mMoveSaverRunnable);
+        mMusicStateListener.clear();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (!isBoundToAltDream) {
+            setupSaverView();
+        }
     }
 
     /**
@@ -117,24 +148,40 @@ public class DayDreamService extends DreamService {
      */
     @DebugLog
     private void setupSaverView() {
-        setInteractive(false);
-        setFullscreen(true);
-        setScreenBright(false);
-        setContentView(R.layout.daydream_container);
+        mHandler.removeCallbacks(mMoveSaverRunnable);
 
-        mSaverView = findViewById(R.id.content_wrapper);
+        setContentView(R.layout.daydream_container);
+        mSaverView = (ViewGroup) findViewById(R.id.dream_container);
         mSaverView.setAlpha(0);
-        mContentView = (View) mSaverView.getParent();
+        mContentView = (ViewGroup) mSaverView.getParent();
+
+        setScreenBright(!DreamPrefs.wantNightMode(this));
+        setFullscreen(DreamPrefs.wantFullscreen(this));
 
         LayoutInflater inflater = getWindow().getLayoutInflater();
-
-        //TODO: Settings for different views
-
-        inflater.inflate(R.layout.daydream_album_art_only, (LinearLayout) mSaverView, true);
-        ArtworkImageView artwork = (ArtworkImageView) findViewById(R.id.album_art_view);
-        ArtworkManager.loadCurrentArtwork(artwork);
-
+        View inner = null;
+        int style = DreamPrefs.getDreamLayout(this);
+        switch (style) {
+            case DreamPrefs.DreamLayout.ART_ONLY:
+                inner = inflater.inflate(R.layout.daydream_art_only, mSaverView, false);
+                setInteractive(false);
+                break;
+            case DreamPrefs.DreamLayout.ART_META:
+                inner = inflater.inflate(R.layout.daydream_art_meta, mSaverView, false);
+                setInteractive(false);
+                break;
+            case DreamPrefs.DreamLayout.ART_CONTROLS:
+                inner = inflater.inflate(R.layout.daydream_art_controls, mSaverView, false);
+                setInteractive(true);
+        }
+        if (inner != null) {
+            mSaverView.addView(inner);
+            // We add the listener for child views since they cant access us.
+            mMusicStateListener.add((MusicStateListener) inner);
+        }
         mMoveSaverRunnable.registerViews(mContentView, mSaverView);
+
+        mHandler.post(mMoveSaverRunnable);
     }
 
     /**
@@ -142,7 +189,7 @@ public class DayDreamService extends DreamService {
      */
     @DebugLog
     private void bindAltDream() {
-        ComponentName altDream = AlternateDreamFragment.getAltDreamComponent(this);
+        ComponentName altDream = DreamPrefs.getAltDreamComponent(this);
         if (altDream != null) {
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE)
                     .setComponent(altDream)
@@ -197,6 +244,7 @@ public class DayDreamService extends DreamService {
                 dreamService.attach(token);
             } catch (NoSuchFieldException|IllegalAccessException|NullPointerException|RemoteException e) {
                 e.printStackTrace();
+                setupSaverView();
             }
         }
 
@@ -205,4 +253,35 @@ public class DayDreamService extends DreamService {
             isBoundToAltDream = false;
         }
     };
+
+    private final class MusicStateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action == null) {
+                return;
+            } else if (action.equals(MusicPlaybackService.META_CHANGED)) {
+                // Let the listener know to the meta chnaged
+                for (final MusicStateListener listener : mMusicStateListener) {
+                    if (listener != null) {
+                        listener.onMetaChanged();
+                    }
+                }
+            } else if (action.equals(MusicPlaybackService.PLAYSTATE_CHANGED)) {
+                // Let the listener know to the playstate chnaged
+                for (final MusicStateListener listener : mMusicStateListener) {
+                    if (listener != null) {
+                        listener.onPlaystateChanged();
+                    }
+                }
+            } else if (action.equals(MusicPlaybackService.REPEATMODE_CHANGED)
+                    || action.equals(MusicPlaybackService.SHUFFLEMODE_CHANGED)) {
+                for (final MusicStateListener listener : mMusicStateListener) {
+                    if (listener != null) {
+                        listener.onPlaybackModeChanged();
+                    }
+                }
+            }
+        }
+    }
 }
