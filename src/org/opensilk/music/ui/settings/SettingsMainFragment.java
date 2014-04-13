@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.ThemeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,16 +66,20 @@ public class SettingsMainFragment extends Fragment {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFragments.add(new Holder(SettingsInterfaceFragment.class.getName(),
                     getString(R.string.settings_ui_category),
-                    R.drawable.ic_settings_interface));
+                    R.drawable.ic_settings_interface_light,
+                    R.drawable.ic_settings_interface_dark));
             mFragments.add(new Holder(SettingsDataFragment.class.getName(),
                     getString(R.string.settings_data_category),
-                    R.drawable.ic_settings_data));
+                    R.drawable.ic_settings_data_light,
+                    R.drawable.ic_settings_data_dark));
             mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
                     getString(R.string.settings_about_category),
-                    R.drawable.ic_settings_about));
+                    R.drawable.ic_settings_about_light,
+                    R.drawable.ic_settings_about_dark));
             mFragments.add(new Holder(SettingsAudioFragment.class.getName(),
                     getString(R.string.settings_audio_title),
-                    R.drawable.ic_settings_audio));
+                    R.drawable.ic_settings_audio_light,
+                    R.drawable.ic_settings_audio_dark));
         }
 
         @Override
@@ -97,9 +102,11 @@ public class SettingsMainFragment extends Fragment {
             View v = view;
             ImageView icon;
             TextView title;
-
+            boolean light = ThemeHelper.isLightTheme(mContext);
             if (v == null) {
                 v = mInflater.inflate(R.layout.settings_grid_item, parent, false);
+                v.setBackgroundResource(light ? R.drawable.drop_shadow_light :
+                        R.drawable.drop_shadow_dark);
                 v.setTag(R.id.grid_item_icon, v.findViewById(R.id.grid_item_icon));
                 v.setTag(R.id.grid_item_text, v.findViewById(R.id.grid_item_text));
             }
@@ -107,7 +114,9 @@ public class SettingsMainFragment extends Fragment {
             icon = (ImageView) v.getTag(R.id.grid_item_icon);
             title = (TextView) v.getTag(R.id.grid_item_text);
 
-            icon.setImageResource(mFragments.get(pos).iconRes);
+            int iconRes = light ? mFragments.get(pos).lightIconRes :
+                    mFragments.get(pos).darkIconRes;
+            icon.setImageResource(iconRes);
             title.setText(mFragments.get(pos).title);
             return v;
         }
@@ -115,18 +124,21 @@ public class SettingsMainFragment extends Fragment {
         private class Holder {
             String className;
             String title;
-            int iconRes;
+            int lightIconRes;
+            int darkIconRes;
 
-            Holder(String className, String title, int iconRes) {
+            Holder(String className, String title, int lightIconRes, int darkIconRes) {
                 this.className = className;
                 this.title = title;
-                this.iconRes = iconRes;
+                this.lightIconRes = lightIconRes;
+                this.darkIconRes = darkIconRes;
             }
 
             Bundle getArguments() {
                 Bundle b = new Bundle();
                 b.putString("title", title);
-                b.putInt("icon", iconRes);
+                b.putInt("light_icon", lightIconRes);
+                b.putInt("dark_icon", darkIconRes);
                 return b;
             }
         }

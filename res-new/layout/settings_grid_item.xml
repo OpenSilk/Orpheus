@@ -4,7 +4,6 @@
     android:layout_width="@dimen/settings_grid_width"
     android:layout_height="@dimen/settings_grid_height"
     android:orientation="vertical"
-    android:background="@drawable/drop_shadow"
     android:gravity="center">
     
         <ImageView

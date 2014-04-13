@@ -3,22 +3,18 @@
 
     <header
         android:fragment="org.opensilk.music.ui.settings.SettingsInterfaceFragment"
-        android:title="@string/settings_ui_category"
-        android:icon="@drawable/ic_settings_interface"  />
+        android:title="@string/settings_ui_category" />
 
     <header
         android:fragment="org.opensilk.music.ui.settings.SettingsDataFragment"
-        android:title="@string/settings_data_category"
-        android:icon="@drawable/ic_settings_data"  />
+        android:title="@string/settings_data_category"  />
 
     <header
         android:fragment="org.opensilk.music.ui.settings.SettingsAudioFragment"
-        android:title="@string/settings_audio_title"
-        android:icon="@drawable/ic_settings_audio"  />
+        android:title="@string/settings_audio_title"  />
 
     <header
         android:fragment="org.opensilk.music.ui.settings.SettingsAboutFragment"
-        android:title="@string/settings_about_category"
-        android:icon="@drawable/ic_settings_about" />
+        android:title="@string/settings_about_category" />
 
 </preference-headers>

@@ -20,7 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/drop_shadow">
+    android:background="@drawable/drop_shadow_light">
 
     <ImageView
         android:id="@+id/widget_album_art"
