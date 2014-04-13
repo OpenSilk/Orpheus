@@ -41,8 +41,6 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.FavoritesLoader;
-import com.andrew.apollo.loaders.LastAddedLoader;
-import com.andrew.apollo.loaders.SongLoader;
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.provider.FavoritesStore;
@@ -755,7 +753,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use.
      */
     public static void shuffleAll(final Context context) {
-        Cursor cursor = SongLoader.makeSongCursor(context);
+        Cursor cursor = CursorHelpers.makeSongCursor(context);
         final long[] mTrackList = getSongListForCursor(cursor);
         final int position = 0;
         if (mTrackList.length == 0 || sService == null) {
@@ -1213,7 +1211,7 @@ public final class MusicUtils {
      * @return The song list for the last added playlist
      */
     public static final long[] getSongListForLastAdded(final Context context) {
-        final Cursor cursor = LastAddedLoader.makeLastAddedCursor(context);
+        final Cursor cursor = CursorHelpers.makeLastAddedCursor(context);
         if (cursor != null) {
             final int count = cursor.getCount();
             final long[] list = new long[count];

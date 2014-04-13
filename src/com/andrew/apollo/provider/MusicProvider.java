@@ -30,6 +30,7 @@ import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Playlist;
 
+import org.opensilk.music.adapters.CursorHelpers;
 import org.opensilk.music.loaders.Projections;
 
 import java.util.HashSet;
@@ -195,15 +196,8 @@ public class MusicProvider extends ContentProvider {
             case 4: //Playlists
                 c = new MatrixCursor(new String[] {"_id", "name", "song_number"});
                 //last added first
-                final int fourWeeks = 4 * 3600 * 24 * 7;
                 // Get the song count
-                final Cursor lastAdded = getContext().getContentResolver().query(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        new String[] { BaseColumns._ID },
-                        MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE
-                                + " !=? AND " + MediaStore.Audio.Media.DATE_ADDED + ">?",
-                        new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)},
-                        MediaStore.Audio.Media.DATE_ADDED + " DESC");
+                final Cursor lastAdded = CursorHelpers.makeLastAddedCursor(getContext());
                 int lastAddedSongNum = 0;
                 if (lastAdded != null) {
                     lastAddedSongNum = lastAdded.getCount();

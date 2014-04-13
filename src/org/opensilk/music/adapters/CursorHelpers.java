@@ -16,6 +16,7 @@
 
 package org.opensilk.music.adapters;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
@@ -25,6 +26,10 @@ import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
+import com.andrew.apollo.utils.PreferenceUtils;
+
+import org.opensilk.music.loaders.Projections;
+import org.opensilk.music.loaders.SongCursorLoader;
 
 /**
  * Created by drew on 2/22/14.
@@ -110,6 +115,24 @@ public class CursorHelpers {
         final String name = c.getString(c.getColumnIndexOrThrow("name"));
         final int songNumber = c.getInt(c.getColumnIndexOrThrow("song_number"));
         return new Playlist(id, name, songNumber);
+    }
+
+    public static Cursor makeLastAddedCursor(final Context context) {
+        final int fourWeeks = 4 * 3600 * 24 * 7;
+        return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.SONG,
+                MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE
+                        + "!=? AND " + MediaStore.Audio.Media.DATE_ADDED + ">?",
+                new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)},
+                MediaStore.Audio.Media.DATE_ADDED + " DESC");
+    }
+
+    public static Cursor makeSongCursor(final Context context) {
+        return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.SONG,
+                SongCursorLoader.SELECTION,
+                SongCursorLoader.SELECTION_ARGS,
+                PreferenceUtils.getInstance(context).getSongSortOrder());
     }
 
 }

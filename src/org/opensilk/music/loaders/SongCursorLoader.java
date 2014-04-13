@@ -27,14 +27,20 @@ import com.andrew.apollo.utils.PreferenceUtils;
  */
 public class SongCursorLoader extends CursorLoader {
 
+    public static String SELECTION = MediaStore.Audio.AudioColumns.IS_MUSIC
+            + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + " !=?";
+    public static String[] SELECTION_ARGS;
+
+    static {
+        SELECTION_ARGS = new String[] {"1","''"};
+    }
+
     public SongCursorLoader(Context context) {
         super(context);
         setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         setProjection(Projections.SONG);
-        setSelection(new StringBuilder()
-                .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
-                .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''").toString());
-        setSelectionArgs(null);
+        setSelection(SELECTION);
+        setSelectionArgs(SELECTION_ARGS);
         setSortOrder(PreferenceUtils.getInstance(getContext()).getSongSortOrder());
     }
 

@@ -39,6 +39,7 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.adapters.CursorHelpers;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.Projections;
@@ -189,13 +190,7 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
             // We have to query for the song count
             final Cursor playlistSongs;
             if (playlistId == -2) { //Last added
-                final int fourWeeks = 4 * 3600 * 24 * 7;
-                playlistSongs = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        Projections.SONG,
-                        MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE
-                                + "!=? AND " + MediaStore.Audio.Media.DATE_ADDED + ">?",
-                        new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)},
-                        MediaStore.Audio.Media.DATE_ADDED + " DESC");
+                playlistSongs = CursorHelpers.makeLastAddedCursor(getContext());
             } else { // user
                 playlistSongs = getContext().getContentResolver().query(
                         MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
