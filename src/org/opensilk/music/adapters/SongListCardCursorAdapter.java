@@ -32,11 +32,11 @@ public class SongListCardCursorAdapter extends CardCursorAdapter {
     private boolean mAllowDelete = true;
 
     public SongListCardCursorAdapter(Context context) {
-        super(context);
+        this(context, true);
     }
 
     public SongListCardCursorAdapter(Context context, boolean allowDelete) {
-        super(context);
+        super(context, null, 0);
         mAllowDelete = allowDelete;
     }
 

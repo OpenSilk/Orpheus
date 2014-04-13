@@ -251,7 +251,7 @@ public class SearchFragment extends Fragment implements
     private static final class SearchAdapter extends CardCursorAdapter {
 
         public SearchAdapter(Context context) {
-            super(context);
+            super(context, null, 0);
         }
 
         @Override

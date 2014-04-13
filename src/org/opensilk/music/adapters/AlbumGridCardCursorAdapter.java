@@ -31,7 +31,7 @@ import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
 public class AlbumGridCardCursorAdapter extends CardGridCursorAdapter {
 
     public AlbumGridCardCursorAdapter(Context context) {
-        super(context);
+        super(context, null, 0);
     }
 
     @Override

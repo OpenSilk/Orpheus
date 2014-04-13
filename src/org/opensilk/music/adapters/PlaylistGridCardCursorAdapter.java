@@ -30,7 +30,7 @@ import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
 public class PlaylistGridCardCursorAdapter extends CardGridCursorAdapter {
 
     public PlaylistGridCardCursorAdapter(Context context) {
-        super(context);
+        super(context, null, 0);
     }
 
     @Override
