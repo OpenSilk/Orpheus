@@ -32,7 +32,7 @@
         android:contentDescription="@string/accessibility_select"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_settings_check"
+        android:src="@drawable/ic_action_tick_white"
         android:layout_gravity="center_horizontal"
         android:background="?android:selectableItemBackground"/>
 

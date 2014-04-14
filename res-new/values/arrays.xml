@@ -9,12 +9,13 @@
         <item>@string/theme_blupheus</item>
     </string-array>
 
+    <!-- See ThemeStyle -->
     <string-array name="theme_list_values" translatable="false">
-        <item>@string/theme_orpheus</item>
-        <item>@string/theme_purpheus</item>
-        <item>@string/theme_grepheus</item>
-        <item>@string/theme_repheus</item>
-        <item>@string/theme_blupheus</item>
+        <item>ORPHEUS</item>
+        <item>PURPHEUS</item>
+        <item>GREPHEUS</item>
+        <item>REPHEUS</item>
+        <item>BLUPHEUS</item>
     </string-array>
 
     <string-array name="cache_size" translatable="false">

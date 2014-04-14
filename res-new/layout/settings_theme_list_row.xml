@@ -9,8 +9,11 @@
     <ImageView
         android:id="@+id/theme_preview_icon"
         android:layout_width="24dp"
-        android:layout_height="match_parent"
-        android:layout_margin="16dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:layout_gravity="center"
         android:scaleType="fitXY"/>
 
@@ -29,6 +32,6 @@
         android:layout_height="match_parent"
         android:layout_margin="8dp"
         android:layout_gravity="center"
-        android:src="@drawable/ic_settings_check" />
+        android:src="@drawable/ic_action_tick_black" />
 
 </LinearLayout>

@@ -17,8 +17,6 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.andrew.apollo.utils.ThemeStyle;
 
-import java.util.Locale;
-
 /**
  * Created by andrew on 3/1/14.
  */
@@ -30,58 +28,90 @@ public class ThemeListPreference extends ListPreference {
 
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
-        int index = 1;
-
-        ListAdapter listAdapter = new ThemeListAdapter(getContext(), -1, getEntries());
-
+        ListAdapter listAdapter = new ThemeListAdapter(getContext(), zip(getEntries(), getEntryValues()));
         builder.setAdapter(listAdapter, this);
         super.onPrepareDialogBuilder(builder);
     }
 
-    public class ThemeListAdapter extends ArrayAdapter<CharSequence> {
-
-        private LayoutInflater mInflater;
-        private Context mContext;
-        private CharSequence[] mThemes;
-
-        public ThemeListAdapter(Context context, int resourceId, CharSequence[] objects) {
-            super(context, resourceId, objects);
-            mContext = context;
-            mInflater = LayoutInflater.from(mContext);
-            mThemes = objects;
+    /**
+     * Zips up entry values and entry names
+     * @param entries
+     * @param values
+     * @return
+     */
+    public static EntryHolder[] zip(CharSequence[] entries, CharSequence[] values) {
+        if (entries.length != values.length) {
+            return null;
         }
+        EntryHolder[] em = new EntryHolder[entries.length];
+        for (int ii=0; ii<entries.length; ii++) {
+            em[ii] = new EntryHolder(entries[ii], values[ii]);
+        }
+        return em;
+    }
+
+    /**
+     * Class to pair entry values with entry display names
+     */
+    public static class EntryHolder {
+        public CharSequence entry;
+        public CharSequence value;
+        public EntryHolder(CharSequence entry, CharSequence value) {
+            this.entry = entry;
+            this.value = value;
+        }
+    }
+
+    /**
+     * List adapter
+     */
+    public static class ThemeListAdapter extends ArrayAdapter<EntryHolder> {
+
+        private ThemeHelper mThemeHelper;
+        private String mCurrentTheme;
+        private LayoutInflater mInflater;
+
+        public ThemeListAdapter(Context context, EntryHolder[] objects) {
+            super(context, -1, objects);
+            mThemeHelper = ThemeHelper.getInstance(getContext());
+            mCurrentTheme = mThemeHelper.getThemeName().replace("DARK", "");
+            mInflater = LayoutInflater.from(getContext());
+        }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
-            ImageView icon;
-            ImageView check;
-            TextView name;
-
-
             if (row == null) {
                 row = mInflater.inflate(R.layout.settings_theme_list_row, parent, false);
-                row.setTag(R.id.theme_preview_icon, row.findViewById(R.id.theme_preview_icon));
-                row.setTag(R.id.theme_check_icon, row.findViewById(R.id.theme_check_icon));
-                row.setTag(R.id.theme_name, row.findViewById(R.id.theme_name));
+                ImageView icon = (ImageView) row.findViewById(R.id.theme_preview_icon);
+                TextView name = (TextView) row.findViewById(R.id.theme_name);
+                ImageView check = (ImageView) row.findViewById(R.id.theme_check_icon);
+                row.setTag(new ViewHolder(icon, name, check));
             }
 
-            icon = (ImageView) row.getTag(R.id.theme_preview_icon);
-            check = (ImageView) row.getTag(R.id.theme_check_icon);
-            name = (TextView) row.getTag(R.id.theme_name);
+            ViewHolder holder = (ViewHolder) row.getTag();
+            if (holder != null) {
+                int themeColor = mThemeHelper.getThemeColor(ThemeStyle.valueOf(getItem(position).value.toString()));
+                holder.icon.setImageDrawable(new ColorDrawable(themeColor));
 
-            name.setText(mThemes[position]);
-            icon.setImageDrawable(new ColorDrawable(ThemeHelper.getInstance(getContext())
-                    .getThemeColor(ThemeStyle.valueOf(mThemes[position].toString()
-                            .toUpperCase(Locale.US)))));
+                holder.name.setText(getItem(position).entry);
 
-            String currentTheme = ThemeHelper.getInstance(mContext).getThemeName().replaceAll("DARK","");
-            if (currentTheme.equalsIgnoreCase(mThemes[position].toString())) {
-                check.setVisibility(View.VISIBLE);
-            } else {
-                check.setVisibility(View.INVISIBLE);
+                holder.check.setImageResource(ThemeHelper.isLightTheme(getContext())
+                        ? R.drawable.ic_action_tick_black : R.drawable.ic_action_tick_white);
+                holder.check.setVisibility(mCurrentTheme.equals(getItem(position).value) ? View.VISIBLE : View.INVISIBLE);
             }
-
             return row;
+        }
+
+        private static class ViewHolder {
+            private ImageView icon;
+            private TextView name;
+            private ImageView check;
+            private ViewHolder(ImageView icon, TextView name, ImageView check) {
+                this.icon = icon;
+                this.name = name;
+                this.check = check;
+            }
         }
 
     }

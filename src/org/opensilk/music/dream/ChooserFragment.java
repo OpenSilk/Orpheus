@@ -105,14 +105,12 @@ public class ChooserFragment extends Fragment implements
 
     protected void setCheckSelected() {
         mCheckMark.setImageDrawable(ThemeHelper.themeDrawable(getActivity(),
-                R.drawable.ic_settings_check,
+                R.drawable.ic_action_tick_white,
                 getResources().getColor(android.R.color.holo_blue_light)));
     }
 
     protected void setCheckUnSelected() {
-        mCheckMark.setImageDrawable(ThemeHelper.themeDrawable(getActivity(),
-                R.drawable.ic_settings_check,
-                getResources().getColor(android.R.color.white)));
+        mCheckMark.setImageResource(R.drawable.ic_action_tick_white);
     }
 
     /**
