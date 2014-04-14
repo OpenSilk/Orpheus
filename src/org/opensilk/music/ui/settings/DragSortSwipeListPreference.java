@@ -17,16 +17,16 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.mobeta.android.dslv.DragSortListView;
 
+import org.opensilk.music.ui.home.HomeFragment.MusicFragment;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.opensilk.music.ui.home.HomeFragment.DEFAULT_PAGES;
-import static org.opensilk.music.ui.home.HomeFragment.TITLE_MAP;
 
 /**
  * Created by andrew on 4/13/14.
@@ -35,7 +35,7 @@ public class DragSortSwipeListPreference extends DialogPreference implements
         DragSortListView.DropListener, DragSortListView.RemoveListener {
 
     private DragSortSwipeListAdapter mAdapter;
-    private ArrayList<String> mCurrentClassList;
+    private ArrayList<MusicFragment> mCurrentClassList;
 
     public DragSortSwipeListPreference(Context context) {
         this(context, null);
@@ -71,9 +71,9 @@ public class DragSortSwipeListPreference extends DialogPreference implements
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        List<String> savedPages = PreferenceUtils.getInstance(getContext()).getHomePages();
+        List<MusicFragment> savedPages = PreferenceUtils.getInstance(getContext()).getHomePages();
         if (savedPages == null) {
-            savedPages = Arrays.asList(DEFAULT_PAGES);
+            savedPages = Arrays.asList(MusicFragment.values());
         }
         mCurrentClassList = new ArrayList<>(savedPages);
 
@@ -90,11 +90,11 @@ public class DragSortSwipeListPreference extends DialogPreference implements
             @Override
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(getContext(), addButton);
-                final List<String> pages = new ArrayList<>(DEFAULT_PAGES.length);
-                for (String item : DEFAULT_PAGES) {
-                    if (!mAdapter.contains(item)) {
+                final List<MusicFragment> pages = Lists.newArrayList();
+                for (MusicFragment item : MusicFragment.values()) {
+                    if (!mCurrentClassList.contains(item)) {
                         pages.add(item);
-                        popupMenu.getMenu().add(Menu.NONE, pages.size()-1, Menu.NONE, TITLE_MAP.get(item));
+                        popupMenu.getMenu().add(Menu.NONE, pages.size()-1, Menu.NONE, item.getTitleResource());
                     }
                 }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -115,14 +115,14 @@ public class DragSortSwipeListPreference extends DialogPreference implements
         super.onDialogClosed(positiveResult);
     }
 
-    public void add(String item) {
+    public void add(MusicFragment item) {
         mAdapter.add(item);
         mAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void drop(int from, int to) {
-        String item = mAdapter.getItem(from);
+        MusicFragment item = mAdapter.getItem(from);
         mAdapter.remove(item);
         mAdapter.insert(item, to);
         mAdapter.notifyDataSetChanged();
@@ -130,16 +130,19 @@ public class DragSortSwipeListPreference extends DialogPreference implements
 
     @Override
     public void remove(int which) {
-        String item = mAdapter.getItem(which);
+        MusicFragment item = mAdapter.getItem(which);
         mAdapter.remove(item);
         mAdapter.notifyDataSetChanged();
     }
 
-    public static class DragSortSwipeListAdapter extends ArrayAdapter<String> {
+    /**
+     * List adapter
+     */
+    public static class DragSortSwipeListAdapter extends ArrayAdapter<MusicFragment> {
 
         private LayoutInflater mInflater;
 
-        public DragSortSwipeListAdapter(Context context, List<String> objects) {
+        public DragSortSwipeListAdapter(Context context, List<MusicFragment> objects) {
             super(context, -1, objects);
             mInflater = LayoutInflater.from(getContext());
         }
@@ -160,25 +163,9 @@ public class DragSortSwipeListPreference extends DialogPreference implements
                 holder.handle.setImageResource(ThemeHelper.isLightTheme(getContext())
                         ? R.drawable.ic_action_drag_light : R.drawable.ic_action_drag_dark);
 
-                holder.text.setText(getContext().getString(TITLE_MAP.get(getItem(position))));
+                holder.text.setText(getContext().getString(getItem(position).getTitleResource()));
             }
-
             return row;
-        }
-
-        public List<String> getItems() {
-            List<String> items = new ArrayList<>();
-            for (int i = 0; i < getCount() ; i++) {
-                items.add(getItem(i));
-            }
-            return items;
-        }
-
-        public boolean contains(String compare) {
-            for (String item : getItems() ) {
-                if (item.equals(compare)) return true;
-            }
-            return false;
         }
 
         private static class ViewHolder {

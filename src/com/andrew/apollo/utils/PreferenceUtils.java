@@ -20,6 +20,8 @@ import android.util.JsonWriter;
 
 import com.andrew.apollo.R;
 
+import org.opensilk.music.ui.home.HomeFragment.MusicFragment;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -177,20 +179,20 @@ public final class PreferenceUtils {
     /**
      * @return List of class names for home pager fragments
      */
-    public final List<String> getHomePages() {
+    public final List<MusicFragment> getHomePages() {
         String pgs = mPreferences.getString(HOME_PAGES, null);
         if (pgs == null) {
             return null;
         }
-        List<String> pages = Lists.newArrayList();
+        List<MusicFragment> pages = Lists.newArrayList();
         JsonReader jw = new JsonReader(new StringReader(pgs));
         try {
             jw.beginArray();
             while (jw.hasNext()) {
-                pages.add(jw.nextString());
+                pages.add(MusicFragment.valueOf(jw.nextString()));
             }
             jw.endArray();
-        } catch (IOException e) {
+        } catch (IOException|IllegalArgumentException e) {
             e.printStackTrace();
             mPreferences.edit().remove(HOME_PAGES).apply();
             return null;
@@ -206,13 +208,13 @@ public final class PreferenceUtils {
      * Saves fragment class names for home pager
      * @param pages
      */
-    public final void setHomePages(List<String> pages) {
+    public final void setHomePages(List<MusicFragment> pages) {
         StringWriter sw = new StringWriter(400);
         JsonWriter jw = new JsonWriter(sw);
         try {
             jw.beginArray();
-            for (String p : pages) {
-                jw.value(p);
+            for (MusicFragment p : pages) {
+                jw.value(p.toString());
             }
             jw.endArray();
             mPreferences.edit().putString(HOME_PAGES, sw.toString()).commit();
