@@ -18,15 +18,13 @@
 package org.opensilk.music.ui.home;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,16 +37,42 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.ui.settings.DragSortSwipeListPreference;
-
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
  * playlists, recent, artists, albums, songs, and genre {@link Fragment}
  */
 public class HomeFragment extends Fragment {
+
+    /** Default order containing all page fragments */
+    public static final String[] DEFAULT_PAGES;
+    /** Page titles for all fragments in DEFAULT_PAGES */
+    public static final int[] PAGE_TITLES;
+    /** Maps fragment class names to their title resource id */
+    public static final Map<String, Integer> TITLE_MAP;
+
+    static {
+        DEFAULT_PAGES = new String[] {
+                HomePlaylistFragment.class.getName(),
+                HomeRecentFragment.class.getName(),
+                HomeArtistFragment.class.getName(),
+                HomeAlbumFragment.class.getName(),
+                HomeSongFragment.class.getName(),
+                HomeGenreFragment.class.getName(),
+        };
+        PAGE_TITLES = new int[] {
+                R.string.page_playlists,
+                R.string.page_recent,
+                R.string.page_artists,
+                R.string.page_albums,
+                R.string.page_songs,
+                R.string.page_genres,
+        };
+        TITLE_MAP = map(DEFAULT_PAGES, PAGE_TITLES);
+    }
 
     private ViewPager mViewPager;
     private HomePagerAdapter mPagerAdapter;
@@ -63,22 +87,17 @@ public class HomeFragment extends Fragment {
         // Initialize the adapter
         mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
 
-        List<String> pages = DragSortSwipeListPreference.listFromString(
-                mPreferences.getHomePages());
+        List<String> pages = mPreferences.getHomePages();
 
-        if (pages == null) {
-            final MusicFragments[] mFragments = MusicFragments.values();
-            for (final MusicFragments mFragment : mFragments) {
-                mPagerAdapter.add(mFragment.getFragmentClass(),
-                        getHumanReadable(mFragment.getFragmentClass().getName()), null);
+        if (pages == null || pages.size() < 1) {
+            for (String className : DEFAULT_PAGES) {
+                mPagerAdapter.add(className, null);
             }
         } else {
             for (String page : pages) {
-                Log.d("HomeFragment", "Pages: " + pages);
-                mPagerAdapter.add(page,getHumanReadable(page), null);
+                mPagerAdapter.add(page, null);
             }
         }
-
     }
 
     @Override
@@ -97,7 +116,6 @@ public class HomeFragment extends Fragment {
 //        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
         // Start on the last page the user was on
         mViewPager.setCurrentItem(mPreferences.getStartPage());
-
         return rootView;
     }
 
@@ -154,21 +172,39 @@ public class HomeFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public static final class HomePagerAdapter extends FragmentPagerAdapter {
-        private final Context context;
-        private final List<Holder> mHolderList = Lists.newArrayList();
+    /**
+     * Creates a map from key/value arrays
+     * @param keys
+     * @param values
+     * @return
+     */
+    public static Map<String, Integer> map(String[] keys, int[] values) {
+        if (keys.length != values.length) {
+            return null;
+        }
+        Map<String, Integer> titleMap = new ArrayMap<>(keys.length);
+        for (int ii=0; ii<keys.length; ii++) {
+            titleMap.put(keys[ii], values[ii]);
+        }
+        return titleMap;
+    }
 
+    /**
+     * Pager adapter
+     */
+    public static final class HomePagerAdapter extends FragmentPagerAdapter {
+        private final Context mContext;
+        private final List<Holder> mHolderList = Lists.newArrayList();
 
         public HomePagerAdapter(Context context, FragmentManager fm) {
             super(fm);
-            this.context = context;
+            mContext = context;
         }
 
         @Override
         public Fragment getItem(int position) {
             Holder holder = mHolderList.get(position);
-            Log.d("HomeFragment", "className: " + holder.className + " -- Position: [" + position + "]");
-            return Fragment.instantiate(context, holder.className, holder.params);
+            return Fragment.instantiate(mContext, holder.className, holder.params);
         }
 
         @Override
@@ -178,22 +214,12 @@ public class HomeFragment extends Fragment {
 
         @Override
         public CharSequence getPageTitle(final int position) {
-            return mHolderList.get(position).title.toUpperCase(Locale.getDefault());
+            final String className = mHolderList.get(position).className;
+            return mContext.getString(TITLE_MAP.get(className)).toUpperCase(Locale.getDefault());
         }
 
-        public void add(final Class<? extends Fragment> className, String title, final Bundle params) {
-            mHolderList.add(new Holder(className.getName(), title, params));
-            Log.d("HomeFragment", "className: " + className.getName() + " -- Position: [" + mHolderList.size() + "]");
-        }
-
-        public void add(final String className, String title, final Bundle params) {
-            mHolderList.add(new Holder(className, title, params));
-            Log.d("HomeFragment", "className: " + className + " -- Position: [" + mHolderList.size() + "]");
-        }
-
-
-        public void removeAll() {
-            mHolderList.clear();
+        public void add(final String className, final Bundle params) {
+            mHolderList.add(new Holder(className, params));
         }
 
         /**
@@ -201,84 +227,11 @@ public class HomeFragment extends Fragment {
          */
         private final static class Holder {
             String className;
-            String title;
             Bundle params;
-            private Holder(String className, String title, Bundle params) {
+            private Holder(String className, Bundle params) {
                 this.className = className;
-                this.title = title;
                 this.params = params;
             }
-        }
-    }
-
-    private String getHumanReadable(String className) {
-        int id;
-        if (className.equals(HomePlaylistFragment.class.getName())) {
-            id = R.string.page_playlists;
-        } else if (className.equals(HomeRecentFragment.class.getName())) {
-            id = R.string.page_recent;
-        } else if (className.equals(HomeArtistFragment.class.getName())) {
-            id = R.string.page_artists;
-        } else if (className.equals(HomeAlbumFragment.class.getName())) {
-            id = R.string.page_albums;
-        } else if (className.equals(HomeSongFragment.class.getName())) {
-            id = R.string.page_songs;
-        } else if (className.equals(HomeGenreFragment.class.getName())) {
-            id = R.string.page_genres;
-        } else {
-            id = R.string.error;
-        }
-
-        return getResources().getString(id);
-    }
-
-    /**
-     * An enumeration of all the main fragments supported.
-     */
-    public enum MusicFragments {
-        /**
-         * The playlist fragment
-         */
-        PLAYLIST(HomePlaylistFragment.class),
-        /**
-         * The recent fragment
-         */
-        RECENT(HomeRecentFragment.class),
-        /**
-         * The artist fragment
-         */
-        ARTIST(HomeArtistFragment.class),
-        /**
-         * The album fragment
-         */
-        ALBUM(HomeAlbumFragment.class),
-        /**
-         * The song fragment
-         */
-        SONG(HomeSongFragment.class),
-        /**
-         * The genre fragment
-         */
-        GENRE(HomeGenreFragment.class);
-
-        private Class<? extends Fragment> mFragmentClass;
-
-        /**
-         * Constructor of <code>MusicFragments</code>
-         *
-         * @param fragmentClass The fragment class
-         */
-        private MusicFragments(final Class<? extends Fragment> fragmentClass) {
-            mFragmentClass = fragmentClass;
-        }
-
-        /**
-         * Method that returns the fragment class.
-         *
-         * @return Class<? extends Fragment> The fragment class.
-         */
-        public Class<? extends Fragment> getFragmentClass() {
-            return mFragmentClass;
         }
     }
 

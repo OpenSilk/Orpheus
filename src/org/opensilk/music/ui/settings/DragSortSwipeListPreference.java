@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,20 +17,16 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.mobeta.android.dslv.DragSortListView;
-
-import org.opensilk.music.ui.home.HomeAlbumFragment;
-import org.opensilk.music.ui.home.HomeArtistFragment;
-import org.opensilk.music.ui.home.HomeGenreFragment;
-import org.opensilk.music.ui.home.HomePlaylistFragment;
-import org.opensilk.music.ui.home.HomeRecentFragment;
-import org.opensilk.music.ui.home.HomeSongFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
+
+import static org.opensilk.music.ui.home.HomeFragment.DEFAULT_PAGES;
+import static org.opensilk.music.ui.home.HomeFragment.TITLE_MAP;
 
 /**
  * Created by andrew on 4/13/14.
@@ -38,15 +34,8 @@ import java.util.Locale;
 public class DragSortSwipeListPreference extends DialogPreference implements
         DragSortListView.DropListener, DragSortListView.RemoveListener {
 
-    private static final String[] DEFAULT_LIST = {
-            HomePlaylistFragment.class.getName(), HomeRecentFragment.class.getName(),
-            HomeArtistFragment.class.getName(), HomeAlbumFragment.class.getName(),
-            HomeSongFragment.class.getName(), HomeGenreFragment.class.getName()};
-
-    public static final String DELIMITER = "|";
-
     private DragSortSwipeListAdapter mAdapter;
-    private List<String> mCurrentClassList;
+    private ArrayList<String> mCurrentClassList;
 
     public DragSortSwipeListPreference(Context context) {
         this(context, null);
@@ -55,21 +44,22 @@ public class DragSortSwipeListPreference extends DialogPreference implements
     public DragSortSwipeListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setDialogLayoutResource(R.layout.drag_sort_swipe_list_preference);
-        setPersistent(true);
     }
 
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
-        builder.setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String items = listToString(mAdapter.getItems());
-                if (items.length() == 0) {
+                // Adapter operates on the underlying list
+                if (mCurrentClassList.size() < 1) {
                     //Error dialog here
                 } else {
+                    PreferenceUtils.getInstance(getContext()).setHomePages(mCurrentClassList);
                     // We're only using the OnPreferenceChangeListener to restart.
-                    getSharedPreferences().edit().putString(getKey(), items).apply();
-                    callChangeListener(items);
+                    callChangeListener(null);
+//                    Log.d("TAG", mAdapter.getItems().toString());
+//                    Log.d("TAG", mCurrentClassList.toString());
                 }
                 dialog.dismiss();
             }
@@ -81,18 +71,14 @@ public class DragSortSwipeListPreference extends DialogPreference implements
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        String strItems = getSharedPreferences().getString(getKey(), "");
-
-        if (strItems.isEmpty()) {
-            mCurrentClassList = Arrays.asList(DEFAULT_LIST);
-        } else {
-            mCurrentClassList = listFromString(strItems);
+        List<String> savedPages = PreferenceUtils.getInstance(getContext()).getHomePages();
+        if (savedPages == null) {
+            savedPages = Arrays.asList(DEFAULT_PAGES);
         }
+        mCurrentClassList = new ArrayList<>(savedPages);
 
         DragSortListView listView = (DragSortListView) view.findViewById(android.R.id.list);
-        mAdapter = new DragSortSwipeListAdapter(getContext(),
-                R.layout.drag_sort_swipe_list_item,
-                mCurrentClassList.toArray(new String[mCurrentClassList.size()]));
+        mAdapter = new DragSortSwipeListAdapter(getContext(), mCurrentClassList);
         listView.setAdapter(mAdapter);
         listView.setDropListener(this);
         listView.setRemoveListener(this);
@@ -104,19 +90,20 @@ public class DragSortSwipeListPreference extends DialogPreference implements
             @Override
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(getContext(), addButton);
-                for (String item : DEFAULT_LIST) {
+                final List<String> pages = new ArrayList<>(DEFAULT_PAGES.length);
+                for (String item : DEFAULT_PAGES) {
                     if (!mAdapter.contains(item)) {
-                        popupMenu.getMenu().add(getHumanReadable(item));
+                        pages.add(item);
+                        popupMenu.getMenu().add(Menu.NONE, pages.size()-1, Menu.NONE, TITLE_MAP.get(item));
                     }
                 }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        add(getClassName(item.getTitle().toString()));
+                        add(pages.get(item.getItemId()));
                         return false;
                     }
                 });
-
                 popupMenu.show();
             }
         });
@@ -148,38 +135,34 @@ public class DragSortSwipeListPreference extends DialogPreference implements
         mAdapter.notifyDataSetChanged();
     }
 
-    public class DragSortSwipeListAdapter extends ArrayAdapter<String> {
+    public static class DragSortSwipeListAdapter extends ArrayAdapter<String> {
 
         private LayoutInflater mInflater;
-        private Context mContext;
-        private int mLayoutRes;
 
-        public DragSortSwipeListAdapter(Context context, int resourceId, String[] objects) {
-            super(context, resourceId, new ArrayList<>(Arrays.asList(objects)));
-            mContext = context;
-            mLayoutRes = resourceId;
-            mInflater = LayoutInflater.from(mContext);
+        public DragSortSwipeListAdapter(Context context, List<String> objects) {
+            super(context, -1, objects);
+            mInflater = LayoutInflater.from(getContext());
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
-            ImageView handle;
-            TextView text;
 
             if (row == null) {
-                row = mInflater.inflate(mLayoutRes, parent, false);
-                row.setTag(R.id.item_handle, row.findViewById(R.id.item_handle));
-                row.setTag(R.id.item_text, row.findViewById(R.id.item_text));
+                row = mInflater.inflate(R.layout.drag_sort_swipe_list_item, parent, false);
+                ImageView handle = (ImageView) row.findViewById(R.id.item_handle);
+                TextView text = (TextView) row.findViewById(R.id.item_text);
+                row.setTag(new ViewHolder(handle, text));
             }
 
-            handle = (ImageView) row.getTag(R.id.item_handle);
-            text = (TextView) row.getTag(R.id.item_text);
+            ViewHolder holder = (ViewHolder) row.getTag();
+            if (holder != null) {
+                holder.handle.setImageResource(ThemeHelper.isLightTheme(getContext())
+                        ? R.drawable.ic_action_drag_light : R.drawable.ic_action_drag_dark);
 
-            handle.setImageResource(ThemeHelper.isLightTheme(mContext)
-                    ? R.drawable.ic_action_drag_light : R.drawable.ic_action_drag_dark);
-            text.setText(getHumanReadable(getItem(position)));
-            Log.d("DragSortList", "Item: " + getHumanReadable(getItem(position)));
+                holder.text.setText(getContext().getString(TITLE_MAP.get(getItem(position))));
+            }
+
             return row;
         }
 
@@ -198,65 +181,14 @@ public class DragSortSwipeListPreference extends DialogPreference implements
             return false;
         }
 
-    }
-
-    public static List<String> listFromString(String items) {
-        if (items.equals("")) {
-            return null;
-        }
-        return new ArrayList<>(Arrays.asList(items.split("\\|")));
-    }
-
-    public static String listToString(List<String> items) {
-        if(items == null || items.size() <= 0) {
-            return "";
-        } else {
-            String s = items.get(0);
-            for(int i = 1; i < items.size(); i++) {
-                s += DELIMITER + items.get(i);
+        private static class ViewHolder {
+            private ImageView handle;
+            private TextView text;
+            private ViewHolder(ImageView handle, TextView text) {
+                this.handle = handle;
+                this.text = text;
             }
-            return s;
         }
-    }
-
-    private String getHumanReadable(String className) {
-        Log.d("DragSortList", "className: " + className);
-        int id = -1;
-        if (className.equals(HomePlaylistFragment.class.getName())) {
-            id = R.string.page_playlists;
-        } else if (className.equals(HomeRecentFragment.class.getName())) {
-            id = R.string.page_recent;
-        } else if (className.equals(HomeArtistFragment.class.getName())) {
-            id = R.string.page_artists;
-        } else if (className.equals(HomeAlbumFragment.class.getName())) {
-            id = R.string.page_albums;
-        } else if (className.equals(HomeSongFragment.class.getName())) {
-            id = R.string.page_songs;
-        } else if (className.equals(HomeGenreFragment.class.getName())) {
-            id = R.string.page_genres;
-        } else {
-            id = R.string.error;
-        }
-
-        return getContext().getResources().getString(id);
-    }
-
-    public static String getClassName(String title) {
-        Log.d("DragSortList", "Title: " + title);
-        if (title.equals("Playlists")) {
-            return HomePlaylistFragment.class.getName();
-        } else if (title.equals("Recent")) {
-            return HomeRecentFragment.class.getName();
-        } else if (title.equals("Artists")) {
-            return HomeArtistFragment.class.getName();
-        } else if (title.equals("Albums")) {
-            return HomeAlbumFragment.class.getName();
-        } else if (title.equals("Songs")) {
-            return HomeSongFragment.class.getName();
-        } else if (title.equals("Genres")) {
-            return HomeGenreFragment.class.getName();
-        }
-        return "WTF HAPPENED HERE?!?!?!";
     }
 
 }

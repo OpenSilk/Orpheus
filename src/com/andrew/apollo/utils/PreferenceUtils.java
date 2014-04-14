@@ -15,8 +15,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.JsonReader;
+import android.util.JsonWriter;
 
 import com.andrew.apollo.R;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
 
 /**
  * A collection of helpers designed to get and set various preferences across
@@ -167,8 +174,56 @@ public final class PreferenceUtils {
         return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.GREPHEUS.toString()));
     }
 
-    public final String getHomePages() {
-        return mPreferences.getString(HOME_PAGES, "");
+    /**
+     * @return List of class names for home pager fragments
+     */
+    public final List<String> getHomePages() {
+        String pgs = mPreferences.getString(HOME_PAGES, null);
+        if (pgs == null) {
+            return null;
+        }
+        List<String> pages = Lists.newArrayList();
+        JsonReader jw = new JsonReader(new StringReader(pgs));
+        try {
+            jw.beginArray();
+            while (jw.hasNext()) {
+                pages.add(jw.nextString());
+            }
+            jw.endArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            mPreferences.edit().remove(HOME_PAGES).apply();
+            return null;
+        } finally {
+            try {
+                jw.close();
+            } catch (IOException ignored) { }
+        }
+        return pages;
+    }
+
+    /**
+     * Saves fragment class names for home pager
+     * @param pages
+     */
+    public final void setHomePages(List<String> pages) {
+        StringWriter sw = new StringWriter(400);
+        JsonWriter jw = new JsonWriter(sw);
+        try {
+            jw.beginArray();
+            for (String p : pages) {
+                jw.value(p);
+            }
+            jw.endArray();
+            mPreferences.edit().putString(HOME_PAGES, sw.toString()).commit();
+        } catch (IOException e) {
+            e.printStackTrace();
+            mPreferences.edit().remove(HOME_PAGES).commit();
+        } finally {
+            try {
+                jw.close();
+            } catch (IOException ignored) { }
+        }
     }
 
     /**
