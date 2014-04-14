@@ -3,6 +3,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:title="@string/settings_interface_home_category">
+
+        <org.opensilk.music.ui.settings.DragSortSwipeListPreference
+            android:key="pref_home_pages"
+            android:title="@string/settings_interface_home_pages_title"
+            android:summary="@string/settings_interface_home_pages_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/settings_interface_theme_category">
 
         <CheckBoxPreference

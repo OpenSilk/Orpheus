@@ -27,9 +27,11 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
 
     private static final String PREF_THEME = "pref_theme";
     private static final String PREF_DARK_THEME = "pref_dark_theme";
+    private static final String PREF_HOME_PAGES = "pref_home_pages";
 
     private CheckBoxPreference mDarkTheme;
     private ThemeListPreference mThemeList;
+    private DragSortSwipeListPreference mHomePages;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,9 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         mThemeList.setOnPreferenceChangeListener(this);
         updateThemeIcon(ThemeHelper.getInstance(getActivity()).getThemeName());
 
+        mHomePages = (DragSortSwipeListPreference) mPrefSet.findPreference(PREF_HOME_PAGES);
+        mHomePages.setOnPreferenceChangeListener(this);
+
     }
 
     @Override
@@ -56,7 +61,8 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
             }
             if (!newTheme.equalsIgnoreCase(currentTheme)) {
                 updateThemeIcon(newTheme);
-                doRestart(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
+                applyTheme(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
+                doRestart();
             }
             return false; // We set preference
         } else if (preference == mDarkTheme) {
@@ -68,7 +74,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
                     newTheme = ThemeStyle.valueOf(currentTheme);
                 } else {
                     //Convert to equivalent dark theme
-                    newTheme = ThemeStyle.valueOf(currentTheme+"DARK");
+                    newTheme = ThemeStyle.valueOf(currentTheme + "DARK");
                 }
             } else {
                 if (currentTheme.contains("DARK")) {
@@ -79,17 +85,24 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
                     newTheme = ThemeStyle.valueOf(currentTheme);
                 }
             }
-            doRestart(newTheme);
+            applyTheme(newTheme);
+            doRestart();
+            return true;
+        } else if (preference == mHomePages) {
+            doRestart();
             return true;
         }
         return false;
     }
 
-    private void doRestart(ThemeStyle newTheme) {
+    private void applyTheme(ThemeStyle newTheme) {
         // Update prefrence
         PreferenceUtils.getInstance(getActivity()).setThemeStyle(newTheme);
         // refresh the singleton
         ThemeHelper.getInstance(getActivity()).reloadTheme();
+    }
+
+    private void doRestart() {
         // notify user of restart
         new AlertDialog.Builder(getActivity())
                 .setMessage(R.string.settings_interface_restart_app)

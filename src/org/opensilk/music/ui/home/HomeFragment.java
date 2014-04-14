@@ -18,12 +18,15 @@
 package org.opensilk.music.ui.home;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,6 +38,8 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+
+import org.opensilk.music.ui.settings.DragSortSwipeListPreference;
 
 import java.util.List;
 import java.util.Locale;
@@ -57,10 +62,23 @@ public class HomeFragment extends Fragment {
 
         // Initialize the adapter
         mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
-        final MusicFragments[] mFragments = MusicFragments.values();
-        for (final MusicFragments mFragment : mFragments) {
-            mPagerAdapter.add(mFragment.getFragmentClass(), null);
+
+        List<String> pages = DragSortSwipeListPreference.listFromString(
+                mPreferences.getHomePages());
+
+        if (pages == null) {
+            final MusicFragments[] mFragments = MusicFragments.values();
+            for (final MusicFragments mFragment : mFragments) {
+                mPagerAdapter.add(mFragment.getFragmentClass(),
+                        getHumanReadable(mFragment.getFragmentClass().getName()), null);
+            }
+        } else {
+            for (String page : pages) {
+                Log.d("HomeFragment", "Pages: " + pages);
+                mPagerAdapter.add(page,getHumanReadable(page), null);
+            }
         }
+
     }
 
     @Override
@@ -138,19 +156,18 @@ public class HomeFragment extends Fragment {
 
     public static final class HomePagerAdapter extends FragmentPagerAdapter {
         private final Context context;
-        private final String[] pageTitles;
         private final List<Holder> mHolderList = Lists.newArrayList();
 
 
         public HomePagerAdapter(Context context, FragmentManager fm) {
             super(fm);
             this.context = context;
-            this.pageTitles = context.getResources().getStringArray(R.array.page_titles);
         }
 
         @Override
         public Fragment getItem(int position) {
             Holder holder = mHolderList.get(position);
+            Log.d("HomeFragment", "className: " + holder.className + " -- Position: [" + position + "]");
             return Fragment.instantiate(context, holder.className, holder.params);
         }
 
@@ -161,12 +178,22 @@ public class HomeFragment extends Fragment {
 
         @Override
         public CharSequence getPageTitle(final int position) {
-            return pageTitles[position].toUpperCase(Locale.getDefault());
+            return mHolderList.get(position).title.toUpperCase(Locale.getDefault());
         }
 
-        public void add(final Class<? extends Fragment> className, final Bundle params) {
-            mHolderList.add(new Holder(className.getName(), params));
-//            notifyDataSetChanged();
+        public void add(final Class<? extends Fragment> className, String title, final Bundle params) {
+            mHolderList.add(new Holder(className.getName(), title, params));
+            Log.d("HomeFragment", "className: " + className.getName() + " -- Position: [" + mHolderList.size() + "]");
+        }
+
+        public void add(final String className, String title, final Bundle params) {
+            mHolderList.add(new Holder(className, title, params));
+            Log.d("HomeFragment", "className: " + className + " -- Position: [" + mHolderList.size() + "]");
+        }
+
+
+        public void removeAll() {
+            mHolderList.clear();
         }
 
         /**
@@ -174,12 +201,35 @@ public class HomeFragment extends Fragment {
          */
         private final static class Holder {
             String className;
+            String title;
             Bundle params;
-            private Holder(String className, Bundle params) {
+            private Holder(String className, String title, Bundle params) {
                 this.className = className;
+                this.title = title;
                 this.params = params;
             }
         }
+    }
+
+    private String getHumanReadable(String className) {
+        int id;
+        if (className.equals(HomePlaylistFragment.class.getName())) {
+            id = R.string.page_playlists;
+        } else if (className.equals(HomeRecentFragment.class.getName())) {
+            id = R.string.page_recent;
+        } else if (className.equals(HomeArtistFragment.class.getName())) {
+            id = R.string.page_artists;
+        } else if (className.equals(HomeAlbumFragment.class.getName())) {
+            id = R.string.page_albums;
+        } else if (className.equals(HomeSongFragment.class.getName())) {
+            id = R.string.page_songs;
+        } else if (className.equals(HomeGenreFragment.class.getName())) {
+            id = R.string.page_genres;
+        } else {
+            id = R.string.error;
+        }
+
+        return getResources().getString(id);
     }
 
     /**
@@ -230,7 +280,6 @@ public class HomeFragment extends Fragment {
         public Class<? extends Fragment> getFragmentClass() {
             return mFragmentClass;
         }
-
     }
 
 }

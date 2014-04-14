@@ -17,6 +17,7 @@
 
     <!-- Subcategories -->
     <string name="settings_about_legal_category">Legal</string>
+    <string name="settings_interface_home_category">Home</string>
     <string name="settings_interface_theme_category">Theme</string>
     <string name="settings_interface_visualizations_category">Visualizations</string>
     <string name="settings_data_download_category">Download</string>
@@ -44,6 +45,8 @@
     <string name="settings_interface_visualizations_title">Enable visualizations</string>
     <string name="settings_interface_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
     <string name="settings_interface_equalizer_summary">Fine tune audio settings</string>
+    <string name="settings_interface_home_pages_title">Select home pages</string>
+    <string name="settings_interface_home_pages_summary">Sort &amp; manage home pages</string>
 
     <string name="settings_download_prefer_network">Prefer downloading artwork</string>
     <string name="settings_download_prefer_network_summary">Tries to download album art before checking device storage</string>
@@ -58,7 +61,7 @@
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
     <!-- Interface -->
-    <string name="settings_interface_restart_app">Orpheus will now restart to apply the new theme.</string>
+    <string name="settings_interface_restart_app">Orpheus will now restart to apply changes.</string>
 
     <!-- Miscellaneous -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>

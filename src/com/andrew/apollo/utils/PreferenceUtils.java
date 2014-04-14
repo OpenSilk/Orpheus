@@ -92,6 +92,9 @@ public final class PreferenceUtils {
     //Key whether or not to show visualizations.
     public static final String SHOW_VISUALIZATIONS = "pref_visualizations";
 
+    //Key for home screen pages
+    public static final String HOME_PAGES = "pref_home_pages";
+
     private static PreferenceUtils sInstance;
 
     private final SharedPreferences mPreferences;
@@ -162,6 +165,10 @@ public final class PreferenceUtils {
      */
     public final ThemeStyle getThemeStyle() {
         return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.GREPHEUS.toString()));
+    }
+
+    public final String getHomePages() {
+        return mPreferences.getString(HOME_PAGES, "");
     }
 
     /**
