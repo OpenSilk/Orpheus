@@ -17,6 +17,7 @@
 
 package com.andrew.apollo;
 
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -37,6 +38,7 @@ import android.media.MediaPlayer;
 import android.media.RemoteControlClient;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -673,6 +675,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Initializes the remote control client
      */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void setUpRemoteControlClient() {
         final Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         mediaButtonIntent.setComponent(mMediaButtonReceiverComponent);
@@ -1493,6 +1496,7 @@ public class MusicPlaybackService extends Service {
      *
      * @param what The broadcast
      */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void updateRemoteControlClient(final String what) {
         int playState = mIsSupposedToBePlaying
                 ? RemoteControlClient.PLAYSTATE_PLAYING
@@ -3195,20 +3199,16 @@ public class MusicPlaybackService extends Service {
             MediaPlayer.OnCompletionListener {
 
         private final WeakReference<MusicPlaybackService> mService;
-
-        private MediaPlayer mCurrentMediaPlayer = new MediaPlayer();
-
-        private MediaPlayer mNextMediaPlayer;
-
+        private CompatMediaPlayer mCurrentMediaPlayer = new CompatMediaPlayer();
+        private CompatMediaPlayer mNextMediaPlayer;
         private Handler mHandler;
-
         private boolean mIsInitialized = false;
 
         /**
          * Constructor of <code>MultiPlayer</code>
          */
         public MultiPlayer(final MusicPlaybackService service) {
-            mService = new WeakReference<MusicPlaybackService>(service);
+            mService = new WeakReference<>(service);
             mCurrentMediaPlayer.setWakeMode(mService.get(), PowerManager.PARTIAL_WAKE_LOCK);
         }
 
@@ -3231,11 +3231,15 @@ public class MusicPlaybackService extends Service {
          *         ready to play, false otherwise
          */
         private boolean setDataSourceImpl(final MediaPlayer player, final String path) {
+            MusicPlaybackService service = mService.get();
+            if (service == null) {
+                return false;
+            }
             try {
                 player.reset();
                 player.setOnPreparedListener(null);
                 if (path.startsWith("content://")) {
-                    player.setDataSource(mService.get(), Uri.parse(path));
+                    player.setDataSource(service, Uri.parse(path));
                 } else {
                     player.setDataSource(path);
                 }
@@ -3248,9 +3252,9 @@ public class MusicPlaybackService extends Service {
             player.setOnErrorListener(this);
             final Intent intent = new Intent(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
             intent.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, getAudioSessionId());
-            intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, mService.get().getPackageName());
+            intent.putExtra(AudioEffect.EXTRA_PACKAGE_NAME, service.getPackageName());
             intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
-            mService.get().sendBroadcast(intent);
+            service.sendBroadcast(intent);
             return true;
         }
 
@@ -3260,7 +3264,12 @@ public class MusicPlaybackService extends Service {
          * @param path The path of the file, or the http/rtsp URL of the stream
          *            you want to play
          */
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         public void setNextDataSource(final String path) {
+            MusicPlaybackService service = mService.get();
+            if (service == null) {
+                return;
+            }
             try {
                 mCurrentMediaPlayer.setNextMediaPlayer(null);
             } catch (IllegalArgumentException e) {
@@ -3276,8 +3285,8 @@ public class MusicPlaybackService extends Service {
             if (path == null) {
                 return;
             }
-            mNextMediaPlayer = new MediaPlayer();
-            mNextMediaPlayer.setWakeMode(mService.get(), PowerManager.PARTIAL_WAKE_LOCK);
+            mNextMediaPlayer = new CompatMediaPlayer();
+            mNextMediaPlayer.setWakeMode(service, PowerManager.PARTIAL_WAKE_LOCK);
             mNextMediaPlayer.setAudioSessionId(getAudioSessionId());
             if (setDataSourceImpl(mNextMediaPlayer, path)) {
                 try {
@@ -3436,12 +3445,16 @@ public class MusicPlaybackService extends Service {
          */
         @Override
         public boolean onError(final MediaPlayer mp, final int what, final int extra) {
+            MusicPlaybackService service = mService.get();
+            if (service == null) {
+                return false;
+            }
             switch (what) {
                 case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
                     mIsInitialized = false;
                     mCurrentMediaPlayer.release();
-                    mCurrentMediaPlayer = new MediaPlayer();
-                    mCurrentMediaPlayer.setWakeMode(mService.get(), PowerManager.PARTIAL_WAKE_LOCK);
+                    mCurrentMediaPlayer = new CompatMediaPlayer();
+                    mCurrentMediaPlayer.setWakeMode(service, PowerManager.PARTIAL_WAKE_LOCK);
                     mHandler.sendMessageDelayed(mHandler.obtainMessage(SERVER_DIED), 2000);
                     return true;
                 default:
@@ -3455,18 +3468,70 @@ public class MusicPlaybackService extends Service {
          */
         @Override
         public void onCompletion(final MediaPlayer mp) {
+            MusicPlaybackService service = mService.get();
+            if (service == null) {
+                return;
+            }
             if (mp == mCurrentMediaPlayer && mNextMediaPlayer != null) {
                 mCurrentMediaPlayer.release();
                 mCurrentMediaPlayer = mNextMediaPlayer;
                 mNextMediaPlayer = null;
                 // Update the remote media info
-                mService.get().mCurrentMediaInfo = mService.get().mNextMediaInfo;
-                mService.get().mNextMediaInfo = null;
+                service.mCurrentMediaInfo = service.mNextMediaInfo;
+                service.mNextMediaInfo = null;
                 mHandler.sendEmptyMessage(TRACK_WENT_TO_NEXT);
             } else {
-                mService.get().mWakeLock.acquire(30000);
+                service.mWakeLock.acquire(30000);
                 mHandler.sendEmptyMessage(TRACK_ENDED);
                 mHandler.sendEmptyMessage(RELEASE_WAKELOCK);
+            }
+        }
+
+        private static class CompatMediaPlayer extends MediaPlayer implements MediaPlayer.OnCompletionListener {
+
+            private boolean mCompatMode = true;
+            private MediaPlayer mNextPlayer;
+            private OnCompletionListener mCompletion;
+
+            public CompatMediaPlayer() {
+                try {
+                    MediaPlayer.class.getMethod("setNextMediaPlayer", MediaPlayer.class);
+                    mCompatMode = false;
+                } catch (NoSuchMethodException e) {
+                    mCompatMode = true;
+                    super.setOnCompletionListener(this);
+                }
+            }
+
+            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+            public void setNextMediaPlayer(MediaPlayer next) {
+                if (mCompatMode) {
+                    mNextPlayer = next;
+                } else {
+                    super.setNextMediaPlayer(next);
+                }
+            }
+
+            @Override
+            public void setOnCompletionListener(OnCompletionListener listener) {
+                if (mCompatMode) {
+                    mCompletion = listener;
+                } else {
+                    super.setOnCompletionListener(listener);
+                }
+            }
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (mNextPlayer != null) {
+                    // as it turns out, starting a new MediaPlayer on the completion
+                    // of a previous player ends up slightly overlapping the two
+                    // playbacks, so slightly delaying the start of the next player
+                    // gives a better user experience
+                    SystemClock.sleep(50);
+                    mNextPlayer.start();
+                }
+                mCompletion.onCompletion(this);
             }
         }
     }

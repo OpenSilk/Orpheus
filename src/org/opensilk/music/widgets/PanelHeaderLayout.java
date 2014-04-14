@@ -19,8 +19,10 @@ package org.opensilk.music.widgets;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -49,6 +51,7 @@ public class PanelHeaderLayout extends FrameLayout {
         this(context, attrs, 0);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public PanelHeaderLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
@@ -59,7 +62,12 @@ public class PanelHeaderLayout extends FrameLayout {
             mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_dark);
         }
         mBackground.setCrossFadeEnabled(true);
-        setBackground(mBackground);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            //noinspection deprecation
+            setBackgroundDrawable(mBackground);
+        } else {
+            setBackground(mBackground);
+        }
     }
 
     private View mButtonBarClosed;

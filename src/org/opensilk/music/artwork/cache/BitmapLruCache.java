@@ -16,6 +16,7 @@
 
 package org.opensilk.music.artwork.cache;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.util.LruCache;
@@ -32,6 +33,7 @@ public class BitmapLruCache extends LruCache<String, Bitmap> implements ArtworkL
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     protected int sizeOf(String key, Bitmap value) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             return value.getAllocationByteCount();

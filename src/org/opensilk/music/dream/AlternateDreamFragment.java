@@ -16,6 +16,7 @@
 
 package org.opensilk.music.dream;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
@@ -107,6 +109,7 @@ public class AlternateDreamFragment extends PreferenceFragment implements
      * from AOSP Settings#DreamBackend.java
      * @return
      */
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public List<DreamInfo> getDreamInfos() {
         PackageManager pm = getActivity().getPackageManager();
         Intent dreamIntent = new Intent(DreamService.SERVICE_INTERFACE);
