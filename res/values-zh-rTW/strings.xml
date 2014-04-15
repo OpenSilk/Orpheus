@@ -52,6 +52,7 @@
     <string name="sort_order_entry_track_list">曲目列表</string>
     <string name="sort_order_entry_number_of_songs">樂曲數量</string>
     <string name="sort_order_entry_number_of_albums">專輯數量</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">我的最愛</string>
     <string name="playlist_favorites">我的最愛</string>
     <string name="playlist_last_added">最後加入</string>

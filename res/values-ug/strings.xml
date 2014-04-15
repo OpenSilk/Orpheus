@@ -52,6 +52,7 @@
     <string name="sort_order_entry_track_list">ناخشا تىزىمى</string>
     <string name="sort_order_entry_number_of_songs">نەغمە سانى</string>
     <string name="sort_order_entry_number_of_albums">ناخشا توپلىمى سانى</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">يىغقۇچ</string>
     <string name="playlist_favorites">يىغقۇچلار</string>
     <string name="playlist_last_added">ئاخىرىدا قوشقان</string>

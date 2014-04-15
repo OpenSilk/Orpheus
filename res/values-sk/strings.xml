@@ -53,6 +53,7 @@
     <string name="sort_order_entry_track_list">Zoznamu stôp</string>
     <string name="sort_order_entry_number_of_songs">Počtu skladieb</string>
     <string name="sort_order_entry_number_of_albums">Počtu albumov</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">Obľúbené skladby</string>
     <string name="playlist_favorites">Obľúbené skladby</string>
     <string name="playlist_last_added">Naposledy pridané skladby</string>

@@ -53,6 +53,7 @@
     <string name="sort_order_entry_track_list">Dziesmu saraksts</string>
     <string name="sort_order_entry_number_of_songs">Dziesmu daudzums</string>
     <string name="sort_order_entry_number_of_albums">Albumu daudzums</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">Izlase</string> <!-- used in voice search processing only -->
     <string name="playlist_favorites">Izlase</string>
     <string name="playlist_last_added">Pēdējie pievienotie</string>
@@ -79,6 +80,7 @@
     <string name="context_menu_open_in_play_store">Atvērt Play veikalā</string>
     <string name="context_menu_remove_from_recent">Noņemt no nesenajiem</string>
     <string name="context_menu_use_as_ringtone">Izmantot kā zvana signālu</string>
+    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
     <string name="accessibility_play">Atskaņot</string>
     <string name="accessibility_pause">Pauze</string>
     <string name="accessibility_next">Nākama</string>

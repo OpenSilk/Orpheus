@@ -53,6 +53,8 @@ limitations under the License.
     <string name="sort_order_entry_track_list">Список пісень</string>
     <string name="sort_order_entry_number_of_songs">Кількість пісень</string>
     <string name="sort_order_entry_number_of_albums">Кількість альбомів</string>
+    <string name="sort_order_entry_filename">Filename</string>
+    <string name="playlist_favorite">Favorite</string> <!-- used in voice search processing only -->
     <string name="playlist_favorites">Улюблені</string>
     <string name="playlist_last_added">Востаннє додано</string>
     <string name="new_playlist">Новий</string>
@@ -78,6 +80,7 @@ limitations under the License.
     <string name="context_menu_open_in_play_store">Відкрити у магазині Play</string>
     <string name="context_menu_remove_from_recent">Видалити з недавніх</string>
     <string name="context_menu_use_as_ringtone">Встановити як дзвінок</string>
+    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
     <string name="accessibility_play">Відтворити</string>
     <string name="accessibility_pause">Призупинити</string>
     <string name="accessibility_next">Наступна</string>
@@ -117,7 +120,10 @@ limitations under the License.
     <string name="hex">#</string>
     <string name="current_color">Поточний</string>
     <string name="new_color">Новий</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
     <string name="app_widget_large_alt">Orpheus: 4x2 (альтернативний)</string>
+    <string name="app_widget_text_separator">-</string>
     <string name="app_widget_recent">Orpheus: недавно відтворені</string>
     <string name="no_effects_for_you">Неможливо відкрити еквалайзер.</string>
     <string name="empty_music">Використовуйте USB-кабель для копіювання музики з комп’ютера.</string>

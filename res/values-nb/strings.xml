@@ -52,6 +52,7 @@
     <string name="sort_order_entry_track_list">Liste over spor</string>
     <string name="sort_order_entry_number_of_songs">Antall sanger</string>
     <string name="sort_order_entry_number_of_albums">Antall album</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">Favoritt</string>
     <string name="playlist_favorites">Favoritter</string>
     <string name="playlist_last_added">Nylige</string>
@@ -78,6 +79,7 @@
     <string name="context_menu_open_in_play_store">Åpne i Google Play</string>
     <string name="context_menu_remove_from_recent">Fjern fra nylige</string>
     <string name="context_menu_use_as_ringtone">Bruk som ringetone</string>
+    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
     <string name="accessibility_play">Spill</string>
     <string name="accessibility_pause">Pause</string>
     <string name="accessibility_next">Neste</string>

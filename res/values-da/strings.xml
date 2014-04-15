@@ -55,6 +55,7 @@
     <string name="sort_order_entry_track_list">Trackliste</string>
     <string name="sort_order_entry_number_of_songs">Antal sange</string>
     <string name="sort_order_entry_number_of_albums">Antal albums</string>
+    <string name="sort_order_entry_filename">Filename</string>
 
     <string name="playlist_favorite">Favorit</string>
     <string name="playlist_favorites">Favoritter</string>

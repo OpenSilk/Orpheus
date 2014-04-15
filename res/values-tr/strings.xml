@@ -53,6 +53,7 @@
     <string name="sort_order_entry_track_list">Parça listesi</string>
     <string name="sort_order_entry_number_of_songs">Şarkı sayısı</string>
     <string name="sort_order_entry_number_of_albums">Albüm sayısı</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">Beğen</string>
     <string name="playlist_favorites">Beğeniler</string>
     <string name="playlist_last_added">Son eklenenler</string>
@@ -79,6 +80,7 @@
     <string name="context_menu_open_in_play_store">Play Store\'da aç</string>
     <string name="context_menu_remove_from_recent">En son\'dan sil</string>
     <string name="context_menu_use_as_ringtone">Zil sesi olarak kullan</string>
+    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
     <string name="accessibility_play">Oynat</string>
     <string name="accessibility_pause">Duraklat</string>
     <string name="accessibility_next">Sonraki</string>

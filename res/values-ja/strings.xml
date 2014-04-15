@@ -57,6 +57,7 @@
     <string name="sort_order_entry_track_list">トラックリスト</string>
     <string name="sort_order_entry_number_of_songs">曲数</string>
     <string name="sort_order_entry_number_of_albums">アルバム数</string>
+    <string name="sort_order_entry_filename">Filename</string>
 
     <string name="playlist_favorite">お気に入り</string>
     <string name="playlist_favorites">お気に入り</string>
@@ -86,6 +87,7 @@
     <string name="context_menu_open_in_play_store">プレイストアで開く</string>
     <string name="context_menu_remove_from_recent">履歴から削除</string>
     <string name="context_menu_use_as_ringtone">着信音として使用</string>
+    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
 
     <string name="accessibility_play">再生</string>
     <string name="accessibility_pause">停止</string>

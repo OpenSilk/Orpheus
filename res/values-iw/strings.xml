@@ -32,6 +32,7 @@
   <string name="menu_save_queue">שמור תור השמעה</string>
   <string name="menu_share">שתף</string>
   <string name="menu_add_to_homescreen">הצמד למסך הבית</string>
+  <string name="menu_equalizer">Equalizer</string>
   <string name="menu_simple">פשוט</string>
   <string name="menu_detailed">מפורט</string>
   <string name="menu_grid">טבלה</string>
@@ -52,6 +53,7 @@
   <string name="sort_order_entry_track_list">רשימת שירים</string>
   <string name="sort_order_entry_number_of_songs">מספר שירים</string>
   <string name="sort_order_entry_number_of_albums">מספר האלבומים</string>
+  <string name="sort_order_entry_filename">Filename</string>
   <string name="playlist_favorite">מועדף</string>
   <string name="playlist_favorites">מועדפים</string>
   <string name="playlist_last_added">הוספו לאחרונה</string>
@@ -115,12 +117,14 @@
   <string name="now_listening_to">#מנגן כעט <xliff:g id="title">%1$s</xliff:g> על ידי <xliff:g id="artist">%2$s</xliff:g> #אפולו</string>
   <string name="share_track_using">שתף שיר בעזרת:</string>
   <string name="color_picker_title">ערכת צבעים</string>
+  <string name="hex">#</string>
   <string name="current_color">נוכחי</string>
   <string name="new_color">חדש</string>
   <string name="app_widget_small">אפולו: 4x1</string>
   <string name="app_widget_large">אפולו: 4x2</string>
   <string name="app_widget_large_alt">אפולו: 4x2 (אחר)</string>
   <string name="app_widget_recent">אפולו: הושמעו לאחרונה</string>
+  <string name="app_widget_text_separator">-</string>
   <string name="no_effects_for_you">ה-equalizer לא הצליח להיפתח.</string>
   <string name="empty_music">כדי להעתיק מוזיקה מהמחשב למכשיר השתמש בכבל USB.</string>
   <string name="empty_last_added">שירים שנוספו בחודש האחרון יראו כאן.</string>

@@ -52,6 +52,7 @@
     <string name="sort_order_entry_track_list">Låtlista</string>
     <string name="sort_order_entry_number_of_songs">Antal låtar</string>
     <string name="sort_order_entry_number_of_albums">Antal album</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">Favorit</string>
     <string name="playlist_favorites">Favoriter</string>
     <string name="playlist_last_added">Senast tillagda</string>
@@ -78,6 +79,7 @@
     <string name="context_menu_open_in_play_store">Öppna i Play Butik</string>
     <string name="context_menu_remove_from_recent">Ta bort från Nya</string>
     <string name="context_menu_use_as_ringtone">Använd som ringsignal</string>
+    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
     <string name="accessibility_play">Spela</string>
     <string name="accessibility_pause">Pausa</string>
     <string name="accessibility_next">Nästa</string>

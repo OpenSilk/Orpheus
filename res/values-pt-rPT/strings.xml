@@ -43,6 +43,8 @@
     <string name="remove_from_favorites">Remover dos favoritos</string>
     <string name="remove_from_recent">Remover das recentes</string>
     <string name="remove_from_queue">Remover da fila</string>
+    <string name="sort_order_entry_az">A-Z</string>
+    <string name="sort_order_entry_za">Z-A</string>
     <string name="sort_order_entry_artist">Artista</string>
     <string name="sort_order_entry_album">Álbum</string>
     <string name="sort_order_entry_year">Ano</string>
@@ -51,6 +53,7 @@
     <string name="sort_order_entry_track_list">Lista de canções</string>
     <string name="sort_order_entry_number_of_songs">Número de músicas</string>
     <string name="sort_order_entry_number_of_albums">Número de álbuns</string>
+    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorites">Favoritos</string>
     <string name="playlist_last_added">Última adicionada</string>
     <string name="new_playlist">Nova lista de rep.</string>
@@ -76,6 +79,7 @@
     <string name="context_menu_open_in_play_store">Abrir na Play Store</string>
     <string name="context_menu_remove_from_recent">Remover das recentes</string>
     <string name="context_menu_use_as_ringtone">Usar como toque</string>
+    <string name="context_menu_remove_from_playlist">Remove from playlist</string>
     <string name="accessibility_play">Reproduzir</string>
     <string name="accessibility_pause">Pausa</string>
     <string name="accessibility_next">Próxima</string>
@@ -112,10 +116,14 @@
     <string name="share_track_using">Partilhar música usando:</string>
     <string name="now_listening_to">#Em reprodução <xliff:g id="title">%1$s</xliff:g> por <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
     <string name="color_picker_title">Esquema de cor</string>
+    <string name="hex">#</string>
     <string name="current_color">Atual</string>
     <string name="new_color">Nova</string>
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
     <string name="app_widget_large_alt">Orpheus: 4x2 (alternativo)</string>
     <string name="app_widget_recent">Orpheus: escutado recentemente</string>
+    <string name="app_widget_text_separator">-</string>
     <string name="no_effects_for_you">O equalizador não pôde ser aberto.</string>
     <string name="empty_music">Para copiar a música do seu computador para seu dispositivo, use um cabo USB.</string>
     <string name="empty_last_added">Vão ser mostradas aqui as músicas que você adicionou no último mês.</string>

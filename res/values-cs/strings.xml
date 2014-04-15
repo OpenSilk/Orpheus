@@ -129,11 +129,15 @@
     <string name="share_track_using">Sdílet skladbu pomocí:</string>
 
     <string name="color_picker_title">Barevné shéma</string>
+    <string name="hex">#</string>
     <string name="current_color">Aktuální</string>
     <string name="new_color">Nová</string>
 
+    <string name="app_widget_small">Orpheus: 4x1</string>
+    <string name="app_widget_large">Orpheus: 4x2</string>
     <string name="app_widget_large_alt">Orpheus: 4x2 (varianta)</string>
     <string name="app_widget_recent">Orpheus: nedávno posloucháné</string>
+    <string name="app_widget_text_separator">-</string>
 
     <string name="no_effects_for_you">Nelze otevřít ekvalizér.</string>
     <string name="empty_music">Pro zkopírování hudebních souborů z počítače do zařízení použijte USB kabel.</string>
