@@ -9,6 +9,7 @@
     <string name="okay">Okay</string>
     <string name="add">Add</string>
     <string name="accessibility_select">select</string>
+    <string name="error">Error</string>
 
     <!-- ################ SETTINGS ################ -->
 
@@ -29,13 +30,12 @@
     <!-- Preference titles and summaries -->
     <string name="settings_about_author_title">Created by OpenSilk Productions LLC</string>
     <string name="settings_about_version_changes_title">What\'s new</string>
-    <string name="settings_about_thanks_lfm">Last.fm</string>
+    <string name="settings_about_thanks_lfm" translatable="false">Last.fm</string>
     <string name="settings_about_thanks_lfm_desc">Cover art and artist images</string>
-    <string name="settings_about_thanks_lfm_url">http://last.fm/</string>
-    <string name="settings_about_thanks_caa">coverartarchive.org</string>
+    <string name="settings_about_thanks_lfm_url">http://last.fm/</string><!--has localized domains-->
+    <string name="settings_about_thanks_caa" translatable="false">coverartarchive.org</string>
     <string name="settings_about_thanks_caa_desc">Cover art</string>
     <string name="settings_about_thanks_caa_url" translatable="false">http://coverartarchive.org/</string>
-
     <string name="settings_about_thanks_an" translatable="false">Andrew Neal</string>
     <string name="settings_about_thanks_an_desc" translatable="false">Apollo</string>
     <string name="settings_about_thanks_ac" translatable="false">Alex Cruz</string>
@@ -54,10 +54,10 @@
     <string name="settings_data_low_resolution_title">Use lower resolution art work</string>
     <string name="settings_data_low_resolution_summary">Enable to reduce image size and bandwidth used</string>
     <string name="settings_data_cache_size">Set image cache limit</string>
-    <string name="settings_data_cache_size_20">20MB</string>
-    <string name="settings_data_cache_size_40">40MB</string>
-    <string name="settings_data_cache_size_60">60MB</string>
-    <string name="settings_data_cache_size_80">80MB</string>
+    <string name="settings_data_cache_size_20" translatable="false">20MB</string>
+    <string name="settings_data_cache_size_40" translatable="false">40MB</string>
+    <string name="settings_data_cache_size_60" translatable="false">60MB</string>
+    <string name="settings_data_cache_size_80" translatable="false">80MB</string>
 
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
@@ -66,18 +66,16 @@
 
     <!-- Miscellaneous -->
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
-    <string name="error">Error</string>
     <string name="no_audio_id">Could not get audio id. Please play a song and try again.</string>
 
     <!-- Themes -->
-    <string name="theme_orpheus">Orpheus</string>
-    <string name="theme_repheus">Repheus</string>
-    <string name="theme_purpheus">Purpheus</string>
-    <string name="theme_blupheus">Blupheus</string>
-    <string name="theme_grepheus">Grepheus</string>
+    <string name="theme_orpheus" translatable="false">Orpheus</string>
+    <string name="theme_repheus" translatable="false">Repheus</string>
+    <string name="theme_purpheus" translatable="false">Purpheus</string>
+    <string name="theme_blupheus" translatable="false">Blupheus</string>
+    <string name="theme_grepheus" translatable="false">Grepheus</string>
 
     <!-- Widgets -->
-
     <string name="widget_settings_label">Configure widget</string>
     <string name="widget_ultra_mini_label">Orpheus Ultra-Mini</string>
     <string name="widget_mini_label">Orpheus Mini</string>
