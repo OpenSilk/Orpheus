@@ -17,8 +17,10 @@
 
 package org.opensilk.music.ui.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -31,6 +33,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.TranslateAnimation;
 
+import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.QueueLoader;
@@ -76,9 +79,46 @@ public class QueueFragment extends Fragment implements
      */
     private DragSortListView mListView;
 
+    /**
+     * Set when we alter the queue to avoid processing the callback
+     */
+    private int mSelfChange = 0;
+
+    /**
+     * Track loader state
+     */
+    private boolean isFirstLoad = true;
+
+    /**
+     * Stores list state when loader is restarted
+     */
+    private ScrollPosition mLastPosition = new ScrollPosition();
+    private static class ScrollPosition {
+        private int prevActiveIndex;
+        private int index;
+        private int top;
+    }
+
+    private final Handler mHandler = new Handler();
+    private final Runnable mLoaderRestartRunnable = new Runnable() {
+        @Override
+        public void run() {
+            restartLoader();
+        }
+    };
+
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Register the music status listener
+        ((BaseSlidingActivity) activity).addMusicStateListener(this);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Start the loader
+        getLoaderManager().initLoader(LOADER, null, this);
     }
 
     @Override
@@ -116,28 +156,17 @@ public class QueueFragment extends Fragment implements
         super.onActivityCreated(savedInstanceState);
         // Enable the options menu
         setHasOptionsMenu(true);
-        // Start the loader
-        getLoaderManager().initLoader(LOADER, null, this);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        scrollToCurrentSong();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Register the music status listener
-        ((BaseSlidingActivity) getActivity()).addMusicStateListener(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
+    public void onDetach() {
+        super.onDetach();
         ((BaseSlidingActivity) getActivity()).removeMusicStateListener(this);
     }
+
+    /*
+     * Loader callbacks
+     */
 
     @Override
     public Loader<List<Song>> onCreateLoader(final int id, final Bundle args) {
@@ -162,24 +191,49 @@ public class QueueFragment extends Fragment implements
         mAdapter.setRowLayoutId(R.layout.dragsort_card_list);
         // Set the data behind the list
         mListView.setAdapter(mAdapter);
-        scrollToCurrentSong();
+        // On first load go to current song else restore the previous scroll position
+        if (isFirstLoad) {
+            isFirstLoad = false;
+            scrollToCurrentSong();
+        } else {
+            restoreScrollPosition();
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<List<Song>> listLoader) {
-
+        mAdapter = null;
+        mListView.setAdapter(null);
     }
+
+    /*
+     * RemoveListener
+     */
 
     @Override
     public void remove(final int which) {
+        mSelfChange = 1;
+        // Auto shuffle makes queue change called twice
+        if (MusicUtils.getShuffleMode() == MusicPlaybackService.SHUFFLE_AUTO) {
+            mSelfChange++;
+        }
         Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
         mAdapter.notifyDataSetChanged();
         MusicUtils.removeTrack(((CardQueueList) c).getData().mSongId);
     }
 
+    /*
+     * Droplistener
+     */
+
     @Override
     public void drop(final int from, final int to) {
+        mSelfChange = 1;
+        // Auto shuffle makes queue change called twice
+        if (MusicUtils.getShuffleMode() == MusicPlaybackService.SHUFFLE_AUTO) {
+            mSelfChange++;
+        }
         Card c = mAdapter.getItem(from);
         mAdapter.remove(c);
         mAdapter.insert(c, to);
@@ -188,8 +242,7 @@ public class QueueFragment extends Fragment implements
     }
 
     /**
-     * Scrolls the list to the currently playing song when the user touches the
-     * header in the {@link TitlePageIndicator}.
+     * Scrolls the list to the currently playing song
      */
     @DebugLog
     public void scrollToCurrentSong() {
@@ -218,46 +271,74 @@ public class QueueFragment extends Fragment implements
         return 0;
     }
 
-    public CardArrayAdapter getAdapter() {
-        return mAdapter;
+    /**
+     * Restores list position after loader restart
+     */
+    private void restoreScrollPosition() {
+        if (MusicUtils.getShuffleMode() == MusicPlaybackService.SHUFFLE_AUTO) {
+            // when the service adjustss the queue our saved state is no longer
+            // valid so we must compensate for the new offset so we dont
+            // jump to the wrong position
+            int activeIndex = getItemPositionBySong();
+            if (activeIndex != mLastPosition.prevActiveIndex) {
+                mLastPosition.index += (activeIndex - mLastPosition.prevActiveIndex);
+                if (mLastPosition.index < 0) {
+                    mLastPosition.index = 0;
+                }
+            }
+        }
+        mListView.setSelectionFromTop(mLastPosition.index, mLastPosition.top);
     }
 
-    private void notifyDataSetChanged() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter.notifyDataSetChanged();
-            }
-        }, 20);
+    private void scheduleLoaderRestart() {
+        mHandler.removeCallbacks(mLoaderRestartRunnable);
+        mHandler.postDelayed(mLoaderRestartRunnable, 40);
     }
 
     @Override
+    @DebugLog
     public void restartLoader() {
         if (isAdded()) {
+            // This is a slight hack to give us a refrence if the
+            // items in the queue are moved
+            mLastPosition.prevActiveIndex = getItemPositionBySong();
+            // store top most index
+            mLastPosition.index = mListView.getFirstVisiblePosition();
+            View v = mListView.getChildAt(0);
+            // store offset of top item
+            mLastPosition.top = v == null ? 0 : v.getTop();
             getLoaderManager().restartLoader(LOADER, null, this);
         }
     }
 
     @Override
+    @DebugLog
     public void onMetaChanged() {
-        notifyDataSetChanged();
-        //mAdapter.notifyDataSetChanged();
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
+    @DebugLog
     public void onPlaystateChanged() {
-        notifyDataSetChanged();
-        //mAdapter.notifyDataSetChanged();
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
+    @DebugLog
     public void onQueueChanged() {
-        // Added this callback but now im thinking why?
-        // Only way i can think of to change the queue while it is showing is
-        // through the queue, so we already know about all the changes
-//        if (isAdded()) {
-//            getLoaderManager().restartLoader(LOADER, null, this);
-//        }
+        if (mSelfChange-->0) {
+            return;
+        }
+        // For auto shuffle when the queue gets adjusted we
+        // can receive several QUEUE_CHANGED updates in quick
+        // succession so we batch the restart calls so our
+        // saved state doesnt alter unexpectedly while
+        // we wait on the loader
+        scheduleLoaderRestart();
     }
 
     @Override

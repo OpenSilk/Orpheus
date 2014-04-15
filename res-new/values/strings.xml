@@ -11,6 +11,9 @@
     <string name="accessibility_select">select</string>
     <string name="error">Error</string>
 
+    <!-- Menus -->
+    <string name="menu_party_shuffle">Party shuffle</string>
+
     <!-- ################ SETTINGS ################ -->
 
     <!-- Main settings screen -->

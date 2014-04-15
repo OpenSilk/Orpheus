@@ -19,21 +19,45 @@ package org.opensilk.music.ui.home;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.SortOrder;
+import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.loaders.SongCursorLoader;
+import org.opensilk.music.ui.cards.CardShuffleList;
+
+import it.gmariotti.cardslib.library.view.CardView;
 
 /**
  * Songs
  */
 public class HomeSongFragment extends HomePagerBaseCursorFragment {
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        if (mListView != null) {
+            CardView cardView = (CardView) inflater.inflate(R.layout.card_list_shuffle, null);
+            // Theme the shuffle icon
+            ImageView thumbnail = (ImageView) cardView.findViewById(R.id.card_thumbnail_image);
+            thumbnail.setImageDrawable(ThemeHelper.getInstance(getActivity()).getShuffleButtonDrawable());
+            // Set card (holds inner view)
+            cardView.setCard(new CardShuffleList(getActivity()));
+            // Add card to list
+            mListView.addHeaderView(cardView);
+        }
+        return v;
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

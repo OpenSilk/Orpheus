@@ -780,6 +780,17 @@ public final class MusicUtils {
     }
 
     /**
+     * Starts auto shuffle mode
+     */
+    public static void startPartyShuffle() {
+        if (sService != null) {
+            try {
+                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_AUTO);
+            } catch (RemoteException ignored) { }
+        }
+    }
+
+    /**
      * Returns The ID for a playlist.
      *
      * @param context The {@link Context} to use.

@@ -127,13 +127,19 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+        // Party shuffle
+        inflater.inflate(R.menu.party_shuffle, menu);
         // Shuffle all
-        inflater.inflate(R.menu.shuffle, menu);
+//        inflater.inflate(R.menu.shuffle, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_party_shuffle:
+                // Starts autoshuffle mode
+                MusicUtils.startPartyShuffle();
+                return true;
             case R.id.menu_shuffle:
                 // Shuffle all the songs
                 MusicUtils.shuffleAll(getActivity());
