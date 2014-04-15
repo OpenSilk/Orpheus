@@ -3,6 +3,7 @@ package org.opensilk.music.ui.settings;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -11,7 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -83,9 +84,10 @@ public class DragSortSwipeListPreference extends DialogPreference implements
         listView.setDropListener(this);
         listView.setRemoveListener(this);
 
-        final ImageButton addButton = (ImageButton) view.findViewById(R.id.add_item);
-        addButton.setImageResource(ThemeHelper.isLightTheme(getContext()) ?
+        final Button addButton = (Button) view.findViewById(R.id.add_item);
+        Drawable icon = getContext().getResources().getDrawable(ThemeHelper.isLightTheme(getContext()) ?
                 R.drawable.ic_action_add_light : R.drawable.ic_action_add_dark);
+        addButton.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
