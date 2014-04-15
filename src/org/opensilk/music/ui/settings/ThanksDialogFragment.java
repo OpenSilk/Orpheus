@@ -32,6 +32,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.ThemeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,9 @@ public class ThanksDialogFragment extends DialogFragment {
             setContentView(R.layout.settings_thanks_listview);
             setTitle(R.string.settings_special_thanks);
             List<Thankee> thankees = new ArrayList<Thankee>(3);
-            thankees.add(new Thankee(null, getResources().getDrawable(R.drawable.lastfm_logo),
+            int lastFmRes = ThemeHelper.isLightTheme(getContext()) ? R.drawable.lastfm_logo_light
+                    : R.drawable.lastfm_logo_dark;
+            thankees.add(new Thankee(null, getResources().getDrawable(lastFmRes),
                     getString(R.string.settings_about_thanks_lfm_desc),
                     getString(R.string.settings_about_thanks_lfm_url)));
             thankees.add(new Thankee(getString(R.string.settings_about_thanks_caa), null,
