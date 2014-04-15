@@ -21,16 +21,16 @@
     <header
         android:fragment="org.opensilk.music.dream.ConfigurationFragment"
         android:title="@string/dream_settings_configure"
-        android:icon="@drawable/ic_settings" />
+        />
 
     <header
         android:fragment="org.opensilk.music.dream.ChooserFragment"
         android:title="@string/dream_settings_choose_dream"
-        android:icon="@drawable/ic_settings" />
+        />
 
     <header
         android:fragment="org.opensilk.music.dream.AlternateDreamFragment"
         android:title="@string/dream_settings_alt_dream"
-        android:icon="@drawable/ic_settings" />
+        />
 
 </preference-headers>
