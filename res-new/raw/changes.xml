@@ -17,6 +17,18 @@
 
 <changelog bulletedList="true">
 
+    <changelogversion versionName="0.4.0">
+        <changelogtext>Add daydream (for 4.2+). Shows album art and controls during playback. Option to pick any installed dream to show while music is pause or stopped.</changelogtext>
+        <changelogtext>Settings now follow app theme</changelogtext>
+        <changelogtext>Add ability to choose and re-order home pages</changelogtext>
+        <changelogtext>Add Muzei extension (shows album art as wallpaper)</changelogtext>
+        <changelogtext>Add support for ICS (4.0+)</changelogtext>
+        <changelogtext>Widgets now open app when artwork is clicked</changelogtext>
+        <changelogtext>Fix scrobbling with the app Simple Last.fm Scrobbler</changelogtext>
+        <changelogtext>Fix playlist cards having wrong menus</changelogtext>
+        <changelogtext>Fix a memory leak</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="0.3.1">
         <changelogtext>Bug fixes</changelogtext>
         <changelogtext>Share intent from now playing menu now sends album art</changelogtext>
