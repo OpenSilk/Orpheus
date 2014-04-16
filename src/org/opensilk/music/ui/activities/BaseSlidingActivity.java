@@ -150,8 +150,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         // Initialize the sliding pane
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-        mSlidingPanel.setDragView(findViewById(R.id.track_artist_info));
+        mSlidingPanel.setDragView(findViewById(R.id.panel_header));
         mSlidingPanel.setPanelSlideListener(this);
+        mSlidingPanel.setEnableDragViewTouchEvents(true);
 
         // Get panel fragment reference
         mNowPlayingFragment = (NowPlayingFragment) getSupportFragmentManager().findFragmentById(R.id.now_playing_fragment);
