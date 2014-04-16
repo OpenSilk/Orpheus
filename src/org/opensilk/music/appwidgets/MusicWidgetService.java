@@ -39,6 +39,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkProviderUtil;
+import org.opensilk.music.ui.activities.HomeSlidingActivity;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -192,6 +193,11 @@ public class MusicWidgetService extends Service implements ServiceConnection {
             views.setImageViewBitmap(R.id.widget_album_art, mArtwork);
         } else {
             views.setImageViewResource(R.id.widget_album_art, R.drawable.default_artwork);
+        }
+        if (widgetSize > ULTRA_MINI) {
+            pendingIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(this, HomeSlidingActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            views.setOnClickPendingIntent(R.id.widget_album_art, pendingIntent);
         }
 
         /* Pause / Play -- set for all widgets */
