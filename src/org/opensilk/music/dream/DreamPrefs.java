@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 
 /**
  * Created by drew on 4/13/14.
@@ -42,7 +43,7 @@ public class DreamPrefs {
      */
     public static void saveDreamLayout(Context context, int dreamLayout) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putInt("dream_layout_style", dreamLayout).apply();
+        prefs.edit().putInt("daydream_layout_style", dreamLayout).apply();
     }
 
     /**
@@ -52,7 +53,7 @@ public class DreamPrefs {
      */
     public static int getDreamLayout(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getInt("dream_layout_style", DreamLayout.ART_CONTROLS);
+        return prefs.getInt("daydream_layout_style", DreamLayout.ART_CONTROLS);
     }
 
     /**
@@ -63,8 +64,7 @@ public class DreamPrefs {
     public static void saveAltDreamComponent(Context context, ComponentName componentName) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit()
-                .putString("alt_dream_package", componentName.getPackageName())
-                .putString("alt_dream_class", componentName.getClassName())
+                .putString("daydream_alt_dream_component", componentName.flattenToString())
                 .apply();
     }
 
@@ -75,10 +75,9 @@ public class DreamPrefs {
      */
     public static ComponentName getAltDreamComponent(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String altPkg = prefs.getString("alt_dream_package", null);
-        String altClz = prefs.getString("alt_dream_class", null);
-        if (altPkg != null && altClz != null) {
-            return new ComponentName(altPkg, altClz);
+        String altCmpnt = prefs.getString("daydream_alt_dream_component", null);
+        if (!TextUtils.isEmpty(altCmpnt)) {
+            return ComponentName.unflattenFromString(altCmpnt);
         }
         return null;
     }
@@ -90,8 +89,7 @@ public class DreamPrefs {
     public static void removeAltDreamComponent(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit()
-                .remove("alt_dream_package")
-                .remove("alt_dream_class")
+                .remove("daydream_alt_dream_component")
                 .apply();
     }
 
