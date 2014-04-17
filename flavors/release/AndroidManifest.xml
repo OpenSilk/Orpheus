@@ -14,7 +14,7 @@
             android:name="org.opensilk.music.artwork.ArtworkProvider"
             android:authorities="org.opensilk.music.artwork.provider"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true"
             android:grantUriPermissions="true"/>
 
         <receiver
@@ -26,6 +26,13 @@
                 <action android:name="org.opensilk.music.repeatmodechanged" />
                 <action android:name="org.opensilk.music.shufflemodechanged" />
                 <action android:name="org.opensilk.music.QUERY_DISABLE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="org.opensilk.music.muzei.MuzeiUpdateReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="org.opensilk.music.metachanged" />
             </intent-filter>
         </receiver>
 

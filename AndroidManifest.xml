@@ -254,6 +254,17 @@
         <service android:name="org.opensilk.music.artwork.ArtworkService"/>
         <!-- Widget service runs in activity process-->
         <service android:name="org.opensilk.music.appwidgets.MusicWidgetService" />
+
+        <!--Muzei extension-->
+        <service android:name="org.opensilk.music.muzei.MuzeiService"
+            android:icon="@drawable/stat_notify_music"
+            android:label="@string/app_name"
+            android:description="@string/muzei_description">
+            <intent-filter>
+                <action android:name="com.google.android.apps.muzei.api.MuzeiArtSource"/>
+            </intent-filter>
+            <meta-data android:name="color" android:value="@android:color/holo_green_light"/>
+        </service>
     </application>
 
 </manifest>

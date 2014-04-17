@@ -118,6 +118,7 @@ dependencies {
     compile 'com.jakewharton:disklrucache:2.0.2'
     compile 'org.apache.commons:commons-io:1.3.2'
     compile 'com.github.gabrielemariotti.changeloglib:library:1.4.0'
+    compile 'com.google.android.apps.muzei:muzei-api:+'
 
     compile 'com.sothree.slidinguppanel:library:1.0.0-SNAPSHOT'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT'

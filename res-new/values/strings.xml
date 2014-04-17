@@ -101,4 +101,7 @@
     <string name="dream_settings_alt_dream_warning">The dream chosen here will display while music is not playing.\n\nWARN: This is experimental and may not function properly.</string>
     <string name="dream_settings_fullscreen">Fullscreen mode</string>
     <string name="dream_settings_fullscreen_summary">Hide status bar and blacks out navigation bar</string>
+
+    <!--Muzei-->
+    <string name="muzei_description">Album art</string>
 </resources>
