@@ -2836,9 +2836,7 @@ public class MusicPlaybackService extends Service {
                     mCurrentMediaInfo = CastUtils.buildMediaInfo(MusicPlaybackService.this, mCursor);
                     setNextTrack();
                 }
-                if (isPlaying()) {
-                    pause();
-                }
+                pauseLocal();
                 updatePlaybackLocation(PlaybackLocation.REMOTE);
                 loadRemoteCurrent(); //TODO check failure
                 restoreRemoteVolumeLevel();
@@ -2852,7 +2850,9 @@ public class MusicPlaybackService extends Service {
         @Override
         @DebugLog
         public void onApplicationConnectionFailed(int errorCode) {
-            //Nothing for us to do, the user must manually try again
+            //Make sure we are on local
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
+
         }
 
         @Override
