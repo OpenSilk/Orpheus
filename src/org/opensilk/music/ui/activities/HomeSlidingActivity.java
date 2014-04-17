@@ -51,6 +51,7 @@ import static android.app.SearchManager.QUERY;
 public class HomeSlidingActivity extends BaseSlidingActivity {
 
     public static final int RESULT_RESTART_APP = RESULT_FIRST_USER << 1;
+    public static final int RESULT_RESTART_FULL = RESULT_FIRST_USER << 2;
 
     private boolean mIsLargeLandscape;
 
@@ -168,6 +169,9 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
                     PendingIntent.FLAG_CANCEL_CURRENT);
             am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
             finish();
+        } else if (requestCode == 0 && resultCode == RESULT_RESTART_FULL) {
+            killServiceOnExit = true;
+            onActivityResult(requestCode, RESULT_RESTART_APP, data);
         }
     }
 

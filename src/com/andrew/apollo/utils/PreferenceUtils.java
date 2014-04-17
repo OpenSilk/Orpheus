@@ -20,6 +20,8 @@ import android.util.JsonWriter;
 
 import com.andrew.apollo.R;
 
+import org.opensilk.cast.util.Utils;
+import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.ui.home.HomeFragment.MusicFragment;
 
 import java.io.IOException;
@@ -503,10 +505,26 @@ public final class PreferenceUtils {
     }
 
     /**
+     * Saves cast enabled pref to cast prefs
+     * @param enabled
+     */
+    public void setCastEnabled(boolean enabled) {
+        Utils.saveBooleanToPreference(mContext, KEY_CAST_ENABLED, enabled);
+    }
+
+    /**
      * @return true if casting is enabled
      */
     public boolean isCastEnabled() {
-        return mPreferences.getBoolean(KEY_CAST_ENABLED, true);
+        return Utils.getBooleanFromPreference(mContext, KEY_CAST_ENABLED, true);
+    }
+
+    /**
+     * Static method for service
+     * @return true if casting is enabled
+     */
+    public static boolean isCastEnabled(Context context) {
+        return Utils.getBooleanFromPreference(context.getApplicationContext(), KEY_CAST_ENABLED, true);
     }
 
     /**

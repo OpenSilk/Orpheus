@@ -58,6 +58,7 @@ import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaStatus;
@@ -72,7 +73,6 @@ import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.LocalCastServiceManager;
-import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
@@ -480,6 +480,8 @@ public class MusicPlaybackService extends Service {
      */
     private ArtworkProviderUtil mArtworkUtil;
 
+    private boolean isCastingEnabled;
+
     /**
      * Token for SilkCastService
      */
@@ -632,8 +634,11 @@ public class MusicPlaybackService extends Service {
         mPlayer = new MultiPlayer(this);
         mPlayer.setHandler(mPlayerHandler);
 
-        // Bind to the cast service
-        mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);
+        isCastingEnabled = PreferenceUtils.isCastEnabled(this);
+        if (isCastingEnabled) {
+            // Bind to the cast service
+            mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);
+        }
 
         // Initialize the remote progress updater task
         mRemoteProgressHandler = new RemoteProgressHandler(this);
@@ -719,6 +724,7 @@ public class MusicPlaybackService extends Service {
      * {@inheritDoc}
      */
     @Override
+    @DebugLog
     public void onDestroy() {
         if (D) Log.d(TAG, "Destroying service");
         super.onDestroy();
@@ -753,19 +759,20 @@ public class MusicPlaybackService extends Service {
             mUnmountReceiver = null;
         }
 
-        // kill the remote app.
-        try {
-            mCastManager.stopApplication();
-        } catch (Exception ignored) { /*pass*/ }
-
         // Unregister with cast manager
         if (mCastManager != null) {
+            // kill the remote app.
+            try {
+                mCastManager.stopApplication();
+            } catch (Exception ignored) { /*pass*/ }
             mCastManager.removeCastConsumer(mCastConsumer);
             mCastManager = null;
         }
 
-        // Unbind cast service
-        LocalCastServiceManager.unbindFromService(mCastServiceToken);
+        if (mCastServiceToken != null) {
+            // Unbind cast service
+            LocalCastServiceManager.unbindFromService(mCastServiceToken);
+        }
 
         // Stop http server
         stopCastServer();
@@ -814,6 +821,9 @@ public class MusicPlaybackService extends Service {
     }
 
     private void updateCastManagerUiCounter(final boolean visible) {
+        if (!isCastingEnabled) {
+            return;
+        }
         if (mCastManager != null) {
             if (visible) {
                 mCastManager.incrementUiCounter();
@@ -847,7 +857,7 @@ public class MusicPlaybackService extends Service {
 
         if (!mServiceInUse) {
             saveQueue(true);
-            stopSelf(mServiceStartId);
+            stopSelf();
         }
     }
 
@@ -2633,7 +2643,7 @@ public class MusicPlaybackService extends Service {
      * @return
      */
     public boolean isRemotePlayback() {
-        return mCastManager != null && mPlaybackLocation == PlaybackLocation.REMOTE;
+        return isCastingEnabled && mCastManager != null && mPlaybackLocation == PlaybackLocation.REMOTE;
     }
 
     /**

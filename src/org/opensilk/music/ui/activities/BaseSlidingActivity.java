@@ -44,6 +44,7 @@ import android.view.View;
 
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.MusicStateListener;
+import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
@@ -105,9 +106,13 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
     private boolean mTransientNetworkDisconnection = false;
+    protected boolean isCastingEnabled;
+    protected boolean killServiceOnExit;
 
     // Theme resourses
     private ThemeHelper mThemeHelper;
+
+    protected PreferenceUtils mPreferences;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -130,23 +135,29 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         // Control the media volume
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
+        // get preferences
+        mPreferences = PreferenceUtils.getInstance(this);
+
         // Bind Apollo's service
         mToken = MusicUtils.bindToService(this, this);
 
         //Cancel any pending clear cache requests
         startService(new Intent(this, ArtworkService.class));
 
-        // Bind cast service
-        mCastServiceToken = RemoteCastServiceManager.bindToService(this,
-                new Messenger(new CastManagerCallbackHandler(this)),
-                null);
+        isCastingEnabled = mPreferences.isCastEnabled();
 
-        // Initialize the media router
-        mMediaRouter = MediaRouter.getInstance(this);
-        mMediaRouteSelector = new MediaRouteSelector.Builder()
-                .addControlCategory(CastMediaControlIntent.categoryForCast(getString(R.string.cast_id)))
-                //.addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
-                .build();
+        if (isCastingEnabled) {
+            // Bind cast service
+            mCastServiceToken = RemoteCastServiceManager.bindToService(this,
+                    new Messenger(new CastManagerCallbackHandler(this)),
+                    null);
+            // Initialize the media router
+            mMediaRouter = MediaRouter.getInstance(this);
+            mMediaRouteSelector = new MediaRouteSelector.Builder()
+                    .addControlCategory(CastMediaControlIntent.categoryForCast(getString(R.string.cast_id)))
+                            //.addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
+                    .build();
+        }
 
         // Initialize the sliding pane
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
@@ -184,14 +195,15 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Media router
-        getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
-        // init router button
-        MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
-        MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
-                MenuItemCompat.getActionProvider(mediaRouteMenuItem);
-        mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
-        mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
-
+        if (isCastingEnabled) {
+            getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
+            // init router button
+            MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
+            MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
+                    MenuItemCompat.getActionProvider(mediaRouteMenuItem);
+            mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
+            mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -199,7 +211,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     protected void onResume() {
         super.onResume();
         // Start scanning for routes
-        if (PreferenceUtils.getInstance(this).isCastEnabled()) {
+        if (isCastingEnabled) {
             mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
                     MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
         }
@@ -210,8 +222,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        // stop scanning for routes
-        mMediaRouter.removeCallback(mMediaRouterCallback);
+        if (isCastingEnabled) {
+            // stop scanning for routes
+            mMediaRouter.removeCallback(mMediaRouterCallback);
+        }
     }
 
     @Override
@@ -260,13 +274,19 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             MusicUtils.unbindFromService(mToken);
             mToken = null;
         }
+        if (killServiceOnExit) {
+            stopService(new Intent(this, MusicPlaybackService.class));
+        }
 
         //Send request to clear cache
         startService(new Intent(ArtworkService.ACTION_CLEAR_CACHE,
                 null, this, ArtworkService.class));
 
         //Unbind from cast service
-        RemoteCastServiceManager.unbindFromService(mCastServiceToken);
+        if (mCastServiceToken != null) {
+            RemoteCastServiceManager.unbindFromService(mCastServiceToken);
+            mCastServiceToken = null;
+        }
 
         // Remove any music status listeners
         mMusicStateListener.clear();
