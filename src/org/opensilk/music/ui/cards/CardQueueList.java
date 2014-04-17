@@ -57,7 +57,7 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
     public void setupInnerViewElements(ViewGroup parent, View view) {
         super.setupInnerViewElements(parent, view);
         mNowPlayingAnimation = (NowPlayingAnimation) view.findViewById(R.id.playing_indicator);
-        maybeStartPlayingIndicator();
+//        maybeStartPlayingIndicator();
     }
 
     @Override
