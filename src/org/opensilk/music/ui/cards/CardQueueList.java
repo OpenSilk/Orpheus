@@ -18,7 +18,7 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.widgets.NowPlayingAnimation;
+import org.opensilk.music.widgets.PlayingIndicator;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -27,7 +27,7 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class CardQueueList extends CardBaseListNoHeader<Song> {
 
-    protected NowPlayingAnimation mNowPlayingAnimation;
+    protected PlayingIndicator mPlayingIndicatior;
 
     public CardQueueList(Context context, Song data) {
         this(context, data, R.layout.card_list_inner_layout_queue);
@@ -56,8 +56,8 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         super.setupInnerViewElements(parent, view);
-        mNowPlayingAnimation = (NowPlayingAnimation) view.findViewById(R.id.playing_indicator);
-//        maybeStartPlayingIndicator();
+        mPlayingIndicatior = (PlayingIndicator) view.findViewById(R.id.playing_indicator_record);
+        maybeStartPlayingIndicator();
     }
 
     @Override
@@ -115,18 +115,18 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
      * Conditionally starts playing indicator animation
      */
     protected void maybeStartPlayingIndicator() {
-        if (mNowPlayingAnimation != null) {
+        if (mPlayingIndicatior != null) {
             // Always set gone. else recycled views might end up with it showing
-            if (mNowPlayingAnimation.isAnimating()) {
-                mNowPlayingAnimation.stopAnimating();
+            if (mPlayingIndicatior.isAnimating()) {
+                mPlayingIndicatior.stopAnimating(); //stopAnimating sets GONE
             } else {
-                mNowPlayingAnimation.setVisibility(View.GONE);
+                mPlayingIndicatior.setVisibility(View.GONE);
             }
             if (mData.mSongId == MusicUtils.getCurrentAudioId()) {
                 if (MusicUtils.isPlaying()) {
-                    mNowPlayingAnimation.startAnimating();
+                    mPlayingIndicatior.startAnimating();
                 } else {
-                    mNowPlayingAnimation.setVisibility(View.VISIBLE);
+                    mPlayingIndicatior.setVisibility(View.VISIBLE);
                 }
             }
         }

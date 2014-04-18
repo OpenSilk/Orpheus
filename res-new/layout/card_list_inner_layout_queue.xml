@@ -14,38 +14,44 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    android:layout_marginLeft="4dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="4dp"
+    android:orientation="horizontal">
 
 
     <!-- This is the base Inner View inside a Card.
          You can customize it with your layout xml file and your Card.
          You can popolate your element with Card#setupInnerViewElements() method -->
-    <TextView
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/card_main_inner_simple_title"
+            android:textAppearance="?android:textAppearanceListItem"
+            style="@style/SingleLineTextView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/card_main_inner_sub_title"
+            android:textAppearance="?android:textAppearanceListItemSmall"
+            style="@style/SingleLineTextView" />
+
+    </LinearLayout>
+
+    <org.opensilk.music.widgets.PlayingIndicator
+        android:id="@+id/playing_indicator_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/card_main_inner_simple_title"
-        android:textAppearance="?android:textAppearanceListItem"
-        style="@style/SingleLineTextView" />
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/card_main_inner_sub_title"
-        android:layout_below="@id/card_main_inner_simple_title"
-        android:textAppearance="?android:textAppearanceListItemSmall"
-        style="@style/SingleLineTextView" />
-
-
-    <org.opensilk.music.widgets.NowPlayingAnimation
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:visibility="gone"
-        android:id="@+id/playing_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-</RelativeLayout>
+</LinearLayout>
