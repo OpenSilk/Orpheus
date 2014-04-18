@@ -21,6 +21,7 @@
         <changelogtext>Add daydream (for 4.2+). Shows album art and controls during playback. Option to pick any installed dream to show while music is pause or stopped.</changelogtext>
         <changelogtext>Settings now follow app theme</changelogtext>
         <changelogtext>Add ability to choose and re-order home pages</changelogtext>
+        <changelogtext>Add playing indicator to queue</changelogtext>
         <changelogtext>Add Muzei extension (shows album art as wallpaper)</changelogtext>
         <changelogtext>Add support for ICS (4.0+)</changelogtext>
         <changelogtext>Widgets now open app when artwork is clicked</changelogtext>
