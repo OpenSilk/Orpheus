@@ -2778,6 +2778,9 @@ public class MusicPlaybackService extends Service {
      * Called when we disconnect or think we are disconnectetd from the cast device
      */
     private void restoreLocalState() {
+        if (mPlaybackLocation == PlaybackLocation.LOCAL) {
+            return;//Connect failed
+        }
         updatePlaybackLocation(PlaybackLocation.LOCAL);
         stopCastServer();
         //Local should already be paused
@@ -2843,16 +2846,14 @@ public class MusicPlaybackService extends Service {
             } else {
                 //TODO what to do?
                 // Just disconnect for now. They will have to start over.
-                mCastManager.selectDevice(null);
+                mCastManager.disconnect();
             }
         }
 
         @Override
         @DebugLog
         public void onApplicationConnectionFailed(int errorCode) {
-            //Make sure we are on local
-            updatePlaybackLocation(PlaybackLocation.LOCAL);
-
+            //Nothing for us to do, the user must manually try again
         }
 
         @Override
@@ -2873,7 +2874,6 @@ public class MusicPlaybackService extends Service {
         @DebugLog
         public void onApplicationStopFailed(int errorCode) {
             // As far as the activity is concered we are disconnected;
-            restoreLocalState();
             mCastManager.selectDevice(null);
         }
 
