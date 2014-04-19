@@ -101,14 +101,14 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
                              final Bundle savedInstanceState) {
         // The View for the fragment's UI
         if (isSimpleLayout()) {
-            mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_fastscroll, null);
+            mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_fastscroll, container, false);
             mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
             mListView = (CardListView) mRootView.findViewById(android.R.id.list);
             mListView.setEmptyView(mLoadingEmpty);
             // Set the data behind the list
             mListView.setAdapter(mAdapter);
         } else {
-            mRootView = (ViewGroup)inflater.inflate(R.layout.card_gridview, null);
+            mRootView = (ViewGroup)inflater.inflate(R.layout.card_gridview, container, false);
             mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
             mGridView = (CardGridView) mRootView.findViewById(R.id.card_grid);
             mGridView.setEmptyView(mLoadingEmpty);

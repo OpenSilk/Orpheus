@@ -36,6 +36,8 @@ import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.loaders.SongCursorLoader;
 import org.opensilk.music.ui.cards.CardShuffleList;
 
+import it.gmariotti.cardslib.library.view.CardGridView;
+import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 
 /**
@@ -45,18 +47,27 @@ public class HomeSongFragment extends HomePagerBaseCursorFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
-        if (mListView != null) {
-            CardView cardView = (CardView) inflater.inflate(R.layout.card_list_shuffle, null);
-            // Theme the shuffle icon
-            ImageView thumbnail = (ImageView) cardView.findViewById(R.id.card_thumbnail_image);
-            thumbnail.setImageDrawable(ThemeHelper.getInstance(getActivity()).getShuffleButtonDrawable());
-            // Set card (holds inner view)
-            cardView.setCard(new CardShuffleList(getActivity()));
-            // Add card to list
-            mListView.addHeaderView(cardView);
-        }
-        return v;
+        // The View for the fragment's UI
+        mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_fastscroll, container, false);
+        mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
+
+        mListView = (CardListView) mRootView.findViewById(android.R.id.list);
+        mListView.setEmptyView(mLoadingEmpty);
+
+        //Shuffle card header view
+        CardView cardView = (CardView) inflater.inflate(R.layout.card_list_shuffle, null);
+        // Theme the shuffle icon
+        ImageView thumbnail = (ImageView) cardView.findViewById(R.id.card_thumbnail_image);
+        thumbnail.setImageDrawable(ThemeHelper.getInstance(getActivity()).getShuffleButtonDrawable());
+        // Set card (holds inner view)
+        cardView.setCard(new CardShuffleList(getActivity()));
+        // Add card to list
+        mListView.addHeaderView(cardView);
+
+        // Set the data behind the list
+        mListView.setAdapter(mAdapter);
+
+        return mRootView;
     }
 
     @Override
