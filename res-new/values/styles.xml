@@ -78,7 +78,7 @@
     </style>
 
     <style name="PagerTabStrip">
-        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textAppearance">@style/TextAppearanceList.SubTitle</item>
     </style>
 
     <style name="Orpheus.Thumbnail">
