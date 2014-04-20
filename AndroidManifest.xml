@@ -14,14 +14,7 @@
      limitations under the License.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.andrew.apollo"
-    android:versionCode="2"
-    android:versionName="1.1" >
-
-    <!-- ICS to Jelly Bean -->
-    <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+    package="com.andrew.apollo">
 
     <!-- Used for caching and creating new playlists -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
