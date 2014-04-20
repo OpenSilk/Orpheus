@@ -117,13 +117,13 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
     }
 
     @Override
-    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        return openFile(uri, mode, null);
+    public ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
+        return openFile(uri, mode);
     }
 
     @Override
     @DebugLog
-    public ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal) throws FileNotFoundException {
+    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         if (!"r".equals(mode)) {
             throw new IllegalArgumentException("Provider is read only");
         }
