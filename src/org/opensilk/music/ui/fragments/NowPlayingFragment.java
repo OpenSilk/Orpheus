@@ -37,7 +37,6 @@ import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.NowPlayingCursor;
 import com.andrew.apollo.loaders.QueueLoader;
@@ -47,9 +46,14 @@ import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkProvider;
+import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.MetaChanged;
+import org.opensilk.music.bus.events.PlaybackModeChanged;
+import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.widgets.AudioVisualizationView;
 import org.opensilk.music.widgets.FullScreenArtworkImageView;
@@ -73,8 +77,7 @@ import static com.andrew.apollo.utils.MusicUtils.sService;
  * Created by drew on 4/10/14.
  */
 public class NowPlayingFragment extends Fragment implements
-        SeekBar.OnSeekBarChangeListener,
-        MusicStateListener {
+        SeekBar.OnSeekBarChangeListener {
     private static final String TAG = NowPlayingFragment.class.getSimpleName();
 
     // Message to refresh the time
@@ -148,13 +151,13 @@ public class NowPlayingFragment extends Fragment implements
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mActivity = (BaseSlidingActivity) activity;
-        // register listener with activity
-        mActivity.addMusicStateListener(this);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // register listener with activity
+        EventBus.getInstance().register(this);
         // Initialize the handler used to update the current time
         mTimeHandler = new TimeHandler(this);
     }
@@ -208,7 +211,7 @@ public class NowPlayingFragment extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         // Unregister listener
-        mActivity.removeMusicStateListener(this);
+        EventBus.getInstance().unregister(this);
         // clear messages so we won't prevent gc
         mTimeHandler.removeMessages(REFRESH_TIME);
     }
@@ -258,22 +261,17 @@ public class NowPlayingFragment extends Fragment implements
     }
 
     /*
-     * MusicStateListener
+     * Events
      */
 
-    @Override
-    public void restartLoader() {
-
-    }
-
-    @Override
-    public void onMetaChanged() {
+    @Subscribe
+    public void onMetaChanged(MetaChanged e) {
         // Current info
         updateNowPlayingInfo();
     }
 
-    @Override
-    public void onPlaystateChanged() {
+    @Subscribe
+    public void onPlaystateChanged(PlaystateChanged e) {
         // Set the play and pause image
         mHeaderPlayPauseButton.updateState();
         mFooterPlayPauseButton.updateState();
@@ -281,13 +279,8 @@ public class NowPlayingFragment extends Fragment implements
         updateVisualizerState();
     }
 
-    @Override
-    public void onQueueChanged() {
-
-    }
-
-    @Override
-    public void onPlaybackModeChanged() {
+    @Subscribe
+    public void onPlaybackModeChanged(PlaybackModeChanged e) {
         // Set the repeat image
         mFooterRepeatButton.updateRepeatState();
         // Set the shuffle image

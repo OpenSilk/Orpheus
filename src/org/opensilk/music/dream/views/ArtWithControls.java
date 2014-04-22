@@ -50,18 +50,13 @@ public class ArtWithControls extends ArtOnly {
         super.onFinishInflate();
         mTrackTitle = (TextView) findViewById(R.id.track_title);
         mPlayPauseButton = (PlayPauseButton) findViewById(R.id.footer_action_button_play);
-        updateInfo();
+//        update();
     }
 
     @Override
-    public void onPlaystateChanged() {
-        super.onPlaystateChanged();
+    public void update() {
+        super.update();
         mPlayPauseButton.updateState();
-    }
-
-    @Override
-    protected void updateInfo() {
-        super.updateInfo();
         mTrackTitle.setText(MusicUtils.getTrackName());
     }
 

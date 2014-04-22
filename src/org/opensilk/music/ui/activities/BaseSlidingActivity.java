@@ -43,10 +43,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.MusicStateListener;
-import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.PreferenceUtils;
@@ -55,15 +52,19 @@ import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.music.artwork.ArtworkService;
+import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.MetaChanged;
+import org.opensilk.music.bus.events.PlaybackModeChanged;
+import org.opensilk.music.bus.events.PlaystateChanged;
+import org.opensilk.music.bus.events.QueueChanged;
+import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Locale;
 
 import hugo.weaving.DebugLog;
@@ -83,9 +84,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         SlidingUpPanelLayout.PanelSlideListener {
 
     private static final String TAG = BaseSlidingActivity.class.getSimpleName();
-
-    /** Playstate and meta change listener */
-    private final ArrayList<MusicStateListener> mMusicStateListener = Lists.newArrayList();
 
     /** The service token */
     private ServiceToken mToken;
@@ -288,8 +286,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mCastServiceToken = null;
         }
 
-        // Remove any music status listeners
-        mMusicStateListener.clear();
     }
 
     @Override
@@ -522,58 +518,19 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             if (action == null) {
                 return;
             } else if (action.equals(MusicPlaybackService.META_CHANGED)) {
-                // Let the listener know to the meta chnaged
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.onMetaChanged();
-                    }
-                }
+                EventBus.getInstance().post(new MetaChanged());
             } else if (action.equals(MusicPlaybackService.PLAYSTATE_CHANGED)) {
-                // Let the listener know to the playstate chnaged
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.onPlaystateChanged();
-                    }
-                }
+                EventBus.getInstance().post(new PlaystateChanged());
             } else if (action.equals(MusicPlaybackService.REFRESH)) {
-                // Let the listener know to update a list
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.restartLoader();
-                    }
-                }
+                EventBus.getInstance().post(new Refresh());
                 // Cancel the broadcast so we aren't constantly refreshing
                 context.removeStickyBroadcast(intent);
             } else if (action.equals(MusicPlaybackService.REPEATMODE_CHANGED)
                     || action.equals(MusicPlaybackService.SHUFFLEMODE_CHANGED)) {
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.onPlaybackModeChanged();
-                    }
-                }
+               EventBus.getInstance().post(new PlaybackModeChanged());
             } else if (action.equals(MusicPlaybackService.QUEUE_CHANGED)) {
-                // Let the listener know to refresh the queue
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.onQueueChanged();
-                    }
-                }
+                EventBus.getInstance().post(new QueueChanged());
             }
-        }
-    }
-
-    /**
-     * @param listener The {@link MusicStateListener} to use
-     */
-    public void addMusicStateListener(final MusicStateListener listener) {
-        if (listener != null) {
-            mMusicStateListener.add(listener);
-        }
-    }
-
-    public void removeMusicStateListener(final MusicStateListener listener) {
-        if (listener != null) {
-            mMusicStateListener.remove(listener);
         }
     }
 

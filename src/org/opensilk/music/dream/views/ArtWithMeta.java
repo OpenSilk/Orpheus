@@ -50,18 +50,12 @@ public class ArtWithMeta extends ArtOnly {
         mTrackTitle = (TextView) findViewById(R.id.track_title);
         mArtistName = (TextView) findViewById(R.id.artist_name);
         mAlbumName = (TextView) findViewById(R.id.album_name);
-        updateInfo();
+//        update();
     }
 
     @Override
-    public void onMetaChanged() {
-        super.onMetaChanged();
-        updateInfo();
-    }
-
-    @Override
-    protected void updateInfo() {
-        super.updateInfo();
+    public void update() {
+        super.update();
         mTrackTitle.setText(MusicUtils.getTrackName());
         mArtistName.setText(MusicUtils.getArtistName());
         mAlbumName.setText(MusicUtils.getAlbumName());

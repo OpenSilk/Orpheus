@@ -32,18 +32,17 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamService;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.music.dream.views.IDreamView;
+
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 import hugo.weaving.DebugLog;
 
@@ -55,7 +54,7 @@ public class DayDreamService extends DreamService {
     private static final String TAG = DayDreamService.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
-    private ViewGroup mContentView, mSaverView;
+    private ViewGroup mContentView, mSaverView, mDreamView;
 
     // True if attached to window
     private boolean isAttached;
@@ -70,13 +69,11 @@ public class DayDreamService extends DreamService {
     private final Handler mHandler;
     private final ScreenSaverAnimation mMoveSaverRunnable;
 
-    private final ArrayList<MusicStateListener> mMusicStateListener;
     private final MusicStateReceiver mPlaybackReceiver;
 
     public DayDreamService() {
         mHandler = new Handler();
         mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
-        mMusicStateListener = Lists.newArrayList();
         mPlaybackReceiver = new MusicStateReceiver();
     }
 
@@ -132,7 +129,6 @@ public class DayDreamService extends DreamService {
         isAttached = false;
         super.onDetachedFromWindow();
         mHandler.removeCallbacks(mMoveSaverRunnable);
-        mMusicStateListener.clear();
     }
 
     @Override
@@ -159,25 +155,22 @@ public class DayDreamService extends DreamService {
         setFullscreen(DreamPrefs.wantFullscreen(this));
 
         LayoutInflater inflater = getWindow().getLayoutInflater();
-        View inner = null;
         int style = DreamPrefs.getDreamLayout(this);
         switch (style) {
             case DreamPrefs.DreamLayout.ART_ONLY:
-                inner = inflater.inflate(R.layout.daydream_art_only, mSaverView, false);
+                mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_only, mSaverView, false);
                 setInteractive(false);
                 break;
             case DreamPrefs.DreamLayout.ART_META:
-                inner = inflater.inflate(R.layout.daydream_art_meta, mSaverView, false);
+                mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_meta, mSaverView, false);
                 setInteractive(false);
                 break;
             case DreamPrefs.DreamLayout.ART_CONTROLS:
-                inner = inflater.inflate(R.layout.daydream_art_controls, mSaverView, false);
+                mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_controls, mSaverView, false);
                 setInteractive(true);
         }
-        if (inner != null) {
-            mSaverView.addView(inner);
-            // We add the listener for child views since they cant access us.
-            mMusicStateListener.add((MusicStateListener) inner);
+        if (mDreamView != null) {
+            mSaverView.addView(mDreamView);
         }
         mMoveSaverRunnable.registerViews(mContentView, mSaverView);
 
@@ -257,30 +250,8 @@ public class DayDreamService extends DreamService {
     private final class MusicStateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (action == null) {
-                return;
-            } else if (action.equals(MusicPlaybackService.META_CHANGED)) {
-                // Let the listener know to the meta chnaged
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.onMetaChanged();
-                    }
-                }
-            } else if (action.equals(MusicPlaybackService.PLAYSTATE_CHANGED)) {
-                // Let the listener know to the playstate chnaged
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.onPlaystateChanged();
-                    }
-                }
-            } else if (action.equals(MusicPlaybackService.REPEATMODE_CHANGED)
-                    || action.equals(MusicPlaybackService.SHUFFLEMODE_CHANGED)) {
-                for (final MusicStateListener listener : mMusicStateListener) {
-                    if (listener != null) {
-                        listener.onPlaybackModeChanged();
-                    }
-                }
+            if (mDreamView != null) {
+                ((IDreamView) mDreamView).update();
             }
         }
     }

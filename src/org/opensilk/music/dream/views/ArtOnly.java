@@ -20,7 +20,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
-import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.artwork.ArtworkManager;
@@ -29,7 +28,7 @@ import org.opensilk.music.widgets.FullScreenArtworkImageView;
 /**
  * Created by drew on 4/13/14.
  */
-public class ArtOnly extends RelativeLayout implements MusicStateListener {
+public class ArtOnly extends RelativeLayout implements IDreamView {
 
     protected FullScreenArtworkImageView mArtwork;
 
@@ -54,35 +53,10 @@ public class ArtOnly extends RelativeLayout implements MusicStateListener {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        updateInfo();
+        update();
     }
 
-    @Override
-    public void restartLoader() {
-
-    }
-
-    @Override
-    public void onMetaChanged() {
-        updateInfo();
-    }
-
-    @Override
-    public void onPlaystateChanged() {
-
-    }
-
-    @Override
-    public void onQueueChanged() {
-
-    }
-
-    @Override
-    public void onPlaybackModeChanged() {
-
-    }
-
-    protected void updateInfo() {
+    public void update() {
         ArtworkManager.loadCurrentArtwork(mArtwork);
     }
 }

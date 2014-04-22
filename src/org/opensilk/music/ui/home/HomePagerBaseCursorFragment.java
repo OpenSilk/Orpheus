@@ -30,11 +30,8 @@ import android.widget.CursorAdapter;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
-
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
 
 import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;

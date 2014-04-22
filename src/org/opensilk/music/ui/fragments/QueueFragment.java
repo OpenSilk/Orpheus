@@ -20,7 +20,7 @@ package org.opensilk.music.ui.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -34,7 +34,6 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.TranslateAnimation;
 
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.MusicStateListener;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.model.Song;
@@ -42,7 +41,13 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.mobeta.android.dslv.DragSortListView;
 import com.mobeta.android.dslv.DragSortListView.DropListener;
 import com.mobeta.android.dslv.DragSortListView.RemoveListener;
+import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.MetaChanged;
+import org.opensilk.music.bus.events.PlaystateChanged;
+import org.opensilk.music.bus.events.QueueChanged;
+import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.cards.CardQueueList;
 
@@ -60,7 +65,6 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
  */
 public class QueueFragment extends Fragment implements
         LoaderCallbacks<List<Song>>,
-        MusicStateListener,
         DropListener,
         RemoveListener {
 
@@ -103,20 +107,15 @@ public class QueueFragment extends Fragment implements
     private final Runnable mLoaderRestartRunnable = new Runnable() {
         @Override
         public void run() {
-            restartLoader();
+            restartLoader(null);
         }
     };
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        // Register the music status listener
-        ((BaseSlidingActivity) activity).addMusicStateListener(this);
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Register the music status listener
+        EventBus.getInstance().register(this);
         // Start the loader
         getLoaderManager().initLoader(LOADER, null, this);
     }
@@ -159,9 +158,9 @@ public class QueueFragment extends Fragment implements
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        ((BaseSlidingActivity) getActivity()).removeMusicStateListener(this);
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getInstance().unregister(this);
     }
 
     /*
@@ -295,9 +294,13 @@ public class QueueFragment extends Fragment implements
         mHandler.postDelayed(mLoaderRestartRunnable, 40);
     }
 
-    @Override
-    @DebugLog
-    public void restartLoader() {
+
+    /*
+     * Events
+     */
+
+    @Subscribe
+    public void restartLoader(Refresh e) {
         if (isAdded()) {
             // This is a slight hack to give us a refrence if the
             // items in the queue are moved
@@ -311,25 +314,22 @@ public class QueueFragment extends Fragment implements
         }
     }
 
-    @Override
-    @DebugLog
-    public void onMetaChanged() {
+    @Subscribe
+    public void onMetaChanged(MetaChanged e) {
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    @Override
-    @DebugLog
-    public void onPlaystateChanged() {
+    @Subscribe
+    public void onPlaystateChanged(PlaystateChanged e) {
         if (mAdapter != null) {
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    @Override
-    @DebugLog
-    public void onQueueChanged() {
+    @Subscribe
+    public void onQueueChanged(QueueChanged e) {
         if (mSelfChange-->0) {
             return;
         }
@@ -341,8 +341,4 @@ public class QueueFragment extends Fragment implements
         scheduleLoaderRestart();
     }
 
-    @Override
-    public void onPlaybackModeChanged() {
-        //pass
-    }
 }
