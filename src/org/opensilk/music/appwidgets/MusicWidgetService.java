@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -51,13 +52,7 @@ import hugo.weaving.DebugLog;
  */
 public class MusicWidgetService extends Service implements ServiceConnection {
 
-    public static final String WIDGET_SIZE = "widget_size";
-    public static final String WIDGET_STYLE = "widget_style";
-
-    public static final int ULTRA_MINI = 1;
-    public static final int MINI = 2;
-    public static final int SMALL = 3;
-    public static final int LARGE = 4;
+    public static final String WIDGET_TYPE = "widget_type";
 
     public static final int STYLE_LARGE_ONE = 0;
     public static final int STYLE_LARGE_TWO = 1;
@@ -119,13 +114,12 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     public int onStartCommand(Intent intent, int flags, final int startId) {
         if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
             final int appId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-            final int widgetSize = intent.getIntExtra(WIDGET_SIZE, -1);
-            final int widgetStyle = intent.getIntExtra(WIDGET_STYLE, STYLE_LARGE_ONE);
-            if (appId != -1 && widgetSize != -1) {
+            final int widgetType = intent.getIntExtra(WIDGET_TYPE, -1);
+            if (appId != -1 && widgetType != -1) {
                 final Runnable update = new Runnable() {
                     @Override
                     public void run() {
-                        updateWidget(appId, startId, widgetSize, widgetStyle);
+                        updateWidget(appId, startId, widgetType);
                     }
                 };
                 if (isBound) {
@@ -139,7 +133,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     }
 
     @DebugLog
-    private void updateWidget(int appId, int startId, int widgetSize, int widgetStyle) {
+    private void updateWidget(int appId, int startId, int widgetType) {
         String albumName = MusicUtils.getAlbumName();
         String albumArtistName = MusicUtils.getAlbumArtistName();
         long albumId = MusicUtils.getCurrentAlbumId();
@@ -148,13 +142,9 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         mShuffleMode = MusicUtils.getShuffleMode();
         mRepeatMode = MusicUtils.getRepeatMode();
         mIsPlaying = MusicUtils.isPlaying();
+        mArtwork = mArtworkProvider.getArtworkThumbnail(albumArtistName, albumName, albumId);
 
-        /* Only query the artwork for the first startId, it'll be cached until the last id is done */
-        if (startId == 1) {
-            mArtwork = mArtworkProvider.getArtworkThumbnail(albumArtistName, albumName, albumId);
-        }
-
-        RemoteViews views = createView(widgetSize, widgetStyle);
+        RemoteViews views = createView(appId, widgetType);
         if (views != null) {
             mAppWidgetManager.updateAppWidget(appId, views);
         }
@@ -164,9 +154,10 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     /*
      * Create views depending on size, and style
      */
-    public RemoteViews createView(int widgetSize, int widgetStyle) {
+    public RemoteViews createView(int appId, int widgetType) {
+        final MusicWidget widget = MusicWidget.valueOf(widgetType);
         int layoutId = -1;
-        switch (widgetSize) {
+        switch (widget) {
             case ULTRA_MINI:
                 layoutId = R.layout.music_widget_ultra_mini;
                 break;
@@ -177,10 +168,18 @@ public class MusicWidgetService extends Service implements ServiceConnection {
                 layoutId = R.layout.music_widget_small;
                 break;
             case LARGE:
-                if (widgetStyle == STYLE_LARGE_ONE) {
-                    layoutId = R.layout.music_widget_large_style_one;
-                } else if (widgetStyle == STYLE_LARGE_TWO) {
-                    layoutId = R.layout.music_widget_large_style_two;
+                SharedPreferences prefs = getSharedPreferences(MusicWidgetSettings.PREFS_NAME,
+                        Context.MODE_MULTI_PROCESS);
+                int widgetStyle = prefs.getInt(MusicWidgetSettings.PREF_PREFIX_KEY + appId,
+                        MusicWidgetService.STYLE_LARGE_ONE);
+                switch (widgetStyle) {
+                    case STYLE_LARGE_TWO:
+                        layoutId = R.layout.music_widget_large_style_two;
+                        break;
+                    case STYLE_LARGE_ONE:
+                    default:
+                        layoutId = R.layout.music_widget_large_style_one;
+                        break;
                 }
         }
 
@@ -194,7 +193,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         } else {
             views.setImageViewResource(R.id.widget_album_art, R.drawable.default_artwork);
         }
-        if (widgetSize > ULTRA_MINI) {
+        if (widget.compareTo(MusicWidget.ULTRA_MINI) > 0) {
             pendingIntent = PendingIntent.getActivity(this, 0,
                     new Intent(this, HomeSlidingActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_album_art, pendingIntent);
@@ -206,12 +205,12 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
         views.setOnClickPendingIntent(R.id.widget_play, pendingIntent);
 
-        if (widgetSize == ULTRA_MINI) { // Ultra Mini only
+        if (widget == MusicWidget.ULTRA_MINI) { // Ultra Mini only
             views.setOnClickPendingIntent(R.id.widget_mask, pendingIntent);
         }
 
         /* Next / Prev */
-        if (widgetSize >= MINI) { // Mini, Small, Large
+        if (widget.compareTo(MusicWidget.MINI) >= 0) { // Mini, Small, Large
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
             views.setOnClickPendingIntent(R.id.widget_previous, pendingIntent);
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.NEXT_ACTION, serviceName);
@@ -219,14 +218,14 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         }
 
         /* Artist name and song title */
-        if (widgetSize >= SMALL) { //Small, Large
+        if (widget.compareTo(MusicWidget.SMALL) >= 0) { //Small, Large
 
             views.setTextViewText(R.id.widget_artist_name, mArtistName);
             views.setTextViewText(R.id.widget_song_title, mTrackName);
         }
 
         /* Shuffle / Repeat */
-        if (widgetSize == LARGE) {
+        if (widget == MusicWidget.LARGE) {
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.SHUFFLE_ACTION, serviceName);
             views.setOnClickPendingIntent(R.id.widget_shuffle, pendingIntent);
             pendingIntent = buildPendingIntent(this, MusicPlaybackService.REPEAT_ACTION, serviceName);

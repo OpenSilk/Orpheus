@@ -17,11 +17,31 @@
 package org.opensilk.music.appwidgets;
 
 /**
- * Created by andrew on 4/3/14.
+ * Created by drew on 4/22/14.
  */
-public class MusicWidgetSmall extends MusicWidgetFixed {
-    @Override
-    protected int getWidgetType() {
-        return MusicWidget.SMALL.ordinal();
+public enum MusicWidget {
+    ULTRA_MINI(MusicWidgetUltraMini.class),
+    MINI(MusicWidgetMini.class),
+    SMALL(MusicWidgetSmall.class),
+    LARGE(MusicWidgetLarge.class);
+
+    private Class<?> clzz;
+
+    private MusicWidget(Class<?> clzz) {
+        this.clzz = clzz;
     }
+
+    public Class<?> getWidgetClass() {
+        return clzz;
+    }
+
+    public static MusicWidget valueOf(int ordinal) {
+        for (MusicWidget w : MusicWidget.values()) {
+            if (w.ordinal() == ordinal) {
+                return w;
+            }
+        }
+        throw new IllegalArgumentException("Unknown value");
+    }
+
 }

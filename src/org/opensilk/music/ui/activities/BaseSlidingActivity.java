@@ -17,11 +17,8 @@
 package org.opensilk.music.ui.activities;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -42,7 +39,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
@@ -54,12 +50,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.music.artwork.ArtworkService;
-import org.opensilk.music.bus.EventBus;
-import org.opensilk.music.bus.events.MetaChanged;
-import org.opensilk.music.bus.events.PlaybackModeChanged;
-import org.opensilk.music.bus.events.PlaystateChanged;
-import org.opensilk.music.bus.events.QueueChanged;
-import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
@@ -87,9 +77,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     /** The service token */
     private ServiceToken mToken;
-
-    /** Broadcast receiver */
-    private PlaybackStatus mPlaybackStatus;
 
     /** Sliding panel */
     protected SlidingUpPanelLayout mSlidingPanel;
@@ -229,37 +216,12 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        // Initialize the broadcast receiver
-        mPlaybackStatus = new PlaybackStatus();
-        final IntentFilter filter = new IntentFilter();
-        // Play and pause changes
-        filter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-        // Shuffle and repeat changes
-        filter.addAction(MusicPlaybackService.SHUFFLEMODE_CHANGED);
-        filter.addAction(MusicPlaybackService.REPEATMODE_CHANGED);
-        // Track changes
-        filter.addAction(MusicPlaybackService.META_CHANGED);
-        // Update a list, probably the playlist fragment's
-        filter.addAction(MusicPlaybackService.REFRESH);
-        // refresh queue
-        filter.addAction(MusicPlaybackService.QUEUE_CHANGED);
-        registerReceiver(mPlaybackStatus, filter);
-
         MusicUtils.notifyForegroundStateChanged(this, true);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // Unregister the receiver
-        try {
-            unregisterReceiver(mPlaybackStatus);
-        } catch (final Throwable ignored) {
-            //$FALL-THROUGH$
-        } finally {
-            mPlaybackStatus = null;
-        }
-
         MusicUtils.notifyForegroundStateChanged(this, false);
     }
 
@@ -507,31 +469,5 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             activity.mMediaRouter.selectRoute(activity.mMediaRouter.getDefaultRoute());
         }
     };
-
-    /**
-     * Used to monitor the state of playback
-     */
-    private final class PlaybackStatus extends BroadcastReceiver {
-        @Override
-        public void onReceive(final Context context, final Intent intent) {
-            final String action = intent.getAction();
-            if (action == null) {
-                return;
-            } else if (action.equals(MusicPlaybackService.META_CHANGED)) {
-                EventBus.getInstance().post(new MetaChanged());
-            } else if (action.equals(MusicPlaybackService.PLAYSTATE_CHANGED)) {
-                EventBus.getInstance().post(new PlaystateChanged());
-            } else if (action.equals(MusicPlaybackService.REFRESH)) {
-                EventBus.getInstance().post(new Refresh());
-                // Cancel the broadcast so we aren't constantly refreshing
-                context.removeStickyBroadcast(intent);
-            } else if (action.equals(MusicPlaybackService.REPEATMODE_CHANGED)
-                    || action.equals(MusicPlaybackService.SHUFFLEMODE_CHANGED)) {
-               EventBus.getInstance().post(new PlaybackModeChanged());
-            } else if (action.equals(MusicPlaybackService.QUEUE_CHANGED)) {
-                EventBus.getInstance().post(new QueueChanged());
-            }
-        }
-    }
 
 }

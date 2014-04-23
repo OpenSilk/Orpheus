@@ -17,11 +17,8 @@
 package org.opensilk.music.dream;
 
 import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -35,11 +32,14 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
+import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.MetaChanged;
+import org.opensilk.music.bus.events.PlaybackModeChanged;
+import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.dream.views.IDreamView;
 
 import java.lang.reflect.Field;
@@ -69,12 +69,9 @@ public class DayDreamService extends DreamService {
     private final Handler mHandler;
     private final ScreenSaverAnimation mMoveSaverRunnable;
 
-    private final MusicStateReceiver mPlaybackReceiver;
-
     public DayDreamService() {
         mHandler = new Handler();
         mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
-        mPlaybackReceiver = new MusicStateReceiver();
     }
 
     @DebugLog
@@ -82,16 +79,6 @@ public class DayDreamService extends DreamService {
     public void onCreate() {
         super.onCreate();
         mMusicServiceToken = MusicUtils.bindToService(this, mMusicServiceConnection);
-
-        final IntentFilter filter = new IntentFilter();
-        // Play and pause changes
-        filter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-        // Shuffle and repeat changes
-        filter.addAction(MusicPlaybackService.SHUFFLEMODE_CHANGED);
-        filter.addAction(MusicPlaybackService.REPEATMODE_CHANGED);
-        // Track changes
-        filter.addAction(MusicPlaybackService.META_CHANGED);
-        registerReceiver(mPlaybackReceiver, filter);
     }
 
     @DebugLog
@@ -106,7 +93,6 @@ public class DayDreamService extends DreamService {
             unbindService(mAltDreamConnection);
             isBoundToAltDream = false;
         }
-        unregisterReceiver(mPlaybackReceiver);
     }
 
     @DebugLog
@@ -121,6 +107,7 @@ public class DayDreamService extends DreamService {
                 setupSaverView();
             }
         }
+        EventBus.getInstance().register(this);
     }
 
     @DebugLog
@@ -129,6 +116,7 @@ public class DayDreamService extends DreamService {
         isAttached = false;
         super.onDetachedFromWindow();
         mHandler.removeCallbacks(mMoveSaverRunnable);
+        EventBus.getInstance().unregister(this);
     }
 
     @Override
@@ -247,12 +235,29 @@ public class DayDreamService extends DreamService {
         }
     };
 
-    private final class MusicStateReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (mDreamView != null) {
-                ((IDreamView) mDreamView).update();
-            }
+    /*
+     * Events
+     */
+
+    @Subscribe
+    public void onMetaChanged(MetaChanged e) {
+        updateView();
+    }
+
+    @Subscribe
+    public void onPlaystateChanged(PlaystateChanged e) {
+        updateView();
+    }
+
+    @Subscribe
+    public void onPlaybackModeChanged(PlaybackModeChanged e) {
+        updateView();
+    }
+
+    private void updateView() {
+        if (mDreamView != null) {
+            ((IDreamView) mDreamView).update();
         }
     }
+
 }

@@ -18,11 +18,9 @@ package org.opensilk.music.appwidgets;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 /**
@@ -31,24 +29,12 @@ import android.util.Log;
 public class MusicWidgetLarge extends AppWidgetProvider {
 
     @Override
-    public void onEnabled(Context context) {
-        /* Enable the BroadcastReceiver */
-        PackageManager pm = context.getPackageManager();
-        if (pm != null) {
-            pm.setComponentEnabledSetting(
-                    new ComponentName(context.getPackageName(), MusicWidgetReceiver.class.getName()),
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    PackageManager.DONT_KILL_APP);
-        }
-    }
-
-    @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int id : appWidgetIds) {
             Intent intent = new Intent(context, MusicWidgetService.class);
             intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id);
-            intent.putExtra(MusicWidgetService.WIDGET_SIZE, MusicWidgetService.LARGE);
+            intent.putExtra(MusicWidgetService.WIDGET_TYPE, MusicWidget.LARGE.ordinal());
             context.startService(intent);
         }
     }
@@ -60,13 +46,8 @@ public class MusicWidgetLarge extends AppWidgetProvider {
                 MusicWidgetSettings.PREFS_NAME, Context.MODE_MULTI_PROCESS).edit();
         for (int id : appWidgetIds) {
             prefs.remove(MusicWidgetSettings.PREF_PREFIX_KEY + id);
-            prefs.apply();
         }
-    }
-
-    @Override
-    public void onDisabled(Context context) {
-        context.sendBroadcast(new Intent(MusicWidgetReceiver.QUERY_DISABLE));
+        prefs.apply();
     }
 
 }

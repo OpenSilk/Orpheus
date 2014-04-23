@@ -18,21 +18,14 @@
             android:grantUriPermissions="true"/>
 
         <receiver
-            android:name="org.opensilk.music.appwidgets.MusicWidgetReceiver"
-            android:enabled="false">
+            android:name="org.opensilk.music.bus.ServiceBroadcastReceiver">
             <intent-filter>
                 <action android:name="org.opensilk.music.debug.playstatechanged" />
                 <action android:name="org.opensilk.music.debug.metachanged" />
                 <action android:name="org.opensilk.music.debug.repeatmodechanged" />
                 <action android:name="org.opensilk.music.debug.shufflemodechanged" />
-                <action android:name="org.opensilk.music.debug.QUERY_DISABLE" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name="org.opensilk.music.muzei.MuzeiUpdateReceiver"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="org.opensilk.music.debug.metachanged" />
+                <action android:name="org.opensilk.music.debug.refresh" />
+                <action android:name="org.opensilk.music.debug.queuechanged" />
             </intent-filter>
         </receiver>
 

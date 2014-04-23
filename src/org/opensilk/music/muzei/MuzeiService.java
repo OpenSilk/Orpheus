@@ -38,7 +38,7 @@ import hugo.weaving.DebugLog;
 public class MuzeiService extends MuzeiArtSource implements ServiceConnection {
     private static final String TAG = MuzeiService.class.getSimpleName();
 
-    protected static final String MUZEI_EXTENSION_ENABLED = "is_muzei_enabled";
+    public static final String MUZEI_EXTENSION_ENABLED = "is_muzei_enabled";
 
     private MusicUtils.ServiceToken mToken;
     private boolean isBound;

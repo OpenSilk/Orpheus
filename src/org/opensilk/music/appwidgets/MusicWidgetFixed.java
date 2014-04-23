@@ -18,29 +18,13 @@ package org.opensilk.music.appwidgets;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 
 /**
  * Created by andrew on 4/5/14.
  */
-public class MusicWidgetFixed extends AppWidgetProvider {
-
-    protected int mSize = -1;
-
-    @Override
-    public void onEnabled(Context context) {
-        /* Enable the BroadcastReceiver */
-        PackageManager pm = context.getPackageManager();
-        if (pm != null) {
-            pm.setComponentEnabledSetting(
-                    new ComponentName(context.getPackageName(), MusicWidgetReceiver.class.getName()),
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    PackageManager.DONT_KILL_APP);
-        }
-    }
+public abstract class MusicWidgetFixed extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -48,14 +32,11 @@ public class MusicWidgetFixed extends AppWidgetProvider {
             Intent intent = new Intent(context, MusicWidgetService.class);
             intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id);
-            intent.putExtra(MusicWidgetService.WIDGET_SIZE, mSize);
+            intent.putExtra(MusicWidgetService.WIDGET_TYPE, getWidgetType());
             context.startService(intent);
         }
     }
 
-    @Override
-    public void onDisabled(Context context) {
-        context.sendBroadcast(new Intent(MusicWidgetReceiver.QUERY_DISABLE));
-    }
+    protected abstract int getWidgetType();
 
 }

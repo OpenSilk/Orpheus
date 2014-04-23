@@ -93,9 +93,7 @@ public class MusicWidgetSettings extends Activity implements AdapterView.OnItemS
                 Intent intent = new Intent(mContext, MusicWidgetService.class);
                 intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-                intent.putExtra(MusicWidgetService.WIDGET_SIZE, MusicWidgetService.LARGE);
-                intent.putExtra(MusicWidgetService.WIDGET_STYLE,
-                        mSpinner.getSelectedItemPosition());
+                intent.putExtra(MusicWidgetService.WIDGET_TYPE, MusicWidget.LARGE.ordinal());
                 mContext.startService(intent);
 
                 Intent resultValue = new Intent();

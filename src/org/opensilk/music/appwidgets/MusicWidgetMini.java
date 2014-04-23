@@ -16,18 +16,12 @@
 
 package org.opensilk.music.appwidgets;
 
-import android.appwidget.AppWidgetManager;
-import android.content.Context;
-
 /**
  * Created by andrew on 4/3/14.
  */
 public class MusicWidgetMini extends MusicWidgetFixed {
-
     @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        mSize = MusicWidgetService.MINI;
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
+    protected int getWidgetType() {
+        return MusicWidget.MINI.ordinal();
     }
-
 }
