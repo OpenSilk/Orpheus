@@ -1458,6 +1458,8 @@ public class MusicPlaybackService extends Service {
 
         final Intent musicIntent = new Intent(intent);
         musicIntent.setAction(what.replace(APOLLO_PACKAGE_NAME, MUSIC_PACKAGE_NAME));
+        musicIntent.putExtra("player", getString(R.string.app_name));
+        musicIntent.putExtra("package", getPackageName());
         sendStickyBroadcast(musicIntent);
 
         if (what.equals(META_CHANGED)) {
