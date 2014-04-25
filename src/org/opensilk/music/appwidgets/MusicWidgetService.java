@@ -271,7 +271,6 @@ public class MusicWidgetService extends Service implements ServiceConnection {
                                                ComponentName serviceName) {
         Intent intent = new Intent(action);
         intent.setComponent(serviceName);
-        intent.putExtra(MusicPlaybackService.NOW_IN_FOREGROUND, false);
         return PendingIntent.getService(context, 0, intent, 0);
     }
 
@@ -291,7 +290,8 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     public void onServiceDisconnected(ComponentName name) {
         isBound = false;
         mToken = null;
-        //TODO maybe rebind
+        // Nothing to do, just shutdown and wait for next update
+        stopSelf();
     }
 
 }
