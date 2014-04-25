@@ -303,7 +303,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Idle time before stopping the foreground notfication (1 minute)
      */
-    private static final int IDLE_DELAY = 60000;
+    private static final int IDLE_DELAY = 60000 * 2;
 
     /**
      * The max size allowed for the track history
