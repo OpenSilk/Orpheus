@@ -408,7 +408,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Used to know when the service is active
      */
-    private boolean mServiceInUse = false;
+    private int mConnectedClients = 0;
 
     /**
      * Used to know if something should be playing or not
@@ -454,8 +454,6 @@ public class MusicPlaybackService extends Service {
     private int mShuffleMode = SHUFFLE_NONE;
 
     private int mRepeatMode = REPEAT_NONE;
-
-    private int mServiceStartId = -1;
 
     private long[] mPlayList = null;
 
@@ -544,7 +542,7 @@ public class MusicPlaybackService extends Service {
     public IBinder onBind(final Intent intent) {
         if (D) Log.d(TAG, "Service bound, intent = " + intent);
         cancelShutdown();
-        mServiceInUse = true;
+        mConnectedClients++;
         return mBinder;
     }
 
@@ -555,7 +553,7 @@ public class MusicPlaybackService extends Service {
     @Override
     public boolean onUnbind(final Intent intent) {
         if (D) Log.d(TAG, "Service unbound");
-        mServiceInUse = false;
+        mConnectedClients--;
         saveQueue(true);
 
         if (mIsSupposedToBePlaying || mPausedByTransientLossOfFocus) {
@@ -572,7 +570,7 @@ public class MusicPlaybackService extends Service {
             scheduleDelayedShutdown();
             return true;
         }
-        stopSelf(mServiceStartId);
+        stopSelf();
         return true;
     }
 
@@ -583,7 +581,7 @@ public class MusicPlaybackService extends Service {
     @Override
     public void onRebind(final Intent intent) {
         cancelShutdown();
-        mServiceInUse = true;
+        mConnectedClients++;
     }
 
     /**
@@ -728,6 +726,8 @@ public class MusicPlaybackService extends Service {
     public void onDestroy() {
         if (D) Log.d(TAG, "Destroying service");
         super.onDestroy();
+        mConnectedClients = 0;
+
         // Remove any sound effects
         final Intent audioEffectsIntent = new Intent(
                 AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
@@ -787,7 +787,6 @@ public class MusicPlaybackService extends Service {
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         if (D) Log.d(TAG, "Got new intent " + intent + ", startId = " + startId);
-        mServiceStartId = startId;
 
         if (intent != null) {
             final String action = intent.getAction();
@@ -855,7 +854,7 @@ public class MusicPlaybackService extends Service {
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
         mRemoteProgressHandler.removeMessages(0);
 
-        if (!mServiceInUse) {
+        if (mConnectedClients <= 0) {
             saveQueue(true);
             stopSelf();
         }
