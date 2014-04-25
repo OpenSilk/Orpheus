@@ -748,6 +748,8 @@ public class MusicPlaybackService extends Service {
 
         // Remove any callbacks from the handler
         mPlayerHandler.removeCallbacksAndMessages(null);
+        // Kill player thread
+        mPlayerHandler.getLooper().quit();
 
         // Close the cursor
         closeCursor();

@@ -81,6 +81,9 @@ public class SettingsAudioFragment extends SettingsFragment implements
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Tells home activity is should initate a restart
+                        if (MusicUtils.isPlaying()) {
+                            MusicUtils.playOrPause();
+                        }
                         getActivity().setResult(RESULT_RESTART_FULL);
                         getActivity().finish();
                     }
