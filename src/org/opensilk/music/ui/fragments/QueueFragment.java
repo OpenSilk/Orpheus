@@ -45,6 +45,7 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MetaChanged;
+import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.bus.events.QueueChanged;
 import org.opensilk.music.bus.events.Refresh;
@@ -132,21 +133,24 @@ public class QueueFragment extends Fragment implements
         // Set the swipe to remove listener
         mListView.setRemoveListener(this);
 
-        AnimationSet set = new AnimationSet(true);
+        if (savedInstanceState == null) {
+            AnimationSet set = new AnimationSet(true);
 
-        Animation animation = new AlphaAnimation(0.0f, 1.0f);
-        animation.setDuration(50);
-        set.addAnimation(animation);
+            Animation animation = new AlphaAnimation(0.0f, 1.0f);
+            animation.setDuration(50);
+            set.addAnimation(animation);
 
-        animation = new TranslateAnimation(
-                Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, -1.0f,Animation.RELATIVE_TO_SELF, 0.0f
-        );
-        animation.setDuration(140);
-        set.addAnimation(animation);
+            animation = new TranslateAnimation(
+                    Animation.RELATIVE_TO_SELF, 0.0f,Animation.RELATIVE_TO_SELF, 0.0f,
+                    Animation.RELATIVE_TO_SELF, -1.0f,Animation.RELATIVE_TO_SELF, 0.0f
+            );
+            animation.setDuration(140);
+            set.addAnimation(animation);
 
-        LayoutAnimationController controller = new LayoutAnimationController(set, 0.5f);
-        mListView.setLayoutAnimation(controller);
+            LayoutAnimationController controller = new LayoutAnimationController(set, 0.5f);
+            mListView.setLayoutAnimation(controller);
+        }
+
         return rootView;
     }
 
@@ -339,6 +343,15 @@ public class QueueFragment extends Fragment implements
         // saved state doesnt alter unexpectedly while
         // we wait on the loader
         scheduleLoaderRestart();
+    }
+
+    @Subscribe
+    public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
+        if (e.isConnected()) {
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
     }
 
 }
