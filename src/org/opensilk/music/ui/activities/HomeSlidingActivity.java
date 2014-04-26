@@ -32,6 +32,8 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.SlideState;
 
+import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.ui.fragments.SearchFragment;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
@@ -64,7 +66,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
         if (mIsLargeLandscape && savedInstanceState == null) {
             mSlidingPanel.setSlidingEnabled(false);
             mSlidingPanel.setInitialState(SlideState.EXPANDED);
-            onPanelExpanded(null);
+            EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
         }
 
         // Load the music browser fragment
@@ -104,19 +106,19 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
                 // Coming from portrait, need to pin the panel open
                 mSlidingPanel.setSlidingEnabled(false);
                 mSlidingPanel.setInitialState(SlideState.EXPANDED);
-                setPanelExpanded();
+                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.onQueueVisibilityChanged(true);
                 }
             } else if (savedInstanceState.getBoolean("panel_needs_collapse", false)) {
                 // Coming back from landscape we should collapse the panel
                 mSlidingPanel.setInitialState(SlideState.COLLAPSED);
-                setPanelCollapsed();
+                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_COLLAPSE));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.popQueueFragment();
                 }
             } else if (savedInstanceState.getBoolean("panel_open", false)) {
-                setPanelExpanded();
+                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.onQueueVisibilityChanged(true);
                 }

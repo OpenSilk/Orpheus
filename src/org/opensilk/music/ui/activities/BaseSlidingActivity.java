@@ -39,6 +39,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
@@ -50,6 +51,9 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.music.artwork.ArtworkService;
+import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
+import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
@@ -169,12 +173,12 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         if (handled) {
             setIntent(null);
         }
-        mNowPlayingFragment.onServiceConnected();
+        EventBus.getInstance().post(new MusicServiceConnectionChanged(true));
     }
 
     @Override
     public void onServiceDisconnected(final ComponentName name) {
-        mNowPlayingFragment.onServiceDisconnected();
+        EventBus.getInstance().post(new MusicServiceConnectionChanged(false));
     }
 
     @Override
@@ -295,12 +299,12 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     @Override
     public void onPanelExpanded(View panel) {
-        mNowPlayingFragment.onPanelExpanded();
+        EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
     }
 
     @Override
     public void onPanelCollapsed(View panel) {
-        mNowPlayingFragment.onPanelCollapsed();
+        EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
     }
 
     @Override
@@ -318,14 +322,6 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         if (!mSlidingPanel.isExpanded()) {
             mSlidingPanel.expandPane();
         }
-    }
-
-    protected void setPanelExpanded() {
-        mNowPlayingFragment.panelIsExpanded();
-    }
-
-    protected void setPanelCollapsed() {
-        mNowPlayingFragment.panelIsCollapsed();
     }
 
     /**

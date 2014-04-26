@@ -52,6 +52,8 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MetaChanged;
+import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
+import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.bus.events.PlaybackModeChanged;
 import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
@@ -287,46 +289,50 @@ public class NowPlayingFragment extends Fragment implements
         mFooterShuffleButton.updateShuffleState();
     }
 
-    /*
-     * SlidingUpPanelLayout.PanelSlideListener
+    /**
+     * Handle panel change events posted by activity
+     * @param e
      */
-
-    public void onPanelExpanded() {
-        mPanelHeader.transitionToOpen();
-    }
-
-    public void onPanelCollapsed() {
-        if (mQueueShowing) {
-            popQueueFragment();
-        }
-        mPanelHeader.transitionToClosed();
-    }
-
-    public void panelIsExpanded() {
-        mPanelHeader.makeOpen();
-    }
-
-    public void panelIsCollapsed() {
-        mPanelHeader.makeClosed();
-    }
-
-    /*
-     * ServiceConnection Callback
-     */
-
-    public void onServiceConnected() {
-        // Set the playback drawables
-        updatePlaybackControls();
-        // Current info
-        updateNowPlayingInfo();
-        // Setup visualizer
-        if (mVisualizer == null) {
-            initVisualizer();
+    @Subscribe
+    public void onPanelStateChanged(PanelStateChanged e) {
+        PanelStateChanged.Action action = e.getAction();
+        switch (action) {
+            case USER_EXPAND:
+                mPanelHeader.transitionToOpen();
+                break;
+            case USER_COLLAPSE:
+                if (mQueueShowing) {
+                    popQueueFragment();
+                }
+                mPanelHeader.transitionToClosed();
+                break;
+            case SYSTEM_EXPAND:
+                mPanelHeader.makeOpen();
+                break;
+            case SYSTEM_COLLAPSE:
+                mPanelHeader.makeClosed();
+                break;
         }
     }
 
-    public void onServiceDisconnected() {
-        destroyVisualizer();
+    /**
+     * Handle changes to music service connection
+     * @param e
+     */
+    @Subscribe
+    public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
+        if (e.isConnected()) {
+            // Set the playback drawables
+            updatePlaybackControls();
+            // Current info
+            updateNowPlayingInfo();
+            // Setup visualizer
+            if (mVisualizer == null) {
+                initVisualizer();
+            }
+        } else {
+            destroyVisualizer();
+        }
     }
 
     /**
