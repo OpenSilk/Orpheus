@@ -110,8 +110,6 @@ public class ArtworkManager {
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
                 initDiskCache();
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                cleanupOldCache();
             }
         }).start();
         // Init mem cache
@@ -209,25 +207,6 @@ public class ArtworkManager {
             return true;
         }
         return false;
-    }
-
-    //TODO remove in 0.4
-    private static final String OLD_DOWNLOAD_CACHE = "DownloadCache";
-    private static final String OLD_IMAGE_CACHE = "ThumbnailCache";
-    private void cleanupOldCache() {
-        try {
-            if (!mPreferences.isOldCacheDeleted()) {
-                File oldCache = CacheUtil.getCacheDir(mContext, OLD_DOWNLOAD_CACHE);
-                if (oldCache != null && oldCache.exists() && oldCache.isDirectory()) {
-                    FileUtils.deleteDirectory(oldCache);
-                }
-                oldCache = CacheUtil.getCacheDir(mContext, OLD_IMAGE_CACHE);
-                if (oldCache != null && oldCache.exists() && oldCache.isDirectory()) {
-                    FileUtils.deleteDirectory(oldCache);
-                }
-                mPreferences.setOldCacheDeleted();
-            }
-        } catch (Exception ignored) {}
     }
 
 }

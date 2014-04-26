@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 
+import com.andrew.apollo.utils.ThemeHelper;
+
 /**
  * Created by andrew on 3/1/14.
  */
@@ -20,7 +22,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mTitle = getArguments().getString("title");
-            mIconRes = getArguments().getInt("icon");
+            mIconRes = getArguments().getInt("dark_icon");
         }
     }
 

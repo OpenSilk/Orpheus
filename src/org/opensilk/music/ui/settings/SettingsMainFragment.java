@@ -3,6 +3,7 @@ package org.opensilk.music.ui.settings;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,23 +25,26 @@ import java.util.List;
  */
 public class SettingsMainFragment extends Fragment {
 
+    GridView mGridView;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.settings_gridview, container, false);
 
-        GridView grid = (GridView) v.findViewById(R.id.settings_grid);
+        mGridView = (GridView) v.findViewById(R.id.settings_grid);
         final SettingsAdapter adapter = new SettingsAdapter(getActivity());
 
-        grid.setAdapter(adapter);
-        grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGridView.setAdapter(adapter);
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SettingsFragment frag = (SettingsFragment) adapter.getItem(position);
+                String tag = adapter.mFragments.get(position).className;
                 getFragmentManager().beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(R.id.settings_content, frag)
-                    .addToBackStack(frag.getTitle())
+                    .replace(R.id.settings_content, frag, tag)
+                    .addToBackStack(null)
                     .commit();
             }
         });
@@ -53,9 +57,22 @@ public class SettingsMainFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         getActivity().getActionBar().setTitle(R.string.settings_title);
         getActivity().getActionBar().setIcon(R.drawable.ic_settings);
+
+        Intent intent = getActivity().getIntent();
+        if (intent != null && intent.getAction() != null) {
+            if ("open_donate".equals(intent.getAction())) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mGridView.getOnItemClickListener().onItemClick(null, null, mGridView.getAdapter().getCount()-1, 0);
+                        getActivity().setIntent(null);
+                    }
+                });
+            }
+        }
     }
 
-    private class SettingsAdapter extends BaseAdapter {
+    private static class SettingsAdapter extends BaseAdapter {
 
         private List<Holder> mFragments = new ArrayList<Holder>();
         private LayoutInflater mInflater;
@@ -65,21 +82,26 @@ public class SettingsMainFragment extends Fragment {
             mContext = context;
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFragments.add(new Holder(SettingsInterfaceFragment.class.getName(),
-                    getString(R.string.settings_ui_category),
+                    mContext.getString(R.string.settings_ui_category),
                     R.drawable.ic_settings_interface_light,
                     R.drawable.ic_settings_interface_dark));
             mFragments.add(new Holder(SettingsDataFragment.class.getName(),
-                    getString(R.string.settings_data_category),
+                    mContext.getString(R.string.settings_data_category),
                     R.drawable.ic_settings_data_light,
                     R.drawable.ic_settings_data_dark));
             mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
-                    getString(R.string.settings_about_category),
+                    mContext.getString(R.string.settings_about_category),
                     R.drawable.ic_settings_about_light,
                     R.drawable.ic_settings_about_dark));
             mFragments.add(new Holder(SettingsAudioFragment.class.getName(),
-                    getString(R.string.settings_audio_title),
+                    mContext.getString(R.string.settings_audio_title),
                     R.drawable.ic_settings_audio_light,
                     R.drawable.ic_settings_audio_dark));
+            // Must be last, add new items above this one.
+            mFragments.add(new Holder(SettingsDonateFragment.class.getName(),
+                    mContext.getString(R.string.settings_donate),
+                    R.drawable.ic_settings_about_light,
+                    R.drawable.ic_settings_about_dark));
         }
 
         @Override
@@ -121,7 +143,7 @@ public class SettingsMainFragment extends Fragment {
             return v;
         }
 
-        private class Holder {
+        private static class Holder {
             String className;
             String title;
             int lightIconRes;

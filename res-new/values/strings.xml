@@ -10,6 +10,7 @@
     <string name="add">Add</string>
     <string name="accessibility_select">select</string>
     <string name="error">Error</string>
+    <string name="retry">Retry</string>
 
     <!-- Menus -->
     <string name="menu_party_shuffle">Party shuffle</string>
@@ -19,6 +20,7 @@
     <!-- Main settings screen -->
     <string name="settings_title">Settings</string>
     <string name="settings_audio_title">Audio</string>
+    <string name="settings_donate">Donate</string>
 
     <!-- Subcategories -->
     <string name="settings_about_legal_category">Legal</string>
@@ -64,6 +66,18 @@
 
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
+
+    <string name="settings_donate_unpurchased">Click for details</string>
+
+    <!-- IAB dialogs -->
+    <string name="iab_purchased">Purchased</string>
+    <string name="iab_purchase_failed">Purchase failed</string>
+    <string name="iab_fetching_inventory">Obtaining product list</string>
+    <string name="iab_unable_to_fetch_inventory">Unable to fetch inventory</string>
+    <string name="iab_service_error">Billing service unavailable</string>
+    <string name="iab_donate">Donate</string>
+    <string name="iab_donate_message">Thank you for using Orpheus. Please consider a donation to support the developers.</string>
+
     <!-- Interface -->
     <string name="settings_interface_restart_app">Orpheus will now restart to apply changes.</string>
 

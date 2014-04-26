@@ -56,6 +56,7 @@ import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
+import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 
 import java.lang.ref.WeakReference;
@@ -147,6 +148,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
                             //.addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
                     .build();
         }
+
+        // Update count for donate dialog
+        IabUtil.incrementAppLaunchCount(BaseSlidingActivity.this);
 
         // Initialize the sliding pane
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);

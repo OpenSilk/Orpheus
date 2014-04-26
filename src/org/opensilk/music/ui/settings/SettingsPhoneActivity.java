@@ -1,11 +1,15 @@
 package org.opensilk.music.ui.settings;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by andrew on 2/28/14.
@@ -20,10 +24,12 @@ public class SettingsPhoneActivity extends Activity {
         setTheme(themeHelper.getTheme());
         setContentView(R.layout.settings_fragment_activity);
 
-        //Load the main fragment
-        getFragmentManager().beginTransaction()
-            .replace(R.id.settings_content, new SettingsMainFragment())
-            .commit();
+        if (savedInstanceState == null) {
+            //Load the main fragment
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.settings_content, new SettingsMainFragment())
+                    .commit();
+        }
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -39,4 +45,14 @@ public class SettingsPhoneActivity extends Activity {
         }
     }
 
+    @Override
+    @DebugLog
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Fragment f = getFragmentManager().findFragmentByTag(SettingsDonateFragment.class.getName());
+        if (f != null) {
+            f.onActivityResult(requestCode, resultCode, data);
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
 }

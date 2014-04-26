@@ -151,8 +151,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                startActivityForResult(new Intent(this, ConfigHelper.isXLargeScreen(getResources()) ?
-                        SettingsTabletActivity.class : SettingsPhoneActivity.class), 0);
+                startActivityForResult(new Intent(this, SettingsPhoneActivity.class), 0);
                 return true;
             case R.id.menu_search:
                 NavUtils.openSearch(this);
@@ -199,6 +198,10 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
         if (!mIsLargeLandscape) {
             super.maybeClosePanel();
         }
+    }
+
+    public boolean isLargeLandscape() {
+        return mIsLargeLandscape;
     }
 
 }

@@ -36,9 +36,10 @@
     <!--<uses-permission android:name="android.permission.GET_TASKS" />-->
     <!-- Used to get ip address for casting -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
     <!-- Used for the Visualizer -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- IAB -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <!-- Casting is currently only supported over wifi -->
     <uses-feature android:name="android.hardware.wifi"/>
@@ -51,9 +52,13 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name_label"
         android:largeHeap="@bool/config_largeHeap">
+        <!--GMS-->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <!--Ad-->
+        <activity android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
 
         <!-- Searchable -->
         <meta-data
