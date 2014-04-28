@@ -17,6 +17,11 @@
 
 <changelog bulletedList="true">
 
+    <changelogversion versionName="0.4.3">
+        <changelogtext>Fix services running all the time</changelogtext>
+        <changelogtext>Orpheus now shows in Simple Last.fm Scrobbler enabled apps list</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="0.4.2">
         <changelogtext>ICS fixes</changelogtext>
     </changelogversion>
