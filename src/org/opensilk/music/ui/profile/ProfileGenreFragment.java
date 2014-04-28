@@ -98,6 +98,7 @@ public class ProfileGenreFragment extends Fragment implements LoaderManager.Load
         // set actionbar title
         ActionBarActivity activity = (ActionBarActivity) getActivity();
         activity.getSupportActionBar().setTitle(mGenre.mGenreName);
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -115,6 +116,9 @@ public class ProfileGenreFragment extends Fragment implements LoaderManager.Load
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                return true;
             case R.id.card_menu_play:
                 MusicUtils.playAll(getActivity(), MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId), 0, false);
                 return true;
@@ -128,8 +132,9 @@ public class ProfileGenreFragment extends Fragment implements LoaderManager.Load
                 AddToPlaylistDialog.newInstance(MusicUtils.getSongListForGenre(getActivity(), mGenre.mGenreId))
                         .show(((FragmentActivity) getActivity()).getSupportFragmentManager(), "AddToPlaylistDialog");
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return false;
     }
 
     protected Bundle createLoaderArgs() {
