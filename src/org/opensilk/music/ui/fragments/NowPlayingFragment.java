@@ -17,8 +17,6 @@
 package org.opensilk.music.ui.fragments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.audiofx.Visualizer;
 import android.net.Uri;
@@ -36,11 +34,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.NowPlayingCursor;
 import com.andrew.apollo.loaders.QueueLoader;
@@ -50,9 +46,6 @@ import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.artwork.ArtworkManager;
@@ -66,7 +59,6 @@ import org.opensilk.music.bus.events.PlaybackModeChanged;
 import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
-import org.opensilk.music.ui.settings.SettingsPhoneActivity;
 import org.opensilk.music.widgets.AudioVisualizationView;
 import org.opensilk.music.widgets.FullScreenArtworkImageView;
 import org.opensilk.music.widgets.HeaderOverflowButton;
@@ -100,8 +92,6 @@ public class NowPlayingFragment extends Fragment implements
 
     // Background art
     private FullScreenArtworkImageView mArtBackground;
-
-    private AdView mAdView;
 
     /*
      * Panel Header
@@ -208,9 +198,6 @@ public class NowPlayingFragment extends Fragment implements
         if (mVisualizer == null) {
             initVisualizer();
         }
-        if (mAdView != null) {
-            mAdView.resume();
-        }
     }
 
     @Override
@@ -218,9 +205,6 @@ public class NowPlayingFragment extends Fragment implements
         super.onPause();
         //Disable visualizer
         destroyVisualizer();
-        if (mAdView != null) {
-            mAdView.pause();
-        }
     }
 
     @Override
@@ -240,9 +224,6 @@ public class NowPlayingFragment extends Fragment implements
         EventBus.getInstance().unregister(this);
         // clear messages so we won't prevent gc
         mTimeHandler.removeMessages(REFRESH_TIME);
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
     }
 
     /*
@@ -367,34 +348,11 @@ public class NowPlayingFragment extends Fragment implements
     public void onIABResult(IABQueryResult r) {
         if (r.error == IABQueryResult.QError.NO_ERROR) {
             if (r.isApproved) {
-                if (mAdView != null) {
-                    mAdView.destroy();
-                    RelativeLayout l = (RelativeLayout) getView();
-                    l.removeView(mAdView);
-                    mAdView = null;
-                }
                 return;
             }
             IabUtil.maybeShowDonateDialog(getActivity());
         }
         //TODO handle faliurs
-        // Init adview
-        RelativeLayout l = (RelativeLayout) getView().findViewById(R.id.panel_container);
-        RelativeLayout.LayoutParams p =new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        p.addRule(RelativeLayout.BELOW, R.id.panel_header);
-        mAdView = new AdView(getActivity());
-        mAdView.setAdUnitId(getString(R.string.ad_unit_id));
-        if (mActivity.isLargeLandscape()) {
-            mAdView.setAdSize(AdSize.BANNER);
-        } else {
-            mAdView.setAdSize(AdSize.SMART_BANNER);
-        }
-        AdRequest.Builder adBuilder = new AdRequest.Builder();
-        adBuilder.addTestDevice("279CD53DED2F9D5F30D63B1F7C6B3619");
-        adBuilder.addTestDevice("6A1872C79991C9D853AE7417F26D0447");
-        mAdView.loadAd(adBuilder.build());
-        l.addView(mAdView, p);
     }
 
     /**
