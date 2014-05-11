@@ -44,6 +44,7 @@ import hugo.weaving.DebugLog;
  */
 public class SettingsDonateFragment extends SettingsFragment implements Preference.OnPreferenceClickListener {
     protected static final String TAG = SettingsDonateFragment.class.getSimpleName();
+    private static final boolean D = true;// BuildConfig.DEBUG;
 
     protected PreferenceScreen mPrefscreen;
     protected IabHelper mIabHelper;
@@ -56,14 +57,13 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
         addPreferencesFromResource(R.xml.settings_donate);
         mPrefscreen = getPreferenceScreen();
         mIabHelper = IabUtil.newHelper(getActivity());
-        mIabHelper.enableDebugLogging(BuildConfig.DEBUG);
         createWaitDialog();
         mIabHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
             @DebugLog
             @Override
             public void onIabSetupFinished(IabResult result) {
                 if (result.isSuccess()) {
-                    Log.d(TAG, "result success");
+                    if (D) Log.d(TAG, "result success");
                     if (mIabHelper != null) {
                         mIabHelper.queryInventoryAsync(true, IabUtil.PRODUCT_SKUS, mQueryListener);
                     }
@@ -94,7 +94,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
     @DebugLog
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (mIabHelper != null && mIabHelper.handleActivityResult(requestCode, resultCode, data)) {
-            Log.d(TAG, "IABHelper handled activity result");
+            if (D) Log.d(TAG, "IABHelper handled activity result");
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -168,11 +168,11 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
         public void onQueryInventoryFinished(IabResult result, Inventory inv) {
             mWaitDialog.dismiss();
             if (result.isSuccess()) {
-                Log.d(TAG, "result success");
+                if (D) Log.d(TAG, "result success");
                 for (String sku : IabUtil.PRODUCT_SKUS) {
                     Purchase p = inv.getPurchase(sku);
                     if (p != null && IabUtil.verifyDeveloperPayload(p)) {
-                        Log.d(TAG, "purchased: " + p.toString());
+                        if (D) Log.d(TAG, "purchased: " + p.toString());
                         final PurchasePreference pref = addPreference(inv.getSkuDetails(p.getSku()));
                         pref.setSummary(R.string.iab_purchased);
                         pref.setEnabled(false);
@@ -190,7 +190,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                     } else {
                         SkuDetails d = inv.getSkuDetails(sku);
                         if (d != null) {
-                            Log.d(TAG, "unpurchased: " + d.toString());
+                            if (D) Log.d(TAG, "unpurchased: " + d.toString());
                             addPreference(d);
                         }
                     }
@@ -220,7 +220,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                 return;
             }
             if (result.isSuccess() && IabUtil.verifyDeveloperPayload(info)) {
-                Log.d(TAG, "purchase success");
+                if (D) Log.d(TAG, "purchase success");
                 String sku = info.getSku();
                 PurchasePreference p = (PurchasePreference) mPrefscreen.findPreference(sku);
                 if (p != null) {
@@ -235,8 +235,9 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                     case IabUtil.SKU_DONATE_THREE:
                         break;
                 }
+                Toast.makeText(getActivity(), R.string.iab_thanks, Toast.LENGTH_LONG).show();
             } else {
-                Log.d(TAG, "purchase failed");
+                if (D) Log.d(TAG, "purchase failed");
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.iab_purchase_failed)
                         .setMessage(result.getMessage())
@@ -253,7 +254,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
             super(context);
             this.skuDetails = details;
             setKey(details.getSku());
-            setTitle(details.getTitle());
+            setTitle(details.getTitle() + " " + details.getPrice());
             setSummary(R.string.settings_donate_unpurchased);
         }
     }

@@ -20,15 +20,20 @@ package org.opensilk.music.bus.events;
  * Created by drew on 4/26/14.
  */
 public class IABQueryResult {
-    public enum QError {
+    public enum Error {
         NO_ERROR,
         BIND_FAILED,
         QUERY_FAILED
     }
-    public final QError error;
+    public final Error error;
     public final boolean isApproved;
-    public IABQueryResult(QError error, boolean isApproved) {
+    public IABQueryResult(Error error, boolean isApproved) {
         this.error = error;
         this.isApproved = isApproved;
+    }
+
+    @Override
+    public String toString() {
+        return error.toString()+", approved="+isApproved;
     }
 }

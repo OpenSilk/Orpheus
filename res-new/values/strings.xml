@@ -77,6 +77,7 @@
     <string name="iab_service_error">Billing service unavailable</string>
     <string name="iab_donate">Donate</string>
     <string name="iab_donate_message">Thank you for using Orpheus. Please consider a donation to support the developers.</string>
+    <string name="iab_thanks">Thank you for your kindness</string>
 
     <!-- Interface -->
     <string name="settings_interface_restart_app">Orpheus will now restart to apply changes.</string>

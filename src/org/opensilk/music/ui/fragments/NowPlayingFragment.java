@@ -346,7 +346,7 @@ public class NowPlayingFragment extends Fragment implements
     @DebugLog
     @Subscribe
     public void onIABResult(IABQueryResult r) {
-        if (r.error == IABQueryResult.QError.NO_ERROR) {
+        if (r.error == IABQueryResult.Error.NO_ERROR) {
             if (r.isApproved) {
                 return;
             }

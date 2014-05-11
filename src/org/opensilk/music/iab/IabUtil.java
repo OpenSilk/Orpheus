@@ -23,9 +23,10 @@ import java.util.List;
  */
 public class IabUtil {
     private static final String TAG = IabUtil.class.getSimpleName();
+    private static final boolean D = true;// BuildConfig.DEBUG;
 
-    public static final String SKU_DONATE_ONE = "android.test.purchased";// "early_adopter";
-    public static final String SKU_DONATE_TWO = "android.test.canceled"; // "donate_one";
+    public static final String SKU_DONATE_ONE = "early_one";
+    public static final String SKU_DONATE_TWO = "donate_two";
     public static final String SKU_DONATE_THREE = "donate_three";
 
     public static final List<String> PRODUCT_SKUS;
@@ -37,7 +38,9 @@ public class IabUtil {
     }
 
     public static IabHelper newHelper(Context context) {
-        return new IabHelper(context, base64EncodedPublicKey);
+        IabHelper h = new IabHelper(context, base64EncodedPublicKey);
+        h.enableDebugLogging(D);
+        return h;
     }
 
     public static final String PREF_APP_LAUNCHES = "app_launches";
@@ -98,30 +101,26 @@ public class IabUtil {
                     helper.queryInventoryAsync(false, PRODUCT_SKUS, new IabHelper.QueryInventoryFinishedListener() {
                         @Override
                         public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-                            if (result.isSuccess()) {
-                                Log.d(TAG, "result success");
-                                Purchase p = inv.getPurchase(SKU_DONATE_ONE);
-                                if (p != null && verifyDeveloperPayload(p)) {
-                                    Log.d(TAG, "earlyAdopter:" + p.toString());
-                                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.QError.NO_ERROR, true));
-                                    return;
-                                }
-                                p = inv.getPurchase(SKU_DONATE_TWO);
-                                if (p != null && verifyDeveloperPayload(p)) {
-                                    Log.d(TAG, "donateOne:" + p.toString());
-                                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.QError.NO_ERROR, true));
-                                    return;
-                                }
-                                Log.d(TAG, "User has no purchases");
-                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.QError.NO_ERROR, false));
-                            } else {
-                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.QError.QUERY_FAILED, false));
-                            }
                             helper.dispose();
+                            if (result.isSuccess()) {
+                                if (D) Log.d(TAG, "result success");
+                                for (String sku : PRODUCT_SKUS) {
+                                    Purchase p = inv.getPurchase(sku);
+                                    if (p != null && verifyDeveloperPayload(p)) {
+                                        Log.d(TAG, "purchase: " + p.toString());
+                                        EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.NO_ERROR, true));
+                                        return;
+                                    }
+                                }
+                                if (D) Log.d(TAG, "User has no purchases");
+                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.NO_ERROR, false));
+                            } else {
+                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.QUERY_FAILED, false));
+                            }
                         }
                     });
                 } else {
-                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.QError.BIND_FAILED, false));
+                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.BIND_FAILED, false));
                     helper.dispose();
                 }
             }
