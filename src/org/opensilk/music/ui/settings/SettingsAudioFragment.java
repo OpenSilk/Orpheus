@@ -10,9 +10,10 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
-import static org.opensilk.music.ui.activities.HomeSlidingActivity.RESULT_RESTART_APP;
 import static org.opensilk.music.ui.activities.HomeSlidingActivity.RESULT_RESTART_FULL;
 
 /**
@@ -39,6 +40,12 @@ public class SettingsAudioFragment extends SettingsFragment implements
         mCasting = (CheckBoxPreference) mPrefSet.findPreference(PreferenceUtils.KEY_CAST_ENABLED);
         mCasting.setChecked(mPreferences.isCastEnabled());
         mCasting.setOnPreferenceChangeListener(this);
+        if (ConnectionResult.SUCCESS != GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity())) {
+            mPreferences.setCastEnabled(false);
+            mCasting.setChecked(false);
+            mCasting.setEnabled(false);
+            mCasting.setSummary(R.string.settings_gms_unavailable);
+        }
     }
 
     @Override

@@ -66,6 +66,7 @@
 
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
+    <string name="settings_gms_unavailable">Google services unavailable, casting will not work</string>
 
     <string name="settings_donate_unpurchased">Click for details</string>
 
