@@ -207,7 +207,7 @@ public class SearchFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-        if (data == null || data.isClosed() || data.getCount() <= 0) {
+        if (data == null || data.isClosed()) {
             // Set the empty text
 //            final TextView empty = (TextView)findViewById(R.id.empty);
 //            empty.setText(getString(R.string.empty_search));
