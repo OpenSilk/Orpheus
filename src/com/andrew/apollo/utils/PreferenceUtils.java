@@ -132,6 +132,30 @@ public final class PreferenceUtils {
         return sInstance;
     }
 
+    public void putBoolean(String key, boolean value) {
+        mPreferences.edit().putBoolean(key, value).apply();
+    }
+
+    public void putLong(String key, long value) {
+        mPreferences.edit().putLong(key, value).apply();
+    }
+
+    public void putInt(String key, int value) {
+        mPreferences.edit().putInt(key, value).apply();
+    }
+
+    public boolean getBoolean(String key, boolean def) {
+        return mPreferences.getBoolean(key, def);
+    }
+
+    public long getLong(String key, long def) {
+        return mPreferences.getLong(key, def);
+    }
+
+    public int getInt(String key, int def) {
+        return mPreferences.getInt(key, def);
+    }
+
     /**
      * Saves the current page the user is on when they close the app.
      * 

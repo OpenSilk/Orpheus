@@ -21,13 +21,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.iab.IabHelper;
@@ -37,14 +37,12 @@ import org.opensilk.music.iab.Inventory;
 import org.opensilk.music.iab.Purchase;
 import org.opensilk.music.iab.SkuDetails;
 
-import hugo.weaving.DebugLog;
-
 /**
  * Created by drew on 4/26/14.
  */
 public class SettingsDonateFragment extends SettingsFragment implements Preference.OnPreferenceClickListener {
     protected static final String TAG = SettingsDonateFragment.class.getSimpleName();
-    private static final boolean D = true;// BuildConfig.DEBUG;
+    private static final boolean D = IabUtil.D;
 
     protected PreferenceScreen mPrefscreen;
     protected IabHelper mIabHelper;
@@ -59,7 +57,6 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
         mIabHelper = IabUtil.newHelper(getActivity());
         createWaitDialog();
         mIabHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            @DebugLog
             @Override
             public void onIabSetupFinished(IabResult result) {
                 if (result.isSuccess()) {
@@ -68,8 +65,9 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                         mIabHelper.queryInventoryAsync(true, IabUtil.PRODUCT_SKUS, mQueryListener);
                     }
                 } else {
-                    Toast.makeText(getActivity(), R.string.iab_service_error, Toast.LENGTH_LONG).show();
-                    getActivity().onBackPressed();
+                    addExternalDonatePref();
+                    mWaitDialog.dismiss();
+                    mIabHelper = null;
                 }
             }
         });
@@ -91,7 +89,6 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
     }
 
     @Override
-    @DebugLog
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (mIabHelper != null && mIabHelper.handleActivityResult(requestCode, resultCode, data)) {
             if (D) Log.d(TAG, "IABHelper handled activity result");
@@ -101,23 +98,15 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
     }
 
     @Override
-    @DebugLog
     public boolean onPreferenceClick(Preference preference) {
         if (preference instanceof PurchasePreference) {
             PurchasePreference p = (PurchasePreference) preference;
             if (p.isPurchased) {
                 Log.e(TAG, "Whoa already purchased");
+                p.setEnabled(false);
                 return false;
             }
-            switch (p.getKey()) {
-                case IabUtil.SKU_DONATE_ONE:
-                case IabUtil.SKU_DONATE_TWO:
-                    showPurchaseDialog(p.skuDetails);
-                    break;
-                default:
-                    Log.e(TAG, "WTF why is there an unknown preference!");
-                    break;
-            }
+            showPurchaseDialog(p.skuDetails);
         }
         return false;
     }
@@ -162,13 +151,24 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
         return p;
     }
 
+    private void addExternalDonatePref() {
+        Preference p = new Preference(getActivity());
+        p.setTitle(R.string.iab_opensilk_donate_url);
+        p.setSummary(R.string.iab_opensilk_donate);
+        p.setIntent(new Intent().setAction(Intent.ACTION_VIEW).setData(Uri.parse(getString(R.string.iab_opensilk_donate_url))));
+        mPrefscreen.addPreference(p);
+    }
+
     private final IabHelper.QueryInventoryFinishedListener mQueryListener = new IabHelper.QueryInventoryFinishedListener() {
         @Override
-        @DebugLog
         public void onQueryInventoryFinished(IabResult result, Inventory inv) {
             mWaitDialog.dismiss();
             if (result.isSuccess()) {
                 if (D) Log.d(TAG, "result success");
+                if (inv.getSkuCount() == 0) {
+                    addExternalDonatePref();
+                    return;
+                }
                 for (String sku : IabUtil.PRODUCT_SKUS) {
                     Purchase p = inv.getPurchase(sku);
                     if (p != null && IabUtil.verifyDeveloperPayload(p)) {
@@ -177,16 +177,16 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                         pref.setSummary(R.string.iab_purchased);
                         pref.setEnabled(false);
                         pref.isPurchased = true;
-                        //XXX for testing only
-                        mIabHelper.consumeAsync(p, new IabHelper.OnConsumeFinishedListener() {
-                            @Override
-                            @DebugLog
-                            public void onConsumeFinished(Purchase purchase, IabResult result) {
-                                pref.isPurchased = false;
-                                pref.setEnabled(true);
-                                pref.setSummary(R.string.settings_donate_unpurchased);
-                            }
-                        });
+                        if (IabUtil.T) { //XXX for testing only
+                            mIabHelper.consumeAsync(p, new IabHelper.OnConsumeFinishedListener() {
+                                @Override
+                                public void onConsumeFinished(Purchase purchase, IabResult result) {
+                                    pref.isPurchased = false;
+                                    pref.setEnabled(true);
+                                    pref.setSummary(R.string.iab_donate_unpurchased);
+                                }
+                            });
+                        }
                     } else {
                         SkuDetails d = inv.getSkuDetails(sku);
                         if (d != null) {
@@ -214,7 +214,6 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
 
     private final IabHelper.OnIabPurchaseFinishedListener mPurchaseListener = new IabHelper.OnIabPurchaseFinishedListener() {
         @Override
-        @DebugLog
         public void onIabPurchaseFinished(IabResult result, Purchase info) {
             if (mIabHelper == null) {
                 return;
@@ -224,16 +223,9 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                 String sku = info.getSku();
                 PurchasePreference p = (PurchasePreference) mPrefscreen.findPreference(sku);
                 if (p != null) {
-                    p.isPurchased = true;
                     p.setSummary(R.string.iab_purchased);
-                }
-                switch (sku) {
-                    case IabUtil.SKU_DONATE_ONE:
-                        break;
-                    case IabUtil.SKU_DONATE_TWO:
-                        break;
-                    case IabUtil.SKU_DONATE_THREE:
-                        break;
+                    p.setEnabled(false);
+                    p.isPurchased = true;
                 }
                 Toast.makeText(getActivity(), R.string.iab_thanks, Toast.LENGTH_LONG).show();
             } else {
@@ -255,7 +247,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
             this.skuDetails = details;
             setKey(details.getSku());
             setTitle(details.getTitle() + " " + details.getPrice());
-            setSummary(R.string.settings_donate_unpurchased);
+            setSummary(R.string.iab_donate_unpurchased);
         }
     }
 }

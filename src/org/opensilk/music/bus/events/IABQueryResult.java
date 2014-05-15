@@ -23,10 +23,17 @@ public class IABQueryResult {
     public enum Error {
         NO_ERROR,
         BIND_FAILED,
-        QUERY_FAILED
+        QUERY_FAILED,
+        NO_SKUS
     }
+
     public final Error error;
     public final boolean isApproved;
+
+    public IABQueryResult(Error error) {
+        this(error, false);
+    }
+
     public IABQueryResult(Error error, boolean isApproved) {
         this.error = error;
         this.isApproved = isApproved;

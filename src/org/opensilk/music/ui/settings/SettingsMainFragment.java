@@ -100,8 +100,8 @@ public class SettingsMainFragment extends Fragment {
             // Must be last, add new items above this one.
             mFragments.add(new Holder(SettingsDonateFragment.class.getName(),
                     mContext.getString(R.string.settings_donate),
-                    R.drawable.ic_settings_about_light,
-                    R.drawable.ic_settings_about_dark));
+                    R.drawable.ic_settings_donate_light,
+                    R.drawable.ic_settings_donate_dark));
         }
 
         @Override

@@ -4,12 +4,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.IABQueryResult;
@@ -23,9 +21,10 @@ import java.util.List;
  */
 public class IabUtil {
     private static final String TAG = IabUtil.class.getSimpleName();
-    private static final boolean D = true;// BuildConfig.DEBUG;
+    public static final boolean T = false; // for testing iab;
+    public static final boolean D = false;
 
-    public static final String SKU_DONATE_ONE = "early_one";
+    public static final String SKU_DONATE_ONE = "donate_one";
     public static final String SKU_DONATE_TWO = "donate_two";
     public static final String SKU_DONATE_THREE = "donate_three";
 
@@ -37,37 +36,46 @@ public class IabUtil {
         PRODUCT_SKUS.add(SKU_DONATE_THREE);
     }
 
+    public static final String PREF_APP_LAUNCHES = "app_launches";
+    public static final String PREF_NEXT_BOTHER = "iab_next_bother";
+
+    private static final long ONE_MINUTE_MILLI = 60 * 1000;
+    private static final long ONE_HOUR_MILLI = 60 * ONE_MINUTE_MILLI;
+    private static final long ONE_DAY_MILLI = 24 * ONE_HOUR_MILLI;
+    private static final long ONE_WEEK_MILLI = 7 * ONE_DAY_MILLI;
+    private static final long MIN_INTERVAL_FOR_BOTHER = 2 * ONE_WEEK_MILLI;
+    private static final int MIN_LAUNCHES_FOR_BOTHER = 4;
+
     public static IabHelper newHelper(Context context) {
         IabHelper h = new IabHelper(context, base64EncodedPublicKey);
         h.enableDebugLogging(D);
         return h;
     }
 
-    public static final String PREF_APP_LAUNCHES = "app_launches";
-    public static final String PREF_NEXT_BOTHER = "iab_next_bother";
     public static void incrementAppLaunchCount(Context context) {
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+        PreferenceUtils p = PreferenceUtils.getInstance(context);
         int prevCount = p.getInt(PREF_APP_LAUNCHES, 0);
-        p.edit().putInt(PREF_APP_LAUNCHES, ++prevCount).apply();
+        p.putInt(PREF_APP_LAUNCHES, ++prevCount);
     }
 
-    private static final int MIN_LAUNCHES = 5;
-    private static final long THREE_WEEKS_MILLI = 3 * 7 * 24 * 60 * 60 * 1000;
     public static void maybeShowDonateDialog(Context context) {
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+        if (T) {
+            showDonateDialog(context);
+            return;
+        }
+        PreferenceUtils p = PreferenceUtils.getInstance(context);
         // feeble attempt to not annoy early adopters with the popup,
         // pref is only present in versions <= 0.4.3
-//        if (p.getBoolean("old_cache_removed", false)) {
-//            return;
-//        }
-//        long nextBother = p.getLong(PREF_NEXT_BOTHER, 0);
-//        int openCount = p.getInt(PREF_APP_LAUNCHES, 0);
-//        if (openCount >= MIN_LAUNCHES && nextBother <= System.currentTimeMillis()) {
-//            p.edit().putInt(PREF_APP_LAUNCHES, 0)
-//                    .putLong(PREF_NEXT_BOTHER, System.currentTimeMillis() + THREE_WEEKS_MILLI)
-//                    .apply();
+        if (p.getBoolean("old_cache_removed", false)) {
+            return;
+        }
+        long nextBother = p.getLong(PREF_NEXT_BOTHER, 0);
+        int openCount = p.getInt(PREF_APP_LAUNCHES, 0);
+        if (openCount >= MIN_LAUNCHES_FOR_BOTHER && nextBother <= System.currentTimeMillis()) {
+            p.putInt(PREF_APP_LAUNCHES, 0);
+            p.putLong(PREF_NEXT_BOTHER, System.currentTimeMillis() + MIN_INTERVAL_FOR_BOTHER);
             showDonateDialog(context);
-//        }
+        }
     }
 
     public static void showDonateDialog(final Context context) {
@@ -92,18 +100,24 @@ public class IabUtil {
      * @param context
      */
     public static void queryDonateAsync(Context context) {
-        final IabHelper helper = new IabHelper(context, base64EncodedPublicKey);
-        helper.enableDebugLogging(BuildConfig.DEBUG);
+        final IabHelper helper = newHelper(context);
         helper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
             @Override
             public void onIabSetupFinished(IabResult result) {
                 if (result.isSuccess()) {
-                    helper.queryInventoryAsync(false, PRODUCT_SKUS, new IabHelper.QueryInventoryFinishedListener() {
+                    helper.queryInventoryAsync(true, PRODUCT_SKUS, new IabHelper.QueryInventoryFinishedListener() {
                         @Override
                         public void onQueryInventoryFinished(IabResult result, Inventory inv) {
                             helper.dispose();
                             if (result.isSuccess()) {
                                 if (D) Log.d(TAG, "result success");
+                                if (D) Log.d(TAG, "purchases=" + inv.mPurchaseMap.toString());
+                                if (D) Log.d(TAG, "skus=" + inv.mSkuMap.toString());
+                                // Debug builds, and other unforseen situations will have zero iab items
+                                if (inv.getSkuCount() == 0) {
+                                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.NO_SKUS));
+                                    return;
+                                }
                                 for (String sku : PRODUCT_SKUS) {
                                     Purchase p = inv.getPurchase(sku);
                                     if (p != null && verifyDeveloperPayload(p)) {
@@ -115,13 +129,13 @@ public class IabUtil {
                                 if (D) Log.d(TAG, "User has no purchases");
                                 EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.NO_ERROR, false));
                             } else {
-                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.QUERY_FAILED, false));
+                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.QUERY_FAILED));
                             }
                         }
                     });
                 } else {
-                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.BIND_FAILED, false));
-                    helper.dispose();
+                    // No billing service
+                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.BIND_FAILED));
                 }
             }
         });

@@ -68,9 +68,8 @@
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
     <string name="settings_gms_unavailable">Google services unavailable, casting will not work</string>
 
-    <string name="settings_donate_unpurchased">Click for details</string>
-
-    <!-- IAB dialogs -->
+    <!-- IAB -->
+    <string name="iab_donate_unpurchased">Click for details</string>
     <string name="iab_purchased">Purchased</string>
     <string name="iab_purchase_failed">Purchase failed</string>
     <string name="iab_fetching_inventory">Obtaining product list</string>
@@ -79,6 +78,8 @@
     <string name="iab_donate">Donate</string>
     <string name="iab_donate_message">Thank you for using Orpheus. Please consider a donation to support the developers.</string>
     <string name="iab_thanks">Thank you for your kindness</string>
+    <string name="iab_opensilk_donate_url" translatable="false">http://opensilk.org/donate/</string>
+    <string name="iab_opensilk_donate">Billing services unavailable. Please visit our website for donate options.</string>
 
     <!-- Interface -->
     <string name="settings_interface_restart_app">Orpheus will now restart to apply changes.</string>

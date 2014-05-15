@@ -347,10 +347,9 @@ public class NowPlayingFragment extends Fragment implements
     @Subscribe
     public void onIABResult(IABQueryResult r) {
         if (r.error == IABQueryResult.Error.NO_ERROR) {
-            if (r.isApproved) {
-                return;
+            if (!r.isApproved) {
+                IabUtil.maybeShowDonateDialog(getActivity());
             }
-            IabUtil.maybeShowDonateDialog(getActivity());
         }
         //TODO handle faliurs
     }
