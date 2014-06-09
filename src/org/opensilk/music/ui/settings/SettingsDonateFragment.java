@@ -52,7 +52,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.settings_donate);
+        addPreferencesFromResource(R.xml.blank_prefscreen);
         mPrefscreen = getPreferenceScreen();
         mIabHelper = IabUtil.newHelper(getActivity());
         createWaitDialog();

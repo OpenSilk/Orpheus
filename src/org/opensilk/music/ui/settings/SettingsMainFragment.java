@@ -97,6 +97,10 @@ public class SettingsMainFragment extends Fragment {
                     mContext.getString(R.string.settings_audio_title),
                     R.drawable.ic_settings_audio_light,
                     R.drawable.ic_settings_audio_dark));
+            mFragments.add(new Holder(SettingsPluginFragment.class.getName(),
+                    mContext.getString(R.string.settings_plugin_category),
+                    R.drawable.ic_settings_about_light,
+                    R.drawable.ic_settings_about_dark));
             // Must be last, add new items above this one.
             mFragments.add(new Holder(SettingsDonateFragment.class.getName(),
                     mContext.getString(R.string.settings_donate),

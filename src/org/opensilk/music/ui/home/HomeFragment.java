@@ -96,11 +96,11 @@ public class HomeFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         // Disable home as up
         ActionBarActivity activity = (ActionBarActivity) getActivity();
-        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        activity.getSupportActionBar().setHomeButtonEnabled(false);
+//        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//        activity.getSupportActionBar().setHomeButtonEnabled(false);
         // Display title
-        activity.getSupportActionBar().setDisplayShowTitleEnabled(true);
-        activity.getSupportActionBar().setTitle(R.string.app_name);
+//        activity.getSupportActionBar().setDisplayShowTitleEnabled(true);
+//        activity.getSupportActionBar().setTitle(R.string.app_name);
         // Enable the options menu
         setHasOptionsMenu(true);
     }

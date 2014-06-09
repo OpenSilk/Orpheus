@@ -23,6 +23,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,14 +33,18 @@ import android.view.View;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout.SlideState;
+import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.api.PluginInfo;
 import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.NavDrawerEvent;
 import org.opensilk.music.bus.events.PanelStateChanged;
+import org.opensilk.music.ui.fragments.NavigationDrawerFragment;
 import org.opensilk.music.ui.fragments.SearchFragment;
 import org.opensilk.music.ui.home.HomeFragment;
+import org.opensilk.music.ui.library.LibraryHomeFragment;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
-import org.opensilk.music.ui.settings.SettingsTabletActivity;
-import org.opensilk.music.util.ConfigHelper;
+import org.opensilk.music.util.RemoteLibraryUtil;
 
 import hugo.weaving.DebugLog;
 
@@ -57,9 +63,29 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
 
     private boolean mIsLargeLandscape;
 
+    /**
+     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+     */
+    protected NavigationDrawerFragment mNavigationDrawerFragment;
+
+    /**
+     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
+     */
+    protected CharSequence mTitle;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize the drawer
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mTitle = getTitle();
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
 
         mIsLargeLandscape = findViewById(R.id.landscape_dummy) != null;
         // Pinn the sliding pane open on landscape layouts
@@ -70,10 +96,10 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
         }
 
         // Load the music browser fragment
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, new HomeFragment()).commit();
-        }
+//        if (savedInstanceState == null) {
+//            getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.main, new HomeFragment()).commit();
+//        }
     }
 
     @Override
@@ -88,6 +114,24 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
             }
         }
         super.onNewIntent(intent);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getInstance().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getInstance().unregister(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RemoteLibraryUtil.unBindAll(this);
     }
 
     @Override
@@ -140,11 +184,15 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // search option
-        getMenuInflater().inflate(R.menu.search, menu);
-        // Settings
-        getMenuInflater().inflate(R.menu.settings, menu);
-        return super.onCreateOptionsMenu(menu);
+        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+            // search option
+            getMenuInflater().inflate(R.menu.search, menu);
+            // Settings
+            getMenuInflater().inflate(R.menu.settings, menu);
+
+            return super.onCreateOptionsMenu(menu);
+        }
+        return false;
     }
 
     @Override
@@ -161,19 +209,27 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
     }
 
     @Override
+    @DebugLog
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 0 && resultCode == RESULT_RESTART_APP) {
-            // Hack to force a refresh for our activity for eg theme change
-            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-            PendingIntent pi = PendingIntent.getActivity(this, 0,
-                    getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName()),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
-            am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
-            finish();
-        } else if (requestCode == 0 && resultCode == RESULT_RESTART_FULL) {
-            killServiceOnExit = true;
-            onActivityResult(requestCode, RESULT_RESTART_APP, data);
+        switch (requestCode) {
+            case 0:
+                if (resultCode == RESULT_RESTART_APP) {
+                    // Hack to force a refresh for our activity for eg theme change
+                    AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    PendingIntent pi = PendingIntent.getActivity(this, 0,
+                            getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName()),
+                            PendingIntent.FLAG_CANCEL_CURRENT);
+                    am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
+                    finish();
+                } else if (resultCode == RESULT_RESTART_FULL) {
+                    killServiceOnExit = true;
+                    onActivityResult(0, RESULT_RESTART_APP, data);
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
+
     }
 
     @Override
@@ -185,6 +241,14 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
     }
 
     @Override
+    public void maybeClosePanel() {
+        // On tablets panel is pinned open
+        if (!mIsLargeLandscape) {
+            super.maybeClosePanel();
+        }
+    }
+
+    @Override
     protected void maybeHideActionBar() {
         //Dont hide action bar on tablets
         if (!mIsLargeLandscape) {
@@ -192,12 +256,42 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
         }
     }
 
+    /*
+     * Abstract Methods
+     */
+
     @Override
-    public void maybeClosePanel() {
-        // On tablets panel is pinned open
-        if (!mIsLargeLandscape) {
-            super.maybeClosePanel();
+    protected int getLayoutId() {
+        return R.layout.activity_base_sliding;
+    }
+
+    /*
+     * Events
+     */
+    @Subscribe
+    public void onDrawerItemSelected(NavDrawerEvent.ItemSelected e) {
+        PluginInfo pi = e.pluginInfo;
+        if (pi.componentName == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main, new HomeFragment()).commit();
+        } else {
+            if (!RemoteLibraryUtil.isBound(pi.componentName)) {
+                RemoteLibraryUtil.bindToService(this, pi.componentName);
+            }
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main, LibraryHomeFragment.newInstance(pi))
+                    .commit();
         }
+    }
+
+    /**
+     *
+     */
+    public void restoreActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setTitle(mTitle);
     }
 
     public boolean isLargeLandscape() {

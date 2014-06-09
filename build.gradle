@@ -3,8 +3,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
-        classpath 'com.jakewharton.hugo:hugo-plugin:1.0.1'
+        classpath 'com.android.tools.build:gradle:0.10.+'
+        classpath 'com.jakewharton.hugo:hugo-plugin:1.1.0'
     }
 }
 apply plugin: 'android'
@@ -15,6 +15,11 @@ repositories {
     mavenCentral()
 }
 
+// Build config
+ext.compileSdkVersion = 19
+ext.buildToolsVersion  = "19.0.3"
+
+// Versioning
 def versionMajor = 0
 def versionMinor = 5
 def versionPatch = 0
@@ -24,23 +29,34 @@ assert(versionMinor < 100) // Double digits
 assert(versionPatch < 100) // Double digits
 assert(versionBuild < 100) // Double digits
 
+// defaultConfig
+ext.minSdkVersion = 16
+ext.targetSdkVersion = 19
+ext.versionCode = versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
+ext.versionName = String.format("%d.%d.%d", versionMajor, versionMinor, versionPatch)
+
 def gitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
 
+def getDebugVersionSuffix() {
+    // When building with Android Studio gitSha() is null;
+    return "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
+}
+
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
 //    lintOptions {
 //        abortOnError false
 //    }
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 19
-        versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
-        versionName String.format("%d.%d.%d", versionMajor, versionMinor, versionPatch)
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
         packageName "org.opensilk.music"
     }
 
@@ -120,12 +136,14 @@ dependencies {
     compile 'com.github.gabrielemariotti.changeloglib:library:1.4.0'
     compile 'com.google.android.apps.muzei:muzei-api:+'
     compile 'com.squareup:otto:1.3.4'
+    compile 'com.jakewharton:butterknife:5.1.0'
 
     compile 'com.sothree.slidinguppanel:library:1.0.0-SNAPSHOT'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT'
     compile 'com.github.manuelpeinado.fadingactionbar:fadingactionbar:3.1.2-SNAPSHOT'
     compile 'com.github.manuelpeinado.fadingactionbar:fadingactionbar-abc:3.1.2-SNAPSHOT'
+    compile 'com.android.volley:volley:1.0-SNAPSHOT'
 
     compile project(':../SilkCastService:library')
-    compile project('../volley:volley')
+    compile project('../OrpheusApi:api')
 }

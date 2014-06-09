@@ -15,6 +15,14 @@
     <!-- Menus -->
     <string name="menu_party_shuffle">Party shuffle</string>
 
+    <!-- ### DRAWER ### -->
+    <string name="drawer_library">Library</string>
+    <string name="drawer_device">Device</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="page_folders">Folders</string>
+
     <!-- ################ SETTINGS ################ -->
 
     <!-- Main settings screen -->
@@ -31,6 +39,7 @@
     <string name="settings_data_storage_category">Storage</string>
     <string name="settings_general_category">General</string>
     <string name="settings_cast_category">Cast</string>
+    <string name="settings_plugin_category">Plugins</string>
 
     <!-- Preference titles and summaries -->
     <string name="settings_about_author_title">Created by OpenSilk Productions LLC</string>
@@ -67,6 +76,9 @@
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
     <string name="settings_gms_unavailable">Google services unavailable, casting will not work</string>
+
+    <string name="settings_plugin_get">Get plugins</string>
+    <string name="settings_plugin_get_summary">Search Play Store for Orpheus plugins</string>
 
     <!-- IAB -->
     <string name="iab_donate_unpurchased">Click for details</string>

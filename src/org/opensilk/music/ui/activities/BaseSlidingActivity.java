@@ -113,7 +113,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         setTheme(mThemeHelper.getPanelTheme());
 
         // Set the layout
-        setContentView(R.layout.activity_base_sliding);
+        setContentView(getLayoutId());
 
         // Setup action bar
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -197,7 +197,7 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
             mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
         }
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -337,6 +337,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
             getSupportActionBar().hide();
         }
     }
+
+    protected abstract int getLayoutId();
 
     /**
      * Handle mediarouter callbacks, responsible for keeping our mediarouter instance
