@@ -3,7 +3,6 @@
     tools:ignore="MissingTranslation">
 
     <string name="app_name" translatable="false">Orpheus</string>
-    <string name="app_name_label" translatable="false">Orpheus</string>
 
     <!-- ################ GENERAL ################ -->
     <string name="okay">Okay</string>

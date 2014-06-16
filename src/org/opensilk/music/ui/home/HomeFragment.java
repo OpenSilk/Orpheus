@@ -23,7 +23,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,22 +35,38 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.ui.modules.ActionBarHelper;
+import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.silkdagger.support.DaggerFragment;
+
 import java.util.List;
 import java.util.Locale;
+
+import javax.inject.Inject;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
  * playlists, recent, artists, albums, songs, and genre {@link Fragment}
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends DaggerFragment {
 
-    private ViewPager mViewPager;
+    @Inject @ForActivity
+    DrawerHelper mDrawerHelper;
+    @Inject @ForActivity
+    ActionBarHelper mActionBarHelper;
+    @InjectView(R.id.pager)
+    ViewPager mViewPager;
     private HomePagerAdapter mPagerAdapter;
     private PreferenceUtils mPreferences;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         // Get the preferences
         mPreferences = PreferenceUtils.getInstance(getActivity());
 
@@ -75,34 +90,30 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
-
-        // The View for the fragment's UI
         final ViewGroup rootView = (ViewGroup)inflater.inflate(
                 R.layout.pager_fragment, container, false);
+        ButterKnife.inject(this, rootView);
+        return rootView;
+    }
 
-        // Initialize the ViewPager
-        mViewPager = (ViewPager)rootView.findViewById(R.id.pager);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         // Attch the adapter
         mViewPager.setAdapter(mPagerAdapter);
         // Offscreen pager loading limit
 //        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
         // Start on the last page the user was on
         mViewPager.setCurrentItem(mPreferences.getStartPage());
-        return rootView;
     }
 
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // Disable home as up
-        ActionBarActivity activity = (ActionBarActivity) getActivity();
-//        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-//        activity.getSupportActionBar().setHomeButtonEnabled(false);
-        // Display title
-//        activity.getSupportActionBar().setDisplayShowTitleEnabled(true);
-//        activity.getSupportActionBar().setTitle(R.string.app_name);
         // Enable the options menu
         setHasOptionsMenu(true);
+        //Set title
+        mActionBarHelper.setTitle(getString(R.string.drawer_device));
     }
 
     @Override
@@ -115,7 +126,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mViewPager = null;
+        ButterKnife.reset(this);
     }
 
     @Override
@@ -127,10 +138,12 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        // Party shuffle
-        inflater.inflate(R.menu.party_shuffle, menu);
-        // Shuffle all
+        if (!mDrawerHelper.isDrawerOpen()) {
+            // Party shuffle
+            inflater.inflate(R.menu.party_shuffle, menu);
+            // Shuffle all
 //        inflater.inflate(R.menu.shuffle, menu);
+        }
     }
 
     @Override
@@ -145,9 +158,8 @@ public class HomeFragment extends Fragment {
                 MusicUtils.shuffleAll(getActivity());
                 return true;
             default:
-                break;
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     /**

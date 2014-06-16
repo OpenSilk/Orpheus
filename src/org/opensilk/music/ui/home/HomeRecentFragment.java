@@ -33,6 +33,10 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import org.opensilk.music.adapters.RecentGridCardCursorAdapter;
 import org.opensilk.music.adapters.RecentListCardCursorAdapter;
 import org.opensilk.music.loaders.RecentCursorLoader;
+import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+
+import javax.inject.Inject;
 
 import static com.andrew.apollo.utils.PreferenceUtils.RECENT_LAYOUT;
 
@@ -41,10 +45,15 @@ import static com.andrew.apollo.utils.PreferenceUtils.RECENT_LAYOUT;
  */
 public class HomeRecentFragment extends HomePagerBaseCursorFragment {
 
+    @Inject @ForActivity
+    DrawerHelper mDrawerHelper;
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.view_as, menu);
+        if (!mDrawerHelper.isDrawerOpen()) {
+            super.onCreateOptionsMenu(menu, inflater);
+            inflater.inflate(R.menu.view_as, menu);
+        }
     }
 
     @Override

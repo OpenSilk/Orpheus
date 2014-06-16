@@ -16,7 +16,9 @@
  */
 package org.opensilk.music.ui.activities;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -33,6 +35,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -43,6 +46,7 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -58,27 +62,29 @@ import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
+import org.opensilk.music.ui.fragments.SearchFragment;
+import org.opensilk.music.ui.settings.SettingsPhoneActivity;
+import org.opensilk.silkdagger.support.DaggerActionBarActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 import hugo.weaving.DebugLog;
 
+import static android.app.SearchManager.QUERY;
 import static org.opensilk.cast.CastMessage.*;
 
 /**
- * A base {@link FragmentActivity} used to update the bottom bar and
- * bind to Apollo's service.
- * <p>
- * {@link HomeSlidingActivity} extends from this skeleton.
- * 
- * @author Andrew Neal (andrewdneal@gmail.com)
+ *
  */
-public abstract class BaseSlidingActivity extends ActionBarActivity implements
+public abstract class BaseSlidingActivity extends DaggerActionBarActivity implements
         ServiceConnection,
         SlidingUpPanelLayout.PanelSlideListener {
 
     private static final String TAG = BaseSlidingActivity.class.getSimpleName();
+
+    public static final int RESULT_RESTART_APP = RESULT_FIRST_USER << 1;
+    public static final int RESULT_RESTART_FULL = RESULT_FIRST_USER << 2;
 
     /** The service token */
     private ServiceToken mToken;
@@ -104,6 +110,8 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     protected PreferenceUtils mPreferences;
 
+    private boolean mIsLargeLandscape;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,8 +124,9 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
         setContentView(getLayoutId());
 
         // Setup action bar
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        ActionBar ab = getSupportActionBar();
+        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        ab.setDisplayShowTitleEnabled(true);
 
         // Fade it in
         //overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -160,10 +169,28 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
         // Get panel fragment reference
         mNowPlayingFragment = (NowPlayingFragment) getSupportFragmentManager().findFragmentById(R.id.now_playing_fragment);
+
+        mIsLargeLandscape = findViewById(R.id.landscape_dummy) != null;
+        // Pinn the sliding pane open on landscape layouts
+        if (mIsLargeLandscape && savedInstanceState == null) {
+            mSlidingPanel.setSlidingEnabled(false);
+            mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.EXPANDED);
+            EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+        }
     }
 
     @Override
     public void onNewIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(QUERY);
+            if (!TextUtils.isEmpty(query)) {
+                SearchFragment f = (SearchFragment) getSupportFragmentManager().findFragmentByTag("search");
+                if (f != null) {
+                    f.onNewQuery(query);
+                    return;
+                }
+            }
+        }
         setIntent(intent);
         boolean handled = mNowPlayingFragment.startPlayback(intent);
         if (handled) {
@@ -259,8 +286,73 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("panel_open", mSlidingPanel.isExpanded());
+        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
+        outState.putBoolean("panel_needs_collapse", mIsLargeLandscape);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (mIsLargeLandscape) {
+                // Coming from portrait, need to pin the panel open
+                mSlidingPanel.setSlidingEnabled(false);
+                mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.EXPANDED);
+                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+                if (savedInstanceState.getBoolean("queue_showing", false)) {
+                    mNowPlayingFragment.onQueueVisibilityChanged(true);
+                }
+            } else if (savedInstanceState.getBoolean("panel_needs_collapse", false)) {
+                // Coming back from landscape we should collapse the panel
+                mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.COLLAPSED);
+                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_COLLAPSE));
+                if (savedInstanceState.getBoolean("queue_showing", false)) {
+                    mNowPlayingFragment.popQueueFragment();
+                }
+            } else if (savedInstanceState.getBoolean("panel_open", false)) {
+                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+                if (savedInstanceState.getBoolean("queue_showing", false)) {
+                    mNowPlayingFragment.onQueueVisibilityChanged(true);
+                }
+            }
+        }
+    }
+
+    @Override
+    @DebugLog
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case 0:
+                if (resultCode == RESULT_RESTART_APP) {
+                    // Hack to force a refresh for our activity for eg theme change
+                    AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    PendingIntent pi = PendingIntent.getActivity(this, 0,
+                            getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName()),
+                            PendingIntent.FLAG_CANCEL_CURRENT);
+                    am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
+                    finish();
+                } else if (resultCode == RESULT_RESTART_FULL) {
+                    killServiceOnExit = true;
+                    onActivityResult(0, RESULT_RESTART_APP, data);
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
+
+    }
+
+    @Override
     public void onBackPressed() {
-        if (mSlidingPanel.isExpanded()) {
+        if (mIsLargeLandscape) {
+            // We don't close the panel on landscape
+            if (!getSupportFragmentManager().popBackStackImmediate()) {
+                finish();
+            }
+        } else if (mSlidingPanel.isExpanded()) {
             maybeClosePanel();
         } else {
             super.onBackPressed();
@@ -290,6 +382,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
 
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
+        //Dont hide action bar on tablets
+        if (mIsLargeLandscape) {
+            return;
+        }
         if (slideOffset < 0.2) {
             if (getSupportActionBar().isShowing()) {
                 getSupportActionBar().hide();
@@ -317,6 +413,10 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
     }
 
     public void maybeClosePanel() {
+        // On tablets panel is pinned open
+        if (mIsLargeLandscape) {
+            return;
+        }
         if (mSlidingPanel.isExpanded()) {
             mSlidingPanel.collapsePane();
         }
@@ -332,10 +432,18 @@ public abstract class BaseSlidingActivity extends ActionBarActivity implements
      * Hides action bar if panel is expanded
      */
     protected void maybeHideActionBar() {
+        //Dont hide action bar on tablets
+        if (mIsLargeLandscape) {
+            return;
+        }
         if (mSlidingPanel.isExpanded()
                 && getSupportActionBar().isShowing()) {
             getSupportActionBar().hide();
         }
+    }
+
+    public boolean isLargeLandscape() {
+        return mIsLargeLandscape;
     }
 
     protected abstract int getLayoutId();

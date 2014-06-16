@@ -14,31 +14,11 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.bus.events;
-
-import org.opensilk.music.api.PluginInfo;
+package org.opensilk.music.ui.modules;
 
 /**
- * Created by drew on 6/14/14.
+ * Created by drew on 6/16/14.
  */
-public class NavDrawerEvent {
-
-    private NavDrawerEvent() {
-
-    }
-
-    public static class Opened {
-
-    }
-
-    public static class Closed {
-
-    }
-
-    public static class ItemSelected {
-        public final PluginInfo pluginInfo;
-        public ItemSelected(PluginInfo pluginInfo) {
-            this.pluginInfo = pluginInfo;
-        }
-    }
+public interface DrawerHelper {
+    public boolean isDrawerOpen();
 }

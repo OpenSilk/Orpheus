@@ -39,10 +39,15 @@ import org.opensilk.music.api.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
+import org.opensilk.music.ui.modules.ActionBarHelper;
 import org.opensilk.music.util.RemoteLibraryUtil;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.silkdagger.support.DaggerFragment;
 
 import java.util.List;
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -55,20 +60,24 @@ import static org.opensilk.music.api.Api.Ability.QUERY_ARTISTS;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryHomeFragment extends Fragment {
+public class LibraryHomeFragment extends DaggerFragment {
 
     public static final int REQUEST_LIBRARY = 1001;
     public static final String ARG_COMPONENT = "argComponent";
     public static final String ARG_IDENTITY = "argIdentity";
 
+    @Inject @ForActivity
+    ActionBarHelper mActionBarHelper;
+
     private RemoteLibrary mLibraryService;
     private PluginInfo mPluginInfo;
-    private String mLibraryIdentity;
 
     @InjectView(R.id.pager)
-    protected ViewPager mPager;
-
+    ViewPager mPager;
     protected HomePagerAdapter mPagerAdapter;
+
+    private String mLibraryIdentity;
+    private int mPreviousPagerPage = 0;
 
     public static LibraryHomeFragment newInstance(PluginInfo p) {
         LibraryHomeFragment f = new LibraryHomeFragment();
@@ -82,8 +91,9 @@ public class LibraryHomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPluginInfo = getArguments().getParcelable("plugininfo");
-        // TODO get LibraryIdentity from prefs;
-
+        // Bind the remote service
+        RemoteLibraryUtil.bindToService(getActivity(), mPluginInfo.componentName);
+        EventBus.getInstance().register(this);
     }
 
     @Override
@@ -98,19 +108,31 @@ public class LibraryHomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
         mPager.setAdapter(mPagerAdapter);
-
-        if (isLibraryBound()) {
-            requestLibrary();
+        if (savedInstanceState != null) {
+            // TODO save / get from prefs
+            mLibraryIdentity = savedInstanceState.getString("library_id");
+            mPreviousPagerPage = savedInstanceState.getInt("library_pager_current");
         }
+    }
 
-        EventBus.getInstance().register(this);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // set title
+        mActionBarHelper.setTitle(mPluginInfo.title);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.reset(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
         EventBus.getInstance().unregister(this);
+        RemoteLibraryUtil.unbindFromService(getActivity(), mPluginInfo.componentName);
     }
 
     @Override
@@ -129,8 +151,16 @@ public class LibraryHomeFragment extends Fragment {
                     //TODO
                 }
                 break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
-        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("library_id", mLibraryIdentity);
+        outState.putInt("library_pager_current", mPager.getCurrentItem());
     }
 
     /*
@@ -173,20 +203,24 @@ public class LibraryHomeFragment extends Fragment {
     private void addPages() {
         if (mLibraryService != null) {
             try {
+                int caps = mLibraryService.getCapabilities();
+
                 final Bundle b = new Bundle(2);
                 b.putParcelable(ARG_COMPONENT, mPluginInfo.componentName);
                 b.putString(ARG_IDENTITY, mLibraryIdentity);
-                int abilities = mLibraryService.getCapabilities();
-                if ((abilities & BROWSE_FOLDERS) == BROWSE_FOLDERS) {
+
+                if ((caps & BROWSE_FOLDERS) == BROWSE_FOLDERS) {
                     mPagerAdapter.add(LibraryFragment.FOLDER, b);
                 }
-                if ((abilities & QUERY_ARTISTS) == QUERY_ARTISTS) {
+                if ((caps & QUERY_ARTISTS) == QUERY_ARTISTS) {
                     mPagerAdapter.add(LibraryFragment.ARTIST, b);
                 }
-                if ((abilities & QUERY_ALBUMS) == QUERY_ALBUMS) {
+                if ((caps & QUERY_ALBUMS) == QUERY_ALBUMS) {
                     mPagerAdapter.add(LibraryFragment.ALBUM, b);
                 }
                 mPagerAdapter.notifyDataSetChanged();
+
+                mPager.setCurrentItem(mPreviousPagerPage);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

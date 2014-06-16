@@ -28,6 +28,7 @@ import org.opensilk.music.api.model.Resource;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
@@ -89,4 +90,13 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("folderid", mFolderId);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle inState) {
+        mFolderId = inState.getString("folderid");
+    }
 }

@@ -32,6 +32,10 @@ import com.andrew.apollo.utils.SortOrder;
 import org.opensilk.music.adapters.ArtistGridCardCursorAdapter;
 import org.opensilk.music.adapters.ArtistListCardCursorAdapter;
 import org.opensilk.music.loaders.ArtistCursorLoader;
+import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+
+import javax.inject.Inject;
 
 import static com.andrew.apollo.utils.PreferenceUtils.ARTIST_LAYOUT;
 
@@ -40,11 +44,16 @@ import static com.andrew.apollo.utils.PreferenceUtils.ARTIST_LAYOUT;
  */
 public class HomeArtistFragment extends HomePagerBaseCursorFragment {
 
+    @Inject @ForActivity
+    DrawerHelper mDrawerHelper;
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.artist_sort_by, menu);
-        inflater.inflate(R.menu.view_as, menu);
+        if (!mDrawerHelper.isDrawerOpen()) {
+            super.onCreateOptionsMenu(menu, inflater);
+            inflater.inflate(R.menu.artist_sort_by, menu);
+            inflater.inflate(R.menu.view_as, menu);
+        }
     }
 
     @Override

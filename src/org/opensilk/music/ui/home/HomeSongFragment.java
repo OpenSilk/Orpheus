@@ -35,6 +35,10 @@ import com.andrew.apollo.utils.ThemeHelper;
 import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.loaders.SongCursorLoader;
 import org.opensilk.music.ui.cards.CardShuffleList;
+import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+
+import javax.inject.Inject;
 
 import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
@@ -44,6 +48,9 @@ import it.gmariotti.cardslib.library.view.CardView;
  * Songs
  */
 public class HomeSongFragment extends HomePagerBaseCursorFragment {
+
+    @Inject @ForActivity
+    DrawerHelper mDrawerHelper;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,8 +79,10 @@ public class HomeSongFragment extends HomePagerBaseCursorFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.song_sort_by, menu);
+        if (!mDrawerHelper.isDrawerOpen()) {
+            super.onCreateOptionsMenu(menu, inflater);
+            inflater.inflate(R.menu.song_sort_by, menu);
+        }
     }
 
     @Override

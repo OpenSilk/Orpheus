@@ -73,4 +73,14 @@ public class LibraryArtistArrayAdapter extends AbsLibraryArrayAdapter<Artist> {
             e.printStackTrace();
         }
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle inState) {
+
+    }
 }

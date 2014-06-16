@@ -44,6 +44,7 @@ public class RemoteLibraryUtil {
         final Context ctx = context.getApplicationContext();
         final ServiceBinder binder = new ServiceBinder(componentName);
         final Intent i = new Intent().setComponent(componentName);
+        ctx.startService(i);
         if (ctx.bindService(i, binder, Context.BIND_AUTO_CREATE)) {
             sMap.put(componentName, binder);
             return true;
@@ -77,7 +78,7 @@ public class RemoteLibraryUtil {
         if (isBound(componentName)) {
             return sMap.get(componentName).service;
         }
-        throw new RemoteException("Service not bound");
+        throw new RemoteException();
     }
 
     public static final class ServiceBinder implements ServiceConnection {

@@ -23,11 +23,16 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.andrew.apollo.utils.MusicUtils;
+import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Resource;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.bus.events.RemoteLibraryEvent;
 import org.opensilk.music.ui.library.adapter.LibraryFolderArrayAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by drew on 6/14/14.
@@ -49,13 +54,23 @@ public class LibraryFolderFragment extends ListFragment {
         mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
 
         mAdapter = new LibraryFolderArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName);
-        mAdapter.startLoad(null);
+        if (savedInstanceState != null) {
+            mAdapter.restoreInstanceState(savedInstanceState);
+        } else {
+            mAdapter.startLoad(null);
+        }
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mAdapter.saveInstanceState(outState);
     }
 
     @Override
@@ -69,4 +84,5 @@ public class LibraryFolderFragment extends ListFragment {
             MusicUtils.playFile(getActivity(), s.dataUri); //TODO
         }
     }
+
 }

@@ -32,13 +32,14 @@ import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
+import org.opensilk.silkdagger.DaggerApplication;
 
 import hugo.weaving.DebugLog;
 
 /**
  * Use to initilaze singletons and global static variables that require context
  */
-public class ApolloApplication extends Application {
+public class ApolloApplication extends DaggerApplication {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     /**
@@ -59,6 +60,7 @@ public class ApolloApplication extends Application {
     @Override
     @DebugLog
     public void onCreate() {
+        super.onCreate();
         /*
          * Init global static variables
          */
@@ -99,6 +101,13 @@ public class ApolloApplication extends Application {
                     .setClassInstanceLimit(HomeSlidingActivity.class, 1);
             StrictMode.setVmPolicy(vmPolicyBuilder.build());
         }
+    }
+
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new ApolloModule(this)
+        };
     }
 
     /**

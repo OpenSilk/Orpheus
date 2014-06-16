@@ -26,6 +26,7 @@ import org.opensilk.music.api.callback.AlbumQueryResult;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,5 +72,15 @@ public class LibraryAlbumArrayAdapter extends AbsLibraryArrayAdapter<Album> {
             e.printStackTrace();
             mLoadingInProgress = false;
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle inState) {
+
     }
 }

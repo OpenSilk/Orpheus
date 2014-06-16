@@ -45,13 +45,23 @@ public class LibraryArtistFragment extends ListFragment {
         mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
 
         mAdapter = new LibraryArtistArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName);
-        mAdapter.startLoad();
+        if (savedInstanceState != null) {
+            mAdapter.restoreInstanceState(savedInstanceState);
+        } else {
+            mAdapter.startLoad();
+        }
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mAdapter.saveInstanceState(outState);
     }
 
     @Override

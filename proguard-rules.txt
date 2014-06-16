@@ -59,3 +59,16 @@
 -dontwarn butterknife.internal.**
 -keep class **$$ViewInjector { *; }
 -keepnames class * { @butterknife.InjectView *;}
+
+#
+# OrpheusApi
+#
+
+-keep class org.opensilk.music.api.** { *; }
+
+#
+# Dagger
+#
+-keep class * extends dagger.internal.Binding
+-keep class * extends dagger.internal.ModuleAdapter
+-dontwarn dagger.internal.codegen.*

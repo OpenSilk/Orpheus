@@ -33,6 +33,8 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.silkdagger.support.DaggerFragment;
+
 import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
 
@@ -41,7 +43,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * Created by drew on 2/22/14.
  */
-public abstract class HomePagerBaseCursorFragment extends Fragment implements
+public abstract class HomePagerBaseCursorFragment extends DaggerFragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     /**
@@ -78,11 +80,6 @@ public abstract class HomePagerBaseCursorFragment extends Fragment implements
      * Preferences
      */
     protected PreferenceUtils mPreferences;
-
-    @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -20,14 +20,19 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import org.opensilk.music.api.model.Resource;
+
+import java.util.ArrayList;
+
 /**
  * Created by drew on 6/14/14.
  */
-public abstract class AbsLibraryArrayAdapter<T> extends ArrayAdapter<T> {
+public abstract class AbsLibraryArrayAdapter<T extends Parcelable> extends ArrayAdapter<T> {
 
     public static final int STEP = 20;
 
@@ -62,13 +67,37 @@ public abstract class AbsLibraryArrayAdapter<T> extends ArrayAdapter<T> {
 
     protected void maybeLoadMore(int position) {
         if (!mLoadingInProgress && !mEndOfResults) {
-            int left = getCount() - 1 - position;
-            if (left > 0 && left < 5) {
+            if ((getCount() - 1) == position) {
                 getMore();
             }
         }
     }
 
     protected abstract void getMore();
+
+    protected abstract void onSaveInstanceState(Bundle outState);
+    protected abstract void onRestoreInstanceState(Bundle inState);
+
+    public void saveInstanceState(Bundle outState) {
+        Bundle b = new Bundle();
+        ArrayList<T> items = new ArrayList<>(getCount());
+        for (int ii=0; ii<getCount(); ii++) {
+            items.add(getItem(ii));
+        }
+        b.putParcelableArrayList("items", items);
+        b.putBundle("pagination", mPaginationBundle);
+        b.putBoolean("eor", mEndOfResults);
+        onSaveInstanceState(b);
+        outState.putBundle(getClass().getName(), b);
+    }
+
+    public void restoreInstanceState(Bundle inState) {
+        Bundle b = inState.getBundle(getClass().getName());
+        ArrayList<T> items = b.getParcelableArrayList("items");
+        addAll(items);
+        mPaginationBundle = b.getBundle("pagination");
+        mEndOfResults = b.getBoolean("eor");
+        onRestoreInstanceState(b);
+    }
 
 }

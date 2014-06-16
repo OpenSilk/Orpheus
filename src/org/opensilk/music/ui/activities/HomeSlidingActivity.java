@@ -17,115 +17,175 @@
 
 package org.opensilk.music.ui.activities;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
+import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout.SlideState;
-import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.PluginInfo;
-import org.opensilk.music.bus.EventBus;
-import org.opensilk.music.bus.events.NavDrawerEvent;
-import org.opensilk.music.bus.events.PanelStateChanged;
-import org.opensilk.music.ui.fragments.NavigationDrawerFragment;
-import org.opensilk.music.ui.fragments.SearchFragment;
+import org.opensilk.music.loaders.NavigationLoader;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.library.LibraryHomeFragment;
+import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
+import org.opensilk.music.util.PluginUtil;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
-import hugo.weaving.DebugLog;
+import java.util.ArrayList;
+import java.util.List;
 
-import static android.app.SearchManager.QUERY;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
- * This class is used to display the {@link ViewPager} used to swipe between the
- * main {@link Fragment}s used to browse the user's music.
- * 
- * @author Andrew Neal (andrewdneal@gmail.com)
+ *
  */
-public class HomeSlidingActivity extends BaseSlidingActivity {
-
-    public static final int RESULT_RESTART_APP = RESULT_FIRST_USER << 1;
-    public static final int RESULT_RESTART_FULL = RESULT_FIRST_USER << 2;
-
-    private boolean mIsLargeLandscape;
+public class HomeSlidingActivity extends BaseSlidingActivity implements
+        LoaderManager.LoaderCallbacks<List<PluginInfo>>,
+        DrawerHelper {
 
     /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+     * Remember the position of the selected item.
      */
-    protected NavigationDrawerFragment mNavigationDrawerFragment;
+    private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
 
     /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
+     * Per the design guidelines, you should show the drawer on launch until the user manually
+     * expands it. This shared preference tracks this.
      */
-    protected CharSequence mTitle;
+    private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
+
+    /**
+     * Helper component that ties the action bar to the navigation drawer.
+     */
+    private ActionBarDrawerToggle mDrawerToggle;
+
+    @InjectView(R.id.drawer_layout)
+    DrawerLayout mDrawerLayout;
+    @InjectView(R.id.drawer_list)
+    ListView mDrawerListView;
+    @InjectView(R.id.drawer_container)
+    View mDrawerContainerView;
+
+    private ArrayAdapter<PluginInfo> mDrawerAdapter;
+
+    private int mCurrentSelectedPosition = 0;
+    private boolean mUserLearnedDrawer;
+    private CharSequence mTitle;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize the drawer
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
+        ButterKnife.inject(this);
 
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+        // Read in the flag indicating whether or not the user has demonstrated awareness of the
+        // drawer. See PREF_USER_LEARNED_DRAWER for details.
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
-        mIsLargeLandscape = findViewById(R.id.landscape_dummy) != null;
-        // Pinn the sliding pane open on landscape layouts
-        if (mIsLargeLandscape && savedInstanceState == null) {
-            mSlidingPanel.setSlidingEnabled(false);
-            mSlidingPanel.setInitialState(SlideState.EXPANDED);
-            EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+        // Init drawer adapter
+        // Add default plugin now since we know it will always be there
+        List<PluginInfo> devices = new ArrayList<>();
+        devices.add(PluginUtil.getDefaultPluginInfo(this));
+        mDrawerAdapter = new ArrayAdapter<>(getSupportActionBar().getThemedContext(),
+                android.R.layout.simple_list_item_1,
+                android.R.id.text1,
+                devices);
+        mDrawerListView.setAdapter(mDrawerAdapter);
+        // Start loader
+        getSupportLoaderManager().initLoader(0, null, this);
+
+        // set up the drawer's list view with items and click listener
+        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectItem(position);
+            }
+        });
+
+        // set a custom shadow that overlays the main content when the drawer opens
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
+
+        // setup action bar
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+
+        // ActionBarDrawerToggle ties together the the proper interactions
+        // between the navigation drawer and the action bar app icon.
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                    /* host Activity */
+                mDrawerLayout,                    /* DrawerLayout object */
+                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
+                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+        ) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+
+                if (!mUserLearnedDrawer) {
+                    // The user manually opened the drawer; store this flag to prevent auto-showing
+                    // the navigation drawer automatically in the future.
+                    mUserLearnedDrawer = true;
+                    SharedPreferences sp = PreferenceManager
+                            .getDefaultSharedPreferences(HomeSlidingActivity.this);
+                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
+                }
+
+                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+        };
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
+        // per the navigation drawer design guidelines.
+        if (!mUserLearnedDrawer) {
+            mDrawerLayout.openDrawer(mDrawerContainerView);
         }
+
+        // Defer code dependent on restoration of previous instance state.
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
 
         // Load the music browser fragment
-//        if (savedInstanceState == null) {
-//            getSupportFragmentManager().beginTransaction()
-//                    .replace(R.id.main, new HomeFragment()).commit();
-//        }
-    }
-
-    @Override
-    public void onNewIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(QUERY);
-            if (!TextUtils.isEmpty(query)) {
-                SearchFragment f = (SearchFragment) getSupportFragmentManager().findFragmentByTag("search");
-                if (f != null) {
-                    f.onNewQuery(query);
+        if (savedInstanceState == null) {
+            mDrawerLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    selectItem(0);
                 }
-            }
+            });
         }
-        super.onNewIntent(intent);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        EventBus.getInstance().register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        EventBus.getInstance().unregister(this);
     }
 
     @Override
@@ -137,66 +197,45 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean("panel_open", mSlidingPanel.isExpanded());
-        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
-        outState.putBoolean("panel_needs_collapse", mIsLargeLandscape);
+        outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            if (mIsLargeLandscape) {
-                // Coming from portrait, need to pin the panel open
-                mSlidingPanel.setSlidingEnabled(false);
-                mSlidingPanel.setInitialState(SlideState.EXPANDED);
-                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
-                if (savedInstanceState.getBoolean("queue_showing", false)) {
-                    mNowPlayingFragment.onQueueVisibilityChanged(true);
-                }
-            } else if (savedInstanceState.getBoolean("panel_needs_collapse", false)) {
-                // Coming back from landscape we should collapse the panel
-                mSlidingPanel.setInitialState(SlideState.COLLAPSED);
-                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_COLLAPSE));
-                if (savedInstanceState.getBoolean("queue_showing", false)) {
-                    mNowPlayingFragment.popQueueFragment();
-                }
-            } else if (savedInstanceState.getBoolean("panel_open", false)) {
-                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
-                if (savedInstanceState.getBoolean("queue_showing", false)) {
-                    mNowPlayingFragment.onQueueVisibilityChanged(true);
-                }
-            }
-        }
+        mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
+        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
     }
 
     @Override
-    public void onBackPressed() {
-        if (mIsLargeLandscape) {
-            // We don't close the panel on landscape
-            if (!getSupportFragmentManager().popBackStackImmediate()) {
-                finish();
-            }
-        } else {
-            super.onBackPressed();
-        }
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Forward the new configuration the drawer toggle component.
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+        if (!isDrawerOpen()) {
             // search option
             getMenuInflater().inflate(R.menu.search, menu);
             // Settings
             getMenuInflater().inflate(R.menu.settings, menu);
 
+            restoreActionBar();
+
             return super.onCreateOptionsMenu(menu);
+        } else {
+            showGlobalContextActionBar();
+            return false;
         }
-        return false;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
         switch (item.getItemId()) {
             case R.id.menu_settings:
                 startActivityForResult(new Intent(this, SettingsPhoneActivity.class), 0);
@@ -204,55 +243,53 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
             case R.id.menu_search:
                 NavUtils.openSearch(this);
                 return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    @DebugLog
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case 0:
-                if (resultCode == RESULT_RESTART_APP) {
-                    // Hack to force a refresh for our activity for eg theme change
-                    AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-                    PendingIntent pi = PendingIntent.getActivity(this, 0,
-                            getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName()),
-                            PendingIntent.FLAG_CANCEL_CURRENT);
-                    am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
-                    finish();
-                } else if (resultCode == RESULT_RESTART_FULL) {
-                    killServiceOnExit = true;
-                    onActivityResult(0, RESULT_RESTART_APP, data);
-                }
-                break;
             default:
-                super.onActivityResult(requestCode, resultCode, data);
-        }
-
-    }
-
-    @Override
-    public void onPanelSlide(View panel, float slideOffset) {
-        //Dont hide action bar on tablets
-        if (!mIsLargeLandscape) {
-            super.onPanelSlide(panel, slideOffset);
+                return super.onOptionsItemSelected(item);
         }
     }
 
-    @Override
-    public void maybeClosePanel() {
-        // On tablets panel is pinned open
-        if (!mIsLargeLandscape) {
-            super.maybeClosePanel();
+    private void selectItem(int position) {
+        mCurrentSelectedPosition = position;
+        if (mDrawerListView != null) {
+            mDrawerListView.setItemChecked(position, true);
+        }
+        if (mDrawerLayout != null) {
+            mDrawerLayout.closeDrawer(mDrawerContainerView);
+        }
+        PluginInfo pi = mDrawerAdapter.getItem(position);
+        //TODO merge
+        if (pi.componentName == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main, new HomeFragment()).commit();
+        } else {
+//            if (!RemoteLibraryUtil.isBound(pi.componentName)) {
+//                RemoteLibraryUtil.bindToService(this, pi.componentName);
+//            }
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main, LibraryHomeFragment.newInstance(pi))
+                    .commit();
         }
     }
 
-    @Override
-    protected void maybeHideActionBar() {
-        //Dont hide action bar on tablets
-        if (!mIsLargeLandscape) {
-            super.maybeHideActionBar();
+    /**
+     * Per the navigation drawer design guidelines, updates the action bar to show the global app
+     * 'context', rather than just what's in the current screen.
+     */
+    private void showGlobalContextActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        mTitle = actionBar.getTitle();
+        actionBar.setTitle(R.string.app_name);
+    }
+
+
+    public void restoreActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(true);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        if (!TextUtils.isEmpty(mTitle)) {
+            actionBar.setTitle(mTitle);
         }
     }
 
@@ -262,40 +299,49 @@ public class HomeSlidingActivity extends BaseSlidingActivity {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.activity_base_sliding;
+        return R.layout.activity_homesliding;
+    }
+
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new HomeModule(this)
+        };
     }
 
     /*
-     * Events
+     * DrawerHelper
      */
-    @Subscribe
-    public void onDrawerItemSelected(NavDrawerEvent.ItemSelected e) {
-        PluginInfo pi = e.pluginInfo;
-        if (pi.componentName == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, new HomeFragment()).commit();
-        } else {
-            if (!RemoteLibraryUtil.isBound(pi.componentName)) {
-                RemoteLibraryUtil.bindToService(this, pi.componentName);
+
+    public boolean isDrawerOpen() {
+        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mDrawerContainerView);
+    }
+
+    /*
+     * Loader callbacks
+     */
+
+    @Override
+    public Loader<List<PluginInfo>> onCreateLoader(int id, Bundle args) {
+        return new NavigationLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<PluginInfo>> loader, List<PluginInfo> data) {
+        if (data != null && !data.isEmpty()) {
+            for (PluginInfo pi : data) {
+                if (mDrawerAdapter.getPosition(pi) < 0) {
+                    mDrawerAdapter.add(pi);
+                }
             }
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, LibraryHomeFragment.newInstance(pi))
-                    .commit();
         }
     }
 
-    /**
-     *
-     */
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-    }
-
-    public boolean isLargeLandscape() {
-        return mIsLargeLandscape;
+    @Override
+    public void onLoaderReset(Loader<List<PluginInfo>> loader) {
+        PluginInfo pi = mDrawerAdapter.getItem(0);
+        mDrawerAdapter.clear();
+        mDrawerAdapter.add(pi);
     }
 
 }
