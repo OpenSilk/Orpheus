@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.modules;
+package org.opensilk.music.ui.library.card;
 
-import android.support.v7.app.ActionBar;
+import android.content.Context;
 
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
-import org.opensilk.silkdagger.qualifier.ForActivity;
-
-import javax.inject.Inject;
+import org.opensilk.music.api.model.Album;
 
 /**
- * Created by drew on 6/16/14.
+ * Created by drew on 6/19/14.
  */
-public class ActionBarControllerImpl implements ActionBarController {
+public class AlbumListCard extends AbsListCard<Album> {
 
-    private final HomeSlidingActivity activity;
+    public AlbumListCard(Context context, Album data) {
+        super(context, data);
+    }
 
-    @Inject
-    public ActionBarControllerImpl(@ForActivity HomeSlidingActivity activity) {
-        this.activity =activity;
+    public AlbumListCard(Context context, Album data, int innerLayout) {
+        super(context, data, innerLayout);
     }
 
     @Override
-    public void setTitle(CharSequence title) {
-        ActionBar ab = activity.getSupportActionBar();
-        ab.setTitle(title);
+    protected void onInnerViewSetup() {
+        mCardTitle.setText(mData.name);
+        mCardSubTitle.setText(mData.artistName);
     }
 }

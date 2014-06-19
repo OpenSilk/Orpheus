@@ -25,12 +25,13 @@ import android.widget.ListView;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui.library.adapter.AbsLibraryArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibrarySongArrayAdapter;
 
 /**
  * Created by drew on 6/14/14.
  */
-public class LibrarySongFragment extends ListFragment {
+public class LibrarySongFragment extends CardListFragment implements AbsLibraryArrayAdapter.LoaderCallback {
 
     private ComponentName mLibraryComponentName;
     private String mLibraryIdentity;
@@ -46,18 +47,12 @@ public class LibrarySongFragment extends ListFragment {
         mLibraryComponentName = getArguments().getParcelable(LibraryHomeFragment.ARG_COMPONENT);
         mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
 
-        mAdapter = new LibrarySongArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName);
+        mAdapter = new LibrarySongArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this);
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
         } else {
             mAdapter.startLoad();
         }
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        setListAdapter(mAdapter);
     }
 
     @Override
@@ -68,7 +63,12 @@ public class LibrarySongFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Song s = mAdapter.getItem(position);
+        Song s = mAdapter.getItemData(position);
         MusicUtils.playFile(getActivity(), s.dataUri);        //TODO
+    }
+
+    @Override
+    public void onFirstLoadComplete() {
+        setListAdapter(mAdapter);
     }
 }

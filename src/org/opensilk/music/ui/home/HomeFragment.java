@@ -35,7 +35,7 @@ import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.ui.modules.ActionBarHelper;
+import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.DaggerFragment;
@@ -57,7 +57,7 @@ public class HomeFragment extends DaggerFragment {
     @Inject @ForActivity
     DrawerHelper mDrawerHelper;
     @Inject @ForActivity
-    ActionBarHelper mActionBarHelper;
+    ActionBarController mActionBarHelper;
     @InjectView(R.id.pager)
     ViewPager mViewPager;
     private HomePagerAdapter mPagerAdapter;

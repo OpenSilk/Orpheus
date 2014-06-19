@@ -12,6 +12,8 @@
     <dimen name="grid_card_vertical_spacing">6dp</dimen>
 
     <!-- Card List -->
+    <!-- Override default card height (96dp) -->
+    <dimen name="card_base_empty_height">60dp</dimen>
 
     <dimen name="list_card_thumbnail">60dp</dimen>
     <dimen name="list_card_thumbnail_large">125dp</dimen>

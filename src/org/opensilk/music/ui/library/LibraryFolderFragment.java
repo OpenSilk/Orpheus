@@ -29,6 +29,7 @@ import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Resource;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
+import org.opensilk.music.ui.library.adapter.AbsLibraryArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryFolderArrayAdapter;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import java.util.List;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryFolderFragment extends ListFragment {
+public class LibraryFolderFragment extends CardListFragment implements AbsLibraryArrayAdapter.LoaderCallback {
 
     private ComponentName mLibraryComponentName;
     private String mLibraryIdentity;
@@ -53,18 +54,12 @@ public class LibraryFolderFragment extends ListFragment {
         mLibraryComponentName = getArguments().getParcelable(LibraryHomeFragment.ARG_COMPONENT);
         mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
 
-        mAdapter = new LibraryFolderArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName);
+        mAdapter = new LibraryFolderArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this);
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
         } else {
             mAdapter.startLoad(null);
         }
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        setListAdapter(mAdapter);
     }
 
     @Override
@@ -75,7 +70,7 @@ public class LibraryFolderFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Resource r = mAdapter.getItem(position);
+        Resource r = mAdapter.getItemData(position);
         if (r instanceof Folder) {
             Folder f = (Folder) r;
             mAdapter.startLoad(f.identity);
@@ -83,6 +78,11 @@ public class LibraryFolderFragment extends ListFragment {
             Song s = (Song) r;
             MusicUtils.playFile(getActivity(), s.dataUri); //TODO
         }
+    }
+
+    @Override
+    public void onFirstLoadComplete() {
+        setListAdapter(mAdapter);
     }
 
 }

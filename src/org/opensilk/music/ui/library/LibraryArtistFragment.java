@@ -23,12 +23,13 @@ import android.view.View;
 import android.widget.ListView;
 
 import org.opensilk.music.api.model.Artist;
+import org.opensilk.music.ui.library.adapter.AbsLibraryArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryArtistArrayAdapter;
 
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryArtistFragment extends ListFragment {
+public class LibraryArtistFragment extends CardListFragment implements AbsLibraryArrayAdapter.LoaderCallback {
 
     private ComponentName mLibraryComponentName;
     private String mLibraryIdentity;
@@ -44,18 +45,12 @@ public class LibraryArtistFragment extends ListFragment {
         mLibraryComponentName = getArguments().getParcelable(LibraryHomeFragment.ARG_COMPONENT);
         mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
 
-        mAdapter = new LibraryArtistArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName);
+        mAdapter = new LibraryArtistArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this);
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
         } else {
             mAdapter.startLoad();
         }
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        setListAdapter(mAdapter);
     }
 
     @Override
@@ -66,8 +61,13 @@ public class LibraryArtistFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Artist a = mAdapter.getItem(position);
+        Artist a = mAdapter.getItemData(position);
         //TODO
+    }
+
+    @Override
+    public void onFirstLoadComplete() {
+        setListAdapter(mAdapter);
     }
 
 }

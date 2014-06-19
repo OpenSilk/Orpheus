@@ -24,18 +24,22 @@ import android.os.RemoteException;
 
 import org.opensilk.music.api.callback.AlbumQueryResult;
 import org.opensilk.music.api.model.Album;
+import org.opensilk.music.ui.library.card.AlbumListCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/14/14.
  */
 public class LibraryAlbumArrayAdapter extends AbsLibraryArrayAdapter<Album> {
 
-    public LibraryAlbumArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent) {
-        super(context, android.R.layout.simple_list_item_1, libraryIdentity, libraryComponent);
+    public LibraryAlbumArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback) {
+        super(context, libraryIdentity, libraryComponent, callback);
     }
 
     @Override
@@ -55,7 +59,11 @@ public class LibraryAlbumArrayAdapter extends AbsLibraryArrayAdapter<Album> {
                                     mPaginationBundle = paginationBundle;
                                     mLoadingInProgress = false;
                                     if (albums.size() > 0) {
-                                        addAll(albums);
+                                        addItems(albums);
+                                    }
+                                    if (!mFirstLoadComplete && mCallback != null) {
+                                        mFirstLoadComplete = true;
+                                        mCallback.onFirstLoadComplete();
                                     }
                                 }
                             });
@@ -82,5 +90,10 @@ public class LibraryAlbumArrayAdapter extends AbsLibraryArrayAdapter<Album> {
     @Override
     protected void onRestoreInstanceState(Bundle inState) {
 
+    }
+
+    @Override
+    protected Card makeCard(Album data) {
+        return new AlbumListCard(getContext(), data);
     }
 }

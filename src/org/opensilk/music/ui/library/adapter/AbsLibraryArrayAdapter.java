@@ -23,16 +23,21 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import org.opensilk.music.api.model.Resource;
+import org.opensilk.music.ui.library.card.AbsListCard;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 
 /**
  * Created by drew on 6/14/14.
  */
-public abstract class AbsLibraryArrayAdapter<T extends Parcelable> extends ArrayAdapter<T> {
+public abstract class AbsLibraryArrayAdapter<D extends Resource> extends CardArrayAdapter {
 
     public static final int STEP = 20;
 
@@ -44,13 +49,21 @@ public abstract class AbsLibraryArrayAdapter<T extends Parcelable> extends Array
     protected boolean mLoadingInProgress;
     protected boolean mEndOfResults;
 
-    protected AbsLibraryArrayAdapter(Context context, int layout, String libraryIdentity, ComponentName libraryComponent) {
-        super(context, layout);
+    protected LoaderCallback mCallback;
+    protected boolean mFirstLoadComplete;
+
+    public interface LoaderCallback {
+        public void onFirstLoadComplete();
+    }
+
+    protected AbsLibraryArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback) {
+        super(context, new ArrayList<Card>());
         if (!(context instanceof Activity)) {
             throw new IllegalArgumentException("Context must be from activity");
         }
         mLibraryIdentity = libraryIdentity;
         mLibraryComponent = libraryComponent;
+        mCallback = callback;
     }
 
     @Override
@@ -61,6 +74,7 @@ public abstract class AbsLibraryArrayAdapter<T extends Parcelable> extends Array
 
     public void startLoad() {
         mPaginationBundle = null;
+        mFirstLoadComplete = false;
         clear();
         getMore();
     }
@@ -78,26 +92,45 @@ public abstract class AbsLibraryArrayAdapter<T extends Parcelable> extends Array
     protected abstract void onSaveInstanceState(Bundle outState);
     protected abstract void onRestoreInstanceState(Bundle inState);
 
+    protected abstract Card makeCard(D data);
+
     public void saveInstanceState(Bundle outState) {
         Bundle b = new Bundle();
-        ArrayList<T> items = new ArrayList<>(getCount());
+        ArrayList<D> items = new ArrayList<>(getCount());
         for (int ii=0; ii<getCount(); ii++) {
-            items.add(getItem(ii));
+            items.add(getItemData(ii));
         }
         b.putParcelableArrayList("items", items);
         b.putBundle("pagination", mPaginationBundle);
         b.putBoolean("eor", mEndOfResults);
+        b.putBoolean("flc", mFirstLoadComplete);
         onSaveInstanceState(b);
         outState.putBundle(getClass().getName(), b);
     }
 
     public void restoreInstanceState(Bundle inState) {
         Bundle b = inState.getBundle(getClass().getName());
-        ArrayList<T> items = b.getParcelableArrayList("items");
-        addAll(items);
+        ArrayList<D> items = b.getParcelableArrayList("items");
+        addItems(items);
         mPaginationBundle = b.getBundle("pagination");
         mEndOfResults = b.getBoolean("eor");
+        mFirstLoadComplete = b.getBoolean("flc");
+        if (mFirstLoadComplete && mCallback != null) {
+            mCallback.onFirstLoadComplete();
+        }
         onRestoreInstanceState(b);
+    }
+
+    public void addItems(Collection<D> collection) {
+        List<Card> cards = new ArrayList<>(collection.size());
+        for (D item : collection) {
+            cards.add(makeCard(item));
+        }
+        addAll(cards);
+    }
+
+    public D getItemData(int position) {
+        return ((AbsListCard<D>) getItem(position)).getData();
     }
 
 }

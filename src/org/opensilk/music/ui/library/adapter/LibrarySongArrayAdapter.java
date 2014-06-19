@@ -24,17 +24,22 @@ import android.os.RemoteException;
 
 import org.opensilk.music.api.callback.SongQueryResult;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui.library.card.SongListCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/18/14.
  */
 public class LibrarySongArrayAdapter extends AbsLibraryArrayAdapter<Song> {
 
-    public LibrarySongArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent) {
-        super(context, android.R.layout.simple_list_item_1, libraryIdentity, libraryComponent);
+    public LibrarySongArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback) {
+        super(context, libraryIdentity, libraryComponent, callback);
     }
 
     @Override
@@ -54,7 +59,11 @@ public class LibrarySongArrayAdapter extends AbsLibraryArrayAdapter<Song> {
                                     mPaginationBundle = paginationBundle;
                                     mLoadingInProgress = false;
                                     if (songs.size() > 0) {
-                                        addAll(songs);
+                                        addItems(songs);
+                                    }
+                                    if (!mFirstLoadComplete && mCallback != null) {
+                                        mFirstLoadComplete = true;
+                                        mCallback.onFirstLoadComplete();
                                     }
                                 }
                             });
@@ -83,4 +92,10 @@ public class LibrarySongArrayAdapter extends AbsLibraryArrayAdapter<Song> {
     protected void onRestoreInstanceState(Bundle inState) {
 
     }
+
+    @Override
+    protected Card makeCard(Song data) {
+        return new SongListCard(getContext(), data);
+    }
+
 }

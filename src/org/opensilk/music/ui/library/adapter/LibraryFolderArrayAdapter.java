@@ -26,12 +26,15 @@ import org.opensilk.music.api.callback.FolderBrowseResult;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Resource;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui.library.card.FolderListCard;
+import org.opensilk.music.ui.library.card.SongListCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
+import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/14/14.
@@ -40,8 +43,8 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
 
     private String mFolderId;
 
-    public LibraryFolderArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent) {
-        super(context, android.R.layout.simple_list_item_1, libraryIdentity, libraryComponent);
+    public LibraryFolderArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback) {
+        super(context, libraryIdentity, libraryComponent, callback);
     }
 
     public void startLoad(String folderId) {
@@ -66,11 +69,15 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
                                     }
                                     mPaginationBundle = bundle;
                                     mLoadingInProgress = false;
-                                    if (folders.size() > 0) {
-                                        addAll(folders);
+                                    List<Resource> items = new ArrayList<Resource>(folders.size() + songs.size());
+                                    items.addAll(folders);
+                                    items.addAll(songs);
+                                    if (items.size() > 0) {
+                                        addItems(items);
                                     }
-                                    if (songs.size() > 0) {
-                                        addAll(songs);
+                                    if (!mFirstLoadComplete && mCallback != null) {
+                                        mFirstLoadComplete = true;
+                                        mCallback.onFirstLoadComplete();
                                     }
                                 }
                             });
@@ -99,4 +106,15 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
     protected void onRestoreInstanceState(Bundle inState) {
         mFolderId = inState.getString("folderid");
     }
+
+    @Override
+    protected Card makeCard(Resource data) {
+        if (data instanceof Folder) {
+            return new FolderListCard(getContext(), (Folder) data);
+        } else if (data instanceof Song) {
+            return new SongListCard(getContext(), (Song) data);
+        }
+        throw new IllegalArgumentException("Resource must be of type Folder or Song");
+    }
+
 }

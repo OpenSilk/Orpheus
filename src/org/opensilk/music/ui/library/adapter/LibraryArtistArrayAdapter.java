@@ -24,9 +24,12 @@ import android.os.RemoteException;
 
 import org.opensilk.music.api.callback.ArtistQueryResult;
 import org.opensilk.music.api.model.Artist;
+import org.opensilk.music.ui.library.card.ArtistListCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
 import java.util.List;
+
+import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/14/14.
@@ -34,8 +37,8 @@ import java.util.List;
 public class LibraryArtistArrayAdapter extends AbsLibraryArrayAdapter<Artist> {
 
 
-    public LibraryArtistArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent) {
-        super(context, android.R.layout.simple_list_item_1, libraryIdentity, libraryComponent);
+    public LibraryArtistArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback) {
+        super(context, libraryIdentity, libraryComponent, callback);
     }
 
     @Override
@@ -55,7 +58,11 @@ public class LibraryArtistArrayAdapter extends AbsLibraryArrayAdapter<Artist> {
                                     mPaginationBundle = paginationBundle;
                                     mLoadingInProgress = false;
                                     if (artists.size() > 0) {
-                                        addAll(artists);
+                                        addItems(artists);
+                                    }
+                                    if (!mFirstLoadComplete && mCallback != null) {
+                                        mFirstLoadComplete = true;
+                                        mCallback.onFirstLoadComplete();
                                     }
                                 }
                             });
@@ -82,5 +89,10 @@ public class LibraryArtistArrayAdapter extends AbsLibraryArrayAdapter<Artist> {
     @Override
     protected void onRestoreInstanceState(Bundle inState) {
 
+    }
+
+    @Override
+    protected Card makeCard(Artist data) {
+        return new ArtistListCard(getContext(), data);
     }
 }

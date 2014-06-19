@@ -39,7 +39,7 @@ import org.opensilk.music.api.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
-import org.opensilk.music.ui.modules.ActionBarHelper;
+import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.DaggerFragment;
@@ -68,7 +68,7 @@ public class LibraryHomeFragment extends DaggerFragment {
     public static final String ARG_IDENTITY = "argIdentity";
 
     @Inject @ForActivity
-    ActionBarHelper mActionBarHelper;
+    ActionBarController mActionBarHelper;
 
     private RemoteLibrary mLibraryService;
     private PluginInfo mPluginInfo;

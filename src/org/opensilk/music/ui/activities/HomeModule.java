@@ -27,7 +27,7 @@ import org.opensilk.music.ui.home.HomeRecentFragment;
 import org.opensilk.music.ui.home.HomeSongFragment;
 import org.opensilk.music.ui.library.LibraryHomeFragment;
 import org.opensilk.music.ui.modules.ActionBarController;
-import org.opensilk.music.ui.modules.ActionBarHelper;
+import org.opensilk.music.ui.modules.ActionBarControllerImpl;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
@@ -44,7 +44,7 @@ import dagger.Provides;
         addsTo = ApolloModule.class,
         injects = {
                 HomeSlidingActivity.class,
-                ActionBarController.class,
+                ActionBarControllerImpl.class,
                 HomeAlbumFragment.class,
                 HomeArtistFragment.class,
                 HomeFragment.class,
@@ -77,7 +77,7 @@ public class HomeModule {
     }
 
     @Provides @Singleton @ForActivity
-    public ActionBarHelper provideActionBarHelper(ActionBarController controller) {
+    public ActionBarController provideActionBarHelper(ActionBarControllerImpl controller) {
         return controller;
     }
 
