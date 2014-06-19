@@ -23,6 +23,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
@@ -43,6 +44,7 @@ import org.opensilk.music.api.PluginInfo;
 import org.opensilk.music.loaders.NavigationLoader;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.library.LibraryHomeFragment;
+import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
 import org.opensilk.music.util.PluginUtil;
@@ -53,6 +55,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import hugo.weaving.DebugLog;
 
 /**
  *
@@ -248,6 +251,23 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         }
     }
 
+    @Override
+    @DebugLog
+    public void onBackPressed() {
+        if (!mIsLargeLandscape && mSlidingPanel.isExpanded()) {
+            maybeClosePanel();
+        } else {
+            Fragment f = getSupportFragmentManager().findFragmentByTag("library");
+            if (f != null && (f instanceof BackButtonListener) && f.isResumed()) {
+                BackButtonListener l = (BackButtonListener) f;
+                if (l.onBackButtonPressed()) {
+                    return;
+                }
+            }
+            super.onBackPressed();
+        }
+    }
+
     private void selectItem(int position) {
         mCurrentSelectedPosition = position;
         if (mDrawerListView != null) {
@@ -260,13 +280,13 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         //TODO merge
         if (pi.componentName == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, new HomeFragment()).commit();
+                    .replace(R.id.main, new HomeFragment(), "home").commit();
         } else {
 //            if (!RemoteLibraryUtil.isBound(pi.componentName)) {
 //                RemoteLibraryUtil.bindToService(this, pi.componentName);
 //            }
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, LibraryHomeFragment.newInstance(pi))
+                    .replace(R.id.main, LibraryHomeFragment.newInstance(pi), "library")
                     .commit();
         }
     }

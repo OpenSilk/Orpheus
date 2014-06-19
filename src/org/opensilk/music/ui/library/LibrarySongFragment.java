@@ -18,13 +18,8 @@ package org.opensilk.music.ui.library;
 
 import android.content.ComponentName;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.view.View;
-import android.widget.ListView;
 
-import com.andrew.apollo.utils.MusicUtils;
-
-import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.library.adapter.AbsLibraryArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibrarySongArrayAdapter;
 
@@ -56,19 +51,22 @@ public class LibrarySongFragment extends CardListFragment implements AbsLibraryA
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setListAdapter(mAdapter);
+        if (savedInstanceState == null) {
+            setListShown(false);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mAdapter.saveInstanceState(outState);
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Song s = mAdapter.getItemData(position);
-        MusicUtils.playFile(getActivity(), s.dataUri);        //TODO
-    }
-
-    @Override
     public void onFirstLoadComplete() {
-        setListAdapter(mAdapter);
+        setListShown(true);
     }
 }

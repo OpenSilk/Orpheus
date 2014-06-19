@@ -21,6 +21,8 @@ import android.view.View;
 
 import org.opensilk.music.api.model.Artist;
 
+import it.gmariotti.cardslib.library.internal.Card;
+
 /**
  * Created by drew on 6/19/14.
  */
@@ -32,6 +34,16 @@ public class ArtistListCard extends AbsListCard<Artist> {
 
     public ArtistListCard(Context context, Artist data, int innerLayout) {
         super(context, data, innerLayout);
+    }
+
+    @Override
+    protected void init() {
+        setOnClickListener(new OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                //TODO
+            }
+        });
     }
 
     @Override

@@ -41,6 +41,8 @@ import it.gmariotti.cardslib.library.view.CardListView;
  * on Android 3.0 or above, this implementation is still used; it does not try
  * to switch to the framework's implementation.  See the framework SDK
  * documentation for a class overview.
+ *
+ * Opensilk: Switched out ListView for CardListView
  */
 public class CardListFragment extends Fragment {
     static final int INTERNAL_EMPTY_ID = 0x00ff0001;

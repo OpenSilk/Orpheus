@@ -19,19 +19,43 @@ package org.opensilk.music.ui.library.card;
 import android.content.Context;
 import android.view.View;
 
+import com.squareup.otto.Bus;
+
 import org.opensilk.music.api.model.Folder;
+import org.opensilk.music.ui.library.event.FolderCardClick;
+import org.opensilk.silkdagger.IDaggerActivity;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+
+import javax.inject.Inject;
+
+import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/19/14.
  */
 public class FolderListCard extends AbsListCard<Folder> {
 
+    @Inject @ForActivity
+    Bus mActivityBus;
+
     public FolderListCard(Context context, Folder data) {
         super(context, data);
+        ((IDaggerActivity) context).inject(this);
     }
 
     public FolderListCard(Context context, Folder data, int innerLayout) {
         super(context, data, innerLayout);
+        ((IDaggerActivity) context).inject(this);
+    }
+
+    @Override
+    protected void init() {
+        setOnClickListener(new OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                mActivityBus.post(new FolderCardClick(mData.identity));
+            }
+        });
     }
 
     @Override

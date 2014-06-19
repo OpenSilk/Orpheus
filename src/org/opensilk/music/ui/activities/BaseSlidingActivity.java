@@ -106,11 +106,11 @@ public abstract class BaseSlidingActivity extends DaggerActionBarActivity implem
     protected boolean killServiceOnExit;
 
     // Theme resourses
-    private ThemeHelper mThemeHelper;
+    protected ThemeHelper mThemeHelper;
 
     protected PreferenceUtils mPreferences;
 
-    private boolean mIsLargeLandscape;
+    protected boolean mIsLargeLandscape;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

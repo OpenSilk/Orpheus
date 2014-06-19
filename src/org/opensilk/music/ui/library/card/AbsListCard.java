@@ -50,6 +50,7 @@ public abstract class AbsListCard<D extends Resource> extends Card {
     public AbsListCard(Context context, D data, int innerLayout) {
         super(context, innerLayout);
         mData = data;
+        init();
     }
 
     @Override
@@ -62,6 +63,7 @@ public abstract class AbsListCard<D extends Resource> extends Card {
         return mData;
     }
 
+    protected abstract void init();
     protected abstract void onInnerViewSetup();
 
 }

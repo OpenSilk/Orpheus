@@ -117,4 +117,8 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
         throw new IllegalArgumentException("Resource must be of type Folder or Song");
     }
 
+    public String getFolderId() {
+        return mFolderId;
+    }
+
 }

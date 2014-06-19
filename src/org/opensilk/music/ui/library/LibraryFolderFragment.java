@@ -16,34 +16,54 @@
 
 package org.opensilk.music.ui.library;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.os.Parcelable;
 import android.view.View;
-import android.widget.ListView;
 
-import com.andrew.apollo.utils.MusicUtils;
+import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.api.model.Folder;
-import org.opensilk.music.api.model.Resource;
-import org.opensilk.music.api.model.Song;
-import org.opensilk.music.bus.events.RemoteLibraryEvent;
 import org.opensilk.music.ui.library.adapter.AbsLibraryArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryFolderArrayAdapter;
+import org.opensilk.music.ui.library.event.FolderCardClick;
+import org.opensilk.music.ui.library.module.DirectoryStack;
+import org.opensilk.silkdagger.IDaggerActivity;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+import javax.inject.Inject;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryFolderFragment extends CardListFragment implements AbsLibraryArrayAdapter.LoaderCallback {
+public class LibraryFolderFragment extends CardListFragment implements
+        AbsLibraryArrayAdapter.LoaderCallback,
+        DirectoryStack {
 
     private ComponentName mLibraryComponentName;
     private String mLibraryIdentity;
 
     protected LibraryFolderArrayAdapter mAdapter;
+
+    @Inject @ForActivity
+    Bus mActivityBus;
+
+    /**
+     * LIFO stack
+     */
+    private Deque<Bundle> mDirectoryStack = new ArrayDeque<>();
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((IDaggerActivity) activity).inject(this);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,32 +77,81 @@ public class LibraryFolderFragment extends CardListFragment implements AbsLibrar
         mAdapter = new LibraryFolderArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this);
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
+            Parcelable[] bundles = savedInstanceState.getParcelableArray("dirstack");
+            if (bundles != null) {
+                for (Parcelable p : bundles) {
+                    // toArray gives us our stack reversed
+                    mDirectoryStack.addLast((Bundle) p);
+                }
+            }
         } else {
             mAdapter.startLoad(null);
         }
+
+        mActivityBus.register(this);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setListAdapter(mAdapter);
+        if (savedInstanceState == null) {
+            setListShown(false);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mActivityBus.unregister(this);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mAdapter.saveInstanceState(outState);
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Resource r = mAdapter.getItemData(position);
-        if (r instanceof Folder) {
-            Folder f = (Folder) r;
-            mAdapter.startLoad(f.identity);
-        } else if (r instanceof Song) {
-            Song s = (Song) r;
-            MusicUtils.playFile(getActivity(), s.dataUri); //TODO
+        if (mDirectoryStack.size() > 0) {
+            Bundle[] bundles = mDirectoryStack.toArray(new Bundle[mDirectoryStack.size()]);
+            outState.putParcelableArray("dirstack", bundles);
         }
     }
 
+    /*
+     * AbsLibraryArrayAdapter.LoaderCallback
+     */
+
     @Override
+    @DebugLog
     public void onFirstLoadComplete() {
-        setListAdapter(mAdapter);
+        setListShown(true);
+    }
+
+    /*
+     * DirectoryStack
+     */
+
+    @Override
+    @DebugLog
+    public boolean popDirectoryStack() {
+        if (mDirectoryStack.peekFirst() != null) {
+            Bundle b = mDirectoryStack.removeFirst();
+            mAdapter.restoreInstanceState(b);
+            return true;
+        }
+        return false;
+    }
+
+    /*
+     * Events
+     */
+
+    @Subscribe
+    public void onFolderClicked(FolderCardClick e) {
+        Bundle b = new Bundle();
+        mAdapter.saveInstanceState(b);
+        mDirectoryStack.addFirst(b);
+        setListShown(false);
+        mAdapter.startLoad(e.folderId);
     }
 
 }

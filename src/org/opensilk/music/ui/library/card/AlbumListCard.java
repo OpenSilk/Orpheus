@@ -17,8 +17,11 @@
 package org.opensilk.music.ui.library.card;
 
 import android.content.Context;
+import android.view.View;
 
 import org.opensilk.music.api.model.Album;
+
+import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/19/14.
@@ -31,6 +34,16 @@ public class AlbumListCard extends AbsListCard<Album> {
 
     public AlbumListCard(Context context, Album data, int innerLayout) {
         super(context, data, innerLayout);
+    }
+
+    @Override
+    protected void init() {
+        setOnClickListener(new OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                //TODO
+            }
+        });
     }
 
     @Override

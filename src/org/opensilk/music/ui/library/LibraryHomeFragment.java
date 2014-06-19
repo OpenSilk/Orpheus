@@ -26,6 +26,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,11 +40,14 @@ import org.opensilk.music.api.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
+import org.opensilk.music.ui.library.module.DirectoryStack;
 import org.opensilk.music.ui.modules.ActionBarController;
+import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.DaggerFragment;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,7 +65,7 @@ import static org.opensilk.music.api.Api.Ability.QUERY_SONGS;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryHomeFragment extends DaggerFragment {
+public class LibraryHomeFragment extends DaggerFragment implements BackButtonListener {
 
     public static final int REQUEST_LIBRARY = 1001;
     public static final String ARG_COMPONENT = "argComponent";
@@ -165,6 +169,21 @@ public class LibraryHomeFragment extends DaggerFragment {
     }
 
     /*
+     * BackButtonListener
+     */
+
+    @Override
+    @DebugLog
+    public boolean onBackButtonPressed() {
+        Fragment f = mPagerAdapter.getFragment(mPager.getCurrentItem());
+        if (f != null && (f instanceof DirectoryStack)) {
+            DirectoryStack d = (DirectoryStack) f;
+            return d.popDirectoryStack();
+        }
+        return false;
+    }
+
+    /*
      * Eventes
      */
 
@@ -238,10 +257,26 @@ public class LibraryHomeFragment extends DaggerFragment {
     public static final class HomePagerAdapter extends FragmentPagerAdapter {
         private final Context mContext;
         private final List<FragmentHolder> mHolderList = Lists.newArrayList();
+        private final SparseArray<WeakReference<Fragment>> mFragments = new SparseArray<>();
 
         public HomePagerAdapter(Context context, FragmentManager fm) {
             super(fm);
             mContext = context;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment f = (Fragment) super.instantiateItem(container, position);
+            mFragments.put(position, new WeakReference<Fragment>(f));
+            return f;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            super.destroyItem(container, position, object);
+            if (mFragments.get(position) != null) {
+                mFragments.remove(position);
+            }
         }
 
         @Override
@@ -263,6 +298,18 @@ public class LibraryHomeFragment extends DaggerFragment {
 
         public void add(final LibraryFragment fragment, final Bundle params) {
             mHolderList.add(new FragmentHolder(fragment, params));
+        }
+
+        public Fragment getFragment(int position) {
+            WeakReference<Fragment> wf = mFragments.get(position);
+            if (wf != null) {
+                return wf.get();
+            }
+            return null;
+        }
+
+        public Class<? extends Fragment> getClassAt(int position) {
+            return mHolderList.get(position).fragment.getFragmentClass();
         }
 
         private final static class FragmentHolder {

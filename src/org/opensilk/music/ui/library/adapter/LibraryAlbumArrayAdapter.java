@@ -27,8 +27,6 @@ import org.opensilk.music.api.model.Album;
 import org.opensilk.music.ui.library.card.AlbumListCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;

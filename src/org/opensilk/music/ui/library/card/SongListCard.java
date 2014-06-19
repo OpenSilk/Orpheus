@@ -18,15 +18,11 @@ package org.opensilk.music.ui.library.card;
 
 import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.andrew.apollo.R;
+import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.model.Song;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -40,6 +36,16 @@ public class SongListCard extends AbsListCard<Song> {
 
     public SongListCard(Context context, Song song, int innerLayout) {
         super(context, song, innerLayout);
+    }
+
+    @Override
+    protected void init() {
+        setOnClickListener(new OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                MusicUtils.playFile(getContext(), mData.dataUri);
+            }
+        });
     }
 
     @Override

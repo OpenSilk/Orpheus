@@ -19,13 +19,16 @@ package org.opensilk.music.ui.activities;
 import android.content.Context;
 
 import com.andrew.apollo.ApolloModule;
+import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.home.HomeAlbumFragment;
 import org.opensilk.music.ui.home.HomeArtistFragment;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.home.HomeRecentFragment;
 import org.opensilk.music.ui.home.HomeSongFragment;
+import org.opensilk.music.ui.library.LibraryFolderFragment;
 import org.opensilk.music.ui.library.LibraryHomeFragment;
+import org.opensilk.music.ui.library.card.FolderListCard;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.ActionBarControllerImpl;
 import org.opensilk.music.ui.modules.DrawerHelper;
@@ -51,6 +54,8 @@ import dagger.Provides;
                 HomeRecentFragment.class,
                 HomeSongFragment.class,
                 LibraryHomeFragment.class,
+                LibraryFolderFragment.class,
+                FolderListCard.class,
         }
 )
 public class HomeModule {
@@ -79,6 +84,11 @@ public class HomeModule {
     @Provides @Singleton @ForActivity
     public ActionBarController provideActionBarHelper(ActionBarControllerImpl controller) {
         return controller;
+    }
+
+    @Provides @Singleton @ForActivity
+    public Bus provideEventBus() {
+        return new Bus("homeactivity");
     }
 
 }

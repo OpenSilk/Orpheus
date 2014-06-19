@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -110,14 +109,17 @@ public abstract class AbsLibraryArrayAdapter<D extends Resource> extends CardArr
 
     public void restoreInstanceState(Bundle inState) {
         Bundle b = inState.getBundle(getClass().getName());
+        if (b == null) {
+            return;
+        }
+        if (getCount() > 0) {
+            clear();
+        }
         ArrayList<D> items = b.getParcelableArrayList("items");
         addItems(items);
         mPaginationBundle = b.getBundle("pagination");
         mEndOfResults = b.getBoolean("eor");
         mFirstLoadComplete = b.getBoolean("flc");
-        if (mFirstLoadComplete && mCallback != null) {
-            mCallback.onFirstLoadComplete();
-        }
         onRestoreInstanceState(b);
     }
 
