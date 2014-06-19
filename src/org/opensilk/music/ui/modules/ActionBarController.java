@@ -16,28 +16,9 @@
 
 package org.opensilk.music.ui.modules;
 
-import android.support.v7.app.ActionBar;
-
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
-import org.opensilk.silkdagger.qualifier.ForActivity;
-
-import javax.inject.Inject;
-
 /**
  * Created by drew on 6/16/14.
  */
-public class ActionBarController implements ActionBarHelper {
-
-    private final HomeSlidingActivity activity;
-
-    @Inject
-    public ActionBarController(@ForActivity HomeSlidingActivity activity) {
-        this.activity =activity;
-    }
-
-    @Override
-    public void setTitle(CharSequence title) {
-        ActionBar ab = activity.getSupportActionBar();
-        ab.setTitle(title);
-    }
+public interface ActionBarController {
+    public void setTitle(CharSequence title);
 }

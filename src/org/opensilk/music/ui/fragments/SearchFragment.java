@@ -252,6 +252,7 @@ public class SearchFragment extends Fragment implements
 
         public SearchAdapter(Context context) {
             super(context, null, 0);
+            setInnerViewTypeCount(2);
         }
 
         @Override
