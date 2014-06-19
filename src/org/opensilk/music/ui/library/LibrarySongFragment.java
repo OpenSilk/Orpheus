@@ -16,10 +16,59 @@
 
 package org.opensilk.music.ui.library;
 
-import android.support.v4.app.Fragment;
+import android.content.ComponentName;
+import android.os.Bundle;
+import android.support.v4.app.ListFragment;
+import android.view.View;
+import android.widget.ListView;
+
+import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui.library.adapter.LibrarySongArrayAdapter;
 
 /**
  * Created by drew on 6/14/14.
  */
-public class LibrarySongFragment extends Fragment {
+public class LibrarySongFragment extends ListFragment {
+
+    private ComponentName mLibraryComponentName;
+    private String mLibraryIdentity;
+
+    protected LibrarySongArrayAdapter mAdapter;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() == null) {
+            throw new RuntimeException("Null args");
+        }
+        mLibraryComponentName = getArguments().getParcelable(LibraryHomeFragment.ARG_COMPONENT);
+        mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
+
+        mAdapter = new LibrarySongArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName);
+        if (savedInstanceState != null) {
+            mAdapter.restoreInstanceState(savedInstanceState);
+        } else {
+            mAdapter.startLoad();
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setListAdapter(mAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mAdapter.saveInstanceState(outState);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Song s = mAdapter.getItem(position);
+        MusicUtils.playFile(getActivity(), s.dataUri);        //TODO
+    }
 }

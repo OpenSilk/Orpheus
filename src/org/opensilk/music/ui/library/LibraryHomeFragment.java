@@ -56,6 +56,7 @@ import hugo.weaving.DebugLog;
 import static org.opensilk.music.api.Api.Ability.BROWSE_FOLDERS;
 import static org.opensilk.music.api.Api.Ability.QUERY_ALBUMS;
 import static org.opensilk.music.api.Api.Ability.QUERY_ARTISTS;
+import static org.opensilk.music.api.Api.Ability.QUERY_SONGS;
 
 /**
  * Created by drew on 6/14/14.
@@ -218,6 +219,10 @@ public class LibraryHomeFragment extends DaggerFragment {
                 if ((caps & QUERY_ALBUMS) == QUERY_ALBUMS) {
                     mPagerAdapter.add(LibraryFragment.ALBUM, b);
                 }
+                if ((caps & QUERY_SONGS) == QUERY_SONGS) {
+                    mPagerAdapter.add(LibraryFragment.SONG, b);
+                }
+
                 mPagerAdapter.notifyDataSetChanged();
 
                 mPager.setCurrentItem(mPreviousPagerPage);
