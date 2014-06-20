@@ -124,12 +124,12 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:19.+'
-    compile 'com.github.gabrielemariotti.cards:library:1.3.0'
+    compile 'com.github.gabrielemariotti.cards:library:1.7.2'
     compile 'com.android.support:appcompat-v7:19.+'
     compile 'com.android.support:mediarouter-v7:19.+'
     compile 'com.google.android.gms:play-services:4.2.+'
     compile 'com.jakewharton:disklrucache:2.0.2'
-    compile 'org.apache.commons:commons-io:1.3.2'
+    compile 'commons-io:commons-io:2.4'
     compile 'com.github.gabrielemariotti.changeloglib:library:1.4.0'
     compile 'com.google.android.apps.muzei:muzei-api:+'
     compile 'com.squareup:otto:1.3.4'
