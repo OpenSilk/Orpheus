@@ -54,7 +54,7 @@ public class LibraryAlbumFragment extends CardListFragment implements AbsLibrary
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
-        if (savedInstanceState == null) {
+        if (mAdapter.isOnFirstLoad()) {
             setListShown(false);
         }
     }

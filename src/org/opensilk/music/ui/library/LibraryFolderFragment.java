@@ -95,7 +95,7 @@ public class LibraryFolderFragment extends CardListFragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
-        if (savedInstanceState == null) {
+        if (mAdapter.isOnFirstLoad()) {
             setListShown(false);
         }
     }

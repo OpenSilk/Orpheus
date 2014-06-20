@@ -135,4 +135,8 @@ public abstract class AbsLibraryArrayAdapter<D extends Resource> extends CardArr
         return ((AbsListCard<D>) getItem(position)).getData();
     }
 
+    public boolean isOnFirstLoad() {
+        return !mFirstLoadComplete;
+    }
+
 }

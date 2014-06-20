@@ -99,6 +99,15 @@ public class LibraryHomeFragment extends DaggerFragment implements BackButtonLis
         // Bind the remote service
         RemoteLibraryUtil.bindToService(getActivity(), mPluginInfo.componentName);
         EventBus.getInstance().register(this);
+        // init adapter
+        mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
+        // restore state
+        if (savedInstanceState != null) {
+            mLibraryIdentity = savedInstanceState.getString("library_id");
+            mPreviousPagerPage = savedInstanceState.getInt("library_pager_current");
+        } else {
+            // TODO save / get from prefs
+        }
     }
 
     @Override
@@ -111,13 +120,7 @@ public class LibraryHomeFragment extends DaggerFragment implements BackButtonLis
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
         mPager.setAdapter(mPagerAdapter);
-        if (savedInstanceState != null) {
-            // TODO save / get from prefs
-            mLibraryIdentity = savedInstanceState.getString("library_id");
-            mPreviousPagerPage = savedInstanceState.getInt("library_pager_current");
-        }
     }
 
     @Override
