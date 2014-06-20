@@ -122,6 +122,11 @@ android {
 
 }
 
+//configurations.all {
+//    // check for updates every build
+//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}
+
 dependencies {
     compile 'com.android.support:support-v4:19.+'
     compile 'com.github.gabrielemariotti.cards:library:1.7.2'
@@ -137,7 +142,7 @@ dependencies {
 
     provided 'com.squareup.dagger:dagger-compiler:1.2.+'
     compile 'com.squareup.dagger:dagger:1.2.+'
-    compile 'org.opensilk.silkdagger:libsilkdagger:0.1.0-SNAPSHOT'
+    compile 'org.opensilk.silkdagger:libsilkdagger:0.2.2-SNAPSHOT'
 
     compile 'com.sothree.slidinguppanel:library:1.0.0-SNAPSHOT'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT'

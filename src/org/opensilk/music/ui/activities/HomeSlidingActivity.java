@@ -55,6 +55,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import dagger.ObjectGraph;
 import hugo.weaving.DebugLog;
 
 /**

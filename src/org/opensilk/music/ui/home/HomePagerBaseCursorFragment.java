@@ -33,7 +33,7 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.silkdagger.support.DaggerFragment;
+import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 
 import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
@@ -43,7 +43,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * Created by drew on 2/22/14.
  */
-public abstract class HomePagerBaseCursorFragment extends DaggerFragment implements
+public abstract class HomePagerBaseCursorFragment extends ActivityScopedDaggerFragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     /**

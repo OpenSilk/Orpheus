@@ -44,8 +44,11 @@ import org.opensilk.music.ui.library.module.DirectoryStack;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.util.RemoteLibraryUtil;
+import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 import org.opensilk.silkdagger.support.DaggerFragment;
+import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -65,7 +68,7 @@ import static org.opensilk.music.api.Api.Ability.QUERY_SONGS;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryHomeFragment extends DaggerFragment implements BackButtonListener {
+public class LibraryHomeFragment extends ScopedDaggerFragment implements BackButtonListener {
 
     public static final int REQUEST_LIBRARY = 1001;
     public static final String ARG_COMPONENT = "argComponent";
@@ -169,6 +172,22 @@ public class LibraryHomeFragment extends DaggerFragment implements BackButtonLis
         super.onSaveInstanceState(outState);
         outState.putString("library_id", mLibraryIdentity);
         outState.putInt("library_pager_current", mPager.getCurrentItem());
+    }
+
+    /*
+     * Abstract Methods
+     */
+
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new LibraryModule(),
+        };
+    }
+
+    @Override
+    protected DaggerInjector getParentInjector(Activity activity) {
+        return (DaggerInjector) activity;
     }
 
     /*

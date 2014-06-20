@@ -29,6 +29,7 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.library.card.FolderListCard;
 import org.opensilk.music.ui.library.card.SongListCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +44,11 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
 
     private String mFolderId;
 
-    public LibraryFolderArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback) {
+    private DaggerInjector mInjector;
+
+    public LibraryFolderArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback, DaggerInjector injector) {
         super(context, libraryIdentity, libraryComponent, callback);
+        mInjector = injector;
     }
 
     public void startLoad(String folderId) {
@@ -110,7 +114,9 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
     @Override
     protected Card makeCard(Resource data) {
         if (data instanceof Folder) {
-            return new FolderListCard(getContext(), (Folder) data);
+            FolderListCard flc = new FolderListCard(getContext(), (Folder) data);
+            mInjector.inject(flc);
+            return flc;
         } else if (data instanceof Song) {
             return new SongListCard(getContext(), (Song) data);
         }

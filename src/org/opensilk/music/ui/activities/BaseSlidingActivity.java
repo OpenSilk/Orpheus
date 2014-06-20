@@ -28,10 +28,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
@@ -46,7 +44,6 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
-import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -63,8 +60,7 @@ import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.fragments.SearchFragment;
-import org.opensilk.music.ui.settings.SettingsPhoneActivity;
-import org.opensilk.silkdagger.support.DaggerActionBarActivity;
+import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.Locale;
@@ -77,7 +73,7 @@ import static org.opensilk.cast.CastMessage.*;
 /**
  *
  */
-public abstract class BaseSlidingActivity extends DaggerActionBarActivity implements
+public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity implements
         ServiceConnection,
         SlidingUpPanelLayout.PanelSlideListener {
 

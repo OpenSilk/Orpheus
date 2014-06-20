@@ -29,8 +29,8 @@ import org.opensilk.music.ui.library.adapter.AbsLibraryArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryFolderArrayAdapter;
 import org.opensilk.music.ui.library.event.FolderCardClick;
 import org.opensilk.music.ui.library.module.DirectoryStack;
-import org.opensilk.silkdagger.IDaggerActivity;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -51,8 +51,8 @@ public class LibraryFolderFragment extends CardListFragment implements
 
     protected LibraryFolderArrayAdapter mAdapter;
 
-    @Inject @ForActivity
-    Bus mActivityBus;
+    @Inject @ForFragment
+    Bus mBus;
 
     /**
      * LIFO stack
@@ -62,7 +62,7 @@ public class LibraryFolderFragment extends CardListFragment implements
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((IDaggerActivity) activity).inject(this);
+        ((DaggerInjector) getParentFragment()).inject(this);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class LibraryFolderFragment extends CardListFragment implements
         mLibraryComponentName = getArguments().getParcelable(LibraryHomeFragment.ARG_COMPONENT);
         mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
 
-        mAdapter = new LibraryFolderArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this);
+        mAdapter = new LibraryFolderArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this, (DaggerInjector)getParentFragment());
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
             Parcelable[] bundles = savedInstanceState.getParcelableArray("dirstack");
@@ -88,7 +88,7 @@ public class LibraryFolderFragment extends CardListFragment implements
             mAdapter.startLoad(null);
         }
 
-        mActivityBus.register(this);
+        mBus.register(this);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class LibraryFolderFragment extends CardListFragment implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mActivityBus.unregister(this);
+        mBus.unregister(this);
     }
 
     @Override

@@ -38,7 +38,7 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.support.DaggerFragment;
+import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +52,7 @@ import butterknife.InjectView;
  * This class is used to hold the {@link ViewPager} used for swiping between the
  * playlists, recent, artists, albums, songs, and genre {@link Fragment}
  */
-public class HomeFragment extends DaggerFragment {
+public class HomeFragment extends ActivityScopedDaggerFragment {
 
     @Inject @ForActivity
     DrawerHelper mDrawerHelper;

@@ -53,9 +53,6 @@ import dagger.Provides;
                 HomeFragment.class,
                 HomeRecentFragment.class,
                 HomeSongFragment.class,
-                LibraryHomeFragment.class,
-                LibraryFolderFragment.class,
-                FolderListCard.class,
         }
 )
 public class HomeModule {
@@ -84,11 +81,6 @@ public class HomeModule {
     @Provides @Singleton @ForActivity
     public ActionBarController provideActionBarHelper(ActionBarControllerImpl controller) {
         return controller;
-    }
-
-    @Provides @Singleton @ForActivity
-    public Bus provideEventBus() {
-        return new Bus("homeactivity");
     }
 
 }
