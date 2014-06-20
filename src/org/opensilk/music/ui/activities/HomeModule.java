@@ -16,21 +16,11 @@
 
 package org.opensilk.music.ui.activities;
 
-import android.content.Context;
-
-import com.andrew.apollo.ApolloModule;
-import com.squareup.otto.Bus;
-
 import org.opensilk.music.ui.home.HomeAlbumFragment;
 import org.opensilk.music.ui.home.HomeArtistFragment;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.home.HomeRecentFragment;
 import org.opensilk.music.ui.home.HomeSongFragment;
-import org.opensilk.music.ui.library.LibraryFolderFragment;
-import org.opensilk.music.ui.library.LibraryHomeFragment;
-import org.opensilk.music.ui.library.card.FolderListCard;
-import org.opensilk.music.ui.modules.ActionBarController;
-import org.opensilk.music.ui.modules.ActionBarControllerImpl;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
@@ -44,16 +34,21 @@ import dagger.Provides;
  */
 @Module (
         library = true,
-        addsTo = ApolloModule.class,
         injects = {
                 HomeSlidingActivity.class,
-                ActionBarControllerImpl.class,
                 HomeAlbumFragment.class,
                 HomeArtistFragment.class,
                 HomeFragment.class,
                 HomeRecentFragment.class,
                 HomeSongFragment.class,
-        }
+        },
+        // Im kinda unsure about this, it seems to work ok,
+        // but the build complains with out it since HomeFragment
+        // needs the ActionBarController, which is provided
+        // by the ActivityModule so we don't know about it
+        // until runtime, i guess, maybe ill figure out how
+        // it all works someday
+        complete = false
 )
 public class HomeModule {
 
@@ -64,23 +59,8 @@ public class HomeModule {
     }
 
     @Provides @Singleton @ForActivity
-    public HomeSlidingActivity provideActivity() {
-        return activity;
-    }
-
-    @Provides @Singleton @ForActivity
-    public Context provideActivityContext() {
-        return activity;
-    }
-
-    @Provides @Singleton @ForActivity
     public DrawerHelper provideDrawerHelper() {
         return activity;
-    }
-
-    @Provides @Singleton @ForActivity
-    public ActionBarController provideActionBarHelper(ActionBarControllerImpl controller) {
-        return controller;
     }
 
 }

@@ -30,6 +30,7 @@ import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
+import org.opensilk.music.ui.activities.ProfileSlidingActivity;
 import org.opensilk.music.ui.fragments.SearchFragment;
 import org.opensilk.music.ui.profile.ProfileAlbumFragment;
 import org.opensilk.music.ui.profile.ProfileArtistFragment;
@@ -61,7 +62,7 @@ public final class NavUtils {
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, artist);
 
-        replaceFragment(context, ProfileArtistFragment.newInstance(b), "artist");
+        startProfileActivity(context, ProfileSlidingActivity.ACTION_ARTIST, b);
     }
 
     /**
@@ -75,16 +76,24 @@ public final class NavUtils {
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, album);
 
-        // We are making teh assumption that all contexts passed through were created
-        // with getActivity()
-        FragmentManager fm = ((HomeSlidingActivity) context).getSupportFragmentManager();
-        int lastIndex = fm.getBackStackEntryCount() - 1;
-        if (lastIndex != -1 && fm.getBackStackEntryAt(lastIndex).getName().equals(album.mAlbumName)) {
-            //If the currently loaded album is the same as the one requesting, don't do it!
-            return;
+        // Completely insane method to prevent 'endless profiles' resulting
+        // from clicking the artwork thumbnail in the sliding pane over and over
+        if (context instanceof ProfileSlidingActivity) {
+            ProfileSlidingActivity activity = (ProfileSlidingActivity) context;
+            if (ProfileSlidingActivity.ACTION_ALBUM.equals(activity.getIntent().getAction())) {
+                Bundle b2 = activity.getIntent().getBundleExtra(Config.EXTRA_DATA);
+                if (b2 != null) {
+                    Album a = b2.getParcelable(Config.EXTRA_DATA);
+                    if (a != null) {
+                        if (album.equals(a)) {
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
-        replaceFragment(context, ProfileAlbumFragment.newInstance(b), album.mAlbumName);
+        startProfileActivity(context, ProfileSlidingActivity.ACTION_ALBUM, b);
     }
 
     /**
@@ -111,7 +120,7 @@ public final class NavUtils {
         bundle.putString(Config.NAME, playlistName);
         bundle.putParcelable(Config.EXTRA_DATA, playlist);
 
-        replaceFragment(context, ProfilePlaylistFragment.newInstance(bundle), "playlist");
+        startProfileActivity(context, ProfileSlidingActivity.ACTION_PLAYLIST, bundle);
     }
 
     /**
@@ -127,7 +136,7 @@ public final class NavUtils {
         bundle.putString(Config.NAME, genre.mGenreName);
         bundle.putParcelable(Config.EXTRA_DATA, genre);
 
-        replaceFragment(context, ProfileGenreFragment.newInstance(bundle), "genre");
+        startProfileActivity(context, ProfileSlidingActivity.ACTION_GENRE, bundle);
     }
 
     /**
@@ -137,6 +146,17 @@ public final class NavUtils {
      */
     public static void openSearch(final Context context) {
         replaceFragment(context, new SearchFragment(), "search");
+    }
+
+    /**
+     * Starts the profile activity with given action and bundle extra
+     * @param context
+     * @param action
+     * @param bundle
+     */
+    public static void startProfileActivity(final Context context, final String action, final Bundle bundle) {
+        context.startActivity(new Intent(context, ProfileSlidingActivity.class)
+                .setAction(action).putExtra(Config.EXTRA_DATA, bundle));
     }
 
     /**

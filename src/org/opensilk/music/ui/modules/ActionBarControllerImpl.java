@@ -17,7 +17,9 @@
 package org.opensilk.music.ui.modules;
 
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 
+import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
@@ -28,11 +30,11 @@ import javax.inject.Inject;
  */
 public class ActionBarControllerImpl implements ActionBarController {
 
-    private final HomeSlidingActivity activity;
+    private final ActionBarActivity activity;
 
     @Inject
-    public ActionBarControllerImpl(@ForActivity HomeSlidingActivity activity) {
-        this.activity =activity;
+    public ActionBarControllerImpl(@ForActivity ActionBarActivity activity) {
+        this.activity = activity;
     }
 
     @Override

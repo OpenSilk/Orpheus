@@ -146,9 +146,13 @@ public class NotificationHelper {
      * Open to the now playing screen
      */
     private PendingIntent getPendingIntent() {
-        return PendingIntent.getActivity(mService, 0, new Intent("org.opensilk.music.AUDIO_PLAYER",
-                null, mService.getApplicationContext(), HomeSlidingActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0);
+        return PendingIntent.getActivity(mService, 0,
+                new Intent(mService, HomeSlidingActivity.class)
+                        .setAction("org.opensilk.music.AUDIO_PLAYER")
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     /**

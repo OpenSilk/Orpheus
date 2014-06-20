@@ -14,37 +14,27 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.library;
-
-import com.squareup.otto.Bus;
-
-import org.opensilk.music.ui.activities.ActivityModule;
-import org.opensilk.music.ui.activities.HomeModule;
-import org.opensilk.music.ui.library.card.FolderListCard;
-import org.opensilk.silkdagger.qualifier.ForFragment;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
+package org.opensilk.music.ui.activities;
 
 import dagger.Module;
-import dagger.Provides;
 
 /**
  * Created by drew on 6/20/14.
  */
 @Module (
         injects = {
-                LibraryHomeFragment.class,
-                LibraryFolderFragment.class,
-                FolderListCard.class,
+                ProfileSlidingActivity.class,
         },
-        addsTo = ActivityModule.class
+        addsTo = ActivityModule.class,
+        library = true
 )
-public class LibraryModule {
+public class ProfileModule {
 
-    @Provides @Singleton @ForFragment
-    public Bus provideEventBus() {
-        return new Bus("library");
+    private final ProfileSlidingActivity activity;
+
+    public ProfileModule(ProfileSlidingActivity activity) {
+        this.activity = activity;
     }
+
 
 }

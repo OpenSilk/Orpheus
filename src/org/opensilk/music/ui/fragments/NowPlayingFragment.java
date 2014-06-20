@@ -58,6 +58,7 @@ import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.bus.events.PlaybackModeChanged;
 import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.iab.IabUtil;
+import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.widgets.AudioVisualizationView;
 import org.opensilk.music.widgets.FullScreenArtworkImageView;
@@ -149,12 +150,12 @@ public class NowPlayingFragment extends Fragment implements
     private long mLastShortSeekEventTime;
     private boolean mFromTouch = false;
 
-    protected HomeSlidingActivity mActivity;
+    protected BaseSlidingActivity mActivity;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mActivity = (HomeSlidingActivity) activity;
+        mActivity = (BaseSlidingActivity) activity;
     }
 
     @Override
