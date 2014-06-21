@@ -69,12 +69,15 @@ public class MusicApp extends Application implements DaggerInjector {
      */
     private GraphHolder mGraphHolder;
 
+    private ObjectGraph mScopedGraphe;
+
     @Override
     @DebugLog
     public void onCreate() {
         super.onCreate();
 
         mGraphHolder = GraphHolder.get(this);
+        mScopedGraphe = mGraphHolder.getObjectGraph().plus(new AppModule(this));
 
         if (DEBUG) {
             // Plant the forest
@@ -100,12 +103,12 @@ public class MusicApp extends Application implements DaggerInjector {
 
     @Override
     public void inject(Object o) {
-        mGraphHolder.inject(o);
+        mScopedGraphe.inject(o);
     }
 
     @Override
     public ObjectGraph getObjectGraph() {
-        return mGraphHolder.getObjectGraph();
+        return mScopedGraphe;
     }
 
     private void enableStrictMode() {

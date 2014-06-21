@@ -65,6 +65,8 @@ import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import hugo.weaving.DebugLog;
 
 import static android.app.SearchManager.QUERY;
@@ -135,10 +137,6 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
 
         // Bind Apollo's service
         mToken = MusicUtils.bindToService(this, this);
-
-        //Cancel any pending clear cache requests
-        //TODO
-//        startService(new Intent(this, ArtworkService.class));
 
         isCastingEnabled = mPreferences.isCastEnabled();
 
@@ -269,11 +267,6 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         if (killServiceOnExit) {
             stopService(new Intent(this, MusicPlaybackService.class));
         }
-
-        //Send request to clear cache
-        // TODO
-//        startService(new Intent(ArtworkService.ACTION_CLEAR_CACHE,
-//                null, this, ArtworkService.class));
 
         //Unbind from cast service
         if (mCastServiceToken != null) {

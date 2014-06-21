@@ -16,10 +16,11 @@
 
 package org.opensilk.music.artwork;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.util.Log;
 
 import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
@@ -56,14 +57,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         maybeWaitForCache();
         Album album = MusicUtils.makeAlbum(mAppContext, id);
         if (album != null) {
-            String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, ArtworkType.LARGE);
-            final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
-            if (pfd != null) {
-                return pfd;
-            }
-            //Add to background request queue so we will have it next time
-            BackgroundRequestor.add(album.mArtistName, album.mAlbumName,
-                    album.mAlbumId, ArtworkType.LARGE);
+            return getArtwork(album.mArtistName, album.mAlbumName);
         }
         return null;
     }
@@ -78,16 +72,60 @@ public class ArtworkServiceImpl implements ArtworkService {
         maybeWaitForCache();
         Album album = MusicUtils.makeAlbum(mAppContext, id);
         if (album != null) {
-            String cacheKey = ArtworkLoader.getCacheKey(album.mArtistName, album.mAlbumName, ArtworkType.THUMBNAIL);
-            final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
-            if (pfd != null) {
-                return pfd;
-            }
-            //Add to background request queue so we will have it next time
-            BackgroundRequestor.add(album.mArtistName, album.mAlbumName,
-                    album.mAlbumId, ArtworkType.THUMBNAIL);
+            return getArtworkThumbnail(album.mArtistName, album.mAlbumName);
         }
         return null;
+    }
+
+    @Override
+    public ParcelFileDescriptor getArtwork(String artistName, String albumName) {
+        String cacheKey = ArtworkLoader.getCacheKey(artistName, albumName, ArtworkType.LARGE);
+        final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
+        if (pfd != null) {
+            return pfd;
+        }
+        //Add to background request queue so we will have it next time
+//        BackgroundRequestor.add(artistName, albumName, album.mAlbumId, ArtworkType.LARGE);
+        return null;
+    }
+
+    @Override
+    public ParcelFileDescriptor getArtworkThumbnail(String artistName, String albumName) {
+        String cacheKey = ArtworkLoader.getCacheKey(artistName, albumName, ArtworkType.THUMBNAIL);
+        final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
+        if (pfd != null) {
+            return pfd;
+        }
+        //Add to background request queue so we will have it next time
+//        BackgroundRequestor.add(artistName, albumName, album.mAlbumId, ArtworkType.THUMBNAIL);
+        return null;
+    }
+
+    @Override
+    @DebugLog
+    public void clearCache() {
+        mManager.mL1Cache.evictAll();
+    }
+
+    @Override
+    @DebugLog
+    public void scheduleCacheClear() {
+        AlarmManager am = (AlarmManager) mAppContext.getSystemService(Context.ALARM_SERVICE);
+        am.set(AlarmManager.RTC, 60 * 1000, getClearCacheIntent());
+    }
+
+    @Override
+    @DebugLog
+    public void cancelCacheClear() {
+        AlarmManager am = (AlarmManager) mAppContext.getSystemService(Context.ALARM_SERVICE);
+        am.cancel(getClearCacheIntent());
+    }
+
+    public PendingIntent getClearCacheIntent() {
+        return PendingIntent.getBroadcast(mAppContext, 0,
+                new Intent(mAppContext, ArtworkBroadcastReceiver.class)
+                        .setAction(ArtworkBroadcastReceiver.CLEAR_CACHE),
+                PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     private synchronized void maybeWaitForCache() {

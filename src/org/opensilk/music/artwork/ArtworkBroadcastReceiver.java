@@ -16,36 +16,34 @@
 
 package org.opensilk.music.artwork;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.music.GraphHolder;
 
-import javax.inject.Singleton;
+import javax.inject.Inject;
 
-import dagger.Module;
-import dagger.Provides;
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 6/21/14.
  */
-@Module (
-        injects = {
-                ArtworkServiceImpl.class,
-                ArtworkProvider.class,
-                ArtworkBroadcastReceiver.class,
-        },
-        complete = false
-)
-public class ArtworkModule {
+public class ArtworkBroadcastReceiver extends BroadcastReceiver {
 
-    @Provides @Singleton
-    public ArtworkService provideArtworkService(ArtworkServiceImpl impl) {
-        return impl;
+    public static final String CLEAR_CACHE = "org.opensilk.music.artwork.clear_cache";
+
+    @Inject
+    ArtworkService mArtworkService;
+
+    @Override
+    @DebugLog
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (CLEAR_CACHE.equals(action)) {
+            GraphHolder gh = GraphHolder.get(context);
+            gh.inject(this);
+            mArtworkService.clearCache();
+        }
     }
-
-    @Provides @Singleton
-    public ArtworkManager provideArtworkManager(@ForApplication Context context) {
-        return ArtworkManager.getInstance(context);
-    }
-
 }

@@ -16,46 +16,23 @@
 
 package org.opensilk.music.artwork;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.IBinder;
+import android.app.PendingIntent;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
-
-import com.andrew.apollo.BuildConfig;
-
-import hugo.weaving.DebugLog;
 
 /**
- * Proxy for remote processes to access the ArtworkManager
- *
- * As of now the easiest way i know of to implement an IBinder
- * is to just use a service, Ergo this class exists
- *
  * Created by drew on 3/23/14.
  */
 public interface ArtworkService {
 
     public ParcelFileDescriptor getArtwork(long id);
     public ParcelFileDescriptor getArtworkThumbnail(long id);
-//    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        mRemoteBinder = null;
-//        mManager = null;
-//        mHandler.removeCallbacks(mClearCacheTask);
-//        ArtworkManager.destroy();
-//    }
-//
-//    private final Runnable mClearCacheTask = new Runnable() {
-//        @Override
-//        public void run() {
-//            if (mManager != null) {
-//                Log.d(TAG, "Clearing mem cache");
-//                mManager.mL1Cache.evictAll();
-//            }
-//        }
-//    };
+
+    public ParcelFileDescriptor getArtwork(String artistName, String albumName);
+    public ParcelFileDescriptor getArtworkThumbnail(String artistName, String albumName);
+
+    public void clearCache();
+
+    public void scheduleCacheClear();
+    public void cancelCacheClear();
 
 }

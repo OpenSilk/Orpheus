@@ -29,7 +29,8 @@ import dagger.Provides;
  * Created by drew on 6/16/14.
  */
 @Module (
-        library = true
+        library = true,
+        addsTo = GlobalModule.class
 )
 public class AppModule {
 

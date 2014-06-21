@@ -42,6 +42,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.PluginInfo;
+import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.loaders.NavigationLoader;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.library.LibraryHomeFragment;
@@ -53,6 +54,8 @@ import org.opensilk.music.util.RemoteLibraryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -94,11 +97,17 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     private boolean mUserLearnedDrawer;
     private CharSequence mTitle;
 
+    @Inject
+    protected ArtworkService mArtworkService;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ButterKnife.inject(this);
+
+        // cancel any pending clear cache request
+        mArtworkService.cancelCacheClear();
 
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
@@ -195,7 +204,12 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RemoteLibraryUtil.unBindAll(this);
+        if (isFinishing()) {
+            // safety measure to ensure we dont maintain remote connections
+            RemoteLibraryUtil.unBindAll(this);
+            // schedule cache clear
+            mArtworkService.scheduleCacheClear();
+        }
     }
 
     @Override
