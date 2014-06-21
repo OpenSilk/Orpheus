@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui.activities;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -277,14 +278,10 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
             mDrawerLayout.closeDrawer(mDrawerContainerView);
         }
         PluginInfo pi = mDrawerAdapter.getItem(position);
-        //TODO merge
-        if (pi.componentName == null) {
+        if (pi.componentName.equals(new ComponentName(this, HomeFragment.class))) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main, new HomeFragment(), "home").commit();
         } else {
-//            if (!RemoteLibraryUtil.isBound(pi.componentName)) {
-//                RemoteLibraryUtil.bindToService(this, pi.componentName);
-//            }
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main, LibraryHomeFragment.newInstance(pi), "library")
                     .commit();

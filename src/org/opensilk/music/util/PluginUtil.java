@@ -31,6 +31,7 @@ import com.andrew.apollo.R;
 
 import org.opensilk.music.api.Api;
 import org.opensilk.music.api.PluginInfo;
+import org.opensilk.music.ui.home.HomeFragment;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -56,29 +57,24 @@ public class PluginUtil {
         for (ResolveInfo resolveInfo : resolveInfos) {
             if (resolveInfo.serviceInfo == null)
                 continue;
-            PluginInfo pluginInfo = new PluginInfo();
-            pluginInfo.title = resolveInfo.loadLabel(pm);
+            CharSequence title = resolveInfo.loadLabel(pm);
+            ComponentName cn = getComponentName(resolveInfo);
 //            pluginInfo.icon = resolveInfo.loadIcon(pm);
-            pluginInfo.componentName = getComponentName(resolveInfo);
-
-            Context packageContext;
+            CharSequence description;
             try {
-                packageContext = context.createPackageContext(
-                        pluginInfo.componentName.getPackageName(), 0);
+                Context packageContext = context.createPackageContext(cn.getPackageName(), 0);
                 Resources packageRes = packageContext.getResources();
-                pluginInfo.description = packageRes.getString(resolveInfo.serviceInfo.descriptionRes);
+                description = packageRes.getString(resolveInfo.serviceInfo.descriptionRes);
             } catch (PackageManager.NameNotFoundException e) {
-                pluginInfo.description = null;
+                description = null;
             }
-
-            pluginInfo.isActive = true;
-            for (ComponentName cn : disabledPlugins) {
-                if (cn.equals(pluginInfo.componentName)) {
+            PluginInfo pluginInfo = new PluginInfo(title, description, cn);
+            for (ComponentName c : disabledPlugins) {
+                if (c.equals(pluginInfo.componentName)) {
                     pluginInfo.isActive = false;
                     break;
                 }
             }
-
             pluginInfos.add(pluginInfo);
         }
         return pluginInfos;
@@ -177,13 +173,11 @@ public class PluginUtil {
     }
 
     public static PluginInfo getDefaultPluginInfo(Context context) {
-        PluginInfo device = new PluginInfo();
-        device.title = context.getString(R.string.drawer_device);
-        device.description = "Play music stored on sdcard";
+        CharSequence title = context.getString(R.string.drawer_device);
+        CharSequence description = "Play music stored on sdcard";
 //        device.icon = context.getResources().getDrawable(R.drawable.ic_launcher);
-        device.isActive = true;
-        device.componentName = null;
-        return device;
+        ComponentName componentName = new ComponentName(context, HomeFragment.class);
+        return new PluginInfo(title, description, componentName);
     }
 
 }

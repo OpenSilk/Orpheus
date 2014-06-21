@@ -24,6 +24,7 @@ import org.opensilk.music.api.PluginInfo;
 import org.opensilk.music.util.PluginUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,6 +43,7 @@ public class NavigationLoader extends WrappedAsyncTaskLoader<List<PluginInfo>> {
         if (extPlugins != null && !extPlugins.isEmpty()) {
             list.addAll(extPlugins);
         }
+        Collections.sort(list);
         return list;
     }
 
