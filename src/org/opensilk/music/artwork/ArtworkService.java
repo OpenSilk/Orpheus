@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
@@ -34,70 +35,27 @@ import hugo.weaving.DebugLog;
  *
  * Created by drew on 3/23/14.
  */
-public class ArtworkService extends Service {
-    private static final String TAG = ArtworkService.class.getSimpleName();
-    private static final boolean D = BuildConfig.DEBUG;
+public interface ArtworkService {
 
-    public static final String ACTION_CLEAR_CACHE = "clear_cache";
-    private static final int TWO_MINUTES = 2 * 60 * 1000;
-
-    IArtworkServiceImpl mRemoteBinder;
-    ArtworkManager mManager;
-    Handler mHandler;
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mRemoteBinder;
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        super.onRebind(intent);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
-    }
-
-    @Override
-    @DebugLog
-    public void onCreate() {
-        super.onCreate();
-        mRemoteBinder = new IArtworkServiceImpl(this);
-        mManager = ArtworkManager.getInstance(getApplicationContext());
-        mHandler = new Handler();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_CLEAR_CACHE.equals(intent.getAction())) {
-            if (D) Log.d(TAG, "Queueing request to clear mem cache");
-            mHandler.postDelayed(mClearCacheTask, TWO_MINUTES);
-        } else {
-            if (D) Log.d(TAG, "Canceling request to clear mem cache");
-            mHandler.removeCallbacks(mClearCacheTask);
-        }
-        return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mRemoteBinder = null;
-        mManager = null;
-        mHandler.removeCallbacks(mClearCacheTask);
-        ArtworkManager.destroy();
-    }
-
-    private final Runnable mClearCacheTask = new Runnable() {
-        @Override
-        public void run() {
-            if (mManager != null) {
-                Log.d(TAG, "Clearing mem cache");
-                mManager.mL1Cache.evictAll();
-            }
-        }
-    };
+    public ParcelFileDescriptor getArtwork(long id);
+    public ParcelFileDescriptor getArtworkThumbnail(long id);
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        mRemoteBinder = null;
+//        mManager = null;
+//        mHandler.removeCallbacks(mClearCacheTask);
+//        ArtworkManager.destroy();
+//    }
+//
+//    private final Runnable mClearCacheTask = new Runnable() {
+//        @Override
+//        public void run() {
+//            if (mManager != null) {
+//                Log.d(TAG, "Clearing mem cache");
+//                mManager.mL1Cache.evictAll();
+//            }
+//        }
+//    };
 
 }

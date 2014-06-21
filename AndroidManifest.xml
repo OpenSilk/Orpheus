@@ -45,7 +45,7 @@
     <uses-feature android:name="android.hardware.wifi"/>
 
     <application
-        android:name=".ApolloApplication"
+        android:name="org.opensilk.music.MusicApp"
         android:theme="@style/Theme.AppCompat.Light"
         android:allowBackup="true"
         android:hardwareAccelerated="@bool/config_hardwareAccelerated"
@@ -248,8 +248,7 @@
         <!-- Cast Service -->
         <service android:name="org.opensilk.cast.SilkCastService"
             android:process=":service"/>
-        <!--Artwork service runs in activity process-->
-        <service android:name="org.opensilk.music.artwork.ArtworkService"/>
+
         <!-- Widget service runs in activity process-->
         <service android:name="org.opensilk.music.appwidgets.MusicWidgetService" />
 

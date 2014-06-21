@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.andrew.apollo;
+package org.opensilk.music;
 
 import android.app.Application;
 import android.content.Context;
@@ -23,6 +23,7 @@ import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
@@ -30,16 +31,20 @@ import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkServiceImpl;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.silkdagger.DaggerApplication;
+import org.opensilk.silkdagger.DaggerInjector;
 
+import dagger.ObjectGraph;
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Use to initilaze singletons and global static variables that require context
  */
-public class ApolloApplication extends DaggerApplication {
+public class MusicApp extends Application implements DaggerInjector {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     /**
@@ -57,10 +62,25 @@ public class ApolloApplication extends DaggerApplication {
      */
     public static int sDefaultThumbnailWidthPx;
 
+    /**
+     * Contains the object graph, we use a singleton instance
+     * to obtain the graph so we can inject our countent providers
+     * which will be created before onCreate() is called.
+     */
+    private GraphHolder mGraphHolder;
+
     @Override
     @DebugLog
     public void onCreate() {
         super.onCreate();
+
+        mGraphHolder = GraphHolder.get(this);
+
+        if (DEBUG) {
+            // Plant the forest
+            Timber.plant(new Timber.DebugTree());
+        }
+
         /*
          * Init global static variables
          */
@@ -76,6 +96,16 @@ public class ApolloApplication extends DaggerApplication {
          */
         // Enable strict mode logging
         enableStrictMode();
+    }
+
+    @Override
+    public void inject(Object o) {
+        mGraphHolder.inject(o);
+    }
+
+    @Override
+    public ObjectGraph getObjectGraph() {
+        return mGraphHolder.getObjectGraph();
     }
 
     private void enableStrictMode() {
@@ -97,17 +127,12 @@ public class ApolloApplication extends DaggerApplication {
                     .setClassInstanceLimit(ThemeHelper.class, 1)
                     .setClassInstanceLimit(MediaCastManager.class, 1)
                     .setClassInstanceLimit(BitmapDiskLruCache.class, 1)
+                    .setClassInstanceLimit(BitmapDiskLruCache.class, 1)
                     .setClassInstanceLimit(ArtworkManager.class, 1)
-                    .setClassInstanceLimit(HomeSlidingActivity.class, 1);
+                    .setClassInstanceLimit(HomeSlidingActivity.class, 1)
+                    .setClassInstanceLimit(ArtworkServiceImpl.class, 1);
             StrictMode.setVmPolicy(vmPolicyBuilder.build());
         }
-    }
-
-    @Override
-    protected Object[] getModules() {
-        return new Object[] {
-                new ApolloModule(this)
-        };
     }
 
     /**

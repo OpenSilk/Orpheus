@@ -16,8 +16,8 @@
 
 package org.opensilk.music.artwork;
 
-import static com.andrew.apollo.ApolloApplication.sDefaultMaxImageWidthPx;
-import static com.andrew.apollo.ApolloApplication.sDefaultThumbnailWidthPx;
+import static org.opensilk.music.MusicApp.sDefaultMaxImageWidthPx;
+import static org.opensilk.music.MusicApp.sDefaultThumbnailWidthPx;
 
 /**
  * Created by drew on 3/29/14.

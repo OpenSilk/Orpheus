@@ -33,14 +33,18 @@ import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 
+import org.opensilk.music.GraphHolder;
+
 import java.io.FileNotFoundException;
+
+import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 3/25/14.
  */
-public class ArtworkProvider extends ContentProvider implements ServiceConnection {
+public class ArtworkProvider extends ContentProvider {
     private static final String TAG = ArtworkProvider.class.getSimpleName();
 
     private static final String AUTHORITY = BuildConfig.ARTWORK_AUTHORITY;
@@ -75,15 +79,15 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
         return ARTWORK_THUMB_URI.buildUpon().appendPath(String.valueOf(albumId)).build();
     }
 
-    /**
-     * Artwork service connection, we proxy requests to the image cache through here
-     */
-    private IArtworkServiceImpl mArtworkService;
+    GraphHolder mGraphHolder;
+    @Inject
+    ArtworkService mArtworkService;
 
     @Override
     @DebugLog
     public boolean onCreate() {
-        doBindService();
+        mGraphHolder = GraphHolder.get(getContext());
+        mGraphHolder.inject(this);
         return true;
     }
 
@@ -127,84 +131,25 @@ public class ArtworkProvider extends ContentProvider implements ServiceConnectio
         if (!"r".equals(mode)) {
             throw new IllegalArgumentException("Provider is read only");
         }
-        if (mArtworkService == null) {
-            waitForService();
-        }
+        final long id;
+        final ParcelFileDescriptor pfd;
         switch (sUriMatcher.match(uri)) {
             case 1: //Fullscreen
-                try {
-                    final long id = Long.decode(uri.getLastPathSegment());
-                    final ParcelFileDescriptor pfd = mArtworkService.getArtwork(id);
-                    if (pfd != null) {
-                        return pfd;
-                    }
-                } catch (RemoteException e) {
-                    throw new FileNotFoundException("" + e.getClass().getName() + " " + e.getMessage());
+                id = Long.decode(uri.getLastPathSegment());
+                pfd = mArtworkService.getArtwork(id);
+                if (pfd != null) {
+                    return pfd;
                 }
                 break;
             case 2: //Thumbnail
-                try {
-                    final long id = Long.decode(uri.getLastPathSegment());
-                    final ParcelFileDescriptor pfd = mArtworkService.getArtworkThumbnail(id);
-                    if (pfd != null) {
-                        return pfd;
-                    }
-                } catch (RemoteException e) {
-                    throw new FileNotFoundException("" + e.getClass().getName() + " " + e.getMessage());
+                id = Long.decode(uri.getLastPathSegment());
+                pfd = mArtworkService.getArtworkThumbnail(id);
+                if (pfd != null) {
+                    return pfd;
                 }
                 break;
         }
         throw new FileNotFoundException("Could not obtain image from cache");
-    }
-
-    /**
-     * Waits for service to bind
-     * @throws FileNotFoundException
-     */
-    private synchronized void waitForService() throws FileNotFoundException {
-        try {
-            long waitTime = 0;
-            while (mArtworkService == null) {
-                // Don' block for more than a second
-                if (waitTime > 1000) throw new FileNotFoundException("Could not bind service");
-                Log.i(TAG, "Waiting on service");
-                // We were called too soon after onCreate, give the service some time
-                // to spin up, This is run in a binder thread so it shouldn't be a big deal
-                // to block it.
-                long start = System.currentTimeMillis();
-                wait(100);
-                Log.i(TAG, "Waited for " + (waitTime += (System.currentTimeMillis() - start)) + "ms");
-            }
-        } catch (InterruptedException e) {
-            throw new FileNotFoundException(""+e.getClass().getName() + " " + e.getMessage());
-        }
-    }
-
-    /**
-     * Tries to bind to the artwork service
-     */
-    private void doBindService() {
-        final Context ctx = getContext();
-        if (ctx != null) {
-            ctx.bindService(new Intent(ctx, ArtworkService.class), this, Context.BIND_AUTO_CREATE);
-        }
-    }
-
-    /*
-     * Implement ServiceConnection interface
-     */
-
-    @Override
-    public synchronized void onServiceConnected(ComponentName name, IBinder service) {
-        mArtworkService = (IArtworkServiceImpl) IArtworkServiceImpl.asInterface(service);
-        notifyAll();
-    }
-
-    @Override
-    public synchronized void onServiceDisconnected(ComponentName name) {
-        mArtworkService = null;
-        notifyAll();
-        doBindService();
     }
 
 }

@@ -14,34 +14,48 @@
  * limitations under the License.
  */
 
-package com.andrew.apollo;
+package org.opensilk.music;
 
 import android.content.Context;
 
+import org.opensilk.music.artwork.ArtworkModule;
+import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
+import dagger.ObjectGraph;
 import dagger.Provides;
 
 /**
- * Created by drew on 6/16/14.
+ * Created by drew on 6/21/14.
  */
-@Module (
-        library = true
-)
-public class ApolloModule {
+public class GraphHolder implements DaggerInjector {
 
-    private final ApolloApplication app;
+    private static GraphHolder instance;
 
-    public ApolloModule(ApolloApplication app) {
-        this.app = app;
+    public static synchronized GraphHolder get(Context context) {
+        if (instance == null) {
+            instance = new GraphHolder(context);
+        }
+        return instance;
     }
 
-    @Provides @Singleton @ForApplication
-    public Context provideAppContext() {
-        return app.getApplicationContext();
+    private ObjectGraph graph;
+
+    private GraphHolder(Context context) {
+        this.graph = ObjectGraph.create(new GlobalModule(context));
+    }
+
+    @Override
+    public void inject(Object o) {
+        graph.inject(o);
+    }
+
+    @Override
+    public ObjectGraph getObjectGraph() {
+        return graph;
     }
 
 }

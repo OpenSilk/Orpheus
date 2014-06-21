@@ -14,14 +14,34 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music;
 
-import android.os.ParcelFileDescriptor;
+import android.content.Context;
+
+import org.opensilk.silkdagger.qualifier.ForApplication;
+
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Created by drew on 3/23/14.
+ * Created by drew on 6/16/14.
  */
-interface IArtworkService {
-    ParcelFileDescriptor getArtwork(long id);
-    ParcelFileDescriptor getArtworkThumbnail(long id);
+@Module (
+        library = true
+)
+public class AppModule {
+
+    private final MusicApp app;
+
+    public AppModule(MusicApp app) {
+        this.app = app;
+    }
+
+    @Provides @Singleton @ForApplication
+    public MusicApp provideApplication() {
+        return app;
+    }
+
 }

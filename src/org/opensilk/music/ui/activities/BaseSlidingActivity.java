@@ -137,7 +137,8 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         mToken = MusicUtils.bindToService(this, this);
 
         //Cancel any pending clear cache requests
-        startService(new Intent(this, ArtworkService.class));
+        //TODO
+//        startService(new Intent(this, ArtworkService.class));
 
         isCastingEnabled = mPreferences.isCastEnabled();
 
@@ -270,8 +271,9 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         }
 
         //Send request to clear cache
-        startService(new Intent(ArtworkService.ACTION_CLEAR_CACHE,
-                null, this, ArtworkService.class));
+        // TODO
+//        startService(new Intent(ArtworkService.ACTION_CLEAR_CACHE,
+//                null, this, ArtworkService.class));
 
         //Unbind from cast service
         if (mCastServiceToken != null) {

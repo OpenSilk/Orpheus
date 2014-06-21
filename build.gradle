@@ -139,6 +139,7 @@ dependencies {
     compile 'com.google.android.apps.muzei:muzei-api:+'
     compile 'com.squareup:otto:1.3.4'
     compile 'com.jakewharton:butterknife:5.1.0'
+    compile 'com.jakewharton.timber:timber:2.3.0'
 
     provided 'com.squareup.dagger:dagger-compiler:1.2.+'
     compile 'com.squareup.dagger:dagger:1.2.+'
