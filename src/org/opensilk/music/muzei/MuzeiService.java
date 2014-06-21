@@ -28,9 +28,12 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.google.android.apps.muzei.api.Artwork;
 import com.google.android.apps.muzei.api.MuzeiArtSource;
 
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProvider;
 
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 4/16/14.
@@ -87,12 +90,12 @@ public class MuzeiService extends MuzeiArtSource implements ServiceConnection {
         if (!isBound && !waitForBind()) {
             return;
         }
-        final long albumId = MusicUtils.getCurrentAlbumId();
-        if (albumId < 0) {
-            Log.e(TAG, "Unable to obtain albumId");
+        final ArtInfo info = MusicUtils.getCurrentArtInfo();
+        if (info == null) {
+            Timber.e("Nothing currently playing");
             return;
         }
-        final Uri artworUri = ArtworkProvider.createArtworkUri(albumId);
+        final Uri artworUri = ArtworkProvider.createArtworkUri(info.artistName, info.albumName);
         publishArtwork(new Artwork.Builder()
                 .imageUri(artworUri)
                 .title(MusicUtils.getAlbumName())

@@ -16,18 +16,20 @@
 
 package org.opensilk.music.adapters;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.loaders.Projections;
 import org.opensilk.music.loaders.SongCursorLoader;
 
@@ -35,6 +37,12 @@ import org.opensilk.music.loaders.SongCursorLoader;
  * Created by drew on 2/22/14.
  */
 public class CursorHelpers {
+
+    public static final Uri ARTWORK_URI;
+
+    static {
+        ARTWORK_URI = Uri.parse("content://media/external/audio/albumart");
+    }
 
     private CursorHelpers() {
         // static
@@ -72,7 +80,7 @@ public class CursorHelpers {
      */
     public static Album makeAlbumFromCursor(final Cursor c) {
         // Copy the album id
-        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the album name
         final String albumName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM));
         // Copy the artist name
@@ -81,8 +89,10 @@ public class CursorHelpers {
         final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS));
         // Copy the release year
         final String year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.FIRST_YEAR));
+        // generate artwork Uri
+        final Uri artworkUri = ContentUris.withAppendedId(ARTWORK_URI, Long.decode(id));
         // Create a new album
-        return new Album(id, albumName, artist, songCount, year);
+        return new Album(id, albumName, artist, songCount, year, artworkUri);
     }
 
     /**

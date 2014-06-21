@@ -83,7 +83,7 @@ public class ArtworkProviderUtil {
     @DebugLog
     public Bitmap getArtwork(String artistName, String albumName, long albumId) {
         final String cacheKey = makeCacheKey(artistName, albumName, albumId, "LARGE");
-        final Uri artworkUri = ArtworkProvider.createArtworkUri(albumId);
+        final Uri artworkUri = ArtworkProvider.createArtworkUri(artistName, albumName);
         Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
         if (bitmap == null) {
             // Fullscreen not available try the thumbnail for a temp fix
@@ -102,7 +102,7 @@ public class ArtworkProviderUtil {
     @DebugLog
     public Bitmap getArtworkThumbnail(String artistName, String albumName, long albumId) {
         final String cacheKey = makeCacheKey(artistName, albumName, albumId, "THUMB");
-        final Uri artworkUri = ArtworkProvider.createArtworkThumbnailUri(albumId);
+        final Uri artworkUri = ArtworkProvider.createArtworkThumbnailUri(artistName, albumName);
         return queryArtworkProvider(artworkUri, cacheKey);
     }
 

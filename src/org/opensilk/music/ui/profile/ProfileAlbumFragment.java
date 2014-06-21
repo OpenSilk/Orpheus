@@ -30,11 +30,11 @@ import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
 import org.opensilk.music.ui.cards.CardAlbumList;
@@ -93,12 +93,12 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-        ArtworkManager.loadArtistImage(mAlbum.mArtistName, mHeaderImage);
-        ArtworkManager.loadAlbumImage(mAlbum.mArtistName, mAlbum.mAlbumName,
-                mAlbum.mAlbumId, mHeaderThumb);
+        ArtworkManager.loadArtistImage(mAlbum.artistName, mHeaderImage);
+        ArtworkManager.loadAlbumImage(mAlbum.artistName, mAlbum.name,
+                mAlbum.artworkUri, mHeaderThumb);
         // Load header text
-        mInfoTitle.setText(mAlbum.mAlbumName);
-        mInfoSubTitle.setText(mAlbum.mArtistName);
+        mInfoTitle.setText(mAlbum.name);
+        mInfoSubTitle.setText(mAlbum.artistName);
         // initialize header overflow
         final CardAlbumList card = new CardAlbumList(getActivity(), mAlbum);
         mOverflowButton.setOnClickListener(new View.OnClickListener() {
@@ -111,7 +111,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
             }
         });
         // set the actionbar title
-        setTitle(mAlbum.mAlbumName);
+        setTitle(mAlbum.name);
         // Init the fading action bar
         if (isLargeLandscape(getResources())) {
             mFadingHelper.fadeActionBar(false);
@@ -150,7 +150,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<Album> {
     @Override
     protected Bundle createLoaderArgs() {
         final Bundle b = new Bundle();
-        b.putLong(Config.ID, mBundleData.mAlbumId);
+        b.putLong(Config.ID, Long.decode(mBundleData.identity));
         return b;
     }
 

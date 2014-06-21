@@ -26,6 +26,8 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 
+import org.opensilk.music.api.model.ArtInfo;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -121,34 +123,31 @@ public class ArtworkLoader {
      * in the cache, and returns a bitmap container that contains all of the data
      * relating to the request (as well as the default image if the requested
      * image is not available).
-     * @param artistName
-     * @param albumName
-     * @param albumId
+     * @param artInfo
      * @param imageListener The listener to call when the remote image is loaded
      * @param imageType
      * @return A container object that contains all of the properties of the request, as well as
      *     the currently available image (default if remote is not loaded).
      */
-    public ImageContainer get(String artistName, String albumName, long albumId,
-                              ImageListener imageListener, ArtworkType imageType) {
+    public ImageContainer get(ArtInfo artInfo, ImageListener imageListener, ArtworkType imageType) {
         // only fulfill requests that were initiated from the main thread.
         throwIfNotOnMainThread();
 
-        final String cacheKey = getCacheKey(artistName, albumName, imageType);
+        final String cacheKey = getCacheKey(artInfo, imageType);
 
         // Try to look up the request in the cache of remote images.
         Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
         if (cachedBitmap != null) {
             if (D) Log.d(TAG, "L1Cache hit: " + cacheKey);
             // Return the cached bitmap.
-            ImageContainer container = new ImageContainer(cachedBitmap, artistName, albumName, albumId, null, null);
+            ImageContainer container = new ImageContainer(cachedBitmap, artInfo, null, null);
             imageListener.onResponse(container, true);
             return container;
         }
 
         // The bitmap did not exist in the cache, fetch it!
         ImageContainer imageContainer =
-                new ImageContainer(null, artistName, albumName, albumId, cacheKey, imageListener);
+                new ImageContainer(null, artInfo, cacheKey, imageListener);
 
         // Update the caller to let them know that they should use the default bitmap.
         imageListener.onResponse(imageContainer, true);
@@ -164,7 +163,7 @@ public class ArtworkLoader {
         // The request is not already in flight. Send the new request to the network and
         // track it.
         IArtworkRequest newRequest =
-                new ArtworkRequest(artistName, albumName, albumId, cacheKey, new Listener<Bitmap>() {
+                new ArtworkRequest(artInfo, cacheKey, new Listener<Bitmap>() {
                     @Override
                     public void onResponse(Bitmap response) {
                         onGetImageSuccess(cacheKey, response);
@@ -245,27 +244,19 @@ public class ArtworkLoader {
         /** The cache key that was associated with the request */
         private final String mCacheKey;
 
-        private final String mArtistName;
-
-        private final String mAlbumName;
-
-        private final long mAlbumId;
+        private final ArtInfo mArtInfo;
 
         /**
          * Constructs a BitmapContainer object.
          * @param bitmap The final bitmap (if it exists).
-         * @param artistName
-         * @param albumName
-         * @param albumId
+         * @param artInfo
          * @param cacheKey
          * @param listener
          */
-        public ImageContainer(Bitmap bitmap, String artistName, String albumName, long albumId,
+        public ImageContainer(Bitmap bitmap, ArtInfo artInfo,
                               String cacheKey, ImageListener listener) {
             mBitmap = bitmap;
-            mArtistName = artistName;
-            mAlbumName = albumName;
-            mAlbumId = albumId;
+            mArtInfo = artInfo;
             mCacheKey = cacheKey;
             mListener = listener;
         }
@@ -273,7 +264,6 @@ public class ArtworkLoader {
         /**
          * Releases interest in the in-flight request (and cancels it if no one else is listening).
          */
-        @DebugLog
         public void cancelRequest() {
             if (mListener == null) {
                 return;
@@ -304,12 +294,8 @@ public class ArtworkLoader {
             return mBitmap;
         }
 
-        public String getArtistName() {
-            return mArtistName;
-        }
-
-        public String getAlbumName() {
-            return mAlbumName;
+        public ArtInfo getArtInfo() {
+            return mArtInfo;
         }
 
         public String getCacheKey() {
@@ -430,11 +416,11 @@ public class ArtworkLoader {
     /**
      * Creates a cache key for use with the L1 cache.
      */
-    public static String getCacheKey(String artistName, String albumName, ArtworkType imageType) {
-        return new StringBuilder(artistName.length() + (albumName != null ? albumName.length() : 4) + 12)
+    public static String getCacheKey(ArtInfo artInfo, ArtworkType imageType) {
+        return new StringBuilder(artInfo.artistName.length() + (artInfo.albumName != null ? artInfo.albumName.length() : 4) + 12)
                 .append("#").append(imageType).append("#")
-                .append(artistName).append("#")
-                .append(albumName)
+                .append(artInfo.artistName).append("#")
+                .append(artInfo.albumName)
                 .toString();
     }
 }

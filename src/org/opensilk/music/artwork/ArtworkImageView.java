@@ -30,6 +30,7 @@ import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.android.volley.VolleyError;
 
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkLoader.ImageContainer;
 import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
 
@@ -45,11 +46,7 @@ public class ArtworkImageView extends ImageView {
     private static final String TAG = ArtworkImageView.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
-    private String mArtistName;
-
-    private String mAlbumName;
-
-    private long mAlbumId;
+    private ArtInfo mArtInfo;
 
     private ArtworkType mImageType;
 
@@ -96,10 +93,11 @@ public class ArtworkImageView extends ImageView {
      * @param url The URL that should be loaded into this ImageView.
      * @param imageLoader ImageLoader that will be used to make the request.
      */
-    public void setImageInfo(String artistName, String albumName, long albumId, ArtworkLoader imageLoader) {
-        mArtistName = artistName;
-        mAlbumName = albumName;
-        mAlbumId = albumId;
+    public void setImageInfo(ArtInfo info, ArtworkLoader imageLoader) {
+        if (info == null) {
+            throw new NullPointerException("ArtInfo cannot be null");
+        }
+        mArtInfo = info;
         mImageLoader = imageLoader;
         // reinitialize the first layer
         mDrawables[0] = new ColorDrawable(getResources().getColor(R.color.transparent));
@@ -157,7 +155,7 @@ public class ArtworkImageView extends ImageView {
 
         // if the URL to be loaded in this view is empty, cancel any old requests and clear the
         // currently loaded image.
-        if (TextUtils.isEmpty(mArtistName)) { //Artist name is always not null
+        if (mArtInfo == null || TextUtils.isEmpty(mArtInfo.artistName)) { //Artist name is always not null
             if (mImageContainer != null) {
                 mImageContainer.cancelRequest();
                 mImageContainer = null;
@@ -168,7 +166,7 @@ public class ArtworkImageView extends ImageView {
 
         // if there was an old request in this view, check if it needs to be canceled.
         if (mImageContainer != null && mImageContainer.getCacheKey() != null) {
-            if (mImageContainer.getCacheKey().equals(ArtworkLoader.getCacheKey(mArtistName, mAlbumName, mImageType))) {
+            if (mImageContainer.getCacheKey().equals(ArtworkLoader.getCacheKey(mArtInfo, mImageType))) {
                 // if the request is from the same URL, return.
                 return;
             } else {
@@ -180,8 +178,7 @@ public class ArtworkImageView extends ImageView {
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
         // from the network.
-        ImageContainer newContainer = mImageLoader.get(mArtistName, mAlbumName, mAlbumId,
-                new ResponseListener(this, isInLayoutPass), mImageType);
+        ImageContainer newContainer = mImageLoader.get(mArtInfo, new ResponseListener(this, isInLayoutPass), mImageType);
 
         // update the ImageContainer to be the new bitmap container.
         mImageContainer = newContainer;

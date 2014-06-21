@@ -36,6 +36,7 @@ import com.andrew.apollo.BuildConfig;
 import org.opensilk.music.GraphHolder;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -57,26 +58,24 @@ public class ArtworkProvider extends ContentProvider {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         ARTWORK_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("artwork").build();
-        sUriMatcher.addURI(AUTHORITY, "artwork/#", 1);
+        sUriMatcher.addURI(AUTHORITY, "artwork/*/*", 1);
 
         ARTWORK_THUMB_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("thumbnail").build();
-        sUriMatcher.addURI(AUTHORITY, "thumbnail/#", 2);
+        sUriMatcher.addURI(AUTHORITY, "thumbnail/*/*", 2);
     }
 
     /**
-     * @param albumId
      * @return Uri to retrieve large (fullscreen) artwork for specified albumId
      */
-    public static Uri createArtworkUri(final long albumId) {
-        return ARTWORK_URI.buildUpon().appendPath(String.valueOf(albumId)).build();
+    public static Uri createArtworkUri(String artistName, String albumName) {
+        return ARTWORK_URI.buildUpon().appendPath(artistName).appendPath(albumName).build();
     }
 
     /**
-     * @param albumId
      * @return Uri to retrieve thumbnail for specified albumId
      */
-    public static Uri createArtworkThumbnailUri(final long albumId) {
-        return ARTWORK_THUMB_URI.buildUpon().appendPath(String.valueOf(albumId)).build();
+    public static Uri createArtworkThumbnailUri(String artistName, String albumName) {
+        return ARTWORK_THUMB_URI.buildUpon().appendPath(artistName).appendPath(albumName).build();
     }
 
     GraphHolder mGraphHolder;
@@ -131,19 +130,25 @@ public class ArtworkProvider extends ContentProvider {
         if (!"r".equals(mode)) {
             throw new IllegalArgumentException("Provider is read only");
         }
-        final long id;
+        final List<String> seg;
         final ParcelFileDescriptor pfd;
         switch (sUriMatcher.match(uri)) {
             case 1: //Fullscreen
-                id = Long.decode(uri.getLastPathSegment());
-                pfd = mArtworkService.getArtwork(id);
+                seg = uri.getPathSegments();
+                if (seg == null || seg.size() < 2) {
+                    break;
+                }
+                pfd = mArtworkService.getArtwork(seg.get(seg.size()-2), seg.get(seg.size()-1));
                 if (pfd != null) {
                     return pfd;
                 }
                 break;
             case 2: //Thumbnail
-                id = Long.decode(uri.getLastPathSegment());
-                pfd = mArtworkService.getArtworkThumbnail(id);
+                seg = uri.getPathSegments();
+                if (seg == null || seg.size() < 2) {
+                    break;
+                }
+                pfd = mArtworkService.getArtworkThumbnail(seg.get(seg.size()-2), seg.get(seg.size()-1));
                 if (pfd != null) {
                     return pfd;
                 }

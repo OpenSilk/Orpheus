@@ -18,6 +18,7 @@ package org.opensilk.music.ui.fragments;
 
 import android.app.SearchManager;
 import android.app.SearchableInfo;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -42,10 +43,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Song;
 
+import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.ui.cards.CardAlbumList;
 import org.opensilk.music.ui.cards.CardArtistList;
 import org.opensilk.music.ui.cards.CardSongList;
@@ -279,13 +281,15 @@ public class SearchFragment extends Fragment implements
                 return card;
             } else if (mimetype.equals("album")) {
                 // Get the Id of the album
-                final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+                final String id = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
                 // Get the album name
                 final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
                 // Get the artist nam
                 final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+                // generate artwork uri
+                final Uri artworkUri = ContentUris.withAppendedId(CursorHelpers.ARTWORK_URI, Long.decode(id));
                 // Build the album as best we can
-                final Album album = new Album(id, name, artist, 0, null);
+                final Album album = new Album(id, name, artist, 0, null, artworkUri);
                 // return album list card
                 CardAlbumList card = new CardAlbumList(getContext(), album);
                 card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),

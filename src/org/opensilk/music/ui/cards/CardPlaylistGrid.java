@@ -32,7 +32,6 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.RenamePlaylist;
-import com.andrew.apollo.model.ArtInfo;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.ApolloUtils;
@@ -40,6 +39,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.Projections;
@@ -205,7 +205,8 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
                     String artist = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
                     String album = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
                     long albumId = playlistSongs.getLong(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
-                    artInfos.add(new ArtInfo(artist, album, albumId));
+                    Uri artworkUri = ContentUris.withAppendedId(CursorHelpers.ARTWORK_URI, albumId);
+                    artInfos.add(new ArtInfo(artist, album, artworkUri));
                     // For now we only load one song
                     break;
                 } while (playlistSongs.moveToNext());
@@ -219,7 +220,7 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
         @Override
         protected void onPostExecute(List<ArtInfo> artInfos) {
             for (ArtInfo info: artInfos) {
-                ArtworkManager.loadAlbumImage(info.mArtistName, info.mAlbumName, info.mAlbumId, view);
+                ArtworkManager.loadImage(info, view);
                 break;// only loading the first
             }
         }

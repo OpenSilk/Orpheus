@@ -36,18 +36,20 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.NowPlayingCursor;
 import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.bus.EventBus;
@@ -816,6 +818,11 @@ public class NowPlayingFragment extends Fragment implements
                 case R.id.panel_menu_share:
                     // Share the current meta data
                     if (MusicUtils.getTrackName() != null && MusicUtils.getArtistName() != null) {
+                        final ArtInfo info = MusicUtils.getCurrentArtInfo();
+                        if (info == null) {
+                            Toast.makeText(mActivity, "Nothing currently playing", Toast.LENGTH_LONG).show();
+                            break;
+                        }
                         final Intent shareIntent = new Intent();
                         final String shareMessage = getString(R.string.now_listening_to,
                                 MusicUtils.getTrackName(), MusicUtils.getArtistName());
@@ -823,7 +830,7 @@ public class NowPlayingFragment extends Fragment implements
                         shareIntent.setType("text/plain");
                         shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
                         shareIntent.putExtra(Intent.EXTRA_STREAM,
-                                ArtworkProvider.createArtworkUri(MusicUtils.getCurrentAlbumId()));
+                                ArtworkProvider.createArtworkUri(info.artistName, info.albumName));
                         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
                     }
                     return true;

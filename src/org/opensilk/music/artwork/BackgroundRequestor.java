@@ -22,6 +22,8 @@ import android.util.Log;
 import com.andrew.apollo.BuildConfig;
 import com.android.volley.Request;
 
+import org.opensilk.music.api.model.ArtInfo;
+
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -47,9 +49,9 @@ public class BackgroundRequestor {
         EXECUTOR = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
     }
 
-    public static void add(String artist, String album, long albumId, ArtworkType imageType) {
-        final String cacheKey = ArtworkLoader.getCacheKey(artist, album, imageType);
-        ArtworkRequest request = new ArtworkRequest(artist, album, albumId, cacheKey, null, imageType, null);
+    public static void add(ArtInfo artInfo, ArtworkType imageType) {
+        final String cacheKey = ArtworkLoader.getCacheKey(artInfo, imageType);
+        ArtworkRequest request = new ArtworkRequest(artInfo, cacheKey, null, imageType, null);
         request.setPriority(Request.Priority.LOW);
         request.start();
         // Should be ok to discard our reference to request since its inner classes will hold their own
@@ -61,27 +63,23 @@ public class BackgroundRequestor {
      */
     static class CheckCacheRunnable implements Runnable {
         final ArtworkLoader.ImageCache cache;
-        final String artist;
-        final String album;
-        final long albumId;
+        final ArtInfo artInfo;
         final ArtworkType artworkType;
 
         CheckCacheRunnable(ArtworkLoader.ImageCache cache,
-                              String artist, String album, long albumId,
+                              ArtInfo artInfo,
                               ArtworkType artworkType) {
-            this.artist = artist;
-            this.album = album;
-            this.albumId = albumId;
+            this.artInfo = artInfo;
             this.cache = cache;
             this.artworkType = artworkType;
         }
 
         @Override
         public void run() {
-            final String cacheKey = ArtworkLoader.getCacheKey(artist, album, artworkType);
+            final String cacheKey = ArtworkLoader.getCacheKey(artInfo, artworkType);
             if (cache != null && !cache.containsKey(cacheKey)) {
                 if (D) Log.d(TAG, "MediaStoreAltRunnable: run() queuing bgrequest for " + cacheKey);
-                BackgroundRequestor.add(artist, album, albumId, artworkType);
+                BackgroundRequestor.add(artInfo, artworkType);
             }
         }
     }

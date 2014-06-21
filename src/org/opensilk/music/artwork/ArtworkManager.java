@@ -30,6 +30,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 
 import org.apache.commons.io.FileUtils;
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
@@ -155,10 +157,14 @@ public class ArtworkManager {
      * Initiates loading artist image into view
      */
     public static boolean loadArtistImage(final String artistName, final ArtworkImageView imageView) {
+        return loadImage(new ArtInfo(artistName, null, null), imageView);
+    }
+
+    public static boolean loadImage(final ArtInfo artInfo, final ArtworkImageView imageView) {
         if (sArtworkManager == null) {
             return false;
         }
-        imageView.setImageInfo(artistName, null, -1, sArtworkManager.mLoader);
+        imageView.setImageInfo(artInfo, sArtworkManager.mLoader);
         return true;
     }
 
@@ -166,20 +172,19 @@ public class ArtworkManager {
      * Initiates loading of album image into view
      */
     public static boolean loadAlbumImage(final String artistName, final String albumName,
-                                         final long albumId, final ArtworkImageView imageView) {
-        if (sArtworkManager == null) {
-            return false;
-        }
-        imageView.setImageInfo(artistName, albumName, albumId, sArtworkManager.mLoader);
-        return true;
+                                         final Uri artworkUri, final ArtworkImageView imageView) {
+        return loadImage(new ArtInfo(artistName, albumName, artworkUri), imageView);
     }
 
     /**
      * Initiates loading of current album image into view;
      */
     public static boolean loadCurrentArtwork(final ArtworkImageView imageView) {
-        return loadAlbumImage(MusicUtils.getAlbumArtistName(), MusicUtils.getAlbumName(),
-                MusicUtils.getCurrentAlbumId(), imageView);
+        ArtInfo artInfo = MusicUtils.getCurrentArtInfo();
+        if (artInfo == null) {
+            return false;
+        }
+        return loadImage(artInfo, imageView);
     }
 
     @DebugLog

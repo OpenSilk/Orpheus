@@ -23,10 +23,10 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
@@ -48,11 +48,11 @@ public class CardAlbumList extends CardBaseListNoHeader<Album> {
 
     @Override
     protected void initContent() {
-        mTitle = mData.mAlbumName;
-        mSubTitle = mData.mArtistName;
-        mSubTitleAlt = mData.mYear;
-        if (mData.mSongNumber > 0) {
-            mExtraText = MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber);
+        mTitle = mData.name;
+        mSubTitle = mData.artistName;
+        mSubTitleAlt = mData.date;
+        if (mData.songs > 0) {
+            mExtraText = MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.songs);
         }
 
         setOnClickListener(new OnCardClickListener() {
@@ -64,7 +64,7 @@ public class CardAlbumList extends CardBaseListNoHeader<Album> {
     }
 
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadAlbumImage(mData.mArtistName, mData.mAlbumName, mData.mAlbumId, view);
+        ArtworkManager.loadAlbumImage(mData.artistName, mData.name, mData.artworkUri, view);
     }
 
     @Override
@@ -78,24 +78,24 @@ public class CardAlbumList extends CardBaseListNoHeader<Album> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.card_menu_play:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId), 0, false);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, false);
                         break;
                     case R.id.card_menu_shuffle:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId), 0, true);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, true);
                         break;
                     case R.id.card_menu_add_queue:
-                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId));
+                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)));
                         break;
                     case R.id.card_menu_add_playlist:
-                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId))
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)))
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_more_by:
-                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.artistName));
                         break;
                     case R.id.card_menu_delete:
-                        final String album = mData.mAlbumName;
-                        DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), mData.mAlbumId),
+                        final String album = mData.name;
+                        DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)),
                                 /*ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName)*/ null) //TODO
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;

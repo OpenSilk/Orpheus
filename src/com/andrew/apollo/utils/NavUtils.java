@@ -24,11 +24,11 @@ import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
 
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.activities.ProfileSlidingActivity;
 import org.opensilk.music.ui.fragments.SearchFragment;

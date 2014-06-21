@@ -174,8 +174,8 @@ public class CastWebServer extends NanoHTTPD {
      */
     @DebugLog
     private Response serveArt(String uri, Map<String, String> headers) {
-        String id = parseId(uri);
-        if (TextUtils.isEmpty(id)) {
+        String[] info = parseArtUri(uri);
+        if (info == null || TextUtils.isEmpty(info[0]) || TextUtils.isEmpty(info[1])) {
             return notFoundResponse();
         }
         String reqEtag = headers.get("if-none-match");
@@ -197,7 +197,7 @@ public class CastWebServer extends NanoHTTPD {
         ByteArrayOutputStream tmpOut = null;
         try {
             final ParcelFileDescriptor pfd = mContext.getContentResolver()
-                    .openFileDescriptor(ArtworkProvider.createArtworkUri(Long.decode(id)), "r");
+                    .openFileDescriptor(ArtworkProvider.createArtworkUri(info[0], info[1]), "r");
             //Hackish but hopefully will yield unique etags (at least for this session)
             String etag = Integer.toHexString(pfd.hashCode());
             if (!quiet) Log.d(TAG, "Created etag " + etag + " for " + uri);
@@ -329,6 +329,17 @@ public class CastWebServer extends NanoHTTPD {
     private static String parseId(String uri) {
         int start = uri.lastIndexOf("/");
         return uri.substring(start+1);
+    }
+
+    private static String[] parseArtUri(String uri) {
+        String[] parts = uri.split("/");
+        String[] info = new String[2];
+        if (parts.length < 2) {
+            return null;
+        }
+        info[1] = parts[parts.length-1];
+        info[0] = parts[parts.length-2];
+        return info;
     }
 
     private static TrackInfo getTrackInfo(final Context context, final String id) {

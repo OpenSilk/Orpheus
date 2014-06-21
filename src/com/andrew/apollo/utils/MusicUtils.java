@@ -41,13 +41,14 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.FavoritesLoader;
-import com.andrew.apollo.model.Album;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
 
 import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.loaders.Projections;
 
 import java.io.File;
@@ -464,6 +465,15 @@ public final class MusicUtils {
         return makeAlbum(context, albumId);
     }
 
+    public static ArtInfo getCurrentArtInfo() {
+        if (sService != null) {
+            try {
+                return sService.getCurrentArtInfo();
+            } catch (RemoteException ignored) {}
+        }
+        return null;
+    }
+
     /**
      * @param context The {@link Context} to use.
      * @param id The ID of the album.
@@ -486,13 +496,13 @@ public final class MusicUtils {
                         AlbumColumns.FIRST_YEAR
                 }, selection, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
         if (c != null && c.moveToFirst()) {
-            album = new Album(
-                    c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)),
-                    c.getString(c.getColumnIndexOrThrow(AlbumColumns.ALBUM)),
-                    c.getString(c.getColumnIndexOrThrow(AlbumColumns.ARTIST)),
-                    c.getInt(c.getColumnIndexOrThrow(AlbumColumns.NUMBER_OF_SONGS)),
-                    c.getString(c.getColumnIndexOrThrow(AlbumColumns.FIRST_YEAR))
-            );
+            final String id =  c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
+            final String name = c.getString(c.getColumnIndexOrThrow(AlbumColumns.ALBUM));
+            final String artist = c.getString(c.getColumnIndexOrThrow(AlbumColumns.ARTIST));
+            final int songs =  c.getInt(c.getColumnIndexOrThrow(AlbumColumns.NUMBER_OF_SONGS));
+            final String year = c.getString(c.getColumnIndexOrThrow(AlbumColumns.FIRST_YEAR));
+            final Uri artworkUri = ContentUris.withAppendedId(CursorHelpers.ARTWORK_URI, Long.decode(id));
+            album = new Album(id, name, artist, songs, year, artworkUri);
         }
         if (c != null) {
             c.close();

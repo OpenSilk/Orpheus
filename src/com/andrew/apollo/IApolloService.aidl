@@ -1,6 +1,6 @@
 package com.andrew.apollo;
 
-import android.graphics.Bitmap;
+import org.opensilk.music.api.model.ArtInfo;
 
 interface IApolloService
 {
@@ -40,5 +40,6 @@ interface IApolloService
     int getMediaMountedCount();
     int getAudioSessionId();
     boolean isRemotePlayback();
+    ArtInfo getCurrentArtInfo();
 }
 

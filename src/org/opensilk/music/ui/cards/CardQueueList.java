@@ -62,7 +62,7 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
 
     @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadAlbumImage(mData.mArtistName, mData.mAlbumName, mData.mAlbumId, view);
+        ArtworkManager.loadAlbumImage(mData.mArtistName, mData.mAlbumName, null, view);
     }
 
     @Override

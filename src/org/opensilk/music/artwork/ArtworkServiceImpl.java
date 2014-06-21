@@ -22,11 +22,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 
-import com.andrew.apollo.model.Album;
-import com.andrew.apollo.utils.MusicUtils;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.io.IOException;
@@ -48,38 +47,11 @@ public class ArtworkServiceImpl implements ArtworkService {
     Context mAppContext;
 
     /**
-     * @param id album id
      * @return ParcelFileDescriptor pipe to disk cache snapshot of image
      */
     @Override
-    @DebugLog
-    public ParcelFileDescriptor getArtwork(long id) {
-        maybeWaitForCache();
-        Album album = MusicUtils.makeAlbum(mAppContext, id);
-        if (album != null) {
-            return getArtwork(album.mArtistName, album.mAlbumName);
-        }
-        return null;
-    }
-
-    /**
-     * @param id album id
-     * @return ParcelFileDescriptor pipe to disk cache snapshot of thumbnail
-     */
-    @Override
-    @DebugLog
-    public ParcelFileDescriptor getArtworkThumbnail(long id) {
-        maybeWaitForCache();
-        Album album = MusicUtils.makeAlbum(mAppContext, id);
-        if (album != null) {
-            return getArtworkThumbnail(album.mArtistName, album.mAlbumName);
-        }
-        return null;
-    }
-
-    @Override
     public ParcelFileDescriptor getArtwork(String artistName, String albumName) {
-        String cacheKey = ArtworkLoader.getCacheKey(artistName, albumName, ArtworkType.LARGE);
+        String cacheKey = ArtworkLoader.getCacheKey(new ArtInfo(artistName, albumName, null), ArtworkType.LARGE);
         final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         if (pfd != null) {
             return pfd;
@@ -89,9 +61,12 @@ public class ArtworkServiceImpl implements ArtworkService {
         return null;
     }
 
+    /**
+     * @return ParcelFileDescriptor pipe to disk cache snapshot of image
+     */
     @Override
     public ParcelFileDescriptor getArtworkThumbnail(String artistName, String albumName) {
-        String cacheKey = ArtworkLoader.getCacheKey(artistName, albumName, ArtworkType.THUMBNAIL);
+        String cacheKey = ArtworkLoader.getCacheKey(new ArtInfo(artistName, albumName, null), ArtworkType.THUMBNAIL);
         final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         if (pfd != null) {
             return pfd;

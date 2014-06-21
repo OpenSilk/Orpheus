@@ -16,8 +16,10 @@
 
 package org.opensilk.music.ui.cards;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
@@ -25,12 +27,13 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.ArtInfo;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
@@ -129,7 +132,8 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
                     String artist = genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
                     String album = genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
                     long albumId = genreSongs.getLong(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
-                    artInfos.add(new ArtInfo(artist, album, albumId));
+                    Uri artworkUri = ContentUris.withAppendedId(CursorHelpers.ARTWORK_URI, albumId);
+                    artInfos.add(new ArtInfo(artist, album, artworkUri));
                     // For now we only load one song
                     break;
                 } while (genreSongs.moveToNext());
@@ -143,7 +147,7 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
         @Override
         protected void onPostExecute(List<ArtInfo> artInfos) {
             for (ArtInfo info: artInfos) {
-                ArtworkManager.loadAlbumImage(info.mArtistName, info.mAlbumName, info.mAlbumId, view);
+                ArtworkManager.loadImage(info, view);
                 break;// only loading the first
             }
         }

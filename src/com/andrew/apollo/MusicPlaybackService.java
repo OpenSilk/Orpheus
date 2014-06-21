@@ -76,6 +76,7 @@ import org.opensilk.cast.helpers.LocalCastServiceManager;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
@@ -1993,6 +1994,10 @@ public class MusicPlaybackService extends Service {
         }
     }
 
+    public ArtInfo getCurrentArtInfo() {
+        return new ArtInfo(getArtistName(), getAlbumName(), null);
+    }
+
     /**
      * Seeks the current track and initiates playback if needed
      *
@@ -3840,6 +3845,11 @@ public class MusicPlaybackService extends Service {
         @Override
         public boolean isRemotePlayback() throws RemoteException {
             return mService.get().isRemotePlayback();
+        }
+
+        @Override
+        public ArtInfo getCurrentArtInfo() {
+            return mService.get().getCurrentArtInfo();
         }
 
     }

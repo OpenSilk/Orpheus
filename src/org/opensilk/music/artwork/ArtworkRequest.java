@@ -16,7 +16,6 @@
 
 package org.opensilk.music.artwork;
 
-import android.content.ContentUris;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -35,6 +34,7 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 
 import org.apache.commons.io.IOUtils;
+import org.opensilk.music.api.model.ArtInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,16 +60,8 @@ public class ArtworkRequest implements IArtworkRequest {
     private static final String TAG = ArtworkRequest.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
-    private static final Uri sArtworkUri;
-
-    static {
-        sArtworkUri = Uri.parse("content://media/external/audio/albumart");
-    }
-
     // stuff needed to build the requests
-    final String mArtistName;
-    final String mAlbumName;
-    final long mAlbumId;
+    final ArtInfo mArtInfo;
     final String mCacheKey;
     final ArtworkType mImageType;
     final Listener<Bitmap> mImageListener;
@@ -83,13 +75,11 @@ public class ArtworkRequest implements IArtworkRequest {
     // art manager, holds all our context stuff
     private final ArtworkManager mManager;
 
-    public ArtworkRequest(String artistName, String albumName, long albumId, String cacheKey,
+    public ArtworkRequest(ArtInfo artInfo, String cacheKey,
                           Listener<Bitmap> listener,
                           ArtworkType imageType,
                           ErrorListener errorListener) {
-        mArtistName = artistName;
-        mAlbumName = albumName;
-        mAlbumId = albumId;
+        mArtInfo = artInfo;
         mCacheKey = cacheKey;
         mImageType = imageType;
         mImageListener = listener;
@@ -118,7 +108,6 @@ public class ArtworkRequest implements IArtworkRequest {
      * Cancels whichever request is currently active
      */
     @Override
-    @DebugLog
     public void cancel() {
         mCanceled = true;
         if (mCurrentRequest != null) {
@@ -149,10 +138,10 @@ public class ArtworkRequest implements IArtworkRequest {
      * @param tryMediaStore true to try media store if downloading is disabled or request returns an error
      */
     private void queueAlbumRequest(boolean tryMediaStore) {
-        if (D) Log.d(TAG, "Building album request for " + mAlbumName);
+        if (D) Log.d(TAG, "Building album request for " + mArtInfo.albumName);
         if (mManager.mPreferences.downloadMissingArtwork()) {
             // Fetch our album info
-            mCurrentRequest = Fetch.albumInfo(mArtistName, mAlbumName, new AlbumResponseListener(tryMediaStore), mPriority);
+            mCurrentRequest = Fetch.albumInfo(mArtInfo.artistName, mArtInfo.albumName, new AlbumResponseListener(tryMediaStore), mPriority);
             mManager.mApiQueue.add(mCurrentRequest);
         } else if (tryMediaStore) {
             ApolloUtils.execute(false, new MediaStoreTask(false));
@@ -167,7 +156,7 @@ public class ArtworkRequest implements IArtworkRequest {
     private void queueArtistRequest() {
         if (mManager.mPreferences.downloadMissingArtistImages()) {
             // Fetch our artist info
-            mCurrentRequest = Fetch.artistInfo(mArtistName, new ArtistResponseListener(), mPriority);
+            mCurrentRequest = Fetch.artistInfo(mArtInfo.artistName, new ArtistResponseListener(), mPriority);
             mManager.mApiQueue.add(mCurrentRequest);
         } else {
             notifyError(new VolleyError("Artist image downloading disabled"));
@@ -180,6 +169,14 @@ public class ArtworkRequest implements IArtworkRequest {
      */
     private void queueImageRequest(final String url) {
         ApolloUtils.execute(false, new QueueImageRequestTask(url));
+    }
+
+    private void queueImageRequest(final Uri uri) {
+        if (uri == null || uri.equals(Uri.EMPTY)) {
+            notifyError(new VolleyError("Null uri"));
+        } else {
+            queueImageRequest(uri.toString());
+        }
     }
 
     /**
@@ -263,6 +260,16 @@ public class ArtworkRequest implements IArtworkRequest {
         }
     }
 
+    private boolean isLocalArtwork() {
+        Uri u = mArtInfo.artworkUri;
+        if (u != null) {
+            if ("content".equals(u.getScheme())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Async task to check our disk cache, if not present we call into volley
      */
@@ -286,20 +293,28 @@ public class ArtworkRequest implements IArtworkRequest {
                         mImageListener.onResponse(bitmap);
                     }
                 } else {
-                    if (!TextUtils.isEmpty(mArtistName)) {
-                        if (!TextUtils.isEmpty(mAlbumName)) {
+                    if (!TextUtils.isEmpty(mArtInfo.artistName)) {
+                        if (!TextUtils.isEmpty(mArtInfo.albumName)) {
                             if (ApolloUtils.isOnline(mManager.mContext)) {
                                 if (mManager.mPreferences.preferDownloadArtwork()) {
                                     queueAlbumRequest(true);
                                 } else {
-                                    ApolloUtils.execute(false, new MediaStoreTask(true));
+                                    if (isLocalArtwork()) {
+                                        ApolloUtils.execute(false, new MediaStoreTask(true));
+                                    } else {
+                                        queueImageRequest(mArtInfo.artworkUri);
+                                    }
                                 }
                             //Not connected but want downloaded artwork, defer until later
                             } else if (mManager.mPreferences.preferDownloadArtwork()) {
                                 notifyError(new VolleyError("No network connection"));
                             //Not connected and dont want downloaded art, just check mediastore
                             } else {
-                                ApolloUtils.execute(false, new MediaStoreTask(false));
+                                if (isLocalArtwork()) {
+                                    ApolloUtils.execute(false, new MediaStoreTask(false));
+                                } else {
+                                    notifyError(new VolleyError("No network connection for remote Uri"));
+                                }
                             }
                         } else { //Assume they meant to download artist images
                             if (ApolloUtils.isOnline(mManager.mContext)) {
@@ -328,7 +343,7 @@ public class ArtworkRequest implements IArtworkRequest {
             this.tryNetwork = tryNetwork;
             ImageResponseListener listener = new ImageResponseListener(mCacheKey,
                     mManager.mL2Cache, mImageListener, mImageErrorListener);
-            fauxRequest = new ArtworkImageRequest("mediastore#"+mAlbumId,
+            fauxRequest = new ArtworkImageRequest("mediastore#"+mArtInfo.artworkUri,
                     listener, mImageType, listener);
             listener.setImageRequest(fauxRequest);
             mCurrentRequest = fauxRequest;
@@ -348,7 +363,7 @@ public class ArtworkRequest implements IArtworkRequest {
             InputStream in = null;
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
-                final Uri uri = ContentUris.withAppendedId(sArtworkUri, mAlbumId);
+                final Uri uri = mArtInfo.artworkUri;
                 in = mManager.mContext.getContentResolver().openInputStream(uri);
                 IOUtils.copy(in, out);
                 final NetworkResponse response = new NetworkResponse(out.toByteArray());
@@ -368,11 +383,11 @@ public class ArtworkRequest implements IArtworkRequest {
                 if (mImageType.equals(ArtworkType.THUMBNAIL)) {
                     // Check if LARGE type exists in cache
                     BackgroundRequestor.EXECUTOR.execute(new BackgroundRequestor.CheckCacheRunnable(
-                            mManager.mL2Cache, mArtistName, mAlbumName, mAlbumId, ArtworkType.LARGE
+                            mManager.mL2Cache, mArtInfo, ArtworkType.LARGE
                     ));
                 }
             } else {
-                if (D) Log.d(TAG, "No artwork for " + mAlbumName + " in mediastore");
+                if (D) Log.d(TAG, "No artwork for " + mArtInfo.albumName + " in mediastore");
                 if (tryNetwork) {
                     queueAlbumRequest(false);
                 } else {
@@ -394,8 +409,7 @@ public class ArtworkRequest implements IArtworkRequest {
 
         QueueImageRequestTask(final String url) {
             this.url = url;
-            this.altKey = ArtworkLoader.getCacheKey(mArtistName, mAlbumName, ArtworkType.LARGE);
-
+            this.altKey = ArtworkLoader.getCacheKey(mArtInfo, ArtworkType.LARGE);
         }
 
         @Override
