@@ -251,7 +251,6 @@ public class ArtworkImageView extends ImageView {
             // inside of a layout. Instead, defer setting the image by posting back to
             // the main thread.
             if (isImmediate && isInLayoutPass) {
-                if (D) Log.d(TAG, "isInLayoutPass... deferring");
                 isInLayoutPass = false;
                 v.post(new Runnable() {
                     @Override

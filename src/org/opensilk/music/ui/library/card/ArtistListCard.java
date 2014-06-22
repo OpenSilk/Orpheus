@@ -50,5 +50,6 @@ public class ArtistListCard extends AbsListCard<Artist> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setVisibility(View.GONE);
+        mArtwork.setVisibility(View.GONE);
     }
 }

@@ -21,7 +21,9 @@ import android.view.View;
 
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.music.api.model.ArtInfo;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.artwork.ArtworkManager;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -52,6 +54,8 @@ public class SongListCard extends AbsListCard<Song> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setText(mData.artistName);
+        mArtwork.setVisibility(View.VISIBLE);
+        ArtworkManager.loadImage(new ArtInfo(mData.albumArtistName, mData.albumName, mData.artworkUri), mArtwork);
     }
 
 }

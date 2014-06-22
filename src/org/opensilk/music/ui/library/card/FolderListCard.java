@@ -60,5 +60,6 @@ public class FolderListCard extends AbsListCard<Folder> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setVisibility(View.GONE);
+        mArtwork.setVisibility(View.GONE);
     }
 }

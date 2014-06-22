@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.api.model.Resource;
+import org.opensilk.music.artwork.ArtworkImageView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -36,6 +37,8 @@ public abstract class AbsListCard<D extends Resource> extends Card {
 
     protected final D mData;
 
+    @InjectView(R.id.artwork_thumb)
+    protected ArtworkImageView mArtwork;
     @InjectView(R.id.card_title)
     protected TextView mCardTitle;
     @InjectView(R.id.card_subtitle)

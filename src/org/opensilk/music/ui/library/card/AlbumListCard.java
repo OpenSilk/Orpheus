@@ -19,7 +19,11 @@ package org.opensilk.music.ui.library.card;
 import android.content.Context;
 import android.view.View;
 
+import com.andrew.apollo.utils.NavUtils;
+
 import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.artwork.ArtworkManager;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -41,7 +45,7 @@ public class AlbumListCard extends AbsListCard<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                //TODO
+                NavUtils.openAlbumProfile(getContext(), mData);
             }
         });
     }
@@ -50,5 +54,7 @@ public class AlbumListCard extends AbsListCard<Album> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setText(mData.artistName);
+        mArtwork.setVisibility(View.VISIBLE);
+        ArtworkManager.loadImage(new ArtInfo(mData.artistName, mData.name, mData.artworkUri), mArtwork);
     }
 }

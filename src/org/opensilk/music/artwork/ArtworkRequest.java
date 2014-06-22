@@ -171,6 +171,7 @@ public class ArtworkRequest implements IArtworkRequest {
         ApolloUtils.execute(false, new QueueImageRequestTask(url));
     }
 
+    @DebugLog
     private void queueImageRequest(final Uri uri) {
         if (uri == null || uri.equals(Uri.EMPTY)) {
             notifyError(new VolleyError("Null uri"));

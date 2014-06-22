@@ -22,6 +22,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <org.opensilk.music.widgets.ThumbnailArtworkImageView
+        android:id="@+id/artwork_thumb"
+        android:layout_width="@dimen/list_card_thumbnail"
+        android:layout_height="@dimen/list_card_thumbnail"
+        style="@style/Orpheus.Thumbnail"/>
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_weight="1"
