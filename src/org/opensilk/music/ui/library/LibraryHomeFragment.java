@@ -36,7 +36,7 @@ import com.andrew.apollo.utils.Lists;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.Api;
-import org.opensilk.music.api.PluginInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
@@ -46,8 +46,6 @@ import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
-import org.opensilk.silkdagger.support.DaggerFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.lang.ref.WeakReference;
@@ -60,10 +58,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import hugo.weaving.DebugLog;
 
-import static org.opensilk.music.api.Api.Ability.BROWSE_FOLDERS;
-import static org.opensilk.music.api.Api.Ability.QUERY_ALBUMS;
-import static org.opensilk.music.api.Api.Ability.QUERY_ARTISTS;
-import static org.opensilk.music.api.Api.Ability.QUERY_SONGS;
+import static org.opensilk.music.api.options.Ability.BROWSE_FOLDERS;
 
 /**
  * Created by drew on 6/14/14.
@@ -254,15 +249,6 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
                 if ((caps & BROWSE_FOLDERS) == BROWSE_FOLDERS) {
                     mPagerAdapter.add(LibraryFragment.FOLDER, b);
                 }
-                if ((caps & QUERY_ARTISTS) == QUERY_ARTISTS) {
-                    mPagerAdapter.add(LibraryFragment.ARTIST, b);
-                }
-                if ((caps & QUERY_ALBUMS) == QUERY_ALBUMS) {
-                    mPagerAdapter.add(LibraryFragment.ALBUM, b);
-                }
-                if ((caps & QUERY_SONGS) == QUERY_SONGS) {
-                    mPagerAdapter.add(LibraryFragment.SONG, b);
-                }
 
                 mPagerAdapter.notifyDataSetChanged();
 
@@ -349,30 +335,8 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
      */
     public static enum LibraryFragment {
         /**
-         * The playlist fragment
+         * Folder fragment
          */
-//        PLAYLIST(HomePlaylistFragment.class, R.string.page_playlists),
-        /**
-         * The recent fragment
-         */
-//        RECENT(HomeRecentFragment.class, R.string.page_recent),
-        /**
-         * The artist fragment
-         */
-        ARTIST(LibraryArtistFragment.class, R.string.page_artists),
-        /**
-         * The album fragment
-         */
-        ALBUM(LibraryAlbumFragment.class, R.string.page_albums),
-        /**
-         * The song fragment
-         */
-        SONG(LibrarySongFragment.class, R.string.page_songs),
-        /**
-         * The genre fragment
-         */
-//        GENRE(HomeGenreFragment.class, R.string.page_genres),
-
         FOLDER(LibraryFolderFragment.class, R.string.page_folders);
 
         private Class<? extends Fragment> mFragmentClass;

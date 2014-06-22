@@ -76,7 +76,7 @@ import org.opensilk.cast.helpers.LocalCastServiceManager;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;

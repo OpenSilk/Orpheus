@@ -31,7 +31,7 @@ import com.android.volley.RequestQueue;
 
 import org.apache.commons.io.FileUtils;
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;

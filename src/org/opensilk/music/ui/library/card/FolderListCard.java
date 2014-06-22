@@ -17,8 +17,11 @@
 package org.opensilk.music.ui.library.card;
 
 import android.content.Context;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 
+import com.andrew.apollo.R;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Folder;
@@ -28,6 +31,7 @@ import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
+import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -39,7 +43,7 @@ public class FolderListCard extends AbsListCard<Folder> {
     Bus mBus; //Injected by adapter
 
     public FolderListCard(Context context, Folder data) {
-        super(context, data);
+        this(context, data, R.layout.library_folder_listcard_inner);
     }
 
     public FolderListCard(Context context, Folder data, int innerLayout) {
@@ -60,6 +64,16 @@ public class FolderListCard extends AbsListCard<Folder> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setVisibility(View.GONE);
-        mArtwork.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onCreatePopupMenu(PopupMenu m) {
+        m.inflate(R.menu.card_album);
+        m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return false;
+            }
+        });
     }
 }

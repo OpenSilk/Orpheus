@@ -18,13 +18,17 @@ package org.opensilk.music.ui.library.card;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.PopupMenu;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 
+import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -32,8 +36,11 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class SongListCard extends AbsListCard<Song> {
 
+    @InjectView(R.id.artwork_thumb)
+    protected ArtworkImageView mArtwork;
+
     public SongListCard(Context context, Song song) {
-        super(context, song);
+        this(context, song, R.layout.library_listcard_artwork);
     }
 
     public SongListCard(Context context, Song song, int innerLayout) {
@@ -54,8 +61,11 @@ public class SongListCard extends AbsListCard<Song> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setText(mData.artistName);
-        mArtwork.setVisibility(View.VISIBLE);
         ArtworkManager.loadImage(new ArtInfo(mData.albumArtistName, mData.albumName, mData.artworkUri), mArtwork);
     }
 
+    @Override
+    protected void onCreatePopupMenu(PopupMenu m) {
+
+    }
 }

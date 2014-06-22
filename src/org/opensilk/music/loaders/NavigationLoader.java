@@ -20,7 +20,7 @@ import android.content.Context;
 
 import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
 
-import org.opensilk.music.api.PluginInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.util.PluginUtil;
 
 import java.util.ArrayList;

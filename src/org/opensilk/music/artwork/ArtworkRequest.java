@@ -34,7 +34,7 @@ import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
 
 import org.apache.commons.io.IOUtils;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

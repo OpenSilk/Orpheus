@@ -17,14 +17,19 @@
 package org.opensilk.music.ui.library.card;
 
 import android.content.Context;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 
+import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -32,8 +37,11 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class AlbumListCard extends AbsListCard<Album> {
 
+    @InjectView(R.id.artwork_thumb)
+    protected ArtworkImageView mArtwork;
+
     public AlbumListCard(Context context, Album data) {
-        super(context, data);
+        super(context, data, R.layout.library_listcard_artwork);
     }
 
     public AlbumListCard(Context context, Album data, int innerLayout) {
@@ -56,5 +64,16 @@ public class AlbumListCard extends AbsListCard<Album> {
         mCardSubTitle.setText(mData.artistName);
         mArtwork.setVisibility(View.VISIBLE);
         ArtworkManager.loadImage(new ArtInfo(mData.artistName, mData.name, mData.artworkUri), mArtwork);
+    }
+
+    @Override
+    protected void onCreatePopupMenu(PopupMenu m) {
+        m.inflate(R.menu.card_album);
+        m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return false;
+            }
+        });
     }
 }

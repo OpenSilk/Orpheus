@@ -23,9 +23,13 @@ import android.os.Bundle;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.callback.FolderBrowseResult;
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Resource;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui.library.card.AlbumListCard;
+import org.opensilk.music.ui.library.card.ArtistListCard;
 import org.opensilk.music.ui.library.card.FolderListCard;
 import org.opensilk.music.ui.library.card.SongListCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
@@ -62,20 +66,17 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
             mLoadingInProgress = true;
             RemoteLibraryUtil.getService(mLibraryComponent).browseFolders(mLibraryIdentity, mFolderId, STEP, mPaginationBundle,
                     new FolderBrowseResult.Stub() {
+
                         @Override
-                        @DebugLog
-                        public void success(final List<Folder> folders, final List<Song> songs, final Bundle bundle) throws RemoteException {
+                        public void success(final List<Resource> items, final Bundle paginationBundle) throws RemoteException {
                             ((Activity) getContext()).runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (bundle == null) {
+                                    if (paginationBundle == null) {
                                         mEndOfResults = true;
                                     }
-                                    mPaginationBundle = bundle;
+                                    mPaginationBundle = paginationBundle;
                                     mLoadingInProgress = false;
-                                    List<Resource> items = new ArrayList<Resource>(folders.size() + songs.size());
-                                    items.addAll(folders);
-                                    items.addAll(songs);
                                     if (items.size() > 0) {
                                         addItems(items);
                                     }
@@ -119,6 +120,10 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
             return flc;
         } else if (data instanceof Song) {
             return new SongListCard(getContext(), (Song) data);
+        } else if (data instanceof Artist) {
+            return new ArtistListCard(getContext(), (Artist) data);
+        } else if (data instanceof Album) {
+            return new AlbumListCard(getContext(), (Album) data);
         }
         throw new IllegalArgumentException("Resource must be of type Folder or Song");
     }

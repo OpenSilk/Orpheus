@@ -30,7 +30,7 @@ import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 import com.android.volley.VolleyError;
 
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkLoader.ImageContainer;
 import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
 

@@ -25,7 +25,7 @@ import android.preference.Preference;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.api.PluginInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.util.PluginUtil;
 
 import java.util.List;

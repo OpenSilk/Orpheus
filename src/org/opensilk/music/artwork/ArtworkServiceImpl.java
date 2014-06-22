@@ -25,7 +25,7 @@ import android.os.ParcelFileDescriptor;
 import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.io.IOException;

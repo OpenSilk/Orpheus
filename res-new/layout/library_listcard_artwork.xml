@@ -32,18 +32,23 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
         android:orientation="vertical"
         android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/card_title"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:id="@+id/card_title"
+            android:textAppearance="?android:textAppearanceListItem"
+            style="@style/SingleLineTextView" />
 
         <TextView
-            android:id="@+id/card_subtitle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:id="@+id/card_subtitle"
+            android:textAppearance="?android:textAppearanceListItemSmall"
+            style="@style/SingleLineTextView" />
 
     </LinearLayout>
 
@@ -51,7 +56,7 @@
     <org.opensilk.music.widgets.CardOverflowButton
         android:id="@+id/card_overflow_button"
         android:layout_width="48dp"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/list_card_thumbnail"
         android:paddingRight="20dp"
         style="@style/Orpheus.MenuButton"
         android:contentDescription="@null" />

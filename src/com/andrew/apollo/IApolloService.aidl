@@ -1,6 +1,6 @@
 package com.andrew.apollo;
 
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 
 interface IApolloService
 {

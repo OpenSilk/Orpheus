@@ -19,6 +19,7 @@ package org.opensilk.music.ui.library.card;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
@@ -28,6 +29,7 @@ import org.opensilk.music.artwork.ArtworkImageView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -37,17 +39,13 @@ public abstract class AbsListCard<D extends Resource> extends Card {
 
     protected final D mData;
 
-    @InjectView(R.id.artwork_thumb)
-    protected ArtworkImageView mArtwork;
     @InjectView(R.id.card_title)
     protected TextView mCardTitle;
     @InjectView(R.id.card_subtitle)
     protected TextView mCardSubTitle;
-    @InjectView(R.id.card_overflow_button)
-    protected View mCardOverflowBtn;
 
     public AbsListCard(Context context, D data) {
-        this(context, data, R.layout.library_list_card_inner);
+        this(context, data, R.layout.library_folder_listcard_inner);
     }
 
     public AbsListCard(Context context, D data, int innerLayout) {
@@ -56,17 +54,25 @@ public abstract class AbsListCard<D extends Resource> extends Card {
         init();
     }
 
+    protected abstract void init();
+    protected abstract void onInnerViewSetup();
+    protected abstract void onCreatePopupMenu(PopupMenu m);
+
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         ButterKnife.inject(this, view);
         onInnerViewSetup();
     }
 
+    @OnClick(R.id.card_overflow_button)
+    public void onOverflowClicked(View v) {
+        PopupMenu m = new PopupMenu(getContext(), v);
+        onCreatePopupMenu(m);
+        m.show();
+    }
+
     public D getData() {
         return mData;
     }
-
-    protected abstract void init();
-    protected abstract void onInnerViewSetup();
 
 }

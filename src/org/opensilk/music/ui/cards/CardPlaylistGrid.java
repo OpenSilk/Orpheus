@@ -39,7 +39,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.adapters.CursorHelpers;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.Projections;

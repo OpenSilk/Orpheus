@@ -29,7 +29,7 @@ import com.google.android.apps.muzei.api.Artwork;
 import com.google.android.apps.muzei.api.MuzeiArtSource;
 
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProvider;
 
 import hugo.weaving.DebugLog;

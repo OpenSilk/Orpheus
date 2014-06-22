@@ -30,7 +30,7 @@ import android.util.JsonWriter;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.api.Api;
-import org.opensilk.music.api.PluginInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.home.HomeFragment;
 
 import java.io.IOException;

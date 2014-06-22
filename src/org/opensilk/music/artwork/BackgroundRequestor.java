@@ -22,7 +22,7 @@ import android.util.Log;
 import com.andrew.apollo.BuildConfig;
 import com.android.volley.Request;
 
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

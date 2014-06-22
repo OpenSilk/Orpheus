@@ -49,7 +49,7 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.bus.EventBus;

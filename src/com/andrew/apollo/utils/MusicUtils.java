@@ -48,7 +48,7 @@ import com.andrew.apollo.provider.RecentStore;
 
 import org.opensilk.music.adapters.CursorHelpers;
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.ArtInfo;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.loaders.Projections;
 
 import java.io.File;

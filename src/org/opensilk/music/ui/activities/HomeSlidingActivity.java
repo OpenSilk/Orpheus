@@ -41,7 +41,7 @@ import android.widget.ListView;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.api.PluginInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.loaders.NavigationLoader;
 import org.opensilk.music.ui.home.HomeFragment;
