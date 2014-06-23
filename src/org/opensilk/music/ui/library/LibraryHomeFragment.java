@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
+import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.Api;
@@ -36,12 +39,14 @@ import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
+import org.opensilk.music.ui.library.event.FolderCardClick;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.silkdagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import javax.inject.Inject;
@@ -56,16 +61,21 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     public static final int REQUEST_LIBRARY = 1001;
     public static final String ARG_COMPONENT = "argComponent";
     public static final String ARG_IDENTITY = "argIdentity";
+    public static final String ARG_FOLDER_ID = "argFolderId";
 
     @Inject @ForActivity
     ActionBarController mActionBarHelper;
     @Inject @ForActivity
     DrawerHelper mDrawerHelper;
+    @Inject @ForFragment
+    Bus mMiniBus;
 
     private RemoteLibrary mLibraryService;
     private PluginInfo mPluginInfo;
-
     private String mLibraryIdentity;
+
+    private boolean mWantGridView;
+    private boolean mFromSavedInstance;
 
     public static LibraryHomeFragment newInstance(PluginInfo p) {
         LibraryHomeFragment f = new LibraryHomeFragment();
@@ -82,9 +92,12 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
         // Bind the remote service
         RemoteLibraryUtil.bindToService(getActivity(), mPluginInfo.componentName);
         EventBus.getInstance().register(this);
+        mMiniBus.register(this);
         // restore state
         if (savedInstanceState != null) {
+            mFromSavedInstance = true;
             mLibraryIdentity = savedInstanceState.getString("library_id");
+            mWantGridView = savedInstanceState.getBoolean("want_grid");
         } else {
             // TODO save / get from prefs
         }
@@ -107,9 +120,10 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        mMiniBus.unregister(this);
         EventBus.getInstance().unregister(this);
         RemoteLibraryUtil.unbindFromService(getActivity(), mPluginInfo.componentName);
+        super.onDestroy();
     }
 
     @Override
@@ -124,14 +138,12 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_view_as_simple:
-                getChildFragmentManager().beginTransaction()
-                        .replace(R.id.container, LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName))
-                        .commit();
+                mWantGridView = false;
+                initFolderFragment();
                 return true;
             case R.id.menu_view_as_grid:
-                getChildFragmentManager().beginTransaction()
-                        .replace(R.id.container, LibraryFolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName))
-                        .commit();
+                mWantGridView = true;
+                initFolderFragment();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -149,7 +161,7 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
                         throw new RuntimeException("Library chooser must set EXTRA_LIBRARY_ID");
                     }
                     mLibraryIdentity = id;
-                    addPages();
+                    initFolderFragment();
                 } else {
                     //TODO
                 }
@@ -163,6 +175,7 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("library_id", mLibraryIdentity);
+        outState.putBoolean("want_grid", mWantGridView);
     }
 
     /*
@@ -192,7 +205,7 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     }
 
     /*
-     * Eventes
+     * Global Eventes
      */
 
     @Subscribe
@@ -209,6 +222,15 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
         }
     }
 
+    /*
+     * Scoped events
+     */
+
+    @Subscribe
+    public void onFolderClicked(FolderCardClick e) {
+        pushFolderFragment(e.folderId);
+    }
+
     private boolean isLibraryBound() {
         return RemoteLibraryUtil.isBound(mPluginInfo.componentName);
     }
@@ -220,17 +242,40 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
                 Intent i = new Intent();
                 mLibraryService.getLibraryChooserIntent(i);
                 startActivityForResult(i, REQUEST_LIBRARY);
-            } else {
-                addPages();
+            } else if (!mFromSavedInstance) {
+                initFolderFragment();
             }
         } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
 
-    private void addPages() {
+    private void initFolderFragment() {
+        Fragment f;
+        if (mWantGridView) {
+            f = LibraryFolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
+        } else {
+            f = LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
+        }
+        FragmentManager fm = getChildFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+        fm.beginTransaction()
+                .replace(R.id.container, f)
+                .commit();
+    }
+
+    private void pushFolderFragment(String folderId) {
+        Fragment f;
+        if (mWantGridView) {
+            f = LibraryFolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
+        } else {
+            f = LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
+        }
         getChildFragmentManager().beginTransaction()
-                .replace(R.id.container, LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName))
+                .replace(R.id.container, f)
+                .addToBackStack(folderId)
                 .commit();
     }
 
