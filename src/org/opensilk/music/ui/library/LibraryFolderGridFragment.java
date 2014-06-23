@@ -25,8 +25,9 @@ import android.view.View;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.ui.library.adapter.AbsLibraryArrayAdapter;
-import org.opensilk.music.ui.library.adapter.LibraryFolderArrayAdapter;
+import org.opensilk.music.ui.library.adapter.LibraryFolderGridArrayAdapter;
+import org.opensilk.music.ui.library.adapter.LibraryFolderListArrayAdapter;
+import org.opensilk.music.ui.library.adapter.LibraryLoaderCallback;
 import org.opensilk.music.ui.library.event.FolderCardClick;
 import org.opensilk.music.ui.library.module.DirectoryStack;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -40,24 +41,34 @@ import javax.inject.Inject;
 import hugo.weaving.DebugLog;
 
 /**
- * Created by drew on 6/14/14.
+ * Created by drew on 6/23/14.
  */
-public class LibraryFolderFragment extends CardListFragment implements
-        AbsLibraryArrayAdapter.LoaderCallback,
+public class LibraryFolderGridFragment extends CardGridFragment implements
+        LibraryLoaderCallback,
         DirectoryStack {
 
     private ComponentName mLibraryComponentName;
     private String mLibraryIdentity;
 
-    protected LibraryFolderArrayAdapter mAdapter;
+    protected LibraryFolderGridArrayAdapter mAdapter;
 
-    @Inject @ForFragment
+    @Inject
+    @ForFragment
     Bus mBus;
 
     /**
      * LIFO stack
      */
     private Deque<Bundle> mDirectoryStack = new ArrayDeque<>();
+
+    public static LibraryFolderGridFragment newInstance(String libraryIdentity, ComponentName libraryComponentName) {
+        LibraryFolderGridFragment f = new LibraryFolderGridFragment();
+        Bundle b = new Bundle(2);
+        b.putString(LibraryHomeFragment.ARG_IDENTITY, libraryIdentity);
+        b.putParcelable(LibraryHomeFragment.ARG_COMPONENT, libraryComponentName);
+        f.setArguments(b);
+        return f;
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -74,7 +85,7 @@ public class LibraryFolderFragment extends CardListFragment implements
         mLibraryComponentName = getArguments().getParcelable(LibraryHomeFragment.ARG_COMPONENT);
         mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
 
-        mAdapter = new LibraryFolderArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this, (DaggerInjector)getParentFragment());
+        mAdapter = new LibraryFolderGridArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this, (DaggerInjector)getParentFragment());
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
             Parcelable[] bundles = savedInstanceState.getParcelableArray("dirstack");

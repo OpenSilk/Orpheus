@@ -25,7 +25,6 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.artwork.ArtworkImageView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -35,7 +34,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public abstract class AbsListCard<D extends Bundleable> extends Card {
+public abstract class AbsLibraryCard<D extends Bundleable> extends Card {
 
     protected final D mData;
 
@@ -44,11 +43,13 @@ public abstract class AbsListCard<D extends Bundleable> extends Card {
     @InjectView(R.id.card_subtitle)
     protected TextView mCardSubTitle;
 
-    public AbsListCard(Context context, D data) {
+    protected boolean mForGrid;
+
+    public AbsLibraryCard(Context context, D data) {
         this(context, data, R.layout.library_folder_listcard_inner);
     }
 
-    public AbsListCard(Context context, D data, int innerLayout) {
+    public AbsLibraryCard(Context context, D data, int innerLayout) {
         super(context, innerLayout);
         mData = data;
         init();
@@ -57,6 +58,9 @@ public abstract class AbsListCard<D extends Bundleable> extends Card {
     protected abstract void init();
     protected abstract void onInnerViewSetup();
     protected abstract void onCreatePopupMenu(PopupMenu m);
+    protected abstract int getListLayout();
+    protected abstract int getGridLayout();
+
 
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
@@ -73,6 +77,18 @@ public abstract class AbsListCard<D extends Bundleable> extends Card {
 
     public D getData() {
         return mData;
+    }
+
+    public void useGridLayout() {
+        setInnerLayout(getGridLayout());
+    }
+
+    public void useListLayout() {
+        setInnerLayout(getListLayout());
+    }
+
+    public boolean isGridStyle() {
+        return getInnerLayout() == getGridLayout();
     }
 
 }

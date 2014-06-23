@@ -23,7 +23,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/artwork_thumb"
+        android:id="@+id/folder_thumb"
         android:layout_width="@dimen/list_card_thumbnail"
         android:layout_height="@dimen/list_card_thumbnail"
         android:text="DIR"

@@ -34,16 +34,16 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class ArtistListCard extends AbsListCard<Artist> {
+public class ArtistLibraryCard extends AbsLibraryCard<Artist> {
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
 
-    public ArtistListCard(Context context, Artist data) {
-        this(context, data, R.layout.library_listcard_artwork);
+    public ArtistLibraryCard(Context context, Artist data) {
+        this(context, data, R.layout.library_listcard_artwork_inner);
     }
 
-    public ArtistListCard(Context context, Artist data, int innerLayout) {
+    public ArtistLibraryCard(Context context, Artist data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
@@ -75,5 +75,15 @@ public class ArtistListCard extends AbsListCard<Artist> {
                 return false;
             }
         });
+    }
+
+    @Override
+    protected int getListLayout() {
+        return R.layout.library_listcard_artwork_inner;
+    }
+
+    @Override
+    protected int getGridLayout() {
+        return R.layout.library_gridcard_artwork_inner;
     }
 }

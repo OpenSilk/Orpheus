@@ -27,14 +27,13 @@ import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.ui.library.card.AlbumListCard;
-import org.opensilk.music.ui.library.card.ArtistListCard;
-import org.opensilk.music.ui.library.card.FolderListCard;
-import org.opensilk.music.ui.library.card.SongListCard;
+import org.opensilk.music.ui.library.card.AlbumLibraryCard;
+import org.opensilk.music.ui.library.card.ArtistLibraryCard;
+import org.opensilk.music.ui.library.card.FolderLibraryCard;
+import org.opensilk.music.ui.library.card.SongLibraryCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
@@ -43,13 +42,17 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter {
+public class LibraryFolderListArrayAdapter extends AbsLibraryListArrayAdapter {
 
     private String mFolderId;
 
     private DaggerInjector mInjector;
 
-    public LibraryFolderArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback, DaggerInjector injector) {
+    public LibraryFolderListArrayAdapter(Context context,
+                                         String libraryIdentity,
+                                         ComponentName libraryComponent,
+                                         LibraryLoaderCallback callback,
+                                         DaggerInjector injector) {
         super(context, libraryIdentity, libraryComponent, callback);
         mInjector = injector;
     }
@@ -120,15 +123,15 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter {
             throw new IllegalArgumentException(e);
         }
         if (Folder.class == c) {
-            FolderListCard flc = new FolderListCard(getContext(), Folder.fromBundle(data));
+            FolderLibraryCard flc = new FolderLibraryCard(getContext(), Folder.fromBundle(data));
             mInjector.inject(flc);
             return flc;
         } else if (Song.class == c) {
-            return new SongListCard(getContext(), Song.fromBundle(data));
+            return new SongLibraryCard(getContext(), Song.fromBundle(data));
         } else if (Artist.class == c) {
-            return new ArtistListCard(getContext(), Artist.fromBundle(data));
+            return new ArtistLibraryCard(getContext(), Artist.fromBundle(data));
         } else if (Album.class == c) {
-            return new AlbumListCard(getContext(), Album.fromBundle(data));
+            return new AlbumLibraryCard(getContext(), Album.fromBundle(data));
         }
         throw new IllegalArgumentException("Unknown resource class");
     }

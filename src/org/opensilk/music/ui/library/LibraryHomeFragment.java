@@ -17,22 +17,18 @@
 package org.opensilk.music.ui.library;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.Lists;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.Api;
@@ -40,25 +36,17 @@ import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
-import org.opensilk.music.ui.library.module.DirectoryStack;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
+import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
-import java.util.Locale;
-
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 import hugo.weaving.DebugLog;
-
-import static org.opensilk.music.api.options.Ability.BROWSE_FOLDERS;
 
 /**
  * Created by drew on 6/14/14.
@@ -71,16 +59,13 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
 
     @Inject @ForActivity
     ActionBarController mActionBarHelper;
+    @Inject @ForActivity
+    DrawerHelper mDrawerHelper;
 
     private RemoteLibrary mLibraryService;
     private PluginInfo mPluginInfo;
 
-    @InjectView(R.id.pager)
-    ViewPager mPager;
-    protected HomePagerAdapter mPagerAdapter;
-
     private String mLibraryIdentity;
-    private int mPreviousPagerPage = 0;
 
     public static LibraryHomeFragment newInstance(PluginInfo p) {
         LibraryHomeFragment f = new LibraryHomeFragment();
@@ -97,12 +82,9 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
         // Bind the remote service
         RemoteLibraryUtil.bindToService(getActivity(), mPluginInfo.componentName);
         EventBus.getInstance().register(this);
-        // init adapter
-        mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
         // restore state
         if (savedInstanceState != null) {
             mLibraryIdentity = savedInstanceState.getString("library_id");
-            mPreviousPagerPage = savedInstanceState.getInt("library_pager_current");
         } else {
             // TODO save / get from prefs
         }
@@ -110,15 +92,8 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.pager_fragment, container, false);
-        ButterKnife.inject(this, v);
+        View v = inflater.inflate(R.layout.topmargin_container, container, false);
         return v;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mPager.setAdapter(mPagerAdapter);
     }
 
     @Override
@@ -126,12 +101,8 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
         super.onActivityCreated(savedInstanceState);
         // set title
         mActionBarHelper.setTitle(mPluginInfo.title);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.reset(this);
+        // enable overflow
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -139,6 +110,32 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
         super.onDestroy();
         EventBus.getInstance().unregister(this);
         RemoteLibraryUtil.unbindFromService(getActivity(), mPluginInfo.componentName);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        if (!mDrawerHelper.isDrawerOpen()) {
+            inflater.inflate(R.menu.view_as, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_view_as_simple:
+                getChildFragmentManager().beginTransaction()
+                        .replace(R.id.container, LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName))
+                        .commit();
+                return true;
+            case R.id.menu_view_as_grid:
+                getChildFragmentManager().beginTransaction()
+                        .replace(R.id.container, LibraryFolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName))
+                        .commit();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -166,7 +163,6 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("library_id", mLibraryIdentity);
-        outState.putInt("library_pager_current", mPager.getCurrentItem());
     }
 
     /*
@@ -192,12 +188,7 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     @Override
     @DebugLog
     public boolean onBackButtonPressed() {
-        Fragment f = mPagerAdapter.getFragment(mPager.getCurrentItem());
-        if (f != null && (f instanceof DirectoryStack)) {
-            DirectoryStack d = (DirectoryStack) f;
-            return d.popDirectoryStack();
-        }
-        return false;
+        return getChildFragmentManager().popBackStackImmediate();
     }
 
     /*
@@ -238,123 +229,9 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     }
 
     private void addPages() {
-        if (mLibraryService != null) {
-            try {
-                int caps = mLibraryService.getCapabilities();
-
-                final Bundle b = new Bundle(2);
-                b.putParcelable(ARG_COMPONENT, mPluginInfo.componentName);
-                b.putString(ARG_IDENTITY, mLibraryIdentity);
-
-                if ((caps & BROWSE_FOLDERS) == BROWSE_FOLDERS) {
-                    mPagerAdapter.add(LibraryFragment.FOLDER, b);
-                }
-
-                mPagerAdapter.notifyDataSetChanged();
-
-                mPager.setCurrentItem(mPreviousPagerPage);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
+        getChildFragmentManager().beginTransaction()
+                .replace(R.id.container, LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName))
+                .commit();
     }
 
-    /**
-     * Pager adapter
-     */
-    public static final class HomePagerAdapter extends FragmentPagerAdapter {
-        private final Context mContext;
-        private final List<FragmentHolder> mHolderList = Lists.newArrayList();
-        private final SparseArray<WeakReference<Fragment>> mFragments = new SparseArray<>();
-
-        public HomePagerAdapter(Context context, FragmentManager fm) {
-            super(fm);
-            mContext = context;
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Fragment f = (Fragment) super.instantiateItem(container, position);
-            mFragments.put(position, new WeakReference<Fragment>(f));
-            return f;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            super.destroyItem(container, position, object);
-            if (mFragments.get(position) != null) {
-                mFragments.remove(position);
-            }
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            FragmentHolder holder = mHolderList.get(position);
-            return Fragment.instantiate(mContext, holder.fragment.getFragmentClass().getName(), holder.params);
-        }
-
-        @Override
-        public int getCount() {
-            return mHolderList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(final int position) {
-            final int id = mHolderList.get(position).fragment.getTitleResource();
-            return mContext.getString(id).toUpperCase(Locale.getDefault());
-        }
-
-        public void add(final LibraryFragment fragment, final Bundle params) {
-            mHolderList.add(new FragmentHolder(fragment, params));
-        }
-
-        public Fragment getFragment(int position) {
-            WeakReference<Fragment> wf = mFragments.get(position);
-            if (wf != null) {
-                return wf.get();
-            }
-            return null;
-        }
-
-        public Class<? extends Fragment> getClassAt(int position) {
-            return mHolderList.get(position).fragment.getFragmentClass();
-        }
-
-        private final static class FragmentHolder {
-            LibraryFragment fragment;
-            Bundle params;
-            private FragmentHolder(LibraryFragment fragment, Bundle params) {
-                this.fragment = fragment;
-                this.params = params;
-            }
-        }
-    }
-
-    /**
-     * An enumeration of all the main fragments supported.
-     */
-    public static enum LibraryFragment {
-        /**
-         * Folder fragment
-         */
-        FOLDER(LibraryFolderFragment.class, R.string.page_folders);
-
-        private Class<? extends Fragment> mFragmentClass;
-        private int mTitleResource;
-
-        private LibraryFragment(final Class<? extends Fragment> fragmentClass,
-                                final int titleResource) {
-            mFragmentClass = fragmentClass;
-            mTitleResource = titleResource;
-        }
-
-        public Class<? extends Fragment> getFragmentClass() {
-            return mFragmentClass;
-        }
-
-        public int getTitleResource() {
-            return mTitleResource;
-        }
-
-    }
 }

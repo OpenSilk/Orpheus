@@ -24,19 +24,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.ui.library.card.AbsListCard;
+import org.opensilk.music.ui.library.card.AbsLibraryCard;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 
 /**
- * Created by drew on 6/14/14.
+ * Created by drew on 6/23/14.
  */
-public abstract class AbsLibraryArrayAdapter extends CardArrayAdapter {
+public abstract class AbsLibraryGridArrayAdapter extends CardGridArrayAdapter {
 
     public static final int STEP = 20;
 
@@ -48,14 +48,10 @@ public abstract class AbsLibraryArrayAdapter extends CardArrayAdapter {
     protected boolean mLoadingInProgress;
     protected boolean mEndOfResults;
 
-    protected LoaderCallback mCallback;
+    protected LibraryLoaderCallback mCallback;
     protected boolean mFirstLoadComplete;
 
-    public interface LoaderCallback {
-        public void onFirstLoadComplete();
-    }
-
-    protected AbsLibraryArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LoaderCallback callback) {
+    protected AbsLibraryGridArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LibraryLoaderCallback callback) {
         super(context, new ArrayList<Card>());
         if (!(context instanceof Activity)) {
             throw new IllegalArgumentException("Context must be from activity");
@@ -100,7 +96,7 @@ public abstract class AbsLibraryArrayAdapter extends CardArrayAdapter {
             items.add(getItemData(ii).toBundle());
         }
         b.putParcelableArrayList("items", items);
-        b.putBundle("pagination", mPaginationBundle);
+        b.putBundle("pb", mPaginationBundle);
         b.putBoolean("eor", mEndOfResults);
         b.putBoolean("flc", mFirstLoadComplete);
         onSaveInstanceState(b);
@@ -117,7 +113,7 @@ public abstract class AbsLibraryArrayAdapter extends CardArrayAdapter {
         }
         ArrayList<Bundle> items = b.getParcelableArrayList("items");
         addItems(items);
-        mPaginationBundle = b.getBundle("pagination");
+        mPaginationBundle = b.getBundle("pb");
         mEndOfResults = b.getBoolean("eor");
         mFirstLoadComplete = b.getBoolean("flc");
         onRestoreInstanceState(b);
@@ -132,7 +128,7 @@ public abstract class AbsLibraryArrayAdapter extends CardArrayAdapter {
     }
 
     public Bundleable getItemData(int position) {
-        return ((AbsListCard) getItem(position)).getData();
+        return ((AbsLibraryCard) getItem(position)).getData();
     }
 
     public boolean isOnFirstLoad() {

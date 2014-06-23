@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
+import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
@@ -44,9 +46,9 @@ import it.gmariotti.cardslib.library.view.CardListView;
  * to switch to the framework's implementation.  See the framework SDK
  * documentation for a class overview.
  *
- * Opensilk: Switched out ListView for CardListView
+ * Opensilk: Switched out ListView for CardGridView
  */
-public class CardListFragment extends Fragment {
+public class CardGridFragment extends Fragment {
     static final int INTERNAL_EMPTY_ID = 0x00ff0001;
     static final int INTERNAL_PROGRESS_CONTAINER_ID = 0x00ff0002;
     static final int INTERNAL_LIST_CONTAINER_ID = 0x00ff0003;
@@ -67,7 +69,7 @@ public class CardListFragment extends Fragment {
     };
 
     ListAdapter mAdapter;
-    CardListView mList;
+    CardGridView mList;
     View mEmptyView;
     TextView mStandardEmptyView;
     View mProgressContainer;
@@ -75,7 +77,7 @@ public class CardListFragment extends Fragment {
     CharSequence mEmptyText;
     boolean mListShown;
 
-    public CardListFragment() {
+    public CardGridFragment() {
     }
 
     /**
@@ -126,9 +128,9 @@ public class CardListFragment extends Fragment {
         lframe.addView(tv, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 
-//        CardListView lv = new CardListView(getActivity());
+//        CardGridView lv = new CardGridView(getActivity());
 //        lv.setId(android.R.id.list);
-        CardListView lv = (CardListView) inflater.inflate(R.layout.card_listview_fastscroll2, null);
+        CardGridView lv = (CardGridView) inflater.inflate(R.layout.card_gridview_fastscroll, null);
         lv.setDrawSelectorOnTop(false);
         lframe.addView(lv, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
@@ -226,7 +228,7 @@ public class CardListFragment extends Fragment {
     /**
      * Get the activity's list view widget.
      */
-    public CardListView getListView() {
+    public CardGridView getGridView() {
         ensureList();
         return mList;
     }
@@ -335,8 +337,8 @@ public class CardListFragment extends Fragment {
         if (root == null) {
             throw new IllegalStateException("Content view not yet created");
         }
-        if (root instanceof CardListView) {
-            mList = (CardListView)root;
+        if (root instanceof CardGridView) {
+            mList = (CardGridView)root;
         } else {
             mStandardEmptyView = (TextView)root.findViewById(INTERNAL_EMPTY_ID);
             if (mStandardEmptyView == null) {
@@ -347,7 +349,7 @@ public class CardListFragment extends Fragment {
             mProgressContainer = root.findViewById(INTERNAL_PROGRESS_CONTAINER_ID);
             mListContainer = root.findViewById(INTERNAL_LIST_CONTAINER_ID);
             View rawListView = root.findViewById(android.R.id.list);
-            if (!(rawListView instanceof CardListView)) {
+            if (!(rawListView instanceof CardGridView)) {
                 if (rawListView == null) {
                     throw new RuntimeException(
                             "Your content must have a ListView whose id attribute is " +
@@ -357,7 +359,7 @@ public class CardListFragment extends Fragment {
                         "Content has view with id attribute 'android.R.id.list' "
                                 + "that is not a ListView class");
             }
-            mList = (CardListView)rawListView;
+            mList = (CardGridView)rawListView;
             if (mEmptyView != null) {
                 mList.setEmptyView(mEmptyView);
             } else if (mEmptyText != null) {
@@ -381,4 +383,3 @@ public class CardListFragment extends Fragment {
         mHandler.post(mRequestFocus);
     }
 }
-

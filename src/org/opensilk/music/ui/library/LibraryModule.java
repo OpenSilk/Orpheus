@@ -18,12 +18,10 @@ package org.opensilk.music.ui.library;
 
 import com.squareup.otto.Bus;
 
-import org.opensilk.music.ui.activities.ActivityModule;
 import org.opensilk.music.ui.activities.HomeModule;
-import org.opensilk.music.ui.library.card.FolderListCard;
+import org.opensilk.music.ui.library.card.FolderLibraryCard;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -35,10 +33,12 @@ import dagger.Provides;
 @Module (
         injects = {
                 LibraryHomeFragment.class,
-                LibraryFolderFragment.class,
-                FolderListCard.class,
+                LibraryFolderListFragment.class,
+                LibraryFolderGridFragment.class,
+                FolderLibraryCard.class,
         },
-        addsTo = ActivityModule.class
+        addsTo = HomeModule.class,
+        complete = false
 )
 public class LibraryModule {
 

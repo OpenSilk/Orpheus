@@ -26,27 +26,25 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.ui.library.event.FolderCardClick;
-import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
-import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/19/14.
  */
-public class FolderListCard extends AbsListCard<Folder> {
+public class FolderLibraryCard extends AbsLibraryCard<Folder> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter
 
-    public FolderListCard(Context context, Folder data) {
+    public FolderLibraryCard(Context context, Folder data) {
         this(context, data, R.layout.library_folder_listcard_inner);
     }
 
-    public FolderListCard(Context context, Folder data, int innerLayout) {
+    public FolderLibraryCard(Context context, Folder data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
@@ -75,5 +73,15 @@ public class FolderListCard extends AbsListCard<Folder> {
                 return false;
             }
         });
+    }
+
+    @Override
+    protected int getListLayout() {
+        return R.layout.library_folder_listcard_inner;
+    }
+
+    @Override
+    protected int getGridLayout() {
+        return R.layout.library_folder_gridcard_inner;
     }
 }
