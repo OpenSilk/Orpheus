@@ -46,7 +46,7 @@ public abstract class AbsLibraryCard<D extends Bundleable> extends Card {
     protected boolean mForGrid;
 
     public AbsLibraryCard(Context context, D data) {
-        this(context, data, R.layout.library_folder_listcard_inner);
+        this(context, data, -1);
     }
 
     public AbsLibraryCard(Context context, D data, int innerLayout) {

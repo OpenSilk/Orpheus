@@ -22,12 +22,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <org.opensilk.music.widgets.ColorCodedThumbnail
         android:id="@+id/folder_thumb"
         android:layout_width="@dimen/list_card_thumbnail"
         android:layout_height="@dimen/list_card_thumbnail"
-        android:text="DIR"
-        android:background="@android:color/holo_blue_dark"
+        android:background="@android:color/transparent"
+        android:textAppearance="?android:textAppearanceLarge"
+        android:textSize="32sp"
         style="@style/Orpheus.Thumbnail"/>
 
     <LinearLayout

@@ -26,10 +26,12 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.ui.library.event.FolderCardClick;
+import org.opensilk.music.widgets.ColorCodedThumbnail;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
+import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -39,6 +41,9 @@ public class FolderLibraryCard extends AbsLibraryCard<Folder> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter
+
+    @InjectView(R.id.folder_thumb)
+    ColorCodedThumbnail mThumbnail;
 
     public FolderLibraryCard(Context context, Folder data) {
         this(context, data, R.layout.library_folder_listcard_inner);
@@ -62,6 +67,7 @@ public class FolderLibraryCard extends AbsLibraryCard<Folder> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setVisibility(View.GONE);
+        mThumbnail.init(mData.name != null ? mData.name : "DIR");
     }
 
     @Override

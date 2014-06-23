@@ -18,9 +18,6 @@
     <!-- See through -->
     <color name="transparent">#00000000</color>
 
-    <!-- Black -->
-    <color name="black">#ff000000</color>
-
     <!-- White -->
     <color name="white">#ffffffff</color>
 
