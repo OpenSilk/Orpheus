@@ -23,7 +23,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.opensilk.music.api.model.Resource;
+import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui.library.card.AbsListCard;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 /**
  * Created by drew on 6/14/14.
  */
-public abstract class AbsLibraryArrayAdapter<D extends Resource> extends CardArrayAdapter {
+public abstract class AbsLibraryArrayAdapter extends CardArrayAdapter {
 
     public static final int STEP = 20;
 
@@ -91,13 +91,13 @@ public abstract class AbsLibraryArrayAdapter<D extends Resource> extends CardArr
     protected abstract void onSaveInstanceState(Bundle outState);
     protected abstract void onRestoreInstanceState(Bundle inState);
 
-    protected abstract Card makeCard(D data);
+    protected abstract Card makeCard(Bundle data);
 
     public void saveInstanceState(Bundle outState) {
         Bundle b = new Bundle();
-        ArrayList<D> items = new ArrayList<>(getCount());
+        ArrayList<Bundle> items = new ArrayList<>(getCount());
         for (int ii=0; ii<getCount(); ii++) {
-            items.add(getItemData(ii));
+            items.add(getItemData(ii).toBundle());
         }
         b.putParcelableArrayList("items", items);
         b.putBundle("pagination", mPaginationBundle);
@@ -115,7 +115,7 @@ public abstract class AbsLibraryArrayAdapter<D extends Resource> extends CardArr
         if (getCount() > 0) {
             clear();
         }
-        ArrayList<D> items = b.getParcelableArrayList("items");
+        ArrayList<Bundle> items = b.getParcelableArrayList("items");
         addItems(items);
         mPaginationBundle = b.getBundle("pagination");
         mEndOfResults = b.getBoolean("eor");
@@ -123,16 +123,16 @@ public abstract class AbsLibraryArrayAdapter<D extends Resource> extends CardArr
         onRestoreInstanceState(b);
     }
 
-    public void addItems(Collection<D> collection) {
+    public void addItems(Collection<Bundle> collection) {
         List<Card> cards = new ArrayList<>(collection.size());
-        for (D item : collection) {
+        for (Bundle item : collection) {
             cards.add(makeCard(item));
         }
         addAll(cards);
     }
 
-    public D getItemData(int position) {
-        return ((AbsListCard<D>) getItem(position)).getData();
+    public Bundleable getItemData(int position) {
+        return ((AbsListCard) getItem(position)).getData();
     }
 
     public boolean isOnFirstLoad() {

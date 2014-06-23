@@ -22,11 +22,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 
-import org.opensilk.music.api.callback.FolderBrowseResult;
+import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
-import org.opensilk.music.api.model.Resource;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.library.card.AlbumListCard;
 import org.opensilk.music.ui.library.card.ArtistListCard;
@@ -44,7 +43,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> {
+public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter {
 
     private String mFolderId;
 
@@ -65,10 +64,10 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
         try {
             mLoadingInProgress = true;
             RemoteLibraryUtil.getService(mLibraryComponent).browseFolders(mLibraryIdentity, mFolderId, STEP, mPaginationBundle,
-                    new FolderBrowseResult.Stub() {
+                    new Result.Stub() {
 
                         @Override
-                        public void success(final List<Resource> items, final Bundle paginationBundle) throws RemoteException {
+                        public void success(final List<Bundle> items, final Bundle paginationBundle) throws RemoteException {
                             ((Activity) getContext()).runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -90,7 +89,7 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
 
                         @Override
                         @DebugLog
-                        public void failure(String reason) throws RemoteException {
+                        public void failure(int code, String reason) throws RemoteException {
 //                            mPaginationBundle = null;
                             mLoadingInProgress = false;
                             //TODO
@@ -113,19 +112,25 @@ public class LibraryFolderArrayAdapter extends AbsLibraryArrayAdapter<Resource> 
     }
 
     @Override
-    protected Card makeCard(Resource data) {
-        if (data instanceof Folder) {
-            FolderListCard flc = new FolderListCard(getContext(), (Folder) data);
+    protected Card makeCard(Bundle data) {
+        Class c;
+        try {
+            c = Class.forName(data.getString("clz"));
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
+        if (Folder.class == c) {
+            FolderListCard flc = new FolderListCard(getContext(), Folder.fromBundle(data));
             mInjector.inject(flc);
             return flc;
-        } else if (data instanceof Song) {
-            return new SongListCard(getContext(), (Song) data);
-        } else if (data instanceof Artist) {
-            return new ArtistListCard(getContext(), (Artist) data);
-        } else if (data instanceof Album) {
-            return new AlbumListCard(getContext(), (Album) data);
+        } else if (Song.class == c) {
+            return new SongListCard(getContext(), Song.fromBundle(data));
+        } else if (Artist.class == c) {
+            return new ArtistListCard(getContext(), Artist.fromBundle(data));
+        } else if (Album.class == c) {
+            return new AlbumListCard(getContext(), Album.fromBundle(data));
         }
-        throw new IllegalArgumentException("Resource must be of type Folder or Song");
+        throw new IllegalArgumentException("Unknown resource class");
     }
 
     public String getFolderId() {

@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.api.model.Resource;
+import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.artwork.ArtworkImageView;
 
 import butterknife.ButterKnife;
@@ -35,7 +35,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public abstract class AbsListCard<D extends Resource> extends Card {
+public abstract class AbsListCard<D extends Bundleable> extends Card {
 
     protected final D mData;
 
