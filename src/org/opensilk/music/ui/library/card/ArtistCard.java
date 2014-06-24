@@ -22,10 +22,9 @@ import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 
@@ -35,16 +34,16 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class AlbumLibraryCard extends AbsLibraryCard<Album> {
+public class ArtistCard extends AbsCard<Artist> {
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
 
-    public AlbumLibraryCard(Context context, Album data) {
-        super(context, data, R.layout.library_listcard_artwork_inner);
+    public ArtistCard(Context context, Artist data) {
+        this(context, data, R.layout.library_listcard_artwork_inner);
     }
 
-    public AlbumLibraryCard(Context context, Album data, int innerLayout) {
+    public ArtistCard(Context context, Artist data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
@@ -53,7 +52,7 @@ public class AlbumLibraryCard extends AbsLibraryCard<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openAlbumProfile(getContext(), mData);
+                //TODO
             }
         });
     }
@@ -61,14 +60,15 @@ public class AlbumLibraryCard extends AbsLibraryCard<Album> {
     @Override
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
-        mCardSubTitle.setText(mData.artistName);
-        mArtwork.setVisibility(View.VISIBLE);
-        ArtworkManager.loadImage(new ArtInfo(mData.artistName, mData.name, mData.artworkUri), mArtwork);
+        mCardSubTitle.setVisibility(View.GONE);
+        mArtwork.setVisibility(View.GONE);
+        ArtworkManager.loadImage(new ArtInfo(mData.name, null, null), mArtwork);
+
     }
 
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
-        m.inflate(R.menu.card_album);
+        m.inflate(R.menu.card_artist);
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {

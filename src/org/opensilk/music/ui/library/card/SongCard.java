@@ -34,16 +34,16 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class SongLibraryCard extends AbsLibraryCard<Song> {
+public class SongCard extends AbsCard<Song> {
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
 
-    public SongLibraryCard(Context context, Song song) {
+    public SongCard(Context context, Song song) {
         this(context, song, R.layout.library_listcard_artwork_inner);
     }
 
-    public SongLibraryCard(Context context, Song song, int innerLayout) {
+    public SongCard(Context context, Song song, int innerLayout) {
         super(context, song, innerLayout);
     }
 

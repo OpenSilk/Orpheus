@@ -44,8 +44,7 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.loaders.NavigationLoader;
-import org.opensilk.music.ui.home.HomeFragment;
-import org.opensilk.music.ui.library.LibraryHomeFragment;
+import org.opensilk.music.ui.library.HomeFragment;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
@@ -292,12 +291,12 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
             mDrawerLayout.closeDrawer(mDrawerContainerView);
         }
         PluginInfo pi = mDrawerAdapter.getItem(position);
-        if (pi.componentName.equals(new ComponentName(this, HomeFragment.class))) {
+        if (pi.componentName.equals(new ComponentName(this, org.opensilk.music.ui.home.HomeFragment.class))) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, new HomeFragment(), "home").commit();
+                    .replace(R.id.main, new org.opensilk.music.ui.home.HomeFragment(), "home").commit();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, LibraryHomeFragment.newInstance(pi), "library")
+                    .replace(R.id.main, HomeFragment.newInstance(pi), "library")
                     .commit();
         }
     }

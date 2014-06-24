@@ -56,7 +56,7 @@ import hugo.weaving.DebugLog;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryHomeFragment extends ScopedDaggerFragment implements BackButtonListener {
+public class HomeFragment extends ScopedDaggerFragment implements BackButtonListener {
 
     public static final int REQUEST_LIBRARY = 1001;
     public static final String ARG_COMPONENT = "argComponent";
@@ -77,8 +77,8 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     private boolean mWantGridView;
     private boolean mFromSavedInstance;
 
-    public static LibraryHomeFragment newInstance(PluginInfo p) {
-        LibraryHomeFragment f = new LibraryHomeFragment();
+    public static HomeFragment newInstance(PluginInfo p) {
+        HomeFragment f = new HomeFragment();
         Bundle b = new Bundle(1);
         b.putParcelable("plugininfo", p);
         f.setArguments(b);
@@ -253,9 +253,9 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     private void initFolderFragment() {
         Fragment f;
         if (mWantGridView) {
-            f = LibraryFolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
+            f = FolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
         } else {
-            f = LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
+            f = FolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
         }
         FragmentManager fm = getChildFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
@@ -269,9 +269,9 @@ public class LibraryHomeFragment extends ScopedDaggerFragment implements BackBut
     private void pushFolderFragment(String folderId) {
         Fragment f;
         if (mWantGridView) {
-            f = LibraryFolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
+            f = FolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
         } else {
-            f = LibraryFolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
+            f = FolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
         }
         getChildFragmentManager().beginTransaction()
                 .replace(R.id.container, f)

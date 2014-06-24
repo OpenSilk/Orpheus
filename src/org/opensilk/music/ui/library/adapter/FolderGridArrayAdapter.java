@@ -27,10 +27,10 @@ import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.ui.library.card.AlbumLibraryCard;
-import org.opensilk.music.ui.library.card.ArtistLibraryCard;
-import org.opensilk.music.ui.library.card.FolderLibraryCard;
-import org.opensilk.music.ui.library.card.SongLibraryCard;
+import org.opensilk.music.ui.library.card.AlbumCard;
+import org.opensilk.music.ui.library.card.ArtistCard;
+import org.opensilk.music.ui.library.card.FolderCard;
+import org.opensilk.music.ui.library.card.SongCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 
@@ -40,19 +40,19 @@ import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
- * Created by drew on 6/14/14.
+ * Created by drew on 6/23/14.
  */
-public class LibraryFolderListArrayAdapter extends AbsLibraryListArrayAdapter {
+public class FolderGridArrayAdapter extends AbsEndlessGridArrayAdapter {
 
     private String mFolderId;
 
     private DaggerInjector mInjector;
 
-    public LibraryFolderListArrayAdapter(Context context,
-                                         String libraryIdentity,
-                                         ComponentName libraryComponent,
-                                         LibraryLoaderCallback callback,
-                                         DaggerInjector injector) {
+    public FolderGridArrayAdapter(Context context,
+                                  String libraryIdentity,
+                                  ComponentName libraryComponent,
+                                  LibraryLoaderCallback callback,
+                                  DaggerInjector injector) {
         super(context, libraryIdentity, libraryComponent, callback);
         mInjector = injector;
     }
@@ -116,22 +116,29 @@ public class LibraryFolderListArrayAdapter extends AbsLibraryListArrayAdapter {
 
     @Override
     protected Card makeCard(Bundle data) {
-        Class c;
+        Class cls;
         try {
-            c = Class.forName(data.getString("clz"));
+            cls = Class.forName(data.getString("clz"));
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
-        if (Folder.class == c) {
-            FolderLibraryCard flc = new FolderLibraryCard(getContext(), Folder.fromBundle(data));
-            mInjector.inject(flc);
-            return flc;
-        } else if (Song.class == c) {
-            return new SongLibraryCard(getContext(), Song.fromBundle(data));
-        } else if (Artist.class == c) {
-            return new ArtistLibraryCard(getContext(), Artist.fromBundle(data));
-        } else if (Album.class == c) {
-            return new AlbumLibraryCard(getContext(), Album.fromBundle(data));
+        if (Folder.class == cls) {
+            FolderCard c = new FolderCard(getContext(), Folder.fromBundle(data));
+            mInjector.inject(c);
+            c.useGridLayout();
+            return c;
+        } else if (Song.class == cls) {
+            SongCard c = new SongCard(getContext(), Song.fromBundle(data));
+            c.useGridLayout();
+            return c;
+        } else if (Artist.class == cls) {
+            ArtistCard c = new ArtistCard(getContext(), Artist.fromBundle(data));
+            c.useGridLayout();
+            return c;
+        } else if (Album.class == cls) {
+            AlbumCard c = new AlbumCard(getContext(), Album.fromBundle(data));
+            c.useGridLayout();
+            return c;
         }
         throw new IllegalArgumentException("Unknown resource class");
     }
@@ -139,5 +146,4 @@ public class LibraryFolderListArrayAdapter extends AbsLibraryListArrayAdapter {
     public String getFolderId() {
         return mFolderId;
     }
-
 }

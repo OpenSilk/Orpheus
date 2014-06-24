@@ -19,7 +19,7 @@ package org.opensilk.music.ui.library;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.activities.HomeModule;
-import org.opensilk.music.ui.library.card.FolderLibraryCard;
+import org.opensilk.music.ui.library.card.FolderCard;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Singleton;
@@ -32,10 +32,10 @@ import dagger.Provides;
  */
 @Module (
         injects = {
-                LibraryHomeFragment.class,
-                LibraryFolderListFragment.class,
-                LibraryFolderGridFragment.class,
-                FolderLibraryCard.class,
+                HomeFragment.class,
+                FolderListFragment.class,
+                FolderGridFragment.class,
+                FolderCard.class,
         },
         addsTo = HomeModule.class,
         complete = false

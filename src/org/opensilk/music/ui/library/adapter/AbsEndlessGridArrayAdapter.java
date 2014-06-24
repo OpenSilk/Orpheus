@@ -24,19 +24,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.ui.library.card.AbsLibraryCard;
+import org.opensilk.music.ui.library.card.AbsCard;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
 
 /**
- * Created by drew on 6/14/14.
+ * Created by drew on 6/23/14.
  */
-public abstract class AbsLibraryListArrayAdapter extends CardArrayAdapter {
+public abstract class AbsEndlessGridArrayAdapter extends CardGridArrayAdapter {
 
     public static final int STEP = 20;
 
@@ -51,7 +51,7 @@ public abstract class AbsLibraryListArrayAdapter extends CardArrayAdapter {
     protected LibraryLoaderCallback mCallback;
     protected boolean mFirstLoadComplete;
 
-    protected AbsLibraryListArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LibraryLoaderCallback callback) {
+    protected AbsEndlessGridArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LibraryLoaderCallback callback) {
         super(context, new ArrayList<Card>());
         if (!(context instanceof Activity)) {
             throw new IllegalArgumentException("Context must be from activity");
@@ -128,7 +128,7 @@ public abstract class AbsLibraryListArrayAdapter extends CardArrayAdapter {
     }
 
     public Bundleable getItemData(int position) {
-        return ((AbsLibraryCard) getItem(position)).getData();
+        return ((AbsCard) getItem(position)).getData();
     }
 
     public boolean isOnFirstLoad() {

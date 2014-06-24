@@ -34,7 +34,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public abstract class AbsLibraryCard<D extends Bundleable> extends Card {
+public abstract class AbsCard<D extends Bundleable> extends Card {
 
     protected final D mData;
 
@@ -45,11 +45,11 @@ public abstract class AbsLibraryCard<D extends Bundleable> extends Card {
 
     protected boolean mForGrid;
 
-    public AbsLibraryCard(Context context, D data) {
+    public AbsCard(Context context, D data) {
         this(context, data, -1);
     }
 
-    public AbsLibraryCard(Context context, D data, int innerLayout) {
+    public AbsCard(Context context, D data, int innerLayout) {
         super(context, innerLayout);
         mData = data;
         init();

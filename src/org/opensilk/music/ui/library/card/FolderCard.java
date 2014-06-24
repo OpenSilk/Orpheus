@@ -37,7 +37,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class FolderLibraryCard extends AbsLibraryCard<Folder> {
+public class FolderCard extends AbsCard<Folder> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter
@@ -45,11 +45,11 @@ public class FolderLibraryCard extends AbsLibraryCard<Folder> {
     @InjectView(R.id.folder_thumb)
     ColorCodedThumbnail mThumbnail;
 
-    public FolderLibraryCard(Context context, Folder data) {
+    public FolderCard(Context context, Folder data) {
         this(context, data, R.layout.library_folder_listcard_inner);
     }
 
-    public FolderLibraryCard(Context context, Folder data, int innerLayout) {
+    public FolderCard(Context context, Folder data, int innerLayout) {
         super(context, data, innerLayout);
     }
 

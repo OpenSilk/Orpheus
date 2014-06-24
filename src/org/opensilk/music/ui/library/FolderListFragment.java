@@ -21,7 +21,7 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.view.View;
 
-import org.opensilk.music.ui.library.adapter.LibraryFolderListArrayAdapter;
+import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryLoaderCallback;
 import org.opensilk.silkdagger.DaggerInjector;
 
@@ -30,21 +30,21 @@ import hugo.weaving.DebugLog;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryFolderListFragment extends CardListFragment implements
+public class FolderListFragment extends CardListFragment implements
         LibraryLoaderCallback {
 
     private ComponentName mLibraryComponentName;
     private String mLibraryIdentity;
     private String mFolderIdentity;
 
-    protected LibraryFolderListArrayAdapter mAdapter;
+    protected FolderListArrayAdapter mAdapter;
 
-    public static LibraryFolderListFragment newInstance(String libraryIdentity, ComponentName libraryComponentName, String folderId) {
-        LibraryFolderListFragment f = new LibraryFolderListFragment();
+    public static FolderListFragment newInstance(String libraryIdentity, ComponentName libraryComponentName, String folderId) {
+        FolderListFragment f = new FolderListFragment();
         Bundle b = new Bundle(3);
-        b.putString(LibraryHomeFragment.ARG_IDENTITY, libraryIdentity);
-        b.putParcelable(LibraryHomeFragment.ARG_COMPONENT, libraryComponentName);
-        b.putString(LibraryHomeFragment.ARG_FOLDER_ID, folderId);
+        b.putString(HomeFragment.ARG_IDENTITY, libraryIdentity);
+        b.putParcelable(HomeFragment.ARG_COMPONENT, libraryComponentName);
+        b.putString(HomeFragment.ARG_FOLDER_ID, folderId);
         f.setArguments(b);
         return f;
     }
@@ -61,11 +61,11 @@ public class LibraryFolderListFragment extends CardListFragment implements
         if (getArguments() == null) {
             throw new RuntimeException("Null args");
         }
-        mLibraryComponentName = getArguments().getParcelable(LibraryHomeFragment.ARG_COMPONENT);
-        mLibraryIdentity = getArguments().getString(LibraryHomeFragment.ARG_IDENTITY);
-        mFolderIdentity = getArguments().getString(LibraryHomeFragment.ARG_FOLDER_ID);
+        mLibraryComponentName = getArguments().getParcelable(HomeFragment.ARG_COMPONENT);
+        mLibraryIdentity = getArguments().getString(HomeFragment.ARG_IDENTITY);
+        mFolderIdentity = getArguments().getString(HomeFragment.ARG_FOLDER_ID);
 
-        mAdapter = new LibraryFolderListArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this, (DaggerInjector)getParentFragment());
+        mAdapter = new FolderListArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this, (DaggerInjector)getParentFragment());
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
         } else {
