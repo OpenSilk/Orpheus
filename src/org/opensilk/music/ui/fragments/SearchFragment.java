@@ -46,7 +46,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Song;
 
-import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.ui.cards.CardAlbumList;
 import org.opensilk.music.ui.cards.CardArtistList;

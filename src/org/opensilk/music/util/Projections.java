@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.util;
 
 import android.provider.BaseColumns;
 import android.provider.MediaStore;

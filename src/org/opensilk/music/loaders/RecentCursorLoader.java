@@ -22,6 +22,8 @@ import android.support.v4.content.CursorLoader;
 import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
 import com.andrew.apollo.provider.RecentStore.RecentStoreColumns;
 
+import org.opensilk.music.util.Projections;
+
 /**
  * Created by drew on 2/18/14.
  */

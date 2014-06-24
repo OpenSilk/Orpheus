@@ -46,10 +46,10 @@ import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
 
-import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.loaders.Projections;
+import org.opensilk.music.util.Projections;
 
 import java.io.File;
 import java.util.Arrays;

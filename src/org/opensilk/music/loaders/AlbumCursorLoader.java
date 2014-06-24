@@ -22,6 +22,8 @@ import android.support.v4.content.CursorLoader;
 
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.util.Projections;
+
 /**
  * Created by drew on 2/18/14.
  */

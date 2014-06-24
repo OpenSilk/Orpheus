@@ -20,6 +20,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import org.opensilk.music.ui.cards.CardArtistList;
+import org.opensilk.music.util.CursorHelpers;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.util;
 
 import android.content.ContentUris;
 import android.content.Context;
@@ -30,7 +30,7 @@ import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.loaders.Projections;
+import org.opensilk.music.util.Projections;
 import org.opensilk.music.loaders.SongCursorLoader;
 
 /**

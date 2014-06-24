@@ -20,6 +20,8 @@ import android.content.Context;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
+import org.opensilk.music.util.Projections;
+
 /**
  * Created by drew on 2/28/14.
  */

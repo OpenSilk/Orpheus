@@ -28,10 +28,9 @@ import android.provider.MediaStore;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Playlist;
 
-import org.opensilk.music.adapters.CursorHelpers;
-import org.opensilk.music.loaders.Projections;
+import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.Projections;
 
 import java.util.HashSet;
 import java.util.List;

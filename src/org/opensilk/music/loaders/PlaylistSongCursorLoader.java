@@ -17,10 +17,10 @@
 package org.opensilk.music.loaders;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
+
+import org.opensilk.music.util.Projections;
 
 /**
  * Created by drew on 2/24/14.

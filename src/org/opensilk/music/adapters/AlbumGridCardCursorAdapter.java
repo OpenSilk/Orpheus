@@ -19,8 +19,8 @@ package org.opensilk.music.adapters;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.loaders.AlbumCursorLoader;
 import org.opensilk.music.ui.cards.CardAlbumGrid;
+import org.opensilk.music.util.CursorHelpers;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;

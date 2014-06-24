@@ -32,12 +32,12 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.adapters.CursorHelpers;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.loaders.Projections;
+import org.opensilk.music.util.Projections;
 
 import java.util.ArrayList;
 import java.util.List;
