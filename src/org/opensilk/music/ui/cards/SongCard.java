@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.library.card;
+package org.opensilk.music.ui.cards;
 
 import android.content.Context;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.MusicUtils;
 
-import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 
@@ -35,17 +34,17 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class AlbumCard extends AbsCard<Album> {
+public class SongCard extends AbsCard<Song> {
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
 
-    public AlbumCard(Context context, Album data) {
-        super(context, data, R.layout.library_listcard_artwork_inner);
+    public SongCard(Context context, Song song) {
+        this(context, song, R.layout.library_listcard_artwork_inner);
     }
 
-    public AlbumCard(Context context, Album data, int innerLayout) {
-        super(context, data, innerLayout);
+    public SongCard(Context context, Song song, int innerLayout) {
+        super(context, song, innerLayout);
     }
 
     @Override
@@ -53,7 +52,7 @@ public class AlbumCard extends AbsCard<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openAlbumProfile(getContext(), mData);
+                MusicUtils.playFile(getContext(), mData.dataUri);
             }
         });
     }
@@ -62,19 +61,12 @@ public class AlbumCard extends AbsCard<Album> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setText(mData.artistName);
-        mArtwork.setVisibility(View.VISIBLE);
-        ArtworkManager.loadImage(new ArtInfo(mData.artistName, mData.name, mData.artworkUri), mArtwork);
+        ArtworkManager.loadImage(new ArtInfo(mData.albumArtistName, mData.albumName, mData.artworkUri), mArtwork);
     }
 
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
-        m.inflate(R.menu.card_album);
-        m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return false;
-            }
-        });
+
     }
 
     @Override
@@ -86,4 +78,5 @@ public class AlbumCard extends AbsCard<Album> {
     protected int getGridLayout() {
         return R.layout.library_gridcard_artwork_inner;
     }
+
 }

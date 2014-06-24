@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.old;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
@@ -23,52 +23,49 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.provider.RecentStore;
+import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
-import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
-
 /**
  * Created by drew on 2/11/14.
  */
-public class CardRecentList extends CardBaseListNoHeader<Album> {
+public class CardArtistList extends CardBaseListNoHeader<Artist> {
 
-    public CardRecentList(Context context, Album data) {
+    public CardArtistList(Context context, Artist data) {
         super(context, data);
     }
 
-    public CardRecentList(Context context, Album data, int innerLayout) {
+    public CardArtistList(Context context, Artist data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
     @Override
     protected void initContent() {
-        mTitle = mData.name;
-        mSubTitle = mData.artistName;
+        mTitle = mData.mArtistName;
+        mSubTitle = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber);
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openAlbumProfile(getContext(), mData);
+                NavUtils.openArtistProfile(getContext(), mData);
             }
         });
     }
 
     @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadAlbumImage(mData.artistName, mData.name, mData.artworkUri, view);
+        ArtworkManager.loadArtistImage(mData.mArtistName, view);
     }
 
     @Override
     public int getOverflowMenuId() {
-        return R.menu.card_recent;
+        return R.menu.card_artist;
     }
 
     public PopupMenu.OnMenuItemClickListener getOverflowPopupMenuListener() {
@@ -77,30 +74,21 @@ public class CardRecentList extends CardBaseListNoHeader<Album> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.card_menu_play:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, false);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, false);
+                        break;
+                    case R.id.card_menu_shuffle:
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, true);
                         break;
                     case R.id.card_menu_add_queue:
-                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)));
+                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId));
                         break;
                     case R.id.card_menu_add_playlist:
-                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)))
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForArtist(getContext(), mData.mArtistId))
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
-                    case R.id.card_menu_go_artist:
-                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.artistName));
-                        break;
-                    case R.id.card_menu_remove_from_recent:
-                        getContext().getContentResolver().delete(RECENTS_URI,
-                                RecentStore.RecentStoreColumns._ID + " = ?",
-                                new String[]{
-                                        mData.identity
-                                }
-                        );
-                        break;
                     case R.id.card_menu_delete:
-                        final String album = mData.name;
-                        DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)),
-                                /*ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName)*/ null) //TODO
+                        final String artist = mData.mArtistName;
+                        DeleteDialog.newInstance(artist, MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), artist)
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }

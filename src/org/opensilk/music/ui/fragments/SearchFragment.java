@@ -48,9 +48,9 @@ import com.andrew.apollo.model.Song;
 
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.ui.cards.CardAlbumList;
-import org.opensilk.music.ui.cards.CardArtistList;
-import org.opensilk.music.ui.cards.CardSongList;
+import org.opensilk.music.ui.cards.old.CardAlbumList;
+import org.opensilk.music.ui.cards.old.CardArtistList;
+import org.opensilk.music.ui.cards.old.CardSongList;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;

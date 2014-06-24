@@ -17,10 +17,8 @@
 
 package org.opensilk.music.ui.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -49,8 +47,7 @@ import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.bus.events.QueueChanged;
 import org.opensilk.music.bus.events.Refresh;
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
-import org.opensilk.music.ui.cards.CardQueueList;
+import org.opensilk.music.ui.cards.old.CardQueueList;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.library.card;
+package org.opensilk.music.ui.cards;
 
 import android.content.Context;
 import android.view.View;

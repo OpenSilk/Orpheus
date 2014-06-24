@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.old;
 
 import android.content.Context;
 import android.view.View;

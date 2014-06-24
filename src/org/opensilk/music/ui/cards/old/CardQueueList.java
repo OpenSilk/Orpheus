@@ -1,4 +1,4 @@
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.old;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;

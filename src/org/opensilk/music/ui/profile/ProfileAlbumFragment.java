@@ -23,21 +23,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
-import org.opensilk.music.ui.cards.CardAlbumList;
+import org.opensilk.music.ui.cards.old.CardAlbumList;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.old;
 
 import android.app.AlertDialog;
 import android.content.ContentUris;

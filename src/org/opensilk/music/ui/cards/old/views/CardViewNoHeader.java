@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards.views;
+package org.opensilk.music.ui.cards.old.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -23,7 +23,7 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.ui.cards.CardBaseListNoHeader;
+import org.opensilk.music.ui.cards.old.CardBaseListNoHeader;
 
 /**
  * Created by drew on 2/22/14.

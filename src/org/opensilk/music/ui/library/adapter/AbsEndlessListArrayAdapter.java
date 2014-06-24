@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.ui.library.card.AbsCard;
+import org.opensilk.music.ui.cards.AbsCard;
 
 import java.util.ArrayList;
 import java.util.Collection;

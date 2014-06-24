@@ -44,7 +44,7 @@ import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.loaders.PlaylistSongCursorLoader;
-import org.opensilk.music.ui.cards.CardSongList;
+import org.opensilk.music.ui.cards.old.CardSongList;
 
 /**
  * Created by drew on 2/24/14.

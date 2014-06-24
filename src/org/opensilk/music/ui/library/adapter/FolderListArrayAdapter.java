@@ -27,10 +27,10 @@ import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.ui.library.card.AlbumCard;
-import org.opensilk.music.ui.library.card.ArtistCard;
-import org.opensilk.music.ui.library.card.FolderCard;
-import org.opensilk.music.ui.library.card.SongCard;
+import org.opensilk.music.ui.cards.AlbumCard;
+import org.opensilk.music.ui.cards.ArtistCard;
+import org.opensilk.music.ui.cards.FolderCard;
+import org.opensilk.music.ui.cards.SongCard;
 import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 

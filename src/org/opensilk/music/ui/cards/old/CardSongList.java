@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.old;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
@@ -30,6 +30,7 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.old.CardBaseListNoHeader;
 
 import it.gmariotti.cardslib.library.internal.Card;
 

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.library.card;
+package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.api.model.Song;
+import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 
@@ -34,17 +34,17 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class SongCard extends AbsCard<Song> {
+public class ArtistCard extends AbsCard<Artist> {
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
 
-    public SongCard(Context context, Song song) {
-        this(context, song, R.layout.library_listcard_artwork_inner);
+    public ArtistCard(Context context, Artist data) {
+        this(context, data, R.layout.library_listcard_artwork_inner);
     }
 
-    public SongCard(Context context, Song song, int innerLayout) {
-        super(context, song, innerLayout);
+    public ArtistCard(Context context, Artist data, int innerLayout) {
+        super(context, data, innerLayout);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class SongCard extends AbsCard<Song> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                MusicUtils.playFile(getContext(), mData.dataUri);
+                //TODO
             }
         });
     }
@@ -60,13 +60,21 @@ public class SongCard extends AbsCard<Song> {
     @Override
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
-        mCardSubTitle.setText(mData.artistName);
-        ArtworkManager.loadImage(new ArtInfo(mData.albumArtistName, mData.albumName, mData.artworkUri), mArtwork);
+        mCardSubTitle.setVisibility(View.GONE);
+        mArtwork.setVisibility(View.GONE);
+        ArtworkManager.loadImage(new ArtInfo(mData.name, null, null), mArtwork);
+
     }
 
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
-
+        m.inflate(R.menu.card_artist);
+        m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -78,5 +86,4 @@ public class SongCard extends AbsCard<Song> {
     protected int getGridLayout() {
         return R.layout.library_gridcard_artwork_inner;
     }
-
 }

@@ -19,7 +19,7 @@ package org.opensilk.music.adapters;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.CardRecentList;
+import org.opensilk.music.ui.cards.old.CardRecentList;
 import org.opensilk.music.util.CursorHelpers;
 
 import it.gmariotti.cardslib.library.internal.Card;

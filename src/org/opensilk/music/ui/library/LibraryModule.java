@@ -19,7 +19,7 @@ package org.opensilk.music.ui.library;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.activities.HomeModule;
-import org.opensilk.music.ui.library.card.FolderCard;
+import org.opensilk.music.ui.cards.FolderCard;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Singleton;

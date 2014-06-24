@@ -29,14 +29,13 @@ import android.widget.TextView;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Artist;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
-import org.opensilk.music.ui.cards.CardArtistList;
+import org.opensilk.music.ui.cards.old.CardArtistList;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 
 import it.gmariotti.cardslib.library.view.CardListView;

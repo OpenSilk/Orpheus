@@ -1,4 +1,4 @@
-package org.opensilk.music.ui.cards.views;
+package org.opensilk.music.ui.cards.old.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

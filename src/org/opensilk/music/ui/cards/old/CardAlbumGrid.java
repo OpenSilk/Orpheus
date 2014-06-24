@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.old;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
@@ -22,10 +22,10 @@ import android.view.View;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
@@ -37,13 +37,13 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
 /**
  * Created by drew on 2/11/14.
  */
-public class CardArtistGrid extends CardBaseThumb<Artist> {
+public class CardAlbumGrid extends CardBaseThumb<Album> {
 
-    public CardArtistGrid(Context context, Artist data) {
+    public CardAlbumGrid(Context context, Album data) {
         super(context, data);
     }
 
-    public CardArtistGrid(Context context, Artist data, int innerLayout) {
+    public CardAlbumGrid(Context context, Album data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
@@ -52,24 +52,23 @@ public class CardArtistGrid extends CardBaseThumb<Artist> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openArtistProfile(getContext(), mData);
+                NavUtils.openAlbumProfile(getContext(), mData);
             }
         });
     }
 
     @Override
     protected void initHeader() {
-        final CardHeaderGrid header = new CardHeaderGrid(getContext());
+        CardHeaderGrid header = new CardHeaderGrid(getContext());
         header.setButtonOverflowVisible(true);
-        header.setTitle(mData.mArtistName);
-        header.setLineTwo(MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber));
-        header.setPopupMenu(R.menu.card_artist, getNewHeaderPopupMenuListener());
+        header.setTitle(mData.name);
+        header.setLineTwo(mData.artistName);
+        header.setPopupMenu(R.menu.card_album, getNewHeaderPopupMenuListener());
         addCardHeader(header);
     }
 
-    @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadArtistImage(mData.mArtistName, view);
+        ArtworkManager.loadAlbumImage(mData.artistName, mData.name, mData.artworkUri, view);
     }
 
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
@@ -78,25 +77,30 @@ public class CardArtistGrid extends CardBaseThumb<Artist> {
             public void onMenuItemClick(BaseCard baseCard, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.card_menu_play:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, false);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, false);
                         break;
                     case R.id.card_menu_shuffle:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, true);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, true);
                         break;
                     case R.id.card_menu_add_queue:
-                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId));
+                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)));
                         break;
                     case R.id.card_menu_add_playlist:
-                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForArtist(getContext(), mData.mArtistId))
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)))
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
+                    case R.id.card_menu_more_by:
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.artistName));
+                        break;
                     case R.id.card_menu_delete:
-                        final String artist = mData.mArtistName;
-                        DeleteDialog.newInstance(artist, MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), artist)
+                        final String album = mData.name;
+                        DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)),
+                                /*ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName)*/ null) //TODO
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }
             }
         };
     }
+
 }

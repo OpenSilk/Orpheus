@@ -34,13 +34,12 @@ import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.loaders.SongCursorLoader;
-import org.opensilk.music.ui.cards.CardShuffleList;
+import org.opensilk.music.ui.cards.old.CardShuffleList;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 
-import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
 
