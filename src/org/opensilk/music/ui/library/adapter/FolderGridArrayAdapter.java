@@ -129,6 +129,7 @@ public class FolderGridArrayAdapter extends AbsEndlessGridArrayAdapter {
             return c;
         } else if (Song.class == cls) {
             SongCard c = new SongCard(getContext(), Song.fromBundle(data));
+            mInjector.inject(c);
             c.useGridLayout();
             return c;
         } else if (Artist.class == cls) {

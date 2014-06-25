@@ -17,16 +17,23 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
+import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.ui.cards.event.SongPopupClicked;
+import org.opensilk.music.ui.cards.event.SongPopupClicked.Event;
+import org.opensilk.silkdagger.qualifier.ForFragment;
+
+import javax.inject.Inject;
 
 import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -35,6 +42,9 @@ import it.gmariotti.cardslib.library.internal.Card;
  * Created by drew on 6/19/14.
  */
 public class SongCard extends AbsCard<Song> {
+
+    @Inject @ForFragment
+    Bus mBus; //Injected by adapter
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
@@ -52,6 +62,7 @@ public class SongCard extends AbsCard<Song> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
+                //TODO
                 MusicUtils.playFile(getContext(), mData.dataUri);
             }
         });
@@ -66,7 +77,40 @@ public class SongCard extends AbsCard<Song> {
 
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
-
+        m.inflate(R.menu.popup_play_next);
+        m.inflate(R.menu.popup_add_to_queue);
+        if (mData.isLocal()) {
+            m.inflate(R.menu.popup_add_to_playlist);
+            m.inflate(R.menu.popup_more_by_artist);
+            m.inflate(R.menu.popup_set_ringtone);
+            m.inflate(R.menu.popup_delete);
+        }
+        m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.popup_play_next:
+                        mBus.post(new SongPopupClicked(Event.PLAY_NEXT, mData));
+                        return true;
+                    case R.id.popup_add_to_queue:
+                        mBus.post(new SongPopupClicked(Event.ADD_TO_QUEUE, mData));
+                        return true;
+                    case R.id.popup_add_to_playlist:
+                        mBus.post(new SongPopupClicked(Event.ADD_TO_PLAYLIST, mData));
+                        return true;
+                    case R.id.popup_more_by_artist:
+                        mBus.post(new SongPopupClicked(Event.MORE_BY_ARTIST, mData));
+                        return true;
+                    case R.id.popup_set_ringtone:
+                        mBus.post(new SongPopupClicked(Event.SET_RINGTONE, mData));
+                        return true;
+                    case R.id.popup_delete:
+                        mBus.post(new SongPopupClicked(Event.DELETE, mData));
+                        return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override

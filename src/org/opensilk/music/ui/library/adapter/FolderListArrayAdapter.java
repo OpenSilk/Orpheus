@@ -116,21 +116,23 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
     @Override
     protected Card makeCard(Bundle data) {
-        Class c;
+        Class cls;
         try {
-            c = Class.forName(data.getString("clz"));
+            cls = Class.forName(data.getString("clz"));
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
-        if (Folder.class == c) {
-            FolderCard flc = new FolderCard(getContext(), Folder.fromBundle(data));
-            mInjector.inject(flc);
-            return flc;
-        } else if (Song.class == c) {
-            return new SongCard(getContext(), Song.fromBundle(data));
-        } else if (Artist.class == c) {
+        if (Folder.class == cls) {
+            FolderCard c = new FolderCard(getContext(), Folder.fromBundle(data));
+            mInjector.inject(c);
+            return c;
+        } else if (Song.class == cls) {
+            SongCard c = new SongCard(getContext(), Song.fromBundle(data));
+            mInjector.inject(c);
+            return c;
+        } else if (Artist.class == cls) {
             return new ArtistCard(getContext(), Artist.fromBundle(data));
-        } else if (Album.class == c) {
+        } else if (Album.class == cls) {
             return new AlbumCard(getContext(), Album.fromBundle(data));
         }
         throw new IllegalArgumentException("Unknown resource class");

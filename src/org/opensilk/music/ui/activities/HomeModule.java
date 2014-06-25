@@ -16,11 +16,6 @@
 
 package org.opensilk.music.ui.activities;
 
-import org.opensilk.music.ui.home.HomeAlbumFragment;
-import org.opensilk.music.ui.home.HomeArtistFragment;
-import org.opensilk.music.ui.home.HomeFragment;
-import org.opensilk.music.ui.home.HomeRecentFragment;
-import org.opensilk.music.ui.home.HomeSongFragment;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
@@ -36,11 +31,6 @@ import dagger.Provides;
         library = true,
         injects = {
                 HomeSlidingActivity.class,
-                HomeAlbumFragment.class,
-                HomeArtistFragment.class,
-                HomeFragment.class,
-                HomeRecentFragment.class,
-                HomeSongFragment.class,
         },
         // Im kinda unsure about this, it seems to work ok,
         // but the build complains with out it since HomeFragment

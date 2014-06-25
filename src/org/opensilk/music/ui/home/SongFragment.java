@@ -16,70 +16,85 @@
 
 package org.opensilk.music.ui.home;
 
+import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CursorAdapter;
-import android.widget.ImageView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.SortOrder;
-import com.andrew.apollo.utils.ThemeHelper;
 
-import org.opensilk.music.adapters.SongListCardCursorAdapter;
 import org.opensilk.music.loaders.SongCursorLoader;
-import org.opensilk.music.ui.cards.old.CardShuffleList;
+import org.opensilk.music.ui.cards.CardShuffle;
+import org.opensilk.music.ui.cards.old.views.ThemedCardView;
+import org.opensilk.music.ui.home.adapter.SongCardCursorAdapter;
+import org.opensilk.music.ui.library.CardListFragment;
 import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 
-import it.gmariotti.cardslib.library.view.CardListView;
-import it.gmariotti.cardslib.library.view.CardView;
-
 /**
- * Songs
+ * Created by drew on 6/24/14.
  */
-public class HomeSongFragment extends HomePagerBaseCursorFragment {
+public class SongFragment extends CardListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     @Inject @ForActivity
     DrawerHelper mDrawerHelper;
 
+    protected PreferenceUtils mPreferences;
+
+    private SongCardCursorAdapter mAdapter;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // The View for the fragment's UI
-        mRootView = (ViewGroup)inflater.inflate(R.layout.card_listview_fastscroll, container, false);
-        mLoadingEmpty = mRootView.findViewById(android.R.id.empty);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((DaggerInjector) getParentFragment()).inject(this);
+    }
 
-        mListView = (CardListView) mRootView.findViewById(android.R.id.list);
-        mListView.setEmptyView(mLoadingEmpty);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mAdapter = new SongCardCursorAdapter(getActivity(), (DaggerInjector) getParentFragment());
+        // Start the loader
+        getLoaderManager().initLoader(0, null, this);
+    }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         //Shuffle card header view
-        CardView cardView = (CardView) inflater.inflate(R.layout.card_list_shuffle, null);
-        // Theme the shuffle icon
-        ImageView thumbnail = (ImageView) cardView.findViewById(R.id.card_thumbnail_image);
-        thumbnail.setImageDrawable(ThemeHelper.getInstance(getActivity()).getShuffleButtonDrawable());
+        ThemedCardView cardView = (ThemedCardView) getLayoutInflater(null).inflate(R.layout.list_card_layout, null);
         // Set card (holds inner view)
-        cardView.setCard(new CardShuffleList(getActivity()));
+        cardView.setCard(new CardShuffle(getActivity()));
         // Add card to list
-        mListView.addHeaderView(cardView);
+        getListView().addHeaderView(cardView);
+        // set the adapter
+        setListAdapter(mAdapter);
+        // set empty view
+        setEmptyText(getString(R.string.empty_music));
+        // hide list until loaded
+        setListShown(false);
+    }
 
-        // Set the data behind the list
-        mListView.setAdapter(mAdapter);
-
-        return mRootView;
+    @Override
+    public void onActivityCreated(final Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // Enable the options menu
+        setHasOptionsMenu(true);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (!mDrawerHelper.isDrawerOpen()) {
-            super.onCreateOptionsMenu(menu, inflater);
             inflater.inflate(R.menu.song_sort_by, menu);
         }
     }
@@ -119,6 +134,12 @@ public class HomeSongFragment extends HomePagerBaseCursorFragment {
         return super.onOptionsItemSelected(item);
     }
 
+    public void refresh() {
+        // Wait a moment for the preference to change.
+        SystemClock.sleep(10);
+        getLoaderManager().restartLoader(0, null, this);
+    }
+
     /*
      * Loader Callbacks
      */
@@ -128,18 +149,27 @@ public class HomeSongFragment extends HomePagerBaseCursorFragment {
         return new SongCursorLoader(getActivity());
     }
 
-    /*
-     * Implement abstract methods
-     */
-
     @Override
-    protected CursorAdapter createAdapter() {
-        return new SongListCardCursorAdapter(getActivity());
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        setListShown(true);
+        mAdapter.swapCursor(data);
     }
 
     @Override
-    protected boolean isSimpleLayout() {
-        return true; // Were always list
+    public void onLoaderReset(Loader<Cursor> loader) {
+        if (isResumed()) {
+            setListShown(false);
+        }
+        mAdapter.swapCursor(null);
+    }
+
+    /*
+     * Abstract methods
+     */
+
+    @Override
+    public int getListViewLayout() {
+        return R.layout.card_listview_fastscroll2;
     }
 
 }

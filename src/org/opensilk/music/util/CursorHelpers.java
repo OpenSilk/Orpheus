@@ -22,16 +22,19 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
-import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.loaders.SongCursorLoader;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 2/22/14.
@@ -53,7 +56,7 @@ public class CursorHelpers {
      * @param cursor cursor created with makeSongCursor
      * @return new Song object
      */
-    public static Song makeSongFromCursor(Cursor cursor) {
+    public static com.andrew.apollo.model.Song makeSongFromCursorOld(Cursor cursor) {
         // Copy the song Id
         final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the song name
@@ -69,7 +72,32 @@ public class CursorHelpers {
         // Make the duration label
         final int seconds = (int) (duration / 1000);
         // Create a new song
-        return new Song(id, songName, artist, album, albumId, seconds);
+        return new com.andrew.apollo.model.Song(id, songName, artist, album, albumId, seconds);
+    }
+
+    public static Song makeSongFromCursor(Context context, Cursor cursor) {
+        // Copy the song Id
+        final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+        // Copy the song name
+        final String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
+        // Copy the artist name
+        final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+        // Copy the album name
+        final String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+        // Copy the album id
+        final long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
+        // find the album artist
+        String albumArtist = getAlbumArtist(context, albumId);
+        if (TextUtils.isEmpty(albumArtist)) albumArtist = artist;
+        // Copy the duration
+        final long duration = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION));
+        // Make the duration label
+        final int seconds = (int) (duration / 1000);
+        // get data uri
+        final Uri dataUri = generateDataUri(id);
+        // generate artwork uri
+        final Uri artworkUri = generateArtworkUri(albumId);
+        return new Song(String.valueOf(id), songName, album, artist, albumArtist, String.valueOf(albumId), seconds, dataUri, artworkUri);
     }
 
     /**
@@ -144,6 +172,30 @@ public class CursorHelpers {
                 SongCursorLoader.SELECTION,
                 SongCursorLoader.SELECTION_ARGS,
                 PreferenceUtils.getInstance(context).getSongSortOrder());
+    }
+
+    public static String getAlbumArtist(Context context, long albumId) {
+        Cursor c = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                new String[]{ MediaStore.Audio.Albums.ARTIST },
+                MediaStore.Audio.Albums._ID + "=?",
+                new String[]{ String.valueOf(albumId) },
+                null);
+        String artist = null;
+        if (c != null) {
+            if (c.moveToFirst()) {
+                artist = c.getString(0);
+            }
+            c.close();
+        }
+        return  artist;
+    }
+
+    public static Uri generateDataUri(long songId) {
+        return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
+    }
+
+    public static Uri generateArtworkUri(long albumId) {
+        return ContentUris.withAppendedId(ARTWORK_URI, albumId);
     }
 
 }

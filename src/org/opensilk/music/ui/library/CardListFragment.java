@@ -46,7 +46,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * Opensilk: Switched out ListView for CardListView
  */
-public class CardListFragment extends Fragment {
+public abstract class CardListFragment extends Fragment {
     static final int INTERNAL_EMPTY_ID = 0x00ff0001;
     static final int INTERNAL_PROGRESS_CONTAINER_ID = 0x00ff0002;
     static final int INTERNAL_LIST_CONTAINER_ID = 0x00ff0003;
@@ -77,6 +77,8 @@ public class CardListFragment extends Fragment {
 
     public CardListFragment() {
     }
+
+    public abstract int getListViewLayout();
 
     /**
      * Provide default implementation to return a simple list view.  Subclasses
@@ -128,7 +130,7 @@ public class CardListFragment extends Fragment {
 
 //        CardListView lv = new CardListView(getActivity());
 //        lv.setId(android.R.id.list);
-        CardListView lv = (CardListView) inflater.inflate(R.layout.card_listview_fastscroll2, null);
+        CardListView lv = (CardListView) inflater.inflate(getListViewLayout(), null);
         lv.setDrawSelectorOnTop(false);
         lframe.addView(lv, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));

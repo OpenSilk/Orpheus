@@ -14,38 +14,51 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards.old;
+package org.opensilk.music.ui.cards;
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 4/15/14.
  */
-public class CardShuffleList extends Card {
+public class CardShuffle extends Card {
 
-    public CardShuffleList(Context context) {
-        this(context, R.layout.card_list_inner_layout_simple);
-    }
+    @InjectView(R.id.shuffle_thumbnail)
+    ImageView mShuffleImage;
+    @InjectView(R.id.card_title)
+    TextView mCardTitle;
 
-    public CardShuffleList(Context context, int innerLayout) {
-        super(context, innerLayout);
+    public CardShuffle(Context context) {
+        super(context, R.layout.card_shuffle_inner);
         init();
     }
 
     private void init() {
-        mTitle = getContext().getString(R.string.menu_shuffle);
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
                 MusicUtils.shuffleAll(getContext());
             }
         });
+    }
+
+    @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        ButterKnife.inject(this, view);
+        mCardTitle.setText(getContext().getString(R.string.menu_shuffle));
+        mShuffleImage.setImageDrawable(ThemeHelper.getInstance(getContext()).getShuffleButtonDrawable());
     }
 
 }

@@ -21,6 +21,8 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.view.View;
 
+import com.andrew.apollo.R;
+
 import org.opensilk.music.ui.library.adapter.FolderGridArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryLoaderCallback;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -98,4 +100,12 @@ public class FolderGridFragment extends CardGridFragment implements
         setListShown(true);
     }
 
+    /*
+     * Abstract methods
+     */
+
+    @Override
+    public int getGridViewLayout() {
+        return R.layout.card_gridview_fastscroll;
+    }
 }

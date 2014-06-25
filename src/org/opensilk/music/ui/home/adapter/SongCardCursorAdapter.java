@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.ui.home.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.old.CardSongList;
+import org.opensilk.music.ui.cards.SongCard;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 
 /**
- * Created by drew on 2/18/14.
+ * Created by drew on 6/24/14.
  */
-public class SongListCardCursorAdapter extends CardCursorAdapter {
+public class SongCardCursorAdapter extends CardCursorAdapter {
 
-    private boolean mAllowDelete = true;
+    private DaggerInjector mInjector;
 
-    public SongListCardCursorAdapter(Context context) {
-        this(context, true);
-    }
-
-    public SongListCardCursorAdapter(Context context, boolean allowDelete) {
+    public SongCardCursorAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
-        mAllowDelete = allowDelete;
+        mInjector = injector;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardSongList(getContext(), CursorHelpers.makeSongFromCursorOld(cursor), mAllowDelete);
+        SongCard card = new SongCard(getContext(), CursorHelpers.makeSongFromCursor(getContext(), cursor));
+        mInjector.inject(card);
+        return card;
     }
 
 }

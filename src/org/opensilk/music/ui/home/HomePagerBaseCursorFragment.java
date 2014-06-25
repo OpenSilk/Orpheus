@@ -33,6 +33,7 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 
 import it.gmariotti.cardslib.library.view.CardGridView;
@@ -43,7 +44,7 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *
  * Created by drew on 2/22/14.
  */
-public abstract class HomePagerBaseCursorFragment extends ActivityScopedDaggerFragment implements
+public abstract class HomePagerBaseCursorFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     /**
@@ -80,6 +81,12 @@ public abstract class HomePagerBaseCursorFragment extends ActivityScopedDaggerFr
      * Preferences
      */
     protected PreferenceUtils mPreferences;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((DaggerInjector) getParentFragment()).inject(this);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
