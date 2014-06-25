@@ -39,8 +39,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.NowPlayingCursor;
-import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.MusicUtils;
@@ -836,19 +834,31 @@ public class NowPlayingFragment extends Fragment implements
                     return true;
                 case R.id.panel_menu_use_ringtone:
                     // Set the current track as a ringtone
-                    MusicUtils.setRingtone(mActivity, MusicUtils.getCurrentAudioId());
+                    String ident = MusicUtils.getCurrentAudioId();
+                    try {
+                        long id = Long.decode(ident);
+                        MusicUtils.setRingtone(mActivity, id);
+                    } catch (NumberFormatException ex) {
+                        //TODO
+                    }
                     return true;
                 case R.id.panel_menu_delete:
-                    // Delete current song
-                    DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{
-                            MusicUtils.getCurrentAudioId()
-                    }, null).show(mActivity.getSupportFragmentManager(), "DeleteDialog");
+                    String ident1 = MusicUtils.getCurrentAudioId();
+                    try {
+                        long id = Long.decode(ident1);
+                        // Delete current song
+                        DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{id}, null)
+                                .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
+                    } catch (NumberFormatException ex) {
+                        //TODO
+                    }
                     return true;
                 case R.id.panel_menu_save_queue:
-                    NowPlayingCursor queue = (NowPlayingCursor) QueueLoader.makeQueueCursor(mActivity);
-                    CreateNewPlaylist.getInstance(MusicUtils.getSongListForCursor(queue)).show(
-                           mActivity.getSupportFragmentManager(), "CreatePlaylist");
-                    queue.close();
+                    //TODO
+//                    NowPlayingCursor queue = (NowPlayingCursor) QueueLoader.makeQueueCursor(mActivity);
+//                    CreateNewPlaylist.getInstance(MusicUtils.getSongListForCursor(queue)).show(
+//                           mActivity.getSupportFragmentManager(), "CreatePlaylist");
+//                    queue.close();
                     return true;
                 case R.id.panel_menu_clear_queue:
                     MusicUtils.clearQueue();
@@ -867,14 +877,15 @@ public class NowPlayingFragment extends Fragment implements
     private final View.OnClickListener mOpenCurrentAlbumProfile = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            if (MusicUtils.getCurrentAudioId() != -1) {
-                Album album = MusicUtils.getCurrentAlbum(mActivity);
-                if (album != null) {
-                    NavUtils.openAlbumProfile(mActivity, album);
-                }
-            } else {
-                MusicUtils.shuffleAll(mActivity);
-            }
+            //TODO
+//            if (MusicUtils.getCurrentAudioId() != -1) {
+//                Album album = MusicUtils.getCurrentAlbum(mActivity);
+//                if (album != null) {
+//                    NavUtils.openAlbumProfile(mActivity, album);
+//                }
+//            } else {
+//                MusicUtils.shuffleAll(mActivity);
+//            }
         }
     };
 

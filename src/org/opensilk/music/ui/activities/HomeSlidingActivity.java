@@ -282,6 +282,23 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         }
     }
 
+    @Override
+    public void onPanelExpanded(View panel) {
+        if (!mIsLargeLandscape) {
+            // The drawer interferes with the queue swipe to remove
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerContainerView);
+        }
+        super.onPanelExpanded(panel);
+    }
+
+    @Override
+    public void onPanelCollapsed(View panel) {
+        if (!mIsLargeLandscape) {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mDrawerContainerView);
+        }
+        super.onPanelCollapsed(panel);
+    }
+
     private void selectItem(int position) {
         mCurrentSelectedPosition = position;
         if (mDrawerListView != null) {

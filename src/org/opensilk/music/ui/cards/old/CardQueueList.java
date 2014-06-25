@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.NowPlayingCursor;
-import com.andrew.apollo.loaders.QueueLoader;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.MusicUtils;
@@ -77,13 +75,13 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.card_menu_play_next:
-                        NowPlayingCursor queue = (NowPlayingCursor) QueueLoader
-                                .makeQueueCursor(getContext());
-                        queue.removeItem(Integer.valueOf(getId()));
-                        queue.close();
-                        MusicUtils.playNext(new long[] {
-                                mData.mSongId
-                        });
+//                        NowPlayingCursor queue = (NowPlayingCursor) QueueLoader
+//                                .makeQueueCursor(getContext());
+//                        queue.removeItem(Integer.valueOf(getId()));
+//                        queue.close();
+//                        MusicUtils.playNext(new long[] {
+//                                mData.mSongId
+//                        });
                         break;
                     case R.id.card_menu_add_playlist:
                         AddToPlaylistDialog.newInstance(new long[]{
@@ -91,7 +89,7 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
                         }).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_remove_queue:
-                        MusicUtils.removeTrack(mData.mSongId);
+//                        MusicUtils.removeTrack(mData.mSongId);
                         break;
                     case R.id.card_menu_more_by:
                         NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
@@ -122,13 +120,13 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
             } else {
                 mPlayingIndicatior.setVisibility(View.GONE);
             }
-            if (mData.mSongId == MusicUtils.getCurrentAudioId()) {
-                if (MusicUtils.isPlaying()) {
-                    mPlayingIndicatior.startAnimating();
-                } else {
-                    mPlayingIndicatior.setVisibility(View.VISIBLE);
-                }
-            }
+//            if (mData.mSongId == MusicUtils.getCurrentAudioId()) {
+//                if (MusicUtils.isPlaying()) {
+//                    mPlayingIndicatior.startAnimating();
+//                } else {
+//                    mPlayingIndicatior.setVisibility(View.VISIBLE);
+//                }
+//            }
         }
     }
 

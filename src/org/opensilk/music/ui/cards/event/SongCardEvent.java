@@ -14,19 +14,31 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.event;
 
-import dagger.Module;
+import org.opensilk.music.api.model.Song;
 
 /**
  * Created by drew on 6/24/14.
  */
-@Module (
-        injects = {
-                SongCard.class,
-                SongQueueCard.class,
-        },
-        complete = false
-)
-public class CardModule {
+public class SongCardEvent {
+
+    public enum Event {
+        PLAY,
+        PLAY_NEXT,
+        ADD_TO_QUEUE,
+        REMOVE_FROM_QUEUE,
+        ADD_TO_PLAYLIST,
+        MORE_BY_ARTIST,
+        SET_RINGTONE,
+        DELETE
+    }
+
+    public final Event event;
+    public final Song song;
+
+    public SongCardEvent(Event event, Song song) {
+        this.event = event;
+        this.song = song;
+    }
 }

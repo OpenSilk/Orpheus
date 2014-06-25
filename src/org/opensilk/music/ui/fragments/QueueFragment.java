@@ -17,9 +17,11 @@
 
 package org.opensilk.music.ui.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -33,24 +35,36 @@ import android.view.animation.TranslateAnimation;
 
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.QueueLoader;
-import com.andrew.apollo.model.Song;
+import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 import com.mobeta.android.dslv.DragSortListView;
 import com.mobeta.android.dslv.DragSortListView.DropListener;
 import com.mobeta.android.dslv.DragSortListView.RemoveListener;
+import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MetaChanged;
 import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.bus.events.QueueChanged;
 import org.opensilk.music.bus.events.Refresh;
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.SongQueueCard;
+import org.opensilk.music.ui.cards.event.SongCardEvent;
 import org.opensilk.music.ui.cards.old.CardQueueList;
+import org.opensilk.music.ui.fragments.adapter.QueueSongCardAdapter;
+import org.opensilk.music.ui.fragments.loader.QueueLoader;
+import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -61,39 +75,27 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class QueueFragment extends Fragment implements
+public class QueueFragment extends ScopedDaggerFragment implements
         LoaderCallbacks<List<Song>>,
         DropListener,
         RemoveListener {
 
-    /**
-     * LoaderCallbacks identifier
-     */
-    private static final int LOADER = 0;
+    @Inject @ForFragment
+    Bus mFragmentBus;
 
-    /**
-     * The adapter for the list
-     */
-    private CardArrayAdapter mAdapter;
-
-    /**
-     * The list view
-     */
+    private QueueSongCardAdapter mAdapter;
     private DragSortListView mListView;
 
-    /**
-     * Set when we alter the queue to avoid processing the callback
-     */
+    private GlobalBusMonitor mGlobalMonitor;
+    private FragmentBusMonitor mFragmentMonitor;
+
+    /** Set when we alter the queue to avoid processing the callback */
     private int mSelfChange = 0;
 
-    /**
-     * Track loader state
-     */
+    /** Track loader state */
     private boolean isFirstLoad = true;
 
-    /**
-     * Stores list state when loader is restarted
-     */
+    /** Stores list state when loader is restarted */
     private ScrollPosition mLastPosition = new ScrollPosition();
     private static class ScrollPosition {
         private int prevActiveIndex;
@@ -101,21 +103,21 @@ public class QueueFragment extends Fragment implements
         private int top;
     }
 
-    private final Handler mHandler = new Handler();
-    private final Runnable mLoaderRestartRunnable = new Runnable() {
-        @Override
-        public void run() {
-            restartLoader(null);
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Register the music status listener
-        EventBus.getInstance().register(this);
+        mGlobalMonitor = new GlobalBusMonitor();
+        EventBus.getInstance().register(mGlobalMonitor);
+        // register with localbus
+        mFragmentMonitor = new FragmentBusMonitor();
+        mFragmentBus.register(mFragmentMonitor);
+        // init adapter
+        mAdapter = new QueueSongCardAdapter(getActivity(), this);
+        //We have to set this manually since we arent using CardListView
+        mAdapter.setRowLayoutId(R.layout.list_dragsort_card_layout);
         // Start the loader
-        getLoaderManager().initLoader(LOADER, null, this);
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -152,16 +154,18 @@ public class QueueFragment extends Fragment implements
     }
 
     @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        // Enable the options menu
-        setHasOptionsMenu(true);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Set the data behind the list
+        mListView.setAdapter(mAdapter);
     }
 
     @Override
     public void onDestroy() {
+        // Unregister the busses;
+        EventBus.getInstance().unregister(mGlobalMonitor);
+        mFragmentBus.unregister(mFragmentMonitor);
         super.onDestroy();
-        EventBus.getInstance().unregister(this);
     }
 
     /*
@@ -175,22 +179,12 @@ public class QueueFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(final Loader<List<Song>> loader, final List<Song> data) {
+        mAdapter.clear();
         // Check for any errors
-        if (data.isEmpty()) {
+        if (data == null || data.isEmpty()) {
             return;
         }
-
-        ArrayList<Card> cards = new ArrayList<Card>();
-        for (int ii=0; ii<data.size(); ii++) {
-            CardQueueList card = new CardQueueList(getActivity(), data.get(ii));
-            card.setId(String.valueOf(ii));
-            cards.add(card);
-        }
-        mAdapter = new CardArrayAdapter(getActivity(), cards);
-        //We have to set this manually since we arent using CardListView
-        mAdapter.setRowLayoutId(R.layout.dragsort_card_list);
-        // Set the data behind the list
-        mListView.setAdapter(mAdapter);
+        mAdapter.addSongs(data);
         // On first load go to current song else restore the previous scroll position
         if (isFirstLoad) {
             isFirstLoad = false;
@@ -202,8 +196,7 @@ public class QueueFragment extends Fragment implements
 
     @Override
     public void onLoaderReset(Loader<List<Song>> listLoader) {
-        mAdapter = null;
-        mListView.setAdapter(null);
+        mAdapter.clear();
     }
 
     /*
@@ -219,8 +212,7 @@ public class QueueFragment extends Fragment implements
         }
         Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
-        mAdapter.notifyDataSetChanged();
-        MusicUtils.removeTrack(((CardQueueList) c).getData().mSongId);
+        MusicUtils.removeTrack(((SongQueueCard) c).getData());
     }
 
     /*
@@ -235,8 +227,10 @@ public class QueueFragment extends Fragment implements
             mSelfChange++;
         }
         Card c = mAdapter.getItem(from);
+        mAdapter.setNotifyOnChange(false);
         mAdapter.remove(c);
         mAdapter.insert(c, to);
+        mAdapter.setNotifyOnChange(true);
         mAdapter.notifyDataSetChanged();
         MusicUtils.moveQueueItem(from, to);
     }
@@ -259,12 +253,12 @@ public class QueueFragment extends Fragment implements
      */
     @DebugLog
     private int getItemPositionBySong() {
-        final long trackId = MusicUtils.getCurrentAudioId();
-        if (mAdapter == null) {
+        final String trackId = MusicUtils.getCurrentAudioId();
+        if (mAdapter == null || mAdapter.getCount() == 0) {
             return 0;
         }
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            if (((CardQueueList) mAdapter.getItem(i)).getData().mSongId == trackId) {
+            if (((SongQueueCard) mAdapter.getItem(i)).getData().identity.equals(trackId)) {
                 return i;
             }
         }
@@ -290,65 +284,160 @@ public class QueueFragment extends Fragment implements
         mListView.setSelectionFromTop(mLastPosition.index, mLastPosition.top);
     }
 
-    private void scheduleLoaderRestart() {
-        mHandler.removeCallbacks(mLoaderRestartRunnable);
-        mHandler.postDelayed(mLoaderRestartRunnable, 40);
-    }
-
-
     /*
-     * Events
+     * Abstract methods
      */
 
-    @Subscribe
-    public void restartLoader(Refresh e) {
-        if (isAdded()) {
-            // This is a slight hack to give us a refrence if the
-            // items in the queue are moved
-            mLastPosition.prevActiveIndex = getItemPositionBySong();
-            // store top most index
-            mLastPosition.index = mListView.getFirstVisiblePosition();
-            View v = mListView.getChildAt(0);
-            // store offset of top item
-            mLastPosition.top = v == null ? 0 : v.getTop();
-            getLoaderManager().restartLoader(LOADER, null, this);
-        }
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new QueueModule(),
+        };
     }
 
-    @Subscribe
-    public void onMetaChanged(MetaChanged e) {
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
-        }
+    @Override
+    protected DaggerInjector getParentInjector(Activity activity) {
+        return (DaggerInjector) activity;
     }
 
-    @Subscribe
-    public void onPlaystateChanged(PlaystateChanged e) {
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
-        }
-    }
+    class GlobalBusMonitor {
 
-    @Subscribe
-    public void onQueueChanged(QueueChanged e) {
-        if (mSelfChange-->0) {
-            return;
-        }
-        // For auto shuffle when the queue gets adjusted we
-        // can receive several QUEUE_CHANGED updates in quick
-        // succession so we batch the restart calls so our
-        // saved state doesnt alter unexpectedly while
-        // we wait on the loader
-        scheduleLoaderRestart();
-    }
+        private final Handler mHandler;
+        private final Runnable mLoaderRestartRunnable;
 
-    @Subscribe
-    public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
-        if (e.isConnected()) {
+        GlobalBusMonitor() {
+            mHandler = new Handler();
+            mLoaderRestartRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    restartLoader(null);
+                }
+            };
+        }
+
+        @Subscribe
+        public void restartLoader(Refresh e) {
+            if (isAdded()) {
+                // This is a slight hack to give us a refrence if the
+                // items in the queue are moved
+                mLastPosition.prevActiveIndex = getItemPositionBySong();
+                // store top most index
+                mLastPosition.index = mListView.getFirstVisiblePosition();
+                View v = mListView.getChildAt(0);
+                // store offset of top item
+                mLastPosition.top = v == null ? 0 : v.getTop();
+                getLoaderManager().restartLoader(0, null, QueueFragment.this);
+            }
+        }
+
+        @Subscribe
+        public void onMetaChanged(MetaChanged e) {
             if (mAdapter != null) {
                 mAdapter.notifyDataSetChanged();
             }
         }
+
+        @Subscribe
+        public void onPlaystateChanged(PlaystateChanged e) {
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+
+        @Subscribe
+        @DebugLog
+        public void onQueueChanged(QueueChanged e) {
+            if (mSelfChange-->0) {
+                return;
+            }
+            // For auto shuffle when the queue gets adjusted we
+            // can receive several QUEUE_CHANGED updates in quick
+            // succession so we batch the restart calls so our
+            // saved state doesnt alter unexpectedly while
+            // we wait on the loader
+            scheduleLoaderRestart();
+        }
+
+        @Subscribe
+        public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
+            if (e.isConnected()) {
+                if (mAdapter != null) {
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        }
+
+        private void scheduleLoaderRestart() {
+            mHandler.removeCallbacks(mLoaderRestartRunnable);
+            mHandler.postDelayed(mLoaderRestartRunnable, 40);
+        }
+
+    }
+
+    class FragmentBusMonitor {
+        @Subscribe
+        public void onCardItemClicked(SongCardEvent e) {
+            switch (e.event) {
+                case PLAY:
+                    // XXX hacky and slow
+                    for(int ii=0; ii<mAdapter.getCount(); ii++) {
+                        SongQueueCard c = (SongQueueCard) mAdapter.getItem(ii);
+                        if (c.getData().equals(e.song)) {
+                            // When selecting a track from the queue, just jump there instead of
+                            // reloading the queue. This is both faster, and prevents accidentally
+                            // dropping out of party shuffle.
+                            MusicUtils.setQueuePosition(ii);
+                            break;
+                        }
+                    }
+                    break;
+                case PLAY_NEXT:
+                    MusicUtils.removeTrack(e.song);
+                    MusicUtils.playNext(new Song[]{e.song});
+                    break;
+                case REMOVE_FROM_QUEUE:
+                    MusicUtils.removeTrack(e.song);
+                    break;
+                case ADD_TO_PLAYLIST:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            AddToPlaylistDialog.newInstance(new long[]{id})
+                                    .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+                case MORE_BY_ARTIST:
+                    if (e.song.isLocal()) {
+                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.artistName));
+                    } // else TODO
+                    break;
+                case SET_RINGTONE:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            MusicUtils.setRingtone(getActivity(), id);
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+                case DELETE:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            DeleteDialog.newInstance(e.song.name, new long[]{id}, null)
+                                    .show(getChildFragmentManager(), "DeleteDialog");
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+            }
+        }
+
     }
 
 }

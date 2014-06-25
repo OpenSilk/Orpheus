@@ -46,6 +46,7 @@ import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
 
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -71,12 +72,14 @@ public final class MusicUtils {
     private static final WeakHashMap<Context, ServiceBinder> mConnectionMap;
 
     private static final long[] sEmptyList;
+    private static final Song[] sEmptySongList;
 
     private static ContentValues[] mContentValuesCache = null;
 
     static {
         mConnectionMap = new WeakHashMap<Context, ServiceBinder>();
         sEmptyList = new long[0];
+        sEmptySongList = new Song[0];
     }
 
     /* This class is never initiated */
@@ -407,40 +410,27 @@ public final class MusicUtils {
     /**
      * @return The current album Id.
      */
-    public static final long getCurrentAlbumId() {
+    public static String getCurrentAlbumId() {
         if (sService != null) {
             try {
                 return sService.getAlbumId();
             } catch (final RemoteException ignored) {
             }
         }
-        return -1;
+        return null;
     }
 
     /**
      * @return The current song Id.
      */
-    public static final long getCurrentAudioId() {
+    public static String getCurrentAudioId() {
         if (sService != null) {
             try {
                 return sService.getAudioId();
             } catch (final RemoteException ignored) {
             }
         }
-        return -1;
-    }
-
-    /**
-     * @return The current artist Id.
-     */
-    public static final long getCurrentArtistId() {
-        if (sService != null) {
-            try {
-                return sService.getArtistId();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return -1;
+        return null;
     }
 
     /**
@@ -461,8 +451,9 @@ public final class MusicUtils {
      * @return the currently playing album
      */
     public static Album getCurrentAlbum(final Context context) {
-        long albumId = getCurrentAlbumId();
-        return makeAlbum(context, albumId);
+        throw new UnsupportedOperationException("Fetching current album not supported");
+//        long albumId = getCurrentAlbumId();
+//        return makeAlbum(context, albumId);
     }
 
     public static ArtInfo getCurrentArtInfo() {
@@ -534,6 +525,50 @@ public final class MusicUtils {
         return artist;
     }
 
+    public static Song makeSong(Context context, long songId) {
+        Cursor c = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.SONG,
+                MediaStore.Audio.Media._ID + "=?",
+                new String[]{String.valueOf(songId)},
+                null);
+        Song s = null;
+        if (c != null) {
+            if (c.moveToFirst()) {
+                s = CursorHelpers.makeSongFromCursor(context, c);
+            }
+            c.close();
+        }
+        return s;
+    }
+
+    public static Song[] makeSongList(Context context, long[] list) {
+        if (list == null || list.length == 0) {
+            return sEmptySongList;
+        }
+        Song[] songs = new Song[list.length];
+        final StringBuilder selection = new StringBuilder();
+        selection.append(MediaStore.Audio.Media._ID + " IN (");
+        for (int ii = 0; ii < list.length; ii++) {
+            selection.append(list[ii]);
+            if (ii < list.length - 1) {
+                selection.append(",");
+            }
+        }
+        selection.append(")");
+        Cursor c = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.SONG, selection.toString(), null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                int ii=0;
+                do {
+                    songs[ii++] = CursorHelpers.makeSongFromCursor(context, c);
+                } while (c.moveToNext());
+            }
+            c.close();
+        }
+        return songs;
+    }
+
     /**
      * @return true if currently casting
      */
@@ -550,25 +585,24 @@ public final class MusicUtils {
     /**
      * @return The queue.
      */
-    public static final long[] getQueue() {
+    public static Song[] getQueue() {
         try {
             if (sService != null) {
                 return sService.getQueue();
-            } else {
             }
         } catch (final RemoteException ignored) {
         }
-        return sEmptyList;
+        return sEmptySongList;
     }
 
     /**
-     * @param id The ID of the track to remove.
-     * @return removes track from a playlist or the queue.
+     * @param song
+     * @return removes track from service playlist.
      */
-    public static final int removeTrack(final long id) {
+    public static int removeTrack(Song song) {
         try {
             if (sService != null) {
-                return sService.removeTrack(id);
+                return sService.removeTrack(song);
             }
         } catch (final RemoteException ingored) {
         }
@@ -728,11 +762,20 @@ public final class MusicUtils {
             } else {
                 sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
             }
-            final long currentId = sService.getAudioId();
+            final String currentId = sService.getAudioId();
             final int currentQueuePosition = getQueuePosition();
-            if (position != -1 && currentQueuePosition == position && currentId == list[position]) {
-                final long[] playlist = getQueue();
-                if (Arrays.equals(list, playlist)) {
+            if (position != -1 && currentQueuePosition == position && String.valueOf(list[position]).equals(currentId)) {
+                final Song[] playlist = getQueue();
+                final long[] l2 = new long[playlist.length];
+                for (int ii=0; ii<playlist.length; ii++) {
+                    try {
+                        l2[ii] = Long.decode(playlist[ii].identity);
+                    } catch (NumberFormatException ex) {
+                        l2[ii] = -1;
+                        continue;
+                    }
+                }
+                if (Arrays.equals(list, l2)) {
                     sService.play();
                     return;
                 }
@@ -760,6 +803,19 @@ public final class MusicUtils {
     }
 
     /**
+     *
+     * @param list
+     */
+    public static void playNext(Song[] list) {
+        if (sService == null) {
+            return;
+        }
+        try {
+            sService.enqueueSongs(list, MusicPlaybackService.NEXT);
+        } catch (RemoteException ignored) { }
+    }
+
+    /**
      * @param context The {@link Context} to use.
      */
     public static void shuffleAll(final Context context) {
@@ -771,12 +827,20 @@ public final class MusicUtils {
         }
         try {
             sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-            final long mCurrentId = sService.getAudioId();
+            final String mCurrentId = sService.getAudioId();
             final int mCurrentQueuePosition = getQueuePosition();
-            if (position != -1 && mCurrentQueuePosition == position
-                    && mCurrentId == mTrackList[position]) {
-                final long[] mPlaylist = getQueue();
-                if (Arrays.equals(mTrackList, mPlaylist)) {
+            if (mCurrentQueuePosition == position && String.valueOf(mTrackList[position]).equals(mCurrentId)) {
+                final Song[] mPlaylist = getQueue();
+                final long[] l2 = new long[mPlaylist.length];
+                for (int ii=0; ii<mPlaylist.length; ii++) {
+                    try {
+                        l2[ii] = Long.decode(mPlaylist[ii].identity);
+                    } catch (NumberFormatException ex) {
+                        l2[ii] = -1;
+                        continue;
+                    }
+                }
+                if (Arrays.equals(mTrackList, l2)) {
                     sService.play();
                     return;
                 }
@@ -1092,10 +1156,10 @@ public final class MusicUtils {
     /**
      * @return The path to the currently playing file as {@link String}
      */
-    public static final String getFilePath() {
+    public static Uri getFileUri() {
         try {
             if (sService != null) {
-                return sService.getPath();
+                return Uri.parse(sService.getPath());
             }
         } catch (final RemoteException ignored) {
         }
@@ -1368,9 +1432,6 @@ public final class MusicUtils {
      * @param list The item(s) to delete.
      */
     public static void deleteTracks(final Context context, final long[] list) {
-        final String[] projection = new String[] {
-                BaseColumns._ID, MediaColumns.DATA, AudioColumns.ALBUM_ID
-        };
         final StringBuilder selection = new StringBuilder();
         selection.append(BaseColumns._ID + " IN (");
         for (int i = 0; i < list.length; i++) {
@@ -1381,25 +1442,26 @@ public final class MusicUtils {
         }
         selection.append(")");
         final Cursor c = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection.toString(),
-                null, null);
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, Projections.SONG,
+                selection.toString(), null, null);
         if (c != null) {
             // Step 1: Remove selected tracks from the current playlist, as well
             // as from the album art cache
             c.moveToFirst();
             while (!c.isAfterLast()) {
                 // Remove from current playlist
-                final long id = c.getLong(0);
-                removeTrack(id);
-                // Remove from the favorites playlist
-                FavoritesStore.getInstance(context).removeItem(id);
-                // Remove any items in the recents database
-                context.getContentResolver().delete(RECENTS_URI,
-                        RecentStore.RecentStoreColumns._ID + " = ?",
-                        new String[] {
-                                String.valueOf(c.getLong(2))
-                        }
-                );
+                Song song = CursorHelpers.makeSongFromCursor(context, c);
+                try {
+                    long id = Long.decode(song.identity);
+                    removeTrack(song);
+                    // Remove from the favorites playlist
+                    FavoritesStore.getInstance(context).removeItem(id);
+                    // Remove any items in the recents database
+                    context.getContentResolver().delete(RECENTS_URI,
+                            RecentStore.RecentStoreColumns._ID + " = ?",
+                            new String[] {song.albumIdentity} );
+
+                } catch (NumberFormatException ignored) { }
                 c.moveToNext();
             }
 
@@ -1428,7 +1490,7 @@ public final class MusicUtils {
 
         final String message = makeLabel(context, R.plurals.NNNtracksdeleted, list.length);
 
-        Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         // We deleted a number of tracks, which could affect any number of
         // things
         // in the media content domain, so update everything.

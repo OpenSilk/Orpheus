@@ -136,13 +136,12 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     private void updateWidget(int appId, int startId, int widgetType) {
         String albumName = MusicUtils.getAlbumName();
         String albumArtistName = MusicUtils.getAlbumArtistName();
-        long albumId = MusicUtils.getCurrentAlbumId();
         mArtistName = MusicUtils.getArtistName();
         mTrackName = MusicUtils.getTrackName();
         mShuffleMode = MusicUtils.getShuffleMode();
         mRepeatMode = MusicUtils.getRepeatMode();
         mIsPlaying = MusicUtils.isPlaying();
-        mArtwork = mArtworkProvider.getArtworkThumbnail(albumArtistName, albumName, albumId);
+        mArtwork = mArtworkProvider.getArtworkThumbnail(albumArtistName, albumName);
 
         RemoteViews views = createView(appId, widgetType);
         if (views != null) {

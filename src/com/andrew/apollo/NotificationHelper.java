@@ -81,7 +81,7 @@ public class NotificationHelper {
      * Call this to build the {@link Notification}.
      */
     public void buildNotification(final String albumName, final String artistName,
-            final String trackName, final Long albumId, final Bitmap albumArt,
+            final String trackName, final Bitmap albumArt,
             final boolean isPlaying) {
 
         // Default notfication layout

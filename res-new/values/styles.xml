@@ -54,11 +54,11 @@
         <!--<item name="android:fastScrollAlwaysVisible">true</item>-->
         <!-- Setup dragsort options-->
         <item name="use_default_controller">true</item>
-        <item name="drag_handle_id">@id/card_thumbnail_image</item>
+        <item name="drag_handle_id">@id/card_drag_element</item>
         <item name="remove_enabled">true</item>
         <item name="remove_mode">flingRemove</item>
         <item name="drag_start_mode">onMove</item>
-        <item name="fling_handle_id">@id/card_thumbnail_image</item>
+        <item name="fling_handle_id">@id/card_drag_element</item>
         <item name="float_background_color">@android:color/transparent</item>
         <!-- since we arent using the CardListView we need to disable dividers ourselves-->
         <item name="android:dividerHeight">0dp</item>

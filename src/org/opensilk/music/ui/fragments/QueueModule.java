@@ -14,19 +14,34 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.fragments;
+
+import com.squareup.otto.Bus;
+
+import org.opensilk.music.ui.activities.ActivityModule;
+import org.opensilk.music.ui.cards.CardModule;
+import org.opensilk.silkdagger.qualifier.ForFragment;
+
+import javax.inject.Singleton;
 
 import dagger.Module;
+import dagger.Provides;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/25/14.
  */
 @Module (
+        addsTo = ActivityModule.class,
         injects = {
-                SongCard.class,
-                SongQueueCard.class,
+                QueueFragment.class,
         },
-        complete = false
+        includes = CardModule.class
 )
-public class CardModule {
+public class QueueModule {
+
+    @Provides @Singleton @ForFragment
+    public Bus provideEventBus() {
+        return new Bus("queue");
+    }
+
 }

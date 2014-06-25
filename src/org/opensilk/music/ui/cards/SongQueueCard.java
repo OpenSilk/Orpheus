@@ -30,7 +30,7 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.SongCardEvent;
-import org.opensilk.music.ui.cards.event.SongCardEvent.Event;
+import org.opensilk.music.widgets.PlayingIndicator;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -39,22 +39,22 @@ import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
- * Created by drew on 6/19/14.
+ * TODO try subclassing SongCard, not sure it will work cause the injection
+ *
+ * Created by drew on 6/25/14.
  */
-public class SongCard extends AbsCard<Song> {
+public class SongQueueCard extends AbsCard<Song> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
+    @InjectView(R.id.card_playing_indicator)
+    protected PlayingIndicator mPlayingIndicator;
 
-    public SongCard(Context context, Song song) {
-        this(context, song, R.layout.library_listcard_artwork_inner);
-    }
-
-    public SongCard(Context context, Song song, int innerLayout) {
-        super(context, song, innerLayout);
+    public SongQueueCard(Context context, Song data) {
+        super(context, data, R.layout.library_queue_listcard_inner);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SongCard extends AbsCard<Song> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new SongCardEvent(Event.PLAY, mData));
+                mBus.post(new SongCardEvent(SongCardEvent.Event.PLAY, mData));
             }
         });
     }
@@ -72,12 +72,13 @@ public class SongCard extends AbsCard<Song> {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setText(mData.artistName);
         ArtworkManager.loadImage(new ArtInfo(mData.albumArtistName, mData.albumName, mData.artworkUri), mArtwork);
+        maybeStartPlayingIndicator();
     }
 
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
         m.inflate(R.menu.popup_play_next);
-        m.inflate(R.menu.popup_add_to_queue);
+        m.inflate(R.menu.popup_remove_from_queue); //XXX different from SongCard
         if (mData.isLocal()) {
             m.inflate(R.menu.popup_add_to_playlist);
             m.inflate(R.menu.popup_more_by_artist);
@@ -89,22 +90,22 @@ public class SongCard extends AbsCard<Song> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.popup_play_next:
-                        mBus.post(new SongCardEvent(Event.PLAY_NEXT, mData));
+                        mBus.post(new SongCardEvent(SongCardEvent.Event.PLAY_NEXT, mData));
                         return true;
-                    case R.id.popup_add_to_queue:
-                        mBus.post(new SongCardEvent(Event.ADD_TO_QUEUE, mData));
+                    case R.id.popup_remove_from_queue:
+                        mBus.post(new SongCardEvent(SongCardEvent.Event.REMOVE_FROM_QUEUE, mData));
                         return true;
                     case R.id.popup_add_to_playlist:
-                        mBus.post(new SongCardEvent(Event.ADD_TO_PLAYLIST, mData));
+                        mBus.post(new SongCardEvent(SongCardEvent.Event.ADD_TO_PLAYLIST, mData));
                         return true;
                     case R.id.popup_more_by_artist:
-                        mBus.post(new SongCardEvent(Event.MORE_BY_ARTIST, mData));
+                        mBus.post(new SongCardEvent(SongCardEvent.Event.MORE_BY_ARTIST, mData));
                         return true;
                     case R.id.popup_set_ringtone:
-                        mBus.post(new SongCardEvent(Event.SET_RINGTONE, mData));
+                        mBus.post(new SongCardEvent(SongCardEvent.Event.SET_RINGTONE, mData));
                         return true;
                     case R.id.popup_delete:
-                        mBus.post(new SongCardEvent(Event.DELETE, mData));
+                        mBus.post(new SongCardEvent(SongCardEvent.Event.DELETE, mData));
                         return true;
                 }
                 return false;
@@ -114,12 +115,32 @@ public class SongCard extends AbsCard<Song> {
 
     @Override
     protected int getListLayout() {
-        return R.layout.library_listcard_artwork_inner;
+        return R.layout.library_queue_listcard_inner;
     }
 
     @Override
     protected int getGridLayout() {
-        return R.layout.library_gridcard_artwork_inner;
+        throw new UnsupportedOperationException("Queue has no grid layout");
     }
 
+    /**
+     * Conditionally starts playing indicator animation
+     */
+    protected void maybeStartPlayingIndicator() {
+        if (mPlayingIndicator != null) {
+            // Always set gone. else recycled views might end up with it showing
+            if (mPlayingIndicator.isAnimating()) {
+                mPlayingIndicator.stopAnimating(); //stopAnimating sets GONE
+            } else {
+                mPlayingIndicator.setVisibility(View.GONE);
+            }
+            if (mData.identity.equals(MusicUtils.getCurrentAudioId())) {
+                if (MusicUtils.isPlaying()) {
+                    mPlayingIndicator.startAnimating();
+                } else {
+                    mPlayingIndicator.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+    }
 }

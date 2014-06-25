@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -42,13 +41,12 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.cards.event.SongPopupClicked;
+import org.opensilk.music.ui.cards.event.SongCardEvent;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
-import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.util.List;
@@ -183,7 +181,7 @@ public class HomeFragment extends ScopedDaggerFragment {
      */
 
     @Subscribe
-    public void onSongPopupItemClicked(SongPopupClicked e) {
+    public void onSongPopupItemClicked(SongCardEvent e) {
         switch (e.event) {
             case PLAY_NEXT:
                 if (e.song.isLocal()) {

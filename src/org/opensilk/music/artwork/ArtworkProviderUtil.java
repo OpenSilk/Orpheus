@@ -77,17 +77,16 @@ public class ArtworkProviderUtil {
      *
      * @param artistName
      * @param albumName
-     * @param albumId
      * @return Bitmap if found else null
      */
     @DebugLog
-    public Bitmap getArtwork(String artistName, String albumName, long albumId) {
-        final String cacheKey = makeCacheKey(artistName, albumName, albumId, "LARGE");
+    public Bitmap getArtwork(String artistName, String albumName) {
+        final String cacheKey = makeCacheKey(artistName, albumName,"LARGE");
         final Uri artworkUri = ArtworkProvider.createArtworkUri(artistName, albumName);
         Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
         if (bitmap == null) {
             // Fullscreen not available try the thumbnail for a temp fix
-            bitmap = getArtworkThumbnail(artistName, albumName, albumId);
+            bitmap = getArtworkThumbnail(artistName, albumName);
         }
         return bitmap;
     }
@@ -96,12 +95,11 @@ public class ArtworkProviderUtil {
      * Fetches thumbnail from the ArtworkProvider
      * @param artistName
      * @param albumName
-     * @param albumId
      * @return
      */
     @DebugLog
-    public Bitmap getArtworkThumbnail(String artistName, String albumName, long albumId) {
-        final String cacheKey = makeCacheKey(artistName, albumName, albumId, "THUMB");
+    public Bitmap getArtworkThumbnail(String artistName, String albumName) {
+        final String cacheKey = makeCacheKey(artistName, albumName, "THUMB");
         final Uri artworkUri = ArtworkProvider.createArtworkThumbnailUri(artistName, albumName);
         return queryArtworkProvider(artworkUri, cacheKey);
     }
@@ -149,13 +147,12 @@ public class ArtworkProviderUtil {
     /**
      * Generates a cache key for local  L1Cache
      */
-    private static String makeCacheKey(String artistName, String albumName, long albumId, String size) {
+    private static String makeCacheKey(String artistName, String albumName, String size) {
         return new StringBuilder((artistName != null ? artistName.length() : 4)
                 + (albumName != null ? albumName.length() : 4) + 1
                 + (size != null ? size.length() : 4))
                 .append(artistName)
                 .append(albumName)
-                .append(albumId)
                 .append(size)
                 .toString();
     }

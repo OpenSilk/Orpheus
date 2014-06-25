@@ -14,29 +14,34 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards.event;
+package org.opensilk.music.ui.fragments.loader;
+
+import android.content.Context;
+
+import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
+import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.model.Song;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by drew on 6/24/14.
  */
-public class SongPopupClicked {
+public class QueueLoader extends WrappedAsyncTaskLoader<List<Song>> {
 
-    public enum Event {
-        PLAY_NEXT,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-        MORE_BY_ARTIST,
-        SET_RINGTONE,
-        DELETE
+    public QueueLoader(Context context) {
+        super(context);
     }
 
-    public final Event event;
-    public final Song song;
-
-    public SongPopupClicked(Event event, Song song) {
-        this.event = event;
-        this.song = song;
+    @Override
+    public List<Song> loadInBackground() {
+        Song[] songs = MusicUtils.getQueue();
+        List<Song> list = new ArrayList<>(songs.length);
+        Collections.addAll(list, songs);
+        return list;
     }
+
 }

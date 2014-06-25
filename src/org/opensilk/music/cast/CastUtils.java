@@ -32,6 +32,7 @@ import com.google.android.gms.common.images.WebImage;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.ReconnectionStatus;
 import org.opensilk.cast.util.Utils;
+import org.opensilk.music.api.model.Song;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -174,12 +175,37 @@ public class CastUtils {
         return null;
     }
 
+    public static MediaInfo buildMediaInfo(Context context, Song song) {
+        if (song != null) {
+            if (song.isLocal()) {
+                try {
+                    String ipaddr = getWifiIpAddress(context);
+                    return buildMediaInfo(song.name, song.albumName, song.artistName, "audio/*",
+                            buildMusicUrl(ipaddr, song.identity), buildArtUrl(ipaddr, song), null);
+                } catch (UnknownHostException ignored) {}
+            } else {
+                return buildMediaInfo(song.name, song.albumName, song.artistName, "audio/*",
+                        song.dataUri.toString(), song.artworkUri.toString(), null);
+            }
+        }
+        return null;
+    }
+
     public static String buildMusicUrl(long id, String host) {
+        return "http://" + host + ":" + CastWebServer.PORT + "/audio/" + id;
+    }
+
+    public static String buildMusicUrl(String host, String id) {
         return "http://" + host + ":" + CastWebServer.PORT + "/audio/" + id;
     }
 
     public static String buildArtUrl(long id, String host) {
         return "http://" + host + ":" + CastWebServer.PORT + "/art/" + id;
+    }
+
+    public static String buildArtUrl(String host, Song song) {
+        String artist = song.albumArtistName != null ? song.albumArtistName : song.artistName;
+        return "http://"+host+":"+CastWebServer.PORT+"/art/"+artist+"/"+song.albumName;
     }
 
     /**
