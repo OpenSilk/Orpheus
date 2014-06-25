@@ -790,6 +790,40 @@ public final class MusicUtils {
     }
 
     /**
+     *
+     * @param list
+     * @param position
+     * @param forceShuffle
+     */
+    public static void playAllSongs(Song[] list, int position, boolean forceShuffle) {
+        if (list.length == 0 || sService == null) {
+            return;
+        }
+        try {
+            if (forceShuffle) {
+                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+            } else {
+                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+            }
+            final String currentId = sService.getAudioId();
+            final int currentQueuePosition = getQueuePosition();
+            if (position != -1 && currentQueuePosition == position && String.valueOf(list[position]).equals(currentId)) {
+                final Song[] playlist = getQueue();
+                if (Arrays.equals(list, playlist)) {
+                    sService.play();
+                    return;
+                }
+            }
+            if (position < 0) {
+                position = 0;
+            }
+            sService.openSongs(list, forceShuffle ? -1 : position);
+            sService.play();
+        } catch (final RemoteException ignored) {
+        }
+    }
+
+    /**
      * @param list The list to enqueue.
      */
     public static void playNext(final long[] list) {

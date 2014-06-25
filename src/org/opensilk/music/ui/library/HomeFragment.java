@@ -68,11 +68,14 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
     @Inject @ForActivity
     DrawerHelper mDrawerHelper;
     @Inject @ForFragment
-    Bus mMiniBus;
+    Bus mFragmentBus;
 
     private RemoteLibrary mLibraryService;
     private PluginInfo mPluginInfo;
     private String mLibraryIdentity;
+
+    private GlobalBusMonitor mGlobalMonitor;
+    private FragmentBusMonitor mFragmentMonitor;
 
     private boolean mWantGridView;
     private boolean mFromSavedInstance;
@@ -91,8 +94,11 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
         mPluginInfo = getArguments().getParcelable("plugininfo");
         // Bind the remote service
         RemoteLibraryUtil.bindToService(getActivity(), mPluginInfo.componentName);
-        EventBus.getInstance().register(this);
-        mMiniBus.register(this);
+        // register with busses
+        mGlobalMonitor = new GlobalBusMonitor();
+        EventBus.getInstance().register(mGlobalMonitor);
+        mFragmentMonitor = new FragmentBusMonitor();
+        mFragmentBus.register(mFragmentMonitor);
         // restore state
         if (savedInstanceState != null) {
             mFromSavedInstance = true;
@@ -120,8 +126,8 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
 
     @Override
     public void onDestroy() {
-        mMiniBus.unregister(this);
-        EventBus.getInstance().unregister(this);
+        mFragmentBus.unregister(mFragmentMonitor);
+        EventBus.getInstance().unregister(mGlobalMonitor);
         RemoteLibraryUtil.unbindFromService(getActivity(), mPluginInfo.componentName);
         super.onDestroy();
     }
@@ -204,33 +210,6 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
         return getChildFragmentManager().popBackStackImmediate();
     }
 
-    /*
-     * Global Eventes
-     */
-
-    @Subscribe
-    public void onServiceConnected(RemoteLibraryEvent.Bound e) {
-        if (mPluginInfo.componentName.equals(e.componentName)) {
-            requestLibrary();
-        }
-    }
-
-    @Subscribe
-    public void onServiceDisconnected(RemoteLibraryEvent.Unbound e) {
-        if (mPluginInfo.componentName.equals(e.componentName)) {
-            mLibraryService = null;
-        }
-    }
-
-    /*
-     * Scoped events
-     */
-
-    @Subscribe
-    public void onFolderClicked(FolderCardClick e) {
-        pushFolderFragment(e.folderId);
-    }
-
     private boolean isLibraryBound() {
         return RemoteLibraryUtil.isBound(mPluginInfo.componentName);
     }
@@ -277,6 +256,29 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
                 .replace(R.id.container, f)
                 .addToBackStack(folderId)
                 .commit();
+    }
+
+    class GlobalBusMonitor {
+        @Subscribe
+        public void onServiceConnected(RemoteLibraryEvent.Bound e) {
+            if (mPluginInfo.componentName.equals(e.componentName)) {
+                requestLibrary();
+            }
+        }
+
+        @Subscribe
+        public void onServiceDisconnected(RemoteLibraryEvent.Unbound e) {
+            if (mPluginInfo.componentName.equals(e.componentName)) {
+                mLibraryService = null;
+            }
+        }
+    }
+
+    class FragmentBusMonitor {
+        @Subscribe
+        public void onFolderClicked(FolderCardClick e) {
+            pushFolderFragment(e.folderId);
+        }
     }
 
 }

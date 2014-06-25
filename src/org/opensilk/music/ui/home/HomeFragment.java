@@ -40,6 +40,7 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.SongCardEvent;
 import org.opensilk.music.ui.modules.ActionBarController;
@@ -69,10 +70,14 @@ public class HomeFragment extends ScopedDaggerFragment {
     ActionBarController mActionBarHelper;
     @Inject @ForFragment
     Bus mFragmentBus;
+
     @InjectView(R.id.pager)
     ViewPager mViewPager;
+
     private HomePagerAdapter mPagerAdapter;
     private PreferenceUtils mPreferences;
+
+    private FragmentBusMonitor mFragmentMonitor;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -97,7 +102,8 @@ public class HomeFragment extends ScopedDaggerFragment {
             }
         }
 
-        mFragmentBus.register(this);
+        mFragmentMonitor = new FragmentBusMonitor();
+        mFragmentBus.register(mFragmentMonitor);
     }
 
     @Override
@@ -144,8 +150,7 @@ public class HomeFragment extends ScopedDaggerFragment {
 
     @Override
     public void onDestroy() {
-        mPagerAdapter = null;
-        mFragmentBus.unregister(this);
+        mFragmentBus.unregister(mFragmentMonitor);
         super.onDestroy();
     }
 
@@ -177,79 +182,6 @@ public class HomeFragment extends ScopedDaggerFragment {
     }
 
     /*
-     * Eventes
-     */
-
-    @Subscribe
-    public void onSongPopupItemClicked(SongCardEvent e) {
-        switch (e.event) {
-            case PLAY_NEXT:
-                if (e.song.isLocal()) {
-                    try {
-                        long id = Long.decode(e.song.identity);
-                        MusicUtils.playNext(new long[] {id});
-                    } catch (NumberFormatException ex) {
-                        //TODO
-                    }
-                } else {
-                    //TODO
-                }
-                break;
-            case ADD_TO_QUEUE:
-                if (e.song.isLocal()) {
-                    try {
-                        long id = Long.decode(e.song.identity);
-                        MusicUtils.addToQueue(getActivity(), new long[] {id});
-                    } catch (NumberFormatException ex) {
-                        //TODO
-                    }
-                } else {
-                    //TODO
-                }
-                break;
-            case ADD_TO_PLAYLIST:
-                if (e.song.isLocal()) {
-                    try {
-                        long id = Long.decode(e.song.identity);
-                        AddToPlaylistDialog.newInstance(new long[]{id})
-                                .show(getChildFragmentManager(), "AddToPlaylistDialog");
-                    } catch (NumberFormatException ex) {
-                        //TODO
-                    }
-                } // else unsupported
-                break;
-            case MORE_BY_ARTIST:
-                if (e.song.isLocal()) {
-                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.artistName));
-                } else {
-                    //TODO
-                }
-                break;
-            case SET_RINGTONE:
-                if (e.song.isLocal()) {
-                    try {
-                        long id = Long.decode(e.song.identity);
-                        MusicUtils.setRingtone(getActivity(), id);
-                    } catch (NumberFormatException ex) {
-                        //TODO
-                    }
-                } // else unsupported
-                break;
-            case DELETE:
-                if (e.song.isLocal()) {
-                    try {
-                        long id = Long.decode(e.song.identity);
-                        DeleteDialog.newInstance(e.song.name, new long[]{ id }, null)
-                                .show(getChildFragmentManager(), "DeleteDialog");
-                    } catch (NumberFormatException ex) {
-                        //TODO
-                    }
-                } // else unsupported
-                break;
-        }
-    }
-
-    /*
      * Abstract methods
      */
 
@@ -263,6 +195,80 @@ public class HomeFragment extends ScopedDaggerFragment {
     @Override
     protected DaggerInjector getParentInjector(Activity activity) {
         return (DaggerInjector) activity;
+    }
+
+    class FragmentBusMonitor {
+        @Subscribe
+        public void onSongPopupItemClicked(SongCardEvent e) {
+            switch (e.event) {
+                case PLAY:
+                    MusicUtils.playAllSongs(new Song[]{e.song}, 0, false);
+                    break;
+                case PLAY_NEXT:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            MusicUtils.playNext(new long[] {id});
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } else {
+                        //TODO
+                    }
+                    break;
+                case ADD_TO_QUEUE:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            MusicUtils.addToQueue(getActivity(), new long[] {id});
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } else {
+                        //TODO
+                    }
+                    break;
+                case ADD_TO_PLAYLIST:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            AddToPlaylistDialog.newInstance(new long[]{id})
+                                    .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+                case MORE_BY_ARTIST:
+                    if (e.song.isLocal()) {
+                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.artistName));
+                    } else {
+                        //TODO
+                    }
+                    break;
+                case SET_RINGTONE:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            MusicUtils.setRingtone(getActivity(), id);
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+                case DELETE:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            DeleteDialog.newInstance(e.song.name, new long[]{ id }, null)
+                                    .show(getChildFragmentManager(), "DeleteDialog");
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+            }
+        }
     }
 
     /**
