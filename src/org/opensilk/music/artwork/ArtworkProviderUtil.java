@@ -81,6 +81,9 @@ public class ArtworkProviderUtil {
      */
     @DebugLog
     public Bitmap getArtwork(String artistName, String albumName) {
+        if (artistName == null || albumName == null) {
+            return null;
+        }
         final String cacheKey = makeCacheKey(artistName, albumName,"LARGE");
         final Uri artworkUri = ArtworkProvider.createArtworkUri(artistName, albumName);
         Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
@@ -99,6 +102,9 @@ public class ArtworkProviderUtil {
      */
     @DebugLog
     public Bitmap getArtworkThumbnail(String artistName, String albumName) {
+        if (artistName == null || albumName == null) {
+            return null;
+        }
         final String cacheKey = makeCacheKey(artistName, albumName, "THUMB");
         final Uri artworkUri = ArtworkProvider.createArtworkThumbnailUri(artistName, albumName);
         return queryArtworkProvider(artworkUri, cacheKey);

@@ -131,8 +131,12 @@ public class CastUtils {
                                             String bigImageUrl) {
         MediaMetadata metadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MUSIC_TRACK);
         metadata.putString(MediaMetadata.KEY_TITLE, trackTitle);
-        metadata.putString(MediaMetadata.KEY_ALBUM_TITLE, albumTitle);
-        metadata.putString(MediaMetadata.KEY_ARTIST, artistName);
+        if (albumTitle != null) {
+            metadata.putString(MediaMetadata.KEY_ALBUM_TITLE, albumTitle);
+        }
+        if (artistName != null) {
+            metadata.putString(MediaMetadata.KEY_ARTIST, artistName);
+        }
         if (imgUrl != null) {
             metadata.addImage(new WebImage(Uri.parse(imgUrl)));
         }
@@ -217,7 +221,11 @@ public class CastUtils {
 
     public static String buildArtUrl(String host, Song song) {
         String artist = song.albumArtistName != null ? song.albumArtistName : song.artistName;
-        return "http://"+host+":"+CastWebServer.PORT+"/art/"+artist+"/"+song.albumName;
+        String album = song.albumName;
+        if (artist == null || album == null) {
+            return null;
+        }
+        return "http://"+host+":"+CastWebServer.PORT+"/art/"+artist+"/"+album;
     }
 
     /**
