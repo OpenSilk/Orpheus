@@ -21,11 +21,15 @@ import android.support.v4.app.Fragment;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.profile.ProfileAlbumFragment;
 import org.opensilk.music.ui.profile.ProfileArtistFragment;
 import org.opensilk.music.ui.profile.ProfileGenreFragment;
 import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+
+import javax.inject.Inject;
 
 /**
  * Created by drew on 6/20/14.
@@ -36,6 +40,9 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     public static final String ACTION_ALBUM = "open_album";
     public static final String ACTION_PLAYLIST = "open_playlist";
     public static final String ACTION_GENRE = "open_genre";
+
+    @Inject @ForActivity
+    protected Bus mActivityBus; //See comment in BaseSlidingActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +79,11 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     @Override
     protected int getLayoutId() {
         return R.layout.activity_profilesliding;
+    }
+
+    @Override
+    protected Bus provideBus() {
+        return mActivityBus;
     }
 
     @Override

@@ -44,6 +44,7 @@ import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
+import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Album;
@@ -70,8 +71,14 @@ import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
+import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
+import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.lang.ref.WeakReference;
+
+import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 
@@ -81,7 +88,7 @@ import static com.andrew.apollo.utils.MusicUtils.sService;
 /**
  * Created by drew on 4/10/14.
  */
-public class NowPlayingFragment extends Fragment implements
+public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         SeekBar.OnSeekBarChangeListener {
     private static final String TAG = NowPlayingFragment.class.getSimpleName();
 
@@ -152,6 +159,12 @@ public class NowPlayingFragment extends Fragment implements
 
     protected BaseSlidingActivity mActivity;
 
+    @Inject @ForActivity
+    Bus mActivityBus;
+
+    private GlobalBusMonitor mGlobalMonitor;
+    private ActivityBusMonitor mActivityMonitor;
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -161,8 +174,11 @@ public class NowPlayingFragment extends Fragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // register listener with activity
-        EventBus.getInstance().register(this);
+        // register the busses
+        mGlobalMonitor = new GlobalBusMonitor();
+        EventBus.getInstance().register(mGlobalMonitor);
+        mActivityMonitor = new ActivityBusMonitor();
+        mActivityBus.register(mActivityMonitor);
         // Initialize the handler used to update the current time
         mTimeHandler = new TimeHandler(this);
     }
@@ -220,11 +236,12 @@ public class NowPlayingFragment extends Fragment implements
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        // Unregister listener
-        EventBus.getInstance().unregister(this);
+        // Unregister the busses
+        EventBus.getInstance().unregister(mGlobalMonitor);
+        mActivityBus.unregister(mActivityMonitor);
         // clear messages so we won't prevent gc
         mTimeHandler.removeMessages(REFRESH_TIME);
+        super.onDestroy();
     }
 
     /*
@@ -269,90 +286,6 @@ public class NowPlayingFragment extends Fragment implements
         }
         mPosOverride = -1;
         mFromTouch = false;
-    }
-
-    /*
-     * Events
-     */
-
-    @Subscribe
-    public void onMetaChanged(MetaChanged e) {
-        // Current info
-        updateNowPlayingInfo();
-    }
-
-    @Subscribe
-    public void onPlaystateChanged(PlaystateChanged e) {
-        // Set the play and pause image
-        mHeaderPlayPauseButton.updateState();
-        mFooterPlayPauseButton.updateState();
-        // update visualizer
-        updateVisualizerState();
-    }
-
-    @Subscribe
-    public void onPlaybackModeChanged(PlaybackModeChanged e) {
-        // Set the repeat image
-        mFooterRepeatButton.updateRepeatState();
-        // Set the shuffle image
-        mFooterShuffleButton.updateShuffleState();
-    }
-
-    /**
-     * Handle panel change events posted by activity
-     * @param e
-     */
-    @Subscribe
-    public void onPanelStateChanged(PanelStateChanged e) {
-        PanelStateChanged.Action action = e.getAction();
-        switch (action) {
-            case USER_EXPAND:
-                mPanelHeader.transitionToOpen();
-                break;
-            case USER_COLLAPSE:
-                if (mQueueShowing) {
-                    popQueueFragment();
-                }
-                mPanelHeader.transitionToClosed();
-                break;
-            case SYSTEM_EXPAND:
-                mPanelHeader.makeOpen();
-                break;
-            case SYSTEM_COLLAPSE:
-                mPanelHeader.makeClosed();
-                break;
-        }
-    }
-
-    /**
-     * Handle changes to music service connection
-     * @param e
-     */
-    @Subscribe
-    public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
-        if (e.isConnected()) {
-            // Set the playback drawables
-            updatePlaybackControls();
-            // Current info
-            updateNowPlayingInfo();
-            // Setup visualizer
-            if (mVisualizer == null) {
-                initVisualizer();
-            }
-        } else {
-            destroyVisualizer();
-        }
-    }
-
-    @DebugLog
-    @Subscribe
-    public void onIABResult(IABQueryResult r) {
-        if (r.error == IABQueryResult.Error.NO_ERROR) {
-            if (!r.isApproved) {
-                IabUtil.maybeShowDonateDialog(getActivity());
-            }
-        }
-        //TODO handle faliurs
     }
 
     /**
@@ -888,6 +821,90 @@ public class NowPlayingFragment extends Fragment implements
 //            }
         }
     };
+
+    class GlobalBusMonitor {
+        @Subscribe
+        public void onMetaChanged(MetaChanged e) {
+            // Current info
+            updateNowPlayingInfo();
+        }
+
+        @Subscribe
+        public void onPlaystateChanged(PlaystateChanged e) {
+            // Set the play and pause image
+            mHeaderPlayPauseButton.updateState();
+            mFooterPlayPauseButton.updateState();
+            // update visualizer
+            updateVisualizerState();
+        }
+
+        @Subscribe
+        public void onPlaybackModeChanged(PlaybackModeChanged e) {
+            // Set the repeat image
+            mFooterRepeatButton.updateRepeatState();
+            // Set the shuffle image
+            mFooterShuffleButton.updateShuffleState();
+        }
+
+        /**
+         * Handle changes to music service connection
+         * @param e
+         */
+        @Subscribe
+        public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
+            if (e.isConnected()) {
+                // Set the playback drawables
+                updatePlaybackControls();
+                // Current info
+                updateNowPlayingInfo();
+                // Setup visualizer
+                if (mVisualizer == null) {
+                    initVisualizer();
+                }
+            } else {
+                destroyVisualizer();
+            }
+        }
+
+        @DebugLog
+        @Subscribe
+        public void onIABResult(IABQueryResult r) {
+            if (r.error == IABQueryResult.Error.NO_ERROR) {
+                if (!r.isApproved) {
+                    IabUtil.maybeShowDonateDialog(getActivity());
+                }
+            }
+            //TODO handle faliurs
+        }
+    }
+
+    class ActivityBusMonitor {
+        /**
+         * Handle panel change events posted by activity
+         * @param e
+         */
+        @Subscribe
+        public void onPanelStateChanged(PanelStateChanged e) {
+            PanelStateChanged.Action action = e.getAction();
+            switch (action) {
+                case USER_EXPAND:
+                    mPanelHeader.transitionToOpen();
+                    break;
+                case USER_COLLAPSE:
+                    if (mQueueShowing) {
+                        popQueueFragment();
+                    }
+                    mPanelHeader.transitionToClosed();
+                    break;
+                case SYSTEM_EXPAND:
+                    mPanelHeader.makeOpen();
+                    break;
+                case SYSTEM_COLLAPSE:
+                    mPanelHeader.makeClosed();
+                    break;
+            }
+        }
+    }
 
     /**
      * Used to update the current time string

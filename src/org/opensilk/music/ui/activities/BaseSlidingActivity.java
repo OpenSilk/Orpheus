@@ -49,6 +49,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.squareup.otto.Bus;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.music.artwork.ArtworkService;
@@ -60,6 +61,7 @@ import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.fragments.SearchFragment;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
 
 import java.lang.ref.WeakReference;
@@ -110,9 +112,16 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
 
     protected boolean mIsLargeLandscape;
 
+    // This is injected by subclasses
+    private Bus mActivityBus;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // nasty hack to workaround daggers inability
+        // to inject abstract classes
+        mActivityBus = provideBus();
 
         // Set our theme
         mThemeHelper = ThemeHelper.getInstance(this);
@@ -170,7 +179,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         if (mIsLargeLandscape && savedInstanceState == null) {
             mSlidingPanel.setSlidingEnabled(false);
             mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.EXPANDED);
-            EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+            mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
         }
     }
 
@@ -292,19 +301,19 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
                 // Coming from portrait, need to pin the panel open
                 mSlidingPanel.setSlidingEnabled(false);
                 mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.EXPANDED);
-                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+                mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.onQueueVisibilityChanged(true);
                 }
             } else if (savedInstanceState.getBoolean("panel_needs_collapse", false)) {
                 // Coming back from landscape we should collapse the panel
                 mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.COLLAPSED);
-                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_COLLAPSE));
+                mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_COLLAPSE));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.popQueueFragment();
                 }
             } else if (savedInstanceState.getBoolean("panel_open", false)) {
-                EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+                mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.onQueueVisibilityChanged(true);
                 }
@@ -390,12 +399,12 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
 
     @Override
     public void onPanelExpanded(View panel) {
-        EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
+        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
     }
 
     @Override
     public void onPanelCollapsed(View panel) {
-        EventBus.getInstance().post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
+        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
     }
 
     @Override
@@ -438,6 +447,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
     }
 
     protected abstract int getLayoutId();
+    protected abstract Bus provideBus();
 
     /**
      * Handle mediarouter callbacks, responsible for keeping our mediarouter instance

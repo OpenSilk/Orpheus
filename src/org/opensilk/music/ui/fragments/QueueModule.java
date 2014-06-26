@@ -40,7 +40,7 @@ import dagger.Provides;
 public class QueueModule {
 
     @Provides @Singleton @ForFragment
-    public Bus provideEventBus() {
+    public Bus provideFragmentBus() {
         return new Bus("queue");
     }
 

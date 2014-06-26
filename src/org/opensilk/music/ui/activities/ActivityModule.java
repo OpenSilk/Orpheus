@@ -19,8 +19,11 @@ package org.opensilk.music.ui.activities;
 import android.content.Context;
 import android.support.v7.app.ActionBarActivity;
 
+import com.squareup.otto.Bus;
+
 import org.opensilk.music.AppModule;
 
+import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.ActionBarControllerImpl;
 import org.opensilk.silkdagger.qualifier.ForActivity;
@@ -38,6 +41,7 @@ import dagger.Provides;
                 ActionBarControllerImpl.class,
                 HomeSlidingActivity.class,
                 ProfileSlidingActivity.class,
+                NowPlayingFragment.class,
         },
         addsTo = AppModule.class,
         library = true
@@ -63,6 +67,11 @@ public class ActivityModule {
     @Provides @Singleton @ForActivity
     public ActionBarController provideActionBarHelper(ActionBarControllerImpl controller) {
         return controller;
+    }
+
+    @Provides @Singleton @ForActivity
+    public Bus provideActivityBus() {
+        return new Bus("activity");
     }
 
 }

@@ -40,6 +40,7 @@ import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
+import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.artwork.ArtworkService;
@@ -50,6 +51,7 @@ import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
 import org.opensilk.music.util.PluginUtil;
 import org.opensilk.music.util.RemoteLibraryUtil;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +100,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
     @Inject
     protected ArtworkService mArtworkService;
+    @Inject @ForActivity
+    protected Bus mActivityBus; // See comment in BaseSlidingActivity;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -347,6 +351,11 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     @Override
     protected int getLayoutId() {
         return R.layout.activity_homesliding;
+    }
+
+    @Override
+    protected Bus provideBus() {
+        return mActivityBus;
     }
 
     @Override
