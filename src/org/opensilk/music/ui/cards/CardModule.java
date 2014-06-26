@@ -25,6 +25,7 @@ import dagger.Module;
         injects = {
                 SongCard.class,
                 SongQueueCard.class,
+                FolderCard.class,
         },
         complete = false
 )

@@ -19,6 +19,7 @@ package org.opensilk.music.ui.library;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.activities.HomeModule;
+import org.opensilk.music.ui.cards.CardModule;
 import org.opensilk.music.ui.cards.FolderCard;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
@@ -35,10 +36,12 @@ import dagger.Provides;
                 HomeFragment.class,
                 FolderListFragment.class,
                 FolderGridFragment.class,
-                FolderCard.class,
         },
         addsTo = HomeModule.class,
-        complete = false
+        complete = false,
+        includes = {
+                CardModule.class,
+        }
 )
 public class LibraryModule {
 

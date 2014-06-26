@@ -1099,6 +1099,22 @@ public final class MusicUtils {
     }
 
     /**
+     *
+     * @param context
+     * @param list
+     */
+    public static void addToQueue(Context context, Song[] list) {
+        if (sService == null) {
+            return;
+        }
+        try {
+            sService.enqueueSongs(list, MusicPlaybackService.LAST);
+            final String message = makeLabel(context, R.plurals.NNNtrackstoqueue, list.length);
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+        } catch (RemoteException ignored) { }
+    }
+
+    /**
      * @param context The {@link Context} to use
      * @param id The song ID.
      */

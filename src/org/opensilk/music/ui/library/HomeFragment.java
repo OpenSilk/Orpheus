@@ -31,14 +31,20 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.Api;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.event.SongCardEvent;
 import org.opensilk.music.ui.library.event.FolderCardClick;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
@@ -278,6 +284,60 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
         @Subscribe
         public void onFolderClicked(FolderCardClick e) {
             pushFolderFragment(e.folderId);
+        }
+
+        @Subscribe
+        public void onSongCardEvent(SongCardEvent e) {
+            switch (e.event) {
+                case PLAY:
+                    MusicUtils.playAllSongs(new Song[]{e.song}, 0, false);
+                    break;
+                case PLAY_NEXT:
+                    MusicUtils.playNext(new Song[]{e.song});
+                    break;
+                case ADD_TO_QUEUE:
+                    MusicUtils.addToQueue(getActivity(), new Song[]{e.song});
+                    break;
+                case ADD_TO_PLAYLIST:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            AddToPlaylistDialog.newInstance(new long[]{id})
+                                    .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+                case MORE_BY_ARTIST:
+                    if (e.song.isLocal()) {
+                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.artistName));
+                    } else {
+                        //TODO
+                    }
+                    break;
+                case SET_RINGTONE:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            MusicUtils.setRingtone(getActivity(), id);
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+                case DELETE:
+                    if (e.song.isLocal()) {
+                        try {
+                            long id = Long.decode(e.song.identity);
+                            DeleteDialog.newInstance(e.song.name, new long[]{id}, null)
+                                    .show(getChildFragmentManager(), "DeleteDialog");
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    break;
+            }
         }
     }
 

@@ -205,28 +205,10 @@ public class HomeFragment extends ScopedDaggerFragment {
                     MusicUtils.playAllSongs(new Song[]{e.song}, 0, false);
                     break;
                 case PLAY_NEXT:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            MusicUtils.playNext(new long[] {id});
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
-                    } else {
-                        //TODO
-                    }
+                    MusicUtils.playNext(new Song[]{e.song});
                     break;
                 case ADD_TO_QUEUE:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            MusicUtils.addToQueue(getActivity(), new long[] {id});
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
-                    } else {
-                        //TODO
-                    }
+                    MusicUtils.addToQueue(getActivity(), new Song[]{e.song});
                     break;
                 case ADD_TO_PLAYLIST:
                     if (e.song.isLocal()) {

@@ -25,6 +25,7 @@ import android.provider.MediaStore;
 import android.support.v7.media.MediaRouter;
 
 import com.andrew.apollo.MusicPlaybackService;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
@@ -132,7 +133,9 @@ public class CastUtils {
         metadata.putString(MediaMetadata.KEY_TITLE, trackTitle);
         metadata.putString(MediaMetadata.KEY_ALBUM_TITLE, albumTitle);
         metadata.putString(MediaMetadata.KEY_ARTIST, artistName);
-        metadata.addImage(new WebImage(Uri.parse(imgUrl)));
+        if (imgUrl != null) {
+            metadata.addImage(new WebImage(Uri.parse(imgUrl)));
+        }
         if (bigImageUrl != null) {
             metadata.addImage(new WebImage(Uri.parse(bigImageUrl)));
         }
@@ -184,8 +187,17 @@ public class CastUtils {
                             buildMusicUrl(ipaddr, song.identity), buildArtUrl(ipaddr, song), null);
                 } catch (UnknownHostException ignored) {}
             } else {
+                String artUrl = null;
+                if (song.artworkUri == null || PreferenceUtils.getInstance(context).preferDownloadArtwork()) {
+                    try {
+                        String ipaddr = getWifiIpAddress(context);
+                        artUrl = buildArtUrl(ipaddr, song);
+                    } catch (UnknownHostException ignored) { }
+                } else {
+                    artUrl = song.artworkUri.toString();
+                }
                 return buildMediaInfo(song.name, song.albumName, song.artistName, "audio/*",
-                        song.dataUri.toString(), song.artworkUri.toString(), null);
+                        song.dataUri.toString(), artUrl, null);
             }
         }
         return null;
