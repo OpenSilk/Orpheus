@@ -576,7 +576,7 @@ public final class MusicUtils {
     }
 
     public static int removeSong(Context context, Song song) {
-        long id = MusicProviderUtil.getIdforSong(context, song);
+        long id = MusicProviderUtil.getIdForSong(context, song);
         if (id >= 0) {
             return removeQueueItem(id);
         }
@@ -1193,6 +1193,16 @@ public final class MusicUtils {
         try {
             if (sService != null) {
                 return sService.isFavorite();
+            }
+        } catch (final RemoteException ignored) {
+        }
+        return false;
+    }
+
+    public static boolean isFromSDCard() {
+        try {
+            if (sService != null) {
+                return sService.isFromSDCard();
             }
         } catch (final RemoteException ignored) {
         }

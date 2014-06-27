@@ -25,7 +25,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.MediaRouteButton;
 import android.util.Log;
@@ -36,7 +35,6 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.CreateNewPlaylist;
@@ -50,7 +48,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.bus.EventBus;
@@ -62,7 +59,6 @@ import org.opensilk.music.bus.events.PlaybackModeChanged;
 import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.widgets.AudioVisualizationView;
 import org.opensilk.music.widgets.FullScreenArtworkImageView;
 import org.opensilk.music.widgets.HeaderOverflowButton;
@@ -73,10 +69,8 @@ import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
-import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
-import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.lang.ref.WeakReference;
 
@@ -335,7 +329,16 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
             @Override
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(mActivity, mHeaderOverflow);
-                popupMenu.getMenuInflater().inflate(R.menu.panel, popupMenu.getMenu());
+                if (isQueueShowing()) {
+                    popupMenu.inflate(R.menu.panel_save_queue);
+                    popupMenu.inflate(R.menu.panel_clear_queue);
+                } else {
+                    popupMenu.inflate(R.menu.panel_share);
+                    if (MusicUtils.isFromSDCard()) {
+                        popupMenu.inflate(R.menu.panel_set_ringtone);
+                        popupMenu.inflate(R.menu.panel_delete);
+                    }
+                }
                 popupMenu.setOnMenuItemClickListener(mPanelOverflowMenuClickListener);
                 popupMenu.show();
             }
@@ -764,46 +767,50 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                         shareIntent.putExtra(Intent.EXTRA_STREAM,
                                 ArtworkProvider.createArtworkUri(albumartist, albumname));
                         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
+                    } else {
+                        //TODO toast
                     }
                     return true;
                 case R.id.panel_menu_use_ringtone:
                     // Set the current track as a ringtone
-                    long id = MusicUtils.getCurrentAudioId();
-                    if (id >= 0) {
-                        RecentSong s = MusicProviderUtil.getRecentSong(mActivity, id);
-                        if (s != null && s.isLocal) {
-                            try {
-                                long realid = Long.decode(s.song.identity);
-                                MusicUtils.setRingtone(mActivity, realid);
-                            } catch (NumberFormatException ex) {
-                                //TODO
-                            }
-                        } // else TODO
-                    } // else TODO
+                    if (MusicUtils.isFromSDCard()) {
+                        long id = MusicUtils.getCurrentAudioId();
+                        long realid = -1;
+                        if (id >= 0) {
+                            realid = MusicProviderUtil.getRealId(mActivity, id);
+                        }
+                        if (realid >= 0) {
+                            MusicUtils.setRingtone(mActivity, realid);
+                        } else {
+                            //TODo toast
+                        }
+                    } // else unsupported
                     return true;
                 case R.id.panel_menu_delete:
                     // Delete current song
-                    long id1 = MusicUtils.getCurrentAudioId();
-                    if (id1 >= 0) {
-                        RecentSong s = MusicProviderUtil.getRecentSong(mActivity, id1);
-                        if (s != null && s.isLocal) {
-                            try {
-                                long realid = Long.decode(s.song.identity);
-                                DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid}, null)
-                                        .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
-                            } catch (NumberFormatException ex) {
-                                //TODO
-                            }
+                    if (MusicUtils.isFromSDCard()) {
+                        long id = MusicUtils.getCurrentAudioId();
+                        long realid = -1;
+                        if (id >= 0) {
+                            realid = MusicProviderUtil.getRealId(mActivity, id);
                         }
-                    }
+                        if (realid >= 0) {
+                            DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid}, null)
+                                    .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
+                        } else {
+                            //TODo toast
+                        }
+                    } // else unsupported
                     return true;
                 case R.id.panel_menu_save_queue:
                     long[] queue = MusicUtils.getQueue();
                     if (queue != null && queue.length > 0) {
-                        long[] playlist = MusicProviderUtil.transformListToLocalIds(mActivity, queue);
+                        long[] playlist = MusicProviderUtil.transformListToRealIds(mActivity, queue);
                         if (playlist.length > 0) {
                             CreateNewPlaylist.getInstance(playlist)
                                     .show(mActivity.getSupportFragmentManager(), "CreatePlaylist");
+                        } else {
+                            // TODO toast
                         }
                     }
                     return true;
@@ -826,18 +833,15 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         public void onClick(final View v) {
             long id = MusicUtils.getCurrentAudioId();
             if (id >= 0) {
-                RecentSong s = MusicProviderUtil.getRecentSong(mActivity, id);
-                if (s != null && s.isLocal) {
-                    try {
-                        long albumId = Long.decode(s.song.albumIdentity);
-                        Album album = MusicUtils.makeAlbum(mActivity, albumId);
-                        if (album != null) {
-                            NavUtils.openAlbumProfile(mActivity, album);
-                        }
-                    } catch (NumberFormatException ex) {
-                        //TODO
+                long albumId = MusicProviderUtil.getAlbumId(mActivity, id);
+                if (albumId >= 0) {
+                    Album album = MusicUtils.makeAlbum(mActivity, albumId);
+                    if (album != null) {
+                        NavUtils.openAlbumProfile(mActivity, album);
+                        return;
                     }
                 }
+                // TODO toast
             } else {
                 MusicUtils.shuffleAll(mActivity);
             }

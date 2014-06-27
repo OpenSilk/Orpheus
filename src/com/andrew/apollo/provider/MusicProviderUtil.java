@@ -83,7 +83,7 @@ public class MusicProviderUtil {
         }
     }
 
-    public static long getIdforSong(Context context, Song song) {
+    public static long getIdForSong(Context context, Song song) {
         Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ BaseColumns._ID },
                 // These are the only mandatory fields
@@ -119,7 +119,7 @@ public class MusicProviderUtil {
         return s;
     }
 
-    public static long[] transformListToLocalIds(Context context, long[] list) {
+    public static long[] transformListToRealIds(Context context, long[] list) {
         long[] newlist = new long[list.length];
 
         final StringBuilder selection = new StringBuilder();
@@ -152,8 +152,47 @@ public class MusicProviderUtil {
                     }
                 } while (c.moveToNext());
             }
+            c.close();
         }
         return newlist;
+    }
+
+    public static long getRealId(Context context, long id) {
+        long realid = -1;
+        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+                new String[]{ MusicStore.Cols.IDENTITY },
+                BaseColumns._ID + "=?",
+                new String[]{ String.valueOf(id) }, null);
+        if (c != null) {
+            if (c.getCount() > 0 && c.moveToFirst()) {
+                try {
+                    realid = Long.decode(c.getString(0));
+                } catch (NumberFormatException ex) {
+                    // pass
+                }
+            }
+            c.close();
+        }
+        return realid;
+    }
+
+    public static long getAlbumId(Context context, long songId) {
+        long albumid = -1;
+        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+                new String[]{ MusicStore.Cols.ALBUM_IDENTITY },
+                BaseColumns._ID + "=?",
+                new String[]{ String.valueOf(songId) }, null);
+        if (c != null) {
+            if (c.getCount() > 0 && c.moveToFirst()) {
+                try {
+                    albumid = Long.decode(c.getString(0));
+                } catch (NumberFormatException ex) {
+                    // pass
+                }
+            }
+            c.close();
+        }
+        return albumid;
     }
 
     public static ContentValues makeSongContentValues(Song song) {

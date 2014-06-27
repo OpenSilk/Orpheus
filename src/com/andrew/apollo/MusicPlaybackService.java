@@ -1984,6 +1984,18 @@ public class MusicPlaybackService extends Service {
     }
 
     /**
+     *
+     */
+    public boolean isFromSDCard() {
+        synchronized (this) {
+            if (mCursor == null || mCursor.isClosed()) {
+                return false;
+            }
+            return mCursor.getInt(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ISLOCAL)) == 1;
+        }
+    }
+
+    /**
      * Seeks the current track and initiates playback if needed
      *
      */
@@ -3832,6 +3844,11 @@ public class MusicPlaybackService extends Service {
         @Override
         public ArtInfo getCurrentArtInfo() {
             return mService.get().getCurrentArtInfo();
+        }
+
+        @Override
+        public boolean isFromSDCard() throws RemoteException {
+            return mService.get().isFromSDCard();
         }
 
     }

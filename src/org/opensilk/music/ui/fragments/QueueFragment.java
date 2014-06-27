@@ -373,7 +373,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
                         try {
                             long id = Long.decode(e.song.song.identity);
                             AddToPlaylistDialog.newInstance(new long[]{id})
-                                    .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                                    .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
                         } catch (NumberFormatException ex) {
                             //TODO
                         }
@@ -399,7 +399,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
                         try {
                             long id = Long.decode(e.song.song.identity);
                             DeleteDialog.newInstance(e.song.song.name, new long[]{id}, null)
-                                    .show(getChildFragmentManager(), "DeleteDialog");
+                                    .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
                         } catch (NumberFormatException ex) {
                             //TODO
                         }

@@ -42,5 +42,6 @@ interface IApolloService
     int getAudioSessionId();
     boolean isRemotePlayback();
     ArtInfo getCurrentArtInfo();
+    boolean isFromSDCard();
 }
 
