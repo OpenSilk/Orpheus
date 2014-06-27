@@ -84,7 +84,8 @@ public class SongQueueCard extends Card {
         ButterKnife.inject(this, view);
         mCardTitle.setText(mData.song.name);
         mCardSubTitle.setText(mData.song.artistName);
-        ArtworkManager.loadImage(new ArtInfo(mData.song.albumArtistName, mData.song.albumName, mData.song.artworkUri), mArtwork);
+        String artist = mData.song.albumArtistName != null ? mData.song.albumArtistName : mData.song.artistName;
+        ArtworkManager.loadImage(new ArtInfo(artist, mData.song.albumName, mData.song.artworkUri), mArtwork);
         maybeStartPlayingIndicator();
     }
 

@@ -288,11 +288,18 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
                     pushFolderFragment(e.folder.identity);
                     break;
                 case PLAY_ALL:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.folder.identity, FetchingProgressFragment.Action.PLAY_ALL)
+                            .show(getChildFragmentManager(), "progress");
                     break;
                 case SHUFFLE_ALL:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.folder.identity, FetchingProgressFragment.Action.SHUFFLE_ALL)
+                            .show(getChildFragmentManager(), "progress");
                     break;
                 case ADD_TO_QUEUE:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, e.folder.identity)
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.folder.identity, FetchingProgressFragment.Action.ADD_QUEUE)
                             .show(getChildFragmentManager(), "progress");
                     break;
             }

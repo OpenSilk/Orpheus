@@ -81,9 +81,10 @@ public class FolderCard extends AbsCard<Folder> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.popup_play_all:
-
+                        mBus.post(new FolderCardClick(Event.PLAY_ALL, mData));
                         return true;
                     case R.id.popup_shuffle_all:
+                        mBus.post(new FolderCardClick(Event.SHUFFLE_ALL, mData));
                         return true;
                     case R.id.popup_add_to_queue:
                         mBus.post(new FolderCardClick(Event.ADD_TO_QUEUE, mData));
