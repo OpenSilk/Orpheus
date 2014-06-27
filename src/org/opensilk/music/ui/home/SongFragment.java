@@ -33,7 +33,7 @@ import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.music.loaders.SongCursorLoader;
 import org.opensilk.music.ui.cards.CardShuffle;
-import org.opensilk.music.ui.cards.old.views.ThemedCardView;
+import org.opensilk.music.ui.cards.views.ThemedCardView;
 import org.opensilk.music.ui.home.adapter.SongCardCursorAdapter;
 import org.opensilk.music.ui.library.CardListFragment;
 import org.opensilk.music.ui.modules.DrawerHelper;

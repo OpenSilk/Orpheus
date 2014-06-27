@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.ui.cards.old;
+package org.opensilk.music.ui.cards;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
@@ -23,101 +23,85 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Song;
+import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
+import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
+
 /**
  * Created by drew on 2/11/14.
  */
-public class CardSongList extends CardBaseListNoHeader<Song> {
+public class CardRecentList extends CardBaseListNoHeader<Album> {
 
-    private boolean mAllowDelete = true;
-
-    public CardSongList(Context context, Song data) {
+    public CardRecentList(Context context, Album data) {
         super(context, data);
     }
 
-    public CardSongList(Context context, Song data, boolean allowDelete) {
-        super(context, data);
-        mAllowDelete = allowDelete;
-    }
-
-    public CardSongList(Context context, Song data, int innerLayout) {
+    public CardRecentList(Context context, Album data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
     @Override
     protected void initContent() {
-        mTitle = mData.mSongName;
-        mSubTitle = mData.mArtistName;
-        mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
+        mTitle = mData.name;
+        mSubTitle = mData.artistName;
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                MusicUtils.playAll(getContext(), new long[]{
-                        mData.mSongId
-                }, 0, false);
+                NavUtils.openAlbumProfile(getContext(), mData);
             }
         });
     }
 
     @Override
-    protected void initThumbnail() {
-        if (mData.mAlbumId > 0) {
-            super.initThumbnail();
-        }
-    }
-
-    @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadAlbumImage(mData.mArtistName, mData.mAlbumName, null, view);
+        ArtworkManager.loadAlbumImage(mData.artistName, mData.name, mData.artworkUri, view);
     }
 
     @Override
     public int getOverflowMenuId() {
-        int menuRes = mAllowDelete ? R.menu.card_song : R.menu.card_song_no_delete;
-        return menuRes;
+        return R.menu.card_recent;
     }
 
-    @Override
     public PopupMenu.OnMenuItemClickListener getOverflowPopupMenuListener() {
         return new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.card_menu_play_next:
-                        MusicUtils.playNextOLD(new long[]{
-                                mData.mSongId
-                        });
+                    case R.id.card_menu_play:
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, false);
                         break;
                     case R.id.card_menu_add_queue:
-                        MusicUtils.addToQueue(getContext(), new long[] {
-                                mData.mSongId
-                        });
+                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)));
                         break;
                     case R.id.card_menu_add_playlist:
-                        AddToPlaylistDialog.newInstance(new long[]{
-                                mData.mSongId
-                        }).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)))
+                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
-                    case R.id.card_menu_more_by:
-                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
+                    case R.id.card_menu_go_artist:
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.artistName));
                         break;
-                    case R.id.card_menu_set_ringtone:
-                        MusicUtils.setRingtone(getContext(), mData.mSongId);
+                    case R.id.card_menu_remove_from_recent:
+                        getContext().getContentResolver().delete(RECENTS_URI,
+                                RecentStore.RecentStoreColumns._ID + " = ?",
+                                new String[]{
+                                        mData.identity
+                                }
+                        );
                         break;
                     case R.id.card_menu_delete:
-                        final String song = mData.mSongName;
-                        DeleteDialog.newInstance(song, new long[]{
-                                mData.mSongId
-                        }, null).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
+                        final String album = mData.name;
+                        DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)),
+                                /*ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName)*/ null) //TODO
+                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }
                 return false;

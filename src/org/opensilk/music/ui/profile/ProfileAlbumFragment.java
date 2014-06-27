@@ -35,7 +35,7 @@ import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
-import org.opensilk.music.ui.cards.old.CardAlbumList;
+import org.opensilk.music.ui.cards.CardAlbumList;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 

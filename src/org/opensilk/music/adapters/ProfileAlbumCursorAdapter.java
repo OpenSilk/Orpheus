@@ -28,7 +28,7 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 
-import org.opensilk.music.ui.cards.old.CardSongList;
+import org.opensilk.music.ui.cards.CardSongList;
 import org.opensilk.music.util.CursorHelpers;
 
 /**

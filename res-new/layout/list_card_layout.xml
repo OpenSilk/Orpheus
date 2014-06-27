@@ -20,7 +20,7 @@
   -->
 
     <!-- This layout overrides the cardslib default layout -->
-<org.opensilk.music.ui.cards.old.views.ThemedCardView
+<org.opensilk.music.ui.cards.views.ThemedCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_cardId"
     android:layout_width="match_parent"

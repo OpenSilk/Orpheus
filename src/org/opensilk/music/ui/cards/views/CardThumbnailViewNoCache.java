@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards.old.views;
+package org.opensilk.music.ui.cards.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

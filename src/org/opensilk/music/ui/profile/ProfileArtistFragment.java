@@ -35,7 +35,7 @@ import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarH
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
-import org.opensilk.music.ui.cards.old.CardArtistList;
+import org.opensilk.music.ui.cards.CardArtistList;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 
 import it.gmariotti.cardslib.library.view.CardListView;

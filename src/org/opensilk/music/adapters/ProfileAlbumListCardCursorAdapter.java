@@ -21,7 +21,7 @@ import android.database.Cursor;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.ui.cards.old.CardAlbumList;
+import org.opensilk.music.ui.cards.CardAlbumList;
 import org.opensilk.music.util.CursorHelpers;
 
 import it.gmariotti.cardslib.library.internal.Card;
