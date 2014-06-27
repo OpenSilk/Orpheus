@@ -7,7 +7,6 @@
         <provider
             android:authorities="org.opensilk.music.provider.debug"
             android:name="com.andrew.apollo.provider.MusicProvider"
-            android:multiprocess="true"
             android:exported="false"/>
 
         <provider

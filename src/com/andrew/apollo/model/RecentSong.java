@@ -14,30 +14,27 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards.event;
+package com.andrew.apollo.model;
 
 import org.opensilk.music.api.model.Song;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/26/14.
  */
-public class SongCardEvent {
+public class RecentSong {
 
-    public enum Event {
-        PLAY,
-        PLAY_NEXT,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-        MORE_BY_ARTIST,
-        SET_RINGTONE,
-        DELETE
-    }
-
-    public final Event event;
     public final Song song;
+    public final long id;
+    public final boolean isLocal;
+    public final int playcount;
+    public final long lastplayed;
 
-    public SongCardEvent(Event event, Song song) {
-        this.event = event;
+    public RecentSong(Song song, long id, boolean isLocal, int playcount, long lastplayed) {
         this.song = song;
+        this.id = id;
+        this.isLocal = isLocal;
+        this.playcount = playcount;
+        this.lastplayed = lastplayed;
     }
+
 }

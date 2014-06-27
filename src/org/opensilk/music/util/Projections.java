@@ -19,6 +19,8 @@ package org.opensilk.music.util;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
+import com.andrew.apollo.provider.MusicStore;
+
 /**
  * Created by drew on 2/22/14.
  */
@@ -32,6 +34,7 @@ public class Projections {
     public static final String[] ALBUM;
     public static final String[] ARTIST;
     public static final String[] PLAYLIST_SONGS;
+    public static final String[] RECENT_SONGS;
 
     static {
         SONG = new String[] {
@@ -85,6 +88,22 @@ public class Projections {
                 MediaStore.Audio.AudioColumns.ALBUM_ID,
                         /* 5 */
                 MediaStore.Audio.AudioColumns.DURATION,
+        };
+        RECENT_SONGS = new String[] {
+                MusicStore.Cols._ID,
+                MusicStore.Cols.IDENTITY,
+                MusicStore.Cols.NAME,
+                MusicStore.Cols.ALBUM_NAME,
+                MusicStore.Cols.ARTIST_NAME,
+                MusicStore.Cols.ALBUM_ARTIST_NAME,
+                MusicStore.Cols.ALBUM_IDENTITY,
+                MusicStore.Cols.DURATION,
+                MusicStore.Cols.DATA_URI,
+                MusicStore.Cols.ARTWORK_URI,
+                MusicStore.Cols.MIME_TYPE,
+                MusicStore.Cols.ISLOCAL,
+                MusicStore.Cols.PLAYCOUNT,
+                MusicStore.Cols.LAST_PLAYED,
         };
     }
 

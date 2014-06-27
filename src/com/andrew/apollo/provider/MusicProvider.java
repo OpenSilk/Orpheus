@@ -17,6 +17,7 @@
 package com.andrew.apollo.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -34,6 +35,8 @@ import org.opensilk.music.util.Projections;
 
 import java.util.HashSet;
 import java.util.List;
+
+import dagger.ObjectGraph;
 
 /**
  * Created by drew on 2/24/14.
@@ -72,12 +75,13 @@ public class MusicProvider extends ContentProvider {
                 .appendPath(String.valueOf(genreId)).appendPath("albums").build();
     }
 
-    /** Reference to our recents store instance */
-    private static RecentStore sRecents;
+    private ObjectGraph mObjectGraph;
+    private MusicStore mStore;
 
     @Override
     public boolean onCreate() {
-        sRecents = RecentStore.getInstance(getContext());
+        mObjectGraph = ObjectGraph.create(new ProviderModule(getContext()));
+        mStore = mObjectGraph.get(MusicStore.class);
         return true;
     }
 
@@ -86,9 +90,9 @@ public class MusicProvider extends ContentProvider {
         Cursor c = null;
         switch (sUriMatcher.match(uri)) {
             case 1: // Recents
-                SQLiteDatabase db = sRecents.getWritableDatabase();
+                SQLiteDatabase db = mStore.getWritableDatabase();
                 if (db != null) {
-                    c = db.query(RecentStore.RecentStoreColumns.NAME,
+                    c = db.query(MusicStore.RECENT_TABLE,
                             projection, selection, selectionArgs, null, null, sortOrder);
 //                    db.close();
                 }
@@ -274,11 +278,13 @@ public class MusicProvider extends ContentProvider {
         Uri ret = null;
         switch (sUriMatcher.match(uri)) {
             case 1:
-                SQLiteDatabase db = sRecents.getWritableDatabase();
+                SQLiteDatabase db = mStore.getWritableDatabase();
                 if (db != null) {
-                    db.insert(RecentStore.RecentStoreColumns.NAME, null, values);
+                    long id = db.insert(MusicStore.RECENT_TABLE, null, values);
 //                    db.close();
-                    ret = RECENTS_URI.buildUpon().appendPath(values.getAsString(BaseColumns._ID)).build();
+                    if (id >= 0) {
+                        ret = ContentUris.withAppendedId(RECENTS_URI, id);
+                    }
                 }
                 break;
             case 2:
@@ -299,9 +305,9 @@ public class MusicProvider extends ContentProvider {
         int ret = 0;
         switch (sUriMatcher.match(uri)) {
             case 1:
-                SQLiteDatabase db = sRecents.getWritableDatabase();
+                SQLiteDatabase db = mStore.getWritableDatabase();
                 if (db != null) {
-                    ret = db.delete(RecentStore.RecentStoreColumns.NAME, selection, selectionArgs);
+                    ret = db.delete(MusicStore.RECENT_TABLE, selection, selectionArgs);
 //                    db.close();
                 }
                 break;
@@ -323,9 +329,9 @@ public class MusicProvider extends ContentProvider {
         int ret = 0;
         switch (sUriMatcher.match(uri)) {
             case 1:
-                SQLiteDatabase db = sRecents.getWritableDatabase();
+                SQLiteDatabase db = mStore.getWritableDatabase();
                 if (db != null) {
-                    ret = db.update(RecentStore.RecentStoreColumns.NAME, values, selection, selectionArgs);
+                    ret = db.update(MusicStore.RECENT_TABLE, values, selection, selectionArgs);
 //                    db.close();
                 }
                 break;

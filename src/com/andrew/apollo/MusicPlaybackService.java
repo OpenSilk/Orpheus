@@ -24,7 +24,6 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -48,16 +47,17 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Audio.AlbumColumns;
-import android.provider.MediaStore.Audio.AudioColumns;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
 
+import com.andrew.apollo.provider.MusicProvider;
+import com.andrew.apollo.provider.MusicProviderUtil;
+import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
-import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.MediaInfo;
@@ -77,9 +77,11 @@ import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
+import org.opensilk.music.util.Projections;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -89,8 +91,6 @@ import java.util.Random;
 import java.util.TreeSet;
 
 import hugo.weaving.DebugLog;
-
-import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
 
 /**
  * A backbround {@link Service} used to keep music playing between activities
@@ -389,12 +389,6 @@ public class MusicPlaybackService extends Service {
      * necessary queries to play audio files
      */
     private Cursor mCursor;
-
-    /**
-     * The cursor used to retrieve info on the album the current track is
-     * part of, if any.
-     */
-    private Cursor mAlbumCursor;
 
     /**
      * Monitors the audio state
@@ -907,7 +901,7 @@ public class MusicPlaybackService extends Service {
     private void updateNotification() {
         if (!mAnyActivityInForeground && isPlaying()) {
             mNotificationHelper.buildNotification(getAlbumName(), getArtistName(),
-                    getTrackName(), getAlbumId(), getAlbumArtThumbnail(), isPlaying());
+                    getTrackName(), getAlbumArtThumbnail(), isPlaying());
         } else if (mAnyActivityInForeground) {
             mNotificationHelper.killNotification();
         }
@@ -1130,24 +1124,26 @@ public class MusicPlaybackService extends Service {
      * @param trackId The track ID
      */
     private void updateCursor(final long trackId) {
-        updateCursor("_id=" + trackId, null);
+        updateCursor(MusicProvider.RECENTS_URI, BaseColumns._ID + "=?", new String[] {String .valueOf(trackId)});
     }
 
-    private void updateCursor(final String selection, final String[] selectionArgs) {
-        synchronized (this) {
-            closeCursor();
-
-            mCursor = openCursorAndGoToFirst(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    PROJECTION, selection, selectionArgs);
-        }
-
-        long albumId = getAlbumId();
-        if (albumId >= 0) {
-            mAlbumCursor = openCursorAndGoToFirst(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                    ALBUM_PROJECTION, "_id=?", new String[] {String.valueOf(albumId)});
+    private void updateCursor(final Uri uri, final String selection, final String[] selectionArgs) {
+        if (MusicProvider.RECENTS_URI.equals(uri)) {
+            synchronized (this) {
+                closeCursor();
+                mCursor = openCursorAndGoToFirst(uri, Projections.RECENT_SONGS, selection, selectionArgs);
+            }
         } else {
-            mAlbumCursor = null;
+            throw new IllegalArgumentException("I havent don that part yet");
         }
+
+//        long albumId = getAlbumId();
+//        if (albumId >= 0) {
+//            mAlbumCursor = openCursorAndGoToFirst(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+//                    ALBUM_PROJECTION, "_id=?", new String[] {String.valueOf(albumId)});
+//        } else {
+//            mAlbumCursor = null;
+//        }
     }
 
     private Cursor openCursorAndGoToFirst(Uri uri, String[] projection,
@@ -1168,10 +1164,6 @@ public class MusicPlaybackService extends Service {
         if (mCursor != null) {
             mCursor.close();
             mCursor = null;
-        }
-        if (mAlbumCursor != null) {
-            mAlbumCursor.close();
-            mAlbumCursor = null;
         }
     }
 
@@ -1201,9 +1193,7 @@ public class MusicPlaybackService extends Service {
 
             updateCursor(mPlayList[mPlayPos]);
             while (true) {
-                if (mCursor != null
-                        && openFile(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/"
-                                + mCursor.getLong(IDCOLIDX))) {
+                if (mCursor != null && openFile(getDataUri().toString())) { //TODO use Uri
                     break;
                 }
                 // if we get here then opening the file failed. We can close the
@@ -1471,26 +1461,7 @@ public class MusicPlaybackService extends Service {
 //                        getArtistName());
 //            }
             // Add the track to the recently played list.
-            Cursor c = getContentResolver().query(RECENTS_URI,
-                    RECENTS_PROJECTION, RecentStore.RecentStoreColumns._ID+"=?",
-                    new String[] {String.valueOf(getAlbumId())},
-                    null);
-            if (c != null && c.getCount() > 0) {
-                ContentValues values = new ContentValues(1);
-                values.put(RecentStore.RecentStoreColumns.TIMEPLAYED, System.currentTimeMillis());
-                getContentResolver().update(RECENTS_URI,
-                        values, RecentStore.RecentStoreColumns._ID+"=?",
-                        new String[]{String.valueOf(getAlbumId())});
-            } else {
-                getContentResolver().insert(RECENTS_URI,
-                        RecentStore.createAlbumContentValues(
-                                getAlbumId(), getAlbumName(), getAlbumArtistName(),
-                                MusicUtils.getSongCountForAlbum(this, getAlbumId()),
-                                MusicUtils.getReleaseDateForAlbum(this, getAlbumId())));
-            }
-            if (c != null && !c.isClosed()) {
-                c.close();
-            }
+            MusicProviderUtil.updatePlaycount(this, getAudioId());
         } else if (what.equals(QUEUE_CHANGED)) {
             saveQueue(true);
             if (isPlaying()) {
@@ -1758,7 +1729,7 @@ public class MusicPlaybackService extends Service {
                     };
                 }
                 try {
-                    updateCursor(where, selectionArgs);
+                    updateCursor(uri, where, selectionArgs);
                     if (mCursor != null) {
                         ensurePlayListCapacity(1);
                         mPlayListLen = 1;
@@ -1873,12 +1844,12 @@ public class MusicPlaybackService extends Service {
      *
      * @return The path to the current song
      */
-    public String getPath() {
+    public Uri getDataUri() {
         synchronized (this) {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.DATA));
+            return Uri.parse(mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.DATA_URI)));
         }
     }
 
@@ -1892,7 +1863,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.ALBUM));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_NAME));
         }
     }
 
@@ -1906,7 +1877,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.TITLE));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.NAME));
         }
     }
 
@@ -1920,7 +1891,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.ARTIST));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ARTIST_NAME));
         }
     }
 
@@ -1931,10 +1902,10 @@ public class MusicPlaybackService extends Service {
      */
     public String getAlbumArtistName() {
         synchronized (this) {
-            if (mAlbumCursor == null || mCursor.isClosed()) {
+            if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mAlbumCursor.getString(mAlbumCursor.getColumnIndexOrThrow(AlbumColumns.ARTIST));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_ARTIST_NAME));
         }
     }
 
@@ -1948,21 +1919,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return -1;
             }
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(AudioColumns.ALBUM_ID));
-        }
-    }
-
-    /**
-     * Returns the artist ID
-     *
-     * @return The current song artist ID
-     */
-    public long getArtistId() {
-        synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return -1;
-            }
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(AudioColumns.ARTIST_ID));
+            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_IDENTITY));
         }
     }
 
@@ -1990,10 +1947,38 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(AudioColumns.MIME_TYPE));
+            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.MIME_TYPE));
         }
     }
 
+    /**
+     *
+     * @return
+     */
+    public Uri getArtworkUri() {
+        synchronized (this) {
+            if (mCursor == null || mCursor.isClosed()) {
+                return null;
+            }
+            String uri = mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ARTWORK_URI));
+            if (uri != null) {
+                return Uri.parse(uri);
+            } else {
+                String artist = getAlbumArtistName();
+                if (artist == null) artist = getArtistName();
+                String album = getAlbumName();
+                if (artist != null && album != null) {
+                    return ArtworkProvider.createArtworkUri(getArtistName(), getAlbumName());
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
     public ArtInfo getCurrentArtInfo() {
         return new ArtInfo(getArtistName(), getAlbumName(), null);
     }
@@ -2621,14 +2606,14 @@ public class MusicPlaybackService extends Service {
      */
     @DebugLog
     public Bitmap getAlbumArt() {
-        return mArtworkUtil.getArtwork(getAlbumArtistName(), getAlbumName(), getAlbumId());
+        return mArtworkUtil.getArtwork(getAlbumArtistName(), getAlbumName());
     }
 
     /**
      * @return thumbnail for the current album.
      */
     public Bitmap getAlbumArtThumbnail() {
-        return mArtworkUtil.getArtworkThumbnail(getAlbumArtistName(), getAlbumName(), getAlbumId());
+        return mArtworkUtil.getArtworkThumbnail(getAlbumArtistName(), getAlbumName());
     }
 
     /**
@@ -3734,14 +3719,6 @@ public class MusicPlaybackService extends Service {
          * {@inheritDoc}
          */
         @Override
-        public long getArtistId() throws RemoteException {
-            return mService.get().getArtistId();
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
         public long getAlbumId() throws RemoteException {
             return mService.get().getAlbumId();
         }
@@ -3779,8 +3756,13 @@ public class MusicPlaybackService extends Service {
          * {@inheritDoc}
          */
         @Override
-        public String getPath() throws RemoteException {
-            return mService.get().getPath();
+        public Uri getDataUri() throws RemoteException {
+            return mService.get().getDataUri();
+        }
+
+        @Override
+        public Uri getArtworkUri() throws RemoteException {
+            return mService.get().getArtworkUri();
         }
 
         /**

@@ -1,5 +1,6 @@
 package com.andrew.apollo;
 
+import android.net.Uri;
 import org.opensilk.music.api.meta.ArtInfo;
 
 interface IApolloService
@@ -25,13 +26,13 @@ interface IApolloService
     long position();
     long seek(long pos);
     long getAudioId();
-    long getArtistId();
     long getAlbumId();
     String getArtistName();
     String getTrackName();
     String getAlbumName();
     String getAlbumArtistName();
-    String getPath();
+    Uri getDataUri();
+    Uri getArtworkUri();
     int getQueuePosition();
     int getShuffleMode();
     int removeTracks(int first, int last);

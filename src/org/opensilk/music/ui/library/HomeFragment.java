@@ -290,13 +290,13 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
         public void onSongCardEvent(SongCardEvent e) {
             switch (e.event) {
                 case PLAY:
-                    MusicUtils.playAllSongs(new Song[]{e.song}, 0, false);
+                    MusicUtils.playAllSongs(getActivity(), new Song[]{e.song}, 0, false);
                     break;
                 case PLAY_NEXT:
-                    MusicUtils.playNext(new Song[]{e.song});
+                    MusicUtils.playNext(getActivity(), new Song[]{e.song});
                     break;
                 case ADD_TO_QUEUE:
-                    MusicUtils.addToQueue(getActivity(), new Song[]{e.song});
+                    MusicUtils.addSongsToQueue(getActivity(), new Song[]{e.song});
                     break;
                 case ADD_TO_PLAYLIST:
                     if (e.song.isLocal()) {

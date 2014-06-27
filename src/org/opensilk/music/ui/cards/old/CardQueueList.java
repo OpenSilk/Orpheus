@@ -79,7 +79,7 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
 //                                .makeQueueCursor(getContext());
 //                        queue.removeItem(Integer.valueOf(getId()));
 //                        queue.close();
-//                        MusicUtils.playNext(new long[] {
+//                        MusicUtils.playNextOLD(new long[] {
 //                                mData.mSongId
 //                        });
                         break;
@@ -89,7 +89,7 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
                         }).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_remove_queue:
-//                        MusicUtils.removeTrack(mData.mSongId);
+//                        MusicUtils.removeTrackOLD(mData.mSongId);
                         break;
                     case R.id.card_menu_more_by:
                         NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));

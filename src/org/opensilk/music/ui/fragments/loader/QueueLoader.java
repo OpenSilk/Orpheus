@@ -17,31 +17,61 @@
 package org.opensilk.music.ui.fragments.loader;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.provider.BaseColumns;
 
 import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
+import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicProvider;
+import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.Projections;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by drew on 6/24/14.
  */
-public class QueueLoader extends WrappedAsyncTaskLoader<List<Song>> {
+public class QueueLoader extends WrappedAsyncTaskLoader<List<RecentSong>> {
 
     public QueueLoader(Context context) {
         super(context);
     }
 
     @Override
-    public List<Song> loadInBackground() {
-        Song[] songs = MusicUtils.getQueue();
-        List<Song> list = new ArrayList<>(songs.length);
-        Collections.addAll(list, songs);
-        return list;
+    public List<RecentSong> loadInBackground() {
+        long[] list = MusicUtils.getQueue();
+        final List<RecentSong> songs = new ArrayList<>(list.length);
+
+        final StringBuilder selection = new StringBuilder();
+        selection.append(BaseColumns._ID + " IN (");
+        for (int i = 0; i < list.length; i++) {
+            selection.append(list[i]);
+            if (i < list.length - 1) {
+                selection.append(",");
+            }
+        }
+        selection.append(")");
+
+        Cursor c = getContext().getContentResolver().query(MusicProvider.RECENTS_URI,
+                Projections.RECENT_SONGS,
+                selection.toString(),
+                null,
+                null);
+        if (c != null) {
+            if (c.getCount() > 0 && c.moveToFirst()) {
+                do {
+                    final RecentSong s = CursorHelpers.makeRecentSongFromCursor(c);
+                    songs.add(s);
+                } while (c.moveToNext());
+            }
+            c.close();
+        }
+        return songs;
     }
 
 }

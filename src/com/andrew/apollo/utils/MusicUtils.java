@@ -44,8 +44,10 @@ import com.andrew.apollo.loaders.FavoritesLoader;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
+import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.provider.RecentStore;
 
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -431,19 +433,6 @@ public final class MusicUtils {
     }
 
     /**
-     * @return The current artist Id.
-     */
-    public static final long getCurrentArtistId() {
-        if (sService != null) {
-            try {
-                return sService.getArtistId();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return -1;
-    }
-
-    /**
      * @return The audio session Id.
      */
     public static final int getAudioSessionId() {
@@ -565,12 +554,31 @@ public final class MusicUtils {
      * @param id The ID of the track to remove.
      * @return removes track from a playlist or the queue.
      */
-    public static final int removeTrack(final long id) {
+    @Deprecated
+    public static final int removeTrackOLD(final long id) {
         try {
             if (sService != null) {
                 return sService.removeTrack(id);
             }
         } catch (final RemoteException ingored) {
+        }
+        return 0;
+    }
+
+    public static int removeQueueItem(long id) {
+        try {
+            if (sService != null) {
+                return sService.removeTrack(id);
+            }
+        } catch (final RemoteException ingored) {
+        }
+        return 0;
+    }
+
+    public static int removeSong(Context context, Song song) {
+        long id = MusicProviderUtil.getIdforSong(context, song);
+        if (id >= 0) {
+            return removeQueueItem(id);
         }
         return 0;
     }
@@ -746,10 +754,27 @@ public final class MusicUtils {
         }
     }
 
+    public static void playAllSongs(Context context, Song[] list, int position, boolean forceShuffle) {
+        if (list.length == 0 || sService == null) {
+            return;
+        }
+        long[] ids = new long[list.length];
+        for (int ii=0; ii<list.length; ii++) {
+            //TODO bulk insert?
+             ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
+        }
+        playAll(context, ids, position, forceShuffle);
+    }
+
     /**
      * @param list The list to enqueue.
      */
-    public static void playNext(final long[] list) {
+    @Deprecated
+    public static void playNextOLD(final long[] list) {
+        throw new UnsupportedOperationException();
+    }
+
+    public static void playNext(long[] list) {
         if (sService == null) {
             return;
         }
@@ -757,6 +782,18 @@ public final class MusicUtils {
             sService.enqueue(list, MusicPlaybackService.NEXT);
         } catch (final RemoteException ignored) {
         }
+    }
+
+    public static void playNext(Context context, Song[] list) {
+        if (list.length == 0 || sService == null) {
+            return;
+        }
+        long[] ids = new long[list.length];
+        for (int ii=0; ii<list.length; ii++) {
+            //TODO bulk insert?
+            ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
+        }
+        playNext(ids);
     }
 
     /**
@@ -995,9 +1032,20 @@ public final class MusicUtils {
         try {
             sService.enqueue(list, MusicPlaybackService.LAST);
             final String message = makeLabel(context, R.plurals.NNNtrackstoqueue, list.length);
-            Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         } catch (final RemoteException ignored) {
         }
+    }
+
+    public static void addSongsToQueue(Context context, Song[] list) {
+        if (list.length == 0 || sService == null) {
+            return;
+        }
+        long[] ids = new long[list.length];
+        for (int ii=0; ii<list.length; ii++) {
+            ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
+        }
+        addToQueue(context, ids);
     }
 
     /**
@@ -1092,10 +1140,20 @@ public final class MusicUtils {
     /**
      * @return The path to the currently playing file as {@link String}
      */
-    public static final String getFilePath() {
+    public static Uri getFileUri() {
         try {
             if (sService != null) {
-                return sService.getPath();
+                return sService.getDataUri();
+            }
+        } catch (final RemoteException ignored) {
+        }
+        return null;
+    }
+
+    public static Uri getArtworkUri() {
+        try {
+            if (sService != null) {
+                return sService.getArtworkUri();
             }
         } catch (final RemoteException ignored) {
         }
@@ -1390,7 +1448,7 @@ public final class MusicUtils {
             while (!c.isAfterLast()) {
                 // Remove from current playlist
                 final long id = c.getLong(0);
-                removeTrack(id);
+                removeTrackOLD(id);
                 // Remove from the favorites playlist
                 FavoritesStore.getInstance(context).removeItem(id);
                 // Remove any items in the recents database

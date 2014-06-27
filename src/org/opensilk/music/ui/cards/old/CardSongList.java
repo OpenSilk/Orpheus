@@ -30,7 +30,6 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.cards.old.CardBaseListNoHeader;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -94,7 +93,7 @@ public class CardSongList extends CardBaseListNoHeader<Song> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.card_menu_play_next:
-                        MusicUtils.playNext(new long[] {
+                        MusicUtils.playNextOLD(new long[]{
                                 mData.mSongId
                         });
                         break;

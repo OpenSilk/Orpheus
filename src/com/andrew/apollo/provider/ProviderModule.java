@@ -14,30 +14,34 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards.event;
+package com.andrew.apollo.provider;
 
-import org.opensilk.music.api.model.Song;
+import android.content.Context;
+
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/26/14.
  */
-public class SongCardEvent {
+@Module(
+        injects = {
+                MusicStore.class
+        }
+)
+public class ProviderModule {
 
-    public enum Event {
-        PLAY,
-        PLAY_NEXT,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-        MORE_BY_ARTIST,
-        SET_RINGTONE,
-        DELETE
+    private final Context context;
+
+    public ProviderModule(Context context) {
+        this.context = context;
     }
 
-    public final Event event;
-    public final Song song;
-
-    public SongCardEvent(Event event, Song song) {
-        this.event = event;
-        this.song = song;
+    @Provides @Singleton
+    public Context provideContext() {
+        return context;
     }
+
 }

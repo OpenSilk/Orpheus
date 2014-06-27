@@ -27,10 +27,13 @@ import android.text.TextUtils;
 import com.andrew.apollo.model.Artist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.loaders.SongCursorLoader;
 
@@ -98,6 +101,50 @@ public class CursorHelpers {
         // generate artwork uri
         final Uri artworkUri = generateArtworkUri(albumId);
         return new Song(String.valueOf(id), songName, album, artist, albumArtist, String.valueOf(albumId), seconds, dataUri, artworkUri);
+    }
+
+    public static Song makeSongFromRecentCursor(Cursor c) {
+        final String identity = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.IDENTITY));
+        final String name = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.NAME));
+        final String albumName = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_NAME));
+        final String artistName = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ARTIST_NAME));
+        final String albumArtistName = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_ARTIST_NAME));
+        final String albumIdentity = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_IDENTITY));
+        final int duration = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.DURATION));
+        final Uri dataUri = Uri.parse(c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.DATA_URI)));
+        String artString = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ARTWORK_URI));
+        final Uri artworkUri;
+        if (artString == null) {
+            String albumartist = albumArtistName != null ? albumArtistName : artistName;
+            if (albumartist != null && albumName != null) {
+                artworkUri = ArtworkProvider.createArtworkUri(albumartist, albumName);
+            } else {
+                artworkUri = null;
+            }
+        } else {
+            artworkUri = Uri.parse(artString);
+        }
+        return new Song.Builder()
+                .setIdentity(identity)
+                .setName(name)
+                .setAlbumName(albumName)
+                .setArtistName(artistName)
+                .setAlbumArtistName(albumArtistName)
+                .setAlbumIdentity(albumIdentity)
+                .setDuration(duration)
+                .setDataUri(dataUri)
+                .setArtworkUri(artworkUri)
+                //TODO mime
+                .build();
+    }
+
+    public static RecentSong makeRecentSongFromCursor(Cursor c) {
+        final Song song = makeSongFromRecentCursor(c);
+        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        final boolean isLocal = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.ISLOCAL)) == 1;
+        final int playcount = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.PLAYCOUNT));
+        final long lastplayed = c.getLong(c.getColumnIndexOrThrow(MusicStore.Cols.LAST_PLAYED));
+        return new RecentSong(song, id, isLocal, playcount, lastplayed);
     }
 
     /**

@@ -41,6 +41,8 @@ import android.widget.Toast;
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
@@ -748,50 +750,62 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
             switch (item.getItemId()) {
                 case R.id.panel_menu_share:
                     // Share the current meta data
-                    if (MusicUtils.getTrackName() != null && MusicUtils.getArtistName() != null) {
-                        final ArtInfo info = MusicUtils.getCurrentArtInfo();
-                        if (info == null) {
-                            Toast.makeText(mActivity, "Nothing currently playing", Toast.LENGTH_LONG).show();
-                            break;
-                        }
+                    String trackname = MusicUtils.getTrackName();
+                    String artistname = MusicUtils.getArtistName();
+                    if (trackname != null && artistname != null) {
                         final Intent shareIntent = new Intent();
-                        final String shareMessage = getString(R.string.now_listening_to,
-                                MusicUtils.getTrackName(), MusicUtils.getArtistName());
+                        final String shareMessage = getString(R.string.now_listening_to, trackname, artistname);
                         shareIntent.setAction(Intent.ACTION_SEND);
                         shareIntent.setType("text/plain");
                         shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+                        String albumartist = MusicUtils.getAlbumArtistName();
+                        if (albumartist == null) albumartist = artistname;
+                        String albumname = MusicUtils.getAlbumName();
                         shareIntent.putExtra(Intent.EXTRA_STREAM,
-                                ArtworkProvider.createArtworkUri(info.artistName, info.albumName));
+                                ArtworkProvider.createArtworkUri(albumartist, albumname));
                         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
                     }
                     return true;
                 case R.id.panel_menu_use_ringtone:
                     // Set the current track as a ringtone
-                    String ident = MusicUtils.getCurrentAudioId();
-                    try {
-                        long id = Long.decode(ident);
-                        MusicUtils.setRingtone(mActivity, id);
-                    } catch (NumberFormatException ex) {
-                        //TODO
-                    }
+                    long id = MusicUtils.getCurrentAudioId();
+                    if (id >= 0) {
+                        RecentSong s = MusicProviderUtil.getRecentSong(mActivity, id);
+                        if (s != null && s.isLocal) {
+                            try {
+                                long realid = Long.decode(s.song.identity);
+                                MusicUtils.setRingtone(mActivity, realid);
+                            } catch (NumberFormatException ex) {
+                                //TODO
+                            }
+                        } // else TODO
+                    } // else TODO
                     return true;
                 case R.id.panel_menu_delete:
-                    String ident1 = MusicUtils.getCurrentAudioId();
-                    try {
-                        long id = Long.decode(ident1);
-                        // Delete current song
-                        DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{id}, null)
-                                .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
-                    } catch (NumberFormatException ex) {
-                        //TODO
+                    // Delete current song
+                    long id1 = MusicUtils.getCurrentAudioId();
+                    if (id1 >= 0) {
+                        RecentSong s = MusicProviderUtil.getRecentSong(mActivity, id1);
+                        if (s != null && s.isLocal) {
+                            try {
+                                long realid = Long.decode(s.song.identity);
+                                DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid}, null)
+                                        .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
+                            } catch (NumberFormatException ex) {
+                                //TODO
+                            }
+                        }
                     }
                     return true;
                 case R.id.panel_menu_save_queue:
-                    //TODO
-//                    NowPlayingCursor queue = (NowPlayingCursor) QueueLoader.makeQueueCursor(mActivity);
-//                    CreateNewPlaylist.getInstance(MusicUtils.getSongListForCursor(queue)).show(
-//                           mActivity.getSupportFragmentManager(), "CreatePlaylist");
-//                    queue.close();
+                    long[] queue = MusicUtils.getQueue();
+                    if (queue != null && queue.length > 0) {
+                        long[] playlist = MusicProviderUtil.transformListToLocalIds(mActivity, queue);
+                        if (playlist.length > 0) {
+                            CreateNewPlaylist.getInstance(playlist)
+                                    .show(mActivity.getSupportFragmentManager(), "CreatePlaylist");
+                        }
+                    }
                     return true;
                 case R.id.panel_menu_clear_queue:
                     MusicUtils.clearQueue();
@@ -810,15 +824,23 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     private final View.OnClickListener mOpenCurrentAlbumProfile = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            //TODO
-//            if (MusicUtils.getCurrentAudioId() != -1) {
-//                Album album = MusicUtils.getCurrentAlbum(mActivity);
-//                if (album != null) {
-//                    NavUtils.openAlbumProfile(mActivity, album);
-//                }
-//            } else {
-//                MusicUtils.shuffleAll(mActivity);
-//            }
+            long id = MusicUtils.getCurrentAudioId();
+            if (id >= 0) {
+                RecentSong s = MusicProviderUtil.getRecentSong(mActivity, id);
+                if (s != null && s.isLocal) {
+                    try {
+                        long albumId = Long.decode(s.song.albumIdentity);
+                        Album album = MusicUtils.makeAlbum(mActivity, albumId);
+                        if (album != null) {
+                            NavUtils.openAlbumProfile(mActivity, album);
+                        }
+                    } catch (NumberFormatException ex) {
+                        //TODO
+                    }
+                }
+            } else {
+                MusicUtils.shuffleAll(mActivity);
+            }
         }
     };
 

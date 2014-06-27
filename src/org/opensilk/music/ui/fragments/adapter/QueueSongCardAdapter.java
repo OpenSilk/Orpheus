@@ -18,6 +18,8 @@ package org.opensilk.music.ui.fragments.adapter;
 
 import android.content.Context;
 
+import com.andrew.apollo.model.RecentSong;
+
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.cards.SongQueueCard;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -40,11 +42,11 @@ public class QueueSongCardAdapter extends CardArrayAdapter {
         mInjector = injector;
     }
 
-    public void addSongs(List<Song> songs) {
+    public void addSongs(List<RecentSong> songs) {
         setNotifyOnChange(false);
-        for (Song s : songs) {
-            SongQueueCard c = new SongQueueCard(getContext(), s);
-            c.setId(s.identity);
+        for (int ii=0; ii<songs.size(); ii++) {
+            SongQueueCard c = new SongQueueCard(getContext(), songs.get(ii));
+            c.setId(String.valueOf(ii));
             mInjector.inject(c);
             add(c);
         }

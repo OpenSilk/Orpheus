@@ -20,8 +20,6 @@ package org.opensilk.music.ui.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -36,6 +34,7 @@ import android.view.animation.TranslateAnimation;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.mobeta.android.dslv.DragSortListView;
@@ -53,22 +52,19 @@ import org.opensilk.music.bus.events.QueueChanged;
 import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.SongQueueCard;
-import org.opensilk.music.ui.cards.event.SongCardEvent;
-import org.opensilk.music.ui.cards.old.CardQueueList;
+import org.opensilk.music.ui.cards.event.SongQueueCardEvent;
 import org.opensilk.music.ui.fragments.adapter.QueueSongCardAdapter;
 import org.opensilk.music.ui.fragments.loader.QueueLoader;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 
 /**
  * This class is used to display all of the songs in the queue.
@@ -76,7 +72,7 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
 public class QueueFragment extends ScopedDaggerFragment implements
-        LoaderCallbacks<List<Song>>,
+        LoaderCallbacks<List<RecentSong>>,
         DropListener,
         RemoveListener {
 
@@ -88,9 +84,6 @@ public class QueueFragment extends ScopedDaggerFragment implements
 
     private GlobalBusMonitor mGlobalMonitor;
     private FragmentBusMonitor mFragmentMonitor;
-
-    /** Set when we alter the queue to avoid processing the callback */
-    private int mSelfChange = 0;
 
     /** Track loader state */
     private boolean isFirstLoad = true;
@@ -173,12 +166,12 @@ public class QueueFragment extends ScopedDaggerFragment implements
      */
 
     @Override
-    public Loader<List<Song>> onCreateLoader(final int id, final Bundle args) {
+    public Loader<List<RecentSong>> onCreateLoader(final int id, final Bundle args) {
         return new QueueLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(final Loader<List<Song>> loader, final List<Song> data) {
+    public void onLoadFinished(final Loader<List<RecentSong>> loader, final List<RecentSong> data) {
         mAdapter.clear();
         // Check for any errors
         if (data == null || data.isEmpty()) {
@@ -195,7 +188,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Song>> listLoader) {
+    public void onLoaderReset(Loader<List<RecentSong>> listLoader) {
         mAdapter.clear();
     }
 
@@ -205,14 +198,9 @@ public class QueueFragment extends ScopedDaggerFragment implements
 
     @Override
     public void remove(final int which) {
-        mSelfChange = 1;
-        // Auto shuffle makes queue change called twice
-        if (MusicUtils.getShuffleMode() == MusicPlaybackService.SHUFFLE_AUTO) {
-            mSelfChange++;
-        }
         Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
-        MusicUtils.removeTrack(((SongQueueCard) c).getData());
+        MusicUtils.removeQueueItem(((SongQueueCard) c).getSong().id);
     }
 
     /*
@@ -221,11 +209,6 @@ public class QueueFragment extends ScopedDaggerFragment implements
 
     @Override
     public void drop(final int from, final int to) {
-        mSelfChange = 1;
-        // Auto shuffle makes queue change called twice
-        if (MusicUtils.getShuffleMode() == MusicPlaybackService.SHUFFLE_AUTO) {
-            mSelfChange++;
-        }
         Card c = mAdapter.getItem(from);
         mAdapter.setNotifyOnChange(false);
         mAdapter.remove(c);
@@ -253,12 +236,12 @@ public class QueueFragment extends ScopedDaggerFragment implements
      */
     @DebugLog
     private int getItemPositionBySong() {
-        final String trackId = MusicUtils.getCurrentAudioId();
+        final long trackId = MusicUtils.getCurrentAudioId();
         if (mAdapter == null || mAdapter.getCount() == 0) {
             return 0;
         }
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            if (((SongQueueCard) mAdapter.getItem(i)).getData().identity.equals(trackId)) {
+            if (trackId == ((SongQueueCard) mAdapter.getItem(i)).getSong().id) {
                 return i;
             }
         }
@@ -347,9 +330,6 @@ public class QueueFragment extends ScopedDaggerFragment implements
         @Subscribe
         @DebugLog
         public void onQueueChanged(QueueChanged e) {
-            if (mSelfChange-->0) {
-                return;
-            }
             // For auto shuffle when the queue gets adjusted we
             // can receive several QUEUE_CHANGED updates in quick
             // succession so we batch the restart calls so our
@@ -376,32 +356,22 @@ public class QueueFragment extends ScopedDaggerFragment implements
 
     class FragmentBusMonitor {
         @Subscribe
-        public void onCardItemClicked(SongCardEvent e) {
+        public void onCardItemClicked(SongQueueCardEvent e) {
             switch (e.event) {
                 case PLAY:
-                    // XXX hacky and slow
-                    for(int ii=0; ii<mAdapter.getCount(); ii++) {
-                        SongQueueCard c = (SongQueueCard) mAdapter.getItem(ii);
-                        if (c.getData().equals(e.song)) {
-                            // When selecting a track from the queue, just jump there instead of
-                            // reloading the queue. This is both faster, and prevents accidentally
-                            // dropping out of party shuffle.
-                            MusicUtils.setQueuePosition(ii);
-                            break;
-                        }
-                    }
+                    //Not evented for queue
                     break;
                 case PLAY_NEXT:
-                    MusicUtils.removeTrack(e.song);
-                    MusicUtils.playNext(new Song[]{e.song});
+                    MusicUtils.removeQueueItem(e.song.id);
+                    MusicUtils.playNext(new long[]{e.song.id});
                     break;
                 case REMOVE_FROM_QUEUE:
-                    MusicUtils.removeTrack(e.song);
+                    MusicUtils.removeQueueItem(e.song.id);
                     break;
                 case ADD_TO_PLAYLIST:
-                    if (e.song.isLocal()) {
+                    if (e.song.isLocal) {
                         try {
-                            long id = Long.decode(e.song.identity);
+                            long id = Long.decode(e.song.song.identity);
                             AddToPlaylistDialog.newInstance(new long[]{id})
                                     .show(getChildFragmentManager(), "AddToPlaylistDialog");
                         } catch (NumberFormatException ex) {
@@ -410,14 +380,14 @@ public class QueueFragment extends ScopedDaggerFragment implements
                     } // else unsupported
                     break;
                 case MORE_BY_ARTIST:
-                    if (e.song.isLocal()) {
-                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.artistName));
+                    if (e.song.isLocal) {
+                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.song.artistName));
                     } // else TODO
                     break;
                 case SET_RINGTONE:
-                    if (e.song.isLocal()) {
+                    if (e.song.isLocal) {
                         try {
-                            long id = Long.decode(e.song.identity);
+                            long id = Long.decode(e.song.song.identity);
                             MusicUtils.setRingtone(getActivity(), id);
                         } catch (NumberFormatException ex) {
                             //TODO
@@ -425,10 +395,10 @@ public class QueueFragment extends ScopedDaggerFragment implements
                     } // else unsupported
                     break;
                 case DELETE:
-                    if (e.song.isLocal()) {
+                    if (e.song.isLocal) {
                         try {
-                            long id = Long.decode(e.song.identity);
-                            DeleteDialog.newInstance(e.song.name, new long[]{id}, null)
+                            long id = Long.decode(e.song.song.identity);
+                            DeleteDialog.newInstance(e.song.song.name, new long[]{id}, null)
                                     .show(getChildFragmentManager(), "DeleteDialog");
                         } catch (NumberFormatException ex) {
                             //TODO

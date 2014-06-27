@@ -16,17 +16,18 @@
 
 package org.opensilk.music.ui.cards.event;
 
-import org.opensilk.music.api.model.Song;
+import com.andrew.apollo.model.RecentSong;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/26/14.
  */
-public class SongCardEvent {
+public class SongQueueCardEvent {
 
     public enum Event {
         PLAY,
         PLAY_NEXT,
         ADD_TO_QUEUE,
+        REMOVE_FROM_QUEUE,
         ADD_TO_PLAYLIST,
         MORE_BY_ARTIST,
         SET_RINGTONE,
@@ -34,10 +35,11 @@ public class SongCardEvent {
     }
 
     public final Event event;
-    public final Song song;
+    public final RecentSong song;
 
-    public SongCardEvent(Event event, Song song) {
+    public SongQueueCardEvent(Event event, RecentSong song) {
         this.event = event;
         this.song = song;
     }
+
 }
