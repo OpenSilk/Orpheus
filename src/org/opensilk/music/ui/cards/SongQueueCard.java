@@ -29,11 +29,9 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.ui.cards.event.SongCardEvent;
-import org.opensilk.music.ui.cards.event.SongQueueCardEvent;
+import org.opensilk.music.ui.cards.event.SongQueueCardClick;
 import org.opensilk.music.widgets.PlayingIndicator;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
@@ -61,11 +59,11 @@ public class SongQueueCard extends Card {
     @InjectView(R.id.card_playing_indicator)
     protected PlayingIndicator mPlayingIndicator;
 
-    private RecentSong mSong;
+    private RecentSong mData;
 
     public SongQueueCard(Context context, RecentSong song) {
         super(context, R.layout.library_queue_listcard_inner);
-        mSong = song;
+        mData = song;
         init();
     }
 
@@ -84,9 +82,9 @@ public class SongQueueCard extends Card {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         ButterKnife.inject(this, view);
-        mCardTitle.setText(mSong.song.name);
-        mCardSubTitle.setText(mSong.song.artistName);
-        ArtworkManager.loadImage(new ArtInfo(mSong.song.albumArtistName, mSong.song.albumName, mSong.song.artworkUri), mArtwork);
+        mCardTitle.setText(mData.song.name);
+        mCardSubTitle.setText(mData.song.artistName);
+        ArtworkManager.loadImage(new ArtInfo(mData.song.albumArtistName, mData.song.albumName, mData.song.artworkUri), mArtwork);
         maybeStartPlayingIndicator();
     }
 
@@ -95,7 +93,7 @@ public class SongQueueCard extends Card {
         PopupMenu m = new PopupMenu(getContext(), v);
         m.inflate(R.menu.popup_play_next);
         m.inflate(R.menu.popup_remove_from_queue); //XXX different from SongCard
-        if (mSong.isLocal) {
+        if (mData.isLocal) {
             m.inflate(R.menu.popup_add_to_playlist);
             m.inflate(R.menu.popup_more_by_artist);
             m.inflate(R.menu.popup_set_ringtone);
@@ -106,22 +104,22 @@ public class SongQueueCard extends Card {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.popup_play_next:
-                        mBus.post(new SongQueueCardEvent(SongQueueCardEvent.Event.PLAY_NEXT, mSong));
+                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.PLAY_NEXT, mData));
                         return true;
                     case R.id.popup_remove_from_queue:
-                        mBus.post(new SongQueueCardEvent(SongQueueCardEvent.Event.REMOVE_FROM_QUEUE, mSong));
+                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.REMOVE_FROM_QUEUE, mData));
                         return true;
                     case R.id.popup_add_to_playlist:
-                        mBus.post(new SongQueueCardEvent(SongQueueCardEvent.Event.ADD_TO_PLAYLIST, mSong));
+                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.ADD_TO_PLAYLIST, mData));
                         return true;
                     case R.id.popup_more_by_artist:
-                        mBus.post(new SongQueueCardEvent(SongQueueCardEvent.Event.MORE_BY_ARTIST, mSong));
+                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.MORE_BY_ARTIST, mData));
                         return true;
                     case R.id.popup_set_ringtone:
-                        mBus.post(new SongQueueCardEvent(SongQueueCardEvent.Event.SET_RINGTONE, mSong));
+                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.SET_RINGTONE, mData));
                         return true;
                     case R.id.popup_delete:
-                        mBus.post(new SongQueueCardEvent(SongQueueCardEvent.Event.DELETE, mSong));
+                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.DELETE, mData));
                         return true;
                 }
                 return false;
@@ -142,7 +140,7 @@ public class SongQueueCard extends Card {
             } else {
                 mPlayingIndicator.setVisibility(View.GONE);
             }
-            if (mSong.id == MusicUtils.getCurrentAudioId()) {
+            if (mData.id == MusicUtils.getCurrentAudioId()) {
                 if (MusicUtils.isPlaying()) {
                     mPlayingIndicator.startAnimating();
                 } else {
@@ -152,7 +150,7 @@ public class SongQueueCard extends Card {
         }
     }
 
-    public RecentSong getSong() {
-        return mSong;
+    public RecentSong getData() {
+        return mData;
     }
 }

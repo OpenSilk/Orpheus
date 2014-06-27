@@ -44,8 +44,8 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.cards.event.SongCardEvent;
-import org.opensilk.music.ui.library.event.FolderCardClick;
+import org.opensilk.music.ui.cards.event.SongCardClick;
+import org.opensilk.music.ui.cards.event.FolderCardClick;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
@@ -283,11 +283,23 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
     class FragmentBusMonitor {
         @Subscribe
         public void onFolderClicked(FolderCardClick e) {
-            pushFolderFragment(e.folderId);
+            switch (e.event) {
+                case OPEN:
+                    pushFolderFragment(e.folder.identity);
+                    break;
+                case PLAY_ALL:
+                    break;
+                case SHUFFLE_ALL:
+                    break;
+                case ADD_TO_QUEUE:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, e.folder.identity)
+                            .show(getChildFragmentManager(), "progress");
+                    break;
+            }
         }
 
         @Subscribe
-        public void onSongCardEvent(SongCardEvent e) {
+        public void onSongCardEvent(SongCardClick e) {
             switch (e.event) {
                 case PLAY:
                     MusicUtils.playAllSongs(getActivity(), new Song[]{e.song}, 0, false);

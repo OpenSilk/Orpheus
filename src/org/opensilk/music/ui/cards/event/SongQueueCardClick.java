@@ -21,7 +21,7 @@ import com.andrew.apollo.model.RecentSong;
 /**
  * Created by drew on 6/26/14.
  */
-public class SongQueueCardEvent {
+public class SongQueueCardClick {
 
     public enum Event {
         PLAY,
@@ -37,7 +37,7 @@ public class SongQueueCardEvent {
     public final Event event;
     public final RecentSong song;
 
-    public SongQueueCardEvent(Event event, RecentSong song) {
+    public SongQueueCardClick(Event event, RecentSong song) {
         this.event = event;
         this.song = song;
     }

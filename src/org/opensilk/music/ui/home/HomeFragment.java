@@ -42,7 +42,7 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.cards.event.SongCardEvent;
+import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -199,7 +199,7 @@ public class HomeFragment extends ScopedDaggerFragment {
 
     class FragmentBusMonitor {
         @Subscribe
-        public void onSongPopupItemClicked(SongCardEvent e) {
+        public void onSongPopupItemClicked(SongCardClick e) {
             switch (e.event) {
                 case PLAY:
                     MusicUtils.playAllSongs(getActivity(), new Song[]{e.song}, 0, false);

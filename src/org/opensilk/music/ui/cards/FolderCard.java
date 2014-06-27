@@ -25,7 +25,8 @@ import com.andrew.apollo.R;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Folder;
-import org.opensilk.music.ui.library.event.FolderCardClick;
+import org.opensilk.music.ui.cards.event.FolderCardClick;
+import org.opensilk.music.ui.cards.event.FolderCardClick.Event;
 import org.opensilk.music.widgets.ColorCodedThumbnail;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
@@ -58,7 +59,7 @@ public class FolderCard extends AbsCard<Folder> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new FolderCardClick(mData.identity));
+                mBus.post(new FolderCardClick(Event.OPEN, mData));
             }
         });
     }
@@ -72,10 +73,22 @@ public class FolderCard extends AbsCard<Folder> {
 
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
-        m.inflate(R.menu.card_album);
+        m.inflate(R.menu.popup_play_all);
+        m.inflate(R.menu.popup_shuffle_all);
+        m.inflate(R.menu.popup_add_to_queue);
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.popup_play_all:
+
+                        return true;
+                    case R.id.popup_shuffle_all:
+                        return true;
+                    case R.id.popup_add_to_queue:
+                        mBus.post(new FolderCardClick(Event.ADD_TO_QUEUE, mData));
+                        return true;
+                }
                 return false;
             }
         });

@@ -43,7 +43,6 @@ import com.mobeta.android.dslv.DragSortListView.RemoveListener;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.api.model.Song;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MetaChanged;
 import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
@@ -52,7 +51,7 @@ import org.opensilk.music.bus.events.QueueChanged;
 import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.SongQueueCard;
-import org.opensilk.music.ui.cards.event.SongQueueCardEvent;
+import org.opensilk.music.ui.cards.event.SongQueueCardClick;
 import org.opensilk.music.ui.fragments.adapter.QueueSongCardAdapter;
 import org.opensilk.music.ui.fragments.loader.QueueLoader;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -200,7 +199,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
     public void remove(final int which) {
         Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
-        MusicUtils.removeQueueItem(((SongQueueCard) c).getSong().id);
+        MusicUtils.removeQueueItem(((SongQueueCard) c).getData().id);
     }
 
     /*
@@ -241,7 +240,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
             return 0;
         }
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            if (trackId == ((SongQueueCard) mAdapter.getItem(i)).getSong().id) {
+            if (trackId == ((SongQueueCard) mAdapter.getItem(i)).getData().id) {
                 return i;
             }
         }
@@ -356,7 +355,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
 
     class FragmentBusMonitor {
         @Subscribe
-        public void onCardItemClicked(SongQueueCardEvent e) {
+        public void onCardItemClicked(SongQueueCardClick e) {
             switch (e.event) {
                 case PLAY:
                     //Not evented for queue

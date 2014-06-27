@@ -1037,6 +1037,16 @@ public final class MusicUtils {
         }
     }
 
+    public static void addToQueueSilent(final long[] list) {
+        if (sService == null) {
+            return;
+        }
+        try {
+           sService.enqueue(list, MusicPlaybackService.LAST);
+        } catch (final RemoteException ignored) {
+        }
+    }
+
     public static void addSongsToQueue(Context context, Song[] list) {
         if (list.length == 0 || sService == null) {
             return;
@@ -1046,6 +1056,17 @@ public final class MusicUtils {
             ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
         }
         addToQueue(context, ids);
+    }
+
+    public static void addSongsToQueueSilent(Context context, Song[] list) {
+        if (list.length == 0 || sService == null) {
+            return;
+        }
+        long[] ids = new long[list.length];
+        for (int ii=0; ii<list.length; ii++) {
+            ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
+        }
+        addToQueueSilent(ids);
     }
 
     /**

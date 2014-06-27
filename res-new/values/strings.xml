@@ -132,4 +132,7 @@
 
     <!--Muzei-->
     <string name="muzei_description">Album art</string>
+
+    <string name="fetching_song_list">Fetching song list…</string>
+    <string name="unable_to_fetch_songs">Unable to get songs</string>
 </resources>

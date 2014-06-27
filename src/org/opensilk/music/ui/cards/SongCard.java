@@ -22,15 +22,14 @@ import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.ui.cards.event.SongCardEvent;
-import org.opensilk.music.ui.cards.event.SongCardEvent.Event;
+import org.opensilk.music.ui.cards.event.SongCardClick;
+import org.opensilk.music.ui.cards.event.SongCardClick.Event;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -62,7 +61,7 @@ public class SongCard extends AbsCard<Song> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new SongCardEvent(Event.PLAY, mData));
+                mBus.post(new SongCardClick(Event.PLAY, mData));
             }
         });
     }
@@ -89,22 +88,22 @@ public class SongCard extends AbsCard<Song> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.popup_play_next:
-                        mBus.post(new SongCardEvent(Event.PLAY_NEXT, mData));
+                        mBus.post(new SongCardClick(Event.PLAY_NEXT, mData));
                         return true;
                     case R.id.popup_add_to_queue:
-                        mBus.post(new SongCardEvent(Event.ADD_TO_QUEUE, mData));
+                        mBus.post(new SongCardClick(Event.ADD_TO_QUEUE, mData));
                         return true;
                     case R.id.popup_add_to_playlist:
-                        mBus.post(new SongCardEvent(Event.ADD_TO_PLAYLIST, mData));
+                        mBus.post(new SongCardClick(Event.ADD_TO_PLAYLIST, mData));
                         return true;
                     case R.id.popup_more_by_artist:
-                        mBus.post(new SongCardEvent(Event.MORE_BY_ARTIST, mData));
+                        mBus.post(new SongCardClick(Event.MORE_BY_ARTIST, mData));
                         return true;
                     case R.id.popup_set_ringtone:
-                        mBus.post(new SongCardEvent(Event.SET_RINGTONE, mData));
+                        mBus.post(new SongCardClick(Event.SET_RINGTONE, mData));
                         return true;
                     case R.id.popup_delete:
-                        mBus.post(new SongCardEvent(Event.DELETE, mData));
+                        mBus.post(new SongCardClick(Event.DELETE, mData));
                         return true;
                 }
                 return false;

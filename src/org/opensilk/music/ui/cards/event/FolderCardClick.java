@@ -16,28 +16,25 @@
 
 package org.opensilk.music.ui.cards.event;
 
-import org.opensilk.music.api.model.Song;
+import org.opensilk.music.api.model.Folder;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/19/14.
  */
-public class SongCardEvent {
+public class FolderCardClick {
 
     public enum Event {
-        PLAY,
-        PLAY_NEXT,
+        OPEN,
+        PLAY_ALL,
+        SHUFFLE_ALL,
         ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-        MORE_BY_ARTIST,
-        SET_RINGTONE,
-        DELETE
     }
 
     public final Event event;
-    public final Song song;
+    public final Folder folder;
 
-    public SongCardEvent(Event event, Song song) {
+    public FolderCardClick(Event event, Folder folder) {
         this.event = event;
-        this.song = song;
+        this.folder = folder;
     }
 }
