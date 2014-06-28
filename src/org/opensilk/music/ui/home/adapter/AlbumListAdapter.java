@@ -14,28 +14,35 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.ui.home.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.CardArtistGrid;
+import org.opensilk.music.ui.cards.AlbumCard;
+import org.opensilk.music.ui.cards.CardAlbumList;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
+import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 
 /**
  * Created by drew on 2/18/14.
  */
-public class ArtistGridCardCursorAdapter extends CardGridCursorAdapter {
+public class AlbumListAdapter extends CardCursorAdapter {
 
-    public ArtistGridCardCursorAdapter(Context context) {
+    private DaggerInjector mInjector;
+
+    public AlbumListAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
+        mInjector = injector;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardArtistGrid(getContext(), CursorHelpers.makeArtistFromCursor(cursor));
+        AlbumCard c = new AlbumCard(getContext(), CursorHelpers.makeLocalAlbumFromCursor(cursor));
+        mInjector.inject(c);
+        return c;
     }
 }

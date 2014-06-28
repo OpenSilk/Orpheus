@@ -34,7 +34,7 @@ import com.andrew.apollo.utils.SortOrder;
 import org.opensilk.music.loaders.LocalSongCursorLoader;
 import org.opensilk.music.ui.cards.CardShuffle;
 import org.opensilk.music.ui.cards.views.ThemedCardView;
-import org.opensilk.music.ui.home.adapter.LocalSongCardCursorAdapter;
+import org.opensilk.music.ui.home.adapter.SongAdapter;
 import org.opensilk.music.ui.library.CardListFragment;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -52,7 +52,7 @@ public class SongFragment extends CardListFragment implements LoaderManager.Load
 
     protected PreferenceUtils mPreferences;
 
-    private LocalSongCardCursorAdapter mAdapter;
+    private SongAdapter mAdapter;
 
     @Override
     public void onAttach(Activity activity) {
@@ -63,7 +63,7 @@ public class SongFragment extends CardListFragment implements LoaderManager.Load
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new LocalSongCardCursorAdapter(getActivity(), (DaggerInjector) getParentFragment());
+        mAdapter = new SongAdapter(getActivity(), (DaggerInjector) getParentFragment());
         // Start the loader
         getLoaderManager().initLoader(0, null, this);
     }

@@ -55,10 +55,6 @@ public class AlbumCard extends AbsCard<Album> {
         super(context, data, R.layout.library_listcard_artwork_inner);
     }
 
-    public AlbumCard(Context context, Album data, int innerLayout) {
-        super(context, data, innerLayout);
-    }
-
     @Override
     protected void init() {
         setOnClickListener(new OnCardClickListener() {

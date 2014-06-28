@@ -27,7 +27,7 @@ public enum MusicFragment {
     /**
      * The playlist fragment
      */
-    PLAYLIST(HomePlaylistFragment.class, R.string.page_playlists),
+//    PLAYLIST(HomePlaylistFragment.class, R.string.page_playlists),
     /**
      * The recent fragment
      */
@@ -35,19 +35,19 @@ public enum MusicFragment {
     /**
      * The artist fragment
      */
-    ARTIST(HomeArtistFragment.class, R.string.page_artists),
+    ARTIST(ArtistFragment.class, R.string.page_artists),
     /**
      * The album fragment
      */
-    ALBUM(HomeAlbumFragment.class, R.string.page_albums),
+    ALBUM(AlbumFragment.class, R.string.page_albums);//,
     /**
      * The song fragment
      */
-    SONG(SongFragment.class, R.string.page_songs),
+//    SONG(SongFragment.class, R.string.page_songs),
     /**
      * The genre fragment
      */
-    GENRE(HomeGenreFragment.class, R.string.page_genres);
+//    GENRE(HomeGenreFragment.class, R.string.page_genres);
 
     private Class<? extends Fragment> mFragmentClass;
     private int mTitleResource;

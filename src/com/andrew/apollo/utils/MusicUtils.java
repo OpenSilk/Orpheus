@@ -507,12 +507,12 @@ public final class MusicUtils {
         final String selection = MediaStore.Audio.ArtistColumns.ARTIST  + "=?";
         final String[] selectionArgs = new String[] { artistName };
         final Cursor c = context.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
-                Projections.ARTIST,
+                Projections.LOCAL_ARTIST,
                 selection,
                 selectionArgs,
                 null);
         if (c != null && c.moveToFirst()) {
-            artist = CursorHelpers.makeArtistFromCursor(c);
+            artist = CursorHelpers.makeLocalArtistFromCursor(c);
         }
         if (c != null) {
             c.close();

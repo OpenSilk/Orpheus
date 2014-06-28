@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opensilk.music.ui.home;
 
 import android.database.Cursor;
@@ -25,32 +26,30 @@ import android.widget.CursorAdapter;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.SortOrder;
 
-import org.opensilk.music.adapters.AlbumGridCardCursorAdapter;
-import org.opensilk.music.adapters.AlbumListCardCursorAdapter;
-import org.opensilk.music.loaders.AlbumCursorLoader;
+import org.opensilk.music.ui.home.adapter.ArtistGridAdapter;
+import org.opensilk.music.ui.home.adapter.ArtistListAdapter;
+import org.opensilk.music.ui.home.loader.ArtistLoader;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 
-import static com.andrew.apollo.utils.PreferenceUtils.ALBUM_LAYOUT;
+import static com.andrew.apollo.utils.PreferenceUtils.ARTIST_LAYOUT;
 
 /**
- * Albums
+ * Created by drew on 6/28/14.
  */
-public class HomeAlbumFragment extends HomePagerBaseCursorFragment {
+public class ArtistFragment extends BasePagerFragment {
 
     @Inject @ForActivity
-    DrawerHelper mDrawerHelper;
+    protected DrawerHelper mDrawerHelper;
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (!mDrawerHelper.isDrawerOpen()) {
-            super.onCreateOptionsMenu(menu, inflater);
-            inflater.inflate(R.menu.album_sort_by, menu);
+            inflater.inflate(R.menu.artist_sort_by, menu);
             inflater.inflate(R.menu.view_as, menu);
         }
     }
@@ -59,62 +58,51 @@ public class HomeAlbumFragment extends HomePagerBaseCursorFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sort_by_az:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_A_Z);
+                mPreferences.setArtistSortOrder(SortOrder.ArtistSortOrder.ARTIST_A_Z);
                 refresh();
                 return true;
             case R.id.menu_sort_by_za:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_Z_A);
-                refresh();
-                return true;
-            case R.id.menu_sort_by_artist:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_ARTIST);
-                refresh();
-                return true;
-            case R.id.menu_sort_by_year:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_YEAR);
+                mPreferences.setArtistSortOrder(SortOrder.ArtistSortOrder.ARTIST_Z_A);
                 refresh();
                 return true;
             case R.id.menu_sort_by_number_of_songs:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                mPreferences.setArtistSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_SONGS);
+                refresh();
+                return true;
+            case R.id.menu_sort_by_number_of_albums:
+                mPreferences.setArtistSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_ALBUMS);
                 refresh();
                 return true;
             case R.id.menu_view_as_simple:
-                mPreferences.setAlbumLayout("simple");
+                mPreferences.setArtistLayout("simple");
                 NavUtils.goHome(getActivity());
                 return true;
             case R.id.menu_view_as_grid:
-                mPreferences.setAlbumLayout("grid");
+                mPreferences.setArtistLayout("grid");
                 NavUtils.goHome(getActivity());
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /*
-     * Loader Callbacks
-     */
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AlbumCursorLoader(getActivity());
+        return new ArtistLoader(getActivity());
     }
-
-    /*
-     * Implement abstract methods
-     */
 
     @Override
     protected CursorAdapter createAdapter() {
-        if (isSimpleLayout()) {
-            return new AlbumListCardCursorAdapter(getActivity());
+        if (wantGridView()) {
+            return new ArtistGridAdapter(getActivity(), mInjector);
         } else {
-            return new AlbumGridCardCursorAdapter(getActivity());
+            return new ArtistListAdapter(getActivity(), mInjector);
         }
     }
 
-    protected boolean isSimpleLayout() {
-        return PreferenceUtils.getInstance(getActivity()).isSimpleLayout(ALBUM_LAYOUT,
-                getActivity());
+    @Override
+    public boolean wantGridView() {
+        return !mPreferences.isSimpleLayout(ARTIST_LAYOUT, getActivity());
     }
 
 }

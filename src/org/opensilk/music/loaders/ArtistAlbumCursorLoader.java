@@ -32,7 +32,7 @@ public class ArtistAlbumCursorLoader extends CursorLoader {
     public ArtistAlbumCursorLoader(Context context, long artistId) {
         super(context);
         setUri(MediaStore.Audio.Artists.Albums.getContentUri("external", artistId));
-        setProjection(Projections.ALBUM);
+        setProjection(Projections.LOCAL_ALBUM);
         setSelection(null);
         setSelectionArgs(null);
         setSortOrder(PreferenceUtils.getInstance(getContext()).getArtistAlbumSortOrder());

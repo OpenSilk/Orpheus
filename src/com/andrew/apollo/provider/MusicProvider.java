@@ -196,7 +196,7 @@ public class MusicProvider extends ContentProvider {
                 // And finally create the return cursor;
                 c = getContext().getContentResolver().query(
                         MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                        Projections.ALBUM,
+                        Projections.LOCAL_ALBUM,
                         albumSelection.toString(),
                         null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 

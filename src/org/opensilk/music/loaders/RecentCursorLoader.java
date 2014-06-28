@@ -32,7 +32,7 @@ public class RecentCursorLoader extends CursorLoader {
     public RecentCursorLoader(Context context) {
         super(context);
         setUri(RECENTS_URI);
-        setProjection(Projections.ALBUM);
+        setProjection(Projections.LOCAL_ALBUM);
         setSelection(null);
         setSelectionArgs(null);
         setSortOrder(RecentStoreColumns.TIMEPLAYED + " DESC");

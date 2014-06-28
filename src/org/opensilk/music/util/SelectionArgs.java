@@ -22,7 +22,7 @@ package org.opensilk.music.util;
 public class SelectionArgs {
 
     public static final String[] LOCAL_SONG;
-    public static String[] ALBUM_SONGS(final long albumId) {
+    public static String[] LOCAL_ALBUM_SONGS(final long albumId) {
         return new String[] {"1", "''", String.valueOf(albumId)};
     }
     public static String[] LAST_ADDED(final long time) {

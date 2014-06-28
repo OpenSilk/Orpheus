@@ -19,30 +19,32 @@ package org.opensilk.music.ui.home.adapter;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.SongCard;
+import org.opensilk.music.ui.cards.ArtistCard;
+import org.opensilk.music.ui.cards.CardArtistGrid;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.DaggerInjector;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
+import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 2/18/14.
  */
-public class LocalSongCardCursorAdapter extends CardCursorAdapter {
+public class ArtistGridAdapter extends CardGridCursorAdapter {
 
     private DaggerInjector mInjector;
 
-    public LocalSongCardCursorAdapter(Context context, DaggerInjector injector) {
+    public ArtistGridAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
         mInjector = injector;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        SongCard card = new SongCard(getContext(), CursorHelpers.makeLocalSongFromCursor(getContext(), cursor));
-        mInjector.inject(card);
-        return card;
+        ArtistCard c = new ArtistCard(getContext(), CursorHelpers.makeLocalArtistFromCursor(cursor));
+        c.useGridLayout();
+        mInjector.inject(c);
+        return c;
     }
 
 }

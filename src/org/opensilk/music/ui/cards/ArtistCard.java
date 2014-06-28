@@ -52,11 +52,7 @@ public class ArtistCard extends AbsCard<Artist> {
     protected ArtworkImageView mArtwork;
 
     public ArtistCard(Context context, Artist data) {
-        this(context, data, R.layout.library_listcard_artwork_inner);
-    }
-
-    public ArtistCard(Context context, Artist data, int innerLayout) {
-        super(context, data, innerLayout);
+        super(context, data, R.layout.library_listcard_artwork_inner);
     }
 
     @Override

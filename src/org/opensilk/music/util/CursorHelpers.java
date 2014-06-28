@@ -24,6 +24,7 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
+import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalSong;
@@ -152,12 +153,32 @@ public class CursorHelpers {
         return new Album(id, albumName, artist, songCount, year, artworkUri);
     }
 
+    public static LocalAlbum makeLocalAlbumFromCursor(final Cursor c) {
+        // Copy the album id
+        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        // Copy the album name
+        final String albumName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM));
+        // Copy the artist name
+        final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ARTIST));
+        // Copy the number of songs
+        final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS));
+        // Copy the release year
+        String year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.FIRST_YEAR));
+        if (TextUtils.isEmpty(year)) {
+            year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.LAST_YEAR));
+        }
+        // generate artwork Uri
+        final Uri artworkUri = generateArtworkUri(id);
+        // Create a new album
+        return new LocalAlbum(id, albumName, artist, songCount, year, artworkUri);
+    }
+
     /**
      * Create artist from cusor
      * @param c cursor created with makeArtistCursor
      * @return new artist
      */
-    public static LocalArtist makeArtistFromCursor(final Cursor c) {
+    public static LocalArtist makeLocalArtistFromCursor(final Cursor c) {
         // Copy the artist id
         final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the artist name
@@ -167,7 +188,7 @@ public class CursorHelpers {
         // Copy the number of songs
         final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS));
         // Create a new artist
-        return new LocalArtist(id, artistName, songCount, albumCount);
+        return new LocalArtist(id, artistName, albumCount, songCount);
     }
 
     public static Genre makeGenreFromCursor(final Cursor c) {
