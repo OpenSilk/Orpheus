@@ -21,35 +21,31 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.widget.CursorAdapter;
 
-import org.opensilk.music.adapters.GenreGridCardCursorAdapter;
-import org.opensilk.music.loaders.GenreCursorLoader;
+import org.opensilk.music.ui.home.adapter.GenreGridAdapter;
+import org.opensilk.music.ui.home.loader.GenreLoader;
 
 /**
- * Genres
+ * Created by drew on 6/28/14.
  */
-public class HomeGenreFragment extends HomePagerBaseCursorFragment {
-
-    /*
-     * Loader Callbacks
-     */
+public class GenreFragment extends BasePagerFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new GenreCursorLoader(getActivity());
+        return new GenreLoader(getActivity());
     }
-
-    /*
-     * Implement abstract methods
-     */
 
     @Override
     protected CursorAdapter createAdapter() {
-        return new GenreGridCardCursorAdapter(getActivity());
+        if (wantGridView()) {
+            return new GenreGridAdapter(getActivity(), mInjector);
+        } else {
+            throw new UnsupportedOperationException("Can't do list yet");
+        }
     }
 
     @Override
-    protected boolean isSimpleLayout() {
-        return false; //Just grid for now.
+    public boolean wantGridView() {
+        return true;
     }
 
 }

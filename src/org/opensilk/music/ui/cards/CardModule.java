@@ -26,6 +26,7 @@ import dagger.Module;
                 AlbumCard.class,
                 ArtistCard.class,
                 FolderCard.class,
+                GenreCard.class,
                 SongCard.class,
                 SongQueueCard.class,
         },

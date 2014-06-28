@@ -34,10 +34,10 @@ import dagger.Provides;
         injects = {
                 ArtistFragment.class,
                 AlbumFragment.class,
+                GenreFragment.class,
                 HomeFragment.class,
                 HomeRecentFragment.class,
                 SongFragment.class,
-                HomeGenreFragment.class,
         },
         includes = CardModule.class,
         complete = false

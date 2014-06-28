@@ -127,6 +127,10 @@ public abstract class CardListGridFragment extends Fragment {
         FrameLayout lframe = new FrameLayout(context);
         lframe.setId(INTERNAL_LIST_CONTAINER_ID);
 
+        //
+        // TODO if this can be optimized im all for it
+        //
+
         View tv = inflater.inflate(getEmptyViewLayout(), null);
 //        TextView tv = new TextView(getActivity());
         tv.setId(INTERNAL_EMPTY_ID);

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/grid_card_thumbheight"
+        android:orientation="horizontal">
+
+        <org.opensilk.music.widgets.ThumbnailArtworkImageView
+            android:id="@+id/artwork_thumb"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            style="@style/Orpheus.Thumbnail"/>
+
+        <org.opensilk.music.widgets.ThumbnailArtworkImageView
+            android:id="@+id/artwork_thumb2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            style="@style/Orpheus.Thumbnail"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/card_title"
+                android:textAppearance="@style/TextAppearanceGrid.Title"
+                style="@style/SingleLineTextView"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/card_subtitle"
+                android:textAppearance="@style/TextAppearanceGrid"
+                style="@style/SingleLineTextView"/>
+
+
+        </LinearLayout>
+
+        <org.opensilk.music.widgets.CardOverflowButton
+            android:id="@+id/card_overflow_button"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:paddingRight="12dp"
+            style="@style/Orpheus.MenuButton"
+            android:contentDescription="@null" />
+
+    </LinearLayout>
+
+</LinearLayout>

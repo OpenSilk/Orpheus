@@ -39,7 +39,7 @@ public enum MusicFragment {
     /**
      * The album fragment
      */
-    ALBUM(AlbumFragment.class, R.string.page_albums);//,
+    ALBUM(AlbumFragment.class, R.string.page_albums),
     /**
      * The song fragment
      */
@@ -47,7 +47,7 @@ public enum MusicFragment {
     /**
      * The genre fragment
      */
-//    GENRE(HomeGenreFragment.class, R.string.page_genres);
+    GENRE(GenreFragment.class, R.string.page_genres);
 
     private Class<? extends Fragment> mFragmentClass;
     private int mTitleResource;

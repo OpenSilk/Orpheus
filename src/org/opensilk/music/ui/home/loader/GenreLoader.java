@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.ui.home.loader;
 
 import android.content.Context;
-import android.database.Cursor;
+import android.support.v4.content.CursorLoader;
 
-import org.opensilk.music.ui.cards.CardGenreGrid;
-import org.opensilk.music.util.CursorHelpers;
-
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
+import com.andrew.apollo.provider.MusicProvider;
 
 /**
- * Created by drew on 2/28/14.
+ * Created by drew on 2/27/14.
  */
-public class GenreGridCardCursorAdapter extends CardGridCursorAdapter {
+public class GenreLoader extends CursorLoader {
 
-    public GenreGridCardCursorAdapter(Context context) {
-        super(context, null, 0);
-    }
-
-    @Override
-    protected Card getCardFromCursor(Cursor cursor) {
-        return new CardGenreGrid(getContext(), CursorHelpers.makeGenreFromCursor(cursor));
+    public GenreLoader(Context context) {
+        super(context);
+        setUri(MusicProvider.GENRES_URI);
+        // Our content provider doesnt read any of these values
+        setProjection(null);
+        setSelection(null);
+        setSelectionArgs(null);
+        setSortOrder(null);
     }
 
 }

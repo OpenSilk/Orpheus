@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.cards.event;
 
-import android.content.Context;
-import android.support.v4.content.CursorLoader;
-
-import com.andrew.apollo.provider.MusicProvider;
+import com.andrew.apollo.model.Genre;
 
 /**
- * Created by drew on 2/27/14.
+ * Created by drew on 6/28/14.
  */
-public class GenreCursorLoader extends CursorLoader {
+public class GenreCardClick {
 
-    public GenreCursorLoader(Context context) {
-        super(context);
-        setUri(MusicProvider.GENRES_URI);
-        // Our content provider doesnt read any of these values
-        setProjection(null);
-        setSelection(null);
-        setSelectionArgs(null);
-        setSortOrder(null);
+    public enum Event {
+        OPEN,
+        PLAY_ALL,
+        SHUFFLE_ALL,
+        ADD_TO_QUEUE,
+        ADD_TO_PLAYLIST
     }
 
+    public final Event event;
+    public final Genre genre;
+
+    public GenreCardClick(Event event, Genre genre) {
+        this.event = event;
+        this.genre = genre;
+    }
 }
