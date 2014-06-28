@@ -29,7 +29,7 @@ import android.util.JsonWriter;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.api.Api;
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.home.HomeFragment;
 
@@ -46,7 +46,7 @@ import java.util.List;
 public class PluginUtil {
 
     public static final String PREF_DISABLED_PLUGINS = "disabled_plugins";
-    public static final String API_PLUGIN_SERVICE = Api.ACTION_LIBRARY_SERVICE;
+    public static final String API_PLUGIN_SERVICE = OrpheusApi.ACTION_LIBRARY_SERVICE;
 
     public static List<PluginInfo> getPluginInfos(Context context) {
         List<ComponentName> disabledPlugins = PluginUtil.readDisabledPlugins(context);

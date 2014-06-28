@@ -28,7 +28,7 @@ import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Artist;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
@@ -45,14 +45,14 @@ import static org.opensilk.music.util.ConfigHelper.isLargeLandscape;
 /**
  * Created by drew on 2/21/14.
  */
-public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
+public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist> {
 
     /* header overlay stuff */
     protected TextView mInfoTitle;
     protected TextView mInfoSubTitle;
     protected View mOverflowButton;
 
-    private Artist mArtist;
+    private LocalArtist mArtist;
 
     public static ProfileArtistFragment newInstance(Bundle args) {
         ProfileArtistFragment f = new ProfileArtistFragment();
@@ -89,10 +89,10 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-        ArtworkManager.loadArtistImage(mArtist.mArtistName, mHeaderImage);
+        ArtworkManager.loadArtistImage(mArtist.name, mHeaderImage);
         // Load header text
-        mInfoTitle.setText(mArtist.mArtistName);
-        mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.mAlbumNumber));
+        mInfoTitle.setText(mArtist.name);
+        mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.albumCount));
         final CardArtistList artistCard = new CardArtistList(getActivity(), mArtist);
         // initialize header overflow
         mOverflowButton.setOnClickListener(new View.OnClickListener() {
@@ -105,7 +105,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
             }
         });
         // set the actionbar title
-        setTitle(mArtist.mArtistName);
+        setTitle(mArtist.name);
         // Init the fading action bar
         if (isLargeLandscape(getResources())) {
             mFadingHelper.fadeActionBar(false);
@@ -142,7 +142,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<Artist> {
     @Override
     protected Bundle createLoaderArgs() {
         final Bundle b = new Bundle();
-        b.putLong(Config.ID, mBundleData.mArtistId);
+        b.putLong(Config.ID, mBundleData.artistId);
         return b;
     }
 

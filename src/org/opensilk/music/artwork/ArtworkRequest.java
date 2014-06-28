@@ -324,8 +324,10 @@ public class ArtworkRequest implements IArtworkRequest {
                                 notifyError(new VolleyError("No network connection"));
                             }
                         }
+                    } else if (mArtInfo.artworkUri != null) {
+                        queueImageRequest(mArtInfo.artworkUri);
                     } else {
-                        notifyError(new VolleyError("Artist name was null"));
+                        notifyError(new VolleyError("Incomplete ArtInfo"));
                     }
                 }
             }

@@ -30,26 +30,21 @@ public class Projections {
         //static
     }
 
-    public static final String[] SONG;
+    public static final String[] LOCAL_SONG;
     public static final String[] ALBUM;
     public static final String[] ARTIST;
     public static final String[] PLAYLIST_SONGS;
     public static final String[] RECENT_SONGS;
 
     static {
-        SONG = new String[] {
-                        /* 0 */
+        LOCAL_SONG = new String[] {
                 BaseColumns._ID,
-                        /* 1 */
                 MediaStore.Audio.AudioColumns.TITLE,
-                        /* 2 */
                 MediaStore.Audio.AudioColumns.ARTIST,
-                        /* 3 */
                 MediaStore.Audio.AudioColumns.ALBUM,
-                        /* 4 */
                 MediaStore.Audio.AudioColumns.ALBUM_ID,
-                        /* 5 */
-                MediaStore.Audio.AudioColumns.DURATION
+                MediaStore.Audio.AudioColumns.DURATION,
+                MediaStore.Audio.AudioColumns.MIME_TYPE,
         };
         ALBUM = new String[] {
                         /* 0 */

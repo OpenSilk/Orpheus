@@ -57,7 +57,7 @@ public class ArtworkServiceImpl implements ArtworkService {
             return pfd;
         }
         //Add to background request queue so we will have it next time
-//        BackgroundRequestor.add(artistName, albumName, album.mAlbumId, ArtworkType.LARGE);
+//        BackgroundRequestor.add(artistName, albumName, album.albumId, ArtworkType.LARGE);
         return null;
     }
 
@@ -72,7 +72,7 @@ public class ArtworkServiceImpl implements ArtworkService {
             return pfd;
         }
         //Add to background request queue so we will have it next time
-//        BackgroundRequestor.add(artistName, albumName, album.mAlbumId, ArtworkType.THUMBNAIL);
+//        BackgroundRequestor.add(artistName, albumName, album.albumId, ArtworkType.THUMBNAIL);
         return null;
     }
 

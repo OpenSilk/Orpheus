@@ -49,9 +49,9 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         // setup card content
-        final CardSongList card = new CardSongList(context, CursorHelpers.makeSongFromCursorOld(cursor));
+        final CardSongList card = new CardSongList(context, CursorHelpers.makeLocalSongFromCursor(context, cursor));
         TextView title = (TextView) view.findViewById(R.id.track_info);
-        title.setText(card.getData().mSongName);
+        title.setText(card.getData().name);
         // hack i dont know why onitemclick doesnt work, might be cause the fading header
         final Context ctx = context;
         final int pos = cursor.getPosition();
@@ -59,7 +59,7 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
         mainContent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                long[] list = MusicUtils.getSongListForAlbum(ctx, card.getData().mAlbumId);
+                long[] list = MusicUtils.getSongListForAlbum(ctx, card.getData().albumId);
                 MusicUtils.playAll(ctx, list, pos, false);
             }
         });

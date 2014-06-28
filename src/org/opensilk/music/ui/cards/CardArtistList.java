@@ -23,7 +23,7 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Artist;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
@@ -36,20 +36,20 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 2/11/14.
  */
-public class CardArtistList extends CardBaseListNoHeader<Artist> {
+public class CardArtistList extends CardBaseListNoHeader<LocalArtist> {
 
-    public CardArtistList(Context context, Artist data) {
+    public CardArtistList(Context context, LocalArtist data) {
         super(context, data);
     }
 
-    public CardArtistList(Context context, Artist data, int innerLayout) {
+    public CardArtistList(Context context, LocalArtist data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
     @Override
     protected void initContent() {
-        mTitle = mData.mArtistName;
-        mSubTitle = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber);
+        mTitle = mData.name;
+        mSubTitle = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.albumCount);
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
@@ -60,7 +60,7 @@ public class CardArtistList extends CardBaseListNoHeader<Artist> {
 
     @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadArtistImage(mData.mArtistName, view);
+        ArtworkManager.loadArtistImage(mData.name, view);
     }
 
     @Override
@@ -74,21 +74,21 @@ public class CardArtistList extends CardBaseListNoHeader<Artist> {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.card_menu_play:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, false);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.artistId), 0, false);
                         break;
                     case R.id.card_menu_shuffle:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, true);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.artistId), 0, true);
                         break;
                     case R.id.card_menu_add_queue:
-                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId));
+                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.artistId));
                         break;
                     case R.id.card_menu_add_playlist:
-                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForArtist(getContext(), mData.mArtistId))
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForArtist(getContext(), mData.artistId))
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_delete:
-                        final String artist = mData.mArtistName;
-                        DeleteDialog.newInstance(artist, MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), artist)
+                        final String artist = mData.name;
+                        DeleteDialog.newInstance(artist, MusicUtils.getSongListForArtist(getContext(), mData.artistId), artist)
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }

@@ -17,17 +17,25 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.utils.NavUtils;
+import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.ui.cards.event.AlbumCardClick;
+import org.opensilk.music.ui.cards.event.AlbumCardClick.Event;
+import org.opensilk.silkdagger.qualifier.ForFragment;
+
+import javax.inject.Inject;
 
 import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -36,6 +44,9 @@ import it.gmariotti.cardslib.library.internal.Card;
  * Created by drew on 6/19/14.
  */
 public class AlbumCard extends AbsCard<Album> {
+
+    @Inject @ForFragment
+    Bus mBus; //Injected by adapter
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
@@ -53,7 +64,7 @@ public class AlbumCard extends AbsCard<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openAlbumProfile(getContext(), mData);
+                mBus.post(new AlbumCardClick(Event.OPEN, mData));
             }
         });
     }
@@ -61,17 +72,48 @@ public class AlbumCard extends AbsCard<Album> {
     @Override
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
-        mCardSubTitle.setText(mData.artistName);
-        mArtwork.setVisibility(View.VISIBLE);
+        if (!TextUtils.isEmpty(mData.artistName)) {
+            mCardSubTitle.setText(mData.artistName);
+            mCardSubTitle.setVisibility(View.VISIBLE);
+        } else {
+            mCardSubTitle.setVisibility(View.GONE);
+        }
         ArtworkManager.loadImage(new ArtInfo(mData.artistName, mData.name, mData.artworkUri), mArtwork);
     }
 
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
-        m.inflate(R.menu.card_album);
+        m.inflate(R.menu.popup_play_all);
+        m.inflate(R.menu.popup_shuffle_all);
+        m.inflate(R.menu.popup_add_to_queue);
+        if (mData instanceof LocalAlbum) {
+            m.inflate(R.menu.popup_add_to_playlist);
+            m.inflate(R.menu.popup_more_by_artist);
+            m.inflate(R.menu.popup_delete);
+        }
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.popup_play_all:
+                        mBus.post(new AlbumCardClick(Event.PLAY_ALL, mData));
+                        return true;
+                    case R.id.popup_shuffle_all:
+                        mBus.post(new AlbumCardClick(Event.SHUFFLE_ALL, mData));
+                        return true;
+                    case R.id.popup_add_to_queue:
+                        mBus.post(new AlbumCardClick(Event.ADD_TO_QUEUE, mData));
+                        return true;
+                    case R.id.popup_add_to_playlist:
+                        mBus.post(new AlbumCardClick(Event.ADD_TO_PLAYLIST, mData));
+                        return true;
+                    case R.id.popup_more_by_artist:
+                        mBus.post(new AlbumCardClick(Event.MORE_BY_ARTIST, mData));
+                        return true;
+                    case R.id.popup_delete:
+                        mBus.post(new AlbumCardClick(Event.DELETE, mData));
+                        return true;
+                }
                 return false;
             }
         });

@@ -22,11 +22,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui.cards.AlbumCard;
 import org.opensilk.music.ui.cards.ArtistCard;
 import org.opensilk.music.ui.cards.FolderCard;
@@ -116,24 +118,23 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
     @Override
     protected Card makeCard(Bundle data) {
-        Class cls;
-        try {
-            cls = Class.forName(data.getString("clz"));
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
-        if (Folder.class == cls) {
-            FolderCard c = new FolderCard(getContext(), Folder.fromBundle(data));
+        Bundleable b = OrpheusApi.transformBundle(data);
+        if (b instanceof Folder) {
+            FolderCard c = new FolderCard(getContext(), (Folder)b);
             mInjector.inject(c);
             return c;
-        } else if (Song.class == cls) {
-            SongCard c = new SongCard(getContext(), Song.fromBundle(data));
+        } else if (b instanceof Song) {
+            SongCard c = new SongCard(getContext(), (Song)b);
             mInjector.inject(c);
             return c;
-        } else if (Artist.class == cls) {
-            return new ArtistCard(getContext(), Artist.fromBundle(data));
-        } else if (Album.class == cls) {
-            return new AlbumCard(getContext(), Album.fromBundle(data));
+        } else if (b instanceof Artist) {
+            ArtistCard c = new ArtistCard(getContext(), (Artist)b);
+            mInjector.inject(c);
+            return c;
+        } else if (b instanceof Album) {
+            AlbumCard c = new AlbumCard(getContext(), (Album)b);
+            mInjector.inject(c);
+            return c;
         }
         throw new IllegalArgumentException("Unknown resource class");
     }

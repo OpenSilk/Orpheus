@@ -124,7 +124,7 @@ public class CardGenreGrid extends CardBaseThumb<Genre> {
             List<ArtInfo> artInfos = new ArrayList<ArtInfo>(1);
             final Cursor genreSongs = getContext().getContentResolver().query(
                     MediaStore.Audio.Genres.Members.getContentUri("external", genreId),
-                    Projections.SONG,
+                    Projections.LOCAL_SONG,
                     MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?",
                     new String[] {"1", "''"}, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
             if (genreSongs != null && genreSongs.moveToFirst()) {

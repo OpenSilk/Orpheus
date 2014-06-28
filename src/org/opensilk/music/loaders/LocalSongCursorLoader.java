@@ -23,26 +23,20 @@ import android.support.v4.content.CursorLoader;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 
 /**
  * Created by drew on 2/18/14.
  */
-public class SongCursorLoader extends CursorLoader {
+public class LocalSongCursorLoader extends CursorLoader {
 
-    public static String SELECTION = MediaStore.Audio.AudioColumns.IS_MUSIC
-            + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + " !=?";
-    public static String[] SELECTION_ARGS;
-
-    static {
-        SELECTION_ARGS = new String[] {"1","''"};
-    }
-
-    public SongCursorLoader(Context context) {
+    public LocalSongCursorLoader(Context context) {
         super(context);
         setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-        setProjection(Projections.SONG);
-        setSelection(SELECTION);
-        setSelectionArgs(SELECTION_ARGS);
+        setProjection(Projections.LOCAL_SONG);
+        setSelection(Selections.LOCAL_SONG);
+        setSelectionArgs(SelectionArgs.LOCAL_SONG);
         setSortOrder(PreferenceUtils.getInstance(getContext()).getSongSortOrder());
     }
 

@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.model.LocalSong;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.ArtInfo;
@@ -77,7 +78,7 @@ public class SongCard extends AbsCard<Song> {
     protected void onCreatePopupMenu(PopupMenu m) {
         m.inflate(R.menu.popup_play_next);
         m.inflate(R.menu.popup_add_to_queue);
-        if (mData.isLocal()) {
+        if (mData instanceof LocalSong) {
             m.inflate(R.menu.popup_add_to_playlist);
             m.inflate(R.menu.popup_more_by_artist);
             m.inflate(R.menu.popup_set_ringtone);

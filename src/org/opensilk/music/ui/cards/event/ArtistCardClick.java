@@ -14,22 +14,30 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.util;
+package org.opensilk.music.ui.cards.event;
+
+import org.opensilk.music.api.model.Artist;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/27/14.
  */
-public class SelectionArgs {
+public class ArtistCardClick {
 
-    public static final String[] LOCAL_SONG;
-    public static String[] ALBUM_SONGS(final long albumId) {
-        return new String[] {"1", "''", String.valueOf(albumId)};
-    }
-    public static String[] LAST_ADDED(final long time) {
-        return new String[] {"1", "''", String.valueOf(time)};
+    public enum Event {
+        OPEN,
+        PLAY_ALL,
+        SHUFFLE_ALL,
+        ADD_TO_QUEUE,
+        ADD_TO_PLAYLIST,
+        DELETE,
     }
 
-    static {
-        LOCAL_SONG = new String[] {"1","''"};
+    public final Event event;
+    public final Artist artist;
+
+    public ArtistCardClick(Event event, Artist artist) {
+        this.event = event;
+        this.artist = artist;
     }
+
 }

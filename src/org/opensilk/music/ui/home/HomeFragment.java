@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
@@ -43,6 +44,7 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.SongCardClick;
+import org.opensilk.music.ui.home.adapter.HomePagerAdapter;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -211,150 +213,33 @@ public class HomeFragment extends ScopedDaggerFragment {
                     MusicUtils.addSongsToQueue(getActivity(), new Song[]{e.song});
                     break;
                 case ADD_TO_PLAYLIST:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            AddToPlaylistDialog.newInstance(new long[]{id})
-                                    .show(getChildFragmentManager(), "AddToPlaylistDialog");
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
+                    if (e.song instanceof LocalSong) {
+                        LocalSong s = (LocalSong) e.song;
+                        AddToPlaylistDialog.newInstance(new long[]{s.songId})
+                                .show(getChildFragmentManager(), "AddToPlaylistDialog");
                     } // else unsupported
                     break;
                 case MORE_BY_ARTIST:
-                    if (e.song.isLocal()) {
-                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.artistName));
-                    } else {
-                        //TODO
-                    }
+                    if (e.song instanceof LocalSong) {
+                        LocalSong s = (LocalSong) e.song;
+                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), s.artistName));
+                    } //else TODO
                     break;
                 case SET_RINGTONE:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            MusicUtils.setRingtone(getActivity(), id);
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
+                    if (e.song instanceof LocalSong) {
+                        LocalSong s = (LocalSong) e.song;
+                        MusicUtils.setRingtone(getActivity(), s.songId);
                     } // else unsupported
                     break;
                 case DELETE:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            DeleteDialog.newInstance(e.song.name, new long[]{ id }, null)
-                                    .show(getChildFragmentManager(), "DeleteDialog");
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
+                    if (e.song instanceof LocalSong) {
+                        LocalSong s = (LocalSong) e.song;
+                        DeleteDialog.newInstance(s.name, new long[]{s.songId}, null)
+                                .show(getChildFragmentManager(), "DeleteDialog");
                     } // else unsupported
                     break;
             }
         }
-    }
-
-    /**
-     * Pager adapter
-     */
-    public static final class HomePagerAdapter extends FragmentPagerAdapter {
-        private final Context mContext;
-        private final List<FragmentHolder> mHolderList = Lists.newArrayList();
-
-        public HomePagerAdapter(Context context, FragmentManager fm) {
-            super(fm);
-            mContext = context;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            FragmentHolder holder = mHolderList.get(position);
-            return Fragment.instantiate(mContext, holder.fragment.getFragmentClass().getName(), holder.params);
-        }
-
-        @Override
-        public int getCount() {
-            return mHolderList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(final int position) {
-            final int id = mHolderList.get(position).fragment.getTitleResource();
-            return mContext.getString(id).toUpperCase(Locale.getDefault());
-        }
-
-        public void add(final MusicFragment fragment, final Bundle params) {
-            mHolderList.add(new FragmentHolder(fragment, params));
-        }
-
-        /**
-         * A private class with information about fragment initialization
-         */
-        private final static class FragmentHolder {
-            MusicFragment fragment;
-            Bundle params;
-            private FragmentHolder(MusicFragment fragment, Bundle params) {
-                this.fragment = fragment;
-                this.params = params;
-            }
-        }
-    }
-
-    /**
-     * An enumeration of all the main fragments supported.
-     */
-    public static enum MusicFragment {
-        /**
-         * The playlist fragment
-         */
-        PLAYLIST(HomePlaylistFragment.class, R.string.page_playlists),
-        /**
-         * The recent fragment
-         */
-        RECENT(HomeRecentFragment.class, R.string.page_recent),
-        /**
-         * The artist fragment
-         */
-        ARTIST(HomeArtistFragment.class, R.string.page_artists),
-        /**
-         * The album fragment
-         */
-        ALBUM(HomeAlbumFragment.class, R.string.page_albums),
-        /**
-         * The song fragment
-         */
-        SONG(SongFragment.class, R.string.page_songs),
-        /**
-         * The genre fragment
-         */
-        GENRE(HomeGenreFragment.class, R.string.page_genres);
-
-        private Class<? extends Fragment> mFragmentClass;
-        private int mTitleResource;
-
-        /**
-         * Constructor of <code>MusicFragments</code>
-         *
-         * @param fragmentClass The fragment class
-         */
-        private MusicFragment(final Class<? extends Fragment> fragmentClass,
-                              final int titleResource) {
-            mFragmentClass = fragmentClass;
-            mTitleResource = titleResource;
-        }
-
-        /**
-         * Method that returns the fragment class.
-         *
-         * @return Class<? extends Fragment> The fragment class.
-         */
-        public Class<? extends Fragment> getFragmentClass() {
-            return mFragmentClass;
-        }
-
-        public int getTitleResource() {
-            return mTitleResource;
-        }
-
     }
 
 }

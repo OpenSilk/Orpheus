@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Artist;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
 
@@ -32,10 +32,6 @@ import org.opensilk.music.api.model.Album;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.activities.ProfileSlidingActivity;
 import org.opensilk.music.ui.fragments.SearchFragment;
-import org.opensilk.music.ui.profile.ProfileAlbumFragment;
-import org.opensilk.music.ui.profile.ProfileArtistFragment;
-import org.opensilk.music.ui.profile.ProfileGenreFragment;
-import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
 
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 
@@ -53,7 +49,7 @@ public final class NavUtils {
      * @param context The {@link Activity} to use.
      * @param artist The artist object
      */
-    public static void openArtistProfile(final Context context, final Artist artist) {
+    public static void openArtistProfile(final Context context, final LocalArtist artist) {
         if (artist == null) {
             return;
         }
@@ -72,28 +68,28 @@ public final class NavUtils {
      */
     public static void openAlbumProfile(final Context context, final Album album) {
         // Create a new bundle to transfer the album info
-        final Bundle b = new Bundle();
-        b.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
-        b.putParcelable(Config.EXTRA_DATA, album);
-
-        // Completely insane method to prevent 'endless profiles' resulting
-        // from clicking the artwork thumbnail in the sliding pane over and over
-        if (context instanceof ProfileSlidingActivity) {
-            ProfileSlidingActivity activity = (ProfileSlidingActivity) context;
-            if (ProfileSlidingActivity.ACTION_ALBUM.equals(activity.getIntent().getAction())) {
-                Bundle b2 = activity.getIntent().getBundleExtra(Config.EXTRA_DATA);
-                if (b2 != null) {
-                    Album a = b2.getParcelable(Config.EXTRA_DATA);
-                    if (a != null) {
-                        if (album.equals(a)) {
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        startProfileActivity(context, ProfileSlidingActivity.ACTION_ALBUM, b);
+//        final Bundle b = new Bundle();
+//        b.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
+//        b.putParcelable(Config.EXTRA_DATA, album);
+//
+//        // Completely insane method to prevent 'endless profiles' resulting
+//        // from clicking the artwork thumbnail in the sliding pane over and over
+//        if (context instanceof ProfileSlidingActivity) {
+//            ProfileSlidingActivity activity = (ProfileSlidingActivity) context;
+//            if (ProfileSlidingActivity.ACTION_ALBUM.equals(activity.getIntent().getAction())) {
+//                Bundle b2 = activity.getIntent().getBundleExtra(Config.EXTRA_DATA);
+//                if (b2 != null) {
+//                    Album a = b2.getParcelable(Config.EXTRA_DATA);
+//                    if (a != null) {
+//                        if (album.equals(a)) {
+//                            return;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        startProfileActivity(context, ProfileSlidingActivity.ACTION_ALBUM, b);
     }
 
     /**

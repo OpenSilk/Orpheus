@@ -22,7 +22,7 @@ import android.view.View;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Artist;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
@@ -37,13 +37,13 @@ import it.gmariotti.cardslib.library.internal.base.BaseCard;
 /**
  * Created by drew on 2/11/14.
  */
-public class CardArtistGrid extends CardBaseThumb<Artist> {
+public class CardArtistGrid extends CardBaseThumb<LocalArtist> {
 
-    public CardArtistGrid(Context context, Artist data) {
+    public CardArtistGrid(Context context, LocalArtist data) {
         super(context, data);
     }
 
-    public CardArtistGrid(Context context, Artist data, int innerLayout) {
+    public CardArtistGrid(Context context, LocalArtist data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
@@ -61,15 +61,15 @@ public class CardArtistGrid extends CardBaseThumb<Artist> {
     protected void initHeader() {
         final CardHeaderGrid header = new CardHeaderGrid(getContext());
         header.setButtonOverflowVisible(true);
-        header.setTitle(mData.mArtistName);
-        header.setLineTwo(MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber));
+        header.setTitle(mData.name);
+        header.setLineTwo(MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.albumCount));
         header.setPopupMenu(R.menu.card_artist, getNewHeaderPopupMenuListener());
         addCardHeader(header);
     }
 
     @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadArtistImage(mData.mArtistName, view);
+        ArtworkManager.loadArtistImage(mData.name, view);
     }
 
     protected CardHeader.OnClickCardHeaderPopupMenuListener getNewHeaderPopupMenuListener() {
@@ -78,21 +78,21 @@ public class CardArtistGrid extends CardBaseThumb<Artist> {
             public void onMenuItemClick(BaseCard baseCard, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.card_menu_play:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, false);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.artistId), 0, false);
                         break;
                     case R.id.card_menu_shuffle:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), 0, true);
+                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.artistId), 0, true);
                         break;
                     case R.id.card_menu_add_queue:
-                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.mArtistId));
+                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForArtist(getContext(), mData.artistId));
                         break;
                     case R.id.card_menu_add_playlist:
-                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForArtist(getContext(), mData.mArtistId))
+                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForArtist(getContext(), mData.artistId))
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_delete:
-                        final String artist = mData.mArtistName;
-                        DeleteDialog.newInstance(artist, MusicUtils.getSongListForArtist(getContext(), mData.mArtistId), artist)
+                        final String artist = mData.name;
+                        DeleteDialog.newInstance(artist, MusicUtils.getSongListForArtist(getContext(), mData.artistId), artist)
                                 .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }

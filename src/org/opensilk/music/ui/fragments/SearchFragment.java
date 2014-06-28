@@ -43,8 +43,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Artist;
-import com.andrew.apollo.model.Song;
+import com.andrew.apollo.model.LocalArtist;
+import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
@@ -273,7 +273,7 @@ public class SearchFragment extends Fragment implements
                 // Get the song count
                 final int songCount = cursor.getInt(cursor.getColumnIndexOrThrow("data2"));
                 // Build artist
-                final Artist artist = new Artist(id, name, songCount, albumCount);
+                final LocalArtist artist = new LocalArtist(id, name, songCount, albumCount);
                 // return artist list card
                 CardArtistList card = new CardArtistList(getContext(), artist);
                 card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
@@ -305,9 +305,9 @@ public class SearchFragment extends Fragment implements
                 // get artist name
                 final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
                 // build the song as best we can
-                final Song song = new Song(id, name, artist, album, 0, 0);
+//                final LocalSong song = new LocalSong(id, name, artist, album, 0, 0);
                 // return song list card
-                return new CardSongList(getContext(), song);
+                return null;//new CardSongList(getContext(), song);
             }
         }
     }

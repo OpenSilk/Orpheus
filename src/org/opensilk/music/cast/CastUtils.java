@@ -184,7 +184,7 @@ public class CastUtils {
 
     public static MediaInfo buildMediaInfo(Context context, Song song) {
         if (song != null) {
-            if (song.isLocal()) {
+            if ("media".equals(song.dataUri.getAuthority())) {
                 try {
                     String ipaddr = getWifiIpAddress(context);
                     return buildMediaInfo(song.name, song.albumName, song.artistName, "audio/*",

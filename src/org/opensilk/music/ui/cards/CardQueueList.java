@@ -9,7 +9,7 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.Song;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
@@ -23,23 +23,23 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 2/13/14.
  */
-public class CardQueueList extends CardBaseListNoHeader<Song> {
+public class CardQueueList extends CardBaseListNoHeader<LocalSong> {
 
     protected PlayingIndicator mPlayingIndicatior;
 
-    public CardQueueList(Context context, Song data) {
+    public CardQueueList(Context context, LocalSong data) {
         this(context, data, R.layout.card_list_inner_layout_queue);
     }
 
-    public CardQueueList(Context context, Song data, int innerLayout) {
+    public CardQueueList(Context context, LocalSong data, int innerLayout) {
         super(context, data, innerLayout);
     }
 
     @Override
     protected void initContent() {
-        mTitle = mData.mSongName;
-        mSubTitle = mData.mArtistName;
-        mExtraText = MusicUtils.makeTimeString(getContext(),mData.mDuration);
+        mTitle = mData.name;
+        mSubTitle = mData.artistName;
+        mExtraText = MusicUtils.makeTimeString(getContext(),mData.duration);
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
@@ -60,7 +60,7 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
 
     @Override
     protected void loadThumbnail(ArtworkImageView view) {
-        ArtworkManager.loadAlbumImage(mData.mArtistName, mData.mAlbumName, null, view);
+        ArtworkManager.loadAlbumImage(mData.artistName, mData.albumName, null, view);
     }
 
     @Override
@@ -85,22 +85,22 @@ public class CardQueueList extends CardBaseListNoHeader<Song> {
                         break;
                     case R.id.card_menu_add_playlist:
                         AddToPlaylistDialog.newInstance(new long[]{
-                                mData.mSongId
+                                mData.songId
                         }).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
                         break;
                     case R.id.card_menu_remove_queue:
 //                        MusicUtils.removeTrackOLD(mData.mSongId);
                         break;
                     case R.id.card_menu_more_by:
-                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.mArtistName));
+                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.artistName));
                         break;
                     case R.id.card_menu_set_ringtone:
-                        MusicUtils.setRingtone(getContext(), mData.mSongId);
+                        MusicUtils.setRingtone(getContext(), mData.songId);
                         break;
                     case R.id.card_menu_delete:
-                        final String song = mData.mSongName;
+                        final String song = mData.name;
                         DeleteDialog.newInstance(song, new long[]{
-                                mData.mSongId
+                                mData.songId
                         }, null).show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
                         break;
                 }

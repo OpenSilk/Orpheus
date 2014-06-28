@@ -23,9 +23,11 @@ import dagger.Module;
  */
 @Module (
         injects = {
+                AlbumCard.class,
+                ArtistCard.class,
+                FolderCard.class,
                 SongCard.class,
                 SongQueueCard.class,
-                FolderCard.class,
         },
         complete = false
 )

@@ -16,7 +16,7 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio.AudioColumns;
 
-import com.andrew.apollo.model.Song;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.Lists;
 
 import java.util.ArrayList;
@@ -28,12 +28,12 @@ import java.util.List;
  * 
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
-public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
+public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<LocalSong>> {
 
     /**
      * The result
      */
-    private final ArrayList<Song> mSongList = Lists.newArrayList();
+    private final ArrayList<LocalSong> mSongList = Lists.newArrayList();
 
     /**
      * The {@link Cursor} used to run the query.
@@ -60,7 +60,7 @@ public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
      * {@inheritDoc}
      */
     @Override
-    public List<Song> loadInBackground() {
+    public List<LocalSong> loadInBackground() {
         // Create the Cursor
         mCursor = makePlaylistSongCursor(getContext(), mPlaylistID);
         // Gather the data
@@ -94,10 +94,10 @@ public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
                 final int seconds = (int) (duration / 1000);
 
                 // Create a new song
-                final Song song = new Song(id, songName, artist, album, albumId, seconds);
-
-                // Add everything up
-                mSongList.add(song);
+//                final LocalSong song = new LocalSong(id, songName, artist, album, albumId, seconds);
+//
+//                // Add everything up
+//                mSongList.add(song);
             } while (mCursor.moveToNext());
         }
         // Close the cursor
@@ -146,8 +146,8 @@ public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
      * @param genreId The Id of the playlist the songs belong to.
      * @return The song list
      */
-    public static List<Song> makePlaylistSongList(final Context context, final Long playlistId) {
-        final List<Song> songList = Lists.newArrayList();
+    public static List<LocalSong> makePlaylistSongList(final Context context, final Long playlistId) {
+        final List<LocalSong> songList = Lists.newArrayList();
         final Cursor c = makePlaylistSongCursor(context, playlistId);
         if (c != null && c.moveToFirst()) {
             do {
@@ -179,10 +179,10 @@ public class PlaylistSongLoader extends WrappedAsyncTaskLoader<List<Song>> {
                 final int seconds = (int) (duration / 1000);
 
                 // Create a new song
-                final Song song = new Song(id, songName, artist, album, albumId, seconds);
-
-                // Add everything up
-                songList.add(song);
+//                final LocalSong song = new LocalSong(id, songName, artist, album, albumId, seconds);
+//
+//                // Add everything up
+//                songList.add(song);
             } while (c.moveToNext());
         }
         if (c != null) {

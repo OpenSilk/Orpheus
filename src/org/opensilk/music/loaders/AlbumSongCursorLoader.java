@@ -32,7 +32,7 @@ public class AlbumSongCursorLoader extends CursorLoader {
     public AlbumSongCursorLoader(Context context, long albumId) {
         super(context);
         setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-        setProjection(Projections.SONG);
+        setProjection(Projections.LOCAL_SONG);
         setSelection(new StringBuilder()
                 .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
                 .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''")

@@ -136,11 +136,11 @@ public class FetchingProgressFragment extends DialogFragment {
         @Override
         @DebugLog
         protected Void doInBackground(Void... params) {
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(10000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             try {
                 RemoteLibraryUtil.getService(mLibraryComponentName)
                         .listSongsInFolder(mLibraryIdentity, mFolderIdentity, 5, bundle, result);
@@ -216,7 +216,7 @@ public class FetchingProgressFragment extends DialogFragment {
             int ii=0;
             for (Bundle b : items) {
                 try {
-                    Song s = Song.fromBundle(b);
+                    Song s = Song.BUNDLE_CREATOR.fromBundle(b);
                     songs[ii++] = s;
                 } catch (IllegalArgumentException ignored) { }
             }

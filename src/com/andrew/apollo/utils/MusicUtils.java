@@ -40,10 +40,7 @@ import android.widget.Toast;
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
-import com.andrew.apollo.loaders.FavoritesLoader;
-import com.andrew.apollo.model.Artist;
-import com.andrew.apollo.provider.FavoritesStore;
-import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.provider.RecentStore;
 
@@ -505,8 +502,8 @@ public final class MusicUtils {
      * @param artistName
      * @return
      */
-    public static Artist makeArtist(final Context context, final String artistName) {
-        Artist artist = null;
+    public static LocalArtist makeArtist(final Context context, final String artistName) {
+        LocalArtist artist = null;
         final String selection = MediaStore.Audio.ArtistColumns.ARTIST  + "=?";
         final String[] selectionArgs = new String[] { artistName };
         final Cursor c = context.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
@@ -1272,24 +1269,24 @@ public final class MusicUtils {
      * @return The song list for the favorite playlist
      */
     public final static long[] getSongListForFavoritesCursor(Cursor cursor) {
-        if (cursor == null) {
+//        if (cursor == null) {
             return sEmptyList;
-        }
-        final int len = cursor.getCount();
-        final long[] list = new long[len];
-        cursor.moveToFirst();
-        int colidx = -1;
-        try {
-            colidx = cursor.getColumnIndexOrThrow(FavoriteColumns.ID);
-        } catch (final Exception ignored) {
-        }
-        for (int i = 0; i < len; i++) {
-            list[i] = cursor.getLong(colidx);
-            cursor.moveToNext();
-        }
-        cursor.close();
-        cursor = null;
-        return list;
+//        }
+//        final int len = cursor.getCount();
+//        final long[] list = new long[len];
+//        cursor.moveToFirst();
+//        int colidx = -1;
+//        try {
+//            colidx = cursor.getColumnIndexOrThrow(FavoriteColumns.ID);
+//        } catch (final Exception ignored) {
+//        }
+//        for (int i = 0; i < len; i++) {
+//            list[i] = cursor.getLong(colidx);
+//            cursor.moveToNext();
+//        }
+//        cursor.close();
+//        cursor = null;
+//        return list;
     }
 
     /**
@@ -1297,13 +1294,13 @@ public final class MusicUtils {
      * @return The song list from our favorites database
      */
     public final static long[] getSongListForFavorites(final Context context) {
-        Cursor cursor = FavoritesLoader.makeFavoritesCursor(context);
-        if (cursor != null) {
-            final long[] list = getSongListForFavoritesCursor(cursor);
-            cursor.close();
-            cursor = null;
-            return list;
-        }
+//        Cursor cursor = FavoritesLoader.makeFavoritesCursor(context);
+//        if (cursor != null) {
+//            final long[] list = getSongListForFavoritesCursor(cursor);
+//            cursor.close();
+//            cursor = null;
+//            return list;
+//        }
         return sEmptyList;
     }
 
@@ -1481,7 +1478,7 @@ public final class MusicUtils {
                 final long id = c.getLong(0);
                 removeTrackOLD(id);
                 // Remove from the favorites playlist
-                FavoritesStore.getInstance(context).removeItem(id);
+//                FavoritesStore.getInstance(context).removeItem(id);
                 // Remove any items in the recents database
                 context.getContentResolver().delete(RECENTS_URI,
                         RecentStore.RecentStoreColumns._ID + " = ?",

@@ -29,18 +29,18 @@ import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 /**
  * Created by drew on 6/24/14.
  */
-public class SongCardCursorAdapter extends CardCursorAdapter {
+public class LocalSongCardCursorAdapter extends CardCursorAdapter {
 
     private DaggerInjector mInjector;
 
-    public SongCardCursorAdapter(Context context, DaggerInjector injector) {
+    public LocalSongCardCursorAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
         mInjector = injector;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        SongCard card = new SongCard(getContext(), CursorHelpers.makeSongFromCursor(getContext(), cursor));
+        SongCard card = new SongCard(getContext(), CursorHelpers.makeLocalSongFromCursor(getContext(), cursor));
         mInjector.inject(card);
         return card;
     }

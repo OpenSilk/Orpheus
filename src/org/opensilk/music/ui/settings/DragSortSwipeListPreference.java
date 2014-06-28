@@ -23,7 +23,7 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.mobeta.android.dslv.DragSortListView;
 
-import org.opensilk.music.ui.home.HomeFragment.MusicFragment;
+import org.opensilk.music.ui.home.MusicFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;

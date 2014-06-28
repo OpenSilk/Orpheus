@@ -192,7 +192,7 @@ public class CardPlaylistGrid extends CardBaseThumb<Playlist> {
             } else { // user
                 playlistSongs = getContext().getContentResolver().query(
                         MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
-                        Projections.SONG,
+                        Projections.LOCAL_SONG,
                         MediaStore.Audio.Playlists.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Playlists.Members.TITLE + "!=?",
                         new String[] {"1", "''"},
                         MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER

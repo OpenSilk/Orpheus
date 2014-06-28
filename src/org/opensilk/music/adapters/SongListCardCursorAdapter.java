@@ -43,7 +43,7 @@ public class SongListCardCursorAdapter extends CardCursorAdapter {
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardSongList(getContext(), CursorHelpers.makeSongFromCursorOld(cursor), mAllowDelete);
+        return null;// new CardSongList(getContext(), CursorHelpers.makeSongFromCursorOld(cursor), mAllowDelete);
     }
 
 }

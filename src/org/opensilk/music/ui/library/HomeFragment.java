@@ -37,13 +37,15 @@ import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.api.Api;
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.event.AlbumCardClick;
+import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
 import org.opensilk.music.ui.modules.ActionBarController;
@@ -168,7 +170,7 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
         switch (requestCode) {
             case REQUEST_LIBRARY:
                 if (resultCode == Activity.RESULT_OK) {
-                    final String id = data.getStringExtra(Api.EXTRA_LIBRARY_ID);
+                    final String id = data.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
                     if (TextUtils.isEmpty(id)) {
                         throw new RuntimeException("Library chooser must set EXTRA_LIBRARY_ID");
                     }
@@ -318,43 +320,64 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
                     MusicUtils.addSongsToQueue(getActivity(), new Song[]{e.song});
                     break;
                 case ADD_TO_PLAYLIST:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            AddToPlaylistDialog.newInstance(new long[]{id})
-                                    .show(getChildFragmentManager(), "AddToPlaylistDialog");
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
-                    } // else unsupported
+                    // unsupported
                     break;
                 case MORE_BY_ARTIST:
-                    if (e.song.isLocal()) {
-                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.artistName));
-                    } else {
-                        //TODO
-                    }
+                    // TODO
                     break;
                 case SET_RINGTONE:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            MusicUtils.setRingtone(getActivity(), id);
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
-                    } // else unsupported
+                    // unsupported
                     break;
                 case DELETE:
-                    if (e.song.isLocal()) {
-                        try {
-                            long id = Long.decode(e.song.identity);
-                            DeleteDialog.newInstance(e.song.name, new long[]{id}, null)
-                                    .show(getChildFragmentManager(), "DeleteDialog");
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
-                    } // else unsupported
+                    // unsupported
+                    break;
+            }
+        }
+
+        @Subscribe
+        public void onArtistCardClicked(ArtistCardClick e) {
+            switch (e.event) {
+                case OPEN:
+                    pushFolderFragment(e.artist.identity);
+                    break;
+                case PLAY_ALL:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.artist.identity, FetchingProgressFragment.Action.PLAY_ALL)
+                            .show(getChildFragmentManager(), "progress");
+                    break;
+                case SHUFFLE_ALL:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.artist.identity, FetchingProgressFragment.Action.SHUFFLE_ALL)
+                            .show(getChildFragmentManager(), "progress");
+                    break;
+                case ADD_TO_QUEUE:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.artist.identity, FetchingProgressFragment.Action.ADD_QUEUE)
+                            .show(getChildFragmentManager(), "progress");
+                    break;
+            }
+        }
+
+        @Subscribe
+        public void onAlbumCardClicked(AlbumCardClick e) {
+            switch (e.event) {
+                case OPEN:
+                    pushFolderFragment(e.album.identity);
+                    break;
+                case PLAY_ALL:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.album.identity, FetchingProgressFragment.Action.PLAY_ALL)
+                            .show(getChildFragmentManager(), "progress");
+                    break;
+                case SHUFFLE_ALL:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.album.identity, FetchingProgressFragment.Action.SHUFFLE_ALL)
+                            .show(getChildFragmentManager(), "progress");
+                    break;
+                case ADD_TO_QUEUE:
+                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
+                            e.album.identity, FetchingProgressFragment.Action.ADD_QUEUE)
+                            .show(getChildFragmentManager(), "progress");
                     break;
             }
         }

@@ -24,8 +24,9 @@ import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
-import com.andrew.apollo.model.Artist;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicStore;
@@ -34,10 +35,7 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProvider;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.loaders.SongCursorLoader;
-
-import hugo.weaving.DebugLog;
+import org.opensilk.music.loaders.LocalSongCursorLoader;
 
 /**
  * Created by drew on 2/22/14.
@@ -59,26 +57,7 @@ public class CursorHelpers {
      * @param cursor cursor created with makeSongCursor
      * @return new Song object
      */
-    public static com.andrew.apollo.model.Song makeSongFromCursorOld(Cursor cursor) {
-        // Copy the song Id
-        final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-        // Copy the song name
-        final String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
-        // Copy the artist name
-        final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
-        // Copy the album name
-        final String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
-        // Copy the album id
-        final long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
-        // Copy the duration
-        final long duration = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION));
-        // Make the duration label
-        final int seconds = (int) (duration / 1000);
-        // Create a new song
-        return new com.andrew.apollo.model.Song(id, songName, artist, album, albumId, seconds);
-    }
-
-    public static Song makeSongFromCursor(Context context, Cursor cursor) {
+    public static LocalSong makeLocalSongFromCursor(Context context, Cursor cursor) {
         // Copy the song Id
         final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the song name
@@ -100,7 +79,9 @@ public class CursorHelpers {
         final Uri dataUri = generateDataUri(id);
         // generate artwork uri
         final Uri artworkUri = generateArtworkUri(albumId);
-        return new Song(String.valueOf(id), songName, album, artist, albumArtist, String.valueOf(albumId), seconds, dataUri, artworkUri);
+        // mime
+        final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
+        return new LocalSong(id, songName, album, artist, albumArtist, albumId, seconds, dataUri, artworkUri, mimeType);
     }
 
     public static Song makeSongFromRecentCursor(Cursor c) {
@@ -124,6 +105,7 @@ public class CursorHelpers {
         } else {
             artworkUri = Uri.parse(artString);
         }
+        final String mimeType = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.MIME_TYPE));
         return new Song.Builder()
                 .setIdentity(identity)
                 .setName(name)
@@ -134,7 +116,7 @@ public class CursorHelpers {
                 .setDuration(duration)
                 .setDataUri(dataUri)
                 .setArtworkUri(artworkUri)
-                //TODO mime
+                .setMimeType(mimeType)
                 .build();
     }
 
@@ -175,7 +157,7 @@ public class CursorHelpers {
      * @param c cursor created with makeArtistCursor
      * @return new artist
      */
-    public static Artist makeArtistFromCursor(final Cursor c) {
+    public static LocalArtist makeArtistFromCursor(final Cursor c) {
         // Copy the artist id
         final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the artist name
@@ -185,7 +167,7 @@ public class CursorHelpers {
         // Copy the number of songs
         final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS));
         // Create a new artist
-        return new Artist(id, artistName, songCount, albumCount);
+        return new LocalArtist(id, artistName, songCount, albumCount);
     }
 
     public static Genre makeGenreFromCursor(final Cursor c) {
@@ -206,7 +188,7 @@ public class CursorHelpers {
     public static Cursor makeLastAddedCursor(final Context context) {
         final int fourWeeks = 4 * 3600 * 24 * 7;
         return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                Projections.SONG,
+                Projections.LOCAL_SONG,
                 MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE
                         + "!=? AND " + MediaStore.Audio.Media.DATE_ADDED + ">?",
                 new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)},
@@ -215,9 +197,9 @@ public class CursorHelpers {
 
     public static Cursor makeSongCursor(final Context context) {
         return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                Projections.SONG,
-                SongCursorLoader.SELECTION,
-                SongCursorLoader.SELECTION_ARGS,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_SONG,
+                SelectionArgs.LOCAL_SONG,
                 PreferenceUtils.getInstance(context).getSongSortOrder());
     }
 
@@ -234,7 +216,7 @@ public class CursorHelpers {
             }
             c.close();
         }
-        return  artist;
+        return artist;
     }
 
     public static Uri generateDataUri(long songId) {

@@ -23,12 +23,12 @@ import android.provider.MediaStore;
  */
 public class Selections {
 
-    public static final String SONG;
+    public static final String LOCAL_SONG;
     public static final String ALBUM_SONGS;
     public static final String LAST_ADDED;
 
     static {
-        SONG = new StringBuilder()
+        LOCAL_SONG = new StringBuilder()
                 .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
                 .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?")
                 .toString();

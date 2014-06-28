@@ -22,7 +22,7 @@ import com.andrew.apollo.R;
 
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.cast.CastUtils;
-import org.opensilk.music.ui.home.HomeFragment.MusicFragment;
+import org.opensilk.music.ui.home.MusicFragment;
 
 import java.io.IOException;
 import java.io.StringReader;

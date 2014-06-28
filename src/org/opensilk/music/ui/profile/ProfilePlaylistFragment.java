@@ -37,8 +37,8 @@ import android.widget.ListView;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.RenamePlaylist;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
-import com.andrew.apollo.model.Song;
 import com.andrew.apollo.utils.MusicUtils;
 import com.mobeta.android.dslv.DragSortListView;
 
@@ -189,11 +189,11 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     public void remove(final int which) {
-        Song song = ((CardSongList) mAdapter.getItem(which)).getData();
+        LocalSong song = ((CardSongList) mAdapter.getItem(which)).getData();
         if (!isFavorites()) {
             final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist.mPlaylistId);
             getActivity().getContentResolver().delete(uri,
-                    MediaStore.Audio.Playlists.Members.AUDIO_ID + "=" + song.mSongId,
+                    MediaStore.Audio.Playlists.Members.AUDIO_ID + "=" + song.songId,
                     null);
         }
     }
