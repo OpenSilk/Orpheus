@@ -107,14 +107,14 @@ android {
             versionNameSuffix "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
             buildConfigField "String", "MUSIC_AUTHORITY", "\"org.opensilk.music.provider.debug\""
             buildConfigField "String", "ARTWORK_AUTHORITY", "\"org.opensilk.music.artwork.provider.debug\""
-            runProguard true
+            runProguard false //true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.debug
         }
         release {
             buildConfigField "String", "MUSIC_AUTHORITY", "\"org.opensilk.music.provider\""
             buildConfigField "String", "ARTWORK_AUTHORITY", "\"org.opensilk.music.artwork.provider\""
-            runProguard true
+            runProguard false //true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
         }
