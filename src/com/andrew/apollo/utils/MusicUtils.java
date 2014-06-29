@@ -40,10 +40,9 @@ import android.widget.Toast;
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
+import org.opensilk.music.util.OrderPreservingCursor;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.model.RecentSong;
-import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.provider.RecentStore;
 
@@ -58,6 +57,8 @@ import org.opensilk.music.util.Selections;
 import java.io.File;
 import java.util.Arrays;
 import java.util.WeakHashMap;
+
+import timber.log.Timber;
 
 import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
 
@@ -779,25 +780,24 @@ public final class MusicUtils {
             }
         }
         selection.append(")");
-        Cursor c = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG + " AND " + selection.toString(),
-                SelectionArgs.LOCAL_SONG,
-                null);
-        if (c != null) {
-            LocalSong[] songs = new LocalSong[c.getCount()];
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                int ii=0;
-                do {
-                    final LocalSong s = CursorHelpers.makeLocalSongFromCursor(context, c);
-                    songs[ii++] = s;
-                } while (c.moveToNext());
-            }
-            c.close();
-            return songs;
+        Cursor c = new OrderPreservingCursor(context, ids);
+        LocalSong[] songs = new LocalSong[c.getCount()];
+        if (c.getCount() > 0 && c.moveToFirst()) {
+            int ii=0;
+            do {
+                final LocalSong s = CursorHelpers.makeLocalSongFromCursor(context, c);
+                songs[ii++] = s;
+            } while (c.moveToNext());
         }
-        return sEmptyLocalSongList;
+        c.close();
+
+//        int ii;
+//        for (ii=0;ii<ids.length;ii++) {
+//            Timber.d(ids[ii] + " :: "+ songs[ii].songId);
+//        }
+
+        return songs;
+
     }
 
     /**

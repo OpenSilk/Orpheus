@@ -20,10 +20,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
 
+import com.andrew.apollo.loaders.NowPlayingCursor;
 import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.RecentStore;
+import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.model.Song;
@@ -31,7 +33,10 @@ import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 6/24/14.
@@ -44,33 +49,22 @@ public class QueueLoader extends WrappedAsyncTaskLoader<List<RecentSong>> {
 
     @Override
     public List<RecentSong> loadInBackground() {
-        long[] list = MusicUtils.getQueue();
-        final List<RecentSong> songs = new ArrayList<>(list.length);
 
-        final StringBuilder selection = new StringBuilder();
-        selection.append(BaseColumns._ID + " IN (");
-        for (int i = 0; i < list.length; i++) {
-            selection.append(list[i]);
-            if (i < list.length - 1) {
-                selection.append(",");
-            }
+        Cursor c = new NowPlayingCursor(getContext());
+        List<RecentSong> songs = new ArrayList<>(c.getCount());
+        if (c.moveToFirst()) {
+            do {
+                final RecentSong s = CursorHelpers.makeRecentSongFromCursor(c);
+                songs.add(s);
+            } while (c.moveToNext());
         }
-        selection.append(")");
+        c.close();
 
-        Cursor c = getContext().getContentResolver().query(MusicProvider.RECENTS_URI,
-                Projections.RECENT_SONGS,
-                selection.toString(),
-                null,
-                null);
-        if (c != null) {
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                do {
-                    final RecentSong s = CursorHelpers.makeRecentSongFromCursor(c);
-                    songs.add(s);
-                } while (c.moveToNext());
-            }
-            c.close();
-        }
+//        long[] list = MusicUtils.getQueue();
+//        for (int ii=0; ii<list.length; ii++) {
+//            Timber.d(list[ii] + " :: " + songs.get(ii).id);
+//        }
+
         return songs;
     }
 

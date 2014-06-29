@@ -1078,6 +1078,9 @@ public class MusicPlaybackService extends Service {
                 } else {
                     if (mShuffleMode != SHUFFLE_NONE) {
                         mPlayPos = getNextPosition(true);
+                        if (mShuffleMode == SHUFFLE_AUTO) {
+                            mPlayPos--;//Removing current track will cause skip
+                        }
                     } else if (mPlayPos >= mPlayListLen) {
                         mPlayPos = 0;
                     }
@@ -1709,6 +1712,10 @@ public class MusicPlaybackService extends Service {
             }
             if (shufmode == SHUFFLE_AUTO) {
                 if (!makeAutoShuffleList()) {
+                    //autoshuffle history is different from regular history
+                    //so clear it as to not mix them together
+                    //TODO maybe fix someday
+                    mHistory.clear();
                     shufmode = SHUFFLE_NONE;
                 }
             }
@@ -2531,6 +2538,10 @@ public class MusicPlaybackService extends Service {
             }
             mShuffleMode = shufflemode;
             if (mShuffleMode == SHUFFLE_AUTO) {
+                // clear history since autoshuffle uses mediastore
+                // ids and regular history uses our musicprovider ids
+                // TODO maybe fix someday
+                mHistory.clear();
                 if (makeAutoShuffleList()) {
                     mPlayListLen = 0;
                     doAutoShuffleUpdate();
