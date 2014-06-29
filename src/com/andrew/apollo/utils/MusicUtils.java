@@ -42,6 +42,8 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.provider.RecentStore;
 
@@ -759,6 +761,40 @@ public final class MusicUtils {
                 } while (cursor.moveToNext());
             }
             cursor.close();
+            return songs;
+        }
+        return sEmptyLocalSongList;
+    }
+
+    public static LocalSong[] getLocalSongList(Context context, long[] ids) {
+        if (ids == null || ids.length == 0) {
+            return sEmptyLocalSongList;
+        }
+        final StringBuilder selection = new StringBuilder();
+        selection.append(BaseColumns._ID + " IN (");
+        for (int i = 0; i < ids.length; i++) {
+            selection.append(ids[i]);
+            if (i < ids.length - 1) {
+                selection.append(",");
+            }
+        }
+        selection.append(")");
+        Cursor c = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_SONG + " AND " + selection.toString(),
+                SelectionArgs.LOCAL_SONG,
+                null);
+        if (c != null) {
+            LocalSong[] songs = new LocalSong[c.getCount()];
+            if (c.getCount() > 0 && c.moveToFirst()) {
+                int ii=0;
+                do {
+                    final LocalSong s = CursorHelpers.makeLocalSongFromCursor(context, c);
+                    songs[ii++] = s;
+                } while (c.moveToNext());
+            }
+            c.close();
             return songs;
         }
         return sEmptyLocalSongList;

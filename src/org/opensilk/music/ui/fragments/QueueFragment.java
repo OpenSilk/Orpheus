@@ -52,7 +52,7 @@ import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.SongQueueCard;
 import org.opensilk.music.ui.cards.event.SongQueueCardClick;
-import org.opensilk.music.ui.fragments.adapter.QueueSongCardAdapter;
+import org.opensilk.music.ui.fragments.adapter.QueueAdapter;
 import org.opensilk.music.ui.fragments.loader.QueueLoader;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -78,7 +78,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
     @Inject @ForFragment
     Bus mFragmentBus;
 
-    private QueueSongCardAdapter mAdapter;
+    private QueueAdapter mAdapter;
     private DragSortListView mListView;
 
     private GlobalBusMonitor mGlobalMonitor;
@@ -105,7 +105,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
         mFragmentMonitor = new FragmentBusMonitor();
         mFragmentBus.register(mFragmentMonitor);
         // init adapter
-        mAdapter = new QueueSongCardAdapter(getActivity(), this);
+        mAdapter = new QueueAdapter(getActivity(), this);
         //We have to set this manually since we arent using CardListView
         mAdapter.setRowLayoutId(R.layout.list_dragsort_card_layout);
         // Start the loader
@@ -170,6 +170,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
     }
 
     @Override
+    @DebugLog
     public void onLoadFinished(final Loader<List<RecentSong>> loader, final List<RecentSong> data) {
         mAdapter.clear();
         // Check for any errors

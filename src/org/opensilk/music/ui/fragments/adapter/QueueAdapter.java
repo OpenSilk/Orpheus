@@ -33,17 +33,18 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 /**
  * Created by drew on 6/25/14.
  */
-public class QueueSongCardAdapter extends CardArrayAdapter {
+public class QueueAdapter extends CardArrayAdapter {
 
     private DaggerInjector mInjector;
 
-    public QueueSongCardAdapter(Context context, DaggerInjector injector) {
+    public QueueAdapter(Context context, DaggerInjector injector) {
         super(context, new ArrayList<Card>());
         mInjector = injector;
     }
 
     public void addSongs(List<RecentSong> songs) {
         setNotifyOnChange(false);
+        clear();
         for (int ii=0; ii<songs.size(); ii++) {
             SongQueueCard c = new SongQueueCard(getContext(), songs.get(ii));
             c.setId(String.valueOf(ii));

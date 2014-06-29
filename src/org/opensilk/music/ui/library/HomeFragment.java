@@ -319,18 +319,6 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
                 case ADD_TO_QUEUE:
                     MusicUtils.addSongsToQueue(getActivity(), new Song[]{e.song});
                     break;
-                case ADD_TO_PLAYLIST:
-                    // unsupported
-                    break;
-                case MORE_BY_ARTIST:
-                    // TODO
-                    break;
-                case SET_RINGTONE:
-                    // unsupported
-                    break;
-                case DELETE:
-                    // unsupported
-                    break;
             }
         }
 

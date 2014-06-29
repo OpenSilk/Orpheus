@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.RecentSong;
 
 import org.opensilk.music.api.model.Song;
@@ -207,7 +208,7 @@ public class MusicProviderUtil {
         values.put(MusicStore.Cols.DATA_URI, song.dataUri.toString());
         values.put(MusicStore.Cols.ARTWORK_URI, song.artworkUri.toString());
         values.put(MusicStore.Cols.MIME_TYPE, song.mimeType);
-        values.put(MusicStore.Cols.ISLOCAL, "media".equals(song.dataUri.getAuthority()) ? 1 : 0);
+        values.put(MusicStore.Cols.ISLOCAL, (song instanceof LocalSong) ? 1 : 0);
         values.put(MusicStore.Cols.PLAYCOUNT, 0);
         values.put(MusicStore.Cols.LAST_PLAYED, 0);
         return values;

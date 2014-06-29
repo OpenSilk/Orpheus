@@ -50,6 +50,7 @@ import android.os.SystemClock;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.support.v7.media.MediaRouter;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.andrew.apollo.provider.MusicProvider;
@@ -58,6 +59,7 @@ import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
+import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.MediaInfo;
@@ -77,11 +79,15 @@ import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -1328,10 +1334,12 @@ public class MusicPlaybackService extends Service {
     private boolean makeAutoShuffleList() {
         Cursor cursor = null;
         try {
-            cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {
-                        MediaStore.Audio.Media._ID
-                    }, MediaStore.Audio.Media.IS_MUSIC + "=1", null, null);
+            cursor = getContentResolver().query(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    new String[]{BaseColumns._ID},
+                    Selections.LOCAL_SONG,
+                    SelectionArgs.LOCAL_SONG,
+                    null);
             if (cursor == null || cursor.getCount() == 0) {
                 return false;
             }
@@ -1363,24 +1371,33 @@ public class MusicPlaybackService extends Service {
             notify = true;
         }
         final int toAdd = 7 - (mPlayListLen - (mPlayPos < 0 ? -1 : mPlayPos));
-        for (int i = 0; i < toAdd; i++) {
-            int lookback = mHistory.size();
-            int idx = -1;
-            while (true) {
-                idx = mShuffler.nextInt(mAutoShuffleList.length);
-                if (!wasRecentlyUsed(idx, lookback)) {
-                    break;
+        if (toAdd > 0) {
+            final long[] list = new long[toAdd];
+            for (int i = 0; i < toAdd; i++) {
+                int lookback = mHistory.size();
+                int idx = -1;
+                while (true) {
+                    idx = mShuffler.nextInt(mAutoShuffleList.length);
+                    if (!wasRecentlyUsed(idx, lookback)) {
+                        break;
+                    }
+                    lookback /= 2;
                 }
-                lookback /= 2;
+                mHistory.add(idx);
+                if (mHistory.size() > MAX_HISTORY_SIZE) {
+                    mHistory.remove(0);
+                }
+                list[i] = mAutoShuffleList[idx];
             }
-            mHistory.add(idx);
-            if (mHistory.size() > MAX_HISTORY_SIZE) {
-                mHistory.remove(0);
+            ensurePlayListCapacity(mPlayListLen + list.length);
+            Song[] songs = MusicUtils.getLocalSongList(this, list);
+            for (Song s : songs) {
+                long id = MusicProviderUtil.insertSong(this, s);
+                mPlayList[mPlayListLen++] = id;
             }
-            ensurePlayListCapacity(mPlayListLen + 1);
-            mPlayList[mPlayListLen++] = mAutoShuffleList[idx];
             notify = true;
         }
+
         if (notify) {
             notifyChange(QUEUE_CHANGED);
         }
@@ -1416,9 +1433,9 @@ public class MusicPlaybackService extends Service {
             // need to grow and copy the array for every
             // insert
             final long[] newlist = new long[size * 2];
-            final int len = mPlayList != null ? mPlayList.length : mPlayListLen;
-            for (int i = 0; i < len; i++) {
-                newlist[i] = mPlayList[i];
+            if (mPlayList != null) {
+                final int len = mPlayList.length;
+                System.arraycopy(mPlayList, 0, newlist, 0, len);
             }
             mPlayList = newlist;
         }
@@ -1963,13 +1980,6 @@ public class MusicPlaybackService extends Service {
             String uri = mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ARTWORK_URI));
             if (uri != null) {
                 return Uri.parse(uri);
-            } else {
-                String artist = getAlbumArtistName();
-                if (artist == null) artist = getArtistName();
-                String album = getAlbumName();
-                if (artist != null && album != null) {
-                    return ArtworkProvider.createArtworkUri(getArtistName(), getAlbumName());
-                }
             }
             return null;
         }
@@ -1980,7 +1990,11 @@ public class MusicPlaybackService extends Service {
      * @return
      */
     public ArtInfo getCurrentArtInfo() {
-        return new ArtInfo(getArtistName(), getAlbumName(), null);
+        String albumartist = getAlbumArtistName();
+        if (TextUtils.isEmpty(albumartist)) {
+            albumartist = getArtistName();
+        }
+        return new ArtInfo(albumartist, getAlbumName(), null);
     }
 
     /**
@@ -2118,11 +2132,11 @@ public class MusicPlaybackService extends Service {
      */
     public long duration() {
         // We'll just cheat and always get it from the local player
-//        if (isRemotePlayback()) {
-//            return durationRemote();
-//        } else {
+        if (isRemotePlayback()) {
+            return durationRemote();
+        } else {
             return durationLocal();
-//        }
+        }
     }
 
     public long durationRemote() {

@@ -36,7 +36,6 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProvider;
-import org.opensilk.music.loaders.LocalSongCursorLoader;
 
 /**
  * Created by drew on 2/22/14.

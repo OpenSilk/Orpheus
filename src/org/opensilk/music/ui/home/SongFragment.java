@@ -28,7 +28,7 @@ import android.widget.CursorAdapter;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.SortOrder;
 
-import org.opensilk.music.loaders.LocalSongCursorLoader;
+import org.opensilk.music.ui.home.loader.SongLoader;
 import org.opensilk.music.ui.cards.CardShuffle;
 import org.opensilk.music.ui.cards.views.ThemedCardView;
 import org.opensilk.music.ui.home.adapter.SongAdapter;
@@ -100,7 +100,7 @@ public class SongFragment extends BasePagerFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new LocalSongCursorLoader(getActivity());
+        return new SongLoader(getActivity());
     }
 
     @Override

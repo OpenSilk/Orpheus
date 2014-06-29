@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.home.loader;
 
 import android.content.Context;
 import android.provider.MediaStore;
@@ -29,9 +29,9 @@ import org.opensilk.music.util.Selections;
 /**
  * Created by drew on 2/18/14.
  */
-public class LocalSongCursorLoader extends CursorLoader {
+public class SongLoader extends CursorLoader {
 
-    public LocalSongCursorLoader(Context context) {
+    public SongLoader(Context context) {
         super(context);
         setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         setProjection(Projections.LOCAL_SONG);
