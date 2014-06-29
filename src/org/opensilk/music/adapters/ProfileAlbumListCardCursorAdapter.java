@@ -21,7 +21,6 @@ import android.database.Cursor;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.ui.cards.CardAlbumList;
 import org.opensilk.music.util.CursorHelpers;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -38,11 +37,12 @@ public class ProfileAlbumListCardCursorAdapter extends CardCursorAdapter {
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        CardAlbumList card = new CardAlbumList(getContext(),
-                CursorHelpers.makeAlbumFromCursor(cursor),
-                R.layout.card_list_inner_layout_extra);
-        card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
-                getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
-        return card;
+//        CardAlbumList card = new CardAlbumList(getContext(),
+//                CursorHelpers.makeAlbumFromCursor(cursor),
+//                R.layout.card_list_inner_layout_extra);
+//        card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
+//                getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
+//        return card;
+        return new Card(getContext());
     }
 }

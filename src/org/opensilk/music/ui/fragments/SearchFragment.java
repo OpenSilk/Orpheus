@@ -48,9 +48,6 @@ import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.ui.cards.CardAlbumList;
-import org.opensilk.music.ui.cards.CardArtistList;
-import org.opensilk.music.ui.cards.CardSongList;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -275,10 +272,10 @@ public class SearchFragment extends Fragment implements
                 // Build artist
                 final LocalArtist artist = new LocalArtist(id, name, songCount, albumCount);
                 // return artist list card
-                CardArtistList card = new CardArtistList(getContext(), artist);
-                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
-                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
-                return card;
+//                CardArtistList card = new CardArtistList(getContext(), artist);
+//                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
+//                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
+//                return card;
             } else if (mimetype.equals("album")) {
                 // Get the Id of the album
                 final String id = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
@@ -291,10 +288,10 @@ public class SearchFragment extends Fragment implements
                 // Build the album as best we can
                 final Album album = new Album(id, name, artist, 0, null, artworkUri);
                 // return album list card
-                CardAlbumList card = new CardAlbumList(getContext(), album);
-                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
-                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
-                return card;
+//                CardAlbumList card = new CardAlbumList(getContext(), album);
+//                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
+//                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
+//                return card;
             } else { /* audio */
                 // get id
                 final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
@@ -309,6 +306,7 @@ public class SearchFragment extends Fragment implements
                 // return song list card
                 return null;//new CardSongList(getContext(), song);
             }
+            return null;
         }
     }
 

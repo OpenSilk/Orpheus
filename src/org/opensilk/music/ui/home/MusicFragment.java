@@ -43,7 +43,7 @@ public enum MusicFragment {
     /**
      * The song fragment
      */
-//    SONG(SongFragment.class, R.string.page_songs),
+    SONG(SongFragment.class, R.string.page_songs),
     /**
      * The genre fragment
      */

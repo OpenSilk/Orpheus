@@ -17,22 +17,8 @@
 package org.opensilk.music.util;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/28/14.
  */
-public class SelectionArgs {
-
-    public static final String[] LOCAL_SONG;
-    public static String[] LOCAL_ALBUM_SONGS(final long albumId) {
-        return new String[] {"1", "''", String.valueOf(albumId)};
-    }
-    public static String[] LAST_ADDED(final long time) {
-        return new String[] {"1", "''", String.valueOf(time)};
-    }
-    public static String[] LOCAL_ARTIST_SONGS(final long artistId) {
-        return new String[] {"1", String.valueOf(artistId)};
-    }
-
-    static {
-        LOCAL_SONG = new String[] {"1","''"};
-    }
+public interface Command {
+    public CharSequence execute();
 }

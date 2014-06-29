@@ -41,6 +41,7 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalArtist;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.provider.RecentStore;
 
@@ -49,6 +50,8 @@ import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 
 import java.io.File;
 import java.util.Arrays;
@@ -70,12 +73,16 @@ public final class MusicUtils {
     private static final WeakHashMap<Context, ServiceBinder> mConnectionMap;
 
     private static final long[] sEmptyList;
+    private static final Song[] sEmptySongList;
+    private static final LocalSong[] sEmptyLocalSongList;
 
     private static ContentValues[] mContentValuesCache = null;
 
     static {
         mConnectionMap = new WeakHashMap<Context, ServiceBinder>();
         sEmptyList = new long[0];
+        sEmptySongList = new Song[0];
+        sEmptyLocalSongList = new LocalSong[0];
     }
 
     /* This class is never initiated */
@@ -630,9 +637,53 @@ public final class MusicUtils {
         };
         final String selection = AudioColumns.ARTIST_ID + "=" + id + " AND "
                 + AudioColumns.IS_MUSIC + "=1";
-        Cursor cursor = context.getContentResolver().query(
+                Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null,
                 AudioColumns.ALBUM_KEY + "," + AudioColumns.TRACK);
+        if (cursor != null) {
+            final long[] mList = getSongListForCursor(cursor);
+            cursor.close();
+            cursor = null;
+            return mList;
+        }
+        return sEmptyList;
+    }
+
+    /**
+     * @param context The {@link Context} to use.
+     * @param id The ID of the artist.
+     * @return The song list for an artist.
+     */
+    public static LocalSong[] getLocalSongListForArtist(final Context context, final long id) {
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_ARTIST_SONGS,
+                SelectionArgs.LOCAL_ARTIST_SONGS(id),
+                AudioColumns.ALBUM_KEY + ", " + AudioColumns.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        if (cursor != null) {
+            LocalSong[] songs = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii= 0;
+                do {
+                    songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return songs;
+        }
+        return sEmptyLocalSongList;
+    }
+
+    public static final long[] getSongListForAlbum(final Context context, final long id) {
+        final String[] projection = new String[] {
+            BaseColumns._ID
+        };
+        final String selection = AudioColumns.ALBUM_ID + "=" + id + " AND " + AudioColumns.IS_MUSIC
+                + "=1";
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null,
+        AudioColumns.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         if (cursor != null) {
             final long[] mList = getSongListForCursor(cursor);
             cursor.close();
@@ -647,22 +698,25 @@ public final class MusicUtils {
      * @param id The ID of the album.
      * @return The song list for an album.
      */
-    public static final long[] getSongListForAlbum(final Context context, final long id) {
-        final String[] projection = new String[] {
-            BaseColumns._ID
-        };
-        final String selection = AudioColumns.ALBUM_ID + "=" + id + " AND " + AudioColumns.IS_MUSIC
-                + "=1";
+    public static LocalSong[] getLocalSongListForAlbum(final Context context, final long id) {
         Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null,
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_ALBUM_SONGS,
+                SelectionArgs.LOCAL_ALBUM_SONGS(id),
                 AudioColumns.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
         if (cursor != null) {
-            final long[] mList = getSongListForCursor(cursor);
+            LocalSong[] songs = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii=0;
+                do {
+                    songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
+            }
             cursor.close();
-            cursor = null;
-            return mList;
+            return songs;
         }
-        return sEmptyList;
+        return sEmptyLocalSongList;
     }
 
     /**
@@ -687,6 +741,27 @@ public final class MusicUtils {
             return mList;
         }
         return sEmptyList;
+    }
+
+    public static LocalSong[] getLocalSongListForGenre(final Context context, final long id) {
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Audio.Genres.Members.getContentUri("external", id),
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_SONG,
+                SelectionArgs.LOCAL_SONG,
+                AudioColumns.ALBUM_KEY + ", " + AudioColumns.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        if (cursor != null) {
+            LocalSong[] songs = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii=0;
+                do {
+                    songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return songs;
+        }
+        return sEmptyLocalSongList;
     }
 
     /**

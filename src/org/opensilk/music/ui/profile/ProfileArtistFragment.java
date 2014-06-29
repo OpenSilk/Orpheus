@@ -35,7 +35,6 @@ import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarH
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
-import org.opensilk.music.ui.cards.CardArtistList;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 
 import it.gmariotti.cardslib.library.view.CardListView;
@@ -93,17 +92,17 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist
         // Load header text
         mInfoTitle.setText(mArtist.name);
         mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.albumCount));
-        final CardArtistList artistCard = new CardArtistList(getActivity(), mArtist);
-        // initialize header overflow
-        mOverflowButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PopupMenu menu = new PopupMenu(v.getContext(), v);
-                menu.inflate(artistCard.getOverflowMenuId());
-                menu.setOnMenuItemClickListener(artistCard.getOverflowPopupMenuListener());
-                menu.show();
-            }
-        });
+//        final CardArtistList artistCard = new CardArtistList(getActivity(), mArtist);
+//        // initialize header overflow
+//        mOverflowButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                PopupMenu menu = new PopupMenu(v.getContext(), v);
+//                menu.inflate(artistCard.getOverflowMenuId());
+//                menu.setOnMenuItemClickListener(artistCard.getOverflowPopupMenuListener());
+//                menu.show();
+//            }
+//        });
         // set the actionbar title
         setTitle(mArtist.name);
         // Init the fading action bar

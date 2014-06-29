@@ -34,7 +34,6 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 
 import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;

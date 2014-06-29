@@ -19,7 +19,6 @@ package org.opensilk.music.ui.home.adapter;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.CardGenreGrid;
 import org.opensilk.music.ui.cards.GenreCard;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.DaggerInjector;

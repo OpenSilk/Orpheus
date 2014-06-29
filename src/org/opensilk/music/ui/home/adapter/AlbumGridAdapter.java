@@ -20,7 +20,6 @@ import android.content.Context;
 import android.database.Cursor;
 
 import org.opensilk.music.ui.cards.AlbumCard;
-import org.opensilk.music.ui.cards.CardAlbumGrid;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.DaggerInjector;
 

@@ -56,13 +56,13 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
         final Context ctx = context;
         final int pos = cursor.getPosition();
         View mainContent = view.findViewById(R.id.track_artist_info);
-        mainContent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                long[] list = MusicUtils.getSongListForAlbum(ctx, card.getData().albumId);
-                MusicUtils.playAll(ctx, list, pos, false);
-            }
-        });
+//        mainContent.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                long[] list = MusicUtils.getSongListForAlbum(ctx, card.getData().albumId);
+//                MusicUtils.playAll(ctx, list, pos, false);
+//            }
+//        });
         // init overflow
         View overflowButton = view.findViewById(R.id.overflow_button);
         overflowButton.setOnClickListener(new View.OnClickListener() {

@@ -18,11 +18,8 @@
 package org.opensilk.music.ui.home;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,8 +30,11 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.utils.Lists;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
@@ -43,17 +43,21 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.event.AlbumCardClick;
+import org.opensilk.music.ui.cards.event.ArtistCardClick;
+import org.opensilk.music.ui.cards.event.GenreCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.home.adapter.HomePagerAdapter;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.util.List;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -201,43 +205,202 @@ public class HomeFragment extends ScopedDaggerFragment {
 
     class FragmentBusMonitor {
         @Subscribe
-        public void onSongPopupItemClicked(SongCardClick e) {
+        public void onSongCardClick(SongCardClick e) {
+            if (!(e.song instanceof LocalSong)) {
+                return;
+            }
+            final LocalSong song = (LocalSong) e.song;
             switch (e.event) {
                 case PLAY:
-                    MusicUtils.playAllSongs(getActivity(), new Song[]{e.song}, 0, false);
+                    MusicUtils.playAllSongs(getActivity(), new Song[]{song}, 0, false);
                     break;
                 case PLAY_NEXT:
-                    MusicUtils.playNext(getActivity(), new Song[]{e.song});
+                    MusicUtils.playNext(getActivity(), new Song[]{song});
                     break;
                 case ADD_TO_QUEUE:
-                    MusicUtils.addSongsToQueue(getActivity(), new Song[]{e.song});
+                    MusicUtils.addSongsToQueue(getActivity(), new Song[]{song});
                     break;
                 case ADD_TO_PLAYLIST:
-                    if (e.song instanceof LocalSong) {
-                        LocalSong s = (LocalSong) e.song;
-                        AddToPlaylistDialog.newInstance(new long[]{s.songId})
-                                .show(getChildFragmentManager(), "AddToPlaylistDialog");
-                    } // else unsupported
+                    AddToPlaylistDialog.newInstance(new long[]{song.songId})
+                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
                     break;
                 case MORE_BY_ARTIST:
-                    if (e.song instanceof LocalSong) {
-                        LocalSong s = (LocalSong) e.song;
-                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), s.artistName));
-                    } //else TODO
+                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), song.artistName));
                     break;
                 case SET_RINGTONE:
-                    if (e.song instanceof LocalSong) {
-                        LocalSong s = (LocalSong) e.song;
-                        MusicUtils.setRingtone(getActivity(), s.songId);
-                    } // else unsupported
+                    MusicUtils.setRingtone(getActivity(), song.songId);
                     break;
                 case DELETE:
-                    if (e.song instanceof LocalSong) {
-                        LocalSong s = (LocalSong) e.song;
-                        DeleteDialog.newInstance(s.name, new long[]{s.songId}, null)
-                                .show(getChildFragmentManager(), "DeleteDialog");
-                    } // else unsupported
+                    DeleteDialog.newInstance(song.name, new long[]{song.songId}, null)
+                            .show(getChildFragmentManager(), "DeleteDialog");
                     break;
+            }
+        }
+
+        @Subscribe
+        public void onAlbumCardClick(AlbumCardClick e) {
+            if (!(e.album instanceof LocalAlbum)) {
+                return;
+            }
+            final LocalAlbum album = (LocalAlbum) e.album;
+            Command command = null;
+            switch (e.event) {
+                case OPEN:
+                    NavUtils.openAlbumProfile(getActivity(), album);
+                    return;
+                case PLAY_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
+                            MusicUtils.playAllSongs(getActivity(), list, 0, false);
+                            return null;
+                        }
+                    };
+                    break;
+                case SHUFFLE_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
+                            MusicUtils.playAllSongs(getActivity(), list, 0, true);
+                            return null;
+                        }
+                    };
+                    break;
+                case ADD_TO_QUEUE:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
+                            MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                            return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                        }
+                    };
+                    break;
+                case ADD_TO_PLAYLIST:
+                    long[] plist = MusicUtils.getSongListForAlbum(getActivity(), album.albumId);
+                    AddToPlaylistDialog.newInstance(plist)
+                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                    return;
+                case DELETE:
+                    long[] dlist = MusicUtils.getSongListForAlbum(getActivity(), album.albumId);
+                    DeleteDialog.newInstance(album.name, dlist, null) //TODO
+                            .show(getChildFragmentManager(), "DeleteDialog");
+                    return;
+                default:
+                    return;
+            }
+            if (command != null) {
+                ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
+            }
+        }
+
+        @Subscribe
+        public void onArtistCardClick(ArtistCardClick e) {
+            if (!(e.artist instanceof LocalArtist)) {
+                return;
+            }
+            final LocalArtist artist = (LocalArtist) e.artist;
+            Command command = null;
+            switch (e.event) {
+                case OPEN:
+                    NavUtils.openArtistProfile(getActivity(), artist);
+                    return;
+                case PLAY_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), artist.artistId);
+                            MusicUtils.playAllSongs(getActivity(), list, 0, false);
+                            return null;
+                        }
+                    };
+                    break;
+                case SHUFFLE_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), artist.artistId);
+                            MusicUtils.playAllSongs(getActivity(), list, 0, true);
+                            return null;
+                        }
+                    };
+                    break;
+                case ADD_TO_QUEUE:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), artist.artistId);
+                            MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                            return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                        }
+                    };
+                    break;
+                case ADD_TO_PLAYLIST:
+                    long[] plist = MusicUtils.getSongListForArtist(getActivity(), artist.artistId);
+                    AddToPlaylistDialog.newInstance(plist)
+                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                    return;
+                case DELETE:
+                    long[] dlist = MusicUtils.getSongListForArtist(getActivity(), artist.artistId);
+                    DeleteDialog.newInstance(artist.name, dlist, null) //TODO
+                            .show(getChildFragmentManager(), "DeleteDialog");
+                    return;
+                default:
+                    return;
+            }
+            if (command != null) {
+                ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
+            }
+        }
+
+        @Subscribe
+        public void onGenreCardClick(GenreCardClick e) {
+            final Genre genre = e.genre;
+            Command command = null;
+            switch (e.event) {
+                case OPEN:
+                    NavUtils.openGenreProfile(getActivity(), e.genre);
+                    return;
+                case PLAY_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForGenre(getActivity(), genre.mGenreId);
+                            MusicUtils.playAllSongs(getActivity(), list, 0, false);
+                            return null;
+                        }
+                    };
+                    break;
+                case SHUFFLE_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForGenre(getActivity(), genre.mGenreId);
+                            MusicUtils.playAllSongs(getActivity(), list, 0, true);
+                            return null;
+                        }
+                    };
+                    break;
+                case ADD_TO_QUEUE:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            LocalSong[] list = MusicUtils.getLocalSongListForGenre(getActivity(), genre.mGenreId);
+                            MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                            return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                        }
+                    };
+                    break;
+                case ADD_TO_PLAYLIST:
+                    long[] plist = MusicUtils.getSongListForGenre(getActivity(), genre.mGenreId);
+                    AddToPlaylistDialog.newInstance(plist)
+                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                    return;
+            }
+            if (command != null) {
+                ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
             }
         }
     }

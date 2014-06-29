@@ -24,18 +24,11 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.CursorAdapter;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.qualifier.ForFragment;
-
-import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 

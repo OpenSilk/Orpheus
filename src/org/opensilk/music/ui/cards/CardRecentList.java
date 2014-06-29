@@ -76,33 +76,33 @@ public class CardRecentList extends CardBaseListNoHeader<Album> {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.card_menu_play:
-                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, false);
-                        break;
-                    case R.id.card_menu_add_queue:
-                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)));
-                        break;
-                    case R.id.card_menu_add_playlist:
-                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)))
-                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
-                        break;
-                    case R.id.card_menu_go_artist:
-                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.artistName));
-                        break;
-                    case R.id.card_menu_remove_from_recent:
-                        getContext().getContentResolver().delete(RECENTS_URI,
-                                RecentStore.RecentStoreColumns._ID + " = ?",
-                                new String[]{
-                                        mData.identity
-                                }
-                        );
-                        break;
-                    case R.id.card_menu_delete:
-                        final String album = mData.name;
-                        DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)),
-                                /*ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName)*/ null) //TODO
-                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
-                        break;
+//                    case R.id.card_menu_play:
+//                        MusicUtils.playAll(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)), 0, false);
+//                        break;
+//                    case R.id.card_menu_add_queue:
+//                        MusicUtils.addToQueue(getContext(), MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)));
+//                        break;
+//                    case R.id.card_menu_add_playlist:
+//                        AddToPlaylistDialog.newInstance(MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)))
+//                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "AddToPlaylistDialog");
+//                        break;
+//                    case R.id.card_menu_go_artist:
+//                        NavUtils.openArtistProfile(getContext(), MusicUtils.makeArtist(getContext(), mData.artistName));
+//                        break;
+//                    case R.id.card_menu_remove_from_recent:
+//                        getContext().getContentResolver().delete(RECENTS_URI,
+//                                RecentStore.RecentStoreColumns._ID + " = ?",
+//                                new String[]{
+//                                        mData.identity
+//                                }
+//                        );
+//                        break;
+//                    case R.id.card_menu_delete:
+//                        final String album = mData.name;
+//                        DeleteDialog.newInstance(album, MusicUtils.getSongListForAlbum(getContext(), Long.decode(mData.identity)),
+//                                /*ImageFetcher.generateAlbumCacheKey(album, mData.mArtistName)*/ null) //TODO
+//                                .show(((FragmentActivity) getContext()).getSupportFragmentManager(), "DeleteDialog");
+//                        break;
                 }
                 return false;
             }

@@ -24,15 +24,16 @@ import android.provider.MediaStore;
 public class Selections {
 
     public static final String LOCAL_SONG;
-    public static final String ALBUM_SONGS;
+    public static final String LOCAL_ALBUM_SONGS;
     public static final String LAST_ADDED;
+    public static final String LOCAL_ARTIST_SONGS;
 
     static {
         LOCAL_SONG = new StringBuilder()
                 .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
                 .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?")
                 .toString();
-        ALBUM_SONGS = new StringBuilder()
+        LOCAL_ALBUM_SONGS = new StringBuilder()
                 .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
                 .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?")
                 .append(" AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=?")
@@ -41,6 +42,10 @@ public class Selections {
                 .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
                 .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?")
                 .append(" AND " + MediaStore.Audio.Media.DATE_ADDED + ">?")
+                .toString();
+        LOCAL_ARTIST_SONGS = new StringBuilder()
+                .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
+                .append(" AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=?")
                 .toString();
     }
 }
