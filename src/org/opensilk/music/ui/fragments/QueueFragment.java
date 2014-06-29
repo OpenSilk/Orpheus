@@ -223,20 +223,19 @@ public class QueueFragment extends ScopedDaggerFragment implements
      */
     @DebugLog
     public void scrollToCurrentSong() {
-        final int currentSongPosition = getItemPositionBySong();
+        final int currentSongPosition = getCurrentTrackPosition();
 
         if (currentSongPosition != 0) {
             mListView.setSelection(currentSongPosition);
         }
     }
 
-    /**
-     * @return The position of an item in the list based on the name of the
-     *         currently playing song.
-     */
-    @DebugLog
-    private int getItemPositionBySong() {
+    private int getCurrentTrackPosition() {
         final long trackId = MusicUtils.getCurrentAudioId();
+        return getTrackPosition(trackId);
+    }
+
+    private int getTrackPosition(long trackId) {
         if (mAdapter == null || mAdapter.getCount() == 0) {
             return 0;
         }
@@ -256,7 +255,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
             // when the service adjustss the queue our saved state is no longer
             // valid so we must compensate for the new offset so we dont
             // jump to the wrong position
-            int activeIndex = getItemPositionBySong();
+            int activeIndex = getCurrentTrackPosition();
             if (activeIndex != mLastPosition.prevActiveIndex) {
                 mLastPosition.index += (activeIndex - mLastPosition.prevActiveIndex);
                 if (mLastPosition.index < 0) {
@@ -303,7 +302,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
             if (isAdded()) {
                 // This is a slight hack to give us a refrence if the
                 // items in the queue are moved
-                mLastPosition.prevActiveIndex = getItemPositionBySong();
+                mLastPosition.prevActiveIndex = getCurrentTrackPosition();
                 // store top most index
                 mLastPosition.index = mListView.getFirstVisiblePosition();
                 View v = mListView.getChildAt(0);
@@ -359,7 +358,11 @@ public class QueueFragment extends ScopedDaggerFragment implements
         public void onCardItemClicked(SongQueueCardClick e) {
             switch (e.event) {
                 case PLAY:
-                    //Not evented for queue
+                    int pos = getTrackPosition(e.song.id);
+                    // When selecting a track from the queue, just jump there instead of
+                    // reloading the queue. This is both faster, and prevents accidentally
+                    // dropping out of party shuffle.
+                    MusicUtils.setQueuePosition(pos);
                     break;
                 case PLAY_NEXT:
                     MusicUtils.removeQueueItem(e.song.id);

@@ -71,10 +71,7 @@ public class SongQueueCard extends Card {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                // When selecting a track from the queue, just jump there instead of
-                // reloading the queue. This is both faster, and prevents accidentally
-                // dropping out of party shuffle.
-                MusicUtils.setQueuePosition(Integer.valueOf(getId()));
+                mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.PLAY, mData));
             }
         });
     }

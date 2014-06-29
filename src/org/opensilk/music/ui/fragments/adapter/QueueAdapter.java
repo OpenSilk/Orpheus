@@ -45,9 +45,9 @@ public class QueueAdapter extends CardArrayAdapter {
     public void addSongs(List<RecentSong> songs) {
         setNotifyOnChange(false);
         clear();
-        for (int ii=0; ii<songs.size(); ii++) {
-            SongQueueCard c = new SongQueueCard(getContext(), songs.get(ii));
-            c.setId(String.valueOf(ii));
+        for (RecentSong s : songs) {
+            SongQueueCard c = new SongQueueCard(getContext(), s);
+            c.setId(s.song.identity);
             mInjector.inject(c);
             add(c);
         }
