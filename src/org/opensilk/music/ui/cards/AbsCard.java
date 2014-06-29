@@ -43,12 +43,6 @@ public abstract class AbsCard<D extends Bundleable> extends Card {
     @InjectView(R.id.card_subtitle)
     protected TextView mCardSubTitle;
 
-    protected boolean mForGrid;
-
-    public AbsCard(Context context, D data) {
-        this(context, data, -1);
-    }
-
     public AbsCard(Context context, D data, int innerLayout) {
         super(context, innerLayout);
         mData = data;

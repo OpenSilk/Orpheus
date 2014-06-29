@@ -36,6 +36,8 @@ import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
 
 import java.lang.ref.WeakReference;
 
+import timber.log.Timber;
+
 /**
  * Handles fetching an image from a URL as well as the life-cycle of the
  * associated request.
@@ -155,7 +157,10 @@ public class ArtworkImageView extends ImageView {
 
         // if the URL to be loaded in this view is empty, cancel any old requests and clear the
         // currently loaded image.
-        if (mArtInfo == null || TextUtils.isEmpty(mArtInfo.artistName)) { //Artist name is always not null
+        if (mArtInfo == null //If artinfo is null or all fields are null
+                || (TextUtils.isEmpty(mArtInfo.artistName)
+                    && TextUtils.isEmpty(mArtInfo.albumName)
+                    && mArtInfo.artworkUri == null)) {
             if (mImageContainer != null) {
                 mImageContainer.cancelRequest();
                 mImageContainer = null;
@@ -172,7 +177,8 @@ public class ArtworkImageView extends ImageView {
             } else {
                 // if there is a pre-existing request, cancel it if it's fetching a different URL.
                 mImageContainer.cancelRequest();
-                setDefaultImageOrNull();
+//                setDefaultImageOrNull();
+                resetImage();
             }
         }
 
@@ -184,13 +190,16 @@ public class ArtworkImageView extends ImageView {
         mImageContainer = newContainer;
     }
 
+    private void resetImage() {
+        setImageBitmap(null);
+    }
+
     private void setDefaultImageOrNull() {
-//        if(mDefaultImageId != 0) {
-//            setImageResource(mDefaultImageId);
-//        }
-//        else {
-            setImageBitmap(null);
-//        }
+        if (mDefaultImageId != 0) {
+            setImageResource(mDefaultImageId);
+        } else {
+            resetImage();
+        }
     }
 
     @Override
@@ -205,7 +214,7 @@ public class ArtworkImageView extends ImageView {
             // If the view was bound to an image request, cancel it and clear
             // out the image from the view.
             mImageContainer.cancelRequest();
-            setImageBitmap(null);
+            resetImage();
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
         }
@@ -231,7 +240,7 @@ public class ArtworkImageView extends ImageView {
         public void onErrorResponse(VolleyError error) {
             ArtworkImageView v = reference.get();
             if (v == null) {
-                if (D) Log.d(TAG, "Reference was null");
+                Timber.w("Reference was null");
                 return;
             }
             if (v.mErrorImageId != 0) {
@@ -243,7 +252,7 @@ public class ArtworkImageView extends ImageView {
         public void onResponse(final ImageContainer response, final boolean isImmediate) {
             ArtworkImageView v = reference.get();
             if (v == null) {
-                if (D) Log.d(TAG, "Reference was null");
+                Timber.w("Reference was null");
                 return;
             }
             // If this was an immediate response that was delivered inside of a layout

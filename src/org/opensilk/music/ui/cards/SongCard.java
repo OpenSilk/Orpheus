@@ -17,6 +17,7 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
@@ -50,11 +51,7 @@ public class SongCard extends AbsCard<Song> {
     protected ArtworkImageView mArtwork;
 
     public SongCard(Context context, Song song) {
-        this(context, song, R.layout.library_listcard_artwork_inner);
-    }
-
-    public SongCard(Context context, Song song, int innerLayout) {
-        super(context, song, innerLayout);
+        super(context, song, R.layout.library_listcard_artwork_inner);
     }
 
     @Override
@@ -71,7 +68,11 @@ public class SongCard extends AbsCard<Song> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         mCardSubTitle.setText(mData.artistName);
-        ArtworkManager.loadImage(new ArtInfo(mData.albumArtistName, mData.albumName, mData.artworkUri), mArtwork);
+        String artist = mData.albumArtistName;
+        if (TextUtils.isEmpty(artist)) {
+            artist = mData.artistName;
+        }
+        ArtworkManager.loadImage(new ArtInfo(artist, mData.albumName, mData.artworkUri), mArtwork);
     }
 
     @Override

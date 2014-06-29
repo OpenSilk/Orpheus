@@ -124,7 +124,6 @@ public class GenreCard extends Card {
         m.inflate(R.menu.popup_shuffle_all);
         m.inflate(R.menu.popup_add_to_queue);
         m.inflate(R.menu.popup_add_to_playlist);
-        m.inflate(R.menu.card_genre);
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {

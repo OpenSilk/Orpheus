@@ -415,12 +415,33 @@ public class ArtworkLoader {
 
     /**
      * Creates a cache key for use with the L1 cache.
+     *
+     * if both artist and album are null we must use the uri or all
+     * requests will return the same cache key, to maintain backwards
+     * compat with orpheus versions < 0.5 we use artist,album when we can.
+     *
+     * if all fields in artinfo are null we cannot fetch any art so an npe will
+     * be thrown
      */
     public static String getCacheKey(ArtInfo artInfo, ArtworkType imageType) {
-        return new StringBuilder(artInfo.artistName.length() + (artInfo.albumName != null ? artInfo.albumName.length() : 4) + 12)
-                .append("#").append(imageType).append("#")
-                .append(artInfo.artistName).append("#")
-                .append(artInfo.albumName)
-                .toString();
+        int size = 0;
+        if (artInfo.artistName == null && artInfo.albumName == null) {
+            if (artInfo.artworkUri == null) {
+                throw new NullPointerException("Cant fetch art with all null fields");
+            }
+            size += artInfo.artworkUri.toString().length();
+            return new StringBuilder(size+12)
+                    .append("#").append(imageType).append("#")
+                    .append(artInfo.artworkUri.toString())
+                    .toString();
+        } else {
+            size += artInfo.artistName != null ? artInfo.artistName.length() : 4;
+            size += artInfo.albumName != null ? artInfo.albumName.length() : 4;
+            return new StringBuilder(size+12)
+                    .append("#").append(imageType).append("#")
+                    .append(artInfo.artistName).append("#")
+                    .append(artInfo.albumName)
+                    .toString();
+        }
     }
 }

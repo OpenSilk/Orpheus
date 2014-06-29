@@ -207,6 +207,16 @@ public class ArtworkRequest implements IArtworkRequest {
         return null;
     }
 
+    private boolean isLocalArtwork() {
+        Uri u = mArtInfo.artworkUri;
+        if (u != null) {
+            if ("content".equals(u.getScheme())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Response listener, dispaches responses to listeners if we havent been canceled
      * and adds bitmap to the diskcache
@@ -261,16 +271,6 @@ public class ArtworkRequest implements IArtworkRequest {
         }
     }
 
-    private boolean isLocalArtwork() {
-        Uri u = mArtInfo.artworkUri;
-        if (u != null) {
-            if ("content".equals(u.getScheme())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Async task to check our disk cache, if not present we call into volley
      */
@@ -285,6 +285,7 @@ public class ArtworkRequest implements IArtworkRequest {
             return null;
         }
 
+        //TODO move the bulk of this logic to the background thread
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             if (!mCanceled) {
@@ -324,10 +325,18 @@ public class ArtworkRequest implements IArtworkRequest {
                                 notifyError(new VolleyError("No network connection"));
                             }
                         }
+                        //no artist or album info just go strait for the artworUri
                     } else if (mArtInfo.artworkUri != null) {
-                        queueImageRequest(mArtInfo.artworkUri);
+                        if (isLocalArtwork()) {
+                            // route local uris through the contentprovider
+                            ApolloUtils.execute(false, new MediaStoreTask(false));
+                        } else {
+                            // assuming remote uris here
+                            queueImageRequest(mArtInfo.artworkUri);
+                        }
                     } else {
-                        notifyError(new VolleyError("Incomplete ArtInfo"));
+                        throw new RuntimeException("Hey dummy you made an ArtworkRequest will null info");
+//                        notifyError(new VolleyError("Incomplete ArtInfo"));
                     }
                 }
             }
