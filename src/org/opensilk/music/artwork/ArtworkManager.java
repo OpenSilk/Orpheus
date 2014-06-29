@@ -124,7 +124,7 @@ public class ArtworkManager {
         mImageQueue = RequestQueueFactory.newImageQueue(context);
     }
 
-    @DebugLog
+    //@DebugLog
     private void initDiskCache() {
         final int size = mPreferences.imageCacheSizeBytes();
         if (D) Log.d(TAG, "L2Cache=" + (size / 1024 / 1024) + "MB");
@@ -187,7 +187,7 @@ public class ArtworkManager {
         return loadImage(artInfo, imageView);
     }
 
-    @DebugLog
+    //@DebugLog
     public static synchronized boolean clearCaches() {
         if (sArtworkManager != null) {
             BackgroundRequestor.EXECUTOR.shutdownNow();

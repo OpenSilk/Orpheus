@@ -165,7 +165,7 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_LIBRARY:
@@ -213,7 +213,7 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
      */
 
     @Override
-    @DebugLog
+    //@DebugLog
     public boolean onBackButtonPressed() {
         return getChildFragmentManager().popBackStackImmediate();
     }

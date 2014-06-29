@@ -270,7 +270,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onBackPressed() {
         if (!mIsLargeLandscape && mSlidingPanel.isExpanded()) {
             maybeClosePanel();

@@ -61,7 +61,7 @@ public abstract class MusicEntryRequest<T> extends Request<T> {
      * @return success if we were able to parse the xml else error
      */
     @Override
-    @DebugLog
+    //@DebugLog
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
         try {
             return Response.success(

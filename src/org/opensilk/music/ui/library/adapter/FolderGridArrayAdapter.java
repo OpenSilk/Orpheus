@@ -64,7 +64,7 @@ public class FolderGridArrayAdapter extends AbsEndlessGridArrayAdapter {
         startLoad();
     }
 
-    @DebugLog
+    //@DebugLog
     protected void getMore() {
         try {
             mLoadingInProgress = true;
@@ -93,7 +93,7 @@ public class FolderGridArrayAdapter extends AbsEndlessGridArrayAdapter {
                         }
 
                         @Override
-                        @DebugLog
+                        //@DebugLog
                         public void failure(int code, String reason) throws RemoteException {
 //                            mPaginationBundle = null;
                             mLoadingInProgress = false;

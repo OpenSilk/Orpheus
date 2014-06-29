@@ -74,14 +74,14 @@ public class DayDreamService extends DreamService {
         mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
     }
 
-    @DebugLog
+    //@DebugLog
     @Override
     public void onCreate() {
         super.onCreate();
         mMusicServiceToken = MusicUtils.bindToService(this, mMusicServiceConnection);
     }
 
-    @DebugLog
+    //@DebugLog
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -95,7 +95,7 @@ public class DayDreamService extends DreamService {
         }
     }
 
-    @DebugLog
+    //@DebugLog
     @Override
     public void onAttachedToWindow() {
         isAttached = true;
@@ -110,7 +110,7 @@ public class DayDreamService extends DreamService {
         EventBus.getInstance().register(this);
     }
 
-    @DebugLog
+    //@DebugLog
     @Override
     public void onDetachedFromWindow() {
         isAttached = false;
@@ -130,7 +130,7 @@ public class DayDreamService extends DreamService {
     /**
      * Init our dreams view
      */
-    @DebugLog
+    //@DebugLog
     private void setupSaverView() {
         mHandler.removeCallbacks(mMoveSaverRunnable);
 
@@ -168,7 +168,7 @@ public class DayDreamService extends DreamService {
     /**
      * Performs bind on alt dream service
      */
-    @DebugLog
+    //@DebugLog
     private void bindAltDream() {
         ComponentName altDream = DreamPrefs.getAltDreamComponent(this);
         if (altDream != null) {

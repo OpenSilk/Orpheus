@@ -70,13 +70,13 @@ public class ArtworkImageRequest extends ImageRequest {
      * volley will attach it to this and dispatch when this one finishes
      * Hence setBackground takes no arguments;
      */
-    @DebugLog
+    //@DebugLog
     public void setBackground() {
         mPriority = Priority.LOW;
         mInBackground = true;
     }
 
-    @DebugLog
+    //@DebugLog
     public boolean isInBackground() {
         return mInBackground;
     }

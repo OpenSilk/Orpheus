@@ -37,7 +37,7 @@ public class ArtworkBroadcastReceiver extends BroadcastReceiver {
     ArtworkService mArtworkService;
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (CLEAR_CACHE.equals(action)) {

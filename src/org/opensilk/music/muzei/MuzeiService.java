@@ -67,7 +67,7 @@ public class MuzeiService extends MuzeiArtSource implements ServiceConnection {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onEnabled() {
         // Tells the receiver its ok to send us updates
         // Note: can't simply enable/disable the receiver because
@@ -78,14 +78,14 @@ public class MuzeiService extends MuzeiArtSource implements ServiceConnection {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onDisabled() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().putBoolean(MUZEI_EXTENSION_ENABLED, false).apply();
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     protected void onUpdate(int reason) {
         if (!isBound && !waitForBind()) {
             return;

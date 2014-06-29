@@ -72,7 +72,7 @@ public class MusicApp extends Application implements DaggerInjector {
     private ObjectGraph mScopedGraphe;
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onCreate() {
         super.onCreate();
 

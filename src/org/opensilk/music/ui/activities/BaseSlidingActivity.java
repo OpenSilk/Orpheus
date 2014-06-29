@@ -322,7 +322,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case 0:
@@ -455,7 +455,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
      */
     private final MediaRouter.Callback mMediaRouterCallback = new MediaRouter.Callback() {
 
-        @DebugLog
+        //@DebugLog
         @Override
         public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
             if (!CastUtils.notifyRouteSelected(BaseSlidingActivity.this, route)) {
@@ -465,7 +465,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
             }
         }
 
-        @DebugLog
+        //@DebugLog
         @Override
         public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
             //
@@ -477,19 +477,19 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
             }
         }
 
-        @DebugLog
+        //@DebugLog
         @Override
         public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
 
         }
 
-        @DebugLog
+        //@DebugLog
         @Override
         public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
 
         }
 
-        @DebugLog
+        //@DebugLog
         @Override
         public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo route) {
 

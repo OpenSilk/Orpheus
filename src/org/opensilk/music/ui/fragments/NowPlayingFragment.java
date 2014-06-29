@@ -377,7 +377,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     /**
      * Initializes visualizer
      */
-    @DebugLog
+    //@DebugLog
     private void initVisualizer() {
         if (MusicUtils.getAudioSessionId() != ERROR_BAD_VALUE) {
             try {
@@ -407,7 +407,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     /**
      * Releases the visualizer
      */
-    @DebugLog
+    //@DebugLog
     private void destroyVisualizer() {
         if (mVisualizer != null) {
             mVisualizer.release();
@@ -418,7 +418,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     /**
      * Enables or disables visualizer depending on playback state
      */
-    @DebugLog
+    //@DebugLog
     private void updateVisualizerState() {
         if (mVisualizer != null && mVisualizerView != null) {
             if (!mQueueShowing && MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
@@ -892,7 +892,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
             }
         }
 
-        @DebugLog
+        //@DebugLog
         @Subscribe
         public void onIABResult(IABQueryResult r) {
             if (r.error == IABQueryResult.Error.NO_ERROR) {

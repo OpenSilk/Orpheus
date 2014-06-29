@@ -77,20 +77,20 @@ public class ArtworkServiceImpl implements ArtworkService {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void clearCache() {
         mManager.mL1Cache.evictAll();
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void scheduleCacheClear() {
         AlarmManager am = (AlarmManager) mAppContext.getSystemService(Context.ALARM_SERVICE);
         am.set(AlarmManager.RTC, 60 * 1000, getClearCacheIntent());
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void cancelCacheClear() {
         AlarmManager am = (AlarmManager) mAppContext.getSystemService(Context.ALARM_SERVICE);
         am.cancel(getClearCacheIntent());

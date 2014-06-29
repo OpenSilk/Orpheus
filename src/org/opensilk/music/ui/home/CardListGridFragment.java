@@ -95,7 +95,7 @@ public abstract class CardListGridFragment extends Fragment {
      * way to have the built-in indeterminant progress state be shown.
      */
     @Override
-    @DebugLog
+    //@DebugLog
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final Context context = getActivity();
@@ -368,7 +368,7 @@ public abstract class CardListGridFragment extends Fragment {
         return mAdapter;
     }
 
-    @DebugLog
+    //@DebugLog
     private void ensureList() {
         if (wantGridView()) {
             if (mGrid != null) return;

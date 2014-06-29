@@ -46,7 +46,7 @@ public class SettingsPhoneActivity extends Activity {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Fragment f = getFragmentManager().findFragmentByTag(SettingsDonateFragment.class.getName());
         if (f != null) {

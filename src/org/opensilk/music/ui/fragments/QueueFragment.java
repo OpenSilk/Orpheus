@@ -170,7 +170,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onLoadFinished(final Loader<List<RecentSong>> loader, final List<RecentSong> data) {
         mAdapter.clear();
         // Check for any errors
@@ -221,7 +221,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
     /**
      * Scrolls the list to the currently playing song
      */
-    @DebugLog
+    //@DebugLog
     public void scrollToCurrentSong() {
         final int currentSongPosition = getCurrentTrackPosition();
 
@@ -327,7 +327,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
         }
 
         @Subscribe
-        @DebugLog
+        //@DebugLog
         public void onQueueChanged(QueueChanged e) {
             // For auto shuffle when the queue gets adjusted we
             // can receive several QUEUE_CHANGED updates in quick

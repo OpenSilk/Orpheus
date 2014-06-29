@@ -79,7 +79,7 @@ public class ArtworkProviderUtil {
      * @param albumName
      * @return Bitmap if found else null
      */
-    @DebugLog
+    //@DebugLog
     public Bitmap getArtwork(String artistName, String albumName) {
         if (artistName == null || albumName == null) {
             return null;
@@ -100,7 +100,7 @@ public class ArtworkProviderUtil {
      * @param albumName
      * @return
      */
-    @DebugLog
+    //@DebugLog
     public Bitmap getArtworkThumbnail(String artistName, String albumName) {
         if (artistName == null || albumName == null) {
             return null;

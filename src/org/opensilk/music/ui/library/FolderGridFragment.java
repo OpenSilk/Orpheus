@@ -95,7 +95,7 @@ public class FolderGridFragment extends CardGridFragment implements
      */
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onFirstLoadComplete() {
         setListShown(true);
     }

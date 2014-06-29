@@ -538,7 +538,7 @@ public class MusicPlaybackService extends Service {
     /**
      * {@inheritDoc}
      */
-    @DebugLog
+    //@DebugLog
     @Override
     public IBinder onBind(final Intent intent) {
         if (D) Log.d(TAG, "Service bound, intent = " + intent);
@@ -550,7 +550,7 @@ public class MusicPlaybackService extends Service {
     /**
      * {@inheritDoc}
      */
-    @DebugLog
+    //@DebugLog
     @Override
     public boolean onUnbind(final Intent intent) {
         if (D) Log.d(TAG, "Service unbound");
@@ -578,7 +578,7 @@ public class MusicPlaybackService extends Service {
     /**
      * {@inheritDoc}
      */
-    @DebugLog
+    //@DebugLog
     @Override
     public void onRebind(final Intent intent) {
         cancelShutdown();
@@ -723,7 +723,7 @@ public class MusicPlaybackService extends Service {
      * {@inheritDoc}
      */
     @Override
-    @DebugLog
+    //@DebugLog
     public void onDestroy() {
         if (D) Log.d(TAG, "Destroying service");
         super.onDestroy();
@@ -2037,7 +2037,7 @@ public class MusicPlaybackService extends Service {
      * @param position The time to seek to
      * @return The time to play the track at
      */
-    @DebugLog
+    //@DebugLog
     public long seek(long position) {
         if (isRemotePlayback()) {
             return seekRemote(position);
@@ -2046,7 +2046,7 @@ public class MusicPlaybackService extends Service {
         }
     }
 
-    @DebugLog
+    //@DebugLog
     private long seekRemote(long position) {
         try {
             if (position < 0) {
@@ -2246,7 +2246,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Resumes or starts playback.
      */
-    @DebugLog
+    //@DebugLog
     public void play() {
         if (isRemotePlayback()) {
             playRemote();
@@ -2255,7 +2255,7 @@ public class MusicPlaybackService extends Service {
         }
     }
 
-    @DebugLog
+    //@DebugLog
     private void playRemote() {
         mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
@@ -2413,7 +2413,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Changes from the current track to the previous played track
      */
-    @DebugLog
+    //@DebugLog
     public void prev() {
         if (D) Log.d(TAG, "Going to previous track");
         if (isRemotePlayback() && mRemoteMediaLoading) {
@@ -2630,7 +2630,7 @@ public class MusicPlaybackService extends Service {
     /**
      * @return The album art for the current album.
      */
-    @DebugLog
+    //@DebugLog
     public Bitmap getAlbumArt() {
         return mArtworkUtil.getArtwork(getAlbumArtistName(), getAlbumName());
     }
@@ -2669,7 +2669,7 @@ public class MusicPlaybackService extends Service {
      * Starts cast http server, creating it if needed.
      * @return success of operation
      */
-    @DebugLog
+    //@DebugLog
     private boolean startCastServer() {
         if (mCastServer == null) {
             try {
@@ -2696,7 +2696,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Stops cast http server if running
      */
-    @DebugLog
+    //@DebugLog
     private void stopCastServer() {
         if (mCastServer != null) {
             mCastServer.stop();
@@ -2708,7 +2708,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Initiates remote playback for current track
      */
-    @DebugLog
+    //@DebugLog
     private void loadRemoteCurrent() {
         if (mCurrentMediaInfo == null) {
             Log.w(TAG, "Tried to load null media");
@@ -2738,7 +2738,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Initiates remote playback for next track
      */
-    @DebugLog
+    //@DebugLog
     private void loadRemoteNext() {
         if (mNextMediaInfo != null) {
             if (loadRemote(mNextMediaInfo, true, 0)) {
@@ -2752,7 +2752,7 @@ public class MusicPlaybackService extends Service {
         }
     }
 
-    @DebugLog
+    //@DebugLog
     private boolean loadRemote(MediaInfo info, boolean autoplay, int startPos) {
         try {
             mRemoteMediaLoading = mCastManager.loadMedia(info, autoplay, startPos, null,
@@ -2848,19 +2848,19 @@ public class MusicPlaybackService extends Service {
     private final IMediaCastConsumer mCastConsumer = new IMediaCastConsumerImpl() {
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onConnected() {
             // Nothing i can think of to do here, we are still waiting for the app to connect
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onDisconnected() {
             restoreLocalState();
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
             if (startCastServer()) {
                 // If wifi was off when the song started mCurrentMediaInfo will be null
@@ -2880,46 +2880,46 @@ public class MusicPlaybackService extends Service {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onApplicationConnectionFailed(int errorCode) {
             //Nothing for us to do, the user must manually try again
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onApplicationDisconnected(int errorCode) {
             restoreLocalState();
         }
 
         /** Called when stopApplication() succeeds*/
         @Override
-        @DebugLog
+        //@DebugLog
         public void onApplicationStopped() {
             mCastManager.selectDevice(null);
         }
 
         /** Called when stopApplication() fails */
         @Override
-        @DebugLog
+        //@DebugLog
         public void onApplicationStopFailed(int errorCode) {
             // As far as the activity is concered we are disconnected;
             mCastManager.selectDevice(null);
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onApplicationStatusChanged(String appStatus) {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onConnectionSuspended(int cause) {
             //restoreLocalState();
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onConnectivityRecovered() {
             updatePlaybackLocation(PlaybackLocation.REMOTE);
             if (mCastServer == null) {
@@ -2950,19 +2950,19 @@ public class MusicPlaybackService extends Service {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onVolumeChanged(double value, boolean isMute) {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onRemoteMediaPlayerMetadataUpdated() {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onRemoteMediaPlayerStatusUpdated() {
             MediaStatus status = mCastManager.getRemoteMediaPlayer().getMediaStatus();
 
@@ -2977,37 +2977,37 @@ public class MusicPlaybackService extends Service {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onRemovedNamespace() {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onDataMessageSendFailed(int errorCode) {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onDataMessageReceived(String message) {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onConnectionFailed(ConnectionResult result) {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onCastDeviceDetected(MediaRouter.RouteInfo info) {
 
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onFailed(int resourceId, int statusCode) {
             Log.e(TAG, "onFailed " + getString(resourceId));
             switch (resourceId) {

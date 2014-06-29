@@ -52,7 +52,7 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPreferences = PreferenceUtils.getInstance(getActivity());
@@ -62,7 +62,7 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onViewCreated(View view, Bundle savedInstanceState) {
         setEmptyText(getEmptyText());
         super.onViewCreated(view, savedInstanceState);

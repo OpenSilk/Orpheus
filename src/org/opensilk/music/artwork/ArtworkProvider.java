@@ -83,7 +83,7 @@ public class ArtworkProvider extends ContentProvider {
     ArtworkService mArtworkService;
 
     @Override
-    @DebugLog
+    //@DebugLog
     public boolean onCreate() {
         mGraphHolder = GraphHolder.get(getContext());
         mGraphHolder.inject(this);
@@ -125,7 +125,7 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         if (!"r".equals(mode)) {
             throw new IllegalArgumentException("Provider is read only");

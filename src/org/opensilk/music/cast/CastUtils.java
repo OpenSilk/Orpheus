@@ -121,7 +121,7 @@ public class CastUtils {
         return c;
     }
 
-    @DebugLog
+    //@DebugLog
     public static MediaInfo buildMediaInfo(String trackTitle,
                                             String albumTitle,
                                             String artistName,

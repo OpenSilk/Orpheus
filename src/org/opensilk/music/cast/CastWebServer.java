@@ -172,7 +172,7 @@ public class CastWebServer extends NanoHTTPD {
      * @param headers
      * @return
      */
-    @DebugLog
+    //@DebugLog
     private Response serveArt(String uri, Map<String, String> headers) {
         String[] info = parseArtUri(uri);
         if (info == null || TextUtils.isEmpty(info[0]) || TextUtils.isEmpty(info[1])) {
@@ -229,7 +229,7 @@ public class CastWebServer extends NanoHTTPD {
      * @param headers
      * @return
      */
-    @DebugLog
+    //@DebugLog
     private Response serveSong(String uri, Map<String,String> headers) {
         String id = parseId(uri);
         if (TextUtils.isEmpty(id)) {
@@ -251,7 +251,7 @@ public class CastWebServer extends NanoHTTPD {
     /* See @SimpleWebServer#serveFile
      * Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias
      */
-    @DebugLog
+    //@DebugLog
     private Response serveFile(File file, String mime, Map<String, String> headers) {
         Response res;
         try {

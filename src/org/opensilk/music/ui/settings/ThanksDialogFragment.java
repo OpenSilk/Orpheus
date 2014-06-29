@@ -45,7 +45,7 @@ import hugo.weaving.DebugLog;
 public class ThanksDialogFragment extends DialogFragment {
 
     @Override
-    @DebugLog
+    //@DebugLog
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new ThanksDialog(getActivity());
     }
@@ -68,7 +68,7 @@ public class ThanksDialogFragment extends DialogFragment {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.settings_thanks_listview);
@@ -99,7 +99,7 @@ public class ThanksDialogFragment extends DialogFragment {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public View getView(int position, View convertView, ViewGroup parent) {
 
             View v = convertView;

@@ -134,7 +134,7 @@ public class FetchingProgressFragment extends DialogFragment {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         protected Void doInBackground(Void... params) {
 //            try {
 //                Thread.sleep(10000);

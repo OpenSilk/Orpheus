@@ -171,7 +171,7 @@ public class ArtworkRequest implements IArtworkRequest {
         ApolloUtils.execute(false, new QueueImageRequestTask(url));
     }
 
-    @DebugLog
+    //@DebugLog
     private void queueImageRequest(final Uri uri) {
         if (uri == null || uri.equals(Uri.EMPTY)) {
             notifyError(new VolleyError("Null uri"));
@@ -465,7 +465,7 @@ public class ArtworkRequest implements IArtworkRequest {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onResponse(Album response) {
             if (!TextUtils.isEmpty(response.getMbid())) {
                 if (mManager.mPreferences.wantHighResolutionArt()) {
@@ -497,7 +497,7 @@ public class ArtworkRequest implements IArtworkRequest {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onErrorResponse(VolleyError error) {
             if (tryMediaStore) {
                 ApolloUtils.execute(false, new MediaStoreTask(false));
@@ -513,7 +513,7 @@ public class ArtworkRequest implements IArtworkRequest {
     class ArtistResponseListener implements MusicEntryResponseCallback<Artist> {
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onResponse(Artist response) {
             String url = getBestImage(response, mManager.mPreferences.wantHighResolutionArt());
             if (!TextUtils.isEmpty(url)) {
@@ -524,7 +524,7 @@ public class ArtworkRequest implements IArtworkRequest {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onErrorResponse(VolleyError error) {
             notifyError(error);
         }
@@ -542,7 +542,7 @@ public class ArtworkRequest implements IArtworkRequest {
         }
 
         @Override
-        @DebugLog
+        //@DebugLog
         public void onErrorResponse(VolleyError error) {
             String url = getBestImage(mAlbum, true);
             if (!TextUtils.isEmpty(url)) {

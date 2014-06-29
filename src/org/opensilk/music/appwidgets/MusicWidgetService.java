@@ -81,7 +81,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onCreate() {
         super.onCreate();
         mToken = MusicUtils.bindToService(this, this);
@@ -102,7 +102,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public void onDestroy() {
         super.onDestroy();
         MusicUtils.unbindFromService(mToken);
@@ -110,7 +110,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     }
 
     @Override
-    @DebugLog
+    //@DebugLog
     public int onStartCommand(Intent intent, int flags, final int startId) {
         if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
             final int appId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
@@ -132,7 +132,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         return START_NOT_STICKY;
     }
 
-    @DebugLog
+    //@DebugLog
     private void updateWidget(int appId, int startId, int widgetType) {
         String albumName = MusicUtils.getAlbumName();
         String albumArtistName = MusicUtils.getAlbumArtistName();
