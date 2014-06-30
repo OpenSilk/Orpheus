@@ -41,6 +41,7 @@ public class GenreGridAdapter extends CardGridCursorAdapter {
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
         GenreCard c = new GenreCard(getContext(), CursorHelpers.makeGenreFromCursor(cursor));
+        c.useGridLayout();
         mInjector.inject(c);
         return c;
     }

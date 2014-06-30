@@ -38,7 +38,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class FolderCard extends AbsCard<Folder> {
+public class FolderCard extends AbsBundleableCard<Folder> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter

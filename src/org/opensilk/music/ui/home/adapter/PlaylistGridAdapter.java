@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.ui.home.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.CardPlaylistGrid;
+import org.opensilk.music.ui.cards.PlaylistCard;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
@@ -28,14 +29,20 @@ import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
 /**
  * Created by drew on 4/12/14.
  */
-public class PlaylistGridCardCursorAdapter extends CardGridCursorAdapter {
+public class PlaylistGridAdapter extends CardGridCursorAdapter {
 
-    public PlaylistGridCardCursorAdapter(Context context) {
+    private final DaggerInjector mInjector;
+
+    public PlaylistGridAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
+        mInjector = injector;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardPlaylistGrid(getContext(), CursorHelpers.makePlaylistFromCursor(cursor));
+        PlaylistCard c = new PlaylistCard(getContext(), CursorHelpers.makePlaylistFromCursor(cursor));
+        c.useGridLayout();
+        mInjector.inject(c);
+        return c;
     }
 }

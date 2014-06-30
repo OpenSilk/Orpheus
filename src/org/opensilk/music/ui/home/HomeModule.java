@@ -36,6 +36,7 @@ import dagger.Provides;
                 AlbumFragment.class,
                 GenreFragment.class,
                 HomeFragment.class,
+                PlaylistFragment.class,
                 HomeRecentFragment.class,
                 SongFragment.class,
         },

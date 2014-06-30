@@ -24,17 +24,15 @@ import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.api.model.spi.Bundleable;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
- * Created by drew on 6/19/14.
+ * Created by drew on 6/30/14.
  */
-public abstract class AbsCard<D extends Bundleable> extends Card {
+public abstract class AbsGenericCard<D> extends Card {
 
     protected final D mData;
 
@@ -43,7 +41,7 @@ public abstract class AbsCard<D extends Bundleable> extends Card {
     @InjectView(R.id.card_subtitle)
     protected TextView mCardSubTitle;
 
-    public AbsCard(Context context, D data, int innerLayout) {
+    public AbsGenericCard(Context context, D data, int innerLayout) {
         super(context, innerLayout);
         mData = data;
         init();
@@ -84,5 +82,4 @@ public abstract class AbsCard<D extends Bundleable> extends Card {
     public boolean isGridStyle() {
         return getInnerLayout() == getGridLayout();
     }
-
 }

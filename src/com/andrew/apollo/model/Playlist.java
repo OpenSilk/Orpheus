@@ -29,31 +29,22 @@ public class Playlist implements Parcelable {
     /**
      * The unique Id of the playlist
      */
-    public long mPlaylistId;
+    public final long mPlaylistId;
 
     /**
      * The playlist name
      */
-    public String mPlaylistName;
+    public final String mPlaylistName;
 
     /**
      * Songs in playlist
      */
-    public int mSongNumber;
+    public final int mSongNumber;
 
     /**
-     * Constructor of <code>Playlist</code>
-     * 
-     * @param playlistId The Id of the playlist
-     * @param playlistName The playlist name
+     * Number of albums in playlist
      */
-    @Deprecated
-    public Playlist(final long playlistId, final String playlistName) {
-        super();
-        mPlaylistId = playlistId;
-        mPlaylistName = playlistName;
-        mSongNumber = 0;
-    }
+    public final int mAlbumNumber;
 
     /**
      * Constructor of <code>Playlist</code>
@@ -61,11 +52,11 @@ public class Playlist implements Parcelable {
      * @param playlistId The Id of the playlist
      * @param playlistName The playlist name
      */
-    public Playlist(final long playlistId, final String playlistName, final int songNumber) {
-        super();
+    public Playlist(final long playlistId, final String playlistName, final int songNumber, final int albumNumber) {
         mPlaylistId = playlistId;
         mPlaylistName = playlistName;
         mSongNumber = songNumber;
+        mAlbumNumber = albumNumber;
     }
 
     /**
@@ -78,6 +69,7 @@ public class Playlist implements Parcelable {
         result = prime * result + (int) mPlaylistId;
         result = prime * result + (mPlaylistName == null ? 0 : mPlaylistName.hashCode());
         result = prime * result + mSongNumber;
+        result = prime * result + mAlbumNumber;
         return result;
     }
 
@@ -100,6 +92,9 @@ public class Playlist implements Parcelable {
             return false;
         }
         if (mSongNumber != other.mSongNumber) {
+            return false;
+        }
+        if (mAlbumNumber != other.mAlbumNumber) {
             return false;
         }
         return TextUtils.equals(mPlaylistName, other.mPlaylistName);
@@ -127,12 +122,14 @@ public class Playlist implements Parcelable {
         dest.writeLong(mPlaylistId);
         dest.writeString(mPlaylistName);
         dest.writeInt(mSongNumber);
+        dest.writeInt(mAlbumNumber);
     }
 
     private Playlist(Parcel in) {
         mPlaylistId = in.readLong();
         mPlaylistName = in.readString();
         mSongNumber = in.readInt();
+        mAlbumNumber = in.readInt();
     }
 
     public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {

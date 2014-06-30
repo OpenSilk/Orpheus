@@ -182,16 +182,16 @@ public class CursorHelpers {
         final long id = c.getLong(c.getColumnIndexOrThrow("_id"));
         final String name = c.getString(c.getColumnIndexOrThrow("name"));
         final int songNumber = c.getInt(c.getColumnIndexOrThrow("song_number"));
-        return new Playlist(id, name, songNumber);
+        final int albumNumber = c.getInt(c.getColumnIndexOrThrow("album_number"));
+        return new Playlist(id, name, songNumber, albumNumber);
     }
 
     public static Cursor makeLastAddedCursor(final Context context) {
         final int fourWeeks = 4 * 3600 * 24 * 7;
         return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 Projections.LOCAL_SONG,
-                MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE
-                        + "!=? AND " + MediaStore.Audio.Media.DATE_ADDED + ">?",
-                new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)},
+                Selections.LAST_ADDED,
+                SelectionArgs.LAST_ADDED(System.currentTimeMillis() / 1000 - fourWeeks),
                 MediaStore.Audio.Media.DATE_ADDED + " DESC");
     }
 

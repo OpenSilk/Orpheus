@@ -18,8 +18,14 @@
 package org.opensilk.music.ui.home;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentUris;
+import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,10 +36,12 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
@@ -43,9 +51,11 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.PlaylistCard;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.cards.event.GenreCardClick;
+import org.opensilk.music.ui.cards.event.PlaylistCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.home.adapter.HomePagerAdapter;
 import org.opensilk.music.ui.modules.ActionBarController;
@@ -397,6 +407,88 @@ public class HomeFragment extends ScopedDaggerFragment {
                     long[] plist = MusicUtils.getSongListForGenre(getActivity(), genre.mGenreId);
                     AddToPlaylistDialog.newInstance(plist)
                             .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                    return;
+            }
+            if (command != null) {
+                ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
+            }
+        }
+
+        @Subscribe
+        public void onPlaylistCardClick(PlaylistCardClick e) {
+            final Playlist playlist = e.playlist;
+            Command command = null;
+            switch (e.event) {
+                case OPEN:
+                    NavUtils.openPlaylistProfile(getActivity(), playlist);
+                    return;
+                case PLAY_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            if (playlist.mPlaylistId == -2) {
+                                MusicUtils.playLastAdded(getActivity(), false);
+                            } else {
+                                MusicUtils.playPlaylist(getActivity(), playlist.mPlaylistId, false);
+                            }
+                            return null;
+                        }
+                    };
+                    break;
+                case SHUFFLE_ALL:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            if (playlist.mPlaylistId == -2) {
+                                MusicUtils.playLastAdded(getActivity(), true);
+                            } else {
+                                MusicUtils.playPlaylist(getActivity(), playlist.mPlaylistId, true);
+                            }
+                            return null;
+                        }
+                    };
+                    break;
+                case ADD_TO_QUEUE:
+                    command = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            Song[] list;
+                            if (playlist.mPlaylistId == -2) {
+                                list = MusicUtils.getSongListForLastAdded(getActivity());
+                            } else {
+                                list = MusicUtils.getSongListForPlaylist(getActivity(), playlist.mPlaylistId);
+                            }
+                            MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                            return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                        }
+                    };
+                    break;
+                case RENAME:
+                    RenamePlaylist.getInstance(playlist.mPlaylistId)
+                            .show(getActivity().getSupportFragmentManager(), "RenameDialog");
+                    return;
+                case DELETE:
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle(getString(R.string.delete_dialog_title, playlist.mPlaylistName))
+                            .setPositiveButton(R.string.context_menu_delete, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(final DialogInterface dialog, final int which) {
+                                    final Uri mUri = ContentUris.withAppendedId(
+                                            MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                                            playlist.mPlaylistId);
+                                    getActivity().getContentResolver().delete(mUri, null, null);
+                                    MusicUtils.refresh();
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(final DialogInterface dialog, final int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setMessage(R.string.cannot_be_undone)
+                            .create()
+                            .show();
                     return;
             }
             if (command != null) {

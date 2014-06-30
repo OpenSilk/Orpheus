@@ -26,15 +26,19 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.util.SparseLongArray;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import dagger.ObjectGraph;
 
@@ -120,8 +124,9 @@ public class MusicProvider extends ContentProvider {
                         final Cursor genreSongs = getContext().getContentResolver().query(
                                 MediaStore.Audio.Genres.Members.getContentUri("external", id),
                                 new String[] { MediaStore.Audio.AudioColumns.ALBUM_ID },
-                                MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?",
-                                new String[] {"1", "''"}, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+                                Selections.LOCAL_SONG,
+                                SelectionArgs.LOCAL_SONG,
+                                MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
 
                         // Don't add genres without any songs
                         if (genreSongs == null) {
@@ -167,8 +172,9 @@ public class MusicProvider extends ContentProvider {
                 final Cursor genreSongs = getContext().getContentResolver().query(
                         MediaStore.Audio.Genres.Members.getContentUri("external", genreId),
                         new String[] {MediaStore.Audio.AudioColumns.ALBUM_ID },
-                        MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?",
-                        new String[] {"1", "''"}, MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+                        Selections.LOCAL_SONG,
+                        SelectionArgs.LOCAL_SONG,
+                        MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
 
                 // loop the songs and filter all the unique album ids
                 final HashSet<String> albumIdsSet = new HashSet<String>();
@@ -207,20 +213,29 @@ public class MusicProvider extends ContentProvider {
                 }
                 return c;
             case 4: //Playlists
-                c = new MatrixCursor(new String[] {"_id", "name", "song_number"});
+                c = new MatrixCursor(new String[] {"_id", "name", "song_number", "album_number"});
                 //last added first
                 // Get the song count
                 final Cursor lastAdded = CursorHelpers.makeLastAddedCursor(getContext());
                 int lastAddedSongNum = 0;
+                int lastAddedAlbumNum = 0;
                 if (lastAdded != null) {
                     lastAddedSongNum = lastAdded.getCount();
+                    if (lastAdded.moveToFirst()) {
+                        Set<String> albums = new HashSet<>(lastAddedSongNum);
+                        do {
+                            albums.add(lastAdded.getString(lastAdded.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)));
+                        } while (lastAdded.moveToNext());
+                        lastAddedAlbumNum = albums.size();
+                    }
                     lastAdded.close();
                 }
                 // if there are songs add the lastadded playlist
                 if (lastAddedSongNum > 0) {
                     ((MatrixCursor) c).addRow(new Object[] { -2,
                             getContext().getResources().getString(R.string.playlist_last_added),
-                            lastAddedSongNum
+                            lastAddedSongNum,
+                            lastAddedAlbumNum
                     });
                 }
                 // User playlists next
@@ -238,17 +253,24 @@ public class MusicProvider extends ContentProvider {
                         // We have to query for the song count
                         final Cursor playlistSongs = getContext().getContentResolver().query(
                                 MediaStore.Audio.Playlists.Members.getContentUri("external", id),
-                                new String[] {MediaStore.Audio.AudioColumns.ALBUM_ID},
-                                MediaStore.Audio.Playlists.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Playlists.Members.TITLE + "!=?",
-                                new String[] {"1", "''"},
-                                MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER
-                        );
+                                new String[] {MediaStore.Audio.Media.ALBUM_ID},
+                                Selections.LOCAL_SONG,
+                                SelectionArgs.LOCAL_SONG,
+                                MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
                         int numSongs = 0;
+                        int numAlbums = 0;
                         if (playlistSongs != null) {
                             numSongs = playlistSongs.getCount();
+                            Set<String> albums = new HashSet<>(numSongs);
+                            if (playlistSongs.moveToFirst()) {
+                                do {
+                                    albums.add(playlistSongs.getString(0));
+                                } while (playlistSongs.moveToNext());
+                            }
+                            numAlbums = albums.size();
                             playlistSongs.close();
                         }
-                        ((MatrixCursor) c).addRow(new Object[] {id, name, numSongs});
+                        ((MatrixCursor) c).addRow(new Object[] {id, name, numSongs, numAlbums});
                     } while (playlists.moveToNext());
                 }
                 if (playlists != null) {

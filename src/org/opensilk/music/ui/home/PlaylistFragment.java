@@ -21,36 +21,31 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.widget.CursorAdapter;
 
-import org.opensilk.music.adapters.PlaylistGridCardCursorAdapter;
-import org.opensilk.music.loaders.PlaylistCursorLoader;
+import org.opensilk.music.ui.home.adapter.PlaylistGridAdapter;
+import org.opensilk.music.ui.home.loader.PlaylistLoader;
 
 /**
- * Playlists
+ * Created by drew on 6/30/14.
  */
-public class HomePlaylistFragment extends HomePagerBaseCursorFragment {
-
-    /*
-     * Loader Callbacks
-     */
+public class PlaylistFragment extends BasePagerFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new PlaylistCursorLoader(getActivity());
+        return new PlaylistLoader(getActivity());
     }
-
-    /*
-     * Implement abstract methods
-     */
 
     @Override
     protected CursorAdapter createAdapter() {
-        return new PlaylistGridCardCursorAdapter(getActivity());
+        if (wantGridView()) {
+            return new PlaylistGridAdapter(getActivity(), mInjector);
+        } else {
+            throw new UnsupportedOperationException("Cant do lists yet");
+        }
     }
 
     @Override
-    protected boolean isSimpleLayout() {
-        return false; //Just grid for now.
+    public boolean wantGridView() {
+        return true;
     }
-
 
 }

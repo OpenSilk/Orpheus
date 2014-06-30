@@ -19,20 +19,18 @@ package org.opensilk.music.ui.cards;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
-import android.text.TextUtils;
-import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
@@ -40,9 +38,8 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.cards.event.GenreCardClick;
-import org.opensilk.music.ui.cards.event.GenreCardClick.Event;
+import org.opensilk.music.ui.cards.event.PlaylistCardClick;
+import org.opensilk.music.ui.cards.event.PlaylistCardClick.Event;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
@@ -59,13 +56,12 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
- * Created by drew on 6/28/14.
+ * Created by drew on 6/30/14.
  */
-public class GenreCard extends AbsGenericCard<Genre> {
+public class PlaylistCard extends AbsGenericCard<Playlist> {
 
     @Inject @ForFragment
     Bus mBus;
@@ -75,15 +71,16 @@ public class GenreCard extends AbsGenericCard<Genre> {
     // no inject
     protected ArtworkImageView mArtwork2;
 
-    public GenreCard(Context context, Genre data) {
+    public PlaylistCard(Context context, Playlist data) {
         super(context, data, determiteLayout(data));
     }
 
+    @Override
     protected void init() {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new GenreCardClick(Event.OPEN, mData));
+                mBus.post(new PlaylistCardClick(Event.OPEN, mData));
             }
         });
     }
@@ -94,39 +91,48 @@ public class GenreCard extends AbsGenericCard<Genre> {
         super.setupInnerViewElements(parent, view);
     }
 
+    @Override
     protected void onInnerViewSetup() {
-        mCardTitle.setText(mData.mGenreName);
-        String l2 = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber)
-                + ", " + MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber);
-        mCardSubTitle.setText(l2);
-        if (mArtwork2 != null) {
-            ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork, mArtwork2));
-        } else {
-            ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork));
+        mCardTitle.setText(mData.mPlaylistName);
+        mCardSubTitle.setText(MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber));
+        if (mData.mAlbumNumber > 0) {
+            if (mArtwork2 != null) {
+                ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork, mArtwork2));
+            } else {
+                ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork));
+            }
         }
     }
 
+    @Override
     protected void onCreatePopupMenu(PopupMenu m) {
         m.inflate(R.menu.popup_play_all);
         m.inflate(R.menu.popup_shuffle_all);
         m.inflate(R.menu.popup_add_to_queue);
-        m.inflate(R.menu.popup_add_to_playlist);
+        if (mData.mPlaylistId != -2) {
+            // cant rename or delete last added
+            m.inflate(R.menu.popup_rename);
+            m.inflate(R.menu.popup_delete);
+        }
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.popup_play_all:
-                        mBus.post(new GenreCardClick(Event.PLAY_ALL, mData));
-                        return true;
+                        mBus.post(new PlaylistCardClick(Event.PLAY_ALL, mData));
+                        break;
                     case R.id.popup_shuffle_all:
-                        mBus.post(new GenreCardClick(Event.SHUFFLE_ALL, mData));
-                        return true;
+                        mBus.post(new PlaylistCardClick(Event.SHUFFLE_ALL, mData));
+                        break;
                     case R.id.popup_add_to_queue:
-                        mBus.post(new GenreCardClick(Event.ADD_TO_QUEUE, mData));
-                        return true;
-                    case R.id.popup_add_to_playlist:
-                        mBus.post(new GenreCardClick(Event.ADD_TO_QUEUE, mData));
-                        return true;
+                        mBus.post(new PlaylistCardClick(Event.ADD_TO_QUEUE, mData));
+                        break;
+                    case R.id.popup_rename:
+                        mBus.post(new PlaylistCardClick(Event.RENAME, mData));
+                        break;
+                    case R.id.popup_delete:
+                        mBus.post(new PlaylistCardClick(Event.DELETE, mData));
+                        break;
                 }
                 return false;
             }
@@ -135,7 +141,7 @@ public class GenreCard extends AbsGenericCard<Genre> {
 
     @Override
     protected int getListLayout() {
-        throw new UnsupportedOperationException("No list for genres");
+        throw new UnsupportedOperationException("No list for playlists");
     }
 
     @Override
@@ -143,8 +149,8 @@ public class GenreCard extends AbsGenericCard<Genre> {
         return determiteLayout(mData);
     }
 
-    private static int determiteLayout(Genre genre) {
-        if (genre.mAlbumNumber >= 2) {
+    private static int determiteLayout(Playlist plist) {
+        if (plist.mAlbumNumber >= 2) {
             return R.layout.library_gridcard_dual_artwork_inner;
         } else {
             return R.layout.library_gridcard_artwork_inner;
@@ -153,37 +159,45 @@ public class GenreCard extends AbsGenericCard<Genre> {
 
     class ArtLoaderTask extends AsyncTask<Void, Void, Set<ArtInfo>> {
         final ArtworkImageView[] views;
-        final long genreId;
+        final long playlistId;
 
-        ArtLoaderTask(long genreId, ArtworkImageView... imageViews) {
+        ArtLoaderTask(long playlistId, ArtworkImageView... imageViews) {
             this.views = imageViews;
-            this.genreId = genreId;
+            this.playlistId = playlistId;
         }
 
         @Override
         protected Set<ArtInfo> doInBackground(Void... params) {
+
             Set<ArtInfo> artInfos = new HashSet<>();
-            final Cursor genreSongs = getContext().getContentResolver().query(
-                    MediaStore.Audio.Genres.Members.getContentUri("external", genreId),
-                    new String[]{
-                            MediaStore.Audio.Media.ARTIST,
-                            MediaStore.Audio.Media.ALBUM,
-                            MediaStore.Audio.Media.ALBUM_ID,
-                    },
-                    Selections.LOCAL_SONG,
-                    SelectionArgs.LOCAL_SONG,
-                    MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
-            if (genreSongs != null && genreSongs.moveToFirst()) {
+            // We have to query for the song count
+            final Cursor playlistSongs;
+            if (playlistId == -2) { //Last added
+                playlistSongs = CursorHelpers.makeLastAddedCursor(getContext());
+            } else { // user
+                playlistSongs = getContext().getContentResolver().query(
+                        MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
+                        new String[]{
+                                MediaStore.Audio.Media.ARTIST, //TODO this should really be albumartist
+                                MediaStore.Audio.Media.ALBUM,
+                                MediaStore.Audio.Media.ALBUM_ID,
+                        },
+                        Selections.LOCAL_SONG,
+                        SelectionArgs.LOCAL_SONG,
+                        MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER
+                );
+            }
+            if (playlistSongs != null && playlistSongs.moveToFirst()) {
                 do {
-                    String artist = genreSongs.getString(0);
-                    String album = genreSongs.getString(1);
-                    long albumId = genreSongs.getLong(2);
+                    String artist = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+                    String album = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+                    long albumId = playlistSongs.getLong(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
                     Uri artworkUri = CursorHelpers.generateArtworkUri(albumId);
                     artInfos.add(new ArtInfo(artist, album, artworkUri));
-                } while (genreSongs.moveToNext() && artInfos.size() <= views.length );
+                } while (playlistSongs.moveToNext() && artInfos.size() <= views.length);
             }
-            if (genreSongs != null) {
-                genreSongs.close();
+            if (playlistSongs != null) {
+                playlistSongs.close();
             }
             return artInfos;
         }
@@ -199,6 +213,5 @@ public class GenreCard extends AbsGenericCard<Genre> {
             }
         }
     }
-
 
 }

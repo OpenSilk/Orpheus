@@ -132,16 +132,16 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
                 }
                 return true;
             case R.id.card_menu_add_queue:
-                long[] list = null;
-                if (mPlaylist.mPlaylistId == -1) {
-                    list = MusicUtils.getSongListForFavorites(getActivity());
-                } else if (mPlaylist.mPlaylistId == -2) {
-                    list = MusicUtils.getSongListForLastAdded(getActivity());
-                } else {
-                    list = MusicUtils.getSongListForPlaylist(getActivity(),
-                            mPlaylist.mPlaylistId);
-                }
-                MusicUtils.addToQueue(getActivity(), list);
+//                long[] list = null;
+//                if (mPlaylist.mPlaylistId == -1) {
+//                    list = MusicUtils.getSongListForFavorites(getActivity());
+//                } else if (mPlaylist.mPlaylistId == -2) {
+//                    list = MusicUtils.getSongListForLastAdded(getActivity());
+//                } else {
+//                    list = MusicUtils.getSongListForPlaylist(getActivity(),
+//                            mPlaylist.mPlaylistId);
+//                }
+//                MusicUtils.addToQueue(getActivity(), list);
                 return true;
             case R.id.card_menu_rename:
                 RenamePlaylist.getInstance(mPlaylist.mPlaylistId).show(

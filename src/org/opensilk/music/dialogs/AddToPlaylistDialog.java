@@ -28,7 +28,7 @@ import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 
-import org.opensilk.music.loaders.PlaylistCursorLoader;
+import org.opensilk.music.ui.home.loader.PlaylistLoader;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class AddToPlaylistDialog extends DialogFragment implements DialogInterfa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUserPlaylists = PlaylistCursorLoader.getUserPlaylists(getActivity());
+        mUserPlaylists = PlaylistLoader.getUserPlaylists(getActivity());
         if (getArguments() != null) {
             mSongIds = getArguments().getLongArray("playlist_list");
         }

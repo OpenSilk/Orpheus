@@ -1343,22 +1343,25 @@ public final class MusicUtils {
      * @param playlistId The playlist Id
      * @return The track list for a playlist
      */
-    public static final long[] getSongListForPlaylist(final Context context, final long playlistId) {
-        final String[] projection = new String[] {
-            MediaStore.Audio.Playlists.Members.AUDIO_ID
-        };
+    public static Song[] getSongListForPlaylist(final Context context, final long playlistId) {
         Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Playlists.Members.getContentUri("external",
-                        Long.valueOf(playlistId)), projection, null, null,
+                MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_SONG,
+                SelectionArgs.LOCAL_SONG,
                 MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-
         if (cursor != null) {
-            final long[] list = getSongListForCursor(cursor);
+            final LocalSong[] list = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii=0;
+                do {
+                    list[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
+            }
             cursor.close();
-            cursor = null;
             return list;
         }
-        return sEmptyList;
+        return sEmptySongList;
     }
 
     /**
@@ -1368,10 +1371,7 @@ public final class MusicUtils {
      * @param playlistId The playlist Id.
      */
     public static void playPlaylist(final Context context, final long playlistId, final boolean forceShuffle) {
-        final long[] playlistList = getSongListForPlaylist(context, playlistId);
-        if (playlistList != null) {
-            playAll(context, playlistList, -1, forceShuffle);
-        }
+        playAllSongs(context, getSongListForPlaylist(context, playlistId), 0, forceShuffle);
     }
 
     /**
@@ -1428,18 +1428,20 @@ public final class MusicUtils {
      * @param context The {@link Context} to use
      * @return The song list for the last added playlist
      */
-    public static final long[] getSongListForLastAdded(final Context context) {
+    public static Song[] getSongListForLastAdded(final Context context) {
         final Cursor cursor = CursorHelpers.makeLastAddedCursor(context);
         if (cursor != null) {
-            final int count = cursor.getCount();
-            final long[] list = new long[count];
-            for (int i = 0; i < count; i++) {
-                cursor.moveToNext();
-                list[i] = cursor.getLong(0);
+            final LocalSong[] list = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii=0;
+                do {
+                    list[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
             }
+            cursor.close();
             return list;
         }
-        return sEmptyList;
+        return sEmptySongList;
     }
 
     /**
@@ -1448,7 +1450,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use
      */
     public static void playLastAdded(final Context context, final boolean forceShuffle) {
-        playAll(context, getSongListForLastAdded(context), 0, forceShuffle);
+        playAllSongs(context, getSongListForLastAdded(context), 0, forceShuffle);
     }
 
     /**

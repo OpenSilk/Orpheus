@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.cards;
+package org.opensilk.music.ui.cards.event;
 
-import dagger.Module;
+import com.andrew.apollo.model.Playlist;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/30/14.
  */
-@Module (
-        injects = {
-                AlbumCard.class,
-                ArtistCard.class,
-                FolderCard.class,
-                GenreCard.class,
-                PlaylistCard.class,
-                SongCard.class,
-                SongQueueCard.class,
-        },
-        complete = false
-)
-public class CardModule {
+public class PlaylistCardClick {
+
+    public enum Event {
+        OPEN,
+        PLAY_ALL,
+        SHUFFLE_ALL,
+        ADD_TO_QUEUE,
+        RENAME,
+        DELETE,
+    }
+
+    public final Event event;
+    public final Playlist playlist;
+
+    public PlaylistCardClick(Event event, Playlist playlist) {
+        this.event = event;
+        this.playlist = playlist;
+    }
+
 }

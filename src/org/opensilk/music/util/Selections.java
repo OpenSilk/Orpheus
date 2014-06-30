@@ -29,23 +29,9 @@ public class Selections {
     public static final String LOCAL_ARTIST_SONGS;
 
     static {
-        LOCAL_SONG = new StringBuilder()
-                .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
-                .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?")
-                .toString();
-        LOCAL_ALBUM_SONGS = new StringBuilder()
-                .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
-                .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?")
-                .append(" AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=?")
-                .toString();
-        LAST_ADDED = new StringBuilder()
-                .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
-                .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?")
-                .append(" AND " + MediaStore.Audio.Media.DATE_ADDED + ">?")
-                .toString();
-        LOCAL_ARTIST_SONGS = new StringBuilder()
-                .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=?")
-                .append(" AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=?")
-                .toString();
+        LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";
+        LOCAL_ALBUM_SONGS = LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=?";
+        LAST_ADDED = LOCAL_SONG + " AND " + MediaStore.Audio.Media.DATE_ADDED + ">?";
+        LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=?";
     }
 }

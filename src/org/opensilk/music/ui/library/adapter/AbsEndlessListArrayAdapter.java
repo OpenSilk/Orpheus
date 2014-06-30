@@ -24,7 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.ui.cards.AbsCard;
+import org.opensilk.music.ui.cards.AbsBundleableCard;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -128,7 +128,7 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter {
     }
 
     public Bundleable getItemData(int position) {
-        return ((AbsCard) getItem(position)).getData();
+        return ((AbsBundleableCard) getItem(position)).getData();
     }
 
     public boolean isOnFirstLoad() {

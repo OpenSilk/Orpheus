@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.home.loader;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -31,9 +31,9 @@ import java.util.List;
 /**
  * Created by drew on 4/12/14.
  */
-public class PlaylistCursorLoader extends CursorLoader {
+public class PlaylistLoader extends CursorLoader {
 
-    public PlaylistCursorLoader(Context context) {
+    public PlaylistLoader(Context context) {
         super(context);
         setUri(MusicProvider.PLAYLIST_URI);
         // Our content provider doesnt read any of these values
@@ -78,7 +78,7 @@ public class PlaylistCursorLoader extends CursorLoader {
                 final String name = c.getString(1);
 
                 // Create a new playlist
-                final Playlist playlist = new Playlist(id, name, 0);
+                final Playlist playlist = new Playlist(id, name, 0, 0);
 
                 // Add everything up
                 usrPlaylists.add(playlist);

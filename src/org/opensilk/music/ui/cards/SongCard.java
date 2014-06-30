@@ -42,7 +42,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class SongCard extends AbsCard<Song> {
+public class SongCard extends AbsBundleableCard<Song> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter

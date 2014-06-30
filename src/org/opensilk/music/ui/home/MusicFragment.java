@@ -27,7 +27,7 @@ public enum MusicFragment {
     /**
      * The playlist fragment
      */
-//    PLAYLIST(HomePlaylistFragment.class, R.string.page_playlists),
+    PLAYLIST(PlaylistFragment.class, R.string.page_playlists),
     /**
      * The recent fragment
      */

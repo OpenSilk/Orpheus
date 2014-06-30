@@ -20,9 +20,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.RecentSong;
@@ -38,15 +36,13 @@ import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 6/25/14.
  */
-public class SongQueueCard extends AbsCard<RecentSong> {
+public class SongQueueCard extends AbsBundleableCard<RecentSong> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter

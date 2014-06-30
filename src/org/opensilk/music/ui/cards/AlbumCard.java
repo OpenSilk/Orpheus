@@ -24,7 +24,6 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalAlbum;
-import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Album;
@@ -43,7 +42,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/19/14.
  */
-public class AlbumCard extends AbsCard<Album> {
+public class AlbumCard extends AbsBundleableCard<Album> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter
