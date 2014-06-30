@@ -47,7 +47,7 @@ public class QueueAdapter extends CardArrayAdapter {
         clear();
         for (RecentSong s : songs) {
             SongQueueCard c = new SongQueueCard(getContext(), s);
-            c.setId(s.song.identity);
+            c.setId(s.identity);
             mInjector.inject(c);
             add(c);
         }

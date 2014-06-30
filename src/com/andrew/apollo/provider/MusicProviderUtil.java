@@ -73,6 +73,7 @@ public class MusicProviderUtil {
             if (c.getCount() > 0 && c.moveToFirst()) {
                 playcount = c.getInt(0);
             }
+            c.close();
             ContentValues values = new ContentValues();
             values.put(MusicStore.Cols.PLAYCOUNT, ++playcount);
             values.put(MusicStore.Cols.LAST_PLAYED, System.currentTimeMillis());
@@ -80,7 +81,6 @@ public class MusicProviderUtil {
                     values,
                     BaseColumns._ID + "=?",
                     new String[]{ String.valueOf(id) });
-            c.close();
         }
     }
 
@@ -113,7 +113,7 @@ public class MusicProviderUtil {
                 null);
         if (c != null) {
             if (c.getCount() > 0 && c.moveToFirst()) {
-                s = CursorHelpers.makeRecentSongFromCursor(c);
+                s = CursorHelpers.makeRecentSongFromRecentCursor(c);
             }
             c.close();
         }

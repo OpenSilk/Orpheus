@@ -16,25 +16,30 @@
 
 package com.andrew.apollo.model;
 
+import android.net.Uri;
+
 import org.opensilk.music.api.model.Song;
 
 /**
  * Created by drew on 6/26/14.
  */
-public class RecentSong {
+public class RecentSong extends Song {
 
-    public final Song song;
-    public final long id;
+    public final long recentId;
     public final boolean isLocal;
-    public final int playcount;
-    public final long lastplayed;
+    public final int playCount;
+    public final long lastPlayed;
 
-    public RecentSong(Song song, long id, boolean isLocal, int playcount, long lastplayed) {
-        this.song = song;
-        this.id = id;
+    public RecentSong(String identity, String name, String albumName, String artistName,
+                      String albumArtistName, String albumIdentity, int duration,
+                      Uri dataUri, Uri artworkUri, String mimeType, long recentId,
+                      boolean isLocal, int playCount, long lastPlayed) {
+        super(identity, name, albumName, artistName,
+                albumArtistName, albumIdentity, duration, dataUri, artworkUri, mimeType);
+        this.recentId = recentId;
         this.isLocal = isLocal;
-        this.playcount = playcount;
-        this.lastplayed = lastplayed;
+        this.playCount = playCount;
+        this.lastPlayed = lastPlayed;
     }
 
 }

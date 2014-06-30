@@ -35,6 +35,7 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.mobeta.android.dslv.DragSortListView;
@@ -54,6 +55,8 @@ import org.opensilk.music.ui.cards.SongQueueCard;
 import org.opensilk.music.ui.cards.event.SongQueueCardClick;
 import org.opensilk.music.ui.fragments.adapter.QueueAdapter;
 import org.opensilk.music.ui.fragments.loader.QueueLoader;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
@@ -198,9 +201,15 @@ public class QueueFragment extends ScopedDaggerFragment implements
 
     @Override
     public void remove(final int which) {
-        Card c = mAdapter.getItem(which);
+        final Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
-        MusicUtils.removeQueueItem(((SongQueueCard) c).getData().id);
+        ApolloUtils.execute(false, new CommandRunner(getActivity(), new Command() {
+            @Override
+            public CharSequence execute() {
+                MusicUtils.removeQueueItem(((SongQueueCard) c).getData().recentId);
+                return null;
+            }
+        }));
     }
 
     /*
@@ -215,7 +224,13 @@ public class QueueFragment extends ScopedDaggerFragment implements
         mAdapter.insert(c, to);
         mAdapter.setNotifyOnChange(true);
         mAdapter.notifyDataSetChanged();
-        MusicUtils.moveQueueItem(from, to);
+        ApolloUtils.execute(false, new CommandRunner(getActivity(), new Command() {
+            @Override
+            public CharSequence execute() {
+                MusicUtils.moveQueueItem(from, to);
+                return null;
+            }
+        }));
     }
 
     /**
@@ -240,7 +255,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
             return 0;
         }
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            if (trackId == ((SongQueueCard) mAdapter.getItem(i)).getData().id) {
+            if (trackId == ((SongQueueCard) mAdapter.getItem(i)).getData().recentId) {
                 return i;
             }
         }
@@ -356,58 +371,89 @@ public class QueueFragment extends ScopedDaggerFragment implements
     class FragmentBusMonitor {
         @Subscribe
         public void onCardItemClicked(SongQueueCardClick e) {
+            final RecentSong song = e.song;
+            Command c = null;
             switch (e.event) {
                 case PLAY:
-                    int pos = getTrackPosition(e.song.id);
-                    // When selecting a track from the queue, just jump there instead of
-                    // reloading the queue. This is both faster, and prevents accidentally
-                    // dropping out of party shuffle.
-                    MusicUtils.setQueuePosition(pos);
+                    c = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            final int pos = getTrackPosition(song.recentId);
+                            // When selecting a track from the queue, just jump there instead of
+                            // reloading the queue. This is both faster, and prevents accidentally
+                            // dropping out of party shuffle.
+                            MusicUtils.setQueuePosition(pos);
+                            return null;
+                        }
+                    };
                     break;
                 case PLAY_NEXT:
-                    MusicUtils.removeQueueItem(e.song.id);
-                    MusicUtils.playNext(new long[]{e.song.id});
+                    c = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            MusicUtils.removeQueueItem(song.recentId);
+                            MusicUtils.playNext(new long[]{song.recentId});
+                            return null;
+                        }
+                    };
                     break;
                 case REMOVE_FROM_QUEUE:
-                    MusicUtils.removeQueueItem(e.song.id);
+                    c = new Command() {
+                        @Override
+                        public CharSequence execute() {
+                            MusicUtils.removeQueueItem(song.recentId);
+                            return null;
+                        }
+                    };
                     break;
                 case ADD_TO_PLAYLIST:
-                    if (e.song.isLocal) {
+                    if (song.isLocal) {
                         try {
-                            long id = Long.decode(e.song.song.identity);
+                            long id = Long.decode(song.identity);
                             AddToPlaylistDialog.newInstance(new long[]{id})
                                     .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
                         } catch (NumberFormatException ex) {
                             //TODO
                         }
                     } // else unsupported
-                    break;
+                    return;
                 case MORE_BY_ARTIST:
-                    if (e.song.isLocal) {
-                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), e.song.song.artistName));
+                    if (song.isLocal) {
+                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), song.artistName));
                     } // else TODO
-                    break;
+                    return;
                 case SET_RINGTONE:
-                    if (e.song.isLocal) {
-                        try {
-                            long id = Long.decode(e.song.song.identity);
-                            MusicUtils.setRingtone(getActivity(), id);
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
+                    if (song.isLocal) {
+                        c = new Command() {
+                            @Override
+                            public CharSequence execute() {
+                                try {
+                                    long id = Long.decode(song.identity);
+                                    MusicUtils.setRingtone(getActivity(), id);
+                                } catch (NumberFormatException ex) {
+                                    //TODO
+                                }
+                                return null;
+                            }
+                        };
                     } // else unsupported
                     break;
                 case DELETE:
-                    if (e.song.isLocal) {
+                    if (song.isLocal) {
                         try {
-                            long id = Long.decode(e.song.song.identity);
-                            DeleteDialog.newInstance(e.song.song.name, new long[]{id}, null)
+                            long id = Long.decode(song.identity);
+                            DeleteDialog.newInstance(song.name, new long[]{id}, null)
                                     .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
                         } catch (NumberFormatException ex) {
                             //TODO
                         }
                     } // else unsupported
-                    break;
+                    return;
+                default:
+                    return;
+            }
+            if (c != null) {
+                ApolloUtils.execute(false, new CommandRunner(getActivity(), c));
             }
         }
 

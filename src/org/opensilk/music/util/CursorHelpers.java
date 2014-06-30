@@ -84,7 +84,7 @@ public class CursorHelpers {
         return new LocalSong(id, songName, album, artist, albumArtist, albumId, seconds, dataUri, artworkUri, mimeType);
     }
 
-    public static Song makeSongFromRecentCursor(Cursor c) {
+    public static RecentSong makeRecentSongFromRecentCursor(Cursor c) {
         final String identity = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.IDENTITY));
         final String name = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.NAME));
         final String albumName = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_NAME));
@@ -95,38 +95,18 @@ public class CursorHelpers {
         final Uri dataUri = Uri.parse(c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.DATA_URI)));
         String artString = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ARTWORK_URI));
         final Uri artworkUri;
-        if (artString == null) {
-            String albumartist = albumArtistName != null ? albumArtistName : artistName;
-            if (albumartist != null && albumName != null) {
-                artworkUri = ArtworkProvider.createArtworkUri(albumartist, albumName);
-            } else {
-                artworkUri = null;
-            }
+        if (TextUtils.isEmpty(artString)) {
+            artworkUri = null;
         } else {
             artworkUri = Uri.parse(artString);
         }
         final String mimeType = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.MIME_TYPE));
-        return new Song.Builder()
-                .setIdentity(identity)
-                .setName(name)
-                .setAlbumName(albumName)
-                .setArtistName(artistName)
-                .setAlbumArtistName(albumArtistName)
-                .setAlbumIdentity(albumIdentity)
-                .setDuration(duration)
-                .setDataUri(dataUri)
-                .setArtworkUri(artworkUri)
-                .setMimeType(mimeType)
-                .build();
-    }
-
-    public static RecentSong makeRecentSongFromCursor(Cursor c) {
-        final Song song = makeSongFromRecentCursor(c);
-        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        final long recentid = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
         final boolean isLocal = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.ISLOCAL)) == 1;
         final int playcount = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.PLAYCOUNT));
         final long lastplayed = c.getLong(c.getColumnIndexOrThrow(MusicStore.Cols.LAST_PLAYED));
-        return new RecentSong(song, id, isLocal, playcount, lastplayed);
+        return new RecentSong(identity, name, albumName, artistName, albumArtistName, albumIdentity, duration,
+                dataUri, artworkUri, mimeType, recentid, isLocal, playcount, lastplayed);
     }
 
     /**

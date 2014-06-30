@@ -17,6 +17,7 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,26 +46,18 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/25/14.
  */
-public class SongQueueCard extends Card {
+public class SongQueueCard extends AbsCard<RecentSong> {
 
     @Inject @ForFragment
     Bus mBus; //Injected by adapter
 
-    @InjectView(R.id.card_title)
-    protected TextView mCardTitle;
-    @InjectView(R.id.card_subtitle)
-    protected TextView mCardSubTitle;
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
     @InjectView(R.id.card_playing_indicator)
     protected PlayingIndicator mPlayingIndicator;
 
-    private RecentSong mData;
-
     public SongQueueCard(Context context, RecentSong song) {
-        super(context, R.layout.library_queue_listcard_inner);
-        mData = song;
-        init();
+        super(context, song, R.layout.library_queue_listcard_inner);
     }
 
     protected void init() {
@@ -77,18 +70,19 @@ public class SongQueueCard extends Card {
     }
 
     @Override
-    public void setupInnerViewElements(ViewGroup parent, View view) {
-        ButterKnife.inject(this, view);
-        mCardTitle.setText(mData.song.name);
-        mCardSubTitle.setText(mData.song.artistName);
-        String artist = mData.song.albumArtistName != null ? mData.song.albumArtistName : mData.song.artistName;
-        ArtworkManager.loadImage(new ArtInfo(artist, mData.song.albumName, mData.song.artworkUri), mArtwork);
+    protected void onInnerViewSetup() {
+        mCardTitle.setText(mData.name);
+        mCardSubTitle.setText(mData.artistName);
+        String artist = mData.albumArtistName;
+        if (TextUtils.isEmpty(artist)) {
+            artist = mData.artistName;
+        }
+        ArtworkManager.loadImage(new ArtInfo(artist, mData.albumName, mData.artworkUri), mArtwork);
         maybeStartPlayingIndicator();
     }
 
-    @OnClick(R.id.card_overflow_button)
-    public void onOverflowClicked(View v) {
-        PopupMenu m = new PopupMenu(getContext(), v);
+    @Override
+    protected void onCreatePopupMenu(PopupMenu m) {
         m.inflate(R.menu.popup_play_next);
         m.inflate(R.menu.popup_remove_from_queue); //XXX different from SongCard
         if (mData.isLocal) {
@@ -123,9 +117,17 @@ public class SongQueueCard extends Card {
                 return false;
             }
         });
-        m.show();
     }
 
+    @Override
+    protected int getListLayout() {
+        return R.layout.library_queue_listcard_inner;
+    }
+
+    @Override
+    protected int getGridLayout() {
+        throw new UnsupportedOperationException("No grid layout for queue");
+    }
 
     /**
      * Conditionally starts playing indicator animation
@@ -138,7 +140,7 @@ public class SongQueueCard extends Card {
             } else {
                 mPlayingIndicator.setVisibility(View.GONE);
             }
-            if (mData.id == MusicUtils.getCurrentAudioId()) {
+            if (mData.recentId == MusicUtils.getCurrentAudioId()) {
                 if (MusicUtils.isPlaying()) {
                     mPlayingIndicator.startAnimating();
                 } else {
@@ -148,7 +150,4 @@ public class SongQueueCard extends Card {
         }
     }
 
-    public RecentSong getData() {
-        return mData;
-    }
 }

@@ -54,7 +54,7 @@ public class QueueLoader extends WrappedAsyncTaskLoader<List<RecentSong>> {
         List<RecentSong> songs = new ArrayList<>(c.getCount());
         if (c.moveToFirst()) {
             do {
-                final RecentSong s = CursorHelpers.makeRecentSongFromCursor(c);
+                final RecentSong s = CursorHelpers.makeRecentSongFromRecentCursor(c);
                 songs.add(s);
             } while (c.moveToNext());
         }
