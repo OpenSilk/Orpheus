@@ -206,7 +206,7 @@ public class MusicProviderUtil {
         values.put(MusicStore.Cols.ALBUM_IDENTITY, song.albumIdentity);
         values.put(MusicStore.Cols.DURATION, song.duration);
         values.put(MusicStore.Cols.DATA_URI, song.dataUri.toString());
-        values.put(MusicStore.Cols.ARTWORK_URI, song.artworkUri.toString());
+        values.put(MusicStore.Cols.ARTWORK_URI, song.artworkUri != null ? song.artworkUri.toString() : null);
         values.put(MusicStore.Cols.MIME_TYPE, song.mimeType);
         values.put(MusicStore.Cols.ISLOCAL, (song instanceof LocalSong) ? 1 : 0);
         values.put(MusicStore.Cols.PLAYCOUNT, 0);
