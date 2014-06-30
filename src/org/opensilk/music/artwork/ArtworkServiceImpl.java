@@ -51,13 +51,14 @@ public class ArtworkServiceImpl implements ArtworkService {
      */
     @Override
     public ParcelFileDescriptor getArtwork(String artistName, String albumName) {
-        String cacheKey = ArtworkLoader.getCacheKey(new ArtInfo(artistName, albumName, null), ArtworkType.LARGE);
+        ArtInfo artInfo = new ArtInfo(artistName, albumName, null);
+        String cacheKey = ArtworkLoader.getCacheKey(artInfo, ArtworkType.LARGE);
         final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         if (pfd != null) {
             return pfd;
         }
         //Add to background request queue so we will have it next time
-//        BackgroundRequestor.add(artistName, albumName, album.albumId, ArtworkType.LARGE);
+        BackgroundRequestor.add(artInfo, ArtworkType.LARGE);
         return null;
     }
 
@@ -66,19 +67,21 @@ public class ArtworkServiceImpl implements ArtworkService {
      */
     @Override
     public ParcelFileDescriptor getArtworkThumbnail(String artistName, String albumName) {
-        String cacheKey = ArtworkLoader.getCacheKey(new ArtInfo(artistName, albumName, null), ArtworkType.THUMBNAIL);
+        ArtInfo artInfo = new ArtInfo(artistName, albumName, null);
+        String cacheKey = ArtworkLoader.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
         final ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         if (pfd != null) {
             return pfd;
         }
         //Add to background request queue so we will have it next time
-//        BackgroundRequestor.add(artistName, albumName, album.albumId, ArtworkType.THUMBNAIL);
+        BackgroundRequestor.add(artInfo, ArtworkType.THUMBNAIL);
         return null;
     }
 
     @Override
     //@DebugLog
     public void clearCache() {
+        Timber.i("Evicting L1 cache");
         mManager.mL1Cache.evictAll();
     }
 
@@ -86,7 +89,7 @@ public class ArtworkServiceImpl implements ArtworkService {
     //@DebugLog
     public void scheduleCacheClear() {
         AlarmManager am = (AlarmManager) mAppContext.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC, 60 * 1000, getClearCacheIntent());
+        am.set(AlarmManager.RTC, System.currentTimeMillis() + (2 * 60 * 1000), getClearCacheIntent());
     }
 
     @Override
