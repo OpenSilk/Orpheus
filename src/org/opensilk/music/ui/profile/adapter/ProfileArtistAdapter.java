@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.ui.profile.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.CardSongList;
+import com.andrew.apollo.R;
+
+import org.opensilk.music.ui.cards.AlbumCard;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 
 /**
- * Created by drew on 2/18/14.
+ * Created by drew on 2/23/14.
  */
-public class SongListCardCursorAdapter extends CardCursorAdapter {
+public class ProfileArtistAdapter extends CardCursorAdapter {
 
-    private boolean mAllowDelete = true;
+    private final DaggerInjector mInjector;
 
-    public SongListCardCursorAdapter(Context context) {
-        this(context, true);
-    }
-
-    public SongListCardCursorAdapter(Context context, boolean allowDelete) {
+    public ProfileArtistAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
-        mAllowDelete = allowDelete;
+        mInjector = injector;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return null;// new CardSongList(getContext(), CursorHelpers.makeSongFromCursorOld(cursor), mAllowDelete);
+        AlbumCard c = new AlbumCard(getContext(), CursorHelpers.makeLocalAlbumFromCursor(cursor));
+        c.setInnerLayout(R.layout.library_listcard_artwork_big_inner);
+        mInjector.inject(c);
+        return c;
     }
-
 }

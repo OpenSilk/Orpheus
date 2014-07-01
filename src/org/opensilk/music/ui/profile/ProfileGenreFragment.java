@@ -36,8 +36,8 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
 
-import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
-import org.opensilk.music.adapters.SongListCardCursorAdapter;
+import org.opensilk.music.ui.profile.adapter.ProfileArtistAdapter;
+import org.opensilk.music.ui.profile.adapter.ProfilePlaylistAdapter;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.loaders.GenreAlbumCursorLoader;
 import org.opensilk.music.loaders.GenreSongCursorLoader;
@@ -53,8 +53,8 @@ public class ProfileGenreFragment extends Fragment implements LoaderManager.Load
     private ViewPager mViewPager;
     private ProfileGenrePagerAdapter mPagerAdapter;
 
-    protected ProfileAlbumListCardCursorAdapter mAlbumAdapter;
-    protected SongListCardCursorAdapter mSongAdapter;
+    protected ProfileArtistAdapter mAlbumAdapter;
+    protected ProfilePlaylistAdapter mSongAdapter;
 
     private Genre mGenre;
 
@@ -72,8 +72,8 @@ public class ProfileGenreFragment extends Fragment implements LoaderManager.Load
         // Initialize the adapter
         mPagerAdapter = new ProfileGenrePagerAdapter(getChildFragmentManager(), getActivity());
         // Init page adapters
-        mAlbumAdapter = new ProfileAlbumListCardCursorAdapter(getActivity());
-        mSongAdapter = new SongListCardCursorAdapter(getActivity());
+        mAlbumAdapter = new ProfileArtistAdapter(getActivity(), null);
+        mSongAdapter = new ProfilePlaylistAdapter(getActivity(), null);
         //start the loaders
         getLoaderManager().initLoader(ALBUM_LOADER, createLoaderArgs(), this);
         getLoaderManager().initLoader(SONG_LOADER, createLoaderArgs(), this);

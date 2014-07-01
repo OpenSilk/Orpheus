@@ -14,40 +14,34 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 
 /**
  * Created by drew on 2/24/14.
  */
-public class PlaylistSongCursorLoader extends CursorLoader {
+public class ProfilePlaylistLoader extends CursorLoader {
 
-    public PlaylistSongCursorLoader(Context context, long playlistId) {
+    public ProfilePlaylistLoader(Context context, long playlistId) {
         super(context);
-        if (isFavorites(playlistId)) {
-
-        } else if (isLastAdded(playlistId)) {
+        if (isLastAdded(playlistId)) {
             setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
             setProjection(Projections.LOCAL_SONG);
-            setSelection(new StringBuilder()
-                    .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
-                    .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''")
-                    .append(" AND " + MediaStore.Audio.Media.DATE_ADDED + ">")
-                    .append(System.currentTimeMillis() / 1000 - (4 * 3600 * 24 * 7)).toString()); // Four weeks
-            setSelectionArgs(null);
+            setSelection(Selections.LAST_ADDED);
+            setSelectionArgs(SelectionArgs.LAST_ADDED(System.currentTimeMillis() / 1000 - (4 * 3600 * 24 * 7)));
             setSortOrder(MediaStore.Audio.Media.DATE_ADDED + " DESC");
         } else { //User generated playlist
             setUri(MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId));
             setProjection(Projections.PLAYLIST_SONGS);
-            setSelection(new StringBuilder()
-                    .append(MediaStore.Audio.AudioColumns.IS_MUSIC + "=1")
-                    .append(" AND " + MediaStore.Audio.AudioColumns.TITLE + " != ''").toString());
-            setSelectionArgs(null);
+            setSelection(Selections.LOCAL_SONG);
+            setSelectionArgs(SelectionArgs.LOCAL_SONG);
             setSortOrder(MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
         }
     }

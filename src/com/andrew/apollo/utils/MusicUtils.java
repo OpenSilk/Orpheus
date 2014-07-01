@@ -1328,7 +1328,7 @@ public final class MusicUtils {
      * @param playlistId The playlist Id
      * @return The track list for a playlist
      */
-    public static Song[] getSongListForPlaylist(final Context context, final long playlistId) {
+    public static LocalSong[] getLocalSongListForPlaylist(final Context context, final long playlistId) {
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
                 Projections.LOCAL_SONG,
@@ -1346,7 +1346,7 @@ public final class MusicUtils {
             cursor.close();
             return list;
         }
-        return sEmptySongList;
+        return sEmptyLocalSongList;
     }
 
     /**
@@ -1356,7 +1356,7 @@ public final class MusicUtils {
      * @param playlistId The playlist Id.
      */
     public static void playPlaylist(final Context context, final long playlistId, final boolean forceShuffle) {
-        playAllSongs(context, getSongListForPlaylist(context, playlistId), 0, forceShuffle);
+        playAllSongs(context, getLocalSongListForPlaylist(context, playlistId), 0, forceShuffle);
     }
 
     /**
@@ -1413,7 +1413,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use
      * @return The song list for the last added playlist
      */
-    public static Song[] getSongListForLastAdded(final Context context) {
+    public static LocalSong[] getLocalSongListForLastAdded(final Context context) {
         final Cursor cursor = CursorHelpers.makeLastAddedCursor(context);
         if (cursor != null) {
             final LocalSong[] list = new LocalSong[cursor.getCount()];
@@ -1426,7 +1426,7 @@ public final class MusicUtils {
             cursor.close();
             return list;
         }
-        return sEmptySongList;
+        return sEmptyLocalSongList;
     }
 
     /**
@@ -1435,7 +1435,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use
      */
     public static void playLastAdded(final Context context, final boolean forceShuffle) {
-        playAllSongs(context, getSongListForLastAdded(context), 0, forceShuffle);
+        playAllSongs(context, getLocalSongListForLastAdded(context), 0, forceShuffle);
     }
 
     /**

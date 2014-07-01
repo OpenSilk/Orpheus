@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.ui.profile.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -26,18 +26,28 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.cards.CardSongList;
+import org.opensilk.music.ui.cards.SongCard;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.silkdagger.DaggerInjector;
 
 /**
  * Created by drew on 2/21/14.
  */
-public class ProfileAlbumCursorAdapter extends CursorAdapter {
+public class ProfileAlbumAdapter extends CursorAdapter {
 
-    public ProfileAlbumCursorAdapter(Context context) {
+    private final DaggerInjector mInjector;
+
+    public ProfileAlbumAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
+        mInjector =injector;
     }
 
     @Override
@@ -47,31 +57,34 @@ public class ProfileAlbumCursorAdapter extends CursorAdapter {
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(View view, final Context context, Cursor cursor) {
         // setup card content
-        final CardSongList card = new CardSongList(context, CursorHelpers.makeLocalSongFromCursor(context, cursor));
+        final SongCard card = new SongCard(context, CursorHelpers.makeLocalSongFromCursor(context, cursor));
+        mInjector.inject(card);
         TextView title = (TextView) view.findViewById(R.id.track_info);
         title.setText(card.getData().name);
-        // hack i dont know why onitemclick doesnt work, might be cause the fading header
-        final Context ctx = context;
-        final int pos = cursor.getPosition();
+        final int position = cursor.getPosition();
+        // hack for my inability to make onitemclicked work.
         View mainContent = view.findViewById(R.id.track_artist_info);
-//        mainContent.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                long[] list = MusicUtils.getSongListForAlbum(ctx, card.getData().albumId);
-//                MusicUtils.playAll(ctx, list, pos, false);
-//            }
-//        });
+        mainContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ApolloUtils.execute(false, new CommandRunner(context, new Command() {
+                    @Override
+                    public CharSequence execute() {
+                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(context, ((LocalSong) card.getData()).albumId);
+                        MusicUtils.playAllSongs(context, list, position, false);
+                        return null;
+                    }
+                }));
+            }
+        });
         // init overflow
         View overflowButton = view.findViewById(R.id.overflow_button);
         overflowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PopupMenu menu = new PopupMenu(view.getContext(), view);
-                menu.inflate(card.getOverflowMenuId());
-                menu.setOnMenuItemClickListener(card.getOverflowPopupMenuListener());
-                menu.show();
+                card.onOverflowClicked(view);
             }
         });
     }

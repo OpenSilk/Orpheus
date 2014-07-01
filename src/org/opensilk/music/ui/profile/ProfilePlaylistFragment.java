@@ -23,7 +23,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,15 +35,28 @@ import android.widget.ListView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 import com.mobeta.android.dslv.DragSortListView;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.adapters.SongListCardCursorAdapter;
-import org.opensilk.music.loaders.PlaylistSongCursorLoader;
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.event.SongCardClick;
+import org.opensilk.music.ui.profile.adapter.ProfilePlaylistAdapter;
+import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui.profile.loader.ProfilePlaylistLoader;
 import org.opensilk.music.ui.cards.CardSongList;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
+import org.opensilk.silkdagger.qualifier.ForFragment;
+
+import javax.inject.Inject;
 
 /**
  * Created by drew on 2/24/14.
@@ -52,6 +64,10 @@ import org.opensilk.music.ui.cards.CardSongList;
 public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> implements
         DragSortListView.DropListener,
         DragSortListView.RemoveListener {
+
+    @Inject @ForFragment
+    Bus mBus;
+    private FragmentBusMonitor mBusMonitor;
 
     private Playlist mPlaylist;
 
@@ -65,14 +81,22 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlaylist = mBundleData;
+        mBusMonitor = new FragmentBusMonitor();
+        mBus.register(mBusMonitor);
         //We have to set this manually since we arent using CardListView
-        ((SongListCardCursorAdapter) mAdapter).setRowLayoutId(R.layout.dragsort_card_list);
+        ((ProfilePlaylistAdapter) mAdapter).setRowLayoutId(R.layout.list_dragsort_card_layout);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dragsort_listview_topmargin, container, false);
         mListView = (ListView) v.findViewById(android.R.id.list);
+        return v;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         if (isLastAdded()) {
             // last added arent sortable
             ((DragSortListView) mListView).setDragEnabled(false);
@@ -84,7 +108,6 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
         }
         // set the adapter
         mListView.setAdapter(mAdapter);
-        return v;
     }
 
     @Override
@@ -95,62 +118,76 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onDestroy() {
+        mBus.unregister(mBusMonitor);
+        super.onDestroy();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.card_playlist, menu);
-        if (mPlaylist.mPlaylistId == -2) {
-            // Cant rename or delete lastadded
-            menu.removeItem(R.id.card_menu_rename);
-            menu.removeItem(R.id.card_menu_delete);
+        inflater.inflate(R.menu.popup_play_all, menu);
+        inflater.inflate(R.menu.popup_shuffle_all, menu);
+        inflater.inflate(R.menu.popup_add_to_queue, menu);
+        if (!isLastAdded()) {
+            // cant rename or delete last added
+            inflater.inflate(R.menu.popup_rename, menu);
+            inflater.inflate(R.menu.popup_delete, menu);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Command command = null;
         switch (item.getItemId()) {
-            case R.id.card_menu_play:
-                if (mPlaylist.mPlaylistId == -1) {
-                    MusicUtils.playFavorites(getActivity(), false);
-                } else if (mPlaylist.mPlaylistId == -2) {
-                    MusicUtils.playLastAdded(getActivity(), false);
-                } else {
-                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, false);
-                }
+            case R.id.popup_play_all:
+                command = new Command() {
+                    @Override
+                    public CharSequence execute() {
+                        if (isLastAdded()) {
+                            MusicUtils.playLastAdded(getActivity(), false);
+                        } else {
+                            MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, false);
+                        }
+                        return null;
+                    }
+                };
+                break;
+            case R.id.popup_shuffle_all:
+                command = new Command() {
+                    @Override
+                    public CharSequence execute() {
+                        if (isLastAdded()) {
+                            MusicUtils.playLastAdded(getActivity(), true);
+                        } else {
+                            MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, true);
+                        }
+                        return null;
+                    }
+                };
+                break;
+            case R.id.popup_add_to_queue:
+                command = new Command() {
+                    @Override
+                    public CharSequence execute() {
+                        LocalSong[] list;
+                        if (isLastAdded()) {
+                            list = MusicUtils.getLocalSongListForLastAdded(getActivity());
+                        } else {
+                            list = MusicUtils.getLocalSongListForPlaylist(getActivity(), mPlaylist.mPlaylistId);
+                        }
+                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                        return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                    }
+                };
+                break;
+            case R.id.popup_rename:
+                RenamePlaylist.getInstance(mPlaylist.mPlaylistId)
+                        .show(getActivity().getSupportFragmentManager(), "RenameDialog");
                 return true;
-            case R.id.card_menu_shuffle:
-                if (mPlaylist.mPlaylistId == -1) {
-                    MusicUtils.playFavorites(getActivity(), true);
-                } else if (mPlaylist.mPlaylistId == -2) {
-                    MusicUtils.playLastAdded(getActivity(), true);
-                } else {
-                    MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, true);
-                }
-                return true;
-            case R.id.card_menu_add_queue:
-//                long[] list = null;
-//                if (mPlaylist.mPlaylistId == -1) {
-//                    list = MusicUtils.getSongListForFavorites(getActivity());
-//                } else if (mPlaylist.mPlaylistId == -2) {
-//                    list = MusicUtils.getSongListForLastAdded(getActivity());
-//                } else {
-//                    list = MusicUtils.getSongListForPlaylist(getActivity(),
-//                            mPlaylist.mPlaylistId);
-//                }
-//                MusicUtils.addToQueue(getActivity(), list);
-                return true;
-            case R.id.card_menu_rename:
-                RenamePlaylist.getInstance(mPlaylist.mPlaylistId).show(
-                        ((FragmentActivity) getActivity()).getSupportFragmentManager(),
-                        "RenameDialog");
-                return true;
-            case R.id.card_menu_delete:
+            case R.id.popup_delete:
                 new AlertDialog.Builder(getActivity())
-                        .setTitle(getActivity().getString(R.string.delete_dialog_title, mPlaylist.mPlaylistName))
+                        .setTitle(getString(R.string.delete_dialog_title, mPlaylist.mPlaylistName))
                         .setPositiveButton(R.string.context_menu_delete, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(final DialogInterface dialog, final int which) {
@@ -171,6 +208,10 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
                         .create()
                         .show();
                 return true;
+        }
+        if (command != null) {
+            ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -212,7 +253,7 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new PlaylistSongCursorLoader(getActivity(), args.getLong(Config.ID));
+        return new ProfilePlaylistLoader(getActivity(), args.getLong(Config.ID));
     }
 
     /*
@@ -221,7 +262,7 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     protected CursorAdapter createAdapter() {
-        return new SongListCardCursorAdapter(getActivity(), false);
+        return new ProfilePlaylistAdapter(getActivity(), this);
     }
 
     @Override
@@ -229,5 +270,40 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
         final Bundle b = new Bundle();
         b.putLong(Config.ID, mBundleData.mPlaylistId);
         return b;
+    }
+
+    class FragmentBusMonitor {
+        @Subscribe
+        public void onSongCardClick(SongCardClick e) {
+            if (!(e.song instanceof LocalSong)) {
+                return;
+            }
+            final LocalSong song = (LocalSong) e.song;
+            switch (e.event) {
+                case PLAY:
+                    MusicUtils.playAllSongs(getActivity(), new Song[]{song}, 0, false);
+                    break;
+                case PLAY_NEXT:
+                    MusicUtils.playNext(getActivity(), new Song[]{song});
+                    break;
+                case ADD_TO_QUEUE:
+                    MusicUtils.addSongsToQueue(getActivity(), new Song[]{song});
+                    break;
+                case ADD_TO_PLAYLIST:
+                    AddToPlaylistDialog.newInstance(new long[]{song.songId})
+                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                    break;
+                case MORE_BY_ARTIST:
+                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), song.artistName));
+                    break;
+                case SET_RINGTONE:
+                    MusicUtils.setRingtone(getActivity(), song.songId);
+                    break;
+                case DELETE:
+                    DeleteDialog.newInstance(song.name, new long[]{song.songId}, null)
+                            .show(getChildFragmentManager(), "DeleteDialog");
+                    break;
+            }
+        }
     }
 }

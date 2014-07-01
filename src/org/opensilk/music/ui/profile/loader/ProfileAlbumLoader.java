@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
 import android.provider.MediaStore;
@@ -23,19 +23,21 @@ import android.support.v4.content.CursorLoader;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 
 /**
- * Created by drew on 2/23/14.
+ * Created by drew on 2/21/14.
  */
-public class ArtistAlbumCursorLoader extends CursorLoader {
+public class ProfileAlbumLoader extends CursorLoader {
 
-    public ArtistAlbumCursorLoader(Context context, long artistId) {
+    public ProfileAlbumLoader(Context context, long albumId) {
         super(context);
-        setUri(MediaStore.Audio.Artists.Albums.getContentUri("external", artistId));
-        setProjection(Projections.LOCAL_ALBUM);
-        setSelection(null);
-        setSelectionArgs(null);
-        setSortOrder(PreferenceUtils.getInstance(getContext()).getArtistAlbumSortOrder());
+        setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+        setProjection(Projections.LOCAL_SONG);
+        setSelection(Selections.LOCAL_ALBUM_SONGS);
+        setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(albumId));
+        setSortOrder(MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
 
 }

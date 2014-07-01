@@ -25,7 +25,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,7 +50,6 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.cards.PlaylistCard;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.cards.event.GenreCardClick;
@@ -455,11 +453,11 @@ public class HomeFragment extends ScopedDaggerFragment {
                     command = new Command() {
                         @Override
                         public CharSequence execute() {
-                            Song[] list;
+                            LocalSong[] list;
                             if (playlist.mPlaylistId == -2) {
-                                list = MusicUtils.getSongListForLastAdded(getActivity());
+                                list = MusicUtils.getLocalSongListForLastAdded(getActivity());
                             } else {
-                                list = MusicUtils.getSongListForPlaylist(getActivity(), playlist.mPlaylistId);
+                                list = MusicUtils.getLocalSongListForPlaylist(getActivity(), playlist.mPlaylistId);
                             }
                             MusicUtils.addSongsToQueueSilent(getActivity(), list);
                             return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);

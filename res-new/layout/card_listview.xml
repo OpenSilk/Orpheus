@@ -16,33 +16,11 @@
   ~   limitations under the License.
   ~  *****************************************************************************
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<it.gmariotti.cardslib.library.view.CardListView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card_list_container"
-    android:orientation="vertical"
-    android:gravity="center"
+    android:id="@android:id/list"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <it.gmariotti.cardslib.library.view.CardListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        card:list_card_layout_resourceID="@layout/card_list_noheader" />
-
-    <ProgressBar
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        style="?android:progressBarStyle"
-        android:visibility="gone"/>
-
-    <TextView
-        android:id="@+id/empty"
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-</LinearLayout>
+    android:layout_height="match_parent"
+    card:list_card_layout_resourceID="@layout/list_card_layout"/>

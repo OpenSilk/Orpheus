@@ -17,35 +17,46 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:minHeight="?android:listPreferredItemHeight">
+    android:layout_height="match_parent">
+
+    <org.opensilk.music.widgets.ThumbnailArtworkImageView
+        android:id="@+id/artwork_thumb"
+        android:layout_width="@dimen/list_card_thumbnail_large"
+        android:layout_height="@dimen/list_card_thumbnail_large"
+        style="@style/Orpheus.Thumbnail"/>
 
     <LinearLayout
-        android:id="@+id/track_artist_info"
         android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="match_parent"
-        android:gravity="left|center_vertical"
-        android:background="?android:selectableItemBackground"
-        android:clickable="true"
+        android:layout_marginLeft="16dp"
         android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:layout_weight="1">
+        android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/track_info"
-            android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/card_title"
             android:textAppearance="?android:textAppearanceListItem"
-            style="@style/SingleLineTextView"/>
+            style="@style/SingleLineTextView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/card_subtitle"
+            android:textAppearance="?android:textAppearanceListItemSmall"
+            style="@style/SingleLineTextView" />
 
     </LinearLayout>
 
+    <!-- OverflowButton -->
     <org.opensilk.music.widgets.CardOverflowButton
-        android:id="@+id/overflow_button"
+        android:id="@+id/card_overflow_button"
         android:layout_width="48dp"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/list_card_thumbnail"
         android:paddingRight="20dp"
         style="@style/Orpheus.MenuButton"
         android:contentDescription="@null" />

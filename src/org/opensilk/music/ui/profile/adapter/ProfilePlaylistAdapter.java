@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.adapters;
+package org.opensilk.music.ui.profile.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
 
-import com.andrew.apollo.R;
-
+import org.opensilk.music.ui.cards.SongPlaylistCard;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 
 /**
- * Created by drew on 2/23/14.
+ * Created by drew on 2/18/14.
  */
-public class ProfileAlbumListCardCursorAdapter extends CardCursorAdapter {
+public class ProfilePlaylistAdapter extends CardCursorAdapter {
 
-    public ProfileAlbumListCardCursorAdapter(Context context) {
+    private final DaggerInjector mInjector;
+
+    public ProfilePlaylistAdapter(Context context, DaggerInjector injector) {
         super(context, null, 0);
+        mInjector = injector;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-//        CardAlbumList card = new CardAlbumList(getContext(),
-//                CursorHelpers.makeAlbumFromCursor(cursor),
-//                R.layout.card_list_inner_layout_extra);
-//        card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
-//                getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
-//        return card;
-        return new Card(getContext());
+        SongPlaylistCard c = new SongPlaylistCard(getContext(), CursorHelpers.makeLocalSongFromCursor(getContext(), cursor));
+        mInjector.inject(c);
+        return c;
     }
+
 }

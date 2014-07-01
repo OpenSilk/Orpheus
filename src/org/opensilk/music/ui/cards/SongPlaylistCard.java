@@ -16,23 +16,25 @@
 
 package org.opensilk.music.ui.cards;
 
-import dagger.Module;
+import android.content.Context;
+import android.widget.PopupMenu;
+
+import com.andrew.apollo.R;
+
+import org.opensilk.music.api.model.Song;
 
 /**
- * Created by drew on 6/24/14.
+ * Created by drew on 6/30/14.
  */
-@Module (
-        injects = {
-                AlbumCard.class,
-                ArtistCard.class,
-                FolderCard.class,
-                GenreCard.class,
-                PlaylistCard.class,
-                SongCard.class,
-                SongPlaylistCard.class,
-                SongQueueCard.class,
-        },
-        complete = false
-)
-public class CardModule {
+public class SongPlaylistCard extends SongCard {
+
+    public SongPlaylistCard(Context context, Song song) {
+        super(context, song);
+    }
+
+    @Override
+    protected void onCreatePopupMenu(PopupMenu m) {
+        super.onCreatePopupMenu(m);
+        m.getMenu().removeItem(R.id.popup_delete);
+    }
 }

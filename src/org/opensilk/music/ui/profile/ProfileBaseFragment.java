@@ -16,6 +16,7 @@
 
 package org.opensilk.music.ui.profile;
 
+import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -32,10 +33,13 @@ import android.widget.ListView;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 
+import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.support.ScopedDaggerFragment;
+
 /**
  * Created by drew on 2/23/14.
  */
-public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public abstract class ProfileBaseFragment<D extends Parcelable> extends ScopedDaggerFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     // Loader identifier
     protected static final int LOADER = 2;
@@ -46,6 +50,8 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
 
     // object passed in bundle
     protected D mBundleData;
+
+    protected DaggerInjector mInjector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,6 +103,18 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
     /*
      * Abstract methods
      */
+
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new ProfileModule(),
+        };
+    }
+
+    @Override
+    protected DaggerInjector getParentInjector(Activity activity) {
+        return (DaggerInjector) activity;
+    }
 
     protected abstract CursorAdapter createAdapter();
     protected abstract Bundle createLoaderArgs();
