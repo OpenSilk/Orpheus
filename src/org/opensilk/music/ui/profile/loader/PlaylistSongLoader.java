@@ -27,9 +27,9 @@ import org.opensilk.music.util.Selections;
 /**
  * Created by drew on 2/24/14.
  */
-public class ProfilePlaylistLoader extends CursorLoader {
+public class PlaylistSongLoader extends CursorLoader {
 
-    public ProfilePlaylistLoader(Context context, long playlistId) {
+    public PlaylistSongLoader(Context context, long playlistId) {
         super(context);
         if (isLastAdded(playlistId)) {
             setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);

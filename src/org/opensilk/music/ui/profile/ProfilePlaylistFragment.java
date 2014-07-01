@@ -50,7 +50,7 @@ import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.profile.adapter.ProfilePlaylistAdapter;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.ui.profile.loader.ProfilePlaylistLoader;
+import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
 import org.opensilk.music.ui.cards.CardSongList;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
@@ -113,6 +113,8 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        // enable options menu
+        setHasOptionsMenu(true);
         // Set actionbar title
         setTitle(mPlaylist.mPlaylistName);
     }
@@ -253,7 +255,7 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new ProfilePlaylistLoader(getActivity(), args.getLong(Config.ID));
+        return new PlaylistSongLoader(getActivity(), args.getLong(Config.ID));
     }
 
     /*

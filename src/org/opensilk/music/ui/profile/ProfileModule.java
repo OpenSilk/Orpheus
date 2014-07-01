@@ -34,6 +34,7 @@ import dagger.Provides;
         injects = {
                 ProfileAlbumFragment.class,
                 ProfileArtistFragment.class,
+                ProfileGenreFragment.class,
                 ProfilePlaylistFragment.class,
         },
         includes = {

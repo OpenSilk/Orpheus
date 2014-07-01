@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 
 /**
  * Created by drew on 2/28/14.
  */
-public class GenreSongCursorLoader extends CursorLoader {
+public class GenreSongLoader extends CursorLoader {
 
-    public GenreSongCursorLoader(Context context, long genreId) {
+    public GenreSongLoader(Context context, long genreId) {
         super(context);
         setUri(MediaStore.Audio.Genres.Members.getContentUri("external", genreId));
         setProjection(Projections.PLAYLIST_SONGS); //We're the same, remap audio_id to _id
-        setSelection(MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?");
-        setSelectionArgs(new String[] {"1", "''"});
+        setSelection(Selections.LOCAL_SONG);
+        setSelectionArgs(SelectionArgs.LOCAL_SONG);
         setSortOrder(MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
     }
 

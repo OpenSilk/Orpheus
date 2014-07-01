@@ -22,7 +22,6 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -44,11 +43,10 @@ import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.profile.adapter.ProfileAlbumAdapter;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.profile.loader.ProfileAlbumLoader;
+import org.opensilk.music.ui.profile.loader.AlbumSongLoader;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
 import org.opensilk.music.util.ConfigHelper;
-import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -158,7 +156,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<LocalAlbum> 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new ProfileAlbumLoader(getActivity(), args.getLong(Config.ID));
+        return new AlbumSongLoader(getActivity(), args.getLong(Config.ID));
     }
 
     /*

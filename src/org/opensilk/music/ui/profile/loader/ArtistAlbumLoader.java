@@ -27,9 +27,9 @@ import org.opensilk.music.util.Projections;
 /**
  * Created by drew on 2/23/14.
  */
-public class ProfileArtistLoader extends CursorLoader {
+public class ArtistAlbumLoader extends CursorLoader {
 
-    public ProfileArtistLoader(Context context, long artistId) {
+    public ArtistAlbumLoader(Context context, long artistId) {
         super(context);
         setUri(MediaStore.Audio.Artists.Albums.getContentUri("external", artistId));
         setProjection(Projections.LOCAL_ALBUM);

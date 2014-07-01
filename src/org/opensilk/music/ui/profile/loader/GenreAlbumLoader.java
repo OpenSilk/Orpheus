@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
 import android.support.v4.content.CursorLoader;
@@ -24,9 +24,9 @@ import com.andrew.apollo.provider.MusicProvider;
 /**
  * Created by drew on 2/28/14.
  */
-public class GenreAlbumCursorLoader extends CursorLoader {
+public class GenreAlbumLoader extends CursorLoader {
 
-    public GenreAlbumCursorLoader(Context context, long genreId) {
+    public GenreAlbumLoader(Context context, long genreId) {
         super(context);
         setUri(MusicProvider.makeGenreAlbumsUri(genreId));
         // our content provider doesnt read any of these

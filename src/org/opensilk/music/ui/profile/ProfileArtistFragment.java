@@ -20,11 +20,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
@@ -46,7 +44,7 @@ import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.profile.adapter.ProfileArtistAdapter;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.profile.loader.ProfileArtistLoader;
+import org.opensilk.music.ui.profile.loader.ArtistAlbumLoader;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
@@ -125,72 +123,6 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist
                 artistCard.onOverflowClicked(v);
             }
         });
-//        mOverflowButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                PopupMenu m = new PopupMenu(v.getContext(), v);
-//                m.inflate(R.menu.popup_play_all);
-//                m.inflate(R.menu.popup_shuffle_all);
-//                m.inflate(R.menu.popup_add_to_queue);
-//                m.inflate(R.menu.popup_add_to_playlist);
-//                m.inflate(R.menu.popup_delete);
-//                m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-//                    @Override
-//                    public boolean onMenuItemClick(MenuItem item) {
-//                        Command command = null;
-//                        switch (item.getItemId()) {
-//                            case R.id.popup_play_all:
-//                                command = new Command() {
-//                                    @Override
-//                                    public CharSequence execute() {
-//                                        LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), mArtist.artistId);
-//                                        MusicUtils.playAllSongs(getActivity(), list, 0, false);
-//                                        return null;
-//                                    }
-//                                };
-//                                break;
-//                            case R.id.popup_shuffle_all:
-//                                command = new Command() {
-//                                    @Override
-//                                    public CharSequence execute() {
-//                                        LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), mArtist.artistId);
-//                                        MusicUtils.playAllSongs(getActivity(), list, 0, true);
-//                                        return null;
-//                                    }
-//                                };
-//                                break;
-//                            case R.id.popup_add_to_queue:
-//                                command = new Command() {
-//                                    @Override
-//                                    public CharSequence execute() {
-//                                        LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), mArtist.artistId);
-//                                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
-//                                        return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
-//                                    }
-//                                };
-//                                break;
-//                            case R.id.popup_add_to_playlist:
-//                                long[] plist = MusicUtils.getSongListForArtist(getActivity(), mArtist.artistId);
-//                                AddToPlaylistDialog.newInstance(plist)
-//                                        .show(getChildFragmentManager(), "AddToPlaylistDialog");
-//                                return true;
-//                            case R.id.popup_delete:
-//                                long[] dlist = MusicUtils.getSongListForArtist(getActivity(), mArtist.artistId);
-//                                DeleteDialog.newInstance(mArtist.name, dlist, null) //TODO
-//                                        .show(getChildFragmentManager(), "DeleteDialog");
-//                                getActivity().finish();
-//                                return true;
-//                        }
-//                        if (command != null) {
-//                            ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
-//                            return true;
-//                        }
-//                        return false;
-//                    }
-//                });
-//                m.show();
-//            }
-//        });
         // set the actionbar title
         setTitle(mArtist.name);
         // Init the fading action bar
@@ -220,7 +152,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new ProfileArtistLoader(getActivity(), args.getLong(Config.ID));
+        return new ArtistAlbumLoader(getActivity(), args.getLong(Config.ID));
     }
 
     /*

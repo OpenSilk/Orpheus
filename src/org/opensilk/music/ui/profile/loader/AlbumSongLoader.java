@@ -29,9 +29,9 @@ import org.opensilk.music.util.Selections;
 /**
  * Created by drew on 2/21/14.
  */
-public class ProfileAlbumLoader extends CursorLoader {
+public class AlbumSongLoader extends CursorLoader {
 
-    public ProfileAlbumLoader(Context context, long albumId) {
+    public AlbumSongLoader(Context context, long albumId) {
         super(context);
         setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         setProjection(Projections.LOCAL_SONG);
