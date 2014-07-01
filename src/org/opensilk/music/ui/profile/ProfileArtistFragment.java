@@ -41,6 +41,8 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.ui.cards.ArtistCard;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
+import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
+import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.ProfileArtistAdapter;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
@@ -62,9 +64,10 @@ import static org.opensilk.music.util.ConfigHelper.isLargeLandscape;
 public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist> {
 
     @Inject @ForFragment
-    Bus mBus;
+    protected Bus mBus;
 
-    private FragmentBusMonitor mBusMonitor;
+    protected AlbumCardClickHandler mAlbumClickHandler;
+    protected ArtistCardClickHandler mArtistClickHandler;
 
     /* header overlay stuff */
     protected TextView mInfoTitle;
@@ -83,8 +86,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mArtist = mBundleData;
-        mBusMonitor = new FragmentBusMonitor();
-        mBus.register(mBusMonitor);
+        registerHandlers();
     }
 
     @Override
@@ -142,7 +144,7 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist
 
     @Override
     public void onDestroy() {
-        mBus.unregister(mBusMonitor);
+        unregisterHandlers();
         super.onDestroy();
     }
 
@@ -171,127 +173,16 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist
         return b;
     }
 
-    class FragmentBusMonitor {
-        @Subscribe
-        public void onArtistCardClick(ArtistCardClick e) {
-            if (!(e.artist instanceof LocalArtist)) {
-                return;
-            }
-            final LocalArtist artist = (LocalArtist) e.artist;
-            Command command = null;
-            switch (e.event) {
-                case OPEN:
-                    NavUtils.openArtistProfile(getActivity(), artist);
-                    return;
-                case PLAY_ALL:
-                    command = new Command() {
-                        @Override
-                        public CharSequence execute() {
-                            LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), artist.artistId);
-                            MusicUtils.playAllSongs(getActivity(), list, 0, false);
-                            return null;
-                        }
-                    };
-                    break;
-                case SHUFFLE_ALL:
-                    command = new Command() {
-                        @Override
-                        public CharSequence execute() {
-                            LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), artist.artistId);
-                            MusicUtils.playAllSongs(getActivity(), list, 0, true);
-                            return null;
-                        }
-                    };
-                    break;
-                case ADD_TO_QUEUE:
-                    command = new Command() {
-                        @Override
-                        public CharSequence execute() {
-                            LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), artist.artistId);
-                            MusicUtils.addSongsToQueueSilent(getActivity(), list);
-                            return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
-                        }
-                    };
-                    break;
-                case ADD_TO_PLAYLIST:
-                    long[] plist = MusicUtils.getSongListForArtist(getActivity(), artist.artistId);
-                    AddToPlaylistDialog.newInstance(plist)
-                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
-                    return;
-                case DELETE:
-                    long[] dlist = MusicUtils.getSongListForArtist(getActivity(), artist.artistId);
-                    DeleteDialog.newInstance(artist.name, dlist, null) //TODO
-                            .show(getChildFragmentManager(), "DeleteDialog");
-                    return;
-                default:
-                    return;
-            }
-            if (command != null) {
-                ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
-            }
-        }
+    private void registerHandlers() {
+        mAlbumClickHandler = getObjectGraph().get(AlbumCardClickHandler.class);
+        mArtistClickHandler = getObjectGraph().get(ArtistCardClickHandler.class);
+        mBus.register(mAlbumClickHandler);
+        mBus.register(mArtistClickHandler);
+    }
 
-        @Subscribe
-        public void onAlbumCardClick(AlbumCardClick e) {
-            if (!(e.album instanceof LocalAlbum)) {
-                return;
-            }
-            final LocalAlbum album = (LocalAlbum) e.album;
-            Command command = null;
-            switch (e.event) {
-                case OPEN:
-                    NavUtils.openAlbumProfile(getActivity(), album);
-                    return;
-                case PLAY_ALL:
-                    command = new Command() {
-                        @Override
-                        public CharSequence execute() {
-                            LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
-                            MusicUtils.playAllSongs(getActivity(), list, 0, false);
-                            return null;
-                        }
-                    };
-                    break;
-                case SHUFFLE_ALL:
-                    command = new Command() {
-                        @Override
-                        public CharSequence execute() {
-                            LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
-                            MusicUtils.playAllSongs(getActivity(), list, 0, true);
-                            return null;
-                        }
-                    };
-                    break;
-                case ADD_TO_QUEUE:
-                    command = new Command() {
-                        @Override
-                        public CharSequence execute() {
-                            LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
-                            MusicUtils.addSongsToQueueSilent(getActivity(), list);
-                            return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
-                        }
-                    };
-                    break;
-                case ADD_TO_PLAYLIST:
-                    long[] plist = MusicUtils.getSongListForAlbum(getActivity(), album.albumId);
-                    AddToPlaylistDialog.newInstance(plist)
-                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
-                    return;
-                case MORE_BY_ARTIST:
-                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), album.artistName));
-                    return;
-                case DELETE:
-                    long[] dlist = MusicUtils.getSongListForAlbum(getActivity(), album.albumId);
-                    DeleteDialog.newInstance(album.name, dlist, null) //TODO
-                            .show(getChildFragmentManager(), "DeleteDialog");
-                    return;
-                default:
-                    return;
-            }
-            if (command != null) {
-                ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
-            }
-        }
+    private void unregisterHandlers() {
+        mBus.unregister(mAlbumClickHandler);
+        mBus.unregister(mArtistClickHandler);
     }
 
 }

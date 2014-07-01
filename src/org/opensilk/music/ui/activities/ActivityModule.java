@@ -17,6 +17,7 @@
 package org.opensilk.music.ui.activities;
 
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 
 import com.squareup.otto.Bus;
@@ -56,6 +57,11 @@ public class ActivityModule {
 
     @Provides @Singleton @ForActivity
     public ActionBarActivity provideActivity() {
+        return activity;
+    }
+
+    @Provides @Singleton @ForActivity
+    public FragmentActivity provideFragmentActivity() {
         return activity;
     }
 

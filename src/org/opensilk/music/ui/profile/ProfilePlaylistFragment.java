@@ -47,7 +47,10 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.event.PlaylistCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick;
+import org.opensilk.music.ui.cards.handler.PlaylistCardClickHandler;
+import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.ProfilePlaylistAdapter;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
@@ -66,8 +69,10 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
         DragSortListView.RemoveListener {
 
     @Inject @ForFragment
-    Bus mBus;
-    private FragmentBusMonitor mBusMonitor;
+    protected Bus mBus;
+
+    protected SongCardClickHandler mSongClickHandler;
+    protected PlaylistCardClickHandler mPlaylistClickHandler;
 
     private Playlist mPlaylist;
 
@@ -81,8 +86,7 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlaylist = mBundleData;
-        mBusMonitor = new FragmentBusMonitor();
-        mBus.register(mBusMonitor);
+        registerHandlers();
         //We have to set this manually since we arent using CardListView
         ((ProfilePlaylistAdapter) mAdapter).setRowLayoutId(R.layout.list_dragsort_card_layout);
     }
@@ -121,7 +125,7 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     public void onDestroy() {
-        mBus.unregister(mBusMonitor);
+        unregisterHandlers();
         super.onDestroy();
     }
 
@@ -140,80 +144,22 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Command command = null;
         switch (item.getItemId()) {
             case R.id.popup_play_all:
-                command = new Command() {
-                    @Override
-                    public CharSequence execute() {
-                        if (isLastAdded()) {
-                            MusicUtils.playLastAdded(getActivity(), false);
-                        } else {
-                            MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, false);
-                        }
-                        return null;
-                    }
-                };
-                break;
+                mBus.post(new PlaylistCardClick(PlaylistCardClick.Event.PLAY_ALL, mPlaylist));
+                return true;
             case R.id.popup_shuffle_all:
-                command = new Command() {
-                    @Override
-                    public CharSequence execute() {
-                        if (isLastAdded()) {
-                            MusicUtils.playLastAdded(getActivity(), true);
-                        } else {
-                            MusicUtils.playPlaylist(getActivity(), mPlaylist.mPlaylistId, true);
-                        }
-                        return null;
-                    }
-                };
-                break;
+                mBus.post(new PlaylistCardClick(PlaylistCardClick.Event.SHUFFLE_ALL, mPlaylist));
+                return true;
             case R.id.popup_add_to_queue:
-                command = new Command() {
-                    @Override
-                    public CharSequence execute() {
-                        LocalSong[] list;
-                        if (isLastAdded()) {
-                            list = MusicUtils.getLocalSongListForLastAdded(getActivity());
-                        } else {
-                            list = MusicUtils.getLocalSongListForPlaylist(getActivity(), mPlaylist.mPlaylistId);
-                        }
-                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
-                        return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
-                    }
-                };
-                break;
+                mBus.post(new PlaylistCardClick(PlaylistCardClick.Event.ADD_TO_QUEUE, mPlaylist));
+                return true;
             case R.id.popup_rename:
-                RenamePlaylist.getInstance(mPlaylist.mPlaylistId)
-                        .show(getActivity().getSupportFragmentManager(), "RenameDialog");
+                mBus.post(new PlaylistCardClick(PlaylistCardClick.Event.RENAME, mPlaylist));
                 return true;
             case R.id.popup_delete:
-                new AlertDialog.Builder(getActivity())
-                        .setTitle(getString(R.string.delete_dialog_title, mPlaylist.mPlaylistName))
-                        .setPositiveButton(R.string.context_menu_delete, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                final Uri mUri = ContentUris.withAppendedId(
-                                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                                        mPlaylist.mPlaylistId);
-                                getActivity().getContentResolver().delete(mUri, null, null);
-                                MusicUtils.refresh();
-                            }
-                        })
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setMessage(R.string.cannot_be_undone)
-                        .create()
-                        .show();
+                mBus.post(new PlaylistCardClick(PlaylistCardClick.Event.DELETE, mPlaylist));
                 return true;
-        }
-        if (command != null) {
-            ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -274,38 +220,15 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
         return b;
     }
 
-    class FragmentBusMonitor {
-        @Subscribe
-        public void onSongCardClick(SongCardClick e) {
-            if (!(e.song instanceof LocalSong)) {
-                return;
-            }
-            final LocalSong song = (LocalSong) e.song;
-            switch (e.event) {
-                case PLAY:
-                    MusicUtils.playAllSongs(getActivity(), new Song[]{song}, 0, false);
-                    break;
-                case PLAY_NEXT:
-                    MusicUtils.playNext(getActivity(), new Song[]{song});
-                    break;
-                case ADD_TO_QUEUE:
-                    MusicUtils.addSongsToQueue(getActivity(), new Song[]{song});
-                    break;
-                case ADD_TO_PLAYLIST:
-                    AddToPlaylistDialog.newInstance(new long[]{song.songId})
-                            .show(getChildFragmentManager(), "AddToPlaylistDialog");
-                    break;
-                case MORE_BY_ARTIST:
-                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), song.artistName));
-                    break;
-                case SET_RINGTONE:
-                    MusicUtils.setRingtone(getActivity(), song.songId);
-                    break;
-                case DELETE:
-                    DeleteDialog.newInstance(song.name, new long[]{song.songId}, null)
-                            .show(getChildFragmentManager(), "DeleteDialog");
-                    break;
-            }
-        }
+    private void registerHandlers() {
+        mSongClickHandler = getObjectGraph().get(SongCardClickHandler.class);
+        mPlaylistClickHandler = getObjectGraph().get(PlaylistCardClickHandler.class);
+        mBus.register(mSongClickHandler);
+        mBus.register(mPlaylistClickHandler);
+    }
+
+    private void unregisterHandlers() {
+        mBus.unregister(mSongClickHandler);
+        mBus.unregister(mPlaylistClickHandler);
     }
 }
