@@ -20,19 +20,31 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.ApolloUtils;
+import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumCursorAdapter;
+import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.loaders.AlbumSongCursorLoader;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
+import org.opensilk.music.util.ConfigHelper;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 
@@ -86,30 +98,90 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<LocalAlbum> 
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Load header images
-//        ArtworkManager.loadArtistImage(mAlbum.artistName, mHeaderImage);
-//        ArtworkManager.loadAlbumImage(mAlbum.artistName, mAlbum.name,
-//                mAlbum.artworkUri, mHeaderThumb);
-//        // Load header text
-//        mInfoTitle.setText(mAlbum.name);
-//        mInfoSubTitle.setText(mAlbum.artistName);
-//        // initialize header overflow
-//        final CardAlbumList card = new CardAlbumList(getActivity(), mAlbum);
-//        mOverflowButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                PopupMenu menu = new PopupMenu(v.getContext(), v);
-//                menu.inflate(card.getOverflowMenuId());
-//                menu.setOnMenuItemClickListener(card.getOverflowPopupMenuListener());
-//                menu.show();
-//            }
-//        });
-//        // set the actionbar title
-//        setTitle(mAlbum.name);
-//        // Init the fading action bar
-//        if (isLargeLandscape(getResources())) {
-//            mFadingHelper.fadeActionBar(false);
-//        }
-//        mFadingHelper.initActionBar(getActivity());
+        ArtworkManager.loadArtistImage(mAlbum.artistName, mHeaderImage);
+        ArtworkManager.loadAlbumImage(mAlbum.artistName, mAlbum.name,
+                mAlbum.artworkUri, mHeaderThumb);
+        // Load header text
+        mInfoTitle.setText(mAlbum.name);
+        mInfoSubTitle.setText(mAlbum.artistName);
+        // initialize header overflow
+        mOverflowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu m = new PopupMenu(v.getContext(), v);
+                m.inflate(R.menu.popup_play_all);
+                m.inflate(R.menu.popup_shuffle_all);
+                m.inflate(R.menu.popup_add_to_queue);
+                m.inflate(R.menu.popup_add_to_playlist);
+                m.inflate(R.menu.popup_more_by_artist);
+                m.inflate(R.menu.popup_delete);
+                m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Command command = null;
+                        switch (item.getItemId()) {
+                            case R.id.popup_play_all:
+                                command = new Command() {
+                                    @Override
+                                    public CharSequence execute() {
+                                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), mAlbum.albumId);
+                                        MusicUtils.playAllSongs(getActivity(), list, 0, false);
+                                        return null;
+                                    }
+                                };
+                                break;
+                            case R.id.popup_shuffle_all:
+                                command = new Command() {
+                                    @Override
+                                    public CharSequence execute() {
+                                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), mAlbum.albumId);
+                                        MusicUtils.playAllSongs(getActivity(), list, 0, true);
+                                        return null;
+                                    }
+                                };
+                                break;
+                            case R.id.popup_add_to_queue:
+                                command = new Command() {
+                                    @Override
+                                    public CharSequence execute() {
+                                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), mAlbum.albumId);
+                                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                                        return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                                    }
+                                };
+                                break;
+                            case R.id.popup_add_to_playlist:
+                                long[] plist = MusicUtils.getSongListForAlbum(getActivity(), mAlbum.albumId);
+                                AddToPlaylistDialog.newInstance(plist)
+                                        .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                                return true;
+                            case R.id.popup_more_by_artist:
+                                NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), mAlbum.artistName));
+                                return true;
+                            case R.id.popup_delete:
+                                long[] dlist = MusicUtils.getSongListForAlbum(getActivity(), mAlbum.albumId);
+                                DeleteDialog.newInstance(mAlbum.name, dlist, null) //TODO
+                                        .show(getChildFragmentManager(), "DeleteDialog");
+                                getActivity().finish();
+                                return true;
+                        }
+                        if (command != null) {
+                            ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                m.show();
+            }
+        });
+        // set the actionbar title
+        setTitle(mAlbum.name);
+        // Init the fading action bar
+        if (ConfigHelper.isLargeLandscape(getResources())) {
+            mFadingHelper.fadeActionBar(false);
+        }
+        mFadingHelper.initActionBar(getActivity());
     }
 
     @Override
@@ -143,7 +215,7 @@ public class ProfileAlbumFragment extends ProfileFadingBaseFragment<LocalAlbum> 
     @Override
     protected Bundle createLoaderArgs() {
         final Bundle b = new Bundle();
-//        b.putLong(Config.ID, Long.decode(mBundleData.identity));
+        b.putLong(Config.ID, mBundleData.albumId);
         return b;
     }
 

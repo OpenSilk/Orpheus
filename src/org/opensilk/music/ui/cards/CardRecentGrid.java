@@ -55,7 +55,7 @@ public class CardRecentGrid extends CardBaseThumb<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                NavUtils.openAlbumProfile(getContext(), mData);
+//                NavUtils.openAlbumProfile(getContext(), mData);
             }
         });
     }

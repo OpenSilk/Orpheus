@@ -67,32 +67,12 @@ public abstract class ProfileBaseFragment<D extends Parcelable> extends Fragment
         // Set home as up
         ActionBarActivity activity = (ActionBarActivity) getActivity();
         activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        // Enable the options menu
-        setHasOptionsMenu(true);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mListView = null;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        // Remove the overflow
-        menu.removeItem(R.id.menu_settings);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                getActivity().onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     /*

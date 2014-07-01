@@ -41,6 +41,8 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import org.opensilk.music.util.OrderPreservingCursor;
+
+import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.provider.MusicProviderUtil;
@@ -57,8 +59,6 @@ import org.opensilk.music.util.Selections;
 import java.io.File;
 import java.util.Arrays;
 import java.util.WeakHashMap;
-
-import timber.log.Timber;
 
 import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
 
@@ -458,7 +458,7 @@ public final class MusicUtils {
      */
     public static Album getCurrentAlbum(final Context context) {
         long albumId = getCurrentAlbumId();
-        return makeAlbum(context, albumId);
+        return makeLocalAlbum(context, albumId);
     }
 
     public static ArtInfo getCurrentArtInfo() {
@@ -475,30 +475,15 @@ public final class MusicUtils {
      * @param id The ID of the album.
      * @return new album.
      */
-    public static Album makeAlbum(final Context context, long albumId) {
-        Album album = null;
-        final String selection = BaseColumns._ID + "=" + albumId;
+    public static LocalAlbum makeLocalAlbum(final Context context, long albumId) {
+        LocalAlbum album = null;
         Cursor c = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                new String[] {
-                        /* 0 */
-                        BaseColumns._ID,
-                        /* 1 */
-                        AlbumColumns.ALBUM,
-                        /* 2 */
-                        AlbumColumns.ARTIST,
-                        /* 3 */
-                        AlbumColumns.NUMBER_OF_SONGS,
-                        /* 4 */
-                        AlbumColumns.FIRST_YEAR
-                }, selection, null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+                Projections.LOCAL_ALBUM,
+                BaseColumns._ID +"=?",
+                new String[]{String.valueOf(albumId)},
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
         if (c != null && c.moveToFirst()) {
-            final String id =  c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
-            final String name = c.getString(c.getColumnIndexOrThrow(AlbumColumns.ALBUM));
-            final String artist = c.getString(c.getColumnIndexOrThrow(AlbumColumns.ARTIST));
-            final int songs =  c.getInt(c.getColumnIndexOrThrow(AlbumColumns.NUMBER_OF_SONGS));
-            final String year = c.getString(c.getColumnIndexOrThrow(AlbumColumns.FIRST_YEAR));
-            final Uri artworkUri = ContentUris.withAppendedId(CursorHelpers.ARTWORK_URI, Long.decode(id));
-            album = new Album(id, name, artist, songs, year, artworkUri);
+            album = CursorHelpers.makeLocalAlbumFromCursor(c);
         }
         if (c != null) {
             c.close();

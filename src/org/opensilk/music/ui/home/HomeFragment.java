@@ -293,6 +293,9 @@ public class HomeFragment extends ScopedDaggerFragment {
                     AddToPlaylistDialog.newInstance(plist)
                             .show(getChildFragmentManager(), "AddToPlaylistDialog");
                     return;
+                case MORE_BY_ARTIST:
+                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), album.artistName));
+                    return;
                 case DELETE:
                     long[] dlist = MusicUtils.getSongListForAlbum(getActivity(), album.albumId);
                     DeleteDialog.newInstance(album.name, dlist, null) //TODO

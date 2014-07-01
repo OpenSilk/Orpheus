@@ -20,6 +20,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
@@ -28,13 +29,21 @@ import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalArtist;
+import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import org.opensilk.music.adapters.ProfileAlbumListCardCursorAdapter;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.loaders.ArtistAlbumCursorLoader;
+import org.opensilk.music.ui.cards.event.ArtistCardClick;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
 import org.opensilk.music.widgets.BottomCropArtworkImageView;
 
 import it.gmariotti.cardslib.library.view.CardListView;
@@ -92,17 +101,73 @@ public class ProfileArtistFragment extends ProfileFadingBaseFragment<LocalArtist
         // Load header text
         mInfoTitle.setText(mArtist.name);
         mInfoSubTitle.setText(MusicUtils.makeLabel(getActivity(), R.plurals.Nalbums, mArtist.albumCount));
-//        final CardArtistList artistCard = new CardArtistList(getActivity(), mArtist);
-//        // initialize header overflow
-//        mOverflowButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                PopupMenu menu = new PopupMenu(v.getContext(), v);
-//                menu.inflate(artistCard.getOverflowMenuId());
-//                menu.setOnMenuItemClickListener(artistCard.getOverflowPopupMenuListener());
-//                menu.show();
-//            }
-//        });
+        // initialize header overflow
+        mOverflowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu m = new PopupMenu(v.getContext(), v);
+                m.inflate(R.menu.popup_play_all);
+                m.inflate(R.menu.popup_shuffle_all);
+                m.inflate(R.menu.popup_add_to_queue);
+                m.inflate(R.menu.popup_add_to_playlist);
+                m.inflate(R.menu.popup_delete);
+                m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Command command = null;
+                        switch (item.getItemId()) {
+                            case R.id.popup_play_all:
+                                command = new Command() {
+                                    @Override
+                                    public CharSequence execute() {
+                                        LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), mArtist.artistId);
+                                        MusicUtils.playAllSongs(getActivity(), list, 0, false);
+                                        return null;
+                                    }
+                                };
+                                break;
+                            case R.id.popup_shuffle_all:
+                                command = new Command() {
+                                    @Override
+                                    public CharSequence execute() {
+                                        LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), mArtist.artistId);
+                                        MusicUtils.playAllSongs(getActivity(), list, 0, true);
+                                        return null;
+                                    }
+                                };
+                                break;
+                            case R.id.popup_add_to_queue:
+                                command = new Command() {
+                                    @Override
+                                    public CharSequence execute() {
+                                        LocalSong[] list = MusicUtils.getLocalSongListForArtist(getActivity(), mArtist.artistId);
+                                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                                        return getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                                    }
+                                };
+                                break;
+                            case R.id.popup_add_to_playlist:
+                                long[] plist = MusicUtils.getSongListForArtist(getActivity(), mArtist.artistId);
+                                AddToPlaylistDialog.newInstance(plist)
+                                        .show(getChildFragmentManager(), "AddToPlaylistDialog");
+                                return true;
+                            case R.id.popup_delete:
+                                long[] dlist = MusicUtils.getSongListForArtist(getActivity(), mArtist.artistId);
+                                DeleteDialog.newInstance(mArtist.name, dlist, null) //TODO
+                                        .show(getChildFragmentManager(), "DeleteDialog");
+                                getActivity().finish();
+                                return true;
+                        }
+                        if (command != null) {
+                            ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                m.show();
+            }
+        });
         // set the actionbar title
         setTitle(mArtist.name);
         // Init the fading action bar

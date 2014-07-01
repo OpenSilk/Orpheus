@@ -143,7 +143,10 @@
         </activity>
 
         <activity android:name="org.opensilk.music.ui.activities.ProfileSlidingActivity"
-            android:theme="@style/Theme.AppCompat.Light.Panel"/>
+            android:theme="@style/Theme.AppCompat.Light.Panel">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+        </activity>
 
         <!-- Used to set options -->
         <activity

@@ -39,7 +39,7 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
@@ -75,8 +75,6 @@ import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
-
-import hugo.weaving.DebugLog;
 
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
 import static com.andrew.apollo.utils.MusicUtils.sService;
@@ -835,7 +833,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
             if (id >= 0) {
                 long albumId = MusicProviderUtil.getAlbumId(mActivity, id);
                 if (albumId >= 0) {
-                    Album album = MusicUtils.makeAlbum(mActivity, albumId);
+                    LocalAlbum album = MusicUtils.makeLocalAlbum(mActivity, albumId);
                     if (album != null) {
                         NavUtils.openAlbumProfile(mActivity, album);
                         return;
