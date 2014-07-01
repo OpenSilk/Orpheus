@@ -2536,13 +2536,19 @@ public class MusicPlaybackService extends Service {
             if (mShuffleMode == shufflemode && mPlayListLen > 0) {
                 return;
             }
-            mShuffleMode = shufflemode;
-            if (mShuffleMode == SHUFFLE_AUTO) {
+            if (mShuffleMode == SHUFFLE_AUTO && shufflemode != SHUFFLE_AUTO) {
                 // clear history since autoshuffle uses mediastore
                 // ids and regular history uses our musicprovider ids
                 // TODO maybe fix someday
                 mHistory.clear();
+            }
+            mShuffleMode = shufflemode;
+            if (mShuffleMode == SHUFFLE_AUTO) {
                 if (makeAutoShuffleList()) {
+                    // clear history since autoshuffle uses mediastore
+                    // ids and regular history uses our musicprovider ids
+                    // TODO maybe fix someday
+                    mHistory.clear();
                     mPlayListLen = 0;
                     doAutoShuffleUpdate();
                     mPlayPos = 0;
