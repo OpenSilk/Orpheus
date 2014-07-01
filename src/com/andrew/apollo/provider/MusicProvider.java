@@ -17,7 +17,6 @@
 package com.andrew.apollo.provider;
 
 import android.content.ContentProvider;
-import android.content.ContentProviderOperation;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -25,11 +24,9 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.*;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.SparseLongArray;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
@@ -45,7 +42,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -173,13 +169,13 @@ public class MusicProvider extends ContentProvider {
                 // a cache update in the background
                 // it will requery but that is preferable to
                 // blocking while the cache is updated
-                Runnable r = new Runnable() {
+                Runnable r1 = new Runnable() {
                     @Override
                     public void run() {
                         updateGenreCache();
                     }
                 };
-                mBackgroundExecutor.execute(r);
+                mBackgroundExecutor.execute(r1);
 
                 break;
             case 3: // Genre albums
@@ -232,78 +228,240 @@ public class MusicProvider extends ContentProvider {
                 }
                 return c;
             case 4: //Playlists
-                c = new MatrixCursor(new String[] {"_id", "name", "song_number", "album_number"});
-                //last added first
-                // Get the song count
-                final Cursor lastAdded = CursorHelpers.makeLastAddedCursor(getContext());
-                int lastAddedSongNum = 0;
-                int lastAddedAlbumNum = 0;
-                if (lastAdded != null) {
-                    lastAddedSongNum = lastAdded.getCount();
-                    if (lastAdded.moveToFirst()) {
-                        Set<String> albums = new HashSet<>(lastAddedSongNum);
-                        do {
-                            albums.add(lastAdded.getString(lastAdded.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)));
-                        } while (lastAdded.moveToNext());
-                        lastAddedAlbumNum = albums.size();
-                    }
-                    lastAdded.close();
-                }
-                // if there are songs add the lastadded playlist
-                if (lastAddedSongNum > 0) {
-                    ((MatrixCursor) c).addRow(new Object[] { -2,
-                            getContext().getResources().getString(R.string.playlist_last_added),
-                            lastAddedSongNum,
-                            lastAddedAlbumNum
-                    });
-                }
-                // User playlists next
-                // Pull all playlists
-                Cursor playlists = getContext().getContentResolver().query(
-                        MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                        new String[] { BaseColumns._ID, MediaStore.Audio.PlaylistsColumns.NAME},
-                        null, null, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
-                if (playlists != null && playlists.moveToFirst()) {
-                    do {
-                        // get playlist id
-                        final long id = playlists.getLong(playlists.getColumnIndexOrThrow(BaseColumns._ID));
-                        // get playlist name
-                        final String name = playlists.getString(playlists.getColumnIndexOrThrow(MediaStore.Audio.PlaylistsColumns.NAME));
-                        // We have to query for the song count
-                        final Cursor playlistSongs = getContext().getContentResolver().query(
-                                MediaStore.Audio.Playlists.Members.getContentUri("external", id),
-                                new String[] {MediaStore.Audio.Media.ALBUM_ID},
-                                Selections.LOCAL_SONG,
-                                SelectionArgs.LOCAL_SONG,
-                                MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-                        int numSongs = 0;
-                        int numAlbums = 0;
-                        if (playlistSongs != null) {
-                            numSongs = playlistSongs.getCount();
-                            Set<String> albums = new HashSet<>(numSongs);
-                            if (playlistSongs.moveToFirst()) {
-                                do {
-                                    albums.add(playlistSongs.getString(0));
-                                } while (playlistSongs.moveToNext());
+                db = mStore.getWritableDatabase();
+                if (db != null) {
+                    c = db.query(MusicStore.PLAYLIST_TABLE,
+                            Projections.CACHED_GROUP, null, null,
+                            null, null, MusicStore.GroupCols.NAME);
+                    if (c != null && c.getCount() > 0) {
+                        // cache hit
+                        // schedule an update
+                        Runnable r2 = new Runnable() {
+                            @Override
+                            public void run() {
+                                updatePlaylistCache();
                             }
-                            numAlbums = albums.size();
-                            playlistSongs.close();
-                        }
-                        ((MatrixCursor) c).addRow(new Object[] {id, name, numSongs, numAlbums});
-                    } while (playlists.moveToNext());
+                        };
+                        mBackgroundExecutor.execute(r2);
+                        break;
+                    }
+                    if (c != null) {
+                        c.close();
+                    } else {
+                        db.close();
+                    }
                 }
-                if (playlists != null) {
-                    playlists.close();
-                }
-                // Set the notification on the playlist uri
-                c.setNotificationUri(getContext().getContentResolver(),MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI);
-                // return our matrix cursor
-                return c;
+
+                // pull playlists, this query is very expensive
+                c = makePlaylistMatrixCursor();
+                // to avoid blocking any further schedule
+                // a cache update in the background
+                // it will requery but that is preferable to
+                // blocking while the cache is updated
+                Runnable r3 = new Runnable() {
+                    @Override
+                    public void run() {
+                        updatePlaylistCache();
+                    }
+                };
+                mBackgroundExecutor.execute(r3);
+                break;
         }
         if (c != null) {
             c.setNotificationUri(getContext().getContentResolver(), uri);
         }
         return c;
+    }
+
+    @DebugLog
+    protected MatrixCursor makePlaylistMatrixCursor() {
+        MatrixCursor c = new MatrixCursor(Projections.CACHED_GROUP);
+        //last added first
+        // Get the song count
+        final Cursor lastAdded = CursorHelpers.makeLastAddedCursor(getContext());
+        int lastAddedSongNum = 0;
+        int lastAddedAlbumNum = 0;
+        String lastAddedSongids = null;
+        String lastAddedAlbumids = null;
+        if (lastAdded != null) {
+            if (lastAdded.moveToFirst()) {
+                List<String> songs = new ArrayList<>(lastAdded.getCount());
+                Set<String> albumidSet = new HashSet<>(lastAdded.getCount());
+                do {
+                    songs.add(lastAdded.getString(lastAdded.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)));
+                    albumidSet.add(lastAdded.getString(lastAdded.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)));
+                } while (lastAdded.moveToNext());
+                lastAddedSongNum = songs.size();
+                lastAddedAlbumNum = albumidSet.size();
+                if (lastAddedSongNum > 0) {
+                    Collections.sort(songs);
+                    StringBuilder songsIdsCsv = new StringBuilder();
+                    int ii=0;
+                    for (String s : songs) {
+                        songsIdsCsv.append(s);
+                        if (++ii < songs.size()) {
+                            songsIdsCsv.append(",");
+                        }
+                    }
+                    lastAddedSongids = songsIdsCsv.toString();
+                }
+                if (lastAddedAlbumNum > 0) {
+                    List<String> albums = new ArrayList<>(albumidSet);
+                    Collections.sort(albums);
+                    StringBuilder albumIdsCsv = new StringBuilder();
+                    int ii=0;
+                    for (String s : albums) {
+                        albumIdsCsv.append(s);
+                        if (++ii < albums.size()) {
+                            albumIdsCsv.append(",");
+                        }
+                    }
+                    lastAddedAlbumids = albumIdsCsv.toString();
+                }
+            }
+            lastAdded.close();
+        }
+        // if there are songs add the lastadded playlist
+        if (lastAddedSongNum > 0) {
+            c.addRow(new Object[]{
+                    -2,
+                    getContext().getResources().getString(R.string.playlist_last_added),
+                    lastAddedSongNum,
+                    lastAddedAlbumNum,
+                    lastAddedSongids,
+                    lastAddedAlbumids,
+            });
+        }
+        // User playlists next
+        // Pull all playlists
+        Cursor playlists = getContext().getContentResolver().query(
+                MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+                new String[] { BaseColumns._ID, MediaStore.Audio.PlaylistsColumns.NAME},
+                null, null, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
+        if (playlists != null && playlists.moveToFirst()) {
+            do {
+                // get playlist id
+                final long id = playlists.getLong(playlists.getColumnIndexOrThrow(BaseColumns._ID));
+                // get playlist name
+                final String name = playlists.getString(playlists.getColumnIndexOrThrow(MediaStore.Audio.PlaylistsColumns.NAME));
+                // We have to query for the song count
+                final Cursor playlistSongs = getContext().getContentResolver().query(
+                        MediaStore.Audio.Playlists.Members.getContentUri("external", id),
+                        new String[] {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.ALBUM_ID},
+                        Selections.LOCAL_SONG,
+                        SelectionArgs.LOCAL_SONG,
+                        MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+                int numSongs = 0;
+                int numAlbums = 0;
+                String songids = null;
+                String albumids = null;
+                if (playlistSongs != null) {
+                    List<String> songs = new ArrayList<>(playlistSongs.getCount());
+                    Set<String> albumsSet = new HashSet<>(playlistSongs.getCount());
+                    if (playlistSongs.moveToFirst()) {
+                        do {
+                            songs.add(playlistSongs.getString(0));
+                            albumsSet.add(playlistSongs.getString(1));
+                        } while (playlistSongs.moveToNext());
+                    }
+                    numSongs = songs.size();
+                    numAlbums = albumsSet.size();
+                    if (numSongs > 0) {
+                        Collections.sort(songs);
+                        StringBuilder songsIdsCsv = new StringBuilder();
+                        int ii=0;
+                        for (String s : songs) {
+                            songsIdsCsv.append(s);
+                            if (++ii < songs.size()) {
+                                songsIdsCsv.append(",");
+                            }
+                        }
+                        songids = songsIdsCsv.toString();
+                    }
+                    if (numAlbums > 0) {
+                        List<String> albums = new ArrayList<>(albumsSet);
+                        Collections.sort(albums);
+                        StringBuilder albumIdsCsv = new StringBuilder();
+                        int ii=0;
+                        for (String s : albums) {
+                            albumIdsCsv.append(s);
+                            if (++ii < albums.size()) {
+                                albumIdsCsv.append(",");
+                            }
+                        }
+                        albumids = albumIdsCsv.toString();
+                    }
+                    playlistSongs.close();
+                }
+                c.addRow(new Object[] {id, name, numSongs, numAlbums, songids, albumids});
+            } while (playlists.moveToNext());
+        }
+        if (playlists != null) {
+            playlists.close();
+        }
+        return c;
+    }
+
+    @DebugLog
+    protected void updatePlaylistCache() {
+        boolean wasupdated = false;
+        Cursor c = makePlaylistMatrixCursor();
+        if (c != null) {
+            if (c.moveToFirst()) {
+                SQLiteDatabase db = mStore.getWritableDatabase();
+                do {
+                    long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
+                    String name = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
+                    int songCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
+                    int albumCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                    String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
+                    String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                    // create content values
+                    ContentValues values = new ContentValues(6);
+                    values.put(MusicStore.GroupCols.NAME, name);
+                    values.put(MusicStore.GroupCols.SONG_COUNT, songCount);
+                    values.put(MusicStore.GroupCols.ALBUM_COUNT, albumCount);
+                    values.put(MusicStore.GroupCols.SONG_IDS, songids);
+                    values.put(MusicStore.GroupCols.ALBUM_IDS, albumids);
+                    // check if its already there and update if needed
+                    Cursor c2 = db.query(MusicStore.PLAYLIST_TABLE,
+                            Projections.CACHED_GROUP,
+                            MusicStore.GroupCols._ID + "=?",
+                            new String[]{String.valueOf(id)},
+                            null, null, null, null);
+                    if (c2 != null) {
+                        try {
+                            if (c2.getCount() > 0) {
+                                if (c2.moveToFirst()) {
+                                    if (TextUtils.equals(name, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.NAME)))
+                                            && songCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT))
+                                            && albumCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT))
+                                            && TextUtils.equals(songids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)))
+                                            && TextUtils.equals(albumids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)))) {
+                                        Timber.i("Cache matches for " +name+" playlist id="+id);
+                                        continue;
+                                    }
+                                }
+                                db.update(MusicStore.PLAYLIST_TABLE, values,
+                                        MusicStore.GroupCols._ID + "=?",
+                                        new String[]{String.valueOf(id)});
+                                wasupdated = true;
+                                continue;
+                            }
+                        } finally {
+                            c2.close();
+                        }
+                    }
+                    values.put(MusicStore.GroupCols._ID, id);
+                    db.insert(MusicStore.PLAYLIST_TABLE, null, values);
+                    wasupdated = true;
+                } while (c.moveToNext());
+                db.close();
+            }
+        }
+        if (wasupdated) {
+            getContext().getContentResolver().notifyChange(PLAYLIST_URI, null);
+        }
     }
 
     @DebugLog
