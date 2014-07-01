@@ -17,6 +17,7 @@
 package com.andrew.apollo.provider;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -24,8 +25,10 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.*;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.SparseLongArray;
 
 import com.andrew.apollo.BuildConfig;
@@ -36,11 +39,21 @@ import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import dagger.ObjectGraph;
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 2/24/14.
@@ -79,6 +92,28 @@ public class MusicProvider extends ContentProvider {
                 .appendPath(String.valueOf(genreId)).appendPath("albums").build();
     }
 
+    private final Executor mBackgroundExecutor = new ThreadPoolExecutor(0, 1, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(),
+            new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(new BackgroundRunnable(r));
+                }
+            }
+    );
+
+    static class BackgroundRunnable implements Runnable {
+        private final Runnable r;
+        BackgroundRunnable(Runnable r) {
+            this.r = r;
+        }
+        @Override
+        public void run() {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            r.run();
+        }
+    }
+
     private ObjectGraph mObjectGraph;
     private MusicStore mStore;
 
@@ -90,11 +125,17 @@ public class MusicProvider extends ContentProvider {
     }
 
     @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        return super.bulkInsert(uri, values);
+    }
+
+    @Override
     public synchronized Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor c = null;
+        SQLiteDatabase db;
         switch (sUriMatcher.match(uri)) {
             case 1: // Recents
-                SQLiteDatabase db = mStore.getWritableDatabase();
+                db = mStore.getWritableDatabase();
                 if (db != null) {
                     c = db.query(MusicStore.RECENT_TABLE,
                             projection, selection, selectionArgs, null, null, sortOrder);
@@ -102,67 +143,45 @@ public class MusicProvider extends ContentProvider {
                 }
                 break;
             case 2: // Genres
-                // Pull list of all genres
-                Cursor genres = getContext().getContentResolver().query(
-                        MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
-                        new String[] { BaseColumns._ID, MediaStore.Audio.GenresColumns.NAME },
-                        MediaStore.Audio.Genres.NAME + " !=?",
-                        new String[] {"''"}, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
-
-                // Build our custom cursor
-                if (genres != null && genres.moveToFirst()) {
-                    c = new MatrixCursor(new String[] {"_id", "name", "song_number", "album_number"});
-                    do {
-                        // Copy the genre id
-                        final long id = genres.getLong(genres.getColumnIndexOrThrow(BaseColumns._ID));
-
-                        // Copy the genre name
-                        final String name = genres.getString(genres.getColumnIndexOrThrow(MediaStore.Audio.GenresColumns.NAME));
-
-                        // This double query really sucks but we have to do in otherwise we can end up
-                        // with genres without any songs
-                        final Cursor genreSongs = getContext().getContentResolver().query(
-                                MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                                new String[] { MediaStore.Audio.AudioColumns.ALBUM_ID },
-                                Selections.LOCAL_SONG,
-                                SelectionArgs.LOCAL_SONG,
-                                MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
-
-                        // Don't add genres without any songs
-                        if (genreSongs == null) {
-                            continue;
-                        } else if (genreSongs.getCount() <= 0) {
-                            genreSongs.close();
-                            continue;
-                        }
-
-                        // copy song count
-                        final int songNum = genreSongs.getCount();
-
-                        // loop the songs and filter all the unique album ids
-                        final HashSet<String> albumIdsSet = new HashSet<String>();
-                        if (genreSongs.moveToFirst()) {
-                            do {
-                                albumIdsSet.add(genreSongs.getString(0));
-                            } while (genreSongs.moveToNext());
-                        }
-                        // copy album count
-                        final int numAlbums = albumIdsSet.size();
-
-                        // close second cursor
-                        genreSongs.close();
-
-                        ((MatrixCursor) c).addRow(new Object[] {id, name, songNum, numAlbums});
-                    } while (genres.moveToNext());
+                db = mStore.getWritableDatabase();
+                if (db != null) {
+                    c = db.query(MusicStore.GENRE_TABLE,
+                            Projections.CACHED_GROUP, null, null,
+                            null, null, MusicStore.GroupCols.NAME);
+                    if (c != null && c.getCount() > 0) {
+                        // cache hit
+                        // schedule an update
+                        Runnable r = new Runnable() {
+                            @Override
+                            public void run() {
+                                updateGenreCache();
+                            }
+                        };
+                        mBackgroundExecutor.execute(r);
+                        break;
+                    }
+                    if (c != null) {
+                        c.close();
+                    } else {
+                        db.close();
+                    }
                 }
-                if (genres != null) {
-                    genres.close();
-                }
-                if (c != null) {
-                    // Set the notification uri on the genres uri not on our proxy uri
-                    c.setNotificationUri(getContext().getContentResolver(), MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI);
-                }
-                return c;
+
+                // pull genres, this query is very expensive
+                c = makeGenreMatrixCursor();
+                // to avoid blocking any further schedule
+                // a cache update in the background
+                // it will requery but that is preferable to
+                // blocking while the cache is updated
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        updateGenreCache();
+                    }
+                };
+                mBackgroundExecutor.execute(r);
+
+                break;
             case 3: // Genre albums
                 // Extract our genre id
                 List<String> pathSegments = uri.getPathSegments();
@@ -283,6 +302,156 @@ public class MusicProvider extends ContentProvider {
         }
         if (c != null) {
             c.setNotificationUri(getContext().getContentResolver(), uri);
+        }
+        return c;
+    }
+
+    @DebugLog
+    protected void updateGenreCache() {
+        boolean wasupdated = false;
+        Cursor c = makeGenreMatrixCursor();
+        if (c != null && c.moveToFirst()) {
+            SQLiteDatabase db = mStore.getWritableDatabase();
+            do {
+                long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
+                String name = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
+                int songCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
+                int albumCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
+                String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                // create content values
+                ContentValues values = new ContentValues(6);
+                values.put(MusicStore.GroupCols.NAME, name);
+                values.put(MusicStore.GroupCols.SONG_COUNT, songCount);
+                values.put(MusicStore.GroupCols.ALBUM_COUNT, albumCount);
+                values.put(MusicStore.GroupCols.SONG_IDS, songids);
+                values.put(MusicStore.GroupCols.ALBUM_IDS, albumids);
+                // check if its already there and update if needed
+                Cursor c2 = db.query(MusicStore.GENRE_TABLE,
+                        Projections.CACHED_GROUP,
+                        MusicStore.GroupCols._ID + "=?",
+                        new String[]{String.valueOf(id)},
+                        null, null, null, null);
+                if (c2 != null) {
+                    try {
+                        if (c2.getCount() > 0) {
+                            if (c2.moveToFirst()) {
+                                if (TextUtils.equals(name, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.NAME)))
+                                        && songCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT))
+                                        && albumCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT))
+                                        && TextUtils.equals(songids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)))
+                                        && TextUtils.equals(albumids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)))) {
+                                    Timber.i("Cache matches for " +name+" genre id="+id);
+                                    continue;
+                                }
+                            }
+                            db.update(MusicStore.GENRE_TABLE, values,
+                                    MusicStore.GroupCols._ID + "=?",
+                                    new String[]{String.valueOf(id)});
+                            wasupdated = true;
+                            continue;
+                        }
+                    } finally {
+                        c2.close();
+                    }
+                }
+                values.put(MusicStore.GroupCols._ID, id);
+                db.insert(MusicStore.GENRE_TABLE, null, values);
+                wasupdated = true;
+            } while (c.moveToNext());
+            db.close();
+        }
+        if (wasupdated) {
+            getContext().getContentResolver().notifyChange(GENRES_URI, null);
+        }
+    }
+
+    @DebugLog
+    protected MatrixCursor makeGenreMatrixCursor() {
+        MatrixCursor c = null;
+        // Pull list of all genres
+        Cursor genres = getContext().getContentResolver().query(
+                MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+                new String[] { BaseColumns._ID, MediaStore.Audio.GenresColumns.NAME },
+                MediaStore.Audio.Genres.NAME + " !=?",
+                new String[] {"''"}, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+
+        // Build our custom cursor
+        if (genres != null && genres.moveToFirst()) {
+            SQLiteDatabase db = mStore.getWritableDatabase();
+            c = new MatrixCursor(Projections.CACHED_GROUP);
+            do {
+                // Copy the genre id
+                final long id = genres.getLong(genres.getColumnIndexOrThrow(BaseColumns._ID));
+                // Copy the genre name
+                final String name = genres.getString(genres.getColumnIndexOrThrow(MediaStore.Audio.GenresColumns.NAME));
+                // Query for the members
+                final Cursor genreSongs = getContext().getContentResolver().query(
+                        MediaStore.Audio.Genres.Members.getContentUri("external", id),
+                        new String[] {
+                                MediaStore.Audio.Genres.Members.AUDIO_ID,
+                                MediaStore.Audio.Genres.Members.ALBUM_ID
+                        },
+                        Selections.LOCAL_SONG,
+                        SelectionArgs.LOCAL_SONG,
+                        MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+
+                // Don't add genres without any songs
+                if (genreSongs == null) {
+                    continue;
+                } else if (genreSongs.getCount() <= 0) {
+                    genreSongs.close();
+                    continue;
+                }
+
+                // copy song count
+                final int songNum = genreSongs.getCount();
+
+                // loop the songs and filter all the unique album ids
+                final List<String> songIds = new ArrayList<>(songNum);
+                final HashSet<String> albumIdsSet = new HashSet<String>(songNum);
+                if (genreSongs.moveToFirst()) {
+                    do {
+                        songIds.add(genreSongs.getString(0));
+                        albumIdsSet.add(genreSongs.getString(1));
+                    } while (genreSongs.moveToNext());
+                }
+                // copy album count
+                final int numAlbums = albumIdsSet.size();
+
+                // close second cursor
+                genreSongs.close();
+
+                // build song ids csv
+                Collections.sort(songIds);
+                StringBuilder songsIdsCsv = new StringBuilder();
+                int ii=0;
+                for (String s : songIds) {
+                    songsIdsCsv.append(s);
+                    if (++ii < songIds.size()) {
+                        songsIdsCsv.append(",");
+                    }
+                }
+
+                // build album ids csv
+                List<String> albumIds = new ArrayList<>(albumIdsSet);
+                Collections.sort(albumIds);
+                StringBuilder albumIdsCsv = new StringBuilder();
+                ii=0;
+                for (String s : albumIds) {
+                    albumIdsCsv.append(s);
+                    if (++ii < albumIds.size()) {
+                        songsIdsCsv.append(",");
+                    }
+                }
+
+                // add row to final cursor
+                c.addRow(new Object[]{id, name, songNum, numAlbums, songsIdsCsv.toString(), albumIdsCsv.toString()});
+            } while (genres.moveToNext());
+            db.close();
+        }
+        if (genres != null) {
+            genres.close();
         }
         return c;
     }

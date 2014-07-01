@@ -171,10 +171,10 @@ public class CursorHelpers {
     }
 
     public static Genre makeGenreFromCursor(final Cursor c) {
-        final long id = c.getLong(c.getColumnIndexOrThrow("_id"));
-        final String name= c.getString(c.getColumnIndexOrThrow("name"));
-        final int songNumber = c.getInt(c.getColumnIndexOrThrow("song_number"));
-        final int albumNumber = c.getInt(c.getColumnIndexOrThrow("album_number"));
+        final long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
+        final String name= c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
+        final int songNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
+        final int albumNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
         return new Genre(id, name, songNumber, albumNumber);
     }
 

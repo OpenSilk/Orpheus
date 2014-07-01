@@ -35,6 +35,7 @@ public class Projections {
     public static final String[] LOCAL_ARTIST;
     public static final String[] PLAYLIST_SONGS;
     public static final String[] RECENT_SONGS;
+    public static final String[] CACHED_GROUP;
 
     static {
         LOCAL_SONG = new String[] {
@@ -85,6 +86,14 @@ public class Projections {
                 MusicStore.Cols.ISLOCAL,
                 MusicStore.Cols.PLAYCOUNT,
                 MusicStore.Cols.LAST_PLAYED,
+        };
+        CACHED_GROUP = new String[] {
+                MusicStore.GroupCols._ID,
+                MusicStore.GroupCols.NAME,
+                MusicStore.GroupCols.SONG_COUNT,
+                MusicStore.GroupCols.ALBUM_COUNT,
+                MusicStore.GroupCols.SONG_IDS,
+                MusicStore.GroupCols.ALBUM_IDS,
         };
     }
 
