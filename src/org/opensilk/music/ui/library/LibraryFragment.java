@@ -63,9 +63,6 @@ import javax.inject.Inject;
 public class LibraryFragment extends ScopedDaggerFragment implements BackButtonListener {
 
     public static final int REQUEST_LIBRARY = 1001;
-    public static final String ARG_COMPONENT = "argComponent";
-    public static final String ARG_IDENTITY = "argIdentity";
-    public static final String ARG_FOLDER_ID = "argFolderId";
     public static final String ARG_LIBRARY_INFO = "argLibraryInfo";
 
     @Inject @ForActivity
@@ -235,11 +232,12 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     }
 
     private void initFolderFragment() {
+        final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null);
         Fragment f;
         if (mWantGridView) {
-            f = FolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
+            f = FolderGridFragment.newInstance(li);
         } else {
-            f = FolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, null);
+            f = FolderListFragment.newInstance(li);
         }
         FragmentManager fm = getChildFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
@@ -251,11 +249,12 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     }
 
     private void pushFolderFragment(String folderId) {
+        final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, folderId);
         Fragment f;
         if (mWantGridView) {
-            f = FolderGridFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
+            f = FolderGridFragment.newInstance(li);
         } else {
-            f = FolderListFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName, folderId);
+            f = FolderListFragment.newInstance(li);
         }
         getChildFragmentManager().beginTransaction()
                 .replace(R.id.container, f)

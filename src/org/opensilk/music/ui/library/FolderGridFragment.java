@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.meta.LibraryInfo;
 
 import org.opensilk.music.ui.library.adapter.FolderGridArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryLoaderCallback;
@@ -33,18 +34,14 @@ import org.opensilk.silkdagger.DaggerInjector;
 public class FolderGridFragment extends CardGridFragment implements
         LibraryLoaderCallback {
 
-    private ComponentName mLibraryComponentName;
-    private String mLibraryIdentity;
-    private String mFolderIdentity;
+    protected LibraryInfo mLibraryInfo;
 
     protected FolderGridArrayAdapter mAdapter;
 
-    public static FolderGridFragment newInstance(String libraryIdentity, ComponentName libraryComponentName, String folderId) {
+    public static FolderGridFragment newInstance(LibraryInfo libraryInfo) {
         FolderGridFragment f = new FolderGridFragment();
-        Bundle b = new Bundle(3);
-        b.putString(LibraryFragment.ARG_IDENTITY, libraryIdentity);
-        b.putParcelable(LibraryFragment.ARG_COMPONENT, libraryComponentName);
-        b.putString(LibraryFragment.ARG_FOLDER_ID, folderId);
+        Bundle b = new Bundle(1);
+        b.putParcelable(LibraryFragment.ARG_LIBRARY_INFO, libraryInfo);
         f.setArguments(b);
         return f;
     }
@@ -61,15 +58,13 @@ public class FolderGridFragment extends CardGridFragment implements
         if (getArguments() == null) {
             throw new RuntimeException("Null args");
         }
-        mLibraryComponentName = getArguments().getParcelable(LibraryFragment.ARG_COMPONENT);
-        mLibraryIdentity = getArguments().getString(LibraryFragment.ARG_IDENTITY);
-        mFolderIdentity = getArguments().getString(LibraryFragment.ARG_FOLDER_ID);
+        mLibraryInfo = getArguments().getParcelable(LibraryFragment.ARG_LIBRARY_INFO);
 
-        mAdapter = new FolderGridArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this, (DaggerInjector)getParentFragment());
+        mAdapter = new FolderGridArrayAdapter(getActivity(), mLibraryInfo.libraryId, mLibraryInfo.libraryComponent, this, (DaggerInjector)getParentFragment());
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
         } else {
-            mAdapter.startLoad(mFolderIdentity);
+            mAdapter.startLoad(mLibraryInfo.currentFolderId);
         }
     }
 
