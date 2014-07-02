@@ -830,16 +830,18 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         @Override
         public void onClick(final View v) {
             long id = MusicUtils.getCurrentAudioId();
-            if (id >= 0) {
-                long albumId = MusicProviderUtil.getAlbumId(mActivity, id);
-                if (albumId >= 0) {
-                    LocalAlbum album = MusicUtils.makeLocalAlbum(mActivity, albumId);
-                    if (album != null) {
-                        NavUtils.openAlbumProfile(mActivity, album);
-                        return;
+            if (id > 0) {
+                if (MusicUtils.isFromSDCard()) {
+                    long albumId = MusicProviderUtil.getAlbumId(mActivity, id);
+                    if (albumId >= 0) {
+                        LocalAlbum album = MusicUtils.makeLocalAlbum(mActivity, albumId);
+                        if (album != null) {
+                            NavUtils.openAlbumProfile(mActivity, album);
+                            return;
+                        }
                     }
-                }
-                // TODO toast
+                    // TODO toast
+                }// else todo notify?
             } else {
                 MusicUtils.shuffleAll(mActivity);
             }
