@@ -144,7 +144,11 @@ public class ArtworkRequest implements IArtworkRequest {
             mCurrentRequest = Fetch.albumInfo(mArtInfo.artistName, mArtInfo.albumName, new AlbumResponseListener(tryMediaStore), mPriority);
             mManager.mApiQueue.add(mCurrentRequest);
         } else if (tryMediaStore) {
-            ApolloUtils.execute(false, new MediaStoreTask(false));
+            if (isLocalArtwork()) {
+                ApolloUtils.execute(false, new MediaStoreTask(false));
+            } else {
+                queueImageRequest(mArtInfo.artworkUri);
+            }
         } else {
             notifyError(new VolleyError("Album art downloading is disabled"));
         }
@@ -509,7 +513,11 @@ public class ArtworkRequest implements IArtworkRequest {
         //@DebugLog
         public void onErrorResponse(VolleyError error) {
             if (tryMediaStore) {
-                ApolloUtils.execute(false, new MediaStoreTask(false));
+                if (isLocalArtwork()) {
+                    ApolloUtils.execute(false, new MediaStoreTask(false));
+                } else {
+                    queueImageRequest(mArtInfo.artworkUri);
+                }
             } else {
                 notifyError(error);
             }
