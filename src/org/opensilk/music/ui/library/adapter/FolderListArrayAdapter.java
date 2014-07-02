@@ -16,13 +16,14 @@
 
 package org.opensilk.music.ui.library.adapter;
 
-import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 
+import com.andrew.apollo.meta.LibraryInfo;
+
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
@@ -33,12 +34,12 @@ import org.opensilk.music.ui.cards.AlbumCard;
 import org.opensilk.music.ui.cards.ArtistCard;
 import org.opensilk.music.ui.cards.FolderCard;
 import org.opensilk.music.ui.cards.SongCard;
-import org.opensilk.music.util.RemoteLibraryUtil;
+import org.opensilk.music.ui.library.RemoteLibraryHelper;
 import org.opensilk.silkdagger.DaggerInjector;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
-import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -46,60 +47,26 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
-    private String mFolderId;
-
     private DaggerInjector mInjector;
 
     public FolderListArrayAdapter(Context context,
-                                  String libraryIdentity,
-                                  ComponentName libraryComponent,
-                                  LibraryLoaderCallback callback,
+                                  RemoteLibraryHelper library,
+                                  LibraryInfo libraryInfo,
+                                  Callback callback,
                                   DaggerInjector injector) {
-        super(context, libraryIdentity, libraryComponent, callback);
+        super(context, library, libraryInfo, callback);
         mInjector = injector;
-    }
-
-    public void startLoad(String folderId) {
-        mFolderId = folderId;
-        startLoad();
     }
 
     //@DebugLog
     protected void getMore() {
         try {
             mLoadingInProgress = true;
-            RemoteLibraryUtil.getService(mLibraryComponent).browseFolders(mLibraryIdentity, mFolderId, STEP, mPaginationBundle,
-                    new Result.Stub() {
-
-                        @Override
-                        public void success(final List<Bundle> items, final Bundle paginationBundle) throws RemoteException {
-                            ((Activity) getContext()).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (paginationBundle == null) {
-                                        mEndOfResults = true;
-                                    }
-                                    mPaginationBundle = paginationBundle;
-                                    mLoadingInProgress = false;
-                                    if (items.size() > 0) {
-                                        addItems(items);
-                                    }
-                                    if (!mFirstLoadComplete && mCallback != null) {
-                                        mFirstLoadComplete = true;
-                                        mCallback.onFirstLoadComplete();
-                                    }
-                                }
-                            });
-                        }
-
-                        @Override
-                        //@DebugLog
-                        public void failure(int code, String reason) throws RemoteException {
-//                            mPaginationBundle = null;
-                            mLoadingInProgress = false;
-                            //TODO
-                        }
-                    });
+            RemoteLibrary l = mLibrary.getService();
+            if (l != null) {
+                l.browseFolders(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId,
+                        STEP, mPaginationBundle, new ResultCallback(this));
+            } //else what todo?
         } catch (RemoteException ex) {
             ex.printStackTrace();
             mLoadingInProgress = false;
@@ -108,12 +75,12 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString("folderid", mFolderId);
+
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle inState) {
-        mFolderId = inState.getString("folderid");
+
     }
 
     @Override
@@ -139,8 +106,47 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
         throw new IllegalArgumentException("Unknown resource class");
     }
 
-    public String getFolderId() {
-        return mFolderId;
+    protected void processResult(List<Bundle> items, Bundle paginationBundle) {
+        if (paginationBundle == null) {
+            mEndOfResults = true;
+        }
+        mPaginationBundle = paginationBundle;
+        mLoadingInProgress = false;
+        if (items.size() > 0) {
+            addItems(items);
+        }
+        if (!mFirstLoadComplete && mCallback != null) {
+            mFirstLoadComplete = true;
+            mCallback.onFirstLoadComplete();
+        }
+    }
+
+    protected static class ResultCallback extends Result.Stub {
+        private final WeakReference<FolderListArrayAdapter> adapter;
+
+        protected ResultCallback(FolderListArrayAdapter adapter) {
+            this.adapter = new WeakReference<>(adapter);
+        }
+
+        @Override
+        public void success(final List<Bundle> items, final Bundle paginationBundle) throws RemoteException {
+            final FolderListArrayAdapter a = adapter.get();
+            if (a != null) {
+                a.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        a.processResult(items, paginationBundle);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void failure(int code, String reason) throws RemoteException {
+            //TODO
+//            mPaginationBundle = null;
+//            mLoadingInProgress = false;
+        }
     }
 
 }

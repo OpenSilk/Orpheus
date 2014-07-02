@@ -17,14 +17,16 @@
 package org.opensilk.music.ui.library.adapter;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.andrew.apollo.meta.LibraryInfo;
+
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui.cards.AbsBundleableCard;
+import org.opensilk.music.ui.library.RemoteLibraryHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,28 +38,29 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 /**
  * Created by drew on 6/14/14.
  */
-public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter {
+public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter implements LibraryAdapter {
 
-    public static final int STEP = 20;
+    public static final int STEP = 30;
 
-    protected final String mLibraryIdentity;
-    protected final ComponentName mLibraryComponent;
+    protected final RemoteLibraryHelper mLibrary;
+    protected final LibraryInfo mLibraryInfo;
 
     protected Bundle mPaginationBundle;
 
     protected boolean mLoadingInProgress;
     protected boolean mEndOfResults;
 
-    protected LibraryLoaderCallback mCallback;
+    protected Callback mCallback;
     protected boolean mFirstLoadComplete;
 
-    protected AbsEndlessListArrayAdapter(Context context, String libraryIdentity, ComponentName libraryComponent, LibraryLoaderCallback callback) {
+    protected AbsEndlessListArrayAdapter(Context context, RemoteLibraryHelper library,
+                                         LibraryInfo libraryInfo, Callback callback) {
         super(context, new ArrayList<Card>());
         if (!(context instanceof Activity)) {
             throw new IllegalArgumentException("Context must be from activity");
         }
-        mLibraryIdentity = libraryIdentity;
-        mLibraryComponent = libraryComponent;
+        mLibrary = library;
+        mLibraryInfo = libraryInfo;
         mCallback = callback;
     }
 
@@ -80,6 +83,11 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter {
                 getMore();
             }
         }
+    }
+
+    protected void runOnUiThread(Runnable r) {
+        Activity activity = (Activity) getContext();
+        activity.runOnUiThread(r);
     }
 
     protected abstract void getMore();

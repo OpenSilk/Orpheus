@@ -38,18 +38,14 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.bus.EventBus;
-import org.opensilk.music.bus.events.RemoteLibraryEvent;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
-import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
+import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
-import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -60,26 +56,25 @@ import javax.inject.Inject;
 /**
  * Created by drew on 6/14/14.
  */
-public class LibraryFragment extends ScopedDaggerFragment implements BackButtonListener {
+public class LibraryFragment extends ScopedDaggerFragment implements BackButtonListener, RemoteLibraryHelper.ConnectionListener {
 
     public static final int REQUEST_LIBRARY = 1001;
     public static final String ARG_LIBRARY_INFO = "argLibraryInfo";
 
     @Inject @ForActivity
-    ActionBarController mActionBarHelper;
+    protected ActionBarController mActionBarHelper;
     @Inject @ForActivity
-    DrawerHelper mDrawerHelper;
+    protected DrawerHelper mDrawerHelper;
     @Inject @ForFragment
-    Bus mFragmentBus;
+    protected Bus mFragmentBus;
+    @Inject @ForFragment
+    protected RemoteLibraryHelper mLibrary;
 
-    private RemoteLibrary mLibraryService;
     private PluginInfo mPluginInfo;
     private String mLibraryIdentity;
 
-    private GlobalBusMonitor mGlobalMonitor;
     private FragmentBusMonitor mFragmentMonitor;
 
-    private boolean mWantGridView;
     private boolean mFromSavedInstance;
 
     public static LibraryFragment newInstance(PluginInfo p) {
@@ -95,17 +90,14 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         super.onCreate(savedInstanceState);
         mPluginInfo = getArguments().getParcelable("plugininfo");
         // Bind the remote service
-        RemoteLibraryUtil.bindToService(getActivity(), mPluginInfo.componentName);
-        // register with busses
-        mGlobalMonitor = new GlobalBusMonitor();
-        EventBus.getInstance().register(mGlobalMonitor);
+        mLibrary.acquireService(mPluginInfo.componentName, this);
+        // register with bus
         mFragmentMonitor = new FragmentBusMonitor();
         mFragmentBus.register(mFragmentMonitor);
         // restore state
         if (savedInstanceState != null) {
             mFromSavedInstance = true;
             mLibraryIdentity = savedInstanceState.getString("library_id");
-            mWantGridView = savedInstanceState.getBoolean("want_grid");
         } else {
             // TODO save / get from prefs
         }
@@ -129,8 +121,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     @Override
     public void onDestroy() {
         mFragmentBus.unregister(mFragmentMonitor);
-        EventBus.getInstance().unregister(mGlobalMonitor);
-        RemoteLibraryUtil.unbindFromService(getActivity(), mPluginInfo.componentName);
+        mLibrary.releaseService();
         super.onDestroy();
     }
 
@@ -146,11 +137,11 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_view_as_simple:
-                mWantGridView = false;
+                //TODO
                 initFolderFragment();
                 return true;
             case R.id.menu_view_as_grid:
-                mWantGridView = true;
+                //TODO
                 initFolderFragment();
                 return true;
             default:
@@ -183,7 +174,6 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("library_id", mLibraryIdentity);
-        outState.putBoolean("want_grid", mWantGridView);
     }
 
     /*
@@ -212,16 +202,12 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         return getChildFragmentManager().popBackStackImmediate();
     }
 
-    private boolean isLibraryBound() {
-        return RemoteLibraryUtil.isBound(mPluginInfo.componentName);
-    }
-
-    private void requestLibrary() {
+    @Override
+    public void onConnected() {
         try {
-            mLibraryService = RemoteLibraryUtil.getService(mPluginInfo.componentName);
             if (TextUtils.isEmpty(mLibraryIdentity)) {
                 Intent i = new Intent();
-                mLibraryService.getLibraryChooserIntent(i);
+                mLibrary.getService().getLibraryChooserIntent(i);
                 startActivityForResult(i, REQUEST_LIBRARY);
             } else if (!mFromSavedInstance) {
                 initFolderFragment();
@@ -233,12 +219,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
     private void initFolderFragment() {
         final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null);
-        Fragment f;
-        if (mWantGridView) {
-            f = FolderGridFragment.newInstance(li);
-        } else {
-            f = FolderListFragment.newInstance(li);
-        }
+        Fragment f = FolderFragment.newInstance(li);
         FragmentManager fm = getChildFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
             fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -250,32 +231,11 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
     private void pushFolderFragment(String folderId) {
         final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, folderId);
-        Fragment f;
-        if (mWantGridView) {
-            f = FolderGridFragment.newInstance(li);
-        } else {
-            f = FolderListFragment.newInstance(li);
-        }
+        Fragment f = FolderFragment.newInstance(li);
         getChildFragmentManager().beginTransaction()
                 .replace(R.id.container, f)
                 .addToBackStack(folderId)
                 .commit();
-    }
-
-    class GlobalBusMonitor {
-        @Subscribe
-        public void onServiceConnected(RemoteLibraryEvent.Bound e) {
-            if (mPluginInfo.componentName.equals(e.componentName)) {
-                requestLibrary();
-            }
-        }
-
-        @Subscribe
-        public void onServiceDisconnected(RemoteLibraryEvent.Unbound e) {
-            if (mPluginInfo.componentName.equals(e.componentName)) {
-                mLibraryService = null;
-            }
-        }
     }
 
     class FragmentBusMonitor {
@@ -287,16 +247,13 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                     pushFolderFragment(e.folder.identity);
                     break;
                 case PLAY_ALL:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.PLAY_ALL)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.PLAY_ALL);
                     break;
                 case SHUFFLE_ALL:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL);
                     break;
                 case ADD_TO_QUEUE:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.ADD_QUEUE)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.ADD_QUEUE);
                     break;
             }
         }
@@ -324,16 +281,13 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                     pushFolderFragment(e.artist.identity);
                     break;
                 case PLAY_ALL:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.PLAY_ALL)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.PLAY_ALL);
                     break;
                 case SHUFFLE_ALL:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL);
                     break;
                 case ADD_TO_QUEUE:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.ADD_QUEUE)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.ADD_QUEUE);
                     break;
             }
         }
@@ -346,18 +300,20 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                     pushFolderFragment(e.album.identity);
                     break;
                 case PLAY_ALL:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.PLAY_ALL)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.PLAY_ALL);
                     break;
                 case SHUFFLE_ALL:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL);
                     break;
                 case ADD_TO_QUEUE:
-                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.ADD_QUEUE)
-                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
+
                     break;
             }
+        }
+
+        protected void doBackgroundWork(LibraryInfo info, BackgroundFetcherFragment.Action action) {
+            FetchingProgressFragment.newInstance(info, action)
+                    .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
         }
 
     }

@@ -17,29 +17,35 @@
 package org.opensilk.music.ui.library;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.meta.LibraryInfo;
 
+import org.opensilk.music.ui.home.CardListGridFragment;
+import org.opensilk.music.ui.library.adapter.FolderGridArrayAdapter;
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
-import org.opensilk.music.ui.library.adapter.LibraryLoaderCallback;
+import org.opensilk.music.ui.library.adapter.LibraryAdapter;
 import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForFragment;
+
+import javax.inject.Inject;
 
 /**
- * Created by drew on 6/14/14.
+ * Created by drew on 7/2/14.
  */
-public class FolderListFragment extends CardListFragment implements
-        LibraryLoaderCallback {
+public class FolderFragment extends CardListGridFragment implements LibraryAdapter.Callback {
+
+    @Inject @ForFragment
+    protected RemoteLibraryHelper mLibrary;
 
     protected LibraryInfo mLibraryInfo;
+    protected LibraryAdapter mAdapter;
 
-    protected FolderListArrayAdapter mAdapter;
-
-    public static FolderListFragment newInstance(LibraryInfo libraryInfo) {
-        FolderListFragment f = new FolderListFragment();
+    public static FolderFragment newInstance(LibraryInfo libraryInfo) {
+        FolderFragment f = new FolderFragment();
         Bundle b = new Bundle(1);
         b.putParcelable(LibraryFragment.ARG_LIBRARY_INFO, libraryInfo);
         f.setArguments(b);
@@ -55,23 +61,20 @@ public class FolderListFragment extends CardListFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() == null) {
-            throw new RuntimeException("Null args");
-        }
         mLibraryInfo = getArguments().getParcelable(LibraryFragment.ARG_LIBRARY_INFO);
 
-        mAdapter = new FolderListArrayAdapter(getActivity(), mLibraryInfo.libraryId, mLibraryInfo.libraryComponent, this, (DaggerInjector)getParentFragment());
+        mAdapter = createAdapter();
         if (savedInstanceState != null) {
             mAdapter.restoreInstanceState(savedInstanceState);
         } else {
-            mAdapter.startLoad(mLibraryInfo.currentFolderId);
+            mAdapter.startLoad();
         }
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setListAdapter(mAdapter);
+        setListAdapter((ArrayAdapter) mAdapter);
         if (mAdapter.isOnFirstLoad()) {
             setListShown(false);
         }
@@ -81,6 +84,14 @@ public class FolderListFragment extends CardListFragment implements
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mAdapter.saveInstanceState(outState);
+    }
+
+    protected LibraryAdapter createAdapter() {
+        if (wantGridView()) {
+            return new FolderGridArrayAdapter(getActivity(), mLibrary, mLibraryInfo, this, (DaggerInjector)getParentFragment());
+        } else {
+            return new FolderListArrayAdapter(getActivity(), mLibrary, mLibraryInfo, this, (DaggerInjector)getParentFragment());
+        }
     }
 
     /*
@@ -101,4 +112,20 @@ public class FolderListFragment extends CardListFragment implements
     public int getListViewLayout() {
         return R.layout.card_listview_fastscroll2;
     }
+
+    @Override
+    public int getGridViewLayout() {
+        return R.layout.card_gridview_fastscroll;
+    }
+
+    @Override
+    public int getEmptyViewLayout() {
+        return R.layout.list_empty_view;
+    }
+
+    @Override
+    public boolean wantGridView() {
+        return false;
+    }
+
 }

@@ -33,8 +33,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.andrew.apollo.R;
-
 import it.gmariotti.cardslib.library.view.CardListView;
 
 /**

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.library.adapter;
+package org.opensilk.music.ui.home;
 
 /**
- * Created by drew on 6/23/14.
+ * Created by drew on 7/2/14.
  */
-public interface LibraryLoaderCallback {
-    public void onFirstLoadComplete();
+public class FolderFragment {
 }

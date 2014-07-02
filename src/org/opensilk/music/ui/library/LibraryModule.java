@@ -33,8 +33,8 @@ import dagger.Provides;
 @Module (
         injects = {
                 LibraryFragment.class,
-                FolderListFragment.class,
-                FolderGridFragment.class,
+                FolderFragment.class,
+                RemoteLibraryHelperImpl.class,
         },
         addsTo = HomeModule.class,
         complete = false,
@@ -47,6 +47,11 @@ public class LibraryModule {
     @Provides @Singleton @ForFragment
     public Bus provideEventBus() {
         return new Bus("library");
+    }
+
+    @Provides @Singleton @ForFragment
+    public RemoteLibraryHelper provideRemoteLibraryHelper(RemoteLibraryHelperImpl h) {
+        return h;
     }
 
 }
