@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.meta.LibraryInfo;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Bus;
@@ -70,6 +71,7 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
     public static final String ARG_COMPONENT = "argComponent";
     public static final String ARG_IDENTITY = "argIdentity";
     public static final String ARG_FOLDER_ID = "argFolderId";
+    public static final String ARG_LIBRARY_INFO = "argLibraryInfo";
 
     @Inject @ForActivity
     ActionBarController mActionBarHelper;
@@ -285,24 +287,22 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
     class FragmentBusMonitor {
         @Subscribe
         public void onFolderClicked(FolderCardClick e) {
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, e.folder.identity);
             switch (e.event) {
                 case OPEN:
                     pushFolderFragment(e.folder.identity);
                     break;
                 case PLAY_ALL:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.folder.identity, FetchingProgressFragment.Action.PLAY_ALL)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.PLAY_ALL)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
                 case SHUFFLE_ALL:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.folder.identity, FetchingProgressFragment.Action.SHUFFLE_ALL)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
                 case ADD_TO_QUEUE:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.folder.identity, FetchingProgressFragment.Action.ADD_QUEUE)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.ADD_QUEUE)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
             }
         }
@@ -324,51 +324,48 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
 
         @Subscribe
         public void onArtistCardClicked(ArtistCardClick e) {
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, e.artist.identity);
             switch (e.event) {
                 case OPEN:
                     pushFolderFragment(e.artist.identity);
                     break;
                 case PLAY_ALL:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.artist.identity, FetchingProgressFragment.Action.PLAY_ALL)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.PLAY_ALL)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
                 case SHUFFLE_ALL:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.artist.identity, FetchingProgressFragment.Action.SHUFFLE_ALL)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
                 case ADD_TO_QUEUE:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.artist.identity, FetchingProgressFragment.Action.ADD_QUEUE)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.ADD_QUEUE)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
             }
         }
 
         @Subscribe
         public void onAlbumCardClicked(AlbumCardClick e) {
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, e.album.identity);
             switch (e.event) {
                 case OPEN:
                     pushFolderFragment(e.album.identity);
                     break;
                 case PLAY_ALL:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.album.identity, FetchingProgressFragment.Action.PLAY_ALL)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.PLAY_ALL)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
                 case SHUFFLE_ALL:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.album.identity, FetchingProgressFragment.Action.SHUFFLE_ALL)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
                 case ADD_TO_QUEUE:
-                    FetchingProgressFragment.newInstance(mLibraryIdentity, mPluginInfo.componentName,
-                            e.album.identity, FetchingProgressFragment.Action.ADD_QUEUE)
-                            .show(getChildFragmentManager(), "progress");
+                    FetchingProgressFragment.newInstance(li, BackgroundFetcherFragment.Action.ADD_QUEUE)
+                            .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
                     break;
             }
         }
+
     }
 
 }
