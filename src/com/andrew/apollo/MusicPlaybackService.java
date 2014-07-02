@@ -2001,7 +2001,7 @@ public class MusicPlaybackService extends Service {
         if (TextUtils.isEmpty(albumartist)) {
             albumartist = getArtistName();
         }
-        return new ArtInfo(albumartist, getAlbumName(), null);
+        return new ArtInfo(albumartist, getAlbumName(), getArtworkUri());
     }
 
     /**
