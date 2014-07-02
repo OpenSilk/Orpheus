@@ -16,9 +16,7 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -36,4 +34,4 @@
         android:textAppearance="?android:textAppearanceLarge"
         android:textStyle="bold" />
 
-</FrameLayout>
+</merge>

@@ -31,6 +31,8 @@ import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.andrew.apollo.R;
+
 import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
@@ -46,9 +48,9 @@ import it.gmariotti.cardslib.library.view.CardListView;
  *           can be swapped out.
  */
 public abstract class CardListGridFragment extends Fragment {
-    static final int INTERNAL_EMPTY_ID = 0x00ff0001;
-    static final int INTERNAL_PROGRESS_CONTAINER_ID = 0x00ff0002;
-    static final int INTERNAL_LIST_CONTAINER_ID = 0x00ff0003;
+    static final int INTERNAL_EMPTY_ID = R.id.clg__empty_view;
+    static final int INTERNAL_PROGRESS_CONTAINER_ID = R.id.clg__progress_container;
+    static final int INTERNAL_LIST_CONTAINER_ID = R.id.clg__list_container;
 
     final private Handler mHandler = new Handler();
 
@@ -98,64 +100,16 @@ public abstract class CardListGridFragment extends Fragment {
     //@DebugLog
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final Context context = getActivity();
 
-        FrameLayout root = new FrameLayout(context);
-
-        // ------------------------------------------------------------------
-
-        LinearLayout pframe = new LinearLayout(context);
-        pframe.setId(INTERNAL_PROGRESS_CONTAINER_ID);
-        pframe.setOrientation(LinearLayout.VERTICAL);
-        pframe.setVisibility(View.GONE);
-        pframe.setGravity(Gravity.CENTER);
-
-        ProgressBar progress = new ProgressBar(context, null,
-                android.R.attr.progressBarStyleLarge);
-        pframe.addView(progress, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-        root.addView(pframe, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-
-        // ------------------------------------------------------------------
-
-        FrameLayout lframe = new FrameLayout(context);
-        lframe.setId(INTERNAL_LIST_CONTAINER_ID);
-
-        //
-        // TODO if this can be optimized im all for it
-        //
-
-        View tv = inflater.inflate(getEmptyViewLayout(), null);
-//        TextView tv = new TextView(getActivity());
-        tv.setId(INTERNAL_EMPTY_ID);
-//        tv.setGravity(Gravity.CENTER);
-        lframe.addView(tv, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-
-        View lv;
+        View root = inflater.inflate(R.layout.fragment_cardlistgrid, container, false);
+        FrameLayout emptyContainer = (FrameLayout) root.findViewById(INTERNAL_EMPTY_ID);
+        inflater.inflate(getEmptyViewLayout(), emptyContainer, true);
+        FrameLayout listContainer = (FrameLayout) root.findViewById(INTERNAL_LIST_CONTAINER_ID);
         if (wantGridView()) {
-            lv = inflater.inflate(getGridViewLayout(), null);
-            ((CardGridView) lv).setDrawSelectorOnTop(false);
+            inflater.inflate(getGridViewLayout(), listContainer, true);
         } else {
-            lv = inflater.inflate(getListViewLayout(), null);
-            ((CardListView) lv).setDrawSelectorOnTop(false);
+            inflater.inflate(getListViewLayout(), listContainer, true);
         }
-//        CardListView lv = new CardListView(getActivity());
-//        lv.setId(android.R.id.list);
-//        CardListView lv = (CardListView) inflater.inflate(getListViewLayout(), null);
-//        lv.setDrawSelectorOnTop(false);
-        lframe.addView(lv, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-
-        root.addView(lframe, new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
-
-        // ------------------------------------------------------------------
-
-        root.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT));
 
         return root;
     }
