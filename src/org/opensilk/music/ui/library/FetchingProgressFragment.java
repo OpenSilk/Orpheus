@@ -42,7 +42,7 @@ public class FetchingProgressFragment extends DialogFragment implements Backgrou
     public static FetchingProgressFragment newInstance(LibraryInfo libraryInfo, Action action) {
         FetchingProgressFragment f = new FetchingProgressFragment();
         Bundle b = new Bundle(2);
-        b.putParcelable(HomeFragment.ARG_LIBRARY_INFO, libraryInfo);
+        b.putParcelable(LibraryFragment.ARG_LIBRARY_INFO, libraryInfo);
         b.putString(ARG_ACTION, action.toString());
         f.setArguments(b);
         return f;
@@ -55,7 +55,7 @@ public class FetchingProgressFragment extends DialogFragment implements Backgrou
             throw new IllegalArgumentException("Null args");
         }
 
-        mLibraryInfo = getArguments().getParcelable(HomeFragment.ARG_LIBRARY_INFO);
+        mLibraryInfo = getArguments().getParcelable(LibraryFragment.ARG_LIBRARY_INFO);
         mAction = Action.valueOf(getArguments().getString(ARG_ACTION));
 
         setStyle(STYLE_NO_TITLE, 0);

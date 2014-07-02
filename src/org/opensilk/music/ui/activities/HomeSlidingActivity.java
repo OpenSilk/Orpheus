@@ -19,10 +19,8 @@ package org.opensilk.music.ui.activities;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -45,7 +43,7 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.loaders.NavigationLoader;
-import org.opensilk.music.ui.library.HomeFragment;
+import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
@@ -60,7 +58,6 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import hugo.weaving.DebugLog;
 
 /**
  *
@@ -289,7 +286,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
                     .replace(R.id.main, new org.opensilk.music.ui.home.HomeFragment(), "home").commit();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, HomeFragment.newInstance(pi), "library")
+                    .replace(R.id.main, LibraryFragment.newInstance(pi), "library")
                     .commit();
         }
     }

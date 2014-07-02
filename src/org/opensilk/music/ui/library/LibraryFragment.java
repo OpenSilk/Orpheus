@@ -31,10 +31,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.meta.LibraryInfo;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -44,7 +42,6 @@ import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.RemoteLibraryEvent;
-import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick;
@@ -60,12 +57,10 @@ import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import javax.inject.Inject;
 
-import hugo.weaving.DebugLog;
-
 /**
  * Created by drew on 6/14/14.
  */
-public class HomeFragment extends ScopedDaggerFragment implements BackButtonListener {
+public class LibraryFragment extends ScopedDaggerFragment implements BackButtonListener {
 
     public static final int REQUEST_LIBRARY = 1001;
     public static final String ARG_COMPONENT = "argComponent";
@@ -90,8 +85,8 @@ public class HomeFragment extends ScopedDaggerFragment implements BackButtonList
     private boolean mWantGridView;
     private boolean mFromSavedInstance;
 
-    public static HomeFragment newInstance(PluginInfo p) {
-        HomeFragment f = new HomeFragment();
+    public static LibraryFragment newInstance(PluginInfo p) {
+        LibraryFragment f = new LibraryFragment();
         Bundle b = new Bundle(1);
         b.putParcelable("plugininfo", p);
         f.setArguments(b);

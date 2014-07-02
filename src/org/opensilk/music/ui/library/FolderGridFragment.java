@@ -27,8 +27,6 @@ import org.opensilk.music.ui.library.adapter.FolderGridArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryLoaderCallback;
 import org.opensilk.silkdagger.DaggerInjector;
 
-import hugo.weaving.DebugLog;
-
 /**
  * Created by drew on 6/23/14.
  */
@@ -44,9 +42,9 @@ public class FolderGridFragment extends CardGridFragment implements
     public static FolderGridFragment newInstance(String libraryIdentity, ComponentName libraryComponentName, String folderId) {
         FolderGridFragment f = new FolderGridFragment();
         Bundle b = new Bundle(3);
-        b.putString(HomeFragment.ARG_IDENTITY, libraryIdentity);
-        b.putParcelable(HomeFragment.ARG_COMPONENT, libraryComponentName);
-        b.putString(HomeFragment.ARG_FOLDER_ID, folderId);
+        b.putString(LibraryFragment.ARG_IDENTITY, libraryIdentity);
+        b.putParcelable(LibraryFragment.ARG_COMPONENT, libraryComponentName);
+        b.putString(LibraryFragment.ARG_FOLDER_ID, folderId);
         f.setArguments(b);
         return f;
     }
@@ -63,9 +61,9 @@ public class FolderGridFragment extends CardGridFragment implements
         if (getArguments() == null) {
             throw new RuntimeException("Null args");
         }
-        mLibraryComponentName = getArguments().getParcelable(HomeFragment.ARG_COMPONENT);
-        mLibraryIdentity = getArguments().getString(HomeFragment.ARG_IDENTITY);
-        mFolderIdentity = getArguments().getString(HomeFragment.ARG_FOLDER_ID);
+        mLibraryComponentName = getArguments().getParcelable(LibraryFragment.ARG_COMPONENT);
+        mLibraryIdentity = getArguments().getString(LibraryFragment.ARG_IDENTITY);
+        mFolderIdentity = getArguments().getString(LibraryFragment.ARG_FOLDER_ID);
 
         mAdapter = new FolderGridArrayAdapter(getActivity(), mLibraryIdentity, mLibraryComponentName, this, (DaggerInjector)getParentFragment());
         if (savedInstanceState != null) {

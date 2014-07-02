@@ -80,7 +80,7 @@ public class BackgroundFetcherFragment extends Fragment {
     public static BackgroundFetcherFragment newInstance(LibraryInfo libraryInfo, Action action, String tag) {
         BackgroundFetcherFragment f = new BackgroundFetcherFragment();
         Bundle b = new Bundle(3);
-        b.putParcelable(HomeFragment.ARG_LIBRARY_INFO, libraryInfo);
+        b.putParcelable(LibraryFragment.ARG_LIBRARY_INFO, libraryInfo);
         b.putString(ARG_ACTION, action.toString());
         b.putString(ARG_TAG, tag);
         f.setArguments(b);
@@ -101,7 +101,7 @@ public class BackgroundFetcherFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        mLibraryInfo = getArguments().getParcelable(HomeFragment.ARG_LIBRARY_INFO);
+        mLibraryInfo = getArguments().getParcelable(LibraryFragment.ARG_LIBRARY_INFO);
         mAction = Action.valueOf(getArguments().getString(ARG_ACTION));
 
         mMessage = getString(R.string.fetching_song_list);

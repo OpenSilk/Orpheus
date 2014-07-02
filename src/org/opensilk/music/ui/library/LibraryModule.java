@@ -20,7 +20,6 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.activities.HomeModule;
 import org.opensilk.music.ui.cards.CardModule;
-import org.opensilk.music.ui.cards.FolderCard;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Singleton;
@@ -33,7 +32,7 @@ import dagger.Provides;
  */
 @Module (
         injects = {
-                HomeFragment.class,
+                LibraryFragment.class,
                 FolderListFragment.class,
                 FolderGridFragment.class,
         },
