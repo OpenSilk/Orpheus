@@ -282,8 +282,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         }
         PluginInfo pi = mDrawerAdapter.getItem(position);
         if (pi.componentName.equals(new ComponentName(this, org.opensilk.music.ui.home.HomeFragment.class))) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, new org.opensilk.music.ui.home.HomeFragment(), "home").commit();
+            NavUtils.goHome(this);
         } else {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main, LibraryFragment.newInstance(pi), "library")

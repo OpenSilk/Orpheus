@@ -19,6 +19,7 @@ import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 
@@ -197,11 +198,7 @@ public final class NavUtils {
      * @param activity The {@link Activity} to use.
      */
     public static void goHome(final Activity activity) {
-        final Intent intent = new Intent(activity, HomeSlidingActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        activity.startActivity(intent);
-        activity.finish();
+        ((FragmentActivity) activity).getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main, new org.opensilk.music.ui.home.HomeFragment(), "home").commit();
     }
 }
