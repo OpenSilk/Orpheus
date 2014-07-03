@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import com.andrew.apollo.R;
 import com.andrew.apollo.meta.LibraryInfo;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -232,6 +233,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                 if (TextUtils.isEmpty(mLibraryIdentity)) {
                     Intent i = new Intent();
                     mLibrary.getService().getLibraryChooserIntent(i);
+                    i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
                     startActivityForResult(i, REQUEST_LIBRARY);
                 } else {
                     initFolderFragment();
