@@ -746,6 +746,7 @@ public class MusicPlaybackService extends Service {
         // Remove the audio focus listener and lock screen controls
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
         mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
+        mAudioManager.unregisterMediaButtonEventReceiver(mMediaButtonReceiverComponent);
 
         // Remove any callbacks from the handler
         mPlayerHandler.removeCallbacksAndMessages(null);
@@ -2266,8 +2267,7 @@ public class MusicPlaybackService extends Service {
     private void playRemote() {
         mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
-        mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
-                MediaButtonIntentReceiver.class.getName()));
+        mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
         try {
             // If we just skipped forward the remote device
             // will still be loaded with the old track
@@ -2314,8 +2314,7 @@ public class MusicPlaybackService extends Service {
             return;
         }
 
-        mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
-                MediaButtonIntentReceiver.class.getName()));
+        mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
 
         if (mPlayer.isInitialized()) {
             final long duration = mPlayer.duration();
@@ -2739,8 +2738,7 @@ public class MusicPlaybackService extends Service {
         if (loadRemote(mCurrentMediaInfo, true, startPos)) {
             mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
-            mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
-                    MediaButtonIntentReceiver.class.getName()));
+            mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
             if (!mIsSupposedToBePlaying) {
                 mIsSupposedToBePlaying = true;
                 notifyChange(PLAYSTATE_CHANGED);
