@@ -40,7 +40,6 @@ import it.gmariotti.cardslib.library.internal.CardGridArrayAdapter;
  */
 public abstract class AbsEndlessGridArrayAdapter extends CardGridArrayAdapter implements LibraryAdapter {
 
-    // TODO reduce this depending on num cpus avail?
     public static final int STEP = 30;
 
     protected final RemoteLibraryHelper mLibrary;

@@ -16,10 +16,6 @@
 
 package org.opensilk.music.ui.library;
 
-import com.squareup.otto.Bus;
-
-import org.opensilk.music.ui.activities.HomeModule;
-import org.opensilk.music.ui.cards.CardModule;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Singleton;
@@ -28,25 +24,22 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by drew on 6/20/14.
+ * Created by drew on 7/3/14.
  */
-@Module (
+@Module(
         injects = {
-                LibraryFragment.class,
-                FolderFragment.class,
+                RemoteLibraryHelperImpl.class,
         },
-        addsTo = HomeModule.class,
         complete = false,
-        includes = {
-                CardModule.class,
-                RemoteLibraryModule.class,
-        }
+        library = true
 )
-public class LibraryModule {
+public class RemoteLibraryModule {
 
-    @Provides @Singleton @ForFragment
-    public Bus provideEventBus() {
-        return new Bus("library");
+    @Provides
+    @Singleton
+    @ForFragment
+    public RemoteLibraryHelper provideRemoteLibraryHelper(RemoteLibraryHelperImpl h) {
+        return h;
     }
 
 }

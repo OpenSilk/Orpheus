@@ -26,26 +26,34 @@ import android.support.v4.app.FragmentActivity;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.meta.LibraryInfo;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.music.AppModule;
+import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.util.RemoteLibraryUtil;
+import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.Module;
 import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 7/1/14.
  */
-public class BackgroundFetcherFragment extends Fragment {
+public class BackgroundFetcherFragment extends Fragment implements RemoteLibraryHelper.ConnectionListener {
 
     public static String ARG_ACTION = "arg_action";
     public static String ARG_TAG = "argTAG";
 
     private static final boolean D = false;
-    private static final int STEP = D ? 8 : 30;
+    private static final int STEP = D ? 8 : 20;
 
     public enum Action {
         ADD_QUEUE,
@@ -58,6 +66,9 @@ public class BackgroundFetcherFragment extends Fragment {
 
     FetcherTask task;
     int numadded = 0;
+
+//    @Inject @ForFragment
+    RemoteLibraryHelper mLibrary;
 
     boolean isComplete = false;
     private CharSequence mMessage;
@@ -90,6 +101,7 @@ public class BackgroundFetcherFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
         Fragment f = ((FragmentActivity) activity).getSupportFragmentManager().findFragmentByTag(getArguments().getString(ARG_TAG));
         if (f != null && f instanceof CompleteListener) {
             mListener = (CompleteListener) f;
@@ -104,10 +116,11 @@ public class BackgroundFetcherFragment extends Fragment {
         mLibraryInfo = getArguments().getParcelable(LibraryFragment.ARG_LIBRARY_INFO);
         mAction = Action.valueOf(getArguments().getString(ARG_ACTION));
 
-        mMessage = getString(R.string.fetching_song_list);
+        // need instance with appcontext, so we gotta get a new one.
+        mLibrary = new RemoteLibraryHelperImpl(getActivity().getApplicationContext());
+        mLibrary.acquireService(mLibraryInfo.libraryComponent, this);
 
-        task = new FetcherTask(mAction);
-        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        mMessage = getString(R.string.fetching_song_list);
     }
 
     @Override
@@ -119,11 +132,56 @@ public class BackgroundFetcherFragment extends Fragment {
     }
 
     @Override
+    @DebugLog
+    public void onDestroy() {
+        mLibrary.releaseService();
+        super.onDestroy();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
+    @Override
+    @DebugLog
+    public void onConnected() {
+        task = new FetcherTask(mAction);
+        ApolloUtils.execute(false, task);
+    }
+
+    /*
+     * Abstract methods
+     */
+
+//    @Override
+//    protected Object[] getModules() {
+//        return new Object[] {
+//                new FragmentModule(),
+//        };
+//    }
+//
+//    @Override
+//    protected DaggerInjector getParentInjector(Activity activity) {
+//        return (DaggerInjector) activity.getApplication();
+//    }
+//
+//    /**
+//     * retained frament needs its own module
+//     */
+//    @Module(
+//            addsTo = AppModule.class,
+//            includes = RemoteLibraryModule.class,
+//            injects = BackgroundFetcherFragment.class
+//    )
+//    static class FragmentModule {
+//
+//    }
+
+    /**
+     *
+     */
     class FetcherTask extends AsyncTask<Void, Void, Void> {
 
         final Action action;
@@ -143,6 +201,15 @@ public class BackgroundFetcherFragment extends Fragment {
         @Override
         @DebugLog
         protected Void doInBackground(Void... params) {
+            try {
+                RemoteLibrary l = mLibrary.getService();
+                if (l != null) {
+                    l.listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId, STEP, bundle, result);
+                    result.waitForComplete();
+                } //else what todo?
+            } catch (RemoteException |InterruptedException e) {
+                //pass
+            }
             if (D) {
                 // artificially inflate execution time to test configuration changes
                 try {
@@ -150,13 +217,6 @@ public class BackgroundFetcherFragment extends Fragment {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
-            try {
-                RemoteLibraryUtil.getService(mLibraryInfo.libraryComponent)
-                        .listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId, STEP, bundle, result);
-                result.waitForComplete();
-            } catch (RemoteException |InterruptedException e) {
-                //pass
             }
             return null;
         }
@@ -197,7 +257,7 @@ public class BackgroundFetcherFragment extends Fragment {
                                 mListener.onMessageUpdated(mMessage);
                             }
                             task = new FetcherTask(Action.ADD_QUEUE, result.paginationBundle);
-                            task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            ApolloUtils.execute(false, task);
                         }
                     });
                 } else {
@@ -208,6 +268,8 @@ public class BackgroundFetcherFragment extends Fragment {
             }
             if (isComplete && mListener != null) {
                 mListener.onComplete(mToastString);
+                getFragmentManager().beginTransaction()
+                        .remove(BackgroundFetcherFragment.this).commit();
             }
         }
     }

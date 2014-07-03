@@ -48,7 +48,6 @@ import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;
 import org.opensilk.music.util.PluginUtil;
-import org.opensilk.music.util.RemoteLibraryUtil;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import java.util.ArrayList;
@@ -177,8 +176,6 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     protected void onDestroy() {
         super.onDestroy();
         if (isFinishing()) {
-            // safety measure to ensure we dont maintain remote connections
-            RemoteLibraryUtil.unBindAll(this);
             // schedule cache clear
             mArtworkService.scheduleCacheClear();
         }

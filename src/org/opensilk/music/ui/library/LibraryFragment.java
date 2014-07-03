@@ -204,16 +204,18 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
     @Override
     public void onConnected() {
-        try {
-            if (TextUtils.isEmpty(mLibraryIdentity)) {
-                Intent i = new Intent();
-                mLibrary.getService().getLibraryChooserIntent(i);
-                startActivityForResult(i, REQUEST_LIBRARY);
-            } else if (!mFromSavedInstance) {
-                initFolderFragment();
+        if (!mFromSavedInstance) {
+            try {
+                if (TextUtils.isEmpty(mLibraryIdentity)) {
+                    Intent i = new Intent();
+                    mLibrary.getService().getLibraryChooserIntent(i);
+                    startActivityForResult(i, REQUEST_LIBRARY);
+                } else {
+                    initFolderFragment();
+                }
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
         }
     }
 

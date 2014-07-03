@@ -135,4 +135,6 @@
 
     <string name="fetching_song_list">Fetching song list…</string>
     <string name="unable_to_fetch_songs">Unable to get songs</string>
+
+    <string name="menu_refresh">Refresh</string>
 </resources>

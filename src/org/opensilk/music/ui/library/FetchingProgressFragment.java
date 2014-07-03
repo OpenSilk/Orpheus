@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
 import com.andrew.apollo.R;
@@ -51,9 +52,6 @@ public class FetchingProgressFragment extends DialogFragment implements Backgrou
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() == null) {
-            throw new IllegalArgumentException("Null args");
-        }
 
         mLibraryInfo = getArguments().getParcelable(LibraryFragment.ARG_LIBRARY_INFO);
         mAction = Action.valueOf(getArguments().getString(ARG_ACTION));
@@ -62,9 +60,11 @@ public class FetchingProgressFragment extends DialogFragment implements Backgrou
 
         if (savedInstanceState == null) {
             getActivity().getSupportFragmentManager().beginTransaction()
-                    .add(BackgroundFetcherFragment.newInstance(mLibraryInfo, mAction, FRAGMENT_TAG), null)
+                    .add(BackgroundFetcherFragment.newInstance(mLibraryInfo, mAction, FRAGMENT_TAG), "bgfetcher")
                     .commit();
         }
+
+        setCancelable(false);
     }
 
     @Override
@@ -78,12 +78,14 @@ public class FetchingProgressFragment extends DialogFragment implements Backgrou
 
     @Override
     public void onComplete(CharSequence toastString) {
-        getDialog().dismiss();
         Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+        dismiss();
     }
 
     @Override
     public void onMessageUpdated(CharSequence message) {
-        ((ProgressDialog) getDialog()).setMessage(message);
+        if (getDialog() != null) {
+            ((ProgressDialog) getDialog()).setMessage(message);
+        }
     }
 }

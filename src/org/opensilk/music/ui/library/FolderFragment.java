@@ -18,6 +18,9 @@ package org.opensilk.music.ui.library;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 
@@ -28,7 +31,9 @@ import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.music.ui.library.adapter.FolderGridArrayAdapter;
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
+import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -38,6 +43,8 @@ import javax.inject.Inject;
  */
 public class FolderFragment extends CardListGridFragment implements LibraryAdapter.Callback {
 
+    @Inject @ForActivity
+    protected DrawerHelper mDrawerHelper;
     @Inject @ForFragment
     protected RemoteLibraryHelper mLibrary;
 
@@ -78,6 +85,29 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
         if (mAdapter.isOnFirstLoad()) {
             setListShown(false);
         }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (!mDrawerHelper.isDrawerOpen()) {
+            inflater.inflate(R.menu.refresh, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_refresh:
+                mAdapter.startLoad();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
