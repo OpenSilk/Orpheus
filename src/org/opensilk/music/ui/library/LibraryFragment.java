@@ -37,6 +37,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
@@ -116,6 +117,28 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         mActionBarHelper.setTitle(mPluginInfo.title);
         // enable overflow
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        try {
+            RemoteLibrary l = mLibrary.getService();
+            if (l != null) {
+                l.resume();
+            }
+        } catch (RemoteException ignored) {}
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        try {
+            RemoteLibrary l = mLibrary.getService();
+            if (l != null) {
+                l.pause();
+            }
+        } catch (RemoteException ignored) {}
     }
 
     @Override
