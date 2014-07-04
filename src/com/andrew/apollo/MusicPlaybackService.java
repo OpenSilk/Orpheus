@@ -1320,7 +1320,8 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "setNextTrack: next play position = " + mNextPlayPos);
         if (mNextPlayPos >= 0 && mPlayList != null) {
             final long id = mPlayList[mNextPlayPos];
-            mPlayer.setNextDataSource(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/" + id);
+            Uri dataUri = MusicProviderUtil.getDataUri(this, id);
+            mPlayer.setNextDataSource(dataUri != null ? dataUri.toString() : null); //TODO use uri
             mNextMediaInfo = CastUtils.buildMediaInfo(this, id);
         } else {
             mPlayer.setNextDataSource(null);

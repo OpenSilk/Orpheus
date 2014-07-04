@@ -196,6 +196,26 @@ public class MusicProviderUtil {
         return albumid;
     }
 
+    public static Uri getDataUri(Context context, long songId) {
+        Uri dataUri = null;
+        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+                new String[]{ MusicStore.Cols.DATA_URI },
+                BaseColumns._ID + "=?",
+                new String[]{ String.valueOf(songId) }, null);
+        if (c != null) {
+            if (c.getCount() > 0 && c.moveToFirst()) {
+                try {
+                    dataUri = Uri.parse(c.getString(0));
+                } catch (IllegalArgumentException ex) {
+                    // pass
+                }
+            }
+            c.close();
+        }
+        return dataUri;
+    }
+
+
     public static ContentValues makeSongContentValues(Song song) {
         ContentValues values = new ContentValues(15);
         values.put(MusicStore.Cols.IDENTITY, song.identity);
