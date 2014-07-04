@@ -25,15 +25,21 @@ import android.provider.MediaStore;
 import android.support.v7.media.MediaRouter;
 
 import com.andrew.apollo.MusicPlaybackService;
+import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicProvider;
+import com.andrew.apollo.provider.MusicProviderUtil;
+import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 
 import org.opensilk.cast.manager.BaseCastManager;
-import org.opensilk.cast.manager.ReconnectionStatus;
+import org.opensilk.cast.manager.BaseCastManager.ReconnectionStatus;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.Projections;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -74,11 +80,11 @@ public class CastUtils {
     public static boolean notifyRouteSelected(Context context, MediaRouter.RouteInfo info) {
         if (sCastService != null) {
             try {
-                if (sCastService.getCastManager().getReconnectionStatus() == ReconnectionStatus.FINALIZE) {
-                    sCastService.getCastManager().setReconnectionStatus(ReconnectionStatus.INACTIVE);
-                    return true;
-                }
-                Utils.saveStringToPreference(context, BaseCastManager.PREFS_KEY_ROUTE_ID, info.getId());
+//                if (sCastService.getCastManager().getReconnectionStatus() == ReconnectionStatus.FINALIZE) {
+//                    sCastService.getCastManager().setReconnectionStatus(ReconnectionStatus.INACTIVE);
+//                    return true;
+//                }
+//                Utils.saveStringToPreference(context, BaseCastManager.PREFS_KEY_ROUTE_ID, info.getId());
                 sCastService.getCastManager().getRouteListener().onRouteSelected(info.getExtras());
                 return true;
             } catch (final RemoteException ignored) {
@@ -107,10 +113,10 @@ public class CastUtils {
 
     public static Cursor getSingleTrackCursor(Context context, String id) {
         Cursor c = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                MusicPlaybackService.PROJECTION,
-                "_id=" + id,
-                null, null);
+                MusicProvider.RECENTS_URI,
+                Projections.RECENT_SONGS,
+                MusicStore.Cols._ID + "=?",
+                new String[]{id}, null);
         if (c == null) {
             return null;
         }
@@ -121,7 +127,7 @@ public class CastUtils {
         return c;
     }
 
-    //@DebugLog
+    @DebugLog
     public static MediaInfo buildMediaInfo(String trackTitle,
                                             String albumTitle,
                                             String artistName,
@@ -162,32 +168,18 @@ public class CastUtils {
 
     public static MediaInfo buildMediaInfo(Context context, Cursor c) {
         if (c != null && !c.isClosed()) {
-            try {
-                final String ipAddr = getWifiIpAddress(context);
-                return buildMediaInfo(
-                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE)),
-                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM)),
-                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST)),
-                        c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE)),
-                        buildMusicUrl(c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)),
-                                ipAddr),
-                        buildArtUrl(c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID)),
-                                ipAddr),
-                        null
-                );
-            } catch (UnknownHostException|IllegalArgumentException ignored) {
-                // fall
-            }
+            final RecentSong song = CursorHelpers.makeRecentSongFromRecentCursor(c);
+            return buildMediaInfo(context, song);
         }
         return null;
     }
 
-    public static MediaInfo buildMediaInfo(Context context, Song song) {
+    public static MediaInfo buildMediaInfo(Context context, RecentSong song) {
         if (song != null) {
-            if ("media".equals(song.dataUri.getAuthority())) {
+            if (song.isLocal) {
                 try {
                     String ipaddr = getWifiIpAddress(context);
-                    return buildMediaInfo(song.name, song.albumName, song.artistName, "audio/*",
+                    return buildMediaInfo(song.name, song.albumName, song.artistName, song.mimeType,
                             buildMusicUrl(ipaddr, song.identity), buildArtUrl(ipaddr, song), null);
                 } catch (UnknownHostException ignored) {}
             } else {
@@ -200,7 +192,7 @@ public class CastUtils {
                 } else {
                     artUrl = song.artworkUri.toString();
                 }
-                return buildMediaInfo(song.name, song.albumName, song.artistName, "audio/*",
+                return buildMediaInfo(song.name, song.albumName, song.artistName, song.mimeType,
                         song.dataUri.toString(), artUrl, null);
             }
         }
@@ -215,11 +207,7 @@ public class CastUtils {
         return "http://" + host + ":" + CastWebServer.PORT + "/audio/" + id;
     }
 
-    public static String buildArtUrl(long id, String host) {
-        return "http://" + host + ":" + CastWebServer.PORT + "/art/" + id;
-    }
-
-    public static String buildArtUrl(String host, Song song) {
+    public static String buildArtUrl(String host, RecentSong song) {
         String artist = song.albumArtistName != null ? song.albumArtistName : song.artistName;
         String album = song.albumName;
         if (artist == null || album == null) {
