@@ -16,6 +16,7 @@
 
 package com.andrew.apollo;
 
+import android.database.Cursor;
 import android.os.Handler;
 
 /**
@@ -32,7 +33,7 @@ public interface IMusicPlayer {
     public boolean isInitialized();
     public void stop(boolean goToIdle);
     public void setNextDataSource(long songId);
-    public void setDataSource(long songId, String path);
+    public void setDataSource(Cursor cursor);
     // note make isInitialized() return false if cant open
     public void setDataSource(String path);
     public long seekAndPlay(long position);

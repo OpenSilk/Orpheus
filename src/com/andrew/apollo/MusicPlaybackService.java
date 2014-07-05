@@ -792,10 +792,14 @@ public class MusicPlaybackService extends Service {
         if (mCastManager != null) {
             if (visible) {
                 mCastManager.incrementUiCounter();
-                mRemoteProgressHandler.removeMessages(0);
+                if (mRemoteProgressHandler != null) {
+                    mRemoteProgressHandler.removeMessages(0);
+                }
             } else {
                 mCastManager.decrementUiCounter();
-                mRemoteProgressHandler.sendEmptyMessage(0);
+                if (mRemoteProgressHandler != null) {
+                    mRemoteProgressHandler.sendEmptyMessage(0);
+                }//TODO init progress handler
             }
         } else {
             // if we haven't bound to the cast service yet we will wait a little and try again.
@@ -818,7 +822,9 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "Nothing is playing anymore, releasing notification");
         mNotificationHelper.killNotification();
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
-        mRemoteProgressHandler.removeMessages(0);
+        if (mRemoteProgressHandler != null) {
+            mRemoteProgressHandler.removeMessages(0);
+        }
 
         if (mConnectedClients <= 0) {
             saveQueue(true);
@@ -915,8 +921,13 @@ public class MusicPlaybackService extends Service {
      * @return
      */
     IMusicPlayer getPlayer() {
-        if (isRemotePlayback() && mCastPlayer != null) {
-            return mCastPlayer;
+        if (isRemotePlayback()) {
+            if (mCastPlayer != null) {
+                return mCastPlayer;
+            } else {
+                Timber.e("Wanted remote playback but cast player is null!");
+                setPlaybackLocation(PlaybackLocation.LOCAL);
+            }
         }
         return mPlayer;
     }
@@ -1373,13 +1384,15 @@ public class MusicPlaybackService extends Service {
      * Sets the track track to be played
      */
     private void setNextTrack() {
-        mNextPlayPos = getNextPosition(false);
-        if (D) Log.d(TAG, "setNextTrack: next play position = " + mNextPlayPos);
-        if (mNextPlayPos >= 0 && mPlayList != null) {
-            final long id = mPlayList[mNextPlayPos];
-            getPlayer().setNextDataSource(id);
-        } else {
-            getPlayer().setNextDataSource(null);
+        synchronized (this) {
+            mNextPlayPos = getNextPosition(false);
+            if (D) Log.d(TAG, "setNextTrack: next play position = " + mNextPlayPos);
+            if (mNextPlayPos >= 0 && mPlayList != null) {
+                final long id = mPlayList[mNextPlayPos];
+                getPlayer().setNextDataSource(id);
+            } else {
+                getPlayer().setNextDataSource(null);
+            }
         }
     }
 
@@ -1715,10 +1728,10 @@ public class MusicPlaybackService extends Service {
                 closeCursor();
                 mOpenFailedCounter = 20;
                 openCurrentAndNext();
-            }
-            if (!getPlayer().isInitialized()) {
-                mPlayListLen = 0;
-                return;
+                if (!getPlayer().isInitialized()) {
+                    mPlayListLen = 0;
+                    return;
+                }
             }
 
             final long seekpos = mPreferences.getLong("seekpos", 0);
@@ -1816,16 +1829,18 @@ public class MusicPlaybackService extends Service {
                 }
                 try {
                     updateCursor(uri, where, selectionArgs);
+                    if (mCursor != null) {
+                        ensurePlayListCapacity(1);
+                        mPlayListLen = 1;
+                        mPlayList[0] = mCursor.getLong(IDCOLIDX);
+                        mPlayPos = 0;
+                    }
                 } catch (final UnsupportedOperationException ex) {
                 }
             }
             IMusicPlayer player = getPlayer();
             if (mCursor != null) {
-                ensurePlayListCapacity(1);
-                mPlayListLen = 1;
-                mPlayList[0] = mCursor.getLong(IDCOLIDX);
-                mPlayPos = 0;
-                player.setDataSource(mPlayList[mPlayPos], path);
+                player.setDataSource(mCursor);
             } else {
                 player.setDataSource(path);
             }
@@ -2084,7 +2099,9 @@ public class MusicPlaybackService extends Service {
      *
      */
     public long seekAndPlay(long position) {
-        return getPlayer().seekAndPlay(position);
+        synchronized (this) {
+            return getPlayer().seekAndPlay(position);
+        }
     }
 
     /**
@@ -2095,21 +2112,23 @@ public class MusicPlaybackService extends Service {
      */
     //@DebugLog
     public long seek(long position) {
-        if (getPlayer().isInitialized()) {
-            if (position < 0) {
-                position = 0;
-            } else {
-                long duration = duration();
-                if (duration > 0 && position > duration) {
-                    position = duration;
+        synchronized (this) {
+            if (getPlayer().isInitialized()) {
+                if (position < 0) {
+                    position = 0;
+                } else {
+                    long duration = duration();
+                    if (duration > 0 && position > duration) {
+                        position = duration;
+                    }
+                }
+                long ret = getPlayer().seek(position);
+                if (ret >= 0) {
+                    notifyChange(POSITION_CHANGED);
                 }
             }
-            long ret = getPlayer().seek(position);
-            if (ret >= 0) {
-                notifyChange(POSITION_CHANGED);
-            }
+            return -1;
         }
-        return -1;
     }
 
     /**
@@ -2118,10 +2137,12 @@ public class MusicPlaybackService extends Service {
      * @return The current playback position in miliseconds
      */
     public long position() {
-        if (getPlayer().isInitialized()) {
-            return getPlayer().position();
+        synchronized (this) {
+            if (getPlayer().isInitialized()) {
+                return getPlayer().position();
+            }
+            return -1;
         }
-        return -1;
     }
 
     /**
@@ -2130,7 +2151,12 @@ public class MusicPlaybackService extends Service {
      * @return The duration of the current track in miliseconds
      */
     public long duration() {
-        return getPlayer().position();
+        synchronized (this) {
+            if (getPlayer().isInitialized()) {
+                return getPlayer().duration();
+            }
+            return -1;
+        }
     }
 
     /**
@@ -2233,30 +2259,36 @@ public class MusicPlaybackService extends Service {
 
         mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
 
-        if (mPlayer.isInitialized()) {
-            final long duration = duration();
-            // if not repeating and only 2 seconds left in current track goToNext
-            if (mRepeatMode != REPEAT_CURRENT && duration > 2000
-                    && mPlayer.position() >= duration - 2000) {
-                gotoNext(true);
-                return;
+        synchronized (this) {
+            if (getPlayer().isInitialized()) {
+                final long duration = duration();
+                // if not repeating and only 2 seconds left in current track goToNext
+                if (mRepeatMode != REPEAT_CURRENT && duration > 2000
+                        && getPlayer().position() >= duration - 2000) {
+                    gotoNext(true);
+                    return;
+                }
+
+                getPlayer().play();
+                mPlayerHandler.removeMessages(MusicPlayerHandler.FADEDOWN);
+                mPlayerHandler.sendEmptyMessage(MusicPlayerHandler.FADEUP);
+
+                if (!mIsSupposedToBePlaying) {
+                    mIsSupposedToBePlaying = true;
+                    notifyChange(PLAYSTATE_CHANGED);
+                }
+
+                cancelShutdown();
+                updateNotification();
+            } else if (mPlayListLen <= 0) {
+                setShuffleMode(SHUFFLE_AUTO);
+            } else {
+                Log.e(TAG, "play() Player not initialized and no playlist");
+                if (mIsSupposedToBePlaying) {
+                    mIsSupposedToBePlaying = false;
+                    notifyChange(PLAYSTATE_CHANGED);
+                }
             }
-
-            getPlayer().play();
-            mPlayerHandler.removeMessages(MusicPlayerHandler.FADEDOWN);
-            mPlayerHandler.sendEmptyMessage(MusicPlayerHandler.FADEUP);
-
-            if (!mIsSupposedToBePlaying) {
-                mIsSupposedToBePlaying = true;
-                notifyChange(PLAYSTATE_CHANGED);
-            }
-
-            cancelShutdown();
-            updateNotification();
-        } else if (mPlayListLen <= 0) {
-            setShuffleMode(SHUFFLE_AUTO);
-        } else {
-            Log.e(TAG, "play() What should I do?");
         }
     }
 
@@ -2264,13 +2296,15 @@ public class MusicPlaybackService extends Service {
      * Temporarily pauses playback.
      */
     public void pause() {
-        if (D) Log.d(TAG, "Pausing playback");
-        mPlayerHandler.removeMessages(MusicPlayerHandler.FADEUP);
-        if (mIsSupposedToBePlaying) {
-            getPlayer().pause();
-            scheduleDelayedShutdown();
-            mIsSupposedToBePlaying = false;
-            notifyChange(PLAYSTATE_CHANGED);
+        synchronized (this) {
+            if (D) Log.d(TAG, "Pausing playback");
+            mPlayerHandler.removeMessages(MusicPlayerHandler.FADEUP);
+            if (mIsSupposedToBePlaying) {
+                getPlayer().pause();
+                scheduleDelayedShutdown();
+                mIsSupposedToBePlaying = false;
+                notifyChange(PLAYSTATE_CHANGED);
+            }
         }
     }
 
@@ -2278,12 +2312,12 @@ public class MusicPlaybackService extends Service {
      * Changes from the current track to the next track
      */
     public void gotoNext(final boolean force) {
-        if (D) Log.d(TAG, "Going to next track");
-        if (!getPlayer().canGoNext()) {
-            Log.d(TAG, "Ignoring next() request");
-            return; //Ignore request
-        }
         synchronized (this) {
+            if (D) Log.d(TAG, "Going to next track");
+            if (!getPlayer().canGoNext()) {
+                Log.w(TAG, "Ignoring next() request");
+                return; //Ignore request
+            }
             if (mPlayListLen <= 0) {
                 if (D) Log.d(TAG, "No play queue");
                 scheduleDelayedShutdown();
@@ -2312,12 +2346,12 @@ public class MusicPlaybackService extends Service {
      */
     //@DebugLog
     public void prev() {
-        if (D) Log.d(TAG, "Going to previous track");
-        if (!getPlayer().canGoPrev()) {
-            Log.w(TAG, "Ignoring prev() request");
-            return; //Ignore request
-        }
         synchronized (this) {
+            if (D) Log.d(TAG, "Going to previous track");
+            if (!getPlayer().canGoPrev()) {
+                Log.w(TAG, "Ignoring prev() request");
+                return; //Ignore request
+            }
             if (mShuffleMode == SHUFFLE_NORMAL) {
                 // Go to previously-played track and remove it from the history
                 final int histsize = mHistory.size();

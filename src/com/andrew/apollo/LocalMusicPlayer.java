@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.andrew.apollo.provider.MusicProviderUtil;
+import com.andrew.apollo.provider.MusicStore;
 
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
@@ -87,8 +88,8 @@ public class LocalMusicPlayer implements IMusicPlayer {
     }
 
     @Override
-    public void setDataSource(long songId, String path) {
-        mPlayer.setDataSource(path);
+    public void setDataSource(Cursor cursor) {
+        mPlayer.setDataSource(cursor.getString(cursor.getColumnIndexOrThrow(MusicStore.Cols.DATA_URI)));
     }
 
     @Override

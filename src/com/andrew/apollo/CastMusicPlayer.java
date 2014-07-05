@@ -16,6 +16,7 @@
 
 package com.andrew.apollo;
 
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.util.Log;
@@ -33,6 +34,9 @@ import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.cast.CastUtils;
 
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
+
 /**
  * Created by drew on 7/4/14.
  */
@@ -44,8 +48,8 @@ public class CastMusicPlayer implements IMusicPlayer {
 
     private Handler mHandler;
 
-    private MediaInfo mCurrentMediaInfo;
-    private MediaInfo mNextMediaInfo;
+    private volatile MediaInfo mCurrentMediaInfo;
+    private volatile MediaInfo mNextMediaInfo;
     private boolean mMarkforLoad;
     private boolean mIsLoading;
 
@@ -136,6 +140,7 @@ public class CastMusicPlayer implements IMusicPlayer {
     }
 
     @Override
+    //@DebugLog
     public boolean isInitialized() {
         return mCurrentMediaInfo != null;
     }
@@ -165,8 +170,8 @@ public class CastMusicPlayer implements IMusicPlayer {
     }
 
     @Override
-    public void setDataSource(long songId, String path) {
-        mCurrentMediaInfo = CastUtils.buildMediaInfo(mService, songId);
+    public void setDataSource(Cursor cursor) {
+        mCurrentMediaInfo = CastUtils.buildMediaInfo(mService, cursor);
         mMarkforLoad = true;
     }
 
@@ -185,6 +190,8 @@ public class CastMusicPlayer implements IMusicPlayer {
                 Log.w(TAG, "seekAndPlay(1) TransientNetworkDisconnection");
             } catch (NoConnectionException e) {
                 handleCastError(e);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
             }
         }
         return position; //TODO return real error
@@ -234,6 +241,10 @@ public class CastMusicPlayer implements IMusicPlayer {
      */
     //@DebugLog
     private void loadRemoteNext() {
+        if (mNextMediaInfo == null) {
+            Timber.w("Tried to load null media");
+            return;
+        }
         loadRemote(mNextMediaInfo, true, 0);
                 // Force the local player onto the next track
 //                mPlayer.onCompletion(mPlayer.getCurrentPlayer());
