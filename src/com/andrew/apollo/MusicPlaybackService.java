@@ -976,6 +976,14 @@ public class MusicPlaybackService extends Service {
         return mPlaybackLocation;
     }
 
+    void setSupposedToBePlaying(boolean playing) {
+        mIsSupposedToBePlaying = playing;
+    }
+
+    boolean isSupposedToBePlaying() {
+        return mIsSupposedToBePlaying;
+    }
+
     void recoverFromTransientDisconnect() {
         updatePlaybackLocation(PlaybackLocation.REMOTE);
         if (mCastServer == null) {
@@ -1523,7 +1531,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Notify the change-receivers that something has changed.
      */
-    private void notifyChange(final String what) {
+    void notifyChange(final String what) {
         if (D) Log.d(TAG, "notifyChange: what = " + what);
 
         // Update the lockscreen controls

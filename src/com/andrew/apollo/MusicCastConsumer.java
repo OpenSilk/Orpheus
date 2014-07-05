@@ -179,6 +179,11 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
         int mIdleReason = status.getIdleReason();
         if (mState == MediaStatus.PLAYER_STATE_PLAYING) {
             if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): Player status = playing");
+            //HACK
+            if (!mService.isSupposedToBePlaying()) {
+                mService.setSupposedToBePlaying(true);
+                mService.notifyChange(MusicPlaybackService.PLAYSTATE_CHANGED);
+            }
         } else if (mState == MediaStatus.PLAYER_STATE_PAUSED) {
             if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): Player status = paused");
         } else if (mState == MediaStatus.PLAYER_STATE_IDLE) {
@@ -238,6 +243,10 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
                 break;
             //play
             case R.string.failed_to_play:
+                if (mService.isSupposedToBePlaying()) {
+                    mService.setSupposedToBePlaying(false);
+                    mService.notifyChange(MusicPlaybackService.PLAYSTATE_CHANGED);
+                }
                 break;
         }
     }
