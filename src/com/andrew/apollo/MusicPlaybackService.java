@@ -83,6 +83,7 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
@@ -93,6 +94,9 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.TreeSet;
+
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * A backbround {@link Service} used to keep music playing between activities
@@ -332,12 +336,12 @@ public class MusicPlaybackService extends Service {
     /**
      * The media player
      */
-    private MultiPlayer mPlayer;
+    private LocalMusicPlayer mPlayer;
 
     /**
-     * The path of the current file to play
+     * the cast media player
      */
-    private String mFileToPlay;
+    private CastMusicPlayer mCastPlayer;
 
     /**
      * Keeps the service running when the screen is off
@@ -454,19 +458,14 @@ public class MusicPlaybackService extends Service {
     private MediaCastManager mCastManager;
 
     /**
+     * Cast manager callbacks
+     */
+    private IMediaCastConsumer mCastConsumer;
+
+    /**
      * Http server for service cast devices
      */
     private CastWebServer mCastServer;
-
-    /**
-     * MediaInfo for the current track
-     */
-    private MediaInfo mCurrentMediaInfo;
-
-    /**
-     * MediaInfo for track next in queue
-     */
-    private MediaInfo mNextMediaInfo;
 
     /**
      * indicates whether we are doing a local or a remote playback
@@ -480,17 +479,6 @@ public class MusicPlaybackService extends Service {
      * Current playback location
      */
     private PlaybackLocation mPlaybackLocation = PlaybackLocation.LOCAL;
-
-    /**
-     * Flag if we need to force reload the current media
-     */
-    private boolean mRemoteMediaNeedsReload = false;
-
-    /**
-     * Whether there remote media is currently being loaded
-     *  used to prevent next/prev requests
-     */
-    private boolean mRemoteMediaLoading = false;
 
     /**
      * Fetches remote progress while we are in background
@@ -597,17 +585,17 @@ public class MusicPlaybackService extends Service {
         registerExternalStorageListener();
 
         // Initialize the media player
-        mPlayer = new MultiPlayer(this);
+        mPlayer = new LocalMusicPlayer(this);
         mPlayer.setHandler(mPlayerHandler);
 
         isCastingEnabled = PreferenceUtils.isCastEnabled(this);
         if (isCastingEnabled) {
             // Bind to the cast service
             mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);
-        }
 
-        // Initialize the remote progress updater task
-        mRemoteProgressHandler = new RemoteProgressHandler(this);
+            // Initialize the remote progress updater task
+            mRemoteProgressHandler = new RemoteProgressHandler(this);
+        }
 
         // Initialize the intent filter and each action
         final IntentFilter filter = new IntentFilter();
@@ -738,6 +726,13 @@ public class MusicPlaybackService extends Service {
             } catch (Exception ignored) { /*pass*/ }
             mCastManager.removeCastConsumer(mCastConsumer);
             mCastManager = null;
+        }
+
+        mRemoteProgressHandler = null;
+
+        if (mCastPlayer != null) {
+            mCastPlayer.release();
+            mCastPlayer = null;
         }
 
         if (mCastServiceToken != null) {
@@ -908,7 +903,7 @@ public class MusicPlaybackService extends Service {
     }
 
     /**
-     *
+     * Used by handler to determine if playback should resume after focus lost
      * @return
      */
     boolean isPausedByTransientLossOfFocus() {
@@ -919,8 +914,82 @@ public class MusicPlaybackService extends Service {
      * Fetches the current player
      * @return
      */
-    MultiPlayer getPlayer() {
+    IMusicPlayer getPlayer() {
+        if (isRemotePlayback() && mCastPlayer != null) {
+            return mCastPlayer;
+        }
         return mPlayer;
+    }
+
+    void switchToCastPlayer() {
+        Timber.d("switchToCastPlayer");
+        startCastServer();
+        if (mPlayer.isInitialized()) {
+            mLastKnowPosition = mPlayer.position();
+        }
+        if (isRemotePlayback()) {
+            setPlaybackLocation(PlaybackLocation.LOCAL);
+        }
+        stop(false);
+        setPlaybackLocation(PlaybackLocation.REMOTE);
+        openCurrentAndNext();
+        if (mLastKnowPosition > 0) {
+            seekAndPlay(mLastKnowPosition);
+        } else {
+            play();
+        }
+    }
+
+    void switchToLocalPlayer() {
+        Timber.d("switchToLocalPlayer");
+        if (mCastPlayer != null && mCastPlayer.isInitialized()) {
+            mLastKnowPosition = mCastPlayer.position();
+        }
+        if (!isRemotePlayback()) {
+            setPlaybackLocation(PlaybackLocation.REMOTE);
+        }
+        stop(false);
+        setPlaybackLocation(PlaybackLocation.LOCAL);
+        openCurrentAndNext();
+        if (mLastKnowPosition > 0) {
+            seek(mLastKnowPosition);
+        }
+        stopCastServer();
+    }
+
+    void setPlaybackLocation(PlaybackLocation location) {
+        mPlaybackLocation = location;
+    }
+
+    PlaybackLocation getPlaybackLocation() {
+        return mPlaybackLocation;
+    }
+
+    void recoverFromTransientDisconnect() {
+        updatePlaybackLocation(PlaybackLocation.REMOTE);
+        if (mCastServer == null) {
+            startCastServer();
+        }
+        if (mCastManager.isConnected()) {
+            try {
+                if (mCastManager.isRemoteMediaLoaded() && mCastManager.isRemoteMediaPlaying()) {
+                    Log.d(TAG, "onConnectivityRecovered: remote media currently playing");
+                    position();// force update the local position
+                    if (!mRemoteProgressHandler.hasMessages(0)) {
+                        // restart progress updater if needed
+                        mRemoteProgressHandler.sendEmptyMessage(0);
+                    }
+                } else {
+                    switchToCastPlayer();
+                }
+            } catch (TransientNetworkDisconnectionException e) {
+                Log.w(TAG, "onConnectivityRecovered(1) TransientNetworkDisconnection");
+            } catch (NoConnectionException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.e(TAG, "onConnectivityRecoverd: Whoa, we arent connected??");
+        }
     }
 
     /**
@@ -1010,35 +1079,10 @@ public class MusicPlaybackService extends Service {
      */
     private void stop(final boolean goToIdle) {
         if (D) Log.d(TAG, "Stopping playback, goToIdle = " + goToIdle);
-        if (isRemotePlayback()) {
-            stopRemote(goToIdle);
-        } else {
-            stopLocal(goToIdle);
+        IMusicPlayer player = getPlayer();
+        if (player.isInitialized()) {
+            player.stop(goToIdle);
         }
-    }
-
-    private void stopRemote(final boolean goToIdle) {
-        try {
-            mCurrentMediaInfo = null;
-            mRemoteMediaNeedsReload = true;
-            if (goToIdle) {
-                mCastManager.stop();
-            } else {
-                mCastManager.pause();
-            }
-        } catch (CastException|NoConnectionException e) {
-            handleCastError(e);
-        } catch (TransientNetworkDisconnectionException e) {
-            Log.w(TAG, "stopRemote(1) TransientNetworkDisconnection");
-        }
-        stopLocal(goToIdle);
-    }
-
-    private void stopLocal(final boolean goToIdle) {
-        if (mPlayer.isInitialized()) {
-            mPlayer.stop();
-        }
-        mFileToPlay = null;
         closeCursor();
         if (goToIdle) {
             scheduleDelayedShutdown();
@@ -1277,7 +1321,7 @@ public class MusicPlaybackService extends Service {
             final int numHistory = mHistory.size();
             int numUnplayed = numTracks;
             for (int i = 0; i < numHistory; i++) {
-                final int idx = mHistory.get(i).intValue();
+                final int idx = mHistory.get(i);
                 if (idx < numTracks && tracks[idx] >= 0) {
                     numUnplayed--;
                     tracks[idx] = -1;
@@ -1294,7 +1338,7 @@ public class MusicPlaybackService extends Service {
                 }
             }
             int skip = 0;
-            if (mShuffleMode == SHUFFLE_NORMAL || mShuffleMode == SHUFFLE_AUTO) {
+            if (mShuffleMode == SHUFFLE_NORMAL) {
                 skip = mShuffler.nextInt(numUnplayed);
             }
             int cnt = -1;
@@ -1333,12 +1377,9 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "setNextTrack: next play position = " + mNextPlayPos);
         if (mNextPlayPos >= 0 && mPlayList != null) {
             final long id = mPlayList[mNextPlayPos];
-            Uri dataUri = MusicProviderUtil.getDataUri(this, id);
-            mPlayer.setNextDataSource(dataUri != null ? dataUri.toString() : null); //TODO use uri
-            mNextMediaInfo = CastUtils.buildMediaInfo(this, id);
+            getPlayer().setNextDataSource(id);
         } else {
-            mPlayer.setNextDataSource(null);
-            mNextMediaInfo = null;
+            getPlayer().setNextDataSource(null);
         }
     }
 
@@ -1346,17 +1387,14 @@ public class MusicPlaybackService extends Service {
      * called when player has gone no the next track
      */
     void wentToNext() {
-        mPlayPos = mNextPlayPos;
-        closeCursor();
-        updateCursor(mPlayList[mPlayPos]);
-
-        // Update the remote media info
-        mCurrentMediaInfo = mNextMediaInfo;
-        mNextMediaInfo = null;
-
-        notifyChange(META_CHANGED);
-        updateNotification();
-        setNextTrack();
+        synchronized (this) {
+            mPlayPos = mNextPlayPos;
+            closeCursor();
+            updateCursor(mPlayList[mPlayPos]);
+            notifyChange(META_CHANGED);
+            updateNotification();
+            setNextTrack();
+        }
     }
 
     /**
@@ -1365,12 +1403,7 @@ public class MusicPlaybackService extends Service {
     private boolean makeAutoShuffleList() {
         Cursor cursor = null;
         try {
-            cursor = getContentResolver().query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{BaseColumns._ID},
-                    Selections.LOCAL_SONG,
-                    SelectionArgs.LOCAL_SONG,
-                    null);
+            cursor = CursorHelpers.getCursorForAutoShuffle(this);
             if (cursor == null || cursor.getCount() == 0) {
                 return false;
             }
@@ -1619,8 +1652,9 @@ public class MusicPlaybackService extends Service {
             }
         }
         editor.putInt("curpos", mPlayPos);
-        if (mPlayer.isInitialized()) {
-            editor.putLong("seekpos", mPlayer.position());
+        IMusicPlayer player = getPlayer();
+        if (player.isInitialized()) {
+            editor.putLong("seekpos", player.position());
         }
         editor.putInt("repeatmode", mRepeatMode);
         editor.putInt("shufflemode", mShuffleMode);
@@ -1682,7 +1716,7 @@ public class MusicPlaybackService extends Service {
                 mOpenFailedCounter = 20;
                 openCurrentAndNext();
             }
-            if (!mPlayer.isInitialized()) {
+            if (!getPlayer().isInitialized()) {
                 mPlayListLen = 0;
                 return;
             }
@@ -1782,19 +1816,20 @@ public class MusicPlaybackService extends Service {
                 }
                 try {
                     updateCursor(uri, where, selectionArgs);
-                    if (mCursor != null) {
-                        ensurePlayListCapacity(1);
-                        mPlayListLen = 1;
-                        mPlayList[0] = mCursor.getLong(IDCOLIDX);
-                        mPlayPos = 0;
-                    }
                 } catch (final UnsupportedOperationException ex) {
                 }
             }
-            mFileToPlay = path;
-            mPlayer.setDataSource(mFileToPlay);
-            mCurrentMediaInfo = CastUtils.buildMediaInfo(this, mCursor);
-            if (mPlayer.isInitialized()) {
+            IMusicPlayer player = getPlayer();
+            if (mCursor != null) {
+                ensurePlayListCapacity(1);
+                mPlayListLen = 1;
+                mPlayList[0] = mCursor.getLong(IDCOLIDX);
+                mPlayPos = 0;
+                player.setDataSource(mPlayList[mPlayPos], path);
+            } else {
+                player.setDataSource(path);
+            }
+            if (player.isInitialized()) {
                 mOpenFailedCounter = 0;
                 return true;
             }
@@ -1982,7 +2017,7 @@ public class MusicPlaybackService extends Service {
      */
     public long getAudioId() {
         synchronized (this) {
-            if (mPlayPos >= 0 && mPlayer.isInitialized()) {
+            if (mPlayPos >= 0 && getPlayer().isInitialized()) {
                 return mPlayList[mPlayPos];
             }
         }
@@ -2049,21 +2084,7 @@ public class MusicPlaybackService extends Service {
      *
      */
     public long seekAndPlay(long position) {
-        long seekedTo = -1;
-        if (isRemotePlayback()) {
-            try {
-                mCastManager.seekAndPlay((int)position);
-                seekedTo = position;
-            } catch (TransientNetworkDisconnectionException e) {
-                Log.w(TAG, "seekAndPlay(1) TransientNetworkDisconnection");
-            } catch (NoConnectionException e) {
-                handleCastError(e);
-            }
-        } else {
-            seekedTo = seekLocal(position);
-            playLocal();
-        }
-        return seekedTo;
+        return getPlayer().seekAndPlay(position);
     }
 
     /**
@@ -2074,45 +2095,19 @@ public class MusicPlaybackService extends Service {
      */
     //@DebugLog
     public long seek(long position) {
-        if (isRemotePlayback()) {
-            return seekRemote(position);
-        } else {
-            return seekLocal(position);
-        }
-    }
-
-    //@DebugLog
-    private long seekRemote(long position) {
-        try {
+        if (getPlayer().isInitialized()) {
             if (position < 0) {
                 position = 0;
             } else {
                 long duration = duration();
-                if (position > duration) {
+                if (duration > 0 && position > duration) {
                     position = duration;
                 }
             }
-            mCastManager.seek((int) position);
-            notifyChange(POSITION_CHANGED);
-            return position;
-        } catch (TransientNetworkDisconnectionException e) {
-            Log.w(TAG, "seekRemote(1) TransientNetworkDisconnection");
-        } catch (NoConnectionException e) {
-            handleCastError(e);
-        }
-        return -1;
-    }
-
-    private long seekLocal(long position) {
-        if (mPlayer.isInitialized()) {
-            if (position < 0) {
-                position = 0;
-            } else if (position > mPlayer.duration()) {
-                position = mPlayer.duration();
+            long ret = getPlayer().seek(position);
+            if (ret >= 0) {
+                notifyChange(POSITION_CHANGED);
             }
-            long result = mPlayer.seek(position);
-            notifyChange(POSITION_CHANGED);
-            return result;
         }
         return -1;
     }
@@ -2123,39 +2118,8 @@ public class MusicPlaybackService extends Service {
      * @return The current playback position in miliseconds
      */
     public long position() {
-        if (isRemotePlayback()) {
-            return positionRemote();
-        } else {
-            return positionLocal();
-        }
-    }
-
-    private long positionRemote() {
-        try {
-            long position = (long) mCastManager.getCurrentMediaPosition();
-            // We seek the local player so we dont have to keep
-            // a separate record of remote seek position
-            if (mPlayer.isInitialized()) {
-                if (position < 0) {
-                    position = 0;
-                } else if (position > mPlayer.duration()) {
-                    position = mPlayer.duration();
-                }
-                long result = mPlayer.seek(position);
-            }
-            return position;
-        } catch (TransientNetworkDisconnectionException e) {
-            Log.w(TAG, "positionRemote(1) TransientNetworkDisconnection");
-            return positionLocal(); // Cheat here, we will probably reconnect
-        } catch (NoConnectionException e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    private long positionLocal() {
-        if (mPlayer.isInitialized()) {
-            return mPlayer.position();
+        if (getPlayer().isInitialized()) {
+            return getPlayer().position();
         }
         return -1;
     }
@@ -2166,33 +2130,7 @@ public class MusicPlaybackService extends Service {
      * @return The duration of the current track in miliseconds
      */
     public long duration() {
-        // We'll just cheat and always get it from the local player
-        if (isRemotePlayback()) {
-            return durationRemote();
-        } else {
-            return durationLocal();
-        }
-    }
-
-    public long durationRemote() {
-        if (mCastManager == null) {
-            return -1;
-        }
-        try {
-            return (long) mCastManager.getMediaDuration();
-        } catch (TransientNetworkDisconnectionException e) {
-            Log.w(TAG, "durationRemote(1) TransientNetworkDisconnection");
-        } catch (NoConnectionException e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    public long durationLocal() {
-        if (mPlayer.isInitialized()) {
-            return mPlayer.duration();
-        }
-        return -1;
+        return getPlayer().position();
     }
 
     /**
@@ -2283,57 +2221,9 @@ public class MusicPlaybackService extends Service {
      */
     //@DebugLog
     public void play() {
-        if (isRemotePlayback()) {
-            playRemote();
-        } else {
-            playLocal();
-        }
-    }
-
-    //@DebugLog
-    private void playRemote() {
-        mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
-        mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
-        try {
-            // If we just skipped forward the remote device
-            // will still be loaded with the old track
-            if (mRemoteMediaNeedsReload) {
-                loadRemoteCurrent();
-                mRemoteMediaNeedsReload = false;
-            } else if (mCastManager.isRemoteMediaLoaded()) {
-                final double duration = duration();
-                final double position = mCastManager.getCurrentMediaPosition();
-                // if not repeating and only 2 seconds left in current track goToNext
-                if (mRepeatMode != REPEAT_CURRENT && duration > 2000
-                        && position >= duration - 2000) {
-                    gotoNext(true);
-                    return;
-                }
-                mCastManager.play((int)position);
-                if (!mIsSupposedToBePlaying) {
-                    mIsSupposedToBePlaying = true;
-                    notifyChange(PLAYSTATE_CHANGED);
-                }
-
-                cancelShutdown();
-                updateNotification();
-            } else if (mPlayListLen <= 0) {
-                setShuffleMode(SHUFFLE_AUTO);
-            } else {
-                Log.w(TAG, "playRemote() What should i do?");
-            }
-        } catch (TransientNetworkDisconnectionException e) {
-            Log.w(TAG, "playRemote(1) TransientNetworkDisconnection");
-        } catch (NoConnectionException e) {
-            handleCastError(e);
-        }
-
-    }
-
-    private void playLocal() {
+        int hint = isRemotePlayback() ? AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK : AudioManager.AUDIOFOCUS_GAIN;
         int status = mAudioManager.requestAudioFocus(mAudioFocusListener,
-                AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+                AudioManager.STREAM_MUSIC, hint);
 
         if (D) Log.d(TAG, "Starting playback: audio focus request status = " + status);
 
@@ -2344,7 +2234,7 @@ public class MusicPlaybackService extends Service {
         mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
 
         if (mPlayer.isInitialized()) {
-            final long duration = mPlayer.duration();
+            final long duration = duration();
             // if not repeating and only 2 seconds left in current track goToNext
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000
                     && mPlayer.position() >= duration - 2000) {
@@ -2352,7 +2242,7 @@ public class MusicPlaybackService extends Service {
                 return;
             }
 
-            mPlayer.start();
+            getPlayer().play();
             mPlayerHandler.removeMessages(MusicPlayerHandler.FADEDOWN);
             mPlayerHandler.sendEmptyMessage(MusicPlayerHandler.FADEUP);
 
@@ -2366,7 +2256,7 @@ public class MusicPlaybackService extends Service {
         } else if (mPlayListLen <= 0) {
             setShuffleMode(SHUFFLE_AUTO);
         } else {
-            Log.w(TAG, "playLocal() What should I do?");
+            Log.e(TAG, "play() What should I do?");
         }
     }
 
@@ -2374,39 +2264,13 @@ public class MusicPlaybackService extends Service {
      * Temporarily pauses playback.
      */
     public void pause() {
-        if (isRemotePlayback()) {
-            pauseRemote();
-        } else {
-            pauseLocal();
-        }
-    }
-
-    private void pauseRemote() {
-        if (mIsSupposedToBePlaying) {
-            try {
-                mCastManager.pause();
-            } catch (CastException|NoConnectionException e) {
-                handleCastError(e);
-            } catch (TransientNetworkDisconnectionException e) {
-                Log.w(TAG, "pauseRemote(1) TransientNetworkDisconnection");
-            } finally {
-                scheduleDelayedShutdown();
-                mIsSupposedToBePlaying = false;
-                notifyChange(PLAYSTATE_CHANGED);
-            }
-        }
-    }
-
-    private void pauseLocal() {
         if (D) Log.d(TAG, "Pausing playback");
-        synchronized (this) {
-            mPlayerHandler.removeMessages(MusicPlayerHandler.FADEUP);
-            if (mIsSupposedToBePlaying) {
-                mPlayer.pause();
-                scheduleDelayedShutdown();
-                mIsSupposedToBePlaying = false;
-                notifyChange(PLAYSTATE_CHANGED);
-            }
+        mPlayerHandler.removeMessages(MusicPlayerHandler.FADEUP);
+        if (mIsSupposedToBePlaying) {
+            getPlayer().pause();
+            scheduleDelayedShutdown();
+            mIsSupposedToBePlaying = false;
+            notifyChange(PLAYSTATE_CHANGED);
         }
     }
 
@@ -2415,8 +2279,8 @@ public class MusicPlaybackService extends Service {
      */
     public void gotoNext(final boolean force) {
         if (D) Log.d(TAG, "Going to next track");
-        if (isRemotePlayback() && mRemoteMediaLoading) {
-            Log.d(TAG, "Remote media is loading ignoring next() request");
+        if (!getPlayer().canGoNext()) {
+            Log.d(TAG, "Ignoring next() request");
             return; //Ignore request
         }
         synchronized (this) {
@@ -2449,8 +2313,8 @@ public class MusicPlaybackService extends Service {
     //@DebugLog
     public void prev() {
         if (D) Log.d(TAG, "Going to previous track");
-        if (isRemotePlayback() && mRemoteMediaLoading) {
-            Log.w(TAG, "Remote media is loading ignoring prev() request");
+        if (!getPlayer().canGoPrev()) {
+            Log.w(TAG, "Ignoring prev() request");
             return; //Ignore request
         }
         synchronized (this) {
@@ -2748,125 +2612,6 @@ public class MusicPlaybackService extends Service {
         releaseWakeLock();
     }
 
-    /**
-     * Initiates remote playback for current track
-     */
-    //@DebugLog
-    private void loadRemoteCurrent() {
-        if (mCurrentMediaInfo == null) {
-            Log.w(TAG, "Tried to load null media");
-            return;
-        }
-        int startPos = 0;
-        // if we are currently playing start where we left off
-        if (mPlayer.isInitialized() && !mRemoteMediaNeedsReload) {
-            startPos = (int) mPlayer.position();
-        }
-        if (loadRemote(mCurrentMediaInfo, true, startPos)) {
-            mAudioManager.requestAudioFocus(null, AudioManager.STREAM_MUSIC,
-                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
-            mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
-            if (!mIsSupposedToBePlaying) {
-                mIsSupposedToBePlaying = true;
-                notifyChange(PLAYSTATE_CHANGED);
-            }
-            cancelShutdown();
-            updateNotification();
-        } else {
-            Log.e(TAG, "Failed to load remote media");
-        }
-    }
-
-    /**
-     * Initiates remote playback for next track
-     */
-    //@DebugLog
-    private void loadRemoteNext() {
-        if (mNextMediaInfo != null) {
-            if (loadRemote(mNextMediaInfo, true, 0)) {
-                // Force the local player onto the next track
-                mPlayer.onCompletion(mPlayer.getCurrentPlayer());
-            } else {
-                Log.e(TAG, "Failed to load remote media");
-            }
-        } else {
-            Log.w(TAG, "mNextMediaInfo was null");
-        }
-    }
-
-    //@DebugLog
-    private boolean loadRemote(MediaInfo info, boolean autoplay, int startPos) {
-        try {
-            mRemoteMediaLoading = true;
-            mCastManager.loadMedia(info, autoplay, startPos, null,
-                    new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-                        @Override
-                        public void onResult(RemoteMediaPlayer.MediaChannelResult result) {
-                            mRemoteMediaLoading = false;
-                            if (!result.getStatus().isSuccess()) {
-                               mCastManager.onFailed(R.string.failed_load, result.getStatus().getStatusCode());
-                            } else {
-
-                            }
-                        }
-                    });
-            return true;
-        } catch (TransientNetworkDisconnectionException e) {
-            Log.w(TAG, "loadRemote(1) TransientNetworkDisconnection");
-        } catch (NoConnectionException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * If we had changed the volume previously restore its value
-     * This is mostly because the cast device keeps getting reset
-     * to max volume on every reconnect
-     */
-    private void restoreRemoteVolumeLevel() {
-        try {
-            double curVol = mCastManager.getVolume();
-            float oldVol = Utils.getFloatFromPreference(this, BaseCastManager.PREFS_KEY_REMOTE_VOLUME);
-            if (oldVol == Float.MIN_VALUE) return; //No preference
-            if (oldVol != curVol) {
-                mCastManager.setVolume(oldVol);
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-    /**
-     * Handles CastError or NoConnectionException
-     * only called if the service thinks its still connected but isn't
-     * eg if we were in transient disconnect and the framework failed
-     * to notify after giving up on reconnecting
-     */
-    private void handleCastError(Throwable c) {
-        Log.w(TAG, "Disconnected from cast device " + c.getClass().getName());
-        // Will initiate reset of mediarouter and restore local state
-        mCastManager.onDeviceSelected(null);
-    }
-
-    /**
-     * Called when we disconnect or think we are disconnectetd from the cast device
-     */
-    private void restoreLocalState() {
-        if (mPlaybackLocation == PlaybackLocation.LOCAL) {
-            return;//Connect failed
-        }
-        updatePlaybackLocation(PlaybackLocation.LOCAL);
-        stopCastServer();
-        //Local should already be paused
-        //pause();
-        synchronized (this) {
-            //Do some stuff pause() does to notify the activity
-            scheduleDelayedShutdown();
-            mIsSupposedToBePlaying = false;
-            notifyChange(PLAYSTATE_CHANGED);
-        }
-    }
-
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         /**
          * {@inheritDoc}
@@ -2888,226 +2633,6 @@ public class MusicPlaybackService extends Service {
     };
 
     /**
-     * Callback handler for cast manager
-     */
-    private final IMediaCastConsumer mCastConsumer = new MediaCastConsumerImpl() {
-
-        @Override
-        //@DebugLog
-        public void onConnected() {
-            // Nothing i can think of to do here, we are still waiting for the app to connect
-        }
-
-        @Override
-        //@DebugLog
-        public void onDisconnected() {
-            restoreLocalState();
-        }
-
-        @Override
-        //@DebugLog
-        public void onApplicationConnected(ApplicationMetadata appMetadata, String sessionId, boolean wasLaunched) {
-            if (startCastServer()) {
-                // If wifi was off when the song started mCurrentMediaInfo will be null
-                if (mCurrentMediaInfo == null) {
-                    mCurrentMediaInfo = CastUtils.buildMediaInfo(MusicPlaybackService.this, mCursor);
-                    setNextTrack();
-                }
-                pauseLocal();
-                updatePlaybackLocation(PlaybackLocation.REMOTE);
-                loadRemoteCurrent(); //TODO check failure
-                restoreRemoteVolumeLevel();
-            } else {
-                //TODO what to do?
-                // Just disconnect for now. They will have to start over.
-                mCastManager.disconnect();
-            }
-        }
-
-        @Override
-        //@DebugLog
-        public boolean onApplicationConnectionFailed(int errorCode) {
-            //Nothing for us to do, the user must manually try again
-            return false;
-        }
-
-        @Override
-        //@DebugLog
-        public void onApplicationDisconnected(int errorCode) {
-            restoreLocalState();
-        }
-
-        /** Called when stopApplication() succeeds*/
-        @Override
-        //@DebugLog
-        public void onApplicationStopped() {
-            mCastManager.onDeviceSelected(null);
-        }
-
-        /** Called when stopApplication() fails */
-        @Override
-        //@DebugLog
-        public void onApplicationStopFailed(int errorCode) {
-            // As far as the activity is concered we are disconnected;
-            mCastManager.onDeviceSelected(null);
-        }
-
-        @Override
-        //@DebugLog
-        public void onApplicationStatusChanged(String appStatus) {
-
-        }
-
-        @Override
-        //@DebugLog
-        public void onConnectionSuspended(int cause) {
-            //restoreLocalState();
-        }
-
-        @Override
-        //@DebugLog
-        public void onConnectivityRecovered() {
-            updatePlaybackLocation(PlaybackLocation.REMOTE);
-            if (mCastServer == null) {
-                startCastServer();
-            }
-            if (mCastManager.isConnected()) {
-                try {
-                    if (mCastManager.isRemoteMediaLoaded() && mCastManager.isRemoteMediaPlaying()) {
-                        Log.d(TAG, "onConnectivityRecovered: remote media currently playing");
-                        position();// force update the local position
-                        if (!mRemoteProgressHandler.hasMessages(0)) {
-                            // restart progress updater if needed
-                            mRemoteProgressHandler.sendEmptyMessage(0);
-                        }
-                    } else {
-                        loadRemoteCurrent();
-                        restoreRemoteVolumeLevel();
-                    }
-                } catch (TransientNetworkDisconnectionException e) {
-                    Log.w(TAG, "onConnectivityRecovered(1) TransientNetworkDisconnection");
-                } catch (NoConnectionException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Log.e(TAG, "onConnectivityRecoverd: Whoa, we arent connected??");
-            }
-
-        }
-
-        @Override
-        //@DebugLog
-        public void onVolumeChanged(double value, boolean isMute) {
-
-        }
-
-        @Override
-        //@DebugLog
-        public void onRemoteMediaPlayerMetadataUpdated() {
-            try {
-                MediaInfo mediaInfo = mCastManager.getRemoteMediaInformation();
-                //TODO update lockscreen
-            } catch (TransientNetworkDisconnectionException e) {
-                Log.e(TAG, "Failed to update lock screen metadaa due to a network issue", e);
-            } catch (NoConnectionException e) {
-                Log.e(TAG, "Failed to update lock screen metadaa due to a network issue", e);
-            }
-        }
-
-        @Override
-        //@DebugLog
-        public void onRemoteMediaPlayerStatusUpdated() {
-            MediaStatus status = mCastManager.getRemoteMediaPlayer().getMediaStatus();
-            int mState = status.getPlayerState();
-            int mIdleReason = status.getIdleReason();
-            if (mState == MediaStatus.PLAYER_STATE_PLAYING) {
-                if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): Player status = playing");
-                updatePlaybackLocation(PlaybackLocation.REMOTE);
-                mIsSupposedToBePlaying = true;
-                notifyChange(PLAYSTATE_CHANGED);
-            } else if (mState == MediaStatus.PLAYER_STATE_PAUSED) {
-                if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): Player status = paused");
-                updatePlaybackLocation(PlaybackLocation.REMOTE);
-                mIsSupposedToBePlaying = false;
-                notifyChange(PLAYSTATE_CHANGED);
-            } else if (mState == MediaStatus.PLAYER_STATE_IDLE) {
-                if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): Player status = idle");
-                mIsSupposedToBePlaying = false;
-                notifyChange(PLAYSTATE_CHANGED);
-                if (mIdleReason == MediaStatus.IDLE_REASON_FINISHED) {
-                    loadRemoteNext();
-                } else if (mIdleReason == MediaStatus.IDLE_REASON_ERROR) {
-                    // something bad happened on the cast device
-                    if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): IDLE reason = ERROR");
-                    mCastManager.onFailed(R.string.failed_receiver_player_error, -1);
-                } else if (mIdleReason == MediaStatus.IDLE_REASON_CANCELED) {
-                    if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): IDLE reason = CANCELLED");
-                    //TODO
-                }
-            } else if (mState == MediaStatus.PLAYER_STATE_BUFFERING) {
-                if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): Player status = buffering");
-            } else {
-                if (D) Log.d(TAG, "onRemoteMediaPlayerStatusUpdated(): Player status = unknown");
-                mIsSupposedToBePlaying = false;
-                notifyChange(PLAYSTATE_CHANGED);
-            }
-        }
-
-        @Override
-        //@DebugLog
-        public boolean onConnectionFailed(ConnectionResult result) {
-            return false;
-        }
-
-        @Override
-        //@DebugLog
-        public void onCastDeviceDetected(MediaRouter.RouteInfo info) {
-
-        }
-
-        @Override
-        //@DebugLog
-        public void onFailed(int resourceId, int statusCode) {
-            Log.e(TAG, "onFailed " + getString(resourceId));
-            switch (resourceId) {
-                //load
-                case R.string.failed_load:
-                    if (mCastManager != null) {
-                        pauseRemote();
-                    }
-                    pauseLocal();
-                    break;
-                //onRemoteMediaPlayerStatusUpdated
-                case R.string.failed_receiver_player_error:
-                    if (mCastManager != null) {
-                        loadRemoteNext();
-                    }
-                    break;
-                //onApplicationConnected;
-                case R.string.failed_no_connection_trans:
-                case R.string.failed_no_connection:
-                case R.string.failed_status_request:
-                    break;
-                //setVolume
-                case R.string.failed_setting_volume:
-                    break;
-                //seek
-                case R.string.failed_seek:
-                    break;
-                //pause
-                case R.string.failed_to_pause:
-                    break;
-                //stop
-                case R.string.failed_to_stop:
-                    break;
-                //play
-                case R.string.failed_to_play:
-                    break;
-            }
-        }
-    };
-
-    /**
      * Service connection callback handler for cast service
      */
     private final CastServiceConnectionCallback mCastServiceConnectionCallback = new CastServiceConnectionCallback() {
@@ -3115,7 +2640,11 @@ public class MusicPlaybackService extends Service {
         public void onCastServiceConnected() {
             // Initialize the cast manager
             mCastManager = LocalCastServiceManager.sCastService.getCastManager();
+            mCastPlayer = new CastMusicPlayer(MusicPlaybackService.this, mCastManager);
+            mCastPlayer.setHandler(mPlayerHandler);
+            mCastConsumer = new MusicCastConsumer(MusicPlaybackService.this, mCastManager);
             mCastManager.addCastConsumer(mCastConsumer);
+            //Initialize the cast media player
         }
 
         @Override
@@ -3123,6 +2652,8 @@ public class MusicPlaybackService extends Service {
             mCastManager = null;
         }
     };
+
+    private long mLastKnowPosition;
 
     /**
      * When the ui is running the progress bar updater task will
@@ -3146,7 +2677,10 @@ public class MusicPlaybackService extends Service {
                     try {
                         //Check first so we dont fill up the log with TransientDisconnects
                         service.mCastManager.checkConnectivity();
-                        service.positionRemote();
+                        CastMusicPlayer player = service.mCastPlayer;
+                        if (player != null) {
+                            service.mLastKnowPosition = player.position();
+                        }
                     } catch (TransientNetworkDisconnectionException|NoConnectionException ignored) { }
                     service.mRemoteProgressHandler.sendEmptyMessageDelayed(0, 3000); //Might increase this
                 } else {

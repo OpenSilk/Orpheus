@@ -219,6 +219,15 @@ public class CursorHelpers {
         return artist;
     }
 
+    public static Cursor getCursorForAutoShuffle(Context context) {
+        return context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                new String[]{BaseColumns._ID},
+                Selections.LOCAL_SONG,
+                SelectionArgs.LOCAL_SONG,
+                null);
+    }
+
     public static Uri generateDataUri(long songId) {
         return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
     }
