@@ -953,6 +953,10 @@ public class MusicPlaybackService extends Service {
 
     void switchToLocalPlayer() {
         Timber.d("switchToLocalPlayer");
+        if (getPlayer() == mPlayer) {
+            Timber.w("Current player is local player");
+            return;
+        }
         if (mCastPlayer != null && mCastPlayer.isInitialized()) {
             mLastKnowPosition = mCastPlayer.position();
         }

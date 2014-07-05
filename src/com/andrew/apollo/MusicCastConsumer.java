@@ -95,7 +95,9 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
     @Override
     //@DebugLog
     public void onDisconnected() {
-        mService.switchToLocalPlayer();;
+        if (mService.isRemotePlayback()) {
+            mService.switchToLocalPlayer();
+        }
     }
 
     @Override
@@ -115,7 +117,9 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
     @Override
     //@DebugLog
     public void onApplicationDisconnected(int errorCode) {
-        mService.switchToLocalPlayer();;
+        if (mService.isRemotePlayback()) {
+            mService.switchToLocalPlayer();
+        }
     }
 
     /** Called when stopApplication() succeeds*/
