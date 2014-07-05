@@ -33,6 +33,8 @@ import org.opensilk.music.AppModule;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
@@ -234,16 +236,38 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
                 }
                 isComplete = true;
             } else {
+                Command c = null;
                 switch (action) {
                     case PLAY_ALL:
-                        MusicUtils.playAllSongs(getActivity(), result.songs, 0, false);
+                        c = new Command() {
+                            @Override
+                            public CharSequence execute() {
+                                MusicUtils.playAllSongs(getActivity(), result.songs, 0, false);
+                                return null;
+                            }
+                        };
                         break;
                     case SHUFFLE_ALL:
-                        MusicUtils.playAllSongs(getActivity(), result.songs, 0, true);
+                        c = new Command() {
+                            @Override
+                            public CharSequence execute() {
+                                MusicUtils.playAllSongs(getActivity(), result.songs, 0, true);
+                                return null;
+                            }
+                        };
                         break;
                     case ADD_QUEUE:
-                        MusicUtils.addSongsToQueueSilent(getActivity(), result.songs);
+                        c = new Command() {
+                            @Override
+                            public CharSequence execute() {
+                                MusicUtils.addSongsToQueueSilent(getActivity(), result.songs);
+                                return null;
+                            }
+                        };
                         break;
+                }
+                if (c != null) {
+                    ApolloUtils.execute(false, new CommandRunner(getActivity(), c));
                 }
                 numadded += result.songs.length;
                 if (result.paginationBundle != null) {
