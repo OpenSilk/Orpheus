@@ -333,7 +333,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                     doBackgroundWork(li, BackgroundFetcherFragment.Action.SHUFFLE_ALL);
                     break;
                 case ADD_TO_QUEUE:
-
+                    doBackgroundWork(li, BackgroundFetcherFragment.Action.ADD_QUEUE);
                     break;
             }
         }
