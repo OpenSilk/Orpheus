@@ -85,8 +85,8 @@ public class HomeRecentFragment extends HomePagerBaseCursorFragment {
         super.onLoadFinished(loader, data);
         if (data == null || data.isClosed() || data.getCount() <= 0) {
             // Set the empty text
-            final FrameLayout emptyView = (FrameLayout) mRootView.findViewById(R.id.empty);
-            final TextView emptyText = (TextView)mRootView.findViewById(R.id.empty_text);
+            final FrameLayout emptyView =  null;//(FrameLayout) mRootView.findViewById(R.id.empty);
+            final TextView emptyText = null;//(TextView)mRootView.findViewById(R.id.empty_text);
             emptyText.setText(getString(R.string.empty_recent));
             if (isSimpleLayout()) {
                 mListView.setEmptyView(emptyView);

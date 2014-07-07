@@ -47,6 +47,8 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import org.opensilk.music.ui.cards.SongCard;
+import org.opensilk.music.ui.cards.SongPlaylistCard;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.cards.handler.PlaylistCardClickHandler;
@@ -54,7 +56,6 @@ import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.ProfilePlaylistAdapter;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
-import org.opensilk.music.ui.cards.CardSongList;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -178,12 +179,12 @@ public class ProfilePlaylistFragment extends ProfileBaseFragment<Playlist> imple
 
     @Override
     public void remove(final int which) {
-        LocalSong song = ((CardSongList) mAdapter.getItem(which)).getData();
+        Song song = ((SongPlaylistCard) mAdapter.getItem(which)).getData();
         if (!isFavorites()) {
             final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist.mPlaylistId);
             getActivity().getContentResolver().delete(uri,
-                    MediaStore.Audio.Playlists.Members.AUDIO_ID + "=" + song.songId,
-                    null);
+                    MediaStore.Audio.Playlists.Members.AUDIO_ID + "=?",
+                    new String[]{song.identity});
         }
     }
 

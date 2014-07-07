@@ -19,7 +19,6 @@ package org.opensilk.music.adapters;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.CardRecentList;
 import org.opensilk.music.util.CursorHelpers;
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -36,6 +35,6 @@ public class RecentListCardCursorAdapter extends CardCursorAdapter {
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return new CardRecentList(getContext(), CursorHelpers.makeAlbumFromCursor(cursor));
+        return null;// new CardRecentList(getContext(), CursorHelpers.makeAlbumFromCursor(cursor));
     }
 }

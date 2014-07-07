@@ -77,10 +77,6 @@
         <item name="float_background_color">@android:color/transparent</item>
     </style>
 
-    <style name="PagerTabStrip">
-        <item name="android:textAppearance">@style/TextAppearanceList.SubTitle</item>
-    </style>
-
     <style name="Orpheus.Thumbnail">
         <item name="android:scaleType">centerCrop</item>
         <item name="android:layout_gravity">center</item>
