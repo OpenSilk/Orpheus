@@ -93,15 +93,26 @@
 
     </style>
 
-    <!-- Grid item text appearance -->
+    <!-- grid item text appearance base -->
 
-    <style name="TextAppearanceGrid" parent="@android:style/TextAppearance.Holo.Small">
+    <style name="TextAppearanceGridBase" parent="@android:style/TextAppearance.Holo.Small">
         <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="TextAppearanceGrid.Title">
+    <style name="TextAppearanceGridTitleBase" parent="@android:style/TextAppearance.Holo">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <!-- Grid item text appearance -->
+
+    <style name="TextAppearanceGrid" parent="TextAppearanceGridBase">
+
+    </style>
+
+    <style name="TextAppearanceGridTitle" parent="TextAppearanceGridTitleBase">
+
     </style>
 
     <!-- text views for lists and grids -->

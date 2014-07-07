@@ -29,9 +29,14 @@
 
     <!-- Grid item text appearance -->
 
-    <style name="TextAppearanceGrid" parent="@android:style/TextAppearance.Holo.Small">
+    <style name="TextAppearanceGrid" parent="TextAppearanceGridBase">
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
+
+    <style name="TextAppearanceGridTitle" parent="TextAppearanceGridTitleBase">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
 
     <!-- panel header text -->
 
