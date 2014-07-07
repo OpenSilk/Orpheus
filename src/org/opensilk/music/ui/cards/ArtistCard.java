@@ -52,7 +52,7 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
     protected ArtworkImageView mArtwork;
 
     public ArtistCard(Context context, Artist data) {
-        super(context, data, R.layout.library_listcard_artwork_inner);
+        super(context, data, R.layout.listcard_artwork_inner);
     }
 
     @Override
@@ -121,11 +121,11 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
 
     @Override
     protected int getListLayout() {
-        return R.layout.library_listcard_artwork_inner;
+        return R.layout.listcard_artwork_inner;
     }
 
     @Override
     protected int getGridLayout() {
-        return R.layout.library_gridcard_artwork_inner;
+        return R.layout.gridcard_artwork_inner;
     }
 }

@@ -16,13 +16,10 @@
 
 package org.opensilk.music.ui.cards;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,15 +38,11 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick.Event;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -151,9 +144,9 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
 
     private static int determiteLayout(Playlist plist) {
         if (plist.mAlbumNumber >= 2) {
-            return R.layout.library_gridcard_dual_artwork_inner;
+            return R.layout.gridcard_artwork_dual_inner;
         } else {
-            return R.layout.library_gridcard_artwork_inner;
+            return R.layout.gridcard_artwork_inner;
         }
     }
 

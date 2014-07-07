@@ -51,7 +51,7 @@ public class AlbumCard extends AbsBundleableCard<Album> {
     protected ArtworkImageView mArtwork;
 
     public AlbumCard(Context context, Album data) {
-        super(context, data, R.layout.library_listcard_artwork_inner);
+        super(context, data, R.layout.listcard_artwork_inner);
     }
 
     @Override
@@ -116,11 +116,11 @@ public class AlbumCard extends AbsBundleableCard<Album> {
 
     @Override
     protected int getListLayout() {
-        return R.layout.library_listcard_artwork_inner;
+        return R.layout.listcard_artwork_inner;
     }
 
     @Override
     protected int getGridLayout() {
-        return R.layout.library_gridcard_artwork_inner;
+        return R.layout.gridcard_artwork_inner;
     }
 }

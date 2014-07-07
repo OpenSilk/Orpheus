@@ -41,7 +41,7 @@ public class CardShuffle extends Card {
     TextView mCardTitle;
 
     public CardShuffle(Context context) {
-        super(context, R.layout.card_shuffle_inner);
+        super(context, R.layout.listcard_shuffle_inner);
         init();
     }
 

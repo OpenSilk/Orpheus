@@ -53,7 +53,7 @@ public class SongQueueCard extends AbsBundleableCard<RecentSong> {
     protected PlayingIndicator mPlayingIndicator;
 
     public SongQueueCard(Context context, RecentSong song) {
-        super(context, song, R.layout.library_queue_listcard_inner);
+        super(context, song, R.layout.listcard_queue_inner);
     }
 
     protected void init() {
@@ -117,7 +117,7 @@ public class SongQueueCard extends AbsBundleableCard<RecentSong> {
 
     @Override
     protected int getListLayout() {
-        return R.layout.library_queue_listcard_inner;
+        return R.layout.listcard_queue_inner;
     }
 
     @Override

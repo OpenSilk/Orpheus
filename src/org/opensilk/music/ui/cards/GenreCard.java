@@ -16,20 +16,15 @@
 
 package org.opensilk.music.ui.cards;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
-import android.text.TextUtils;
-import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Genre;
@@ -40,26 +35,20 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.GenreCardClick;
 import org.opensilk.music.ui.cards.event.GenreCardClick.Event;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -145,9 +134,9 @@ public class GenreCard extends AbsGenericCard<Genre> {
 
     private static int determiteLayout(Genre genre) {
         if (genre.mAlbumNumber >= 2) {
-            return R.layout.library_gridcard_dual_artwork_inner;
+            return R.layout.gridcard_artwork_dual_inner;
         } else {
-            return R.layout.library_gridcard_artwork_inner;
+            return R.layout.gridcard_artwork_inner;
         }
     }
 

@@ -47,7 +47,7 @@ public class FolderCard extends AbsBundleableCard<Folder> {
     ColorCodedThumbnail mThumbnail;
 
     public FolderCard(Context context, Folder data) {
-        this(context, data, R.layout.library_folder_listcard_inner);
+        this(context, data, R.layout.listcard_folder_inner);
     }
 
     public FolderCard(Context context, Folder data, int innerLayout) {
@@ -97,11 +97,11 @@ public class FolderCard extends AbsBundleableCard<Folder> {
 
     @Override
     protected int getListLayout() {
-        return R.layout.library_folder_listcard_inner;
+        return R.layout.listcard_folder_inner;
     }
 
     @Override
     protected int getGridLayout() {
-        return R.layout.library_folder_gridcard_inner;
+        return R.layout.gridcard_folder_inner;
     }
 }

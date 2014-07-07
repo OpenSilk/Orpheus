@@ -43,7 +43,7 @@ public class ProfileArtistAdapter extends CardCursorAdapter {
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
         AlbumCard c = new AlbumCard(getContext(), CursorHelpers.makeLocalAlbumFromCursor(cursor));
-        c.setInnerLayout(R.layout.library_listcard_artwork_big_inner);
+        c.setInnerLayout(R.layout.listcard_artwork_big_inner);
         mInjector.inject(c);
         return c;
     }
