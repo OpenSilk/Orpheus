@@ -17,7 +17,18 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+
+import com.andrew.apollo.R;
 
 /**
  * Created by drew on 7/7/14.
@@ -74,4 +85,47 @@ public class SquareThumbnailArtworkImageView extends ThumbnailArtworkImageView {
     public void requestLayout() {
         forceLayout();
     }
+
+    @Override
+    public void setImageDrawable(Drawable drawable) {
+        super.setImageDrawable(drawable);
+        if (drawable != null && (drawable instanceof TransitionDrawable)) {
+            TransitionDrawable d = (TransitionDrawable)drawable;
+            Drawable d2 = d.getDrawable(1);
+            if (d2 != null && (d2 instanceof BitmapDrawable)) {
+                Bitmap b = ((BitmapDrawable)d2).getBitmap();
+                makePalette(b);
+            }
+        }
+    }
+
+    @Override
+    public void setImageBitmap(Bitmap bm) {
+        super.setImageBitmap(bm);
+        if (bm != null) {
+            makePalette(bm);
+        }
+    }
+
+    protected void makePalette(Bitmap b) {
+        Palette.generateAsync(b, new Palette.PaletteAsyncListener() {
+            @Override
+            public void onGenerated(Palette palette) {
+                View parent = (View) getParent();
+                if (parent != null) {
+                    View overlay = parent.findViewById(R.id.griditem_desc_overlay);
+                    if (overlay != null) {
+                        PaletteItem item = palette.getDarkVibrantColor();
+                        if (item == null) {
+                            item = palette.getVibrantColor();
+                        }
+                        if (item != null) {
+                            overlay.setBackgroundColor(item.getRgb());
+                        }
+                    }
+                }
+            }
+        });
+    }
+
 }

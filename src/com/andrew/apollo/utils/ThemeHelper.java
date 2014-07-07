@@ -166,6 +166,20 @@ public class ThemeHelper {
         return new ColorDrawable(color);
     }
 
+    public static int getPrimaryColor(Context context) {
+        return resolveAttr(context, R.attr.colorPrimary).data;
+    }
+
+    public static int getAccentColor(Context context) {
+        return resolveAttr(context, R.attr.colorAccent).data;
+    }
+
+    static TypedValue resolveAttr(Context context, int attr) {
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(attr, outValue, true);
+        return outValue;
+    }
+
     public final Drawable getShuffleButtonDrawable() {
         return themeDrawable(R.drawable.ic_action_playback_shuffle_black);
     }
