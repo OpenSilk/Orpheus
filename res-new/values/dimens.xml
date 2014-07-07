@@ -70,18 +70,6 @@
     <dimen name="music_widget_mini_button_bar_height">48.0dip</dimen>
     <dimen name="music_widget_large_button_bar_width">48.0dip</dimen>
 
-    <!--Playing indicator-->
-    <dimen name="playing_indicator_width">5dp</dimen>
-    <dimen name="playing_indicator_height">16dp</dimen>
-    <dimen name="playing_indicator_height_1">1dp</dimen>
-    <dimen name="playing_indicator_height_2">3dp</dimen>
-    <dimen name="playing_indicator_height_3">5dp</dimen>
-    <dimen name="playing_indicator_height_4">7dp</dimen>
-    <dimen name="playing_indicator_height_5">9dp</dimen>
-    <dimen name="playing_indicator_height_6">11dp</dimen>
-    <dimen name="playing_indicator_height_7">13dp</dimen>
-    <dimen name="playing_indicator_height_8">15dp</dimen>
-
     <!-- Daydream -->
     <dimen name="dream_art_size">300dp</dimen>
 
