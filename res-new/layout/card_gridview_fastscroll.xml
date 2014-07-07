@@ -27,4 +27,4 @@
     android:stretchMode="columnWidth"
     android:gravity="center"
     style="@style/FastScrollGrid"
-    card:list_card_layout_resourceID="@layout/list_card_layout" />
+    card:list_card_layout_resourceID="@layout/grid_card_layout" />
