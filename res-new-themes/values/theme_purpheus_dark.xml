@@ -35,6 +35,8 @@
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarPurpheusDark</item>
         <item name="android:seekBarStyle">@style/SeekBarPurpheusDark</item>
         <item name="android:fastScrollThumbDrawable">@drawable/purpheus_fastscroll_thumb_default_holo</item>
+
+        <item name="colorPrimary">@color/app_color_purpheus</item>
     </style>
 
     <!--OpenSilk-->
@@ -46,10 +48,7 @@
 
     <!--end OpenSilk-->
 
-    <style name="ActionBar.Solid.PurpheusDark" parent="@style/Widget.AppCompat.ActionBar.Solid">
-        <item name="android:background">@drawable/ab_solid_purpheus</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus_dark</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_purpheus</item>
+    <style name="ActionBar.Solid.PurpheusDark" parent="@style/ActionBar.Solid.DarkBase">
         <item name="android:progressBarStyle">@style/ProgressBar.PurpheusDark</item>
     </style>
 

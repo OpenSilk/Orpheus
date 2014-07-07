@@ -32,36 +32,26 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.Genre;
-import com.andrew.apollo.model.LocalAlbum;
-import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.utils.ApolloUtils;
-import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.api.model.Song;
-import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.GenreCardClick;
-import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
-import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.GenreCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.home.adapter.SongAdapter;
 import org.opensilk.music.ui.profile.adapter.ProfileArtistAdapter;
-import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.profile.loader.GenreAlbumLoader;
 import org.opensilk.music.ui.profile.loader.GenreSongLoader;
-import org.opensilk.music.util.Command;
-import org.opensilk.music.util.CommandRunner;
+import org.opensilk.music.widgets.SlidingTabLayout;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import javax.inject.Inject;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
  * Created by drew on 2/28/14.
@@ -78,7 +68,10 @@ public class ProfileGenreFragment extends ScopedDaggerFragment implements Loader
     protected AlbumCardClickHandler mAlbumClickHandler;
     protected SongCardClickHandler mSongClickHandler;
 
-    private ViewPager mViewPager;
+    @InjectView(R.id.tab_bar)
+    SlidingTabLayout mTabs;
+    @InjectView(R.id.pager)
+    ViewPager mViewPager;
     private ProfileGenrePagerAdapter mPagerAdapter;
 
     protected ProfileArtistAdapter mAlbumAdapter;
@@ -112,11 +105,17 @@ public class ProfileGenreFragment extends ScopedDaggerFragment implements Loader
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
         // The View for the fragment's UI
         final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.pager_fragment, container, false);
-        // Initialize the ViewPager
-        mViewPager = (ViewPager)rootView.findViewById(R.id.pager);
+        return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.inject(this,view);
         // Attach the adapter
         mViewPager.setAdapter(mPagerAdapter);
-        return rootView;
+        // attach tabs
+        mTabs.setViewPager(mViewPager);
     }
 
     @Override

@@ -37,6 +37,8 @@
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarBlupheus</item>
         <item name="android:seekBarStyle">@style/SeekBarBlupheus</item>
         <item name="android:fastScrollThumbDrawable">@drawable/blupheus_fastscroll_thumb_holo</item>
+
+        <item name="colorPrimary">@color/app_color_blupheus</item>
     </style>
 
     <!--OpenSilk-->
@@ -48,10 +50,7 @@
 
     <!--end OpenSilk-->
 
-    <style name="ActionBar.Solid.Blupheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/ab_solid_blupheus</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_blupheus</item>
+    <style name="ActionBar.Solid.Blupheus" parent="@style/ActionBar.Solid.LightBase">
         <item name="android:progressBarStyle">@style/ProgressBar.Blupheus</item>
     </style>
 

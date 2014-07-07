@@ -65,6 +65,7 @@ import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
+import org.opensilk.music.widgets.SlidingTabLayout;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -92,6 +93,8 @@ public class HomeFragment extends ScopedDaggerFragment {
 
     @InjectView(R.id.pager)
     ViewPager mViewPager;
+    @InjectView(R.id.tab_bar)
+    SlidingTabLayout mTabs;
 
     private HomePagerAdapter mPagerAdapter;
     private PreferenceUtils mPreferences;
@@ -142,6 +145,8 @@ public class HomeFragment extends ScopedDaggerFragment {
         super.onViewCreated(view, savedInstanceState);
         // Attch the adapter
         mViewPager.setAdapter(mPagerAdapter);
+        // attach tabs
+        mTabs.setViewPager(mViewPager);
         // Offscreen pager loading limit
 //        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
         // Start on the last page the user was on

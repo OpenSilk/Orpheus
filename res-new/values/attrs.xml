@@ -7,4 +7,9 @@
             <enum name="right" value="2" />
         </attr>
     </declare-styleable>
+    <declare-styleable name="ThemeColors">
+        <attr name="colorPrimary" format="color"/>
+        <attr name="colorPrimaryDark" format="color"/>
+        <attr name="colorAccent" format="color"/>
+    </declare-styleable>
 </resources>

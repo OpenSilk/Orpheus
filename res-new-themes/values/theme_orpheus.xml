@@ -37,6 +37,9 @@
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheus</item>
         <item name="android:seekBarStyle">@style/SeekBarOrpheus</item>
         <item name="android:fastScrollThumbDrawable">@drawable/orpheus_fastscroll_thumb_holo</item>
+
+        <item name="colorPrimary">@color/app_color_orpheus</item>
+        <item name="colorAccent">@android:color/holo_blue_dark</item>
     </style>
 
     <!--OpenSilk-->
@@ -48,10 +51,7 @@
 
     <!--end OpenSilk-->
 
-    <style name="ActionBar.Solid.Orpheus" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/ab_solid_orpheus</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_orpheus</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_orpheus</item>
+    <style name="ActionBar.Solid.Orpheus" parent="@style/ActionBar.Solid.LightBase">
         <item name="android:progressBarStyle">@style/ProgressBar.Orpheus</item>
     </style>
 

@@ -26,6 +26,11 @@
         <item name="android:colorBackground">@drawable/background_holo_light</item>
         <!--Sliding pane shadow-->
         <item name="shadowDrawable">@drawable/shadow_above</item>
+
+        <!-- Disable shadow on action bar-->
+        <item name="android:windowContentOverlay">@null</item>
+
+        <item name="colorAccent">@android:color/holo_blue_dark</item>
     </style>
 
     <!--Common styles for dark theme-->
@@ -40,11 +45,30 @@
         <item name="android:colorBackground">@drawable/background_holo_dark</item>
         <!--Sliding pane shadow-->
         <item name="shadowDrawable">@drawable/shadow_above_light</item>
+
+        <!-- Disable shadow on action bar-->
+        <item name="android:windowContentOverlay">@null</item>
+
+        <item name="colorAccent">@android:color/holo_blue_dark</item>
     </style>
 
     <!-- Use custom overflow icon -->
     <style name="ActionButton.Overflow.CommonBase" parent="@style/Widget.AppCompat.Base.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_menu_moreoverflow_holo_dark</item>
+    </style>
+
+    <!-- Base action bar for light theme-->
+    <style name="ActionBar.Solid.LightBase" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">?colorPrimary</item>
+        <item name="android:backgroundStacked">?colorPrimary</item>
+        <item name="android:backgroundSplit">?colorPrimary</item>
+    </style>
+
+    <!-- Base action bar for dark theme-->
+    <style name="ActionBar.Solid.DarkBase" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="android:background">?colorPrimary</item>
+        <item name="android:backgroundStacked">?colorPrimary</item>
+        <item name="android:backgroundSplit">?colorPrimary</item>
     </style>
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
