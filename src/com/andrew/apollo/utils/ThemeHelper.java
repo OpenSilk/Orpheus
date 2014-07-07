@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 
@@ -158,25 +159,11 @@ public class ThemeHelper {
     /**
      * @return drawable used for action bar background
      */
-    public final Drawable getActionBarBackground() {
-        switch (mActiveTheme) {
-            case ORPHEUS:
-            case ORPHEUSDARK:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_orpheus);
-            case BLUPHEUS:
-            case BLUPHEUSDARK:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_blupheus);
-            case REPHEUS:
-            case REPHEUSDARK:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_repheus);
-            case GREPHEUS:
-            case GREPHEUSDARK:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_grepheus);
-            case PURPHEUS:
-            case PURPHEUSDARK:
-                return mContext.getResources().getDrawable(R.drawable.ab_solid_purpheus);
-        }
-        return null;
+    public static Drawable getActionBarBackground(Context context) {
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.colorPrimary, outValue, true);
+        final int color = outValue.data;
+        return new ColorDrawable(color);
     }
 
     public final Drawable getShuffleButtonDrawable() {

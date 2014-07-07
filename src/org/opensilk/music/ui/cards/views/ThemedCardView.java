@@ -28,11 +28,11 @@ public class ThemedCardView extends CardView {
     @Override
     protected void buildUI() {
         super.buildUI();
-        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-        if (isLightTheme) {
-            changeBackgroundResourceId(R.drawable.card_background_light);
-        } else {
-            changeBackgroundResourceId(R.drawable.card_background_dark);
-        }
+//        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+//        if (isLightTheme) {
+//            changeBackgroundResourceId(R.drawable.card_background_light);
+//        } else {
+//            changeBackgroundResourceId(R.drawable.card_background_dark);
+//        }
     }
 }

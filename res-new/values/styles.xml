@@ -100,11 +100,12 @@
     <!-- Grid item text appearance -->
 
     <style name="TextAppearanceGrid" parent="@android:style/TextAppearance.Holo.Small">
-
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="TextAppearanceGrid.Title">
         <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <!-- text views for lists and grids -->

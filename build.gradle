@@ -155,4 +155,6 @@ dependencies {
 
     compile project(':../SilkCastService:library')
     compile project(':../OrpheusApi:api')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
 }

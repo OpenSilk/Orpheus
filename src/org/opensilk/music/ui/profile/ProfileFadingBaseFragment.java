@@ -40,14 +40,12 @@ public abstract class ProfileFadingBaseFragment<D extends Parcelable> extends Pr
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActionBarBackground = ThemeHelper.getInstance(getActivity()).getActionBarBackground();
+        mActionBarBackground = ThemeHelper.getActionBarBackground(getActivity());
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Reset our action bar color XXX it appears mActionBarBackground get gc'd before we reach here
-        getActivity().getActionBar().setBackgroundDrawable(ThemeHelper.getInstance(getActivity()).getActionBarBackground());
         mFadingHelper = null;
         mHeaderImage = null;
     }

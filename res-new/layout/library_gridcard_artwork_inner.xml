@@ -15,30 +15,36 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+<org.opensilk.music.widgets.SquareFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:foreground="?android:selectableItemBackground">
 
-    <org.opensilk.music.widgets.ThumbnailArtworkImageView
+    <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
         android:id="@+id/artwork_thumb"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/grid_card_thumbheight"
+        android:layout_height="match_parent"
         style="@style/Orpheus.Thumbnail"/>
 
     <LinearLayout
+        android:id="@+id/griditem_desc_overlay"
+        android:layout_gravity="bottom"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?colorAccent"
+        android:alpha="0.7"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"
+        android:minHeight="48dp">
 
         <LinearLayout
+            android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="8dp"
-            android:orientation="vertical"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical">
 
             <TextView
@@ -55,17 +61,15 @@
                 android:textAppearance="@style/TextAppearanceGrid"
                 style="@style/SingleLineTextView"/>
 
-
         </LinearLayout>
 
         <org.opensilk.music.widgets.CardOverflowButton
             android:id="@+id/card_overflow_button"
             android:layout_width="36dp"
             android:layout_height="match_parent"
-            android:paddingRight="12dp"
             style="@style/Orpheus.MenuButton"
             android:contentDescription="@null" />
 
     </LinearLayout>
 
-</LinearLayout>
+</org.opensilk.music.widgets.SquareFrameLayout>
