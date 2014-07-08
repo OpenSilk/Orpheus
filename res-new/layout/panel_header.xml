@@ -73,6 +73,8 @@
         </LinearLayout>
 
         <FrameLayout
+            android:id="@+id/header_menu_bar"
+            android:animateLayoutChanges="true"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 

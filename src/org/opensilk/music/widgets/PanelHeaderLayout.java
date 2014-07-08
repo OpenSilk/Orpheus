@@ -33,15 +33,18 @@ import android.widget.FrameLayout;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
+import butterknife.ButterKnife;
+
 /**
  * Created by drew on 3/16/14.
  */
 public class PanelHeaderLayout extends FrameLayout {
 
-    private static final int TRANSITION_DURATION = 250;
+    private static final int TRANSITION_DURATION = 200;
 
     private TransitionDrawable mBackground;
     private boolean isOpen;
+    private FrameLayout mHeaderMenubar;
 
     public PanelHeaderLayout(Context context) {
         this(context, null);
@@ -76,6 +79,7 @@ public class PanelHeaderLayout extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mHeaderMenubar = ButterKnife.findById(this, R.id.header_menu_bar);
         mButtonBarClosed = findViewById(R.id.header_closed_button_bar);
         mButtonBarOpen = findViewById(R.id.header_open_button_bar);
         mButtonBarOpen.setVisibility(GONE);
@@ -84,16 +88,18 @@ public class PanelHeaderLayout extends FrameLayout {
 
     public void transitionToClosed() {
         if (isOpen) {
-            mBackground.reverseTransition(TRANSITION_DURATION*2);
-            flipit();
+            mBackground.reverseTransition(TRANSITION_DURATION * 2);
+            mButtonBarOpen.setVisibility(GONE);
+            mButtonBarClosed.setVisibility(VISIBLE);
             isOpen = false;
         }
     }
 
     public void transitionToOpen() {
         if (!isOpen) {
-            mBackground.startTransition(TRANSITION_DURATION*2);
-            flipit();
+            mBackground.startTransition(TRANSITION_DURATION * 2);
+            mButtonBarClosed.setVisibility(GONE);
+            mButtonBarOpen.setVisibility(VISIBLE);
             isOpen = true;
         }
     }

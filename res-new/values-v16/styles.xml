@@ -40,12 +40,11 @@
 
     <!-- panel header text -->
 
-    <style name="TextAppearancePanelHeader.Title" parent="@android:style/TextAppearance.Holo.Medium">
-        <item name="android:textStyle">bold</item>
+    <style name="TextAppearancePanelHeader.Title" parent="TextAppearancePanelHeaderBase">
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
 
-    <style name="TextAppearancePanelHeader.SubTitle" parent="@android:style/TextAppearance.Holo.Small">
+    <style name="TextAppearancePanelHeader.SubTitle" parent="TextAppearancePanelHeaderSmallBase">
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
 

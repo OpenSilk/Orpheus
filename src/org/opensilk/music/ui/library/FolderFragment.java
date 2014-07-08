@@ -144,7 +144,7 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
 
     @Override
     public int getListViewLayout() {
-        return wantGridView() ? R.layout.card_gridview_fastscroll : R.layout.card_listview_fastscroll2;
+        return wantGridView() ? R.layout.card_gridview : R.layout.card_listview;
     }
 
     @Override

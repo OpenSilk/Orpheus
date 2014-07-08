@@ -109,7 +109,7 @@
     </style>
 
     <style name="TextAppearanceGridTitleBase" parent="@android:style/TextAppearance.Holo">
-        <item name="android:textStyle">bold</item>
+        <!--<item name="android:textStyle">bold</item>-->
         <item name="android:textColor">@android:color/white</item>
     </style>
 
@@ -134,11 +134,20 @@
 
     <!--PANEL HEADER-->
 
-    <style name="TextAppearancePanelHeader.Title" parent="@android:style/TextAppearance.Holo.Medium">
+    <style name="TextAppearancePanelHeaderBase" parent="@android:style/TextAppearance.Holo">
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="TextAppearancePanelHeader.SubTitle" parent="@android:style/TextAppearance.Holo.Small">
+    <style name="TextAppearancePanelHeaderSmallBase" parent="@android:style/TextAppearance.Holo.Small">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearancePanelHeader.Title" parent="TextAppearancePanelHeaderBase">
+
+    </style>
+
+    <style name="TextAppearancePanelHeader.SubTitle" parent="TextAppearancePanelHeaderSmallBase">
 
     </style>
 

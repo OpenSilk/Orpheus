@@ -26,5 +26,5 @@
     android:horizontalSpacing="@dimen/grid_card_horizontal_spacing"
     android:stretchMode="columnWidth"
     android:gravity="center"
-    style="@style/FastScrollGrid"
+    style="@style/CardGridView"
     card:list_card_layout_resourceID="@layout/grid_card_layout" />
