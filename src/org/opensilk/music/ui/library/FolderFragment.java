@@ -124,6 +124,10 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
         }
     }
 
+    public boolean wantGridView() {
+        return false; //TODO
+    }
+
     /*
      * AbsLibraryArrayAdapter.LoaderCallback
      */
@@ -140,22 +144,12 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
 
     @Override
     public int getListViewLayout() {
-        return R.layout.card_listview_fastscroll2;
-    }
-
-    @Override
-    public int getGridViewLayout() {
-        return R.layout.card_gridview_fastscroll;
+        return wantGridView() ? R.layout.card_gridview_fastscroll : R.layout.card_listview_fastscroll2;
     }
 
     @Override
     public int getEmptyViewLayout() {
         return R.layout.list_empty_view;
-    }
-
-    @Override
-    public boolean wantGridView() {
-        return false;
     }
 
 }

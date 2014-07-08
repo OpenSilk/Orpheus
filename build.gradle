@@ -131,10 +131,12 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:19.+'
-    compile 'com.github.gabrielemariotti.cards:library:1.7.3'
     compile 'com.android.support:appcompat-v7:19.+'
     compile 'com.android.support:mediarouter-v7:19.+'
     compile 'com.google.android.gms:play-services:5.0.+'
+    compile 'com.github.gabrielemariotti.cards:library:1.7.4-SNAPSHOT@aar'
+    compile 'com.github.gabrielemariotti.cards:library-extra:1.7.4-SNAPSHOT@aar'
+    compile 'com.etsy.android.grid:library:1.0.5'
     compile 'com.jakewharton:disklrucache:2.0.2'
     compile 'commons-io:commons-io:2.4'
     compile 'com.github.gabrielemariotti.changeloglib:library:1.4.0'

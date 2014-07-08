@@ -17,32 +17,46 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
+    android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.opensilk.music.widgets.HalfHeightFrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <org.opensilk.music.widgets.SquareFrameLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
 
-        <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
+        <org.opensilk.music.widgets.HalfSizeSquareThumbnailArtworkImageView
             android:id="@+id/artwork_thumb"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="top|left"
-            android:layout_marginRight="1dp"
-            style="@style/Orpheus.Thumbnail"/>
+            android:layout_marginBottom="1dp"
+            android:layout_marginRight="1dp"/>
 
-        <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
+        <org.opensilk.music.widgets.HalfSizeSquareThumbnailArtworkImageView
             android:id="@+id/artwork_thumb2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="top|right"
-            android:layout_marginLeft="1dp"
-            style="@style/Orpheus.Thumbnail"/>
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="1dp"/>
 
-    </org.opensilk.music.widgets.HalfHeightFrameLayout>
+        <org.opensilk.music.widgets.HalfSizeSquareThumbnailArtworkImageView
+            android:id="@+id/artwork_thumb3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|left"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="1dp"/>
+
+        <org.opensilk.music.widgets.HalfSizeSquareThumbnailArtworkImageView
+            android:id="@+id/artwork_thumb4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|right"
+            android:layout_marginTop="1dp"
+            android:layout_marginLeft="1dp"/>
+
+    </org.opensilk.music.widgets.SquareFrameLayout>
 
     <LinearLayout
         android:id="@+id/griditem_desc_overlay"

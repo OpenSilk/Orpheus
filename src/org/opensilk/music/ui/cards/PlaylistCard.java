@@ -63,6 +63,8 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
     protected ArtworkImageView mArtwork;
     // no inject
     protected ArtworkImageView mArtwork2;
+    protected ArtworkImageView mArtwork3;
+    protected ArtworkImageView mArtwork4;
 
     public PlaylistCard(Context context, Playlist data) {
         super(context, data, determiteLayout(data));
@@ -81,6 +83,8 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         mArtwork2 = ButterKnife.findById(view, R.id.artwork_thumb2);
+        mArtwork3 = ButterKnife.findById(view, R.id.artwork_thumb3);
+        mArtwork4 = ButterKnife.findById(view, R.id.artwork_thumb4);
         super.setupInnerViewElements(parent, view);
     }
 
@@ -89,7 +93,9 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
         mCardTitle.setText(mData.mPlaylistName);
         mCardSubTitle.setText(MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber));
         if (mData.mAlbumNumber > 0) {
-            if (mArtwork2 != null) {
+            if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
+                ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork, mArtwork2, mArtwork3, mArtwork4));
+            } else if (mArtwork2 != null) {
                 ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork, mArtwork2));
             } else {
                 ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork));
@@ -143,7 +149,9 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
     }
 
     private static int determiteLayout(Playlist plist) {
-        if (plist.mAlbumNumber >= 2) {
+        if (plist.mAlbumNumber >= 4) {
+            return R.layout.gridcard_artwork_quad_inner;
+        } else if (plist.mAlbumNumber >= 2) {
             return R.layout.gridcard_artwork_dual_inner;
         } else {
             return R.layout.gridcard_artwork_inner;

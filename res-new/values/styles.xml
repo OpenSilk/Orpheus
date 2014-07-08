@@ -29,7 +29,7 @@
     </style>
 
     <style name="CardGridView">
-        <item name="android:numColumns">2</item>
+        <item name="android:numColumns">@integer/grid_cols_vertical</item>
     </style>
 
     <style name="FastScrollGrid" parent="CardGridView">

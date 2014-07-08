@@ -63,6 +63,8 @@ public class GenreCard extends AbsGenericCard<Genre> {
     protected ArtworkImageView mArtwork;
     // no inject
     protected ArtworkImageView mArtwork2;
+    protected ArtworkImageView mArtwork3;
+    protected ArtworkImageView mArtwork4;
 
     public GenreCard(Context context, Genre data) {
         super(context, data, determiteLayout(data));
@@ -80,6 +82,8 @@ public class GenreCard extends AbsGenericCard<Genre> {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         mArtwork2 = ButterKnife.findById(view, R.id.artwork_thumb2);
+        mArtwork3 = ButterKnife.findById(view, R.id.artwork_thumb3);
+        mArtwork4 = ButterKnife.findById(view, R.id.artwork_thumb4);
         super.setupInnerViewElements(parent, view);
     }
 
@@ -88,10 +92,14 @@ public class GenreCard extends AbsGenericCard<Genre> {
         String l2 = MusicUtils.makeLabel(getContext(), R.plurals.Nalbums, mData.mAlbumNumber)
                 + ", " + MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber);
         mCardSubTitle.setText(l2);
-        if (mArtwork2 != null) {
-            ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork, mArtwork2));
-        } else {
-            ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork));
+        if (mData.mAlbumNumber > 0){
+            if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
+                ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork, mArtwork2, mArtwork3, mArtwork4));
+            } else if (mArtwork2 != null) {
+                ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork, mArtwork2));
+            } else {
+                ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork));
+            }
         }
     }
 
@@ -133,7 +141,9 @@ public class GenreCard extends AbsGenericCard<Genre> {
     }
 
     private static int determiteLayout(Genre genre) {
-        if (genre.mAlbumNumber >= 2) {
+        if (genre.mAlbumNumber >= 4) {
+            return R.layout.gridcard_artwork_quad_inner;
+        } else if (genre.mAlbumNumber >= 2) {
             return R.layout.gridcard_artwork_dual_inner;
         } else {
             return R.layout.gridcard_artwork_inner;

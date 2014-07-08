@@ -16,7 +16,5 @@
   -->
 
 <resources>
-    <style name="CardGridView">
-        <item name="android:numColumns">4</item>
-    </style>
+    <integer name="grid_cols_horizontal">2</integer>
 </resources>

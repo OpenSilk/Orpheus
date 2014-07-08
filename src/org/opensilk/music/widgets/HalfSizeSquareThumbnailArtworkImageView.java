@@ -17,32 +17,26 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-
-import com.andrew.apollo.R;
 
 /**
+ * This image view is specifically designed for use inside the {@link org.opensilk.music.widgets.SquareFrameLayout}
+ * We take advantage of knowing the parent will be a perfect square and simply take
+ * half its height/width to make ourselves into a square, we can then use layout_gravity in the xml
+ * to place ourselves in a quadrant of the parent.
+ *
  * Created by drew on 7/7/14.
  */
-public class SquareThumbnailArtworkImageView extends PaletteableThumbnailArtworkImageView {
-    public SquareThumbnailArtworkImageView(Context context) {
+public class HalfSizeSquareThumbnailArtworkImageView extends PaletteableThumbnailArtworkImageView {
+    public HalfSizeSquareThumbnailArtworkImageView(Context context) {
         super(context);
     }
 
-    public SquareThumbnailArtworkImageView(Context context, AttributeSet attrs) {
+    public HalfSizeSquareThumbnailArtworkImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public SquareThumbnailArtworkImageView(Context context, AttributeSet attrs, int defStyle) {
+    public HalfSizeSquareThumbnailArtworkImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
@@ -56,7 +50,7 @@ public class SquareThumbnailArtworkImageView extends PaletteableThumbnailArtwork
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
             // Now use the smallest of the measured dimensions for both dimensions
-            final int minSize = Math.min(getMeasuredWidth(), getMeasuredHeight());
+            final int minSize = Math.min(getMeasuredWidth(), getMeasuredHeight()) / 2;
             setMeasuredDimension(minSize, minSize);
             return;
         }
@@ -65,11 +59,11 @@ public class SquareThumbnailArtworkImageView extends PaletteableThumbnailArtwork
         if (widthSize == 0 || heightSize == 0) {
             // If one of the dimensions has no restriction on size, set both dimensions to be the
             // on that does
-            size = Math.max(widthSize, heightSize);
+            size = Math.max(widthSize, heightSize) /2;
         } else {
             // Both dimensions have restrictions on size, set both dimensions to be the
             // smallest of the two
-            size = Math.min(widthSize, heightSize);
+            size = Math.min(widthSize, heightSize) /2;
         }
 
         final int newMeasureSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);

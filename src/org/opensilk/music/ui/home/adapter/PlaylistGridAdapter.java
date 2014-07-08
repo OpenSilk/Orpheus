@@ -23,13 +23,14 @@ import org.opensilk.music.ui.cards.PlaylistCard;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.DaggerInjector;
 
+import it.gmariotti.cardslib.library.extra.staggeredgrid.internal.CardGridStaggeredCursorAdapter;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardGridCursorAdapter;
 
 /**
  * Created by drew on 4/12/14.
  */
-public class PlaylistGridAdapter extends CardGridCursorAdapter {
+public class PlaylistGridAdapter extends CardGridStaggeredCursorAdapter {
 
     private final DaggerInjector mInjector;
 

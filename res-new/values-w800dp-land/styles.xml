@@ -26,8 +26,4 @@
         <!--<item name="android:layout_marginTop">?attr/actionBarSize</item>-->
     </style>
 
-    <style name="CardGridView">
-        <item name="android:numColumns">2</item>
-    </style>
-
 </resources>

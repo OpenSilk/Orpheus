@@ -1,20 +1,28 @@
 package org.opensilk.music.ui.cards.views;
 
 import android.content.Context;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
+import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.widgets.PaletteableThumbnailArtworkImageView;
+import org.opensilk.music.widgets.SquareThumbnailArtworkImageView;
+
 import it.gmariotti.cardslib.library.view.CardView;
+import timber.log.Timber;
 
 /**
  * Created by drew on 3/17/14.
  */
-public class ThemedCardView extends CardView {
+public class ThemedCardView extends CardView implements Palette.PaletteAsyncListener {
 
     protected int defaultOverlayColor;
+    protected View mDescOverlay;
 
     public ThemedCardView(Context context) {
         super(context);
@@ -44,9 +52,46 @@ public class ThemedCardView extends CardView {
         } else {
             changeBackgroundResourceId(R.drawable.card_background_dark);
         }
-        View overlay = findViewById(R.id.griditem_desc_overlay);
-        if (overlay != null) {
-            overlay.setBackgroundColor(defaultOverlayColor);
+        mDescOverlay = findViewById(R.id.griditem_desc_overlay);
+        if (mDescOverlay != null) {
+            mDescOverlay.setBackgroundColor(defaultOverlayColor);
+        }
+        View img = findViewById(R.id.artwork_thumb);
+        if (img != null && (img instanceof PaletteableThumbnailArtworkImageView)) {
+            ((PaletteableThumbnailArtworkImageView) img).installListener(this);
         }
     }
+
+    @Override
+    public void onGenerated(Palette palette) {
+        if (mDescOverlay != null) {
+            PaletteItem item = palette.getDarkVibrantColor();
+            if (item == null) {
+                Timber.w("Unable to get palette");
+            }
+            if (item != null) {
+                mDescOverlay.setBackgroundColor(item.getRgb());
+            }
+        }
+    }
+    /*
+    new Palette.PaletteAsyncListener() {
+            @Override
+            public void onGenerated(Palette palette) {
+                View parent = (View) getParent();
+                if (parent != null) {
+                    View overlay = parent.findViewById(R.id.griditem_desc_overlay);
+                    if (overlay != null) {
+                        PaletteItem item = palette.getDarkVibrantColor();
+                        if (item == null) {
+                            item = palette.getVibrantColor();
+                        }
+                        if (item != null) {
+                            overlay.setBackgroundColor(item.getRgb());
+                        }
+                    }
+                }
+            }
+        }
+     */
 }

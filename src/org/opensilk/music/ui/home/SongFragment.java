@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CursorAdapter;
+import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.SortOrder;
@@ -52,7 +53,7 @@ public class SongFragment extends BasePagerFragment {
         // Set card (holds inner view)
         cardView.setCard(new CardShuffle(getActivity()));
         // Add card to list
-        getListView().addHeaderView(cardView);
+        ((ListView) getListView()).addHeaderView(cardView);
         super.onViewCreated(view, savedInstanceState);
     }
 

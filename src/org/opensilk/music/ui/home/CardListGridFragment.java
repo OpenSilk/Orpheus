@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -56,17 +57,12 @@ public abstract class CardListGridFragment extends Fragment {
 
     final private Runnable mRequestFocus = new Runnable() {
         public void run() {
-            if (wantGridView()) {
-                mGrid.focusableViewAvailable(mGrid);
-            } else {
-                mList.focusableViewAvailable(mList);
-            }
+            mList.focusableViewAvailable(mList);
         }
     };
 
     ListAdapter mAdapter;
-    CardListView mList;
-    CardGridView mGrid;
+    AbsListView mList;
     View mEmptyView;
     TextView mStandardEmptyView;
     View mProgressContainer;
@@ -78,9 +74,7 @@ public abstract class CardListGridFragment extends Fragment {
     }
 
     public abstract int getListViewLayout();
-    public abstract int getGridViewLayout();
     public abstract int getEmptyViewLayout();
-    public abstract boolean wantGridView();
 
     /**
      * Provide default implementation to return a simple list view.  Subclasses
@@ -105,11 +99,7 @@ public abstract class CardListGridFragment extends Fragment {
         FrameLayout emptyContainer = (FrameLayout) root.findViewById(INTERNAL_EMPTY_ID);
         inflater.inflate(getEmptyViewLayout(), emptyContainer, true);
         FrameLayout listContainer = (FrameLayout) root.findViewById(INTERNAL_LIST_CONTAINER_ID);
-        if (wantGridView()) {
-            inflater.inflate(getGridViewLayout(), listContainer, true);
-        } else {
-            inflater.inflate(getListViewLayout(), listContainer, true);
-        }
+        inflater.inflate(getListViewLayout(), listContainer, true);
 
         return root;
     }
@@ -130,7 +120,6 @@ public abstract class CardListGridFragment extends Fragment {
     public void onDestroyView() {
         mHandler.removeCallbacks(mRequestFocus);
         mList = null;
-        mGrid = null;
         mListShown = false;
         mEmptyView = mProgressContainer = mListContainer = null;
         mStandardEmptyView = null;
@@ -143,23 +132,12 @@ public abstract class CardListGridFragment extends Fragment {
     public void setListAdapter(ListAdapter adapter) {
         boolean hadAdapter = mAdapter != null;
         mAdapter = adapter;
-        if (wantGridView()) {
-            if (mGrid != null) {
-                mGrid.setAdapter(adapter);
-                if (!mListShown && !hadAdapter) {
-                    // The list was hidden, and previously didn't have an
-                    // adapter.  It is now time to show it.
-                    setListShown(true, getView().getWindowToken() != null);
-                }
-            }
-        } else {
-            if (mList != null) {
-                mList.setAdapter(adapter);
-                if (!mListShown && !hadAdapter) {
-                    // The list was hidden, and previously didn't have an
-                    // adapter.  It is now time to show it.
-                    setListShown(true, getView().getWindowToken() != null);
-                }
+        if (mList != null) {
+            mList.setAdapter(adapter);
+            if (!mListShown && !hadAdapter) {
+                // The list was hidden, and previously didn't have an
+                // adapter.  It is now time to show it.
+                setListShown(true, getView().getWindowToken() != null);
             }
         }
     }
@@ -172,11 +150,7 @@ public abstract class CardListGridFragment extends Fragment {
      */
     public void setSelection(int position) {
         ensureList();
-        if (wantGridView()) {
-            mGrid.setSelection(position);
-        } else {
-            mList.setSelection(position);
-        }
+        mList.setSelection(position);
     }
 
     /**
@@ -184,11 +158,7 @@ public abstract class CardListGridFragment extends Fragment {
      */
     public int getSelectedItemPosition() {
         ensureList();
-        if (wantGridView()) {
-            return mGrid.getSelectedItemPosition();
-        } else {
-            return mList.getSelectedItemPosition();
-        }
+        return mList.getSelectedItemPosition();
     }
 
     /**
@@ -196,30 +166,15 @@ public abstract class CardListGridFragment extends Fragment {
      */
     public long getSelectedItemId() {
         ensureList();
-        if (wantGridView()) {
-            return mGrid.getSelectedItemId();
-        } else {
-            return mList.getSelectedItemId();
-        }
+        return mList.getSelectedItemId();
     }
 
     /**
      * Get the activity's list view widget.
      */
-    public CardListView getListView() {
+    public AbsListView getListView() {
         ensureList();
-        if (wantGridView()) {
-            throw new NullPointerException("Can't get list when grid was requested");
-        }
         return mList;
-    }
-
-    public CardGridView getGridView() {
-        ensureList();
-        if (!wantGridView()) {
-            throw new NullPointerException("Can't get grid when list was requested");
-        }
-        return mGrid;
     }
 
     /**
@@ -234,11 +189,7 @@ public abstract class CardListGridFragment extends Fragment {
         }
         mStandardEmptyView.setText(text);
         if (mEmptyText == null) {
-            if (wantGridView()) {
-                mGrid.setEmptyView(mEmptyView);
-            } else {
-                mList.setEmptyView(mEmptyView);
-            }
+            mList.setEmptyView(mEmptyView);
         }
         mEmptyText = text;
     }
@@ -324,100 +275,54 @@ public abstract class CardListGridFragment extends Fragment {
 
     //@DebugLog
     private void ensureList() {
-        if (wantGridView()) {
-            if (mGrid != null) return;
-        } else {
-            if (mList != null) return;
-        }
+        if (mList != null) return;
         View root = getView();
         if (root == null) {
             throw new IllegalStateException("Content view not yet created");
         }
-        if (wantGridView()) {
-            if (root instanceof CardGridView) {
-                mGrid = (CardGridView)root;
+        if (root instanceof AbsListView) {
+            mList = (CardListView)root;
+        } else {
+            View ev = root.findViewById(INTERNAL_EMPTY_ID);
+            if (ev instanceof TextView) {
+                mStandardEmptyView = (TextView)ev;
+                mEmptyView = mStandardEmptyView;
             } else {
-                View ev = root.findViewById(INTERNAL_EMPTY_ID);
-                if (ev instanceof TextView) {
-                    mStandardEmptyView = (TextView)ev;
-                    mEmptyView = mStandardEmptyView;
+                mEmptyView = ev;
+                View et = root.findViewById(android.R.id.empty);
+                if (et instanceof TextView) {
+                    mStandardEmptyView = (TextView)et;
                 } else {
-                    mEmptyView = ev;
-                    View et = root.findViewById(android.R.id.empty);
-                    if (et instanceof TextView) {
-                        mStandardEmptyView = (TextView)et;
-                    } else {
-                        throw new RuntimeException("Your empty view must be either a TextView or " +
-                                "contain a TextView with id android.R.id.empty");
-                    }
-                }
-                mEmptyView.setVisibility(View.GONE);
-                mProgressContainer = root.findViewById(INTERNAL_PROGRESS_CONTAINER_ID);
-                mListContainer = root.findViewById(INTERNAL_LIST_CONTAINER_ID);
-                View rawListView = root.findViewById(android.R.id.list);
-                if (!(rawListView instanceof CardGridView)) {
-                    if (rawListView == null) {
-                        throw new RuntimeException(
-                                "Your content must have a CardGridView whose id attribute is " +
-                                        "'android.R.id.list'");
-                    }
-                    throw new RuntimeException(
-                            "Content has view with id attribute 'android.R.id.list' "
-                                    + "that is not a CardGridView class");
-                }
-                mGrid = (CardGridView)rawListView;
-                if (mEmptyView != null) {
-                    mGrid.setEmptyView(mEmptyView);
-                } else if (mEmptyText != null) {
-                    mStandardEmptyView.setText(mEmptyText);
-                    mGrid.setEmptyView(mStandardEmptyView);
+                    throw new RuntimeException("Your empty view must be either a TextView or " +
+                            "contain a TextView with id android.R.id.empty");
                 }
             }
-        } else {
-            if (root instanceof CardListView) {
-                mList = (CardListView)root;
-            } else {
-                View ev = root.findViewById(INTERNAL_EMPTY_ID);
-                if (ev instanceof TextView) {
-                    mStandardEmptyView = (TextView)ev;
-                    mEmptyView = mStandardEmptyView;
-                } else {
-                    mEmptyView = ev;
-                    View et = root.findViewById(android.R.id.empty);
-                    if (et instanceof TextView) {
-                        mStandardEmptyView = (TextView)et;
-                    } else {
-                        throw new RuntimeException("Your empty view must be either a TextView or " +
-                                "contain a TextView with id android.R.id.empty");
-                    }
-                }
-                mEmptyView.setVisibility(View.GONE);
+            mEmptyView.setVisibility(View.GONE);
 //                mStandardEmptyView = (TextView)root.findViewById(INTERNAL_EMPTY_ID);
 //                if (mStandardEmptyView == null) {
 //                    mEmptyView = root.findViewById(android.R.id.empty);
 //                } else {
 //                    mStandardEmptyView.setVisibility(View.GONE);
 //                }
-                mProgressContainer = root.findViewById(INTERNAL_PROGRESS_CONTAINER_ID);
-                mListContainer = root.findViewById(INTERNAL_LIST_CONTAINER_ID);
-                View rawListView = root.findViewById(android.R.id.list);
-                if (!(rawListView instanceof CardListView)) {
-                    if (rawListView == null) {
-                        throw new RuntimeException(
-                                "Your content must have a ListView whose id attribute is " +
-                                        "'android.R.id.list'");
-                    }
+            mProgressContainer = root.findViewById(INTERNAL_PROGRESS_CONTAINER_ID);
+            mListContainer = root.findViewById(INTERNAL_LIST_CONTAINER_ID);
+            View rawListView = root.findViewById(android.R.id.list);
+            if (!(rawListView instanceof AbsListView)) {
+                if (rawListView == null) {
                     throw new RuntimeException(
-                            "Content has view with id attribute 'android.R.id.list' "
-                                    + "that is not a ListView class");
+                            "Your content must have an AbsListView whose id attribute is " +
+                                    "'android.R.id.list'");
                 }
-                mList = (CardListView)rawListView;
-                if (mEmptyView != null) {
-                    mList.setEmptyView(mEmptyView);
-                } else if (mEmptyText != null) {
-                    mStandardEmptyView.setText(mEmptyText);
-                    mList.setEmptyView(mStandardEmptyView);
-                }
+                throw new RuntimeException(
+                        "Content has view with id attribute 'android.R.id.list' "
+                                + "that is not an AbsListView class");
+            }
+            mList = (AbsListView)rawListView;
+            if (mEmptyView != null) {
+                mList.setEmptyView(mEmptyView);
+            } else if (mEmptyText != null) {
+                mStandardEmptyView.setText(mEmptyText);
+                mList.setEmptyView(mStandardEmptyView);
             }
         }
         mListShown = true;

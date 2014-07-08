@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2014 OpenSilk Productions LLC
   ~
@@ -15,8 +16,14 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <style name="CardGridView">
-        <item name="android:numColumns">@integer/grid_cols_horizontal</item>
-    </style>
-</resources>
+<it.gmariotti.cardslib.library.extra.staggeredgrid.view.CardGridStaggeredView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card="http://schemas.android.com/apk/res-auto"
+    android:id="@android:id/list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    card:item_margin="2dp"
+    card:column_count_portrait="@integer/grid_cols_vertical"
+    card:column_count_landscape="@integer/grid_cols_horizontal"
+    card:list_card_layout_resourceID="@layout/grid_card_layout"
+    />

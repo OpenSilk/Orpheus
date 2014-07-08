@@ -21,6 +21,8 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.widget.CursorAdapter;
 
+import com.andrew.apollo.R;
+
 import org.opensilk.music.ui.home.adapter.PlaylistGridAdapter;
 import org.opensilk.music.ui.home.loader.PlaylistLoader;
 
@@ -46,6 +48,11 @@ public class PlaylistFragment extends BasePagerFragment {
     @Override
     public boolean wantGridView() {
         return true;
+    }
+
+    @Override
+    public int getListViewLayout() {
+        return wantGridView() ? R.layout.card_staggeredgridview : R.layout.card_listview_fastscroll2;
     }
 
 }

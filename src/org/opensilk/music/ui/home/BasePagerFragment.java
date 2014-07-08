@@ -104,18 +104,23 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
     }
 
     protected abstract CursorAdapter createAdapter();
+    protected abstract boolean wantGridView();
 
     /*
      * Loader Callbacks
      */
 
     @Override
+    @DebugLog
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
+        //seems to be required for staggeredgrid
+        mAdapter.notifyDataSetChanged();
         setListShown(true);
     }
 
     @Override
+    @DebugLog
     public void onLoaderReset(Loader<Cursor> loader) {
         if (isResumed()) {
             setListShown(false);
@@ -129,12 +134,7 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
 
     @Override
     public int getListViewLayout() {
-        return R.layout.card_listview_fastscroll2;
-    }
-
-    @Override
-    public int getGridViewLayout() {
-        return R.layout.card_gridview_fastscroll;
+        return wantGridView() ? R.layout.card_gridview_fastscroll : R.layout.card_listview_fastscroll2;
     }
 
     @Override
