@@ -10,9 +10,8 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.widgets.PaletteableThumbnailArtworkImageView;
-import org.opensilk.music.widgets.SquareThumbnailArtworkImageView;
 
+import butterknife.ButterKnife;
 import it.gmariotti.cardslib.library.view.CardView;
 import timber.log.Timber;
 
@@ -55,10 +54,10 @@ public class ThemedCardView extends CardView implements Palette.PaletteAsyncList
         mDescOverlay = findViewById(R.id.griditem_desc_overlay);
         if (mDescOverlay != null) {
             mDescOverlay.setBackgroundColor(defaultOverlayColor);
-        }
-        View img = findViewById(R.id.artwork_thumb);
-        if (img != null && (img instanceof PaletteableThumbnailArtworkImageView)) {
-            ((PaletteableThumbnailArtworkImageView) img).installListener(this);
+            ArtworkImageView img = ButterKnife.findById(this, R.id.artwork_thumb);
+            if (img != null) {
+                img.installListener(this);
+            }
         }
     }
 
@@ -70,6 +69,7 @@ public class ThemedCardView extends CardView implements Palette.PaletteAsyncList
                 Timber.w("Unable to get palette");
             }
             if (item != null) {
+                // todo animate
                 mDescOverlay.setBackgroundColor(item.getRgb());
             }
         }

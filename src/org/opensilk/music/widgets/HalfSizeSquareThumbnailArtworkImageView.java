@@ -27,7 +27,7 @@ import android.util.AttributeSet;
  *
  * Created by drew on 7/7/14.
  */
-public class HalfSizeSquareThumbnailArtworkImageView extends PaletteableThumbnailArtworkImageView {
+public class HalfSizeSquareThumbnailArtworkImageView extends ThumbnailArtworkImageView {
     public HalfSizeSquareThumbnailArtworkImageView(Context context) {
         super(context);
     }
@@ -68,6 +68,16 @@ public class HalfSizeSquareThumbnailArtworkImageView extends PaletteableThumbnai
 
         final int newMeasureSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
         super.onMeasure(newMeasureSpec, newMeasureSpec);
+    }
+
+    /**
+     * improves the performance by not passing
+     * requestLayout() to its parent, taking advantage of knowing that image size
+     * won't change once set.
+     */
+    @Override
+    public void requestLayout() {
+        forceLayout();
     }
 
 }

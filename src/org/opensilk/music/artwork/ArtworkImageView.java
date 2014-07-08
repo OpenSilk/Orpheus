@@ -20,6 +20,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -70,6 +71,8 @@ public class ArtworkImageView extends ImageView {
 
     /** Current ImageContainer. (either in-flight or finished) */
     private ImageContainer mImageContainer;
+
+    private Palette.PaletteAsyncListener mListener;
 
     public ArtworkImageView(Context context) {
         this(context, null);
@@ -136,6 +139,10 @@ public class ArtworkImageView extends ImageView {
      */
     public void setErrorImageResId(int errorImage) {
         mErrorImageId = errorImage;
+    }
+
+    public void installListener(Palette.PaletteAsyncListener l) {
+        mListener = l;
     }
 
     /**
@@ -218,6 +225,8 @@ public class ArtworkImageView extends ImageView {
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
         }
+        // clear listener ref
+        mListener = null;
         super.onDetachedFromWindow();
     }
 
@@ -279,6 +288,9 @@ public class ArtworkImageView extends ImageView {
                     transitionDrawable.setCrossFadeEnabled(true);
                     v.setImageDrawable(transitionDrawable);
                     transitionDrawable.startTransition(340);
+                }
+                if (v.mListener != null) {
+                    Palette.generateAsync(response.getBitmap(), v.mListener);
                 }
             } else if (v.mDefaultImageId != 0) {
                 // We missed the L1 cache set the default drawable as fist

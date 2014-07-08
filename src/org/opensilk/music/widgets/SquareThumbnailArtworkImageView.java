@@ -30,10 +30,12 @@ import android.view.ViewParent;
 
 import com.andrew.apollo.R;
 
+import org.opensilk.music.artwork.ArtworkImageView;
+
 /**
  * Created by drew on 7/7/14.
  */
-public class SquareThumbnailArtworkImageView extends PaletteableThumbnailArtworkImageView {
+public class SquareThumbnailArtworkImageView extends ThumbnailArtworkImageView {
     public SquareThumbnailArtworkImageView(Context context) {
         super(context);
     }
@@ -74,6 +76,16 @@ public class SquareThumbnailArtworkImageView extends PaletteableThumbnailArtwork
 
         final int newMeasureSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
         super.onMeasure(newMeasureSpec, newMeasureSpec);
+    }
+
+    /**
+     * improves the performance by not passing
+     * requestLayout() to its parent, taking advantage of knowing that image size
+     * won't change once set.
+     */
+    @Override
+    public void requestLayout() {
+        forceLayout();
     }
 
 }
