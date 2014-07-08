@@ -37,6 +37,8 @@
         <item name="android:fastScrollThumbDrawable">@drawable/grepheus_fastscroll_thumb_default_holo</item>
 
         <item name="colorPrimary">@color/app_color_grepheus</item>
+        <item name="colorAccent">@color/app_color_grepheus_complement</item>
+
     </style>
 
     <!--OpenSilk-->

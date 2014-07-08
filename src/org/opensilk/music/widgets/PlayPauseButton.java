@@ -52,13 +52,13 @@ public class PlayPauseButton extends ImageButton implements OnClickListener, OnL
     public PlayPauseButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-        if (isLightTheme) {
-            mPlayButton = getResources().getDrawable(R.drawable.ic_action_playback_play_black);
-            mPauseButton = getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
-        } else {
+//        if (isLightTheme) {
+//            mPlayButton = getResources().getDrawable(R.drawable.ic_action_playback_play_black);
+//            mPauseButton = getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
+//        } else {
             mPlayButton = getResources().getDrawable(R.drawable.ic_action_playback_play_white);
             mPauseButton = getResources().getDrawable(R.drawable.ic_action_playback_pause_white);
-        }
+//        }
         setOnClickListener(this);
         setOnLongClickListener(this);
         updateState();

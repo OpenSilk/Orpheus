@@ -43,13 +43,15 @@ public class QueueButton extends ImageView {
     public QueueButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-        if (isLightTheme) {
-            mQueueButton = R.drawable.ic_action_queue_holo_light;
-        } else {
+//        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+//        if (isLightTheme) {
+//            mQueueButton = R.drawable.ic_action_queue_holo_light;
+//        } else {
             mQueueButton = R.drawable.ic_action_queue_holo_dark;
-        }
-        mQueueButtonActiveDrawable = ThemeHelper.getInstance(getContext()).getQueueButtonDrawable();
+//        }
+        mQueueButtonActiveDrawable = ThemeHelper.themeDrawable(getContext(),
+                R.drawable.ic_action_queue_holo_dark,
+                ThemeHelper.getAccentColor(getContext()));
     }
 
     public void setQueueShowing(boolean showing) {

@@ -39,7 +39,7 @@
         <item name="android:fastScrollThumbDrawable">@drawable/orpheus_fastscroll_thumb_holo</item>
 
         <item name="colorPrimary">@color/app_color_orpheus</item>
-        <item name="colorAccent">@android:color/holo_blue_dark</item>
+        <item name="colorAccent">@color/app_color_orpheus_complement</item>
     </style>
 
     <!--OpenSilk-->

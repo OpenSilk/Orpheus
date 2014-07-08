@@ -37,6 +37,8 @@
         <item name="android:fastScrollThumbDrawable">@drawable/repheus_fastscroll_thumb_default_holo</item>
 
         <item name="colorPrimary">@color/app_color_repheus</item>
+        <item name="colorAccent">@color/app_color_repheus_complement</item>
+
     </style>
 
     <!--OpenSilk-->

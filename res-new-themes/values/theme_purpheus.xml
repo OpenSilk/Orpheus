@@ -39,6 +39,8 @@
         <item name="android:fastScrollThumbDrawable">@drawable/purpheus_fastscroll_thumb_holo</item>
 
         <item name="colorPrimary">@color/app_color_purpheus</item>
+        <item name="colorAccent">@color/app_color_purpheus_complement</item>
+
     </style>
 
     <!--OpenSilk-->

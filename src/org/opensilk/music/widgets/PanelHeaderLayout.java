@@ -21,11 +21,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -58,12 +61,17 @@ public class PanelHeaderLayout extends FrameLayout {
     public PanelHeaderLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-        if (isLightTheme) {
-            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_light);
-        } else {
-            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_dark);
-        }
+//        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+//        if (isLightTheme) {
+//            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_light);
+//        } else {
+//            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_dark);
+//        }
+        final int primaryColor = ThemeHelper.getPrimaryColor(getContext());
+        ColorDrawable c1 = new ColorDrawable(primaryColor);
+        ColorDrawable c2 = new ColorDrawable(primaryColor);
+        c2.setAlpha(0);
+        mBackground = new TransitionDrawable(new Drawable[]{c1,c2});
         mBackground.setCrossFadeEnabled(true);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             //noinspection deprecation

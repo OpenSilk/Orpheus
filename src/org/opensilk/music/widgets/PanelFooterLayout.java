@@ -39,12 +39,14 @@ public class PanelFooterLayout extends LinearLayout {
     public PanelFooterLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-        if (isLightTheme) {
-            setBackgroundResource(R.color.app_background_light_transparent);
-        } else {
-            setBackgroundResource(R.color.app_background_dark_transparent);
-        }
+//        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+//        if (isLightTheme) {
+//            setBackgroundResource(R.color.app_background_light_transparent);
+//        } else {
+//            setBackgroundResource(R.color.app_background_dark_transparent);
+//        }
+        final int primaryColor = ThemeHelper.getPrimaryColor(getContext());
+        setBackgroundColor(primaryColor);
 
     }
 
