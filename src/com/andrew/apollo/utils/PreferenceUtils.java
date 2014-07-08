@@ -199,7 +199,7 @@ public final class PreferenceUtils {
      * @return
      */
     public final ThemeStyle getThemeStyle() {
-        return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.GREPHEUS.toString()));
+        return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.ORPHEUS.toString()));
     }
 
     /**
