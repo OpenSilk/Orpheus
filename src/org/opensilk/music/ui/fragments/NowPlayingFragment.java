@@ -109,12 +109,10 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     private PlayPauseButton mHeaderPlayPauseButton;
     // Next button
     private RepeatingImageButton mHeaderNextButton;
-    // Album art
-    private ThumbnailArtworkImageView mHeaderAlbumArt;
     // queue switch button
     private QueueButton mHeaderQueueButton;
     // overflow btn
-    private HeaderOverflowButton mHeaderOverflow;
+    private View mHeaderOverflow;
     // Track name
     private TextView mHeaderTrackName;
     // Artist name
@@ -310,10 +308,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         mHeaderTrackName = (TextView) v.findViewById(R.id.header_track_info);
         // Artist name
         mHeaderArtistName = (TextView) v.findViewById(R.id.header_artist_info);
-        // Album art
-        mHeaderAlbumArt = (ThumbnailArtworkImageView) v.findViewById(R.id.header_album_art);
-        // Open to the currently playing album profile
-        mHeaderAlbumArt.setOnClickListener(mOpenCurrentAlbumProfile);
         // Used to show and hide the queue fragment
         mHeaderQueueButton = (QueueButton) v.findViewById(R.id.header_switch_queue);
         mHeaderQueueButton.setOnClickListener(mToggleHiddenPanel);
@@ -322,7 +316,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
 
 
         // overflow
-        mHeaderOverflow = (HeaderOverflowButton) v.findViewById(R.id.header_overflow);
+        mHeaderOverflow = v.findViewById(R.id.header_overflow);
         mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -491,8 +485,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         mHeaderTrackName.setText(MusicUtils.getTrackName());
         // Set the artist name
         mHeaderArtistName.setText(MusicUtils.getArtistName());
-        // Set the album art
-        ArtworkManager.loadCurrentArtwork(mHeaderAlbumArt);
         // Set the total time
         mFooterTotalTime.setText(MusicUtils.makeTimeString(mActivity, MusicUtils.duration() / 1000));
         // Set the album art
@@ -820,31 +812,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                     break;
             }
             return false;
-        }
-    };
-
-    /**
-     * Opens the album profile of the currently playing album
-     */
-    private final View.OnClickListener mOpenCurrentAlbumProfile = new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            long id = MusicUtils.getCurrentAudioId();
-            if (id > 0) {
-                if (MusicUtils.isFromSDCard()) {
-                    long albumId = MusicProviderUtil.getAlbumId(mActivity, id);
-                    if (albumId >= 0) {
-                        LocalAlbum album = MusicUtils.makeLocalAlbum(mActivity, albumId);
-                        if (album != null) {
-                            NavUtils.openAlbumProfile(mActivity, album);
-                            return;
-                        }
-                    }
-                    // TODO toast
-                }// else todo notify?
-            } else {
-                MusicUtils.shuffleAll(mActivity);
-            }
         }
     };
 

@@ -46,7 +46,7 @@ public class PanelFooterLayout extends LinearLayout {
 //            setBackgroundResource(R.color.app_background_dark_transparent);
 //        }
         final int primaryColor = ThemeHelper.getPrimaryColor(getContext());
-        setBackgroundColor(primaryColor);
+        setBackgroundColor(ThemeHelper.setColorAlpha(primaryColor, 0xCC));
 
     }
 

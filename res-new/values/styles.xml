@@ -134,12 +134,12 @@
 
     <!--PANEL HEADER-->
 
-    <style name="TextAppearancePanelHeaderBase" parent="@android:style/TextAppearance.Holo">
-        <item name="android:textStyle">bold</item>
+    <style name="TextAppearancePanelHeaderBase" parent="@android:style/TextAppearance.Holo.Medium">
+        <!--<item name="android:textStyle">bold</item>-->
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="TextAppearancePanelHeaderSmallBase" parent="@android:style/TextAppearance.Holo.Small">
+    <style name="TextAppearancePanelHeaderSmallBase" parent="@android:style/TextAppearance.Holo">
         <item name="android:textColor">@android:color/white</item>
     </style>
 

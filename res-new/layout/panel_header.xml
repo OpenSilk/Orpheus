@@ -35,13 +35,13 @@
         android:orientation="horizontal">
 
         <!-- album art thumb -->
-        <org.opensilk.music.widgets.ThumbnailArtworkImageView
-            android:id="@+id/header_album_art"
-            android:layout_width="@dimen/panel_header_thumbnail_size"
-            android:layout_height="@dimen/panel_header_thumbnail_size"
-            android:layout_margin="@dimen/panel_header_thumbnail_margin"
-            style="@style/Orpheus.Thumbnail"
-            android:contentDescription="@null"/>
+        <!--<org.opensilk.music.widgets.ThumbnailArtworkImageView-->
+            <!--android:id="@+id/header_album_art"-->
+            <!--android:layout_width="@dimen/panel_header_thumbnail_size"-->
+            <!--android:layout_height="@dimen/panel_header_thumbnail_size"-->
+            <!--android:layout_margin="@dimen/panel_header_thumbnail_margin"-->
+            <!--style="@style/Orpheus.Thumbnail"-->
+            <!--android:contentDescription="@null"/>-->
 
         <!-- Track title / artist
         this is the anchor for sliding -->
@@ -52,6 +52,7 @@
             android:gravity="left|center_vertical"
             android:clickable="true"
             android:orientation="vertical"
+            android:layout_marginLeft="16dp"
             android:layout_weight="1">
 
             <TextView
@@ -115,8 +116,9 @@
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@null"/>
 
-                <org.opensilk.music.widgets.HeaderOverflowButton
+                <ImageButton
                     android:id="@+id/header_overflow"
+                    android:src="@drawable/ic_menu_moreoverflow_holo_dark"
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@null" />
 

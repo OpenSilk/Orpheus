@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -172,6 +173,10 @@ public class ThemeHelper {
 
     public static int getAccentColor(Context context) {
         return resolveAttr(context, R.attr.colorAccent).data;
+    }
+
+    public static int setColorAlpha(int color, int alpha) {
+        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
 
     static TypedValue resolveAttr(Context context, int attr) {

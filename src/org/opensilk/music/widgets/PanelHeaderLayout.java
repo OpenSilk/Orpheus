@@ -69,8 +69,7 @@ public class PanelHeaderLayout extends FrameLayout {
 //        }
         final int primaryColor = ThemeHelper.getPrimaryColor(getContext());
         ColorDrawable c1 = new ColorDrawable(primaryColor);
-        ColorDrawable c2 = new ColorDrawable(primaryColor);
-        c2.setAlpha(0);
+        ColorDrawable c2 = new ColorDrawable(ThemeHelper.setColorAlpha(primaryColor, 0xCC)); //80%
         mBackground = new TransitionDrawable(new Drawable[]{c1,c2});
         mBackground.setCrossFadeEnabled(true);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
