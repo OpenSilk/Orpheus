@@ -30,7 +30,6 @@
         <!-- Disable shadow on action bar-->
         <item name="android:windowContentOverlay">@null</item>
 
-        <item name="colorAccent">@android:color/holo_blue_dark</item>
     </style>
 
     <!--Common styles for dark theme-->
@@ -49,7 +48,6 @@
         <!-- Disable shadow on action bar-->
         <item name="android:windowContentOverlay">@null</item>
 
-        <item name="colorAccent">@android:color/holo_blue_dark</item>
     </style>
 
     <!-- Use custom overflow icon -->

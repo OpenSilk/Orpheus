@@ -34,7 +34,6 @@
         <!-- Generated with http://android-holo-colors.com -->
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheusDark</item>
         <item name="android:seekBarStyle">@style/SeekBarOrpheusDark</item>
-        <item name="android:fastScrollThumbDrawable">@drawable/orpheus_fastscroll_thumb_default_holo</item>
 
         <item name="colorPrimary">@color/app_color_orpheus</item>
         <item name="colorAccent">@color/app_color_orpheus_complement</item>
