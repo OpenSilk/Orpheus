@@ -22,7 +22,9 @@
 <!-- This layout overrides the cardslib default layout -->
 <org.opensilk.music.ui.cards.views.ThemedCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card="http://schemas.android.com/apk/res-auto"
     android:id="@+id/list_cardId"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    card:card_layout_resourceID="@layout/card_grid_layout"
     style="@style/grid_card"/>

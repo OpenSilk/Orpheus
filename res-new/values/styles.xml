@@ -85,11 +85,19 @@
 
     <!-- List item text appearance -->
 
-    <style name="TextAppearanceList.Title" parent="@android:style/TextAppearance.Holo.Medium">
-        <item name="android:textStyle">bold</item>
+    <style name="TextAppearanceListBase" parent="@android:style/TextAppearance.Holo">
+        <!--<item name="android:textStyle">bold</item>-->
     </style>
 
-    <style name="TextAppearanceList.SubTitle" parent="@android:style/TextAppearance.Holo.Small">
+    <style name="TextAppearanceListSecondaryBase" parent="@android:style/TextAppearance.Holo.Small">
+
+    </style>
+
+    <style name="TextAppearanceList.Title" parent="TextAppearanceListBase">
+
+    </style>
+
+    <style name="TextAppearanceList.SubTitle" parent="TextAppearanceListSecondaryBase">
 
     </style>
 

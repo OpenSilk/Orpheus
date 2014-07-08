@@ -24,6 +24,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.CursorAdapter;
+import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.PreferenceUtils;
@@ -68,6 +69,10 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
         setListShown(false);
+        if (!wantGridView()) {
+            // reset dividers for CardListView
+            ((ListView) getListView()).setDividerHeight((int)(1 * getResources().getDisplayMetrics().density));
+        }
     }
 
     @Override
@@ -134,7 +139,7 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
 
     @Override
     public int getListViewLayout() {
-        return wantGridView() ? R.layout.card_gridview_fastscroll : R.layout.card_listview_fastscroll2;
+        return wantGridView() ? R.layout.card_gridview_fastscroll : R.layout.card_listview;
     }
 
     @Override

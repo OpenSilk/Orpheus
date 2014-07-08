@@ -19,11 +19,11 @@
 
     <!-- List item text appearance -->
 
-    <style name="TextAppearanceList.Title" parent="@android:style/TextAppearance.Holo.Medium">
+    <style name="TextAppearanceList.Title" parent="TextAppearanceListBase">
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
 
-    <style name="TextAppearanceList.SubTitle" parent="@android:style/TextAppearance.Holo.Small">
+    <style name="TextAppearanceList.SubTitle" parent="TextAppearanceListSecondaryBase">
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
 
