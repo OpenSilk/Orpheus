@@ -17,6 +17,8 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
@@ -26,7 +28,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 /**
  * Created by drew on 3/16/14.
  */
-public class PanelFooterLayout extends LinearLayout {
+public class PanelFooterLayout extends LinearLayout implements Palette.PaletteAsyncListener {
 
     public PanelFooterLayout(Context context) {
         this(context, null);
@@ -50,4 +52,12 @@ public class PanelFooterLayout extends LinearLayout {
 
     }
 
+    @Override
+    public void onGenerated(Palette palette) {
+        PaletteItem item = palette.getDarkVibrantColor();
+        if (item != null) {
+            final int color = ThemeHelper.setColorAlpha(item.getRgb(), 0xB3);//70%
+            setBackgroundColor(color);
+        }
+    }
 }

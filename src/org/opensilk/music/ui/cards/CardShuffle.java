@@ -58,7 +58,9 @@ public class CardShuffle extends Card {
     public void setupInnerViewElements(ViewGroup parent, View view) {
         ButterKnife.inject(this, view);
         mCardTitle.setText(getContext().getString(R.string.menu_shuffle));
-        mShuffleImage.setImageDrawable(ThemeHelper.getInstance(getContext()).getShuffleButtonDrawable());
+        final int accentColor = ThemeHelper.getAccentColor(getContext());
+        mShuffleImage.setImageDrawable(ThemeHelper.themeDrawable(getContext(),
+                R.drawable.ic_action_playback_shuffle_white, accentColor));
     }
 
 }

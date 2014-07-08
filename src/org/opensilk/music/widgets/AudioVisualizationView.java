@@ -54,7 +54,8 @@ public class AudioVisualizationView extends View {
         mBytes = null;
 
         mForePaint.setAntiAlias(true);
-        mForePaint.setColor(ThemeHelper.getInstance(mContext).getThemeColor());
+        final int accentColor = ThemeHelper.getAccentColor(getContext());
+        mForePaint.setColor(accentColor);
         mForePaint.setAlpha(150);
     }
 

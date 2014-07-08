@@ -91,7 +91,7 @@ public class ThemeListPreference extends ListPreference {
 
             ViewHolder holder = (ViewHolder) row.getTag();
             if (holder != null) {
-                int themeColor = mThemeHelper.getThemeColor(ThemeStyle.valueOf(getItem(position).value.toString()));
+                int themeColor = mThemeHelper.getThemePrimaryColor(ThemeStyle.valueOf(getItem(position).value.toString()));
                 holder.icon.setImageDrawable(new ColorDrawable(themeColor));
 
                 holder.name.setText(getItem(position).entry);

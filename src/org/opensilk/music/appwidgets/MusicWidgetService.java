@@ -45,8 +45,6 @@ import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import hugo.weaving.DebugLog;
-
 /**
  * Created by drew on 3/31/14.
  */
@@ -238,7 +236,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
                     break;
                 case MusicPlaybackService.SHUFFLE_AUTO:
                 default:
-                    drawable = mThemeHelper.getShuffleButtonDrawable();
+                    drawable = mThemeHelper.getPrimaryColorShuffleButtonDrawable();
                     break;
             }
             if (drawable != null && drawable instanceof BitmapDrawable) {
@@ -248,10 +246,10 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
             switch (mRepeatMode) {
                 case MusicPlaybackService.REPEAT_ALL:
-                    drawable = mThemeHelper.getRepeatButtonDrawable();
+                    drawable = mThemeHelper.getPrimaryColorRepeatButtonDrawable();
                     break;
                 case MusicPlaybackService.REPEAT_CURRENT:
-                    drawable = mThemeHelper.getRepeatOneButtonDrawable();
+                    drawable = mThemeHelper.getPrimaryColorRepeatOneButtonDrawable();
                     break;
                 default:
                     drawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_white);

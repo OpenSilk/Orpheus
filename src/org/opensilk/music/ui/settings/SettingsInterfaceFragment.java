@@ -8,12 +8,9 @@ import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.andrew.apollo.utils.ThemeStyle;
-import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
 
 import java.util.Locale;
 
@@ -120,7 +117,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
 
     private void updateThemeIcon(String name) {
         mThemeList.setIcon(new ColorDrawable(ThemeHelper.getInstance(getActivity())
-                .getThemeColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US)))));
+                .getThemePrimaryColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US)))));
     }
 
 }

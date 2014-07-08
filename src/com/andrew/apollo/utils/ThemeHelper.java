@@ -17,7 +17,6 @@
 package com.andrew.apollo.utils;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -122,14 +121,14 @@ public class ThemeHelper {
     /**
      * @return current theme color
      */
-    public final int getThemeColor() {
-        return getThemeColor(mActiveTheme);
+    public final int getThemePrimaryColor() {
+        return getThemePrimaryColor(mActiveTheme);
     }
 
     /**
      * @return theme color for style
      */
-    public final int getThemeColor(ThemeStyle style) {
+    public final int getThemePrimaryColor(ThemeStyle style) {
         switch (style) {
             case ORPHEUS:
             case ORPHEUSDARK:
@@ -161,10 +160,7 @@ public class ThemeHelper {
      * @return drawable used for action bar background
      */
     public static Drawable getActionBarBackground(Context context) {
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.colorPrimary, outValue, true);
-        final int color = outValue.data;
-        return new ColorDrawable(color);
+        return new ColorDrawable(getPrimaryColor(context));
     }
 
     public static int getPrimaryColor(Context context) {
@@ -185,20 +181,16 @@ public class ThemeHelper {
         return outValue;
     }
 
-    public final Drawable getShuffleButtonDrawable() {
-        return themeDrawable(R.drawable.ic_action_playback_shuffle_black);
+    public final Drawable getPrimaryColorShuffleButtonDrawable() {
+        return themeDrawable(R.drawable.ic_action_playback_shuffle_white);
     }
 
-    public final Drawable getRepeatButtonDrawable() {
+    public final Drawable getPrimaryColorRepeatButtonDrawable() {
         return themeDrawable(R.drawable.ic_action_playback_repeat_black);
     }
 
-    public final Drawable getRepeatOneButtonDrawable() {
+    public final Drawable getPrimaryColorRepeatOneButtonDrawable() {
         return themeDrawable(R.drawable.ic_action_playback_repeat_1_black);
-    }
-
-    public final Drawable getQueueButtonDrawable() {
-        return themeDrawable(R.drawable.ic_action_queue_black);
     }
 
     /**
@@ -208,7 +200,7 @@ public class ThemeHelper {
      * @return
      */
     public final Drawable themeDrawable(int resId) {
-        return themeDrawable(mContext, resId, getThemeColor());
+        return themeDrawable(mContext, resId, getThemePrimaryColor());
     }
 
     /**

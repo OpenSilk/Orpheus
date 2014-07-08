@@ -25,6 +25,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -37,11 +39,12 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import butterknife.ButterKnife;
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 3/16/14.
  */
-public class PanelHeaderLayout extends FrameLayout {
+public class PanelHeaderLayout extends FrameLayout implements Palette.PaletteAsyncListener {
 
     private static final int TRANSITION_DURATION = 200;
 
@@ -71,6 +74,7 @@ public class PanelHeaderLayout extends FrameLayout {
         ColorDrawable c1 = new ColorDrawable(primaryColor);
         ColorDrawable c2 = new ColorDrawable(ThemeHelper.setColorAlpha(primaryColor, 0xCC)); //80%
         mBackground = new TransitionDrawable(new Drawable[]{c1,c2});
+        mBackground.setId(1, 0x333);
         mBackground.setCrossFadeEnabled(true);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             //noinspection deprecation
@@ -91,6 +95,16 @@ public class PanelHeaderLayout extends FrameLayout {
         mButtonBarOpen = findViewById(R.id.header_open_button_bar);
         mButtonBarOpen.setVisibility(GONE);
         isOpen = false;
+    }
+
+    @Override
+    @DebugLog
+    public void onGenerated(Palette palette) {
+        PaletteItem item = palette.getDarkVibrantColor();
+        if (item != null) {
+            final int color = ThemeHelper.setColorAlpha(item.getRgb(), 0xB3); //70%
+            mBackground.setDrawableByLayerId(0x333, new ColorDrawable(color));
+        }
     }
 
     public void transitionToClosed() {

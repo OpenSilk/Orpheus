@@ -289,6 +289,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
 
         // Background art
         mArtBackground = (FullScreenArtworkImageView) v.findViewById(R.id.panel_background_art);
+        mArtBackground.installListener(mPanelHeader);
 
         //Visualizer view
         mVisualizerView = (AudioVisualizationView) v.findViewById(R.id.visualizer_view);
