@@ -66,7 +66,6 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private static final int TITLE_OFFSET_DIPS = 24;
     private static final int TAB_VIEW_PADDING_DIPS = 12;
     private static final int TAB_VIEW_TEXT_SIZE_SP = 14;
-    private static final int TAB_LAYOUT_MIN_HEIGHT_DIPS = 48;
     private static final int UNSELECTED_TEXT_COLOR_ALPHA = 0x99;
 
     private int mTitleOffset;
@@ -104,8 +103,6 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
         mSelectedTextColor = context.getResources().getColor(android.R.color.white);
         mUnselectedTextColor = SlidingTabStrip.setColorAlpha(mSelectedTextColor, UNSELECTED_TEXT_COLOR_ALPHA);
-
-        setMinimumHeight((int) (TAB_LAYOUT_MIN_HEIGHT_DIPS * getResources().getDisplayMetrics().density));
 
         mTitleOffset = (int) (TITLE_OFFSET_DIPS * getResources().getDisplayMetrics().density);
 
