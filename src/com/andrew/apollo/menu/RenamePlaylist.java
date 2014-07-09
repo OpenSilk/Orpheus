@@ -21,6 +21,7 @@ import android.provider.MediaStore.Audio;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.format.Capitalize;
+import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.utils.MusicUtils;
 
 /**
@@ -84,9 +85,11 @@ public class RenamePlaylist extends BasePlaylistDialog {
             final ContentValues values = new ContentValues(1);
             values.put(Audio.Playlists.NAME, Capitalize.capitalize(playlistName));
             resolver.update(Audio.Playlists.EXTERNAL_CONTENT_URI, values,
-                    MediaStore.Audio.Playlists._ID + "=?", new String[] {
-                        String.valueOf(mRenameId)
-                    });
+                    MediaStore.Audio.Playlists._ID + "=?", new String[]{
+                            String.valueOf(mRenameId)
+                    }
+            );
+            resolver.notifyChange(MusicProvider.PLAYLIST_URI, null);
             closeKeyboard();
             getDialog().dismiss();
         }

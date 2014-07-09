@@ -27,6 +27,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
@@ -117,6 +118,7 @@ public class PlaylistCardClickHandler {
                                         MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                                         playlist.mPlaylistId);
                                 getActivity().getContentResolver().delete(mUri, null, null);
+                                getActivity().getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
                                 MusicUtils.refresh();
                             }
                         })

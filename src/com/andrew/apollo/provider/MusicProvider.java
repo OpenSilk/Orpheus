@@ -405,10 +405,11 @@ public class MusicProvider extends ContentProvider {
     @DebugLog
     protected void updatePlaylistCache() {
         boolean wasupdated = false;
+        // Add new
         Cursor c = makePlaylistMatrixCursor();
         if (c != null) {
+            SQLiteDatabase db = mStore.getWritableDatabase();
             if (c.moveToFirst()) {
-                SQLiteDatabase db = mStore.getWritableDatabase();
                 do {
                     long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
                     String name = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
@@ -438,7 +439,7 @@ public class MusicProvider extends ContentProvider {
                                             && albumCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT))
                                             && TextUtils.equals(songids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)))
                                             && TextUtils.equals(albumids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)))) {
-                                        Timber.i("Cache matches for " +name+" playlist id="+id);
+                                        Timber.v("Cache matches for " +name+" playlist id="+id);
                                         continue;
                                     }
                                 }
@@ -456,8 +457,38 @@ public class MusicProvider extends ContentProvider {
                     db.insert(MusicStore.PLAYLIST_TABLE, null, values);
                     wasupdated = true;
                 } while (c.moveToNext());
-                db.close();
             }
+            // remove old
+            Cursor c2 = db.query(MusicStore.PLAYLIST_TABLE,
+                    Projections.CACHED_GROUP,
+                    null, null, null, null, null, null);
+            if (c2 != null) {
+                if (c2.moveToFirst()) {
+                    do {
+                        boolean found = false;
+                        long id = c2.getLong(c2.getColumnIndexOrThrow(BaseColumns._ID));
+                        if (c.moveToFirst()) {
+                            do {
+                                long id2 = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+                                if (id == id2) {
+                                    found = true;
+                                    break;
+                                }
+                            } while (c.moveToNext());
+                        }
+                        if (!found) {
+                            Timber.v("Removing playlist " + c2.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME)));
+                            db.delete(MusicStore.PLAYLIST_TABLE,
+                                    BaseColumns._ID + "=?",
+                                    new String[]{String.valueOf(id)});
+                            wasupdated = true;
+                        }
+                    } while (c2.moveToNext());
+                }
+                c2.close();
+            }
+            db.close();
+            c.close();
         }
         if (wasupdated) {
             getContext().getContentResolver().notifyChange(PLAYLIST_URI, null);
@@ -468,56 +499,88 @@ public class MusicProvider extends ContentProvider {
     protected void updateGenreCache() {
         boolean wasupdated = false;
         Cursor c = makeGenreMatrixCursor();
-        if (c != null && c.moveToFirst()) {
+        if (c != null) {
             SQLiteDatabase db = mStore.getWritableDatabase();
-            do {
-                long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
-                String name = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
-                int songCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
-                int albumCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-                String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
-                String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-                // create content values
-                ContentValues values = new ContentValues(6);
-                values.put(MusicStore.GroupCols.NAME, name);
-                values.put(MusicStore.GroupCols.SONG_COUNT, songCount);
-                values.put(MusicStore.GroupCols.ALBUM_COUNT, albumCount);
-                values.put(MusicStore.GroupCols.SONG_IDS, songids);
-                values.put(MusicStore.GroupCols.ALBUM_IDS, albumids);
-                // check if its already there and update if needed
-                Cursor c2 = db.query(MusicStore.GENRE_TABLE,
-                        Projections.CACHED_GROUP,
-                        MusicStore.GroupCols._ID + "=?",
-                        new String[]{String.valueOf(id)},
-                        null, null, null, null);
-                if (c2 != null) {
-                    try {
-                        if (c2.getCount() > 0) {
-                            if (c2.moveToFirst()) {
-                                if (TextUtils.equals(name, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.NAME)))
-                                        && songCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT))
-                                        && albumCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT))
-                                        && TextUtils.equals(songids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)))
-                                        && TextUtils.equals(albumids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)))) {
-                                    Timber.i("Cache matches for " +name+" genre id="+id);
-                                    continue;
+            if (c.moveToFirst()) {
+                do {
+                    long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
+                    String name = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
+                    int songCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
+                    int albumCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                    String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
+                    String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                    // create content values
+                    ContentValues values = new ContentValues(6);
+                    values.put(MusicStore.GroupCols.NAME, name);
+                    values.put(MusicStore.GroupCols.SONG_COUNT, songCount);
+                    values.put(MusicStore.GroupCols.ALBUM_COUNT, albumCount);
+                    values.put(MusicStore.GroupCols.SONG_IDS, songids);
+                    values.put(MusicStore.GroupCols.ALBUM_IDS, albumids);
+                    // check if its already there and update if needed
+                    Cursor c2 = db.query(MusicStore.GENRE_TABLE,
+                            Projections.CACHED_GROUP,
+                            MusicStore.GroupCols._ID + "=?",
+                            new String[]{String.valueOf(id)},
+                            null, null, null, null);
+                    if (c2 != null) {
+                        try {
+                            if (c2.getCount() > 0) {
+                                if (c2.moveToFirst()) {
+                                    if (TextUtils.equals(name, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.NAME)))
+                                            && songCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT))
+                                            && albumCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT))
+                                            && TextUtils.equals(songids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)))
+                                            && TextUtils.equals(albumids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)))) {
+                                        Timber.v("Cache matches for " + name + " genre id=" + id);
+                                        continue;
+                                    }
                                 }
+                                db.update(MusicStore.GENRE_TABLE, values,
+                                        MusicStore.GroupCols._ID + "=?",
+                                        new String[]{String.valueOf(id)});
+                                wasupdated = true;
+                                continue;
                             }
-                            db.update(MusicStore.GENRE_TABLE, values,
-                                    MusicStore.GroupCols._ID + "=?",
+                        } finally {
+                            c2.close();
+                        }
+                    }
+                    values.put(MusicStore.GroupCols._ID, id);
+                    db.insert(MusicStore.GENRE_TABLE, null, values);
+                    wasupdated = true;
+                } while (c.moveToNext());
+            }
+            // remove old
+            Cursor c2 = db.query(MusicStore.GENRE_TABLE,
+                    Projections.CACHED_GROUP,
+                    null, null, null, null, null, null);
+            if (c2 != null) {
+                if (c2.moveToFirst()) {
+                    do {
+                        boolean found = false;
+                        long id = c2.getLong(c2.getColumnIndexOrThrow(BaseColumns._ID));
+                        if (c.moveToFirst()) {
+                            do {
+                                long id2 = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+                                if (id == id2) {
+                                    found = true;
+                                    break;
+                                }
+                            } while (c.moveToNext());
+                        }
+                        if (!found) {
+                            Timber.v("Removing genre " + c2.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME)));
+                            db.delete(MusicStore.GENRE_TABLE,
+                                    BaseColumns._ID + "=?",
                                     new String[]{String.valueOf(id)});
                             wasupdated = true;
-                            continue;
                         }
-                    } finally {
-                        c2.close();
-                    }
+                    } while (c2.moveToNext());
                 }
-                values.put(MusicStore.GroupCols._ID, id);
-                db.insert(MusicStore.GENRE_TABLE, null, values);
-                wasupdated = true;
-            } while (c.moveToNext());
+                c2.close();
+            }
             db.close();
+            c.close();
         }
         if (wasupdated) {
             getContext().getContentResolver().notifyChange(GENRES_URI, null);

@@ -196,6 +196,22 @@ public class MusicProviderUtil {
         return albumid;
     }
 
+    public static long getRecentId(Context context, long realSongId) {
+        long recentId = -1;
+        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+                new String[]{ MusicStore.Cols._ID },
+                MusicStore.Cols.IDENTITY + "=? AND " + MusicStore.Cols.ISLOCAL + "=?",
+                new String[]{String.valueOf(realSongId), "1"}, null
+                );
+        if (c != null) {
+            if (c.moveToFirst()) {
+                recentId = c.getLong(0);
+            }
+            c.close();
+        }
+        return recentId;
+    }
+
     public static Uri getDataUri(Context context, long songId) {
         Uri dataUri = null;
         Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,

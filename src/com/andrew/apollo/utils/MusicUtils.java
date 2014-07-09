@@ -45,7 +45,9 @@ import org.opensilk.music.util.OrderPreservingCursor;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicProviderUtil;
+import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.provider.RecentStore;
 
 import org.opensilk.music.api.model.Song;
@@ -1066,7 +1068,7 @@ public final class MusicUtils {
     public static void clearPlaylist(final Context context, final int playlistId) {
         final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
         context.getContentResolver().delete(uri, null, null);
-        return;
+        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
     }
 
     /**
@@ -1094,6 +1096,7 @@ public final class MusicUtils {
         final String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplaylist, numinserted, numinserted);
         Toast.makeText((Activity) context, message, Toast.LENGTH_LONG).show();
+        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
     }
 
     /**
@@ -1112,6 +1115,7 @@ public final class MusicUtils {
         final String message = context.getResources().getQuantityString(
                 R.plurals.NNNtracksfromplaylist, 1, 1);
         Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
+        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
     }
 
     /**
@@ -1572,18 +1576,18 @@ public final class MusicUtils {
             // as from the album art cache
             c.moveToFirst();
             while (!c.isAfterLast()) {
-                // Remove from current playlist
-                final long id = c.getLong(0);
-                removeTrackOLD(id);
-                // Remove from the favorites playlist
+                long id = MusicProviderUtil.getRecentId(context, c.getLong(0));
+                if (id >= 0) {
+                    // Remove from current playlist
+                    removeQueueItem(id);
+                    // Remove from the favorites playlist
 //                FavoritesStore.getInstance(context).removeItem(id);
-                // Remove any items in the recents database
-                context.getContentResolver().delete(RECENTS_URI,
-                        RecentStore.RecentStoreColumns._ID + " = ?",
-                        new String[] {
-                                String.valueOf(c.getLong(2))
-                        }
-                );
+                    // Remove any items in the recents database
+                    context.getContentResolver().delete(RECENTS_URI,
+                            MusicStore.Cols._ID + " = ?",
+                            new String[] {String.valueOf(id)}
+                    );
+                }
                 c.moveToNext();
             }
 
@@ -1617,6 +1621,8 @@ public final class MusicUtils {
         // things
         // in the media content domain, so update everything.
         context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
+        context.getContentResolver().notifyChange(MusicProvider.GENRES_URI, null);
         // Notify the lists to update
         refresh();
     }
