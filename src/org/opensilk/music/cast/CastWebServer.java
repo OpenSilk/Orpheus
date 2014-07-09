@@ -52,9 +52,7 @@ import hugo.weaving.DebugLog;
  * Serves audio files and album art
  * url requests must be in the form:
  *      /audio/${audio._id}
- *      /art/${album._id}
- *
- * We use the album id for art so our etags will work effectively
+ *      /art?artist={name}&album={name}
  *
  * Created by drew on 2/14/14.
  */
@@ -136,10 +134,10 @@ public class CastWebServer extends NanoHTTPD {
             }
         }
 
-        return respond(Collections.unmodifiableMap(header), uri);
+        return respond(Collections.unmodifiableMap(header), Collections.unmodifiableMap(parms), uri);
     }
 
-    private Response respond(Map<String, String> headers, String uri) {
+    private Response respond(Map<String, String> headers, Map<String, String> params, String uri) {
         // Remove URL arguments
         uri = uri.trim().replace(File.separatorChar, '/');
         if (uri.indexOf('?') >= 0) {
@@ -156,7 +154,7 @@ public class CastWebServer extends NanoHTTPD {
         if (uri.startsWith("/audio")) {
             response = serveSong(uri, headers);
         } else if (uri.startsWith("/art")) {
-            response = serveArt(uri, headers);
+            response = serveArt(headers, params, uri);
         }
 
         return response != null ? response : notFoundResponse();
@@ -173,9 +171,10 @@ public class CastWebServer extends NanoHTTPD {
      * @return
      */
     //@DebugLog
-    private Response serveArt(String uri, Map<String, String> headers) {
-        String[] info = parseArtUri(uri);
-        if (info == null || TextUtils.isEmpty(info[0]) || TextUtils.isEmpty(info[1])) {
+    private Response serveArt(Map<String, String> headers, Map<String, String> params, String uri) {
+        String artist = params.get("artist");
+        String album= params.get("album");
+        if (TextUtils.isEmpty(artist) || TextUtils.isEmpty(album)) {
             return notFoundResponse();
         }
         String reqEtag = headers.get("if-none-match");
@@ -197,7 +196,7 @@ public class CastWebServer extends NanoHTTPD {
         ByteArrayOutputStream tmpOut = null;
         try {
             final ParcelFileDescriptor pfd = mContext.getContentResolver()
-                    .openFileDescriptor(ArtworkProvider.createArtworkUri(info[0], info[1]), "r");
+                    .openFileDescriptor(ArtworkProvider.createArtworkUri(artist, album), "r");
             //Hackish but hopefully will yield unique etags (at least for this session)
             String etag = Integer.toHexString(pfd.hashCode());
             if (!quiet) Log.d(TAG, "Created etag " + etag + " for " + uri);

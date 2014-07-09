@@ -41,7 +41,9 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 
 import hugo.weaving.DebugLog;
@@ -213,7 +215,13 @@ public class CastUtils {
         if (artist == null || album == null) {
             return null;
         }
-        return "http://"+host+":"+CastWebServer.PORT+"/art/"+artist+"/"+album;
+        try {
+            artist = URLEncoder.encode(artist, "UTF-8");
+            album = URLEncoder.encode(album, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();//better never happens
+        }
+        return "http://"+host+":"+CastWebServer.PORT+"/art?artist="+artist+"&album="+album;
     }
 
     /**
