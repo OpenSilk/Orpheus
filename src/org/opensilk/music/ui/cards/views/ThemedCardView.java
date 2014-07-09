@@ -39,7 +39,7 @@ public class ThemedCardView extends CardView implements Palette.PaletteAsyncList
     }
 
     void getOverlayColor(Context context) {
-        defaultOverlayColor = ThemeHelper.getAccentColor(context);
+        defaultOverlayColor = ThemeHelper.setColorAlpha(ThemeHelper.getAccentColor(context), 0xcc);
     }
 
     @Override
@@ -64,13 +64,17 @@ public class ThemedCardView extends CardView implements Palette.PaletteAsyncList
     @Override
     public void onGenerated(Palette palette) {
         if (mDescOverlay != null) {
-            PaletteItem item = palette.getDarkVibrantColor();
+            PaletteItem item = palette.getVibrantColor();
+            if (item == null) {
+                Timber.w("Trying muted palette");
+                item = palette.getMutedColor();
+            }
             if (item == null) {
                 Timber.w("Unable to get palette");
             }
             if (item != null) {
                 // todo animate
-                mDescOverlay.setBackgroundColor(item.getRgb());
+                mDescOverlay.setBackgroundColor(ThemeHelper.setColorAlpha(item.getRgb(), 0xcc));
             }
         }
     }
