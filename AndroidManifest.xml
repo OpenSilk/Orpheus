@@ -67,7 +67,7 @@
         <!-- The God Activity -->
         <activity
             android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
-            android:theme="@style/Theme.AppCompat.Light.Panel"
+            android:theme="@style/Theme.Default.Panel"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
@@ -143,7 +143,7 @@
         </activity>
 
         <activity android:name="org.opensilk.music.ui.activities.ProfileSlidingActivity"
-            android:theme="@style/Theme.AppCompat.Light.Panel">
+            android:theme="@style/Theme.Default.Panel.Profile">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>

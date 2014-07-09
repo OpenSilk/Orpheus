@@ -38,6 +38,7 @@ import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.PluginInfo;
@@ -94,6 +95,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        setTheme(ThemeHelper.getInstance(this).getPanelTheme());
         super.onCreate(savedInstanceState);
 
         ButterKnife.inject(this);

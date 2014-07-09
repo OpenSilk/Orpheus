@@ -105,9 +105,6 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
     protected boolean isCastingEnabled;
     protected boolean killServiceOnExit;
 
-    // Theme resourses
-    protected ThemeHelper mThemeHelper;
-
     protected PreferenceUtils mPreferences;
 
     protected boolean mIsLargeLandscape;
@@ -123,17 +120,13 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         // to inject abstract classes
         mActivityBus = provideBus();
 
-        // Set our theme
-        mThemeHelper = ThemeHelper.getInstance(this);
-        setTheme(mThemeHelper.getPanelTheme());
-
         // Set the layout
         setContentView(getLayoutId());
 
         // Setup action bar
-        ActionBar ab = getSupportActionBar();
-        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        ab.setDisplayShowTitleEnabled(true);
+//        ActionBar ab = getSupportActionBar();
+//        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+//        ab.setDisplayShowTitleEnabled(true);
 
         // Fade it in
         //overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

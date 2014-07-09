@@ -33,6 +33,7 @@ import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProvider;
@@ -175,7 +176,9 @@ public class CursorHelpers {
         final String name= c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
         final int songNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
         final int albumNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-        return new Genre(id, name, songNumber, albumNumber);
+        final long[] songs = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)));
+        final long[] albums = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)));
+        return new Genre(id, name, songNumber, albumNumber, songs, albums);
     }
 
     public static Playlist makePlaylistFromCursor(final Cursor c) {
@@ -183,7 +186,9 @@ public class CursorHelpers {
         final String name= c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
         final int songNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
         final int albumNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-        return new Playlist(id, name, songNumber, albumNumber);
+        final long[] songs = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)));
+        final long[] albums = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)));
+        return new Playlist(id, name, songNumber, albumNumber, songs, albums);
     }
 
     public static Cursor makeLastAddedCursor(final Context context) {
@@ -201,6 +206,14 @@ public class CursorHelpers {
                 Selections.LOCAL_SONG,
                 SelectionArgs.LOCAL_SONG,
                 PreferenceUtils.getInstance(context).getSongSortOrder());
+    }
+
+    public static Cursor makeSingleLocalSongCursor(final Context context, long id) {
+        return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_SONG + " AND " + MediaStore.Audio.Media._ID + "=?",
+                new String[]{SelectionArgs.LOCAL_SONG[0], SelectionArgs.LOCAL_SONG[1], String.valueOf(id)},
+                null);
     }
 
     public static String getAlbumArtist(Context context, long albumId) {
@@ -228,12 +241,56 @@ public class CursorHelpers {
                 null);
     }
 
+    public static Cursor makeArtistSongsCursor(Context context, long artistId) {
+        return context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_SONG + " AND " + MediaStore.Audio.Media.ARTIST_ID + "=?",
+                new String[]{SelectionArgs.LOCAL_SONG[0], SelectionArgs.LOCAL_SONG[1], String.valueOf(artistId)},
+                PreferenceUtils.getInstance(context).getArtistSongSortOrder());
+    }
+
+    public static Cursor makeLocalAlbumsCursor(Context context, long[] albumIds) {
+        return context.getContentResolver().query(
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                Projections.LOCAL_ALBUM,
+                Selections.LOCAL_ALBUMS(albumIds), null, null);
+    }
+
+    public static ArtInfo makeArtInfoFromLocalAlbumCursor(Cursor c) {
+        return new ArtInfo(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)),
+                c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)),
+                generateArtworkUri(c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID))));
+    }
+
+    public static Cursor makeLocalArtistAlbumsCursor(Context context, long artistId) {
+        return context.getContentResolver().query(MediaStore.Audio.Artists.Albums.getContentUri("external", artistId),
+                Projections.LOCAL_ALBUM,
+                null, null,
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+    }
+
     public static Uri generateDataUri(long songId) {
         return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
     }
 
     public static Uri generateArtworkUri(long albumId) {
         return ContentUris.withAppendedId(ARTWORK_URI, albumId);
+    }
+
+    static long[] fromCsv(String csv) {
+        if (csv == null) {
+            return new long[0];
+        }
+        final String[] strings = csv.split(",");
+        if (strings == null || strings.length == 0) {
+            return new long[0];
+        }
+        final long[] ids = new long[strings.length];
+        for (int ii=0; ii< strings.length; ii++) {
+            ids[ii] = Long.valueOf(strings[ii]);
+        }
+        return ids;
     }
 
 }

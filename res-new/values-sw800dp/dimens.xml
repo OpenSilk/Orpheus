@@ -21,6 +21,4 @@
         744/4 - 54 - 132 -->
     <dimen name="grid_card_thumbheight">132dp</dimen>
 
-    <!-- 70% of sw -->
-    <dimen name="profile_header_height">560dp</dimen>
 </resources>

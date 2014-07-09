@@ -16,15 +16,22 @@
 
 package org.opensilk.music.ui.activities;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 
-import org.opensilk.music.ui.profile.ProfileAlbumFragment;
-import org.opensilk.music.ui.profile.ProfileArtistFragment;
+import org.opensilk.music.ui.profile.AlbumFragment;
+import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.ProfileGenreFragment;
 import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
 import org.opensilk.silkdagger.qualifier.ForActivity;
@@ -46,16 +53,25 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(ThemeHelper.getInstance(this).getProfileTheme());
+//        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR);
+        setupFauxDialog();
         super.onCreate(savedInstanceState);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setBackgroundDrawable(null);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle("                    "); //Hack to make click area larger
+        actionBar.setIcon(new ColorDrawable(android.R.color.transparent));
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
         Fragment f = null;
 
         String action = getIntent().getAction();
         if (ACTION_ARTIST.equals(action)) {
-            f = ProfileArtistFragment.newInstance(b);
+            f = ArtistFragment.newInstance(b);
         } else if (ACTION_ALBUM.equals(action)) {
-            f = ProfileAlbumFragment.newInstance(b);
+            f = AlbumFragment.newInstance(b);
         } else if (ACTION_PLAYLIST.equals(action)) {
             f = ProfilePlaylistFragment.newInstance(b);
         } else if (ACTION_GENRE.equals(action)) {
@@ -70,6 +86,30 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
                     .commit();
         }
 
+    }
+
+    // Thanks dashclock for this
+    private void setupFauxDialog() {
+        // Check if this should be a dialog
+        TypedValue tv = new TypedValue();
+        if (!getTheme().resolveAttribute(R.attr.isDialog, tv, true) || tv.data == 0) {
+            return;
+        }
+
+        // Should be a dialog; set up the window parameters.
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.width = getResources().getDimensionPixelSize(R.dimen.profile_dialog_width);
+        params.height = Math.min(
+                getResources().getDimensionPixelSize(R.dimen.profile_dialog_max_height),
+                dm.heightPixels * 3 / 4);
+        params.alpha = 1.0f;
+        params.dimAmount = 0.5f;
+        getWindow().setAttributes(params);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
+                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
     /*
@@ -90,7 +130,6 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     protected Object[] getModules() {
         return new Object[] {
                 new ActivityModule(this),
-                new ProfileModule(this),
         };
     }
 

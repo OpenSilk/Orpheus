@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.Blupheus" parent="@style/Theme.LightBase">
+    <style name="Theme.Blupheus" parent="Theme.LightBase">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_blupheus</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Blupheus</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Blupheus</item>
@@ -47,6 +47,29 @@
     <style name="Theme.Blupheus.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="Theme.Blupheus.Profile" parent="Theme.Profile.Light">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_blupheus</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Blupheus</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Blupheus</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Blupheus</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Blupheus</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Blupheus</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_blupheus</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_blupheus</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Blupheus</item>
+
+        <!-- Light.DarkActionBar specific -->
+        <item name="android:actionBarWidgetTheme">@style/Theme.Blupheus.Widget</item>
+
+        <!-- Generated with http://android-holo-colors.com -->
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarBlupheus</item>
+        <item name="android:seekBarStyle">@style/SeekBarBlupheus</item>
+
+        <item name="colorPrimary">@color/app_color_blupheus</item>
+        <item name="colorAccent">@color/app_color_blupheus_complement</item>
+
     </style>
 
     <!--end OpenSilk-->

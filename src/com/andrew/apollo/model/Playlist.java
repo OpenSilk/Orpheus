@@ -17,6 +17,7 @@ import android.text.TextUtils;
 
 import com.andrew.apollo.utils.Lists;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,83 +27,52 @@ import java.util.List;
  */
 public class Playlist implements Parcelable {
 
-    /**
-     * The unique Id of the playlist
-     */
     public final long mPlaylistId;
-
-    /**
-     * The playlist name
-     */
     public final String mPlaylistName;
-
-    /**
-     * Songs in playlist
-     */
     public final int mSongNumber;
-
-    /**
-     * Number of albums in playlist
-     */
     public final int mAlbumNumber;
+    public final long[] mSongIds;
+    public final long[] mAlbumIds;
 
-    /**
-     * Constructor of <code>Playlist</code>
-     *
-     * @param playlistId The Id of the playlist
-     * @param playlistName The playlist name
-     */
-    public Playlist(final long playlistId, final String playlistName, final int songNumber, final int albumNumber) {
-        mPlaylistId = playlistId;
-        mPlaylistName = playlistName;
-        mSongNumber = songNumber;
-        mAlbumNumber = albumNumber;
+    public Playlist(long mPlaylistId, String mPlaylistName, int mSongNumber,
+                    int mAlbumNumber, long[] mSongIds, long[] mAlbumIds) {
+        this.mPlaylistId = mPlaylistId;
+        this.mPlaylistName = mPlaylistName;
+        this.mSongNumber = mSongNumber;
+        this.mAlbumNumber = mAlbumNumber;
+        this.mSongIds = mSongIds;
+        this.mAlbumIds = mAlbumIds;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Playlist)) return false;
+
+        Playlist playlist = (Playlist) o;
+
+        if (mAlbumNumber != playlist.mAlbumNumber) return false;
+        if (mPlaylistId != playlist.mPlaylistId) return false;
+        if (mSongNumber != playlist.mSongNumber) return false;
+        if (!Arrays.equals(mAlbumIds, playlist.mAlbumIds)) return false;
+        if (mPlaylistName != null ? !mPlaylistName.equals(playlist.mPlaylistName) : playlist.mPlaylistName != null)
+            return false;
+        if (!Arrays.equals(mSongIds, playlist.mSongIds)) return false;
+
+        return true;
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) mPlaylistId;
-        result = prime * result + (mPlaylistName == null ? 0 : mPlaylistName.hashCode());
-        result = prime * result + mSongNumber;
-        result = prime * result + mAlbumNumber;
+        int result = (int) (mPlaylistId ^ (mPlaylistId >>> 32));
+        result = 31 * result + (mPlaylistName != null ? mPlaylistName.hashCode() : 0);
+        result = 31 * result + mSongNumber;
+        result = 31 * result + mAlbumNumber;
+        result = 31 * result + (mSongIds != null ? Arrays.hashCode(mSongIds) : 0);
+        result = 31 * result + (mAlbumIds != null ? Arrays.hashCode(mAlbumIds) : 0);
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Playlist)) {
-            return false;
-        }
-        final Playlist other = (Playlist)obj;
-        if (mPlaylistId != other.mPlaylistId) {
-            return false;
-        }
-        if (mSongNumber != other.mSongNumber) {
-            return false;
-        }
-        if (mAlbumNumber != other.mAlbumNumber) {
-            return false;
-        }
-        return TextUtils.equals(mPlaylistName, other.mPlaylistName);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return mPlaylistName;
@@ -123,6 +93,8 @@ public class Playlist implements Parcelable {
         dest.writeString(mPlaylistName);
         dest.writeInt(mSongNumber);
         dest.writeInt(mAlbumNumber);
+        dest.writeLongArray(mSongIds);
+        dest.writeLongArray(mAlbumIds);
     }
 
     private Playlist(Parcel in) {
@@ -130,6 +102,8 @@ public class Playlist implements Parcelable {
         mPlaylistName = in.readString();
         mSongNumber = in.readInt();
         mAlbumNumber = in.readInt();
+        mSongIds = in.createLongArray();
+        mAlbumIds = in.createLongArray();
     }
 
     public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {

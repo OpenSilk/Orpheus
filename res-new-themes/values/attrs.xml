@@ -16,15 +16,7 @@
   -->
 
 <resources>
-    <!--960 - 400 - 24 - 6*4 / 512
-        512/3 - 54 = 116 -->
-    <dimen name="grid_card_thumbheight">116dp</dimen>
-
-    <dimen name="list_card_thumbnail_large">144dp</dimen>
-
-    <!-- 70% of window width -->
-    <dimen name="profile_header_height">336dp</dimen>
-
-    <!--Landscape layout-->
-    <dimen name="panel_width">400dp</dimen>
+    <declare-styleable name="ProfileTheme">
+        <attr name="isDialog" format="boolean" />
+    </declare-styleable>
 </resources>

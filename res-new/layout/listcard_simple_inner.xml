@@ -22,31 +22,30 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:listPreferredItemHeight">
 
-    <LinearLayout
-        android:id="@+id/track_artist_info"
+    <TextView
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:gravity="left|center_vertical"
-        android:background="?android:selectableItemBackground"
-        android:clickable="true"
-        android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:id="@+id/card_title"
+        android:layout_marginLeft="16dp"
+        android:textAppearance="?android:textAppearanceListItem"
+        style="@style/SingleLineTextView" />
 
-        <TextView
-            android:id="@+id/track_info"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textAppearance="?android:textAppearanceListItem"
-            style="@style/SingleLineTextView"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:id="@+id/card_subtitle"
+        android:layout_marginRight="8dp"
+        android:textAppearance="?android:textAppearanceListItemSmall"
+        style="@style/SingleLineTextView" />
 
-    </LinearLayout>
-
+    <!-- OverflowButton -->
     <org.opensilk.music.widgets.CardOverflowButton
-        android:id="@+id/overflow_button"
+        android:id="@+id/card_overflow_button"
         android:layout_width="48dp"
-        android:layout_height="match_parent"
-        android:paddingRight="20dp"
+        android:layout_height="48dp"
+        android:paddingRight="16dp"
         style="@style/Orpheus.MenuButton"
         android:contentDescription="@null" />
 

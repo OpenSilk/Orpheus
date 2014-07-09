@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.RepheusDark" parent="@style/Theme.DarkBase">
+    <style name="Theme.RepheusDark" parent="Theme.DarkBase">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.RepheusDark</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.RepheusDark</item>
@@ -47,6 +47,26 @@
         <item name="windowActionBarOverlay">true</item>
     </style>
 
+    <style name="Theme.RepheusDark.Profile" parent="Theme.Profile.Dark">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.RepheusDark</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.RepheusDark</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.RepheusDark</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.RepheusDark</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.RepheusDark</item>
+        <!--Fix if we ever use CAB-->
+        <item name="android:actionModeBackground">@drawable/cab_background_top_repheus</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_repheus</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.RepheusDark</item>
+
+        <!-- Generated with http://android-holo-colors.com -->
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarRepheusDark</item>
+        <item name="android:seekBarStyle">@style/SeekBarRepheusDark</item>
+
+        <item name="colorPrimary">@color/app_color_repheus</item>
+        <item name="colorAccent">@color/app_color_repheus_complement</item>
+
+    </style>
     <!--end OpenSilk-->
 
     <style name="ActionBar.Solid.RepheusDark" parent="@style/ActionBar.Solid.DarkBase">

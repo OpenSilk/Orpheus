@@ -88,6 +88,32 @@ public class ThemeHelper {
         return -1;
     }
 
+    public final int getProfileTheme() {
+        switch (mActiveTheme) {
+            case ORPHEUS:
+                return R.style.Theme_Orpheus_Profile;
+            case BLUPHEUS:
+                return R.style.Theme_Blupheus_Profile;
+            case REPHEUS:
+                return R.style.Theme_Repheus_Profile;
+            case GREPHEUS:
+                return R.style.Theme_Grepheus_Profile;
+            case PURPHEUS:
+                return R.style.Theme_Purpheus_Profile;
+            case ORPHEUSDARK:
+                return R.style.Theme_OrpheusDark_Profile;
+            case BLUPHEUSDARK:
+                return R.style.Theme_BlupheusDark_Profile;
+            case REPHEUSDARK:
+                return R.style.Theme_RepheusDark_Profile;
+            case GREPHEUSDARK:
+                return R.style.Theme_GrepheusDark_Profile;
+            case PURPHEUSDARK:
+                return R.style.Theme_PurpheusDark_Profile;
+        }
+        return -1;
+    }
+
     /**
      * @return Theme style used for ordinary activities
      */
@@ -175,7 +201,7 @@ public class ThemeHelper {
         return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
 
-    static TypedValue resolveAttr(Context context, int attr) {
+    public static TypedValue resolveAttr(Context context, int attr) {
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(attr, outValue, true);
         return outValue;

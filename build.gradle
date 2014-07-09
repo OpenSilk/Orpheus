@@ -151,8 +151,6 @@ dependencies {
 
     compile 'com.sothree.slidinguppanel:library:1.0.0-SNAPSHOT@aar'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
-    compile 'com.github.manuelpeinado.fadingactionbar:fadingactionbar:3.1.2-SNAPSHOT@aar'
-    compile 'com.github.manuelpeinado.fadingactionbar:fadingactionbar-abc:3.1.2-SNAPSHOT@aar'
     compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
 
     compile project(':../SilkCastService:library')

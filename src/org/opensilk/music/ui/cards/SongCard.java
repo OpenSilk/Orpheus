@@ -20,10 +20,12 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.ArtInfo;
@@ -36,6 +38,7 @@ import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
 import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -47,7 +50,6 @@ public class SongCard extends AbsBundleableCard<Song> {
     @Inject @ForFragment
     Bus mBus; //Injected by adapter
 
-    @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
 
     public SongCard(Context context, Song song) {
@@ -65,14 +67,26 @@ public class SongCard extends AbsBundleableCard<Song> {
     }
 
     @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        mArtwork = ButterKnife.findById(view, R.id.artwork_thumb);
+        super.setupInnerViewElements(parent, view);
+    }
+
+    @Override
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
-        mCardSubTitle.setText(mData.artistName);
-        String artist = mData.albumArtistName;
-        if (TextUtils.isEmpty(artist)) {
-            artist = mData.artistName;
+        if (getSimpleLayout() == getInnerLayout()) {
+            mCardSubTitle.setText(MusicUtils.makeTimeString(getContext(), mData.duration));
+        } else {
+            mCardSubTitle.setText(mData.artistName);
         }
-        ArtworkManager.loadImage(new ArtInfo(artist, mData.albumName, mData.artworkUri), mArtwork);
+        if (mArtwork != null) {
+            String artist = mData.albumArtistName;
+            if (TextUtils.isEmpty(artist)) {
+                artist = mData.artistName;
+            }
+            ArtworkManager.loadImage(new ArtInfo(artist, mData.albumName, mData.artworkUri), mArtwork);
+        }
     }
 
     @Override
@@ -121,6 +135,14 @@ public class SongCard extends AbsBundleableCard<Song> {
     @Override
     protected int getGridLayout() {
         return R.layout.gridcard_artwork_inner;
+    }
+
+    protected int getSimpleLayout() {
+        return R.layout.listcard_simple_inner;
+    }
+
+    public void useSimpleLayout() {
+        setInnerLayout(getSimpleLayout());
     }
 
 }

@@ -16,6 +16,7 @@
 
 package org.opensilk.music.util;
 
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
 /**
@@ -27,6 +28,18 @@ public class Selections {
     public static final String LOCAL_ALBUM_SONGS;
     public static final String LAST_ADDED;
     public static final String LOCAL_ARTIST_SONGS;
+    public static String LOCAL_ALBUMS(long[] albumIds) {
+        final StringBuilder selection = new StringBuilder();
+        selection.append(MediaStore.Audio.Albums._ID + " IN (");
+        for (int i = 0; i < albumIds.length; i++) {
+            selection.append(albumIds[i]);
+            if (i < albumIds.length - 1) {
+                selection.append(",");
+            }
+        }
+        selection.append(")");
+        return selection.toString();
+    }
 
     static {
         LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";

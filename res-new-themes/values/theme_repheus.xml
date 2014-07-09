@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.Repheus" parent="@style/Theme.LightBase">
+    <style name="Theme.Repheus" parent="Theme.LightBase">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_repheus</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Repheus</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Repheus</item>
@@ -49,6 +49,28 @@
         <item name="windowActionBarOverlay">true</item>
     </style>
 
+    <style name="Theme.Repheus.Profile" parent="Theme.Profile.Light">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_repheus</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Repheus</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Repheus</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Repheus</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Repheus</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Repheus</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_repheus</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_repheus</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Repheus</item>
+
+        <!-- Light.DarkActionBar specific -->
+        <item name="android:actionBarWidgetTheme">@style/Theme.Repheus.Widget</item>
+
+        <!-- Generated with http://android-holo-colors.com -->
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarRepheus</item>
+        <item name="android:seekBarStyle">@style/SeekBarRepheus</item>
+
+        <item name="colorPrimary">@color/app_color_repheus</item>
+        <item name="colorAccent">@color/app_color_repheus_complement</item>
+
+    </style>
     <!--end OpenSilk-->
 
     <style name="ActionBar.Solid.Repheus" parent="@style/ActionBar.Solid.LightBase">

@@ -15,6 +15,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,40 +27,12 @@ import java.util.Set;
  */
 public class Genre implements Parcelable {
 
-    /**
-     * The unique Id of the genre
-     */
-    public long mGenreId;
-
-    /**
-     * The genre name
-     */
-    public String mGenreName;
-
-    /**
-     * Genre song count
-     */
-    public int mSongNumber;
-
-    /**
-     * Genre album count
-     */
-    public int mAlbumNumber;
-
-    /**
-     * Constructor of <code>Genre</code>
-     * 
-     * @param genreId The Id of the genre
-     * @param genreName The genre name
-     */
-    @Deprecated
-    public Genre(final long genreId, final String genreName) {
-        super();
-        mGenreId = genreId;
-        mGenreName = genreName;
-        mSongNumber = 0;
-        mAlbumNumber = 0;
-    }
+    public final long mGenreId;
+    public final String mGenreName;
+    public final int mSongNumber;
+    public final int mAlbumNumber;
+    public final long[] mSongIds;
+    public final long[] mAlbumIds;
 
     /**
      * Constructor of <code>Genre</code>
@@ -67,58 +40,44 @@ public class Genre implements Parcelable {
      * @param genreId The Id of the genre
      * @param genreName The genre name
      */
-    public Genre(final long genreId, final String genreName, final int songNumber, final int albumNumber) {
-        super();
+    public Genre(long genreId, String genreName, int songNumber, int albumNumber, long[] songIds, long[] albumIds) {
         mGenreId = genreId;
         mGenreName = genreName;
         mSongNumber = songNumber;
         mAlbumNumber = albumNumber;
+        mSongIds = songIds;
+        mAlbumIds = albumIds;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Genre)) return false;
+
+        Genre genre = (Genre) o;
+
+        if (mAlbumNumber != genre.mAlbumNumber) return false;
+        if (mGenreId != genre.mGenreId) return false;
+        if (mSongNumber != genre.mSongNumber) return false;
+        if (!Arrays.equals(mAlbumIds, genre.mAlbumIds)) return false;
+        if (mGenreName != null ? !mGenreName.equals(genre.mGenreName) : genre.mGenreName != null)
+            return false;
+        if (!Arrays.equals(mSongIds, genre.mSongIds)) return false;
+
+        return true;
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) mGenreId;
-        result = prime * result + (mGenreName == null ? 0 : mGenreName.hashCode());
-        result = prime * result + mSongNumber;
-        result = prime * result + mAlbumNumber;
+        int result = (int) (mGenreId ^ (mGenreId >>> 32));
+        result = 31 * result + (mGenreName != null ? mGenreName.hashCode() : 0);
+        result = 31 * result + mSongNumber;
+        result = 31 * result + mAlbumNumber;
+        result = 31 * result + (mSongIds != null ? Arrays.hashCode(mSongIds) : 0);
+        result = 31 * result + (mAlbumIds != null ? Arrays.hashCode(mAlbumIds) : 0);
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Genre)) {
-            return false;
-        }
-        final Genre other = (Genre)obj;
-        if (mGenreId != other.mGenreId) {
-            return false;
-        }
-        if (mSongNumber != other.mSongNumber) {
-            return false;
-        }
-        if (mAlbumNumber != other.mAlbumNumber) {
-            return false;
-        }
-        return TextUtils.equals(mGenreName, other.mGenreName);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return mGenreName;
@@ -139,6 +98,8 @@ public class Genre implements Parcelable {
         dest.writeString(mGenreName);
         dest.writeInt(mSongNumber);
         dest.writeInt(mAlbumNumber);
+        dest.writeLongArray(mSongIds);
+        dest.writeLongArray(mAlbumIds);
     }
 
     private Genre(Parcel in) {
@@ -146,6 +107,8 @@ public class Genre implements Parcelable {
         mGenreName = in.readString();
         mSongNumber = in.readInt();
         mAlbumNumber = in.readInt();
+        mSongIds = in.createLongArray();
+        mAlbumIds = in.createLongArray();
     }
 
     public static final Creator<Genre> CREATOR = new Creator<Genre>() {

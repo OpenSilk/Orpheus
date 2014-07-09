@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2014 OpenSilk Productions LLC
   ~
@@ -14,24 +15,33 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <org.opensilk.music.widgets.ProfileHeaderLayout
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sticky_header_container"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
+
+    <View
+        android:id="@+id/dummy"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"/>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/sticky_header"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_alignParentBottom="true">
+        android:layout_height="@dimen/profile_sticky_header_height">
 
         <!-- Album title / artist -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:gravity="left|center_vertical"
-            android:clickable="true"
             android:orientation="vertical"
-            android:layout_marginLeft="96dp"
+            android:layout_marginLeft="16dp"
             android:layout_weight="1">
 
             <TextView
@@ -49,20 +59,12 @@
 
         </LinearLayout>
 
-        <org.opensilk.music.widgets.HeaderOverflowButton
+        <ImageButton
             android:id="@+id/profile_header_overflow"
-            android:gravity="right"
             style="@style/Orpheus.MenuButton"
+            android:src="@drawable/ic_menu_overflow_card_holo_dark"
             android:contentDescription="@null" />
 
-    </org.opensilk.music.widgets.ProfileHeaderLayout>
+    </LinearLayout>
 
-    <org.opensilk.music.widgets.ThumbnailArtworkImageView
-        android:id="@+id/album_image_header"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginLeft="8dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"/>
-
-</RelativeLayout>
+</LinearLayout>

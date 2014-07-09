@@ -78,7 +78,7 @@ public class PlaylistLoader extends CursorLoader {
                 final String name = c.getString(1);
 
                 // Create a new playlist
-                final Playlist playlist = new Playlist(id, name, 0, 0);
+                final Playlist playlist = new Playlist(id, name, 0, 0, null, null);
 
                 // Add everything up
                 usrPlaylists.add(playlist);

@@ -14,27 +14,28 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.activities;
+package org.opensilk.music.ui.cards.event;
 
-import dagger.Module;
+import com.andrew.apollo.model.LocalSongGroup;
 
 /**
- * Created by drew on 6/20/14.
+ * Created by drew on 7/10/14.
  */
-@Module (
-        injects = {
-                ProfileSlidingActivity.class,
-        },
-        addsTo = ActivityModule.class,
-        library = true
-)
-public class ProfileModule {
+public class SongGroupCardClick {
 
-    private final ProfileSlidingActivity activity;
-
-    public ProfileModule(ProfileSlidingActivity activity) {
-        this.activity = activity;
+    public enum Event {
+        OPEN,
+        PLAY_ALL,
+        SHUFFLE_ALL,
+        ADD_TO_QUEUE,
+        ADD_TO_PLAYLIST,
     }
 
+    public final Event event;
+    public final LocalSongGroup songGroup;
 
+    public SongGroupCardClick(Event event, LocalSongGroup songGroup) {
+        this.event = event;
+        this.songGroup = songGroup;
+    }
 }

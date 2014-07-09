@@ -62,6 +62,20 @@ public class MusicProviderUtil {
         return -1;
     }
 
+    public static long insertFromMediaStore(Context context, long mediaStoreId) {
+        Cursor c = CursorHelpers.makeSingleLocalSongCursor(context, mediaStoreId);
+        if (c != null) {
+            try {
+                if (c.moveToFirst()) {
+                    return insertSong(context, CursorHelpers.makeLocalSongFromCursor(context, c));
+                }
+            } finally {
+                c.close();
+            }
+        }
+        return -1;
+    }
+
     public static void updatePlaycount(Context context, long id) {
         Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ MusicStore.Cols.PLAYCOUNT },

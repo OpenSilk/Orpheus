@@ -22,6 +22,7 @@ import org.opensilk.music.ui.cards.handler.FolderCardClickHandler;
 import org.opensilk.music.ui.cards.handler.GenreCardClickHandler;
 import org.opensilk.music.ui.cards.handler.PlaylistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
+import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongQueueCardClickHandler;
 
 import dagger.Module;
@@ -36,7 +37,9 @@ import dagger.Module;
                 FolderCard.class,
                 GenreCard.class,
                 PlaylistCard.class,
+                SongAlbumCard.class,
                 SongCard.class,
+                SongGroupCard.class,
                 SongPlaylistCard.class,
                 SongQueueCard.class,
                 AlbumCardClickHandler.class,
@@ -45,6 +48,7 @@ import dagger.Module;
                 GenreCardClickHandler.class,
                 PlaylistCardClickHandler.class,
                 SongCardClickHandler.class,
+                SongGroupCardClickHandler.class,
                 SongQueueCardClickHandler.class,
         },
         complete = false

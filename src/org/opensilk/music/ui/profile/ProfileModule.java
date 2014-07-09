@@ -18,6 +18,7 @@ package org.opensilk.music.ui.profile;
 
 import com.squareup.otto.Bus;
 
+import org.opensilk.music.ui.activities.ActivityModule;
 import org.opensilk.music.ui.cards.CardModule;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
@@ -30,12 +31,12 @@ import dagger.Provides;
  * Created by drew on 6/30/14.
  */
 @Module(
-        addsTo = org.opensilk.music.ui.activities.ProfileModule.class,
+        addsTo = ActivityModule.class,
         injects = {
-                ProfileAlbumFragment.class,
-                ProfileArtistFragment.class,
                 ProfileGenreFragment.class,
                 ProfilePlaylistFragment.class,
+                AlbumFragment.class,
+                ArtistFragment.class,
         },
         includes = {
                 CardModule.class,

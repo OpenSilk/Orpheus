@@ -758,15 +758,6 @@ public final class MusicUtils {
         if (ids == null || ids.length == 0) {
             return sEmptyLocalSongList;
         }
-        final StringBuilder selection = new StringBuilder();
-        selection.append(BaseColumns._ID + " IN (");
-        for (int i = 0; i < ids.length; i++) {
-            selection.append(ids[i]);
-            if (i < ids.length - 1) {
-                selection.append(",");
-            }
-        }
-        selection.append(")");
         Cursor c = new OrderPreservingCursor(context, ids);
         LocalSong[] songs = new LocalSong[c.getCount()];
         if (c.getCount() > 0 && c.moveToFirst()) {
@@ -816,7 +807,7 @@ public final class MusicUtils {
 
     /**
      * @param context The {@link Context} to use.
-     * @param list The list of songs to play.
+     * @param list The list of songs to play. (ids must be from musicprovider (recent id)
      * @param position Specify where to start.
      * @param forceShuffle True to force a shuffle, false otherwise.
      */
@@ -857,6 +848,24 @@ public final class MusicUtils {
         for (int ii=0; ii<list.length; ii++) {
             //TODO bulk insert?
              ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
+        }
+        playAll(context, ids, position, forceShuffle);
+    }
+
+    /**
+     *
+     * @param context
+     * @param list long[] containing ids of songs from mediastore
+     * @param position
+     * @param forceShuffle
+     */
+    public static void playAllfromMediaStore(Context context, long[] list, int position, boolean forceShuffle) {
+        if (list == null || list.length == 0 || sService == null) {
+            return;
+        }
+        long[] ids = new long[list.length];
+        for (int ii=0; ii<list.length; ii++) {
+            ids[ii] = MusicProviderUtil.insertFromMediaStore(context, list[ii]);
         }
         playAll(context, ids, position, forceShuffle);
     }

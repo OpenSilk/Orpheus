@@ -20,9 +20,6 @@
         664/4 - 54 = 112-->
     <dimen name="grid_card_thumbheight">112dp</dimen>
 
-    <!-- 40% sw -->
-    <dimen name="profile_header_height">320dp</dimen>
-
     <!--Landscape layout-->
     <dimen name="panel_width">560dp</dimen>
 </resources>

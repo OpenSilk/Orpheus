@@ -2,20 +2,38 @@
 <resources>
 
     <!-- placeholder theme, default theme in manifest, colored themes override in onCreate -->
-    <style name="Theme.AppCompat.Light.Panel" parent="@style/Theme.AppCompat.Light">
+    <style name="Theme.Default.Panel" parent="Theme.AppCompat.Light">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
         <item name="android:actionBarStyle">@style/ActionBar.Default</item>
+        <!-- Disable shadow on action bar-->
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <style name="ActionBar.Default" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+    <style name="ActionBar.Default" parent="Widget.AppCompat.ActionBar.Solid">
+        <item name="android:background">@null</item>
         <!-- override the launcher name -->
         <item name="android:title">@string/app_name</item>
     </style>
+
+    <style name="Theme.Default.Panel.Profile" parent="Theme.Base.AppCompat.DialogWhenLarge">
+        <!--needed to allow sliding up pane-->
+        <item name="windowActionBarOverlay">true</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Default.Profile</item>
+        <!-- Disable shadow on action bar-->
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="ActionBar.Default.Profile" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@null</item>
+        <item name="android:title">" "</item>
+        <item name="android:displayOptions">homeAsUp</item>
+    </style>
+
     <!-- end placeholder theme-->
 
     <!--Common styles for light theme-->
-    <style name="Theme.LightBase" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
 
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
@@ -32,8 +50,30 @@
 
     </style>
 
+    <style name="Theme.Profile.LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="isDialog">false</item>
+    </style>
+
+    <style name="Theme.Profile.Light" parent="Theme.Profile.LightBase">
+        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
+        <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
+        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
+
+        <item name="android:colorBackground">@drawable/background_holo_light</item>
+        <!--Sliding pane shadow-->
+        <item name="shadowDrawable">@drawable/shadow_above</item>
+
+        <!-- Disable shadow on action bar-->
+        <item name="android:windowContentOverlay">@null</item>
+
+        <!--needed to allow sliding up pane-->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
     <!--Common styles for dark theme-->
-    <style name="Theme.DarkBase" parent="@style/Theme.AppCompat">
+    <style name="Theme.DarkBase" parent="Theme.AppCompat">
 
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
@@ -47,7 +87,29 @@
 
         <!-- Disable shadow on action bar-->
         <item name="android:windowContentOverlay">@null</item>
+    </style>
 
+
+    <style name="Theme.Profile.DarkBase" parent="Theme.AppCompat">
+        <item name="isDialog">false</item>
+    </style>
+
+    <style name="Theme.Profile.Dark" parent="Theme.Profile.DarkBase">
+        <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
+        <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
+        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
+
+        <item name="android:colorBackground">@drawable/background_holo_dark</item>
+        <!--Sliding pane shadow-->
+        <item name="shadowDrawable">@drawable/shadow_above_light</item>
+
+        <!-- Disable shadow on action bar-->
+        <item name="android:windowContentOverlay">@null</item>
+
+        <!--needed to allow sliding up pane-->
+        <item name="windowActionBarOverlay">true</item>
     </style>
 
     <!-- Use custom overflow icon -->

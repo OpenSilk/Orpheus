@@ -42,4 +42,29 @@ public class RecentSong extends Song {
         this.lastPlayed = lastPlayed;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RecentSong)) return false;
+        if (!super.equals(o)) return false;
+
+        RecentSong that = (RecentSong) o;
+
+        if (isLocal != that.isLocal) return false;
+        if (lastPlayed != that.lastPlayed) return false;
+        if (playCount != that.playCount) return false;
+        if (recentId != that.recentId) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (int) (recentId ^ (recentId >>> 32));
+        result = 31 * result + (isLocal ? 1 : 0);
+        result = 31 * result + playCount;
+        result = 31 * result + (int) (lastPlayed ^ (lastPlayed >>> 32));
+        return result;
+    }
 }

@@ -19,7 +19,7 @@
 
 <resources>
 
-    <style name="Theme.BlupheusDark" parent="@style/Theme.DarkBase">
+    <style name="Theme.BlupheusDark" parent="Theme.DarkBase">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.BlupheusDark</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.BlupheusDark</item>
@@ -45,6 +45,27 @@
     <style name="Theme.BlupheusDark.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="Theme.BlupheusDark.Profile" parent="Theme.Profile.Dark">
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_orpheus</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.BlupheusDark</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.BlupheusDark</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.BlupheusDark</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.BlupheusDark</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.BlupheusDark</item>
+        <!--Fix if we ever use CAB-->
+        <item name="android:actionModeBackground">@drawable/cab_background_top_blupheus</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_blupheus</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.BlupheusDark</item>
+
+        <!-- Generated with http://android-holo-colors.com -->
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarBlupheusDark</item>
+        <item name="android:seekBarStyle">@style/SeekBarBlupheusDark</item>
+
+        <item name="colorPrimary">@color/app_color_blupheus</item>
+        <item name="colorAccent">@color/app_color_blupheus_complement</item>
+
     </style>
 
     <!--end OpenSilk-->

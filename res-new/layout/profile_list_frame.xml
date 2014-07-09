@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
   ~ Copyright (C) 2014 OpenSilk Productions LLC
   ~
@@ -15,16 +16,18 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <!--960 - 400 - 24 - 6*4 / 512
-        512/3 - 54 = 116 -->
-    <dimen name="grid_card_thumbheight">116dp</dimen>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <dimen name="list_card_thumbnail_large">144dp</dimen>
+    <include
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        layout="@layout/card_listview"/>
 
-    <!-- 70% of window width -->
-    <dimen name="profile_header_height">336dp</dimen>
+    <include
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        layout="@layout/profile_sticky_header"/>
 
-    <!--Landscape layout-->
-    <dimen name="panel_width">400dp</dimen>
-</resources>
+</FrameLayout>
