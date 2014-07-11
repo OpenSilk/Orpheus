@@ -103,7 +103,7 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         params.width = getResources().getDimensionPixelSize(R.dimen.profile_dialog_width);
         params.height = Math.min(
                 getResources().getDimensionPixelSize(R.dimen.profile_dialog_max_height),
-                dm.heightPixels * 3 / 4);
+                dm.heightPixels * 7 / 8);
         params.alpha = 1.0f;
         params.dimAmount = 0.5f;
         getWindow().setAttributes(params);
