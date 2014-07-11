@@ -44,7 +44,7 @@ import hugo.weaving.DebugLog;
 /**
  * Created by drew on 3/16/14.
  */
-public class PanelHeaderLayout extends FrameLayout implements Palette.PaletteAsyncListener {
+public class PanelHeaderLayout extends FrameLayout {
 
     private static final int TRANSITION_DURATION = 200;
 
@@ -64,16 +64,12 @@ public class PanelHeaderLayout extends FrameLayout implements Palette.PaletteAsy
     public PanelHeaderLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-//        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-//        if (isLightTheme) {
-//            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_light);
-//        } else {
-//            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_dark);
-//        }
-        final int primaryColor = ThemeHelper.getPrimaryColor(getContext());
-        ColorDrawable c1 = new ColorDrawable(primaryColor);
-        ColorDrawable c2 = new ColorDrawable(ThemeHelper.setColorAlpha(primaryColor, 0xCC)); //80%
-        mBackground = new TransitionDrawable(new Drawable[]{c1,c2});
+        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        if (isLightTheme) {
+            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_light);
+        } else {
+            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_dark);
+        }
         mBackground.setId(1, 0x333);
         mBackground.setCrossFadeEnabled(true);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
@@ -97,14 +93,8 @@ public class PanelHeaderLayout extends FrameLayout implements Palette.PaletteAsy
         isOpen = false;
     }
 
-    @Override
-    @DebugLog
-    public void onGenerated(Palette palette) {
-        PaletteItem item = palette.getDarkVibrantColor();
-        if (item != null) {
-            final int color = ThemeHelper.setColorAlpha(item.getRgb(), 0xB3); //70%
-            mBackground.setDrawableByLayerId(0x333, new ColorDrawable(color));
-        }
+    public void updateBackground(int color) {
+        mBackground.setDrawableByLayerId(0x333, new ColorDrawable(ThemeHelper.setColorAlpha(color, 0xB3))); //70%
     }
 
     public void transitionToClosed() {

@@ -116,9 +116,8 @@
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@null"/>
 
-                <ImageButton
+                <org.opensilk.music.widgets.HeaderOverflowButton
                     android:id="@+id/header_overflow"
-                    android:src="@drawable/ic_menu_moreoverflow_holo_dark"
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@null" />
 

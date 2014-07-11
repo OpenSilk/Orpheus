@@ -48,13 +48,13 @@
                 android:id="@+id/info_title"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:textAppearance="@style/TextAppearancePanelHeader.Title"/>
+                android:textAppearance="@style/TextAppearanceProfileHeader.Title"/>
 
             <TextView
                 android:id="@+id/info_subtitle"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"/>
+                android:textAppearance="@style/TextAppearanceProfileHeader.SubTitle"/>
 
 
         </LinearLayout>

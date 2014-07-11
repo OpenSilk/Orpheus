@@ -50,12 +50,12 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
 
     public ShuffleButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-//        if (isLightTheme) {
-//            mShuffleDrawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_black);
-//        } else {
+        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        if (isLightTheme) {
+            mShuffleDrawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_black);
+        } else {
             mShuffleDrawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_white);
-//        }
+        }
         setOnClickListener(this);
         setOnLongClickListener(this);
         mShuffleActiveDrawable = ThemeHelper.themeDrawable(getContext(),

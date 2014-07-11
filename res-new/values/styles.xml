@@ -118,11 +118,10 @@
 
     <style name="TextAppearancePanelHeaderBase" parent="@android:style/TextAppearance.Holo.Medium">
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="TextAppearancePanelHeaderSmallBase" parent="@android:style/TextAppearance.Holo">
-        <item name="android:textColor">@android:color/white</item>
+
     </style>
 
     <style name="TextAppearancePanelHeader.Title" parent="TextAppearancePanelHeaderBase">
@@ -131,6 +130,14 @@
 
     <style name="TextAppearancePanelHeader.SubTitle" parent="TextAppearancePanelHeaderSmallBase">
 
+    </style>
+
+    <style name="TextAppearanceProfileHeader.Title" parent="TextAppearancePanelHeaderBase">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="TextAppearanceProfileHeader.SubTitle" parent="TextAppearancePanelHeaderSmallBase">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="Orpheus.MenuButton" parent="@style/Widget.AppCompat.ActionButton.Overflow">

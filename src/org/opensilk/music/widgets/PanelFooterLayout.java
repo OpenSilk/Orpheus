@@ -17,8 +17,6 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
-import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
@@ -28,7 +26,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 /**
  * Created by drew on 3/16/14.
  */
-public class PanelFooterLayout extends LinearLayout implements Palette.PaletteAsyncListener {
+public class PanelFooterLayout extends LinearLayout {
 
     public PanelFooterLayout(Context context) {
         this(context, null);
@@ -41,23 +39,16 @@ public class PanelFooterLayout extends LinearLayout implements Palette.PaletteAs
     public PanelFooterLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-//        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
-//        if (isLightTheme) {
-//            setBackgroundResource(R.color.app_background_light_transparent);
-//        } else {
-//            setBackgroundResource(R.color.app_background_dark_transparent);
-//        }
-        final int primaryColor = ThemeHelper.getPrimaryColor(getContext());
-        setBackgroundColor(ThemeHelper.setColorAlpha(primaryColor, 0xCC));
-
-    }
-
-    @Override
-    public void onGenerated(Palette palette) {
-        PaletteItem item = palette.getDarkVibrantColor();
-        if (item != null) {
-            final int color = ThemeHelper.setColorAlpha(item.getRgb(), 0xB3);//70%
-            setBackgroundColor(color);
+        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        if (isLightTheme) {
+            setBackgroundColor(getResources().getColor(R.color.app_background_light_transparent));
+        } else {
+            setBackgroundColor(getResources().getColor(R.color.app_background_dark_transparent));
         }
     }
+
+    public void updateBackground(int color) {
+        setBackgroundColor(ThemeHelper.setColorAlpha(color, 0xB3)); //70%
+    }
+
 }
