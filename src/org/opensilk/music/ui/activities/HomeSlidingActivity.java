@@ -82,6 +82,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     ListView mDrawerListView;
     @InjectView(R.id.drawer_container)
     View mDrawerContainerView;
+    @InjectView(R.id.drawer_settings)
+    View mSettingsOption;
 
     private ArrayAdapter<PluginInfo> mDrawerAdapter;
 
@@ -108,7 +110,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         List<PluginInfo> devices = new ArrayList<>();
         devices.add(PluginUtil.getDefaultPluginInfo(this));
         mDrawerAdapter = new ArrayAdapter<>(getSupportActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_1,
+                R.layout.drawer_list_item,
                 android.R.id.text1,
                 devices);
         mDrawerListView.setAdapter(mDrawerAdapter);
@@ -136,7 +138,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                    /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */
-                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
+                R.drawable.ic_navigation_drawer,             /* nav drawer image to replace 'Up' caret */
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                 R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -172,6 +174,14 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
                 }
             });
         }
+
+        mSettingsOption.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDrawerLayout.closeDrawer(mDrawerContainerView);
+                startActivityForResult(new Intent(HomeSlidingActivity.this, SettingsPhoneActivity.class), 0);
+            }
+        });
     }
 
     @Override
@@ -208,8 +218,6 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         if (!isDrawerOpen()) {
             // search option
             getMenuInflater().inflate(R.menu.search, menu);
-            // Settings
-            getMenuInflater().inflate(R.menu.settings, menu);
 
             restoreActionBar();
 
@@ -226,9 +234,6 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
             return true;
         }
         switch (item.getItemId()) {
-            case R.id.menu_settings:
-                startActivityForResult(new Intent(this, SettingsPhoneActivity.class), 0);
-                return true;
             case R.id.menu_search:
                 NavUtils.openSearch(this);
                 return true;

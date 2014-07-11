@@ -15,8 +15,8 @@
     <string name="menu_party_shuffle">Party shuffle</string>
 
     <!-- ### DRAWER ### -->
-    <string name="drawer_library">Library</string>
-    <string name="drawer_device">Device</string>
+    <string name="drawer_library">Libraries</string>
+    <string name="drawer_device">Local Storage</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 

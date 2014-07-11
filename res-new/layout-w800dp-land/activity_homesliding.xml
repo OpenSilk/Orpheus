@@ -84,16 +84,23 @@
         android:orientation="vertical"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
-        android:background="#cccc"
+        android:background="?android:colorBackground"
         android:layout_gravity="left"
-        android:paddingTop="?actionBarSize">
-        <!-- need padding for actionbaroverlay not using margin so
-        drawer takes full height when panel is open-->
+        android:layout_marginTop="?actionBarSize">
 
         <TextView
             android:text="@string/drawer_library"
+            android:textAppearance="?android:textAppearance"
+            android:textAllCaps="true"
+            android:padding="16dp"
+            android:textColor="?android:textColorSecondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:dividerHorizontal"/>
 
         <ListView
             android:id="@+id/drawer_list"
@@ -104,6 +111,22 @@
             android:divider="@android:color/transparent"
             android:dividerHeight="0dp"
             tools:context="org.opensilk.music.ui.fragments.NavigationDrawerFragment" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:dividerHorizontal"/>
+
+        <TextView
+            android:id="@+id/drawer_settings"
+            android:textAppearance="?android:textAppearance"
+            android:textAllCaps="true"
+            android:textColor="?android:textColorSecondary"
+            android:background="?android:selectableItemBackground"
+            android:text="@string/menu_settings"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
