@@ -1143,14 +1143,16 @@ public final class MusicUtils {
         }
     }
 
-    public static void addToQueueSilent(final long[] list) {
+    public static CharSequence addToQueueSilent(final Context context, final long[] list) {
         if (sService == null) {
-            return;
+            return null;
         }
         try {
            sService.enqueue(list, MusicPlaybackService.LAST);
+            return makeLabel(context, R.plurals.NNNtrackstoqueue, list.length);
         } catch (final RemoteException ignored) {
         }
+        return null;
     }
 
     public static void addSongsToQueue(Context context, Song[] list) {
@@ -1164,15 +1166,15 @@ public final class MusicUtils {
         addToQueue(context, ids);
     }
 
-    public static void addSongsToQueueSilent(Context context, Song[] list) {
+    public static CharSequence addSongsToQueueSilent(Context context, Song[] list) {
         if (list.length == 0 || sService == null) {
-            return;
+            return null;
         }
         long[] ids = new long[list.length];
         for (int ii=0; ii<list.length; ii++) {
             ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
         }
-        addToQueueSilent(ids);
+        return addToQueueSilent(context, ids);
     }
 
     /**

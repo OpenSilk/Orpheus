@@ -47,17 +47,19 @@ public class MusicProviderUtil {
                 ret = c.getLong(0);
             }
             c.close();
-            if (ret > 0) {
+            if (ret >= 0) {
                 return ret;
             }
         }
         ContentValues values = makeSongContentValues(song);
+        if (song instanceof LocalSong) {
+            values.put(MusicStore.Cols.ALBUM_ARTIST_NAME, CursorHelpers.getAlbumArtist(context, ((LocalSong) song).albumId));
+        }
         Uri uri = context.getContentResolver().insert(MusicProvider.RECENTS_URI, values);
         if (uri != null) {
             try {
                 return Long.decode(uri.getLastPathSegment());
             } catch (NumberFormatException ignored) { }
-            return Long.decode(uri.getLastPathSegment());
         }
         return -1;
     }
@@ -67,6 +69,7 @@ public class MusicProviderUtil {
         if (c != null) {
             try {
                 if (c.moveToFirst()) {
+                    // TODO need albumARtist
                     return insertSong(context, CursorHelpers.makeLocalSongFromCursor(context, c));
                 }
             } finally {

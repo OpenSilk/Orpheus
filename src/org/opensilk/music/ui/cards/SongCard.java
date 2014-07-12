@@ -25,6 +25,7 @@ import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
 
@@ -34,6 +35,8 @@ import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick.Event;
+import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -81,11 +84,15 @@ public class SongCard extends AbsBundleableCard<Song> {
             mCardSubTitle.setText(mData.artistName);
         }
         if (mArtwork != null) {
-            String artist = mData.albumArtistName;
-            if (TextUtils.isEmpty(artist)) {
-                artist = mData.artistName;
+            if (mData instanceof LocalSong) {
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), new long[]{((LocalSong) mData).albumId}, mArtwork));
+            } else {
+                String artist = mData.albumArtistName;
+                if (TextUtils.isEmpty(artist)) {
+                    artist = mData.artistName;
+                }
+                ArtworkManager.loadImage(new ArtInfo(artist, mData.albumName, mData.artworkUri), mArtwork);
             }
-            ArtworkManager.loadImage(new ArtInfo(artist, mData.albumName, mData.artworkUri), mArtwork);
         }
     }
 

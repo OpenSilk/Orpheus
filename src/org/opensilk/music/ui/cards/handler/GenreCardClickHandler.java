@@ -82,8 +82,7 @@ public class GenreCardClickHandler {
                     @Override
                     public CharSequence execute() {
                         LocalSong[] list = MusicUtils.getLocalSongListForGenre(getActivity(), genre.mGenreId);
-                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
-                        return getActivity().getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                        return MusicUtils.addSongsToQueueSilent(getActivity(), list);
                     }
                 };
                 break;

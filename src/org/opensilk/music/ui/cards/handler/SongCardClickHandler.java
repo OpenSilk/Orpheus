@@ -18,8 +18,10 @@ package org.opensilk.music.ui.cards.handler;
 
 import android.support.v4.app.FragmentActivity;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Subscribe;
@@ -27,6 +29,8 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.SongCardClick;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
@@ -48,42 +52,65 @@ public class SongCardClickHandler {
 
     @Subscribe
     public void onSongCardEvent(SongCardClick e) {
+        final Song song = e.song;
+        Command c = null;
         switch (e.event) {
             case PLAY:
-                MusicUtils.playAllSongs(getActivity(), new Song[]{e.song}, 0, false);
+                c = new Command() {
+                    @Override
+                    public CharSequence execute() {
+                        MusicUtils.playAllSongs(getActivity(), new Song[]{song}, 0, false);
+                        return null;
+                    }
+                };
                 break;
             case PLAY_NEXT:
-                MusicUtils.playNext(getActivity(), new Song[]{e.song});
+                c = new Command() {
+                    @Override
+                    public CharSequence execute() {
+                        MusicUtils.playNext(getActivity(), new Song[]{song});
+                        return null;
+                    }
+                };
                 break;
             case ADD_TO_QUEUE:
-                MusicUtils.addSongsToQueue(getActivity(), new Song[]{e.song});
+                c = new Command() {
+                    @Override
+                    public CharSequence execute() {
+                        final Song[] list = new Song[]{song};
+                        return MusicUtils.addSongsToQueueSilent(getActivity(), list);
+                    }
+                };
                 break;
             case ADD_TO_PLAYLIST:
-                if (e.song instanceof LocalSong) {
-                    LocalSong song = (LocalSong) e.song;
-                    AddToPlaylistDialog.newInstance(new long[]{song.songId})
+                if (song instanceof LocalSong) {
+                    LocalSong localsong = (LocalSong) song;
+                    AddToPlaylistDialog.newInstance(new long[]{localsong.songId})
                             .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
                 }
-                break;
+                return;
             case MORE_BY_ARTIST:
-                if (e.song instanceof LocalSong) {
-                    LocalSong song = (LocalSong) e.song;
-                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), song.artistName));
+                if (song instanceof LocalSong) {
+                    LocalSong localsong = (LocalSong) song;
+                    NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), localsong.artistName));
                 }
-                break;
+                return;
             case SET_RINGTONE:
-                if (e.song instanceof LocalSong) {
-                    LocalSong song = (LocalSong) e.song;
-                    MusicUtils.setRingtone(getActivity(), song.songId);
+                if (song instanceof LocalSong) {
+                    LocalSong localsong = (LocalSong) song;
+                    MusicUtils.setRingtone(getActivity(), localsong.songId);
                 }
-                break;
+                return;
             case DELETE:
-                if (e.song instanceof LocalSong) {
-                    LocalSong song = (LocalSong) e.song;
-                    DeleteDialog.newInstance(song.name, new long[]{song.songId}, null)
+                if (song instanceof LocalSong) {
+                    LocalSong localsong = (LocalSong) song;
+                    DeleteDialog.newInstance(localsong.name, new long[]{localsong.songId}, null)
                             .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
                 }
-                break;
+                return;
+        }
+        if (c != null) {
+            ApolloUtils.execute(false, new CommandRunner(getActivity(), c));
         }
     }
 

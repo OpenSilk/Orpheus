@@ -87,8 +87,7 @@ public class AlbumCardClickHandler {
                     @Override
                     public CharSequence execute() {
                         LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
-                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
-                        return getActivity().getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                        return MusicUtils.addSongsToQueueSilent(getActivity(), list);
                     }
                 };
                 break;

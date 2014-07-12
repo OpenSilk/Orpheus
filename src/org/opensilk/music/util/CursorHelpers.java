@@ -70,8 +70,8 @@ public class CursorHelpers {
         // Copy the album id
         final long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
         // find the album artist
-        String albumArtist = getAlbumArtist(context, albumId);
-        if (TextUtils.isEmpty(albumArtist)) albumArtist = artist;
+        String albumArtist = null;// getAlbumArtist(context, albumId);
+//        if (TextUtils.isEmpty(albumArtist)) albumArtist = artist;
         // Copy the duration
         final long duration = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION));
         // Make the duration label

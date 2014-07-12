@@ -99,8 +99,7 @@ public class PlaylistCardClickHandler {
                         } else {
                             list = MusicUtils.getLocalSongListForPlaylist(getActivity(), playlist.mPlaylistId);
                         }
-                        MusicUtils.addSongsToQueueSilent(getActivity(), list);
-                        return getActivity().getResources().getQuantityString(R.plurals.NNNtrackstoqueue, list.length, list.length);
+                        return MusicUtils.addSongsToQueueSilent(getActivity(), list);
                     }
                 };
                 break;
