@@ -312,7 +312,7 @@ public class MusicPlaybackService extends Service {
      * Keeps a mapping of the track history
      */
     private static final LinkedList<Integer> mHistory = Lists.newLinkedList();
-
+    private static final LinkedList<Integer> mAutoHistory = Lists.newLinkedList();
     /**
      * Used to shuffle the tracks
      */
@@ -1463,7 +1463,7 @@ public class MusicPlaybackService extends Service {
         if (toAdd > 0) {
             final long[] list = new long[toAdd];
             for (int i = 0; i < toAdd; i++) {
-                int lookback = mHistory.size();
+                int lookback = mAutoHistory.size();
                 int idx = -1;
                 while (true) {
                     idx = mShuffler.nextInt(mAutoShuffleList.length);
@@ -1472,9 +1472,9 @@ public class MusicPlaybackService extends Service {
                     }
                     lookback /= 2;
                 }
-                mHistory.add(idx);
-                if (mHistory.size() > MAX_HISTORY_SIZE) {
-                    mHistory.remove(0);
+                mAutoHistory.add(idx);
+                if (mAutoHistory.size() > MAX_HISTORY_SIZE) {
+                    mAutoHistory.remove(0);
                 }
                 list[i] = mAutoShuffleList[idx];
             }
@@ -1497,13 +1497,13 @@ public class MusicPlaybackService extends Service {
         if (lookbacksize == 0) {
             return false;
         }
-        final int histsize = mHistory.size();
+        final int histsize = mAutoHistory.size();
         if (histsize < lookbacksize) {
             lookbacksize = histsize;
         }
         final int maxidx = histsize - 1;
         for (int i = 0; i < lookbacksize; i++) {
-            final long entry = mHistory.get(maxidx - i);
+            final long entry = mAutoHistory.get(maxidx - i);
             if (entry == idx) {
                 return true;
             }
@@ -1657,8 +1657,9 @@ public class MusicPlaybackService extends Service {
             }
             editor.putString("queue", q.toString());
             editor.putInt("cardid", mCardId);
-            if (mShuffleMode != SHUFFLE_NONE) {
-                len = mHistory.size();
+            // save shuffle history
+            len = mHistory.size();
+            if (len > 0) {
                 q.setLength(0);
                 for (int i = 0; i < len; i++) {
                     int n = mHistory.get(i);
@@ -1674,6 +1675,29 @@ public class MusicPlaybackService extends Service {
                     }
                 }
                 editor.putString("history", q.toString());
+            } else {
+                editor.remove("history");
+            }
+            // save autoshuffle history
+            len = mAutoHistory.size();
+            if (len > 0) {
+                q.setLength(0);
+                for (int i = 0; i < len; i++) {
+                    int n = mAutoHistory.get(i);
+                    if (n == 0) {
+                        q.append("0;");
+                    } else {
+                        while (n != 0) {
+                            final int digit = n & 0xf;
+                            n >>>= 4;
+                            q.append(HEX_DIGITS[digit]);
+                        }
+                        q.append(";");
+                    }
+                }
+                editor.putString("autohistory", q.toString());
+            } else {
+                editor.remove("autohistory");
             }
         }
         editor.putInt("curpos", mPlayPos);
@@ -1765,44 +1789,70 @@ public class MusicPlaybackService extends Service {
             if (shufmode != SHUFFLE_AUTO && shufmode != SHUFFLE_NORMAL) {
                 shufmode = SHUFFLE_NONE;
             }
-            if (shufmode != SHUFFLE_NONE) {
-                q = mPreferences.getString("history", "");
-                qlen = q != null ? q.length() : 0;
-                if (qlen > 1) {
-                    plen = 0;
-                    n = 0;
-                    shift = 0;
-                    mHistory.clear();
-                    for (int i = 0; i < qlen; i++) {
-                        final char c = q.charAt(i);
-                        if (c == ';') {
-                            if (n >= mPlayListLen) {
-                                mHistory.clear();
-                                break;
-                            }
-                            mHistory.add(n);
-                            n = 0;
-                            shift = 0;
-                        } else {
-                            if (c >= '0' && c <= '9') {
-                                n += c - '0' << shift;
-                            } else if (c >= 'a' && c <= 'f') {
-                                n += 10 + c - 'a' << shift;
-                            } else {
-                                mHistory.clear();
-                                break;
-                            }
-                            shift += 4;
+            // restore shuffle history
+            q = mPreferences.getString("history", "");
+            qlen = q != null ? q.length() : 0;
+            if (qlen > 1) {
+                plen = 0;
+                n = 0;
+                shift = 0;
+                mHistory.clear();
+                for (int i = 0; i < qlen; i++) {
+                    final char c = q.charAt(i);
+                    if (c == ';') {
+                        if (n >= mPlayListLen) {
+                            mHistory.clear();
+                            break;
                         }
+                        mHistory.add(n);
+                        n = 0;
+                        shift = 0;
+                    } else {
+                        if (c >= '0' && c <= '9') {
+                            n += c - '0' << shift;
+                        } else if (c >= 'a' && c <= 'f') {
+                            n += 10 + c - 'a' << shift;
+                        } else {
+                            mHistory.clear();
+                            break;
+                        }
+                        shift += 4;
+                    }
+                }
+            }
+            // restore auto shuffle history
+            q = mPreferences.getString("autohistory", "");
+            qlen = q != null ? q.length() : 0;
+            if (qlen > 1) {
+                plen = 0;
+                n = 0;
+                shift = 0;
+                mAutoHistory.clear();
+                for (int i = 0; i < qlen; i++) {
+                    final char c = q.charAt(i);
+                    if (c == ';') {
+                        if (n >= mPlayListLen) {
+                            mAutoHistory.clear();
+                            break;
+                        }
+                        mAutoHistory.add(n);
+                        n = 0;
+                        shift = 0;
+                    } else {
+                        if (c >= '0' && c <= '9') {
+                            n += c - '0' << shift;
+                        } else if (c >= 'a' && c <= 'f') {
+                            n += 10 + c - 'a' << shift;
+                        } else {
+                            mAutoHistory.clear();
+                            break;
+                        }
+                        shift += 4;
                     }
                 }
             }
             if (shufmode == SHUFFLE_AUTO) {
                 if (!makeAutoShuffleList()) {
-                    //autoshuffle history is different from regular history
-                    //so clear it as to not mix them together
-                    //TODO maybe fix someday
-                    mHistory.clear();
                     shufmode = SHUFFLE_NONE;
                 }
             }
@@ -2370,8 +2420,7 @@ public class MusicPlaybackService extends Service {
                 if (histsize == 0) {
                     return;
                 }
-                final Integer pos = mHistory.remove(histsize - 1);
-                mPlayPos = pos.intValue();
+                mPlayPos = mHistory.remove(histsize - 1);
             } else {
                 if (mPlayPos > 0) {
                     mPlayPos--;
@@ -2472,19 +2521,9 @@ public class MusicPlaybackService extends Service {
             if (mShuffleMode == shufflemode && mPlayListLen > 0) {
                 return;
             }
-            if (mShuffleMode == SHUFFLE_AUTO && shufflemode != SHUFFLE_AUTO) {
-                // clear history since autoshuffle uses mediastore
-                // ids and regular history uses our musicprovider ids
-                // TODO maybe fix someday
-                mHistory.clear();
-            }
             mShuffleMode = shufflemode;
             if (mShuffleMode == SHUFFLE_AUTO) {
                 if (makeAutoShuffleList()) {
-                    // clear history since autoshuffle uses mediastore
-                    // ids and regular history uses our musicprovider ids
-                    // TODO maybe fix someday
-                    mHistory.clear();
                     mPlayListLen = 0;
                     doAutoShuffleUpdate();
                     mPlayPos = 0;
