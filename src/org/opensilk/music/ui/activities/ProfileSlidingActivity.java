@@ -32,6 +32,7 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.ArtistFragment;
+import org.opensilk.music.ui.profile.GenreFragment;
 import org.opensilk.music.ui.profile.ProfileGenreFragment;
 import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
 import org.opensilk.silkdagger.qualifier.ForActivity;
@@ -75,7 +76,7 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         } else if (ACTION_PLAYLIST.equals(action)) {
             f = ProfilePlaylistFragment.newInstance(b);
         } else if (ACTION_GENRE.equals(action)) {
-            f = ProfileGenreFragment.newInstance(b);
+            f = GenreFragment.newInstance(b);
         } else {
             finish();
         }

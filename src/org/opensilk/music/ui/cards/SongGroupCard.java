@@ -37,6 +37,7 @@ import org.opensilk.music.ui.cards.event.GenreCardClick;
 import org.opensilk.music.ui.cards.event.SongGroupCardClick;
 import org.opensilk.music.ui.cards.event.SongGroupCardClick.Event;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import java.util.HashSet;
@@ -84,11 +85,11 @@ public class SongGroupCard extends AbsGenericCard<LocalSongGroup> {
         mCardSubTitle.setText(l2);
         if (mData.albumIds.length > 0){
             if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.albumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4));
             } else if (mArtwork2 != null) {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.albumIds, mArtwork, mArtwork2));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork, mArtwork2));
             } else {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.albumIds, mArtwork));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork));
             }
         }
     }
@@ -141,41 +142,4 @@ public class SongGroupCard extends AbsGenericCard<LocalSongGroup> {
         }
     }
 
-    class ArtLoaderTask extends AsyncTask<Void, Void, Set<ArtInfo>> {
-        final long[] albumIds;
-        final ArtworkImageView[] images;
-
-        ArtLoaderTask(long[] albumIds, ArtworkImageView... images) {
-            this.albumIds = albumIds;
-            this.images = images;
-        }
-
-        @Override
-        protected Set<ArtInfo> doInBackground(Void... params) {
-            Set<ArtInfo> artInfos = new HashSet<>(albumIds.length);
-            Cursor c = CursorHelpers.makeLocalAlbumsCursor(getContext(), albumIds);
-            if (c != null) {
-                if (c.moveToFirst()) {
-                    do {
-                        ArtInfo info = CursorHelpers.makeArtInfoFromLocalAlbumCursor(c);
-                        artInfos.add(info);
-                    } while (c.moveToNext() && artInfos.size() <= images.length);
-                }
-                c.close();
-            }
-
-            return artInfos;
-        }
-
-        @Override
-        protected void onPostExecute(Set<ArtInfo> artInfos) {
-            if (artInfos.size() >= images.length) {
-                int ii=0;
-                for (ArtInfo info : artInfos) {
-                    ArtworkManager.loadImage(info, images[ii++]);
-                    if (ii==images.length) break;
-                }
-            }
-        }
-    }
 }

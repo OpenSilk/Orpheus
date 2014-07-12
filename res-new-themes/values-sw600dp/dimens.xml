@@ -16,6 +16,6 @@
   -->
 
 <resources>
-    <dimen name="profile_dialog_width">480dp</dimen>
-    <dimen name="profile_dialog_max_height">600dp</dimen>
+    <dimen name="profile_dialog_width">460dp</dimen>
+    <dimen name="profile_dialog_max_height">700dp</dimen>
 </resources>

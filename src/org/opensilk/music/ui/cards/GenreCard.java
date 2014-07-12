@@ -38,6 +38,7 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.GenreCardClick;
 import org.opensilk.music.ui.cards.event.GenreCardClick.Event;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -94,11 +95,11 @@ public class GenreCard extends AbsGenericCard<Genre> {
         mCardSubTitle.setText(l2);
         if (mData.mAlbumNumber > 0){
             if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork, mArtwork2, mArtwork3, mArtwork4));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4));
             } else if (mArtwork2 != null) {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork, mArtwork2));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2));
             } else {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.mGenreId, mArtwork));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork));
             }
         }
     }
@@ -149,55 +150,5 @@ public class GenreCard extends AbsGenericCard<Genre> {
             return R.layout.gridcard_artwork_inner;
         }
     }
-
-    class ArtLoaderTask extends AsyncTask<Void, Void, Set<ArtInfo>> {
-        final ArtworkImageView[] views;
-        final long genreId;
-
-        ArtLoaderTask(long genreId, ArtworkImageView... imageViews) {
-            this.views = imageViews;
-            this.genreId = genreId;
-        }
-
-        @Override
-        protected Set<ArtInfo> doInBackground(Void... params) {
-            Set<ArtInfo> artInfos = new HashSet<>();
-            final Cursor genreSongs = getContext().getContentResolver().query(
-                    MediaStore.Audio.Genres.Members.getContentUri("external", genreId),
-                    new String[]{
-                            MediaStore.Audio.Media.ARTIST,
-                            MediaStore.Audio.Media.ALBUM,
-                            MediaStore.Audio.Media.ALBUM_ID,
-                    },
-                    Selections.LOCAL_SONG,
-                    SelectionArgs.LOCAL_SONG,
-                    MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
-            if (genreSongs != null && genreSongs.moveToFirst()) {
-                do {
-                    String artist = genreSongs.getString(0);
-                    String album = genreSongs.getString(1);
-                    long albumId = genreSongs.getLong(2);
-                    Uri artworkUri = CursorHelpers.generateArtworkUri(albumId);
-                    artInfos.add(new ArtInfo(artist, album, artworkUri));
-                } while (genreSongs.moveToNext() && artInfos.size() <= views.length );
-            }
-            if (genreSongs != null) {
-                genreSongs.close();
-            }
-            return artInfos;
-        }
-
-        @Override
-        protected void onPostExecute(Set<ArtInfo> artInfos) {
-            if (artInfos.size() >= views.length) {
-                int ii = 0;
-                for (ArtInfo a : artInfos) {
-                    ArtworkManager.loadImage(a, views[ii++]);
-                    if (ii == views.length) break;
-                }
-            }
-        }
-    }
-
 
 }

@@ -40,11 +40,17 @@ public class Selections {
         selection.append(")");
         return selection.toString();
     }
+    public static final String GENRE;
+    public static final String GENRE_MEMBER;
+    public static final String PLAYLIST_MEMBER;
 
     static {
         LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";
         LOCAL_ALBUM_SONGS = LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=?";
         LAST_ADDED = LOCAL_SONG + " AND " + MediaStore.Audio.Media.DATE_ADDED + ">?";
         LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=?";
+        GENRE = MediaStore.Audio.Genres.NAME + "!=?";
+        GENRE_MEMBER = LOCAL_SONG;
+        PLAYLIST_MEMBER = LOCAL_SONG;
     }
 }

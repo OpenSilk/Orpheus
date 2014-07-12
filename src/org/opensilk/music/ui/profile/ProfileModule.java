@@ -37,6 +37,7 @@ import dagger.Provides;
                 ProfilePlaylistFragment.class,
                 AlbumFragment.class,
                 ArtistFragment.class,
+                GenreFragment.class,
         },
         includes = {
                 CardModule.class,

@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
@@ -336,20 +337,20 @@ public class MusicProvider extends ContentProvider {
         // Pull all playlists
         Cursor playlists = getContext().getContentResolver().query(
                 MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-                new String[] { BaseColumns._ID, MediaStore.Audio.PlaylistsColumns.NAME},
+                Projections.PLAYLIST,
                 null, null, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
         if (playlists != null && playlists.moveToFirst()) {
             do {
                 // get playlist id
-                final long id = playlists.getLong(playlists.getColumnIndexOrThrow(BaseColumns._ID));
+                final long id = playlists.getLong(playlists.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID));
                 // get playlist name
-                final String name = playlists.getString(playlists.getColumnIndexOrThrow(MediaStore.Audio.PlaylistsColumns.NAME));
+                final String name = playlists.getString(playlists.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
                 // We have to query for the song count
                 final Cursor playlistSongs = getContext().getContentResolver().query(
                         MediaStore.Audio.Playlists.Members.getContentUri("external", id),
-                        new String[] {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.ALBUM_ID},
-                        Selections.LOCAL_SONG,
-                        SelectionArgs.LOCAL_SONG,
+                        Projections.PLAYLIST_MEMBER,
+                        Selections.PLAYLIST_MEMBER,
+                        SelectionArgs.PLAYLIST_MEMBER,
                         MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
                 int numSongs = 0;
                 int numAlbums = 0;
@@ -360,8 +361,8 @@ public class MusicProvider extends ContentProvider {
                     Set<String> albumsSet = new HashSet<>(playlistSongs.getCount());
                     if (playlistSongs.moveToFirst()) {
                         do {
-                            songs.add(playlistSongs.getString(0));
-                            albumsSet.add(playlistSongs.getString(1));
+                            songs.add(playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID)));
+                            albumsSet.add(playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.ALBUM_ID)));
                         } while (playlistSongs.moveToNext());
                     }
                     numSongs = songs.size();
@@ -415,8 +416,8 @@ public class MusicProvider extends ContentProvider {
                     String name = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
                     int songCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
                     int albumCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-                    String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
-                    String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                    String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS));
+                    String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS));
                     // create content values
                     ContentValues values = new ContentValues(6);
                     values.put(MusicStore.GroupCols.NAME, name);
@@ -439,13 +440,13 @@ public class MusicProvider extends ContentProvider {
                                             && albumCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT))
                                             && TextUtils.equals(songids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)))
                                             && TextUtils.equals(albumids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)))) {
-                                        Timber.v("Cache matches for " +name+" playlist id="+id);
                                         continue;
                                     }
                                 }
                                 db.update(MusicStore.PLAYLIST_TABLE, values,
                                         MusicStore.GroupCols._ID + "=?",
                                         new String[]{String.valueOf(id)});
+                                Timber.v("Updated " +name+" playlist id="+id);
                                 wasupdated = true;
                                 continue;
                             }
@@ -507,8 +508,8 @@ public class MusicProvider extends ContentProvider {
                     String name = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
                     int songCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
                     int albumCount = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-                    String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
-                    String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
+                    String songids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS));
+                    String albumids = c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS));
                     // create content values
                     ContentValues values = new ContentValues(6);
                     values.put(MusicStore.GroupCols.NAME, name);
@@ -531,13 +532,13 @@ public class MusicProvider extends ContentProvider {
                                             && albumCount == c2.getInt(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT))
                                             && TextUtils.equals(songids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)))
                                             && TextUtils.equals(albumids, c2.getString(c2.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)))) {
-                                        Timber.v("Cache matches for " + name + " genre id=" + id);
                                         continue;
                                     }
                                 }
                                 db.update(MusicStore.GENRE_TABLE, values,
                                         MusicStore.GroupCols._ID + "=?",
                                         new String[]{String.valueOf(id)});
+                                Timber.v("Updated " + name + " genre id=" + id);
                                 wasupdated = true;
                                 continue;
                             }
@@ -593,9 +594,10 @@ public class MusicProvider extends ContentProvider {
         // Pull list of all genres
         Cursor genres = getContext().getContentResolver().query(
                 MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
-                new String[] { BaseColumns._ID, MediaStore.Audio.GenresColumns.NAME },
-                MediaStore.Audio.Genres.NAME + " !=?",
-                new String[] {"''"}, MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+                Projections.GENRE,
+                Selections.GENRE,
+                SelectionArgs.GENRE,
+                MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
 
         // Build our custom cursor
         if (genres != null && genres.moveToFirst()) {
@@ -609,12 +611,9 @@ public class MusicProvider extends ContentProvider {
                 // Query for the members
                 final Cursor genreSongs = getContext().getContentResolver().query(
                         MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                        new String[] {
-                                MediaStore.Audio.Genres.Members.AUDIO_ID,
-                                MediaStore.Audio.Genres.Members.ALBUM_ID
-                        },
-                        Selections.LOCAL_SONG,
-                        SelectionArgs.LOCAL_SONG,
+                        Projections.GENRE_MEMBER,
+                        Selections.GENRE_MEMBER,
+                        SelectionArgs.GENRE_MEMBER,
                         MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
 
                 // Don't add genres without any songs
@@ -633,8 +632,8 @@ public class MusicProvider extends ContentProvider {
                 final HashSet<String> albumIdsSet = new HashSet<String>(songNum);
                 if (genreSongs.moveToFirst()) {
                     do {
-                        songIds.add(genreSongs.getString(0));
-                        albumIdsSet.add(genreSongs.getString(1));
+                        songIds.add(genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.AUDIO_ID)));
+                        albumIdsSet.add(genreSongs.getString(genreSongs.getColumnIndexOrThrow(MediaStore.Audio.Genres.Members.ALBUM_ID)));
                     } while (genreSongs.moveToNext());
                 }
                 // copy album count
@@ -662,10 +661,9 @@ public class MusicProvider extends ContentProvider {
                 for (String s : albumIds) {
                     albumIdsCsv.append(s);
                     if (++ii < albumIds.size()) {
-                        songsIdsCsv.append(",");
+                        albumIdsCsv.append(",");
                     }
                 }
-
                 // add row to final cursor
                 c.addRow(new Object[]{id, name, songNum, numAlbums, songsIdsCsv.toString(), albumIdsCsv.toString()});
             } while (genres.moveToNext());

@@ -254,7 +254,9 @@ public class CursorHelpers {
         return context.getContentResolver().query(
                 MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                 Projections.LOCAL_ALBUM,
-                Selections.LOCAL_ALBUMS(albumIds), null, null);
+                Selections.LOCAL_ALBUMS(albumIds),
+                null,
+                MediaStore.Audio.Albums._ID);
     }
 
     public static ArtInfo makeArtInfoFromLocalAlbumCursor(Cursor c) {
@@ -288,7 +290,11 @@ public class CursorHelpers {
         }
         final long[] ids = new long[strings.length];
         for (int ii=0; ii< strings.length; ii++) {
-            ids[ii] = Long.valueOf(strings[ii]);
+            try {
+                ids[ii] = Long.valueOf(strings[ii]);
+            } catch (NumberFormatException e) {
+                ids[ii] = -1;
+            }
         }
         return ids;
     }

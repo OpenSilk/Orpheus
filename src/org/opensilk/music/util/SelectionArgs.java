@@ -31,8 +31,14 @@ public class SelectionArgs {
     public static String[] LOCAL_ARTIST_SONGS(final long artistId) {
         return new String[] {"1", String.valueOf(artistId)};
     }
+    public static final String[] GENRE;
+    public static final String[] GENRE_MEMBER;
+    public static final String[] PLAYLIST_MEMBER;
 
     static {
         LOCAL_SONG = new String[] {"1","''"};
+        GENRE = new String[] {"''"};
+        GENRE_MEMBER = LOCAL_SONG;
+        PLAYLIST_MEMBER = LOCAL_SONG;
     }
 }

@@ -38,6 +38,7 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick.Event;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -94,11 +95,11 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
         mCardSubTitle.setText(MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber));
         if (mData.mAlbumNumber > 0) {
             if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork, mArtwork2, mArtwork3, mArtwork4));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4));
             } else if (mArtwork2 != null) {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork, mArtwork2));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2));
             } else {
-                ApolloUtils.execute(false, new ArtLoaderTask(mData.mPlaylistId, mArtwork));
+                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork));
             }
         }
     }
@@ -155,63 +156,6 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
             return R.layout.gridcard_artwork_dual_inner;
         } else {
             return R.layout.gridcard_artwork_inner;
-        }
-    }
-
-    class ArtLoaderTask extends AsyncTask<Void, Void, Set<ArtInfo>> {
-        final ArtworkImageView[] views;
-        final long playlistId;
-
-        ArtLoaderTask(long playlistId, ArtworkImageView... imageViews) {
-            this.views = imageViews;
-            this.playlistId = playlistId;
-        }
-
-        @Override
-        protected Set<ArtInfo> doInBackground(Void... params) {
-
-            Set<ArtInfo> artInfos = new HashSet<>();
-            // We have to query for the song count
-            final Cursor playlistSongs;
-            if (playlistId == -2) { //Last added
-                playlistSongs = CursorHelpers.makeLastAddedCursor(getContext());
-            } else { // user
-                playlistSongs = getContext().getContentResolver().query(
-                        MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
-                        new String[]{
-                                MediaStore.Audio.Media.ARTIST, //TODO this should really be albumartist
-                                MediaStore.Audio.Media.ALBUM,
-                                MediaStore.Audio.Media.ALBUM_ID,
-                        },
-                        Selections.LOCAL_SONG,
-                        SelectionArgs.LOCAL_SONG,
-                        MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER
-                );
-            }
-            if (playlistSongs != null && playlistSongs.moveToFirst()) {
-                do {
-                    String artist = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
-                    String album = playlistSongs.getString(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
-                    long albumId = playlistSongs.getLong(playlistSongs.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
-                    Uri artworkUri = CursorHelpers.generateArtworkUri(albumId);
-                    artInfos.add(new ArtInfo(artist, album, artworkUri));
-                } while (playlistSongs.moveToNext() && artInfos.size() <= views.length);
-            }
-            if (playlistSongs != null) {
-                playlistSongs.close();
-            }
-            return artInfos;
-        }
-
-        @Override
-        protected void onPostExecute(Set<ArtInfo> artInfos) {
-            if (artInfos.size() >= views.length) {
-                int ii = 0;
-                for (ArtInfo a : artInfos) {
-                    ArtworkManager.loadImage(a, views[ii++]);
-                    if (ii == views.length) break;
-                }
-            }
         }
     }
 
