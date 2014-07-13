@@ -63,6 +63,12 @@
         android:layout_gravity="left"
         android:layout_marginTop="?actionBarSize">
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/orpheus_logo_record"/>
+
         <TextView
             android:text="@string/drawer_library"
             android:textAppearance="?android:textAppearance"

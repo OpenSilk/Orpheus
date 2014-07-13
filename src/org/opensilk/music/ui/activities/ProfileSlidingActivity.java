@@ -62,7 +62,8 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(null);
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("                    "); //Hack to make click area larger
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_action_arrow_left_white);
+        actionBar.setTitle(" ");
         actionBar.setIcon(new ColorDrawable(android.R.color.transparent));
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);

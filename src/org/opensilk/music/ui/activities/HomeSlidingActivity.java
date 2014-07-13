@@ -20,6 +20,7 @@ package org.opensilk.music.ui.activities;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -132,6 +133,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
+        actionBar.setIcon(new ColorDrawable(android.R.color.transparent));
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
