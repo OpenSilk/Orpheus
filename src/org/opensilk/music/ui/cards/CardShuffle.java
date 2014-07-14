@@ -23,8 +23,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
+
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -49,7 +53,14 @@ public class CardShuffle extends Card {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                MusicUtils.shuffleAll(getContext());
+                ApolloUtils.execute(false, new CommandRunner(getContext(),
+                        new Command() {
+                            @Override
+                            public CharSequence execute() {
+                                MusicUtils.shuffleAll(getContext());
+                                return null;
+                            }
+                        }));
             }
         });
     }

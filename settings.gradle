@@ -1,2 +1,3 @@
 include ':../SilkCastService:library'
 include ':../OrpheusApi:api'
+include ':../SilkFileBrowser:lib_sfb'

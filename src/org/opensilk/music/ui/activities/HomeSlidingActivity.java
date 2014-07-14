@@ -17,13 +17,12 @@
 
 package org.opensilk.music.ui.activities;
 
-import android.content.ComponentName;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
@@ -44,12 +43,11 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.artwork.ArtworkService;
-import org.opensilk.music.loaders.NavigationLoader;
+import org.opensilk.music.ui.nav.adapter.NavAdapter;
+import org.opensilk.music.ui.nav.loader.NavLoader;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
-import org.opensilk.music.ui.settings.SettingsPhoneActivity;
-import org.opensilk.music.util.PluginUtil;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import java.util.ArrayList;
@@ -59,6 +57,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 /**
  *
@@ -83,13 +82,12 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     ListView mDrawerListView;
     @InjectView(R.id.drawer_container)
     View mDrawerContainerView;
-    @InjectView(R.id.drawer_settings)
-    View mSettingsOption;
 
-    private ArrayAdapter<PluginInfo> mDrawerAdapter;
+    private NavAdapter mDrawerAdapter;
 
     private int mCurrentSelectedPosition = 0;
     private CharSequence mTitle;
+    private CharSequence mSubTitle;
 
     @Inject
     protected ArtworkService mArtworkService;
@@ -107,13 +105,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         mArtworkService.cancelCacheClear();
 
         // Init drawer adapter
-        // Add default plugin now since we know it will always be there
-        List<PluginInfo> devices = new ArrayList<>();
-        devices.add(PluginUtil.getDefaultPluginInfo(this));
-        mDrawerAdapter = new ArrayAdapter<>(getSupportActionBar().getThemedContext(),
-                R.layout.drawer_list_item,
-                android.R.id.text1,
-                devices);
+        mDrawerAdapter = new NavAdapter(this);
         mDrawerListView.setAdapter(mDrawerAdapter);
         // Start loader
         getSupportLoaderManager().initLoader(0, null, this);
@@ -169,21 +161,15 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
         // Load the music browser fragment
         if (savedInstanceState == null) {
+            // todo save/restore previous
             mDrawerLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    selectItem(0);
+                    selectItem(1);
                 }
             });
         }
 
-        mSettingsOption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDrawerLayout.closeDrawer(mDrawerContainerView);
-                startActivityForResult(new Intent(HomeSlidingActivity.this, SettingsPhoneActivity.class), 0);
-            }
-        });
     }
 
     @Override
@@ -251,6 +237,9 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
             maybeClosePanel();
         } else {
             Fragment f = getSupportFragmentManager().findFragmentByTag("library");
+            if (f == null) {
+                f = getSupportFragmentManager().findFragmentByTag("folders");
+            }
             if (f != null && (f instanceof BackButtonListener) && f.isResumed()) {
                 BackButtonListener l = (BackButtonListener) f;
                 if (l.onBackButtonPressed()) {
@@ -286,13 +275,9 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mDrawerContainerView);
         }
-        PluginInfo pi = mDrawerAdapter.getItem(position);
-        if (pi.componentName.equals(new ComponentName(this, org.opensilk.music.ui.home.HomeFragment.class))) {
-            NavUtils.goHome(this);
-        } else {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, LibraryFragment.newInstance(pi), "library")
-                    .commit();
+        Runnable action = mDrawerAdapter.getItem(position).action;
+        if (action != null) {
+            runOnUiThread(action);
         }
     }
 
@@ -305,7 +290,9 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         mTitle = actionBar.getTitle();
-        actionBar.setTitle(R.string.app_name);
+        actionBar.setTitle(null);
+        mSubTitle = actionBar.getSubtitle();
+        actionBar.setSubtitle(null);
     }
 
 
@@ -315,6 +302,9 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         if (!TextUtils.isEmpty(mTitle)) {
             actionBar.setTitle(mTitle);
+        }
+        if (!TextUtils.isEmpty(mSubTitle)) {
+            actionBar.setSubtitle(mSubTitle);
         }
     }
 
@@ -354,25 +344,20 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
     @Override
     public Loader<List<PluginInfo>> onCreateLoader(int id, Bundle args) {
-        return new NavigationLoader(this);
+        return new NavLoader(this);
     }
 
     @Override
     public void onLoadFinished(Loader<List<PluginInfo>> loader, List<PluginInfo> data) {
         if (data != null && !data.isEmpty()) {
-            for (PluginInfo pi : data) {
-                if (mDrawerAdapter.getPosition(pi) < 0) {
-                    mDrawerAdapter.add(pi);
-                }
-            }
+            mDrawerAdapter.addPlugins(data);
         }
     }
 
     @Override
     public void onLoaderReset(Loader<List<PluginInfo>> loader) {
-        PluginInfo pi = mDrawerAdapter.getItem(0);
         mDrawerAdapter.clear();
-        mDrawerAdapter.add(pi);
+        mDrawerAdapter.addAll(NavAdapter.makeDefaultNavList(this));
     }
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.util;
+package org.opensilk.music;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,7 +31,7 @@ import javax.inject.Singleton;
 @Singleton
 public class AppPreferences {
 
-
+    public static final String PREF_DEFAULT_MEDIA_FOLDER = "pref_default_media_folder";
 
 
     private SharedPreferences prefs;
@@ -39,6 +39,10 @@ public class AppPreferences {
     @Inject
     public AppPreferences(@ForApplication Context context) {
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+    public static AppPreferences get(Context context) {
+        return new AppPreferences(context);
     }
 
     public void putBoolean(String key, boolean value) {
@@ -53,6 +57,10 @@ public class AppPreferences {
         prefs.edit().putInt(key, value).apply();
     }
 
+    public void putString(String key, String value) {
+        prefs.edit().putString(key, value).apply();
+    }
+
     public boolean getBoolean(String key, boolean def) {
         return prefs.getBoolean(key, def);
     }
@@ -65,4 +73,11 @@ public class AppPreferences {
         return prefs.getInt(key, def);
     }
 
+    public String getString(String key, String def) {
+        return prefs.getString(key, def);
+    }
+
+    public void remove(String key) {
+        prefs.edit().remove(key).apply();
+    }
 }

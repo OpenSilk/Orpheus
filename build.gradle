@@ -10,10 +10,13 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'hugo'
 
-repositories {
-    maven { url "../m2/repository" }
-    mavenCentral()
+allprojects {
+    repositories {
+        maven { url "../m2/repository" }
+        mavenCentral()
+    }
 }
+
 
 // Build config
 ext.compileSdkVersion = 19
@@ -156,5 +159,6 @@ dependencies {
     compile project(':../SilkCastService:library')
     compile project(':../OrpheusApi:api')
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':../SilkFileBrowser:lib_sfb')
 
 }

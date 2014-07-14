@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
@@ -570,6 +571,9 @@ public final class MusicUtils {
     }
 
     public static int removeSong(Context context, Song song) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         long id = MusicProviderUtil.getIdForSong(context, song);
         if (id >= 0) {
             return removeQueueItem(id);
@@ -841,6 +845,9 @@ public final class MusicUtils {
     }
 
     public static void playAllSongs(Context context, Song[] list, int position, boolean forceShuffle) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         if (list.length == 0 || sService == null) {
             return;
         }
@@ -860,6 +867,9 @@ public final class MusicUtils {
      * @param forceShuffle
      */
     public static void playAllfromMediaStore(Context context, long[] list, int position, boolean forceShuffle) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         if (list == null || list.length == 0 || sService == null) {
             return;
         }
@@ -873,22 +883,20 @@ public final class MusicUtils {
     /**
      * @param list The list to enqueue.
      */
-    @Deprecated
-    public static void playNextOLD(final long[] list) {
-        throw new UnsupportedOperationException();
-    }
-
-    public static void playNext(long[] list) {
+    public static void playNext(long[] recentslist) {
         if (sService == null) {
             return;
         }
         try {
-            sService.enqueue(list, MusicPlaybackService.NEXT);
+            sService.enqueue(recentslist, MusicPlaybackService.NEXT);
         } catch (final RemoteException ignored) {
         }
     }
 
     public static void playNext(Context context, Song[] list) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         if (list.length == 0 || sService == null) {
             return;
         }
@@ -904,6 +912,9 @@ public final class MusicUtils {
      * @param context The {@link Context} to use.
      */
     public static void shuffleAll(final Context context) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         Cursor cursor = CursorHelpers.makeSongCursor(context);
         final long[] mTrackList = getSongListForCursor(cursor);
         final int position = 0;
@@ -911,18 +922,22 @@ public final class MusicUtils {
             return;
         }
         try {
+            final long[] realTrackList = new long[mTrackList.length];
+            for (int ii=0; ii<mTrackList.length; ii++) {
+                realTrackList[ii] = MusicProviderUtil.insertFromMediaStore(context, mTrackList[ii]);
+            }
             sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
             final long mCurrentId = sService.getAudioId();
             final int mCurrentQueuePosition = getQueuePosition();
-            if (position != -1 && mCurrentQueuePosition == position
-                    && mCurrentId == mTrackList[position]) {
+            if (mCurrentQueuePosition == position
+                    && mCurrentId == realTrackList[position]) {
                 final long[] mPlaylist = getQueue();
-                if (Arrays.equals(mTrackList, mPlaylist)) {
+                if (Arrays.equals(realTrackList, mPlaylist)) {
                     sService.play();
                     return;
                 }
             }
-            sService.open(mTrackList, -1);
+            sService.open(realTrackList, -1);
             sService.play();
             cursor.close();
             cursor = null;
@@ -1156,6 +1171,9 @@ public final class MusicUtils {
     }
 
     public static void addSongsToQueue(Context context, Song[] list) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         if (list.length == 0 || sService == null) {
             return;
         }
@@ -1167,6 +1185,9 @@ public final class MusicUtils {
     }
 
     public static CharSequence addSongsToQueueSilent(Context context, Song[] list) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         if (list.length == 0 || sService == null) {
             return null;
         }
@@ -1567,6 +1588,9 @@ public final class MusicUtils {
      * @param list The item(s) to delete.
      */
     public static void deleteTracks(final Context context, final long[] list) {
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            throw new RuntimeException("Stop calling from main thread");
+        }
         final String[] projection = new String[] {
                 BaseColumns._ID, MediaColumns.DATA, AudioColumns.ALBUM_ID
         };

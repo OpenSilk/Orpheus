@@ -34,6 +34,7 @@ import dagger.Module;
         injects = {
                 AlbumCard.class,
                 ArtistCard.class,
+                FileItemCard.class,
                 FolderCard.class,
                 GenreCard.class,
                 PlaylistCard.class,

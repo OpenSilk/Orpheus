@@ -19,8 +19,8 @@
     <string name="drawer_device">Local Storage</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-
-    <string name="page_folders">Folders</string>
+    <string name="music">Music</string>
+    <string name="folders">Folders</string>
 
     <!-- ################ SETTINGS ################ -->
 
@@ -58,7 +58,6 @@
     <string name="settings_interface_theme_title">Select a theme</string>
     <string name="settings_interface_visualizations_title">Enable visualizations</string>
     <string name="settings_interface_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
-    <string name="settings_interface_equalizer_summary">Fine tune audio settings</string>
     <string name="settings_interface_home_pages_title">Select home pages</string>
     <string name="settings_interface_home_pages_summary">Sort &amp; manage home pages</string>
 
@@ -72,6 +71,10 @@
     <string name="settings_data_cache_size_60" translatable="false">60MB</string>
     <string name="settings_data_cache_size_80" translatable="false">80MB</string>
 
+    <string name="settings_equalizer_summary">Fine tune audio settings</string>
+    <string name="settings_equalizer_none">No equalizer found</string>
+    <string name="settings_storage_default_folder_title">Pick shuffle folder</string>
+    <string name="settings_storage_default_folder_summary">Only songs in this folder will be included in party shuffle</string>
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
     <string name="settings_gms_unavailable">Google services unavailable, casting will not work</string>

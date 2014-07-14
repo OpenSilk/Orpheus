@@ -159,7 +159,7 @@ public class HomeFragment extends ScopedDaggerFragment {
         // Enable the options menu
         setHasOptionsMenu(true);
         //Set title
-        mActionBarHelper.setTitle(getString(R.string.drawer_device));
+        mActionBarHelper.setTitle(getString(R.string.music));
     }
 
     @Override

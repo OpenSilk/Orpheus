@@ -14,49 +14,59 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.home;
+package org.opensilk.music.ui.folder;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
-import android.widget.CursorAdapter;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.filebrowser.FileBrowserArgs;
+import org.opensilk.filebrowser.FileItem;
+import org.opensilk.filebrowser.FileItemArrayLoader;
+import org.opensilk.music.ui.cards.FileItemCard;
+import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.silkdagger.DaggerInjector;
 
-import hugo.weaving.DebugLog;
+import java.util.ArrayList;
+import java.util.List;
+
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 
 /**
- * Created by drew on 6/28/14.
+ * Created by drew on 7/2/14.
  */
-public abstract class BasePagerFragment extends CardListGridFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class FolderChildFragment extends CardListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
 
     protected static final int LOADER = 0;
 
     protected DaggerInjector mInjector;
+    private CardArrayAdapter mAdapter;
+    private FileBrowserArgs mBrowserArgs;
 
-    protected CursorAdapter mAdapter;
-    protected PreferenceUtils mPreferences;
+    public static FolderChildFragment newInstance(FileBrowserArgs args) {
+        FolderChildFragment f = new FolderChildFragment();
+        Bundle b = new Bundle(1);
+        b.putParcelable("__args", args);
+        f.setArguments(b);
+        return f;
+    }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mInjector = (DaggerInjector) getParentFragment();
-        mInjector.inject(this);
     }
 
     @Override
-    //@DebugLog
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPreferences = PreferenceUtils.getInstance(getActivity());
-        mAdapter = createAdapter();
+        mBrowserArgs = getArguments().getParcelable("__args");
+        mAdapter = new CardArrayAdapter(getActivity(), new ArrayList<Card>());
         // Start the loader
         getLoaderManager().initLoader(LOADER, null, this);
     }
@@ -68,24 +78,12 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
         setListShown(false);
-//        if (!wantGridView()) {
-//            // reset dividers for CardListView
-//            ((ListView) getListView()).setDividerHeight((int)(1 * getResources().getDisplayMetrics().density));
-//        }
-    }
-
-    @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        // Enable the options menu
-        setHasOptionsMenu(true);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         mAdapter = null;
-        mPreferences = null;
     }
 
     @Override
@@ -94,40 +92,37 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
         mInjector = null;
     }
 
-    /**
-     * Restarts the loader. Called when user updates the sort by option
-     */
-    public void refresh() {
-        // Wait a moment for the preference to change.
-        SystemClock.sleep(10);
-        getLoaderManager().restartLoader(LOADER, null, this);
-    }
-
     protected CharSequence getEmptyText() {
         return getString(R.string.empty_music);
     }
-
-    protected abstract CursorAdapter createAdapter();
-    protected abstract boolean wantGridView();
 
     /*
      * Loader Callbacks
      */
 
     @Override
-    @DebugLog
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
-        //seems to be required for staggeredgrid
-        mAdapter.notifyDataSetChanged();
+    public Loader<List<FileItem>> onCreateLoader(int id, Bundle args) {
+        return new FileItemArrayLoader(getActivity(), mBrowserArgs);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<FileItem>> loader, List<FileItem> data) {
+        mAdapter.clear();
+        if (data != null && data.size() > 0) {
+            List<Card> cards = new ArrayList<>(data.size());
+            for (FileItem item : data) {
+                FileItemCard c = new FileItemCard(getActivity(), item);
+                mInjector.inject(c);
+                cards.add(c);
+            }
+            mAdapter.addAll(cards);
+        }
         setListShown(true);
     }
 
     @Override
-    @DebugLog
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
-        mAdapter.notifyDataSetChanged();
+    public void onLoaderReset(Loader<List<FileItem>> loader) {
+        mAdapter.clear();
     }
 
     /*
@@ -136,7 +131,7 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
 
     @Override
     public int getListViewLayout() {
-        return wantGridView() ? R.layout.card_gridview : R.layout.card_listview;
+        return R.layout.card_listview;
     }
 
     @Override

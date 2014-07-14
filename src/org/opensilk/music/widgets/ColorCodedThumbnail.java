@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
+import timber.log.Timber;
+
 /**
  * Created by drew on 6/23/14.
  */
@@ -47,16 +49,23 @@ public class ColorCodedThumbnail extends TextView {
     }
 
     public void init(String title) {
-        if (TextUtils.isEmpty(title)) {
-            throw new NullPointerException("Cannot init with null title");
+        Integer color = null;
+        if (!TextUtils.isEmpty(title)) {
+            if (title.equals("..")) {
+                setText(title);
+            } else {
+                Character c = title.toUpperCase().charAt(0);
+                setText(c.toString());
+                if (c.compareTo('A') < 0 && c.compareTo('0') >= 0) {
+                    color = COLORS.get(COLORS.keyAt(Integer.valueOf(c.toString())));
+                } else {
+                    color = COLORS.get(c);
+                }
+            }
         }
-        Character c = title.toUpperCase().charAt(0);
-        Integer color = COLORS.get(c);
         if (color == null) {
             color = R.color.red;
         }
-//        setTextColor(getResources().getColor(color));
-        setText(c.toString());
         setBackgroundColor(getResources().getColor(color));
     }
 

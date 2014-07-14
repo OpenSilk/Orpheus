@@ -32,33 +32,13 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 6/30/14.
  */
-public abstract class AbsGenericCard<D> extends Card {
-
-    protected final D mData;
-
-    @InjectView(R.id.card_title)
-    protected TextView mCardTitle;
-    @InjectView(R.id.card_subtitle)
-    protected TextView mCardSubTitle;
+public abstract class AbsGenericCard<D> extends AbsBasicCard<D> {
 
     public AbsGenericCard(Context context, D data, int innerLayout) {
-        super(context, innerLayout);
-        mData = data;
-        init();
+        super(context, data, innerLayout);
     }
 
-    protected abstract void init();
-    protected abstract void onInnerViewSetup();
     protected abstract void onCreatePopupMenu(PopupMenu m);
-    protected abstract int getListLayout();
-    protected abstract int getGridLayout();
-
-
-    @Override
-    public void setupInnerViewElements(ViewGroup parent, View view) {
-        ButterKnife.inject(this, view);
-        onInnerViewSetup();
-    }
 
     @OnClick(R.id.card_overflow_button)
     public void onOverflowClicked(View v) {
@@ -67,19 +47,4 @@ public abstract class AbsGenericCard<D> extends Card {
         m.show();
     }
 
-    public D getData() {
-        return mData;
-    }
-
-    public void useGridLayout() {
-        setInnerLayout(getGridLayout());
-    }
-
-    public void useListLayout() {
-        setInnerLayout(getListLayout());
-    }
-
-    public boolean isGridStyle() {
-        return getInnerLayout() == getGridLayout();
-    }
 }

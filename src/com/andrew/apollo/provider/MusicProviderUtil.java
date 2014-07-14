@@ -69,7 +69,6 @@ public class MusicProviderUtil {
         if (c != null) {
             try {
                 if (c.moveToFirst()) {
-                    // TODO need albumARtist
                     return insertSong(context, CursorHelpers.makeLocalSongFromCursor(context, c));
                 }
             } finally {

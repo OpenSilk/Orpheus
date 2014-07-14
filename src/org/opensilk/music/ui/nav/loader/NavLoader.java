@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loaders;
+package org.opensilk.music.ui.nav.loader;
 
 import android.content.Context;
 
@@ -30,9 +30,9 @@ import java.util.List;
 /**
  * Created by drew on 6/16/14.
  */
-public class NavigationLoader extends WrappedAsyncTaskLoader<List<PluginInfo>> {
+public class NavLoader extends WrappedAsyncTaskLoader<List<PluginInfo>> {
 
-    public NavigationLoader(Context context) {
+    public NavLoader(Context context) {
         super(context);
     }
 

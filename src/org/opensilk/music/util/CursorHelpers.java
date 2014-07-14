@@ -33,10 +33,13 @@ import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.MusicApp;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.Song;
-import org.opensilk.music.artwork.ArtworkProvider;
+import org.opensilk.music.AppPreferences;
+import org.opensilk.silkdagger.DaggerInjector;
+
+import java.util.Arrays;
 
 /**
  * Created by drew on 2/22/14.
@@ -209,10 +212,12 @@ public class CursorHelpers {
     }
 
     public static Cursor makeSingleLocalSongCursor(final Context context, long id) {
+        String [] selectionArgs = Arrays.copyOf(SelectionArgs.LOCAL_SONG, SelectionArgs.LOCAL_SONG.length+1);
+        selectionArgs[selectionArgs.length-1] = String.valueOf(id);
         return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_SONG + " AND " + MediaStore.Audio.Media._ID + "=?",
-                new String[]{SelectionArgs.LOCAL_SONG[0], SelectionArgs.LOCAL_SONG[1], String.valueOf(id)},
+                selectionArgs,
                 null);
     }
 
@@ -233,10 +238,16 @@ public class CursorHelpers {
     }
 
     public static Cursor getCursorForAutoShuffle(Context context) {
+        String selection = Selections.LOCAL_SONG;
+        AppPreferences prefs = ((DaggerInjector) context.getApplicationContext()).getObjectGraph().get(AppPreferences.class);
+        String deffldr = prefs.getString(AppPreferences.PREF_DEFAULT_MEDIA_FOLDER, null);
+        if (!TextUtils.isEmpty(deffldr)) {
+            selection += " AND " + MediaStore.Audio.Media.DATA + " like '" + deffldr + "%'";
+        }
         return context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 new String[]{BaseColumns._ID},
-                Selections.LOCAL_SONG,
+                selection,
                 SelectionArgs.LOCAL_SONG,
                 null);
     }

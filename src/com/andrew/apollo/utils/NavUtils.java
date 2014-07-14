@@ -25,15 +25,19 @@ import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
-import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.Playlist;
 
-import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.activities.ProfileSlidingActivity;
+import org.opensilk.music.ui.folder.FolderFragment;
 import org.opensilk.music.ui.fragments.SearchFragment;
+import org.opensilk.music.ui.home.HomeFragment;
+import org.opensilk.music.ui.library.LibraryFragment;
+import org.opensilk.music.ui.settings.SettingsPhoneActivity;
 
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 
@@ -197,8 +201,31 @@ public final class NavUtils {
      * 
      * @param activity The {@link Activity} to use.
      */
-    public static void goHome(final Activity activity) {
-        ((FragmentActivity) activity).getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main, new org.opensilk.music.ui.home.HomeFragment(), "home").commit();
+    public static void goHome(FragmentActivity activity) {
+        FragmentManager fm = activity.getSupportFragmentManager();
+        maybeClearBackstack(fm);
+        fm.beginTransaction().replace(R.id.main, new HomeFragment(), "home").commit();
+    }
+
+    public static void openFoldersFragment(FragmentActivity activity) {
+        FragmentManager fm = activity.getSupportFragmentManager();
+        maybeClearBackstack(fm);
+        fm.beginTransaction().replace(R.id.main, new FolderFragment(), "folders").commit();
+    }
+
+    public static void openSettings(Activity activity) {
+        activity.startActivityForResult(new Intent(activity, SettingsPhoneActivity.class), 0);
+    }
+
+    public static void openLibrary(FragmentActivity activity, PluginInfo info) {
+        FragmentManager fm = activity.getSupportFragmentManager();
+        maybeClearBackstack(fm);
+        fm.beginTransaction().replace(R.id.main, LibraryFragment.newInstance(info), "library").commit();
+    }
+
+    public static void maybeClearBackstack(FragmentManager fm) {
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
     }
 }

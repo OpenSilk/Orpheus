@@ -19,12 +19,17 @@ package org.opensilk.music.ui.home.loader;
 import android.content.Context;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
+import android.text.TextUtils;
 
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.silkdagger.DaggerInjector;
+
+import java.util.Arrays;
 
 /**
  * Created by drew on 2/18/14.

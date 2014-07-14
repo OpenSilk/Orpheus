@@ -47,17 +47,6 @@ public class SongFragment extends BasePagerFragment {
     DrawerHelper mDrawerHelper;
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        //Shuffle card header view
-        ThemedCardView cardView = (ThemedCardView) getLayoutInflater(null).inflate(R.layout.list_card_layout, null);
-        // Set card (holds inner view)
-        cardView.setCard(new CardShuffle(getActivity()));
-        // Add card to list
-        ((ListView) getListView()).addHeaderView(cardView);
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (!mDrawerHelper.isDrawerOpen()) {
             inflater.inflate(R.menu.song_sort_by, menu);

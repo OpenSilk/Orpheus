@@ -24,7 +24,7 @@
         <Preference
             android:key="pref_equalizer"
             android:title="@string/menu_equalizer"
-            android:summary="@string/settings_interface_equalizer_summary"/>
+            android:summary="@string/settings_equalizer_summary"/>
 
     </PreferenceCategory>
 
@@ -36,6 +36,17 @@
             android:title="@string/settings_cast_enable_title"
             android:summary="@string/settings_cast_enable_summary"
             android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_storage_category">
+
+        <Preference
+            android:key="pref_default_media_folder"
+            android:title="@string/settings_storage_default_folder_title"
+            android:summary="@string/settings_storage_default_folder_summary"
+            />
 
     </PreferenceCategory>
 

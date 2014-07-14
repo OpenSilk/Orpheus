@@ -14,10 +14,26 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.home;
+package org.opensilk.music.ui.nav;
 
 /**
- * Created by drew on 7/2/14.
+ * Created by drew on 7/15/14.
  */
-public class FolderFragment {
+public class NavItem {
+
+    public enum Type {
+        HEADER,
+        ITEM,
+    }
+
+    public final Type type;
+    public final CharSequence title;
+    public final Runnable action;
+
+    public NavItem(Type type, CharSequence title, Runnable action) {
+        this.type = type;
+        this.title = title;
+        this.action = action;
+    }
+
 }

@@ -42,4 +42,10 @@ public class ActionBarControllerImpl implements ActionBarController {
         ActionBar ab = activity.getSupportActionBar();
         ab.setTitle(title);
     }
+
+    @Override
+    public void setSubTitle(CharSequence subTitle) {
+        ActionBar ab = activity.getSupportActionBar();
+        ab.setSubtitle(subTitle);
+    }
 }

@@ -35,7 +35,8 @@ import dagger.Provides;
         injects = {
                 QueueFragment.class,
         },
-        includes = CardModule.class
+        includes = CardModule.class,
+        complete = false
 )
 public class QueueModule {
 

@@ -41,7 +41,8 @@ import dagger.Provides;
         },
         includes = {
                 CardModule.class,
-        }
+        },
+        complete = false
 )
 public class ProfileModule {
 

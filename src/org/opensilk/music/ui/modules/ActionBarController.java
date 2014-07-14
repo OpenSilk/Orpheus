@@ -21,4 +21,5 @@ package org.opensilk.music.ui.modules;
  */
 public interface ActionBarController {
     public void setTitle(CharSequence title);
+    public void setSubTitle(CharSequence subTitle);
 }

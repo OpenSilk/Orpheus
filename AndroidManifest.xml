@@ -168,6 +168,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="org.opensilk.music.ui.folder.FolderPickerActivity"/>
+
         <!-- 1x1 Ultra-mini widget -->
         <receiver
             android:name="org.opensilk.music.appwidgets.MusicWidgetUltraMini"

@@ -42,7 +42,7 @@ public class CommandRunner extends AsyncTask<Void, Void, CharSequence> {
     @Override
     protected void onPostExecute(CharSequence charSequence) {
         if (!TextUtils.isEmpty(charSequence)) {
-            Toast.makeText(context, charSequence, Toast.LENGTH_SHORT);
+            Toast.makeText(context, charSequence, Toast.LENGTH_SHORT).show();
         }
     }
 }

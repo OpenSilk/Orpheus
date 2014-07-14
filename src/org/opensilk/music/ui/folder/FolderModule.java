@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package org.opensilk.music;
+package org.opensilk.music.ui.folder;
 
-import android.content.Context;
+import com.squareup.otto.Bus;
 
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.music.ui.activities.HomeModule;
+import org.opensilk.music.ui.cards.CardModule;
+import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Singleton;
 
@@ -26,31 +28,21 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by drew on 6/16/14.
+ * Created by drew on 7/15/14.
  */
-@Module (
-        library = true,
-        addsTo = GlobalModule.class,
+@Module(
+        addsTo = HomeModule.class,
         injects = {
-                AppPreferences.class,
-        }
+                FolderFragment.class,
+        },
+        complete = false,
+        includes = CardModule.class
 )
-public class AppModule {
+public class FolderModule {
 
-    private final MusicApp app;
-
-    public AppModule(MusicApp app) {
-        this.app = app;
-    }
-
-    @Provides @Singleton @ForApplication
-    public MusicApp provideApplication() {
-        return app;
-    }
-
-    @Provides @Singleton
-    public AppPreferences provideAppPreferences(@ForApplication Context context) {
-        return new AppPreferences(context);
+    @Provides @Singleton @ForFragment
+    public Bus provideFragmentBus() {
+        return new Bus("folders");
     }
 
 }

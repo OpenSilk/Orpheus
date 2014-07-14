@@ -1,10 +1,16 @@
 package org.opensilk.music.ui.settings;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
+import android.text.TextUtils;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
@@ -13,6 +19,14 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import org.opensilk.music.AppModule;
+import org.opensilk.music.ui.folder.FolderPickerActivity;
+import org.opensilk.music.AppPreferences;
+import org.opensilk.silkdagger.DaggerInjector;
+
+import javax.inject.Inject;
+
+import static android.app.Activity.RESULT_OK;
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
 import static org.opensilk.music.ui.activities.HomeSlidingActivity.RESULT_RESTART_FULL;
 
@@ -24,10 +38,27 @@ public class SettingsAudioFragment extends SettingsFragment implements
         Preference.OnPreferenceChangeListener {
 
     private static final String PREF_EQUALIZER = "pref_equalizer";
+    private static final String PREF_DEFAULT_FOLDER = AppPreferences.PREF_DEFAULT_MEDIA_FOLDER;
 
+    @Inject
+    protected AppPreferences mAppPreferences;
+    // TODO migrate to AppPreferences;
     private PreferenceUtils mPreferences;
     private Preference mEqualizer;
     private CheckBoxPreference mCasting;
+    private Preference mDefaultFolder;
+
+    @dagger.Module (
+            injects = { SettingsAudioFragment.class },
+            addsTo = AppModule.class
+    )
+    public static class Module {}
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((DaggerInjector) activity.getApplication()).getObjectGraph().plus(new Object[]{new Module()}).inject(this);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,6 +68,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
         mPrefSet = getPreferenceScreen();
         mEqualizer = mPrefSet.findPreference(PREF_EQUALIZER);
         mEqualizer.setOnPreferenceClickListener(this);
+        resolveEqualizer();
         mCasting = (CheckBoxPreference) mPrefSet.findPreference(PreferenceUtils.KEY_CAST_ENABLED);
         mCasting.setChecked(mPreferences.isCastEnabled());
         mCasting.setOnPreferenceChangeListener(this);
@@ -46,6 +78,12 @@ public class SettingsAudioFragment extends SettingsFragment implements
             mCasting.setEnabled(false);
             mCasting.setSummary(R.string.settings_gms_unavailable);
         }
+        mDefaultFolder = mPrefSet.findPreference(PREF_DEFAULT_FOLDER);
+        String folder = mAppPreferences.getString(PREF_DEFAULT_FOLDER, null);
+        if (!TextUtils.isEmpty(folder)) {
+            mDefaultFolder.setSummary(folder);
+        }
+        mDefaultFolder.setOnPreferenceClickListener(this);
     }
 
     @Override
@@ -61,8 +99,32 @@ public class SettingsAudioFragment extends SettingsFragment implements
                 NavUtils.openEffectsPanel(getActivity());
             }
             return true;
+        } else if (preference == mDefaultFolder) {
+            Intent i = new Intent(getActivity(), FolderPickerActivity.class);
+            String folder = mAppPreferences.getString(PREF_DEFAULT_FOLDER, null);
+            if (!TextUtils.isEmpty(folder)) {
+                i.putExtra(FolderPickerActivity.EXTRA_DIR, folder);
+            }
+            startActivityForResult(i, 0);
+            return true;
         }
         return false;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
+                final String folder = data.getStringExtra(FolderPickerActivity.EXTRA_DIR);
+                if (!TextUtils.isEmpty(folder)) {
+                    mDefaultFolder.setSummary(folder);
+                    mAppPreferences.putString(PREF_DEFAULT_FOLDER, folder);
+                }
+            } else  {
+                mDefaultFolder.setSummary(getString(R.string.settings_storage_default_folder_summary));
+                mAppPreferences.remove(PREF_DEFAULT_FOLDER);
+            }
+        }
     }
 
     @Override
@@ -96,5 +158,15 @@ public class SettingsAudioFragment extends SettingsFragment implements
                     }
                 })
                 .show();
+    }
+
+    private void resolveEqualizer() {
+        final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+        PackageManager pm = getActivity().getPackageManager();
+        ResolveInfo ri = pm.resolveActivity(effects, 0);
+        if (ri == null) {
+            mEqualizer.setEnabled(false);
+            mEqualizer.setSummary(R.string.settings_equalizer_none);
+        }
     }
 }
