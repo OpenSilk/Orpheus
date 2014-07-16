@@ -23,19 +23,10 @@ import com.andrew.apollo.model.Playlist;
  */
 public class PlaylistCardClick {
 
-    public enum Event {
-        OPEN,
-        PLAY_ALL,
-        SHUFFLE_ALL,
-        ADD_TO_QUEUE,
-        RENAME,
-        DELETE,
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final Playlist playlist;
 
-    public PlaylistCardClick(Event event, Playlist playlist) {
+    public PlaylistCardClick(CardEvent event, Playlist playlist) {
         this.event = event;
         this.playlist = playlist;
     }

@@ -27,14 +27,13 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.FileItemUtil;
+import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.FileItemCardClick;
-import org.opensilk.music.ui.cards.event.FileItemCardClick.Event;
 import org.opensilk.music.widgets.ColorCodedThumbnail;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -62,7 +61,7 @@ public class FileItemCard extends AbsGenericCard<FileItem> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new FileItemCardClick(Event.OPEN, mData));
+                mBus.post(new FileItemCardClick(CardEvent.OPEN, mData));
             }
         });
     }
@@ -104,7 +103,7 @@ public class FileItemCard extends AbsGenericCard<FileItem> {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     try {
-                        Event event = Event.valueOf(item.getItemId());
+                        CardEvent event = CardEvent.valueOf(item.getItemId());
                         mBus.post(new FileItemCardClick(event, mData));
                         return true;
                     } catch (IllegalArgumentException e) {

@@ -45,6 +45,7 @@ import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
 import org.opensilk.music.ui.cards.event.SongCardClick;
+import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
@@ -76,6 +77,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     private String mLibraryIdentity;
 
     private FragmentBusMonitor mFragmentMonitor;
+    private SongCardClickHandler mSongClickHandler;
 
     private boolean mFromSavedInstance;
 
@@ -95,7 +97,9 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         mLibrary.acquireService(mPluginInfo.componentName, this);
         // register with bus
         mFragmentMonitor = new FragmentBusMonitor();
+        mSongClickHandler = getObjectGraph().get(SongCardClickHandler.class);
         mFragmentBus.register(mFragmentMonitor);
+        mFragmentBus.register(mSongClickHandler);
         // restore state
         if (savedInstanceState != null) {
             mFromSavedInstance = true;
@@ -145,6 +149,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     @Override
     public void onDestroy() {
         mFragmentBus.unregister(mFragmentMonitor);
+        mFragmentBus.unregister(mSongClickHandler);
         mLibrary.releaseService();
         super.onDestroy();
     }
@@ -281,21 +286,6 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                     break;
                 case ADD_TO_QUEUE:
                     doBackgroundWork(li, BackgroundFetcherFragment.Action.ADD_QUEUE);
-                    break;
-            }
-        }
-
-        @Subscribe
-        public void onSongCardEvent(SongCardClick e) {
-            switch (e.event) {
-                case PLAY:
-                    MusicUtils.playAllSongs(getActivity(), new Song[]{e.song}, 0, false);
-                    break;
-                case PLAY_NEXT:
-                    MusicUtils.playNext(getActivity(), new Song[]{e.song});
-                    break;
-                case ADD_TO_QUEUE:
-                    MusicUtils.addSongsToQueue(getActivity(), new Song[]{e.song});
                     break;
             }
         }

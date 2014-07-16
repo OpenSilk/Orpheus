@@ -18,14 +18,12 @@ package org.opensilk.music.ui.cards;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
 

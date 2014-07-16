@@ -23,18 +23,10 @@ import com.andrew.apollo.model.Genre;
  */
 public class GenreCardClick {
 
-    public enum Event {
-        OPEN,
-        PLAY_ALL,
-        SHUFFLE_ALL,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final Genre genre;
 
-    public GenreCardClick(Event event, Genre genre) {
+    public GenreCardClick(CardEvent event, Genre genre) {
         this.event = event;
         this.genre = genre;
     }

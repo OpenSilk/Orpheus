@@ -32,7 +32,7 @@ import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
-import org.opensilk.music.ui.cards.event.ArtistCardClick.Event;
+import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -60,7 +60,7 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new ArtistCardClick(Event.OPEN, mData));
+                mBus.post(new ArtistCardClick(CardEvent.OPEN, mData));
             }
         });
     }
@@ -97,22 +97,12 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.popup_play_all:
-                        mBus.post(new ArtistCardClick(Event.PLAY_ALL, mData));
-                        return true;
-                    case R.id.popup_shuffle_all:
-                        mBus.post(new ArtistCardClick(Event.SHUFFLE_ALL, mData));
-                        return true;
-                    case R.id.popup_add_to_queue:
-                        mBus.post(new ArtistCardClick(Event.ADD_TO_QUEUE, mData));
-                        return true;
-                    case R.id.popup_add_to_playlist:
-                        mBus.post(new ArtistCardClick(Event.ADD_TO_PLAYLIST, mData));
-                        return true;
-                    case R.id.popup_delete:
-                        mBus.post(new ArtistCardClick(Event.DELETE, mData));
-                        return true;
+                try {
+                    CardEvent event = CardEvent.valueOf(item.getItemId());
+                    mBus.post(new ArtistCardClick(event, mData));
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
                 }
                 return false;
             }

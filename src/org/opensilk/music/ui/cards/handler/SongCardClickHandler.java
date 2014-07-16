@@ -18,7 +18,6 @@ package org.opensilk.music.ui.cards.handler;
 
 import android.support.v4.app.FragmentActivity;
 
-import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.ApolloUtils;
@@ -55,7 +54,7 @@ public class SongCardClickHandler {
         final Song song = e.song;
         Command c = null;
         switch (e.event) {
-            case PLAY:
+            case OPEN:
                 c = new Command() {
                     @Override
                     public CharSequence execute() {

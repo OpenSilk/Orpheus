@@ -23,19 +23,10 @@ import org.opensilk.music.api.model.Artist;
  */
 public class ArtistCardClick {
 
-    public enum Event {
-        OPEN,
-        PLAY_ALL,
-        SHUFFLE_ALL,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-        DELETE,
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final Artist artist;
 
-    public ArtistCardClick(Event event, Artist artist) {
+    public ArtistCardClick(CardEvent event, Artist artist) {
         this.event = event;
         this.artist = artist;
     }

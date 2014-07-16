@@ -30,6 +30,7 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.SongQueueCardClick;
 import org.opensilk.music.widgets.PlayingIndicator;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -60,7 +61,7 @@ public class SongQueueCard extends AbsBundleableCard<RecentSong> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.PLAY, mData));
+                mBus.post(new SongQueueCardClick(CardEvent.OPEN, mData));
             }
         });
     }
@@ -90,25 +91,12 @@ public class SongQueueCard extends AbsBundleableCard<RecentSong> {
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.popup_play_next:
-                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.PLAY_NEXT, mData));
-                        return true;
-                    case R.id.popup_remove_from_queue:
-                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.REMOVE_FROM_QUEUE, mData));
-                        return true;
-                    case R.id.popup_add_to_playlist:
-                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.ADD_TO_PLAYLIST, mData));
-                        return true;
-                    case R.id.popup_more_by_artist:
-                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.MORE_BY_ARTIST, mData));
-                        return true;
-                    case R.id.popup_set_ringtone:
-                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.SET_RINGTONE, mData));
-                        return true;
-                    case R.id.popup_delete:
-                        mBus.post(new SongQueueCardClick(SongQueueCardClick.Event.DELETE, mData));
-                        return true;
+                try {
+                    CardEvent event = CardEvent.valueOf(item.getItemId());
+                    mBus.post(new SongQueueCardClick(event, mData));
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
                 }
                 return false;
             }

@@ -18,7 +18,6 @@ package org.opensilk.music.ui.cards.handler;
 
 import android.support.v4.app.FragmentActivity;
 
-import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSong;
@@ -29,7 +28,6 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
-import org.opensilk.music.ui.library.FetchingProgressFragment;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
 import org.opensilk.silkdagger.qualifier.ForActivity;

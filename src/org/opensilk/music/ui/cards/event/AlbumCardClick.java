@@ -17,27 +17,16 @@
 package org.opensilk.music.ui.cards.event;
 
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.Artist;
 
 /**
  * Created by drew on 6/27/14.
  */
 public class AlbumCardClick {
 
-    public enum Event {
-        OPEN,
-        PLAY_ALL,
-        SHUFFLE_ALL,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-        MORE_BY_ARTIST,
-        DELETE,
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final Album album;
 
-    public AlbumCardClick(Event event, Album album) {
+    public AlbumCardClick(CardEvent event, Album album) {
         this.event = event;
         this.album = album;
     }

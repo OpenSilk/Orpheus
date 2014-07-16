@@ -23,18 +23,10 @@ import com.andrew.apollo.model.LocalSongGroup;
  */
 public class SongGroupCardClick {
 
-    public enum Event {
-        OPEN,
-        PLAY_ALL,
-        SHUFFLE_ALL,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final LocalSongGroup songGroup;
 
-    public SongGroupCardClick(Event event, LocalSongGroup songGroup) {
+    public SongGroupCardClick(CardEvent event, LocalSongGroup songGroup) {
         this.event = event;
         this.songGroup = songGroup;
     }

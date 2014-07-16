@@ -25,8 +25,8 @@ import com.andrew.apollo.R;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Folder;
+import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
-import org.opensilk.music.ui.cards.event.FolderCardClick.Event;
 import org.opensilk.music.widgets.ColorCodedThumbnail;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
@@ -59,7 +59,7 @@ public class FolderCard extends AbsBundleableCard<Folder> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new FolderCardClick(Event.OPEN, mData));
+                mBus.post(new FolderCardClick(CardEvent.OPEN, mData));
             }
         });
     }
@@ -79,16 +79,12 @@ public class FolderCard extends AbsBundleableCard<Folder> {
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.popup_play_all:
-                        mBus.post(new FolderCardClick(Event.PLAY_ALL, mData));
-                        return true;
-                    case R.id.popup_shuffle_all:
-                        mBus.post(new FolderCardClick(Event.SHUFFLE_ALL, mData));
-                        return true;
-                    case R.id.popup_add_to_queue:
-                        mBus.post(new FolderCardClick(Event.ADD_TO_QUEUE, mData));
-                        return true;
+                try {
+                    CardEvent event = CardEvent.valueOf(item.getItemId());
+                    mBus.post(new FolderCardClick(event, mData));
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
                 }
                 return false;
             }

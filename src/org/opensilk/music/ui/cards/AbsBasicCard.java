@@ -19,14 +19,12 @@ package org.opensilk.music.ui.cards;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**

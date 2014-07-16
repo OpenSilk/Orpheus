@@ -23,17 +23,10 @@ import org.opensilk.music.api.model.Folder;
  */
 public class FolderCardClick {
 
-    public enum Event {
-        OPEN,
-        PLAY_ALL,
-        SHUFFLE_ALL,
-        ADD_TO_QUEUE,
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final Folder folder;
 
-    public FolderCardClick(Event event, Folder folder) {
+    public FolderCardClick(CardEvent event, Folder folder) {
         this.event = event;
         this.folder = folder;
     }

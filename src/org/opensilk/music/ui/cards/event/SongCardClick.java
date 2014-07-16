@@ -23,20 +23,10 @@ import org.opensilk.music.api.model.Song;
  */
 public class SongCardClick {
 
-    public enum Event {
-        PLAY,
-        PLAY_NEXT,
-        ADD_TO_QUEUE,
-        ADD_TO_PLAYLIST,
-        MORE_BY_ARTIST,
-        SET_RINGTONE,
-        DELETE
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final Song song;
 
-    public SongCardClick(Event event, Song song) {
+    public SongCardClick(CardEvent event, Song song) {
         this.event = event;
         this.song = song;
     }

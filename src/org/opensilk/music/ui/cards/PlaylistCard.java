@@ -17,10 +17,6 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,19 +28,11 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
 
-import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick;
-import org.opensilk.music.ui.cards.event.PlaylistCardClick.Event;
-import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
 import org.opensilk.silkdagger.qualifier.ForFragment;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -76,7 +64,7 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new PlaylistCardClick(Event.OPEN, mData));
+                mBus.post(new PlaylistCardClick(CardEvent.OPEN, mData));
             }
         });
     }
@@ -117,22 +105,12 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.popup_play_all:
-                        mBus.post(new PlaylistCardClick(Event.PLAY_ALL, mData));
-                        break;
-                    case R.id.popup_shuffle_all:
-                        mBus.post(new PlaylistCardClick(Event.SHUFFLE_ALL, mData));
-                        break;
-                    case R.id.popup_add_to_queue:
-                        mBus.post(new PlaylistCardClick(Event.ADD_TO_QUEUE, mData));
-                        break;
-                    case R.id.popup_rename:
-                        mBus.post(new PlaylistCardClick(Event.RENAME, mData));
-                        break;
-                    case R.id.popup_delete:
-                        mBus.post(new PlaylistCardClick(Event.DELETE, mData));
-                        break;
+                try {
+                    CardEvent event = CardEvent.valueOf(item.getItemId());
+                    mBus.post(new PlaylistCardClick(event, mData));
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
                 }
                 return false;
             }

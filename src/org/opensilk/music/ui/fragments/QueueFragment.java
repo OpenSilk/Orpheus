@@ -373,7 +373,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
             final RecentSong song = e.song;
             Command c = null;
             switch (e.event) {
-                case PLAY:
+                case OPEN:
                     c = new Command() {
                         @Override
                         public CharSequence execute() {

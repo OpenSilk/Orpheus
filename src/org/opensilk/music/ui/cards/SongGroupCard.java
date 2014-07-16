@@ -17,31 +17,21 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.os.AsyncTask;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
 
-import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.ui.cards.event.GenreCardClick;
+import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.SongGroupCardClick;
-import org.opensilk.music.ui.cards.event.SongGroupCardClick.Event;
-import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.silkdagger.qualifier.ForFragment;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -72,7 +62,7 @@ public class SongGroupCard extends AbsGenericCard<LocalSongGroup> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new SongGroupCardClick(Event.OPEN, mData));
+                mBus.post(new SongGroupCardClick(CardEvent.OPEN, mData));
             }
         });
     }
@@ -103,19 +93,12 @@ public class SongGroupCard extends AbsGenericCard<LocalSongGroup> {
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.popup_play_all:
-                        mBus.post(new SongGroupCardClick(Event.PLAY_ALL, mData));
-                        return true;
-                    case R.id.popup_shuffle_all:
-                        mBus.post(new SongGroupCardClick(Event.SHUFFLE_ALL, mData));
-                        return true;
-                    case R.id.popup_add_to_queue:
-                        mBus.post(new SongGroupCardClick(Event.ADD_TO_QUEUE, mData));
-                        return true;
-                    case R.id.popup_add_to_playlist:
-                        mBus.post(new SongGroupCardClick(Event.ADD_TO_QUEUE, mData));
-                        return true;
+                try {
+                    CardEvent event = CardEvent.valueOf(item.getItemId());
+                    mBus.post(new SongGroupCardClick(event, mData));
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
                 }
                 return false;
             }

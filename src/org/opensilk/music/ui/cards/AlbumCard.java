@@ -26,12 +26,12 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalAlbum;
 import com.squareup.otto.Bus;
 
-import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
-import org.opensilk.music.ui.cards.event.AlbumCardClick.Event;
+import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -59,7 +59,7 @@ public class AlbumCard extends AbsBundleableCard<Album> {
         setOnClickListener(new OnCardClickListener() {
             @Override
             public void onClick(Card card, View view) {
-                mBus.post(new AlbumCardClick(Event.OPEN, mData));
+                mBus.post(new AlbumCardClick(CardEvent.OPEN, mData));
             }
         });
     }
@@ -89,25 +89,12 @@ public class AlbumCard extends AbsBundleableCard<Album> {
         m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.popup_play_all:
-                        mBus.post(new AlbumCardClick(Event.PLAY_ALL, mData));
-                        return true;
-                    case R.id.popup_shuffle_all:
-                        mBus.post(new AlbumCardClick(Event.SHUFFLE_ALL, mData));
-                        return true;
-                    case R.id.popup_add_to_queue:
-                        mBus.post(new AlbumCardClick(Event.ADD_TO_QUEUE, mData));
-                        return true;
-                    case R.id.popup_add_to_playlist:
-                        mBus.post(new AlbumCardClick(Event.ADD_TO_PLAYLIST, mData));
-                        return true;
-                    case R.id.popup_more_by_artist:
-                        mBus.post(new AlbumCardClick(Event.MORE_BY_ARTIST, mData));
-                        return true;
-                    case R.id.popup_delete:
-                        mBus.post(new AlbumCardClick(Event.DELETE, mData));
-                        return true;
+                try {
+                    CardEvent event = CardEvent.valueOf(item.getItemId());
+                    mBus.post(new AlbumCardClick(event, mData));
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
                 }
                 return false;
             }

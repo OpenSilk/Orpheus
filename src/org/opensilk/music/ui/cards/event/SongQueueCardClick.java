@@ -23,21 +23,10 @@ import com.andrew.apollo.model.RecentSong;
  */
 public class SongQueueCardClick {
 
-    public enum Event {
-        PLAY,
-        PLAY_NEXT,
-        ADD_TO_QUEUE,
-        REMOVE_FROM_QUEUE,
-        ADD_TO_PLAYLIST,
-        MORE_BY_ARTIST,
-        SET_RINGTONE,
-        DELETE
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final RecentSong song;
 
-    public SongQueueCardClick(Event event, RecentSong song) {
+    public SongQueueCardClick(CardEvent event, RecentSong song) {
         this.event = event;
         this.song = song;
     }

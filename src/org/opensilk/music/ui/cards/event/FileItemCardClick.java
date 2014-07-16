@@ -16,8 +16,6 @@
 
 package org.opensilk.music.ui.cards.event;
 
-import com.andrew.apollo.R;
-
 import org.opensilk.filebrowser.FileItem;
 
 /**
@@ -25,36 +23,10 @@ import org.opensilk.filebrowser.FileItem;
  */
 public class FileItemCardClick {
 
-    public enum Event {
-        OPEN(-1),
-        PLAY_NEXT(R.id.popup_play_next),
-        PLAY_ALL(R.id.popup_play_all),
-        SHUFFLE_ALL(R.id.popup_shuffle_all),
-        ADD_TO_QUEUE(R.id.popup_add_to_queue),
-        ADD_TO_PLAYLIST(R.id.popup_add_to_playlist),
-        SET_RINGTONE(R.id.popup_set_ringtone),
-        DELETE(R.id.popup_delete);
-
-        private final int resourceId;
-
-        private Event(int resourceId) {
-            this.resourceId = resourceId;
-        }
-
-        public static Event valueOf(int resourceId) {
-            for (Event e: Event.values()) {
-                if (e.resourceId == resourceId) {
-                    return e;
-                }
-            }
-            throw new IllegalArgumentException("Unknown id: "+ resourceId);
-        }
-    }
-
-    public final Event event;
+    public final CardEvent event;
     public final FileItem file;
 
-    public FileItemCardClick(Event event, FileItem file) {
+    public FileItemCardClick(CardEvent event, FileItem file) {
         this.event = event;
         this.file = file;
     }

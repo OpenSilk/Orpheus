@@ -18,7 +18,6 @@ package org.opensilk.music.ui.cards.handler;
 
 import android.support.v4.app.FragmentActivity;
 
-import com.andrew.apollo.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
