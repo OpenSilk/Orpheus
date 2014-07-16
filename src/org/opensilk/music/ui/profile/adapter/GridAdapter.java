@@ -27,7 +27,6 @@ import org.opensilk.silkdagger.DaggerInjector;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import it.gmariotti.cardslib.library.extra.staggeredgrid.internal.CardGridStaggeredArrayAdapter;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -35,11 +34,11 @@ import it.gmariotti.cardslib.library.internal.Card;
 /**
  * Created by drew on 7/10/14.
  */
-public class ArtistAdapter extends CardGridStaggeredArrayAdapter {
+public class GridAdapter extends CardGridStaggeredArrayAdapter {
 
     private final DaggerInjector mInjector;
 
-    public ArtistAdapter(Context context, DaggerInjector injector) {
+    public GridAdapter(Context context, DaggerInjector injector) {
         super(context, new ArrayList<Card>());
         mInjector = injector;
     }

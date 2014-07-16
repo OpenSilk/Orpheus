@@ -65,7 +65,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -110,7 +109,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
         // init adapter
         mAdapter = new QueueAdapter(getActivity(), this);
         //We have to set this manually since we arent using CardListView
-        mAdapter.setRowLayoutId(R.layout.list_dragsort_card_layout);
+        mAdapter.setRowLayoutId(R.layout.list_card_dragsort_layout);
         // Start the loader
         getLoaderManager().initLoader(0, null, this);
     }

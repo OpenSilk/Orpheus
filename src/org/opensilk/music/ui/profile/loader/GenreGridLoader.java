@@ -25,8 +25,6 @@ import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSongGroup;
 
-import org.opensilk.music.ui.cards.AlbumCard;
-import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.util.CursorHelpers;
 
 import java.util.ArrayList;

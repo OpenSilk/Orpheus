@@ -20,8 +20,6 @@ import android.content.Context;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
-import com.andrew.apollo.utils.PreferenceUtils;
-
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;

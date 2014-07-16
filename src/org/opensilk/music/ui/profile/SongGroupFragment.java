@@ -25,19 +25,14 @@ import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Genre;
-import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.ui.cards.GenreCard;
 import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.home.adapter.SongAdapter;
-import org.opensilk.music.ui.profile.adapter.SongGroupAdapter;
-import org.opensilk.music.ui.profile.loader.GenreSongLoader;
 import org.opensilk.music.ui.profile.loader.SongGroupLoader;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.silkdagger.qualifier.ForFragment;

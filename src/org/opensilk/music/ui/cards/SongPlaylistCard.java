@@ -17,24 +17,50 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 
 import org.opensilk.music.api.model.Song;
 
+import butterknife.ButterKnife;
+
 /**
  * Created by drew on 6/30/14.
  */
 public class SongPlaylistCard extends SongCard {
+
+    protected View mDragHandle;
+    private boolean mForLastAdded;
 
     public SongPlaylistCard(Context context, Song song) {
         super(context, song);
     }
 
     @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        mDragHandle = ButterKnife.findById((View)parent.getParent().getParent(), R.id.card_drag_element);
+        super.setupInnerViewElements(parent, view);
+    }
+
+    @Override
+    protected void onInnerViewSetup() {
+        super.onInnerViewSetup();
+        if (mForLastAdded) {
+            // hide drag handle on last added
+            mDragHandle.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
     protected void onCreatePopupMenu(PopupMenu m) {
         super.onCreatePopupMenu(m);
         m.getMenu().removeItem(R.id.popup_delete);
+    }
+
+    public void forLastAdded() {
+        mForLastAdded= true;
     }
 }

@@ -19,7 +19,7 @@ package org.opensilk.music.ui.profile.adapter;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.ui.cards.SongCard;
+import org.opensilk.music.ui.cards.SongPlaylistCard;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.DaggerInjector;
 
@@ -27,21 +27,27 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 
 /**
- * Created by drew on 7/16/14.
+ * Created by drew on 2/18/14.
  */
-public class SongGroupAdapter extends CardCursorAdapter {
+public class PlaylistAdapter extends CardCursorAdapter {
 
     private final DaggerInjector mInjector;
+    private final long mPlaylistId;
 
-    public SongGroupAdapter(Context context, DaggerInjector injector) {
-        super(context);
+    public PlaylistAdapter(Context context, DaggerInjector injector, long playlistId) {
+        super(context, null, 0);
         mInjector = injector;
+        mPlaylistId = playlistId;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        SongCard c = new SongCard(getContext(), CursorHelpers.makeLocalSongFromCursor(getContext(), cursor));
+        SongPlaylistCard c = new SongPlaylistCard(getContext(), CursorHelpers.makeLocalSongFromCursor(getContext(), cursor));
+        if (mPlaylistId == -2) {
+            c.forLastAdded();
+        }
         mInjector.inject(c);
         return c;
     }
+
 }

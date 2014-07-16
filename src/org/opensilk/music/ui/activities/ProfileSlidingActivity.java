@@ -26,13 +26,14 @@ import android.view.WindowManager;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
+import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
-import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
+import org.opensilk.music.ui.profile.PlaylistFragment;
 import org.opensilk.music.ui.profile.SongGroupFragment;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
@@ -75,7 +76,7 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         } else if (ACTION_ALBUM.equals(action)) {
             f = AlbumFragment.newInstance(b);
         } else if (ACTION_PLAYLIST.equals(action)) {
-            f = ProfilePlaylistFragment.newInstance(b);
+            f = PlaylistFragment.newInstance(b);
         } else if (ACTION_GENRE.equals(action)) {
             f = GenreFragment.newInstance(b);
         } else if (ACTION_SONG_GROUP.equals(action)) {

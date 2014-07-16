@@ -31,9 +31,8 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui.cards.GenreCard;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
-import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
-import org.opensilk.music.ui.profile.adapter.GenreAdapter;
+import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui.profile.loader.GenreGridLoader;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -59,7 +58,7 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
 
     private Genre mGenre;
 
-    protected GenreAdapter mAdapter;
+    protected GridAdapter mAdapter;
     @Inject @ForFragment
     protected Bus mBus;
 
@@ -73,7 +72,7 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mGenre = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new GenreAdapter(getActivity(), this);
+        mAdapter = new GridAdapter(getActivity(), this);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
         registerHandlers();

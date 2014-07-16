@@ -43,8 +43,8 @@ import hugo.weaving.DebugLog;
 
 /**
  * Detail view that mimics the io2014 app
- * layout consists of a hero image, sticky header, and staggered grid view
- * the hero is parallax(ed) on scroll of the grid view, once the header at the
+ * layout consists of a hero image, sticky header, and staggered grid (or list) view
+ * the hero is parallax(ed) on scroll of the grid/list view, once the header at the
  * base of the hero image reaches the top it sticks, and the background expands
  * to fill in the action bar area
  *
@@ -171,6 +171,7 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            // logic here derived from http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/
             if (visibleItemCount == 0) return;
             if (firstVisibleItem == 0) {
                 // parallax

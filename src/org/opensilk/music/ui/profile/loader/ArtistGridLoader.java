@@ -25,20 +25,13 @@ import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSongGroup;
-import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 7/10/14.

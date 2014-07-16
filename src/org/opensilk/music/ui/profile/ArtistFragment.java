@@ -33,7 +33,7 @@ import org.opensilk.music.ui.cards.ArtistCard;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
 import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
-import org.opensilk.music.ui.profile.adapter.ArtistAdapter;
+import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui.profile.loader.ArtistGridLoader;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
@@ -55,7 +55,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
 
     private LocalArtist mArtist;
 
-    protected ArtistAdapter mAdapter;
+    protected GridAdapter mAdapter;
     @Inject @ForFragment
     protected Bus mBus;
 
@@ -69,7 +69,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mArtist = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new ArtistAdapter(getActivity(), this);
+        mAdapter = new GridAdapter(getActivity(), this);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
         registerHandlers();
