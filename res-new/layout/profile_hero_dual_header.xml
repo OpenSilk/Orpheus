@@ -23,7 +23,8 @@
     <org.opensilk.music.widgets.HalfHeightFrameLayout
         android:id="@+id/hero_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/profile_sticky_header_height">
 
         <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
             android:id="@+id/hero_image"
@@ -42,9 +43,5 @@
             style="@style/Orpheus.Thumbnail"/>
 
     </org.opensilk.music.widgets.HalfHeightFrameLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/profile_sticky_header_height"/>
 
 </FrameLayout>
