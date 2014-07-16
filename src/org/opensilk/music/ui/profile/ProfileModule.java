@@ -33,11 +33,12 @@ import dagger.Provides;
 @Module(
         addsTo = ActivityModule.class,
         injects = {
-                ProfileGenreFragment.class,
                 ProfilePlaylistFragment.class,
                 AlbumFragment.class,
                 ArtistFragment.class,
                 GenreFragment.class,
+                GenreSongsFragment.class,
+                SongGroupFragment.class,
         },
         includes = {
                 CardModule.class,

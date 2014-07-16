@@ -30,6 +30,7 @@ import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.utils.PreferenceUtils;
 
@@ -267,7 +268,7 @@ public class CursorHelpers {
                 Projections.LOCAL_ALBUM,
                 Selections.LOCAL_ALBUMS(albumIds),
                 null,
-                MediaStore.Audio.Albums._ID);
+                MediaStore.Audio.Albums.ALBUM_KEY);
     }
 
     public static ArtInfo makeArtInfoFromLocalAlbumCursor(Cursor c) {

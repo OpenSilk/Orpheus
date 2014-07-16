@@ -23,6 +23,7 @@ import android.provider.MediaStore;
 import com.andrew.apollo.R;
 import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
 import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.utils.PreferenceUtils;
 
@@ -44,18 +45,18 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class ArtistGridLoader extends WrappedAsyncTaskLoader<List<Object>> {
 
-    private final long artistId;
+    private final LocalArtist artist;
 
-    public ArtistGridLoader(Context context, long artistId) {
+    public ArtistGridLoader(Context context, LocalArtist artist) {
         super(context);
-        this.artistId = artistId;
+        this.artist = artist;
     }
 
     @Override
     public List<Object> loadInBackground() {
         List<Object> objs = new ArrayList<>();
         // get all songs;
-        Cursor c = CursorHelpers.makeArtistSongsCursor(getContext(), artistId);
+        Cursor c = CursorHelpers.makeArtistSongsCursor(getContext(), artist.artistId);
         final List<Long> songIds = new ArrayList<>(c.getCount());
         final Set<Long> albumIdsSet = new HashSet<>(c.getCount());
         if (c != null) {
@@ -74,12 +75,12 @@ public class ArtistGridLoader extends WrappedAsyncTaskLoader<List<Object>> {
                 for (int ii=0; ii<albumsL.length; ii++) {
                     albums[ii] = albumsL[ii];
                 }
-                objs.add(new LocalSongGroup(getContext().getString(R.string.all_songs), songs, albums));
+                objs.add(new LocalSongGroup(getContext().getString(R.string.all_songs), artist.name, songs, albums));
             }
             c.close();
         }
         // get the albums
-        c = CursorHelpers.makeLocalArtistAlbumsCursor(getContext(), artistId);
+        c = CursorHelpers.makeLocalArtistAlbumsCursor(getContext(), artist.artistId);
         if (c != null) {
             if (c.moveToFirst()) {
                 do {

@@ -43,6 +43,18 @@ public class Selections {
     public static final String GENRE;
     public static final String GENRE_MEMBER;
     public static final String PLAYLIST_MEMBER;
+    public static String LOCAL_SONGS(long[] songIds) {
+        final StringBuilder selection = new StringBuilder();
+        selection.append(MediaStore.Audio.Media._ID + " IN (");
+        for (int i = 0; i < songIds.length; i++) {
+            selection.append(songIds[i]);
+            if (i < songIds.length - 1) {
+                selection.append(",");
+            }
+        }
+        selection.append(")");
+        return selection.toString();
+    }
 
     static {
         LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";

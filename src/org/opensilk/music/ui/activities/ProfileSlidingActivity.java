@@ -22,7 +22,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.Window;
 import android.view.WindowManager;
 
 import com.andrew.apollo.Config;
@@ -33,8 +32,8 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
-import org.opensilk.music.ui.profile.ProfileGenreFragment;
 import org.opensilk.music.ui.profile.ProfilePlaylistFragment;
+import org.opensilk.music.ui.profile.SongGroupFragment;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
@@ -48,6 +47,7 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     public static final String ACTION_ALBUM = "open_album";
     public static final String ACTION_PLAYLIST = "open_playlist";
     public static final String ACTION_GENRE = "open_genre";
+    public static final String ACTION_SONG_GROUP = "open_song_group";
 
     @Inject @ForActivity
     protected Bus mActivityBus; //See comment in BaseSlidingActivity
@@ -78,6 +78,8 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
             f = ProfilePlaylistFragment.newInstance(b);
         } else if (ACTION_GENRE.equals(action)) {
             f = GenreFragment.newInstance(b);
+        } else if (ACTION_SONG_GROUP.equals(action)) {
+            f = SongGroupFragment.newInstance(b);
         } else {
             finish();
         }

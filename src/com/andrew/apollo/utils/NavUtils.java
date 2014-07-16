@@ -28,6 +28,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
+import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.api.meta.PluginInfo;
@@ -139,6 +140,12 @@ public final class NavUtils {
         bundle.putParcelable(Config.EXTRA_DATA, genre);
 
         startProfileActivity(context, ProfileSlidingActivity.ACTION_GENRE, bundle);
+    }
+
+    public static void openSongGroupProfile(Context context, LocalSongGroup songGroup) {
+        final Bundle b = new Bundle();
+        b.putParcelable(Config.EXTRA_DATA, songGroup);
+        startProfileActivity(context, ProfileSlidingActivity.ACTION_SONG_GROUP, b);
     }
 
     /**

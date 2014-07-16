@@ -117,7 +117,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
 
     @Override
     public Loader<List<Object>> onCreateLoader(int id, Bundle args) {
-        return new ArtistGridLoader(getActivity(), mArtist.artistId);
+        return new ArtistGridLoader(getActivity(), mArtist);
     }
 
     @Override

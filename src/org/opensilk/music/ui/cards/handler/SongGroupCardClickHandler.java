@@ -58,7 +58,7 @@ public class SongGroupCardClickHandler {
         Command command = null;
         switch (e.event) {
             case OPEN:
-                //TODO
+                NavUtils.openSongGroupProfile(getActivity(), group);
                 return;
             case PLAY_ALL:
                 command = new Command() {
