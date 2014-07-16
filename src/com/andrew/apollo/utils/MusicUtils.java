@@ -1587,7 +1587,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use.
      * @param list The item(s) to delete.
      */
-    public static void deleteTracks(final Context context, final long[] list) {
+    public static CharSequence deleteTracks(final Context context, final long[] list) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             throw new RuntimeException("Stop calling from main thread");
         }
@@ -1609,21 +1609,18 @@ public final class MusicUtils {
         if (c != null) {
             // Step 1: Remove selected tracks from the current playlist, as well
             // as from the album art cache
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
-                long id = MusicProviderUtil.getRecentId(context, c.getLong(0));
-                if (id >= 0) {
-                    // Remove from current playlist
-                    removeQueueItem(id);
-                    // Remove from the favorites playlist
+            if (c.moveToFirst()) {
+                do {
+                    long id = MusicProviderUtil.getRecentId(context, c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)));
+                    if (id >= 0) {
+                        // Remove from current playlist
+                        removeQueueItem(id);
+                        // Remove from the favorites playlist
 //                FavoritesStore.getInstance(context).removeItem(id);
-                    // Remove any items in the recents database
-                    context.getContentResolver().delete(RECENTS_URI,
-                            MusicStore.Cols._ID + " = ?",
-                            new String[] {String.valueOf(id)}
-                    );
-                }
-                c.moveToNext();
+                        // Remove any items in the recents database
+                        MusicProviderUtil.removeFromRecents(context, id);
+                    }
+                } while (c.moveToNext());
             }
 
             // Step 2: Remove selected tracks from the database
@@ -1631,27 +1628,22 @@ public final class MusicUtils {
                     selection.toString(), null);
 
             // Step 3: Remove files from card
-            c.moveToFirst();
-            while (!c.isAfterLast()) {
-                final String name = c.getString(1);
-                final File f = new File(name);
-                try { // File.delete can throw a security exception
-                    if (!f.delete()) {
-                        // I'm not sure if we'd ever get here (deletion would
-                        // have to fail, but no exception thrown)
-                        Log.e("MusicUtils", "Failed to delete file " + name);
+            if (c.moveToFirst()) {
+                do {
+                    final String name = c.getString(1);
+                    final File f = new File(name);
+                    try { // File.delete can throw a security exception
+                        if (!f.delete()) {
+                            // I'm not sure if we'd ever get here (deletion would
+                            // have to fail, but no exception thrown)
+                            Log.e("MusicUtils", "Failed to delete file " + name);
+                        }
+                    } catch (final SecurityException ex) {
                     }
-                    c.moveToNext();
-                } catch (final SecurityException ex) {
-                    c.moveToNext();
-                }
+                } while (c.moveToNext());
             }
             c.close();
         }
-
-        final String message = makeLabel(context, R.plurals.NNNtracksdeleted, list.length);
-
-        Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
         // We deleted a number of tracks, which could affect any number of
         // things
         // in the media content domain, so update everything.
@@ -1660,5 +1652,9 @@ public final class MusicUtils {
         context.getContentResolver().notifyChange(MusicProvider.GENRES_URI, null);
         // Notify the lists to update
         refresh();
+
+        final String message = makeLabel(context, R.plurals.NNNtracksdeleted, list.length);
+
+        return message;
     }
 }

@@ -98,7 +98,7 @@ public class FileItemCard extends AbsGenericCard<FileItem> {
                 m.inflate(R.menu.popup_shuffle_all);
                 m.inflate(R.menu.popup_add_to_queue);
                 m.inflate(R.menu.popup_add_to_playlist);
-                m.inflate(R.menu.popup_delete);
+//                m.inflate(R.menu.popup_delete); //TODO
             }
             m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override

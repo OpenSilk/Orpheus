@@ -23,6 +23,9 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
+
 /**
  * Alert dialog used to delete tracks.
  * <p>
@@ -94,10 +97,15 @@ public class DeleteDialog extends DialogFragment {
                         // Remove the items from the image cache
 //                        mFetcher.removeFromCache(key); //TODO
                         // Delete the selected item(s)
-                        MusicUtils.deleteTracks(getActivity(), mItemList);
-                        if (getActivity() instanceof DeleteDialogCallback) {
-                            ((DeleteDialogCallback)getActivity()).onDelete(mItemList);
-                        }
+                        ApolloUtils.execute(false, new CommandRunner(getActivity(), new Command() {
+                            @Override
+                            public CharSequence execute() {
+                                return MusicUtils.deleteTracks(getActivity(), mItemList);
+                            }
+                        }));
+//                        if (getActivity() instanceof DeleteDialogCallback) {
+//                            ((DeleteDialogCallback)getActivity()).onDelete(mItemList);
+//                        }
                         dialog.dismiss();
                     }
                 }).setNegativeButton(R.string.cancel, new OnClickListener() {

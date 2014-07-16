@@ -247,6 +247,12 @@ public class MusicProviderUtil {
         return dataUri;
     }
 
+    public static void removeFromRecents(Context context, long recentsId) {
+        context.getContentResolver().delete(MusicProvider.RECENTS_URI,
+                MusicStore.Cols._ID + "=?",
+                new String[] {String.valueOf(recentsId)}
+        );
+    }
 
     public static ContentValues makeSongContentValues(Song song) {
         ContentValues values = new ContentValues(15);
