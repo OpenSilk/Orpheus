@@ -17,6 +17,7 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.View;
 
 import com.andrew.apollo.model.LocalSong;
@@ -26,28 +27,36 @@ import com.andrew.apollo.utils.MusicUtils;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
+import org.opensilk.music.util.CursorHelpers;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 7/10/14.
  */
-public class SongAlbumCard extends SongCard {
+public class SongCollectionCard extends SongCard {
 
     private int position;
-    private long albumId;
+    private Uri uri;
+    private String[] projection;
+    private String selection;
+    private String[] selectionArgs;
+    private String sortOrder;
 
-    public SongAlbumCard(Context context, Song song) {
+    public SongCollectionCard(Context context, Song song) {
         super(context, song);
-        useSimpleLayout();
     }
 
     public void setPosition(int position) {
         this.position = position;
     }
 
-    public void setAlbumId(long albumId) {
-        this.albumId = albumId;
+    public void setQueryParams(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        this.uri = uri;
+        this.projection = projection;
+        this.selection =selection;
+        this.selectionArgs = selectionArgs;
+        this.sortOrder = sortOrder;
     }
 
     @Override
@@ -58,7 +67,7 @@ public class SongAlbumCard extends SongCard {
                 Command c = new Command() {
                     @Override
                     public CharSequence execute() {
-                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getContext(), albumId);
+                        LocalSong[] list = CursorHelpers.makeLocalSongList(getContext(), uri, projection, selection, selectionArgs, sortOrder);
                         MusicUtils.playAllSongs(getContext(), list, position, false);
                         return null;
                     }

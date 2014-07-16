@@ -18,6 +18,7 @@ package org.opensilk.music.ui.profile;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
@@ -33,9 +34,14 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.AlbumCard;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
-import org.opensilk.music.ui.profile.adapter.AlbumAdapter;
+import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.AlbumSongLoader;
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
+import org.opensilk.music.util.Uris;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -54,7 +60,7 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
 
     private LocalAlbum mAlbum;
 
-    protected AlbumAdapter mAdapter;
+    protected SongCollectionAdapter mAdapter;
     @Inject @ForFragment
     protected Bus mBus;
 
@@ -68,7 +74,12 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAlbum = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new AlbumAdapter(getActivity(), this, mAlbum.albumId);
+        mAdapter = new SongCollectionAdapter(getActivity(), this, true,
+                Uris.LOCAL_ALBUM_SONGS,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_ALBUM_SONGS,
+                SelectionArgs.LOCAL_ALBUM_SONGS(mAlbum.albumId),
+                SortOrder.LOCAL_ALBUM_SONGS);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
         registerHandlers();

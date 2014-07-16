@@ -18,7 +18,9 @@ package org.opensilk.music.ui.profile.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
+import org.opensilk.music.ui.cards.SongCollectionCard;
 import org.opensilk.music.ui.cards.SongPlaylistCard;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -29,24 +31,29 @@ import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 /**
  * Created by drew on 2/18/14.
  */
-public class PlaylistAdapter extends CardCursorAdapter {
+public class PlaylistAdapter extends SongCollectionAdapter {
 
-    private final DaggerInjector mInjector;
-    private final long mPlaylistId;
+    private final long playlistId;
 
-    public PlaylistAdapter(Context context, DaggerInjector injector, long playlistId) {
-        super(context, null, 0);
-        mInjector = injector;
-        mPlaylistId = playlistId;
+    public PlaylistAdapter(Context context, DaggerInjector mInjector,
+                           Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder,
+                           long playlistId) {
+        super(context, mInjector, false, uri, projection, selection, selectionArgs, sortOrder);
+        this.playlistId = playlistId;
     }
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
         SongPlaylistCard c = new SongPlaylistCard(getContext(), CursorHelpers.makeLocalSongFromCursor(getContext(), cursor));
-        if (mPlaylistId == -2) {
+        c.setPosition(cursor.getPosition());
+        c.setQueryParams(uri, projection, selection, selectionArgs, sortOrder);
+        if (useSimpleLayout) {
+            c.useSimpleLayout();
+        }
+        if (playlistId == -2) {
             c.forLastAdded();
         }
-        mInjector.inject(c);
+        injector.inject(c);
         return c;
     }
 

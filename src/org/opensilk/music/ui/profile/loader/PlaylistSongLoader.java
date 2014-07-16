@@ -17,12 +17,13 @@
 package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
-import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
+import org.opensilk.music.util.Uris;
 
 /**
  * Created by drew on 2/24/14.
@@ -32,17 +33,17 @@ public class PlaylistSongLoader extends CursorLoader {
     public PlaylistSongLoader(Context context, long playlistId) {
         super(context);
         if (isLastAdded(playlistId)) {
-            setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            setUri(Uris.EXTERNAL_MEDIASTORE);
             setProjection(Projections.LOCAL_SONG);
             setSelection(Selections.LAST_ADDED);
             setSelectionArgs(SelectionArgs.LAST_ADDED(System.currentTimeMillis() / 1000 - (4 * 3600 * 24 * 7)));
-            setSortOrder(MediaStore.Audio.Media.DATE_ADDED + " DESC");
+            setSortOrder(SortOrder.LAST_ADDED);
         } else { //User generated playlist
-            setUri(MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId));
+            setUri(Uris.PLAYLIST(playlistId));
             setProjection(Projections.PLAYLIST_SONGS);
             setSelection(Selections.LOCAL_SONG);
             setSelectionArgs(SelectionArgs.LOCAL_SONG);
-            setSortOrder(MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
+            setSortOrder(SortOrder.PLAYLIST_SONGS);
         }
     }
 

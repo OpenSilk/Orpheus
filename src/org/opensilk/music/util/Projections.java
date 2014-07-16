@@ -30,6 +30,7 @@ public class Projections {
         //static
     }
 
+    public static final String[] ID_ONLY;
     public static final String[] LOCAL_SONG;
     public static final String[] LOCAL_ALBUM;
     public static final String[] LOCAL_ARTIST;
@@ -42,6 +43,9 @@ public class Projections {
     public static final String[] PLAYLIST_MEMBER;
 
     static {
+        ID_ONLY = new String[] {
+                BaseColumns._ID,
+        };
         LOCAL_SONG = new String[] {
                 BaseColumns._ID,
                 MediaStore.Audio.AudioColumns.TITLE,

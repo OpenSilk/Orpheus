@@ -30,6 +30,7 @@ import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
@@ -64,7 +65,7 @@ public class AlbumCardClickHandler {
                 command = new Command() {
                     @Override
                     public CharSequence execute() {
-                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
+                        LocalSong[] list = CursorHelpers.getLocalSongListForAlbum(getActivity(), album.albumId);
                         MusicUtils.playAllSongs(getActivity(), list, 0, false);
                         return null;
                     }
@@ -74,7 +75,7 @@ public class AlbumCardClickHandler {
                 command = new Command() {
                     @Override
                     public CharSequence execute() {
-                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
+                        LocalSong[] list = CursorHelpers.getLocalSongListForAlbum(getActivity(), album.albumId);
                         MusicUtils.playAllSongs(getActivity(), list, 0, true);
                         return null;
                     }
@@ -84,13 +85,13 @@ public class AlbumCardClickHandler {
                 command = new Command() {
                     @Override
                     public CharSequence execute() {
-                        LocalSong[] list = MusicUtils.getLocalSongListForAlbum(getActivity(), album.albumId);
+                        LocalSong[] list = CursorHelpers.getLocalSongListForAlbum(getActivity(), album.albumId);
                         return MusicUtils.addSongsToQueueSilent(getActivity(), list);
                     }
                 };
                 break;
             case ADD_TO_PLAYLIST:
-                long[] plist = MusicUtils.getSongListForAlbum(getActivity(), album.albumId);
+                long[] plist = CursorHelpers.getSongIdsForAlbum(getActivity(), album.albumId);
                 AddToPlaylistDialog.newInstance(plist)
                         .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
                 return;
@@ -98,7 +99,7 @@ public class AlbumCardClickHandler {
                 NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), album.artistName));
                 return;
             case DELETE:
-                long[] dlist = MusicUtils.getSongListForAlbum(getActivity(), album.albumId);
+                long[] dlist = CursorHelpers.getSongIdsForAlbum(getActivity(), album.albumId);
                 DeleteDialog.newInstance(album.name, dlist, null) //TODO
                         .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
                 return;

@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 /**
  * Created by drew on 6/30/14.
  */
-public class SongPlaylistCard extends SongCard {
+public class SongPlaylistCard extends SongCollectionCard {
 
     protected View mDragHandle;
     private boolean mForLastAdded;

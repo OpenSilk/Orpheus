@@ -23,6 +23,8 @@ import android.support.v4.content.CursorLoader;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
+import org.opensilk.music.util.Uris;
 
 /**
  * Created by drew on 7/16/14.
@@ -31,10 +33,10 @@ public class SongGroupLoader extends CursorLoader {
 
     public SongGroupLoader(Context context, long[] songIds) {
         super(context);
-        setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+        setUri(Uris.EXTERNAL_MEDIASTORE);
         setProjection(Projections.LOCAL_SONG);
-        setSelection(Selections.LOCAL_SONG + " AND " + Selections.LOCAL_SONGS(songIds));
-        setSelectionArgs(SelectionArgs.LOCAL_SONG);
-        setSortOrder(MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        setSelection(Selections.SONG_GROUP(songIds));
+        setSelectionArgs(SelectionArgs.SONG_GROUP);
+        setSortOrder(SortOrder.SONG_GROUP);
     }
 }

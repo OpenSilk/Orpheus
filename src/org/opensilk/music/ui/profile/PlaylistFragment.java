@@ -40,6 +40,11 @@ import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
 import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
+import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
+import org.opensilk.music.util.Uris;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -78,7 +83,27 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlaylist = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new PlaylistAdapter(getActivity(), this, mPlaylist.mPlaylistId);
+        final Uri uri;
+        final String[] projection;
+        final String selection;
+        final String[] selectionArgs;
+        final String sortOrder;
+        if (isLastAdded()) {
+            uri = Uris.EXTERNAL_MEDIASTORE;
+            projection = Projections.LOCAL_SONG;
+            selection = Selections.LAST_ADDED;
+            selectionArgs = SelectionArgs.LAST_ADDED(System.currentTimeMillis() / 1000 - (4 * 3600 * 24 * 7));
+            sortOrder = SortOrder.LAST_ADDED;
+        } else { //User generated playlist
+            uri = Uris.PLAYLIST(mPlaylist.mPlaylistId);
+            projection = Projections.PLAYLIST_SONGS;
+            selection = Selections.LOCAL_SONG;
+            selectionArgs = SelectionArgs.LOCAL_SONG;
+            sortOrder = SortOrder.PLAYLIST_SONGS;
+        }
+        mAdapter = new PlaylistAdapter(getActivity(), this,
+                uri, projection, selection, selectionArgs, sortOrder,
+                mPlaylist.mPlaylistId);
         //We have to set this manually since we arent using CardListView
         mAdapter.setRowLayoutId(R.layout.list_card_dragsort_layout);
         // start the loader

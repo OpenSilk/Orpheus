@@ -284,6 +284,86 @@ public class CursorHelpers {
                 MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
     }
 
+    public static LocalSong[] makeLocalSongList(Context context, Uri uri, String[] projection,
+                                                String selection, String[] selectionArgs, String sortOrder) {
+        Cursor c = context.getContentResolver().query(uri,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder);
+        if (c != null) {
+            LocalSong[] list = new LocalSong[c.getCount()];
+            if (c.moveToFirst()) {
+                int ii=0;
+                do {
+                    list[ii++] = makeLocalSongFromCursor(context, c);
+                } while (c.moveToNext());
+            }
+            c.close();
+            return list;
+        }
+        return new LocalSong[0];
+    }
+
+    public static long[] getSongIdsForCursor(Cursor cursor) {
+        if (cursor == null) {
+            return new long[0];
+        }
+        final int len = cursor.getCount();
+        final long[] list = new long[len];
+        cursor.moveToFirst();
+        int columnIndex = -1;
+        try {
+            columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+        } catch (final IllegalArgumentException notaplaylist) {
+            columnIndex = cursor.getColumnIndexOrThrow(BaseColumns._ID);
+        }
+        for (int i = 0; i < len; i++) {
+            list[i] = cursor.getLong(columnIndex);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        cursor = null;
+        return list;
+    }
+
+    public static long[] getSongIdsForAlbum(Context context, long albumid) {
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Projections.ID_ONLY,
+                Selections.LOCAL_ALBUM_SONGS,
+                SelectionArgs.LOCAL_ALBUM_SONGS(albumid),
+                SortOrder.LOCAL_ALBUM_SONGS);
+        if (cursor != null) {
+            final long[] mList = getSongIdsForCursor(cursor);
+            cursor.close();
+            cursor = null;
+            return mList;
+        }
+        return new long[0];
+    }
+
+    public static LocalSong[] getLocalSongListForAlbum(final Context context, final long id) {
+        Cursor cursor = context.getContentResolver().query(
+                Uris.LOCAL_ALBUM_SONGS,
+                Projections.LOCAL_SONG,
+                Selections.LOCAL_ALBUM_SONGS,
+                SelectionArgs.LOCAL_ALBUM_SONGS(id),
+                SortOrder.LOCAL_ALBUM_SONGS);
+        if (cursor != null) {
+            LocalSong[] songs = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii=0;
+                do {
+                    songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return songs;
+        }
+        return new LocalSong[0];
+    }
+
     public static Uri generateDataUri(long songId) {
         return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
     }

@@ -36,7 +36,7 @@ import dagger.Module;
                 FolderCard.class,
                 GenreCard.class,
                 PlaylistCard.class,
-                SongAlbumCard.class,
+                SongCollectionCard.class,
                 SongCard.class,
                 SongGroupCard.class,
                 SongPlaylistCard.class,

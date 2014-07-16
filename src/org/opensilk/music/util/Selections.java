@@ -43,7 +43,7 @@ public class Selections {
     public static final String GENRE;
     public static final String GENRE_MEMBER;
     public static final String PLAYLIST_MEMBER;
-    public static String LOCAL_SONGS(long[] songIds) {
+    public static String SONG_GROUP(long[] songIds) {
         final StringBuilder selection = new StringBuilder();
         selection.append(MediaStore.Audio.Media._ID + " IN (");
         for (int i = 0; i < songIds.length; i++) {
@@ -53,7 +53,7 @@ public class Selections {
             }
         }
         selection.append(")");
-        return selection.toString();
+        return LOCAL_SONG + " AND " + selection.toString();
     }
 
     static {

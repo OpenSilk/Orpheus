@@ -34,11 +34,15 @@ public class SelectionArgs {
     public static final String[] GENRE;
     public static final String[] GENRE_MEMBER;
     public static final String[] PLAYLIST_MEMBER;
+    public static final String[] PLAYLIST_SONGS;
+    public static final String[] SONG_GROUP;
 
     static {
         LOCAL_SONG = new String[] {"1","''"};
         GENRE = new String[] {"''"};
         GENRE_MEMBER = LOCAL_SONG;
         PLAYLIST_MEMBER = LOCAL_SONG;
+        PLAYLIST_SONGS = LOCAL_SONG;
+        SONG_GROUP = LOCAL_SONG;
     }
 }

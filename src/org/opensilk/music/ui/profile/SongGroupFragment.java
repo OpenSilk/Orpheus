@@ -33,8 +33,14 @@ import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.home.adapter.SongAdapter;
+import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.SongGroupLoader;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
+import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
+import org.opensilk.music.util.Uris;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -56,7 +62,7 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
 
     private LocalSongGroup mSongGroup;
 
-    protected SongAdapter mAdapter;
+    protected SongCollectionAdapter mAdapter;
     @Inject @ForFragment
     protected Bus mBus;
 
@@ -70,7 +76,12 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSongGroup = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new SongAdapter(getActivity(), this);
+        mAdapter = new SongCollectionAdapter(getActivity(), this, false,
+                Uris.EXTERNAL_MEDIASTORE,
+                Projections.LOCAL_SONG,
+                Selections.SONG_GROUP(mSongGroup.songIds),
+                SelectionArgs.SONG_GROUP,
+                SortOrder.SONG_GROUP);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
         registerHandlers();
