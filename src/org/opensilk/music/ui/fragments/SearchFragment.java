@@ -48,6 +48,7 @@ import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
+import org.opensilk.music.util.Uris;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -284,7 +285,7 @@ public class SearchFragment extends Fragment implements
                 // Get the artist nam
                 final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
                 // generate artwork uri
-                final Uri artworkUri = ContentUris.withAppendedId(CursorHelpers.ARTWORK_URI, Long.decode(id));
+                final Uri artworkUri = ContentUris.withAppendedId(Uris.ARTWORK_URI, Long.decode(id));
                 // Build the album as best we can
                 final Album album = new Album(id, name, artist, 0, null, artworkUri);
                 // return album list card

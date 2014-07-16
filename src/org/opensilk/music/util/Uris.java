@@ -23,6 +23,7 @@ import android.provider.MediaStore;
  * Created by drew on 7/16/14.
  */
 public class Uris {
+    public static final Uri ARTWORK_URI = Uri.parse("content://media/external/audio/albumart");
     public static final Uri EXTERNAL_MEDIASTORE = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     public static final Uri LOCAL_ALBUM_SONGS = EXTERNAL_MEDIASTORE;
     public static Uri PLAYLIST(long playlistId) {

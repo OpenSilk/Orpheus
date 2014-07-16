@@ -25,8 +25,9 @@ public class SelectionArgs {
     public static String[] LOCAL_ALBUM_SONGS(final long albumId) {
         return new String[] {"1", "''", String.valueOf(albumId)};
     }
-    public static String[] LAST_ADDED(final long time) {
-        return new String[] {"1", "''", String.valueOf(time)};
+    public static String[] LAST_ADDED() {
+        final int fourWeeks = 4 * 3600 * 24 * 7;
+        return new String[] {"1", "''", String.valueOf(System.currentTimeMillis() / 1000 - fourWeeks)};
     }
     public static String[] LOCAL_ARTIST_SONGS(final long artistId) {
         return new String[] {"1", String.valueOf(artistId)};

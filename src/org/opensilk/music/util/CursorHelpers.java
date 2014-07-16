@@ -47,12 +47,6 @@ import java.util.Arrays;
  */
 public class CursorHelpers {
 
-    public static final Uri ARTWORK_URI;
-
-    static {
-        ARTWORK_URI = Uri.parse("content://media/external/audio/albumart");
-    }
-
     private CursorHelpers() {
         // static
     }
@@ -132,7 +126,7 @@ public class CursorHelpers {
         // Copy the release year
         final String year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.FIRST_YEAR));
         // generate artwork Uri
-        final Uri artworkUri = ContentUris.withAppendedId(ARTWORK_URI, Long.decode(id));
+        final Uri artworkUri = generateArtworkUri(Long.decode(id));
         // Create a new album
         return new Album(id, albumName, artist, songCount, year, artworkUri);
     }
@@ -196,11 +190,10 @@ public class CursorHelpers {
     }
 
     public static Cursor makeLastAddedCursor(final Context context) {
-        final int fourWeeks = 4 * 3600 * 24 * 7;
         return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 Projections.LOCAL_SONG,
                 Selections.LAST_ADDED,
-                SelectionArgs.LAST_ADDED(System.currentTimeMillis() / 1000 - fourWeeks),
+                SelectionArgs.LAST_ADDED(),
                 MediaStore.Audio.Media.DATE_ADDED + " DESC");
     }
 
@@ -369,7 +362,7 @@ public class CursorHelpers {
     }
 
     public static Uri generateArtworkUri(long albumId) {
-        return ContentUris.withAppendedId(ARTWORK_URI, albumId);
+        return ContentUris.withAppendedId(Uris.ARTWORK_URI, albumId);
     }
 
     static long[] fromCsv(String csv) {

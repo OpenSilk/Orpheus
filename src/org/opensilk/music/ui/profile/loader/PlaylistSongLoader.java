@@ -36,7 +36,7 @@ public class PlaylistSongLoader extends CursorLoader {
             setUri(Uris.EXTERNAL_MEDIASTORE);
             setProjection(Projections.LOCAL_SONG);
             setSelection(Selections.LAST_ADDED);
-            setSelectionArgs(SelectionArgs.LAST_ADDED(System.currentTimeMillis() / 1000 - (4 * 3600 * 24 * 7)));
+            setSelectionArgs(SelectionArgs.LAST_ADDED());
             setSortOrder(SortOrder.LAST_ADDED);
         } else { //User generated playlist
             setUri(Uris.PLAYLIST(playlistId));

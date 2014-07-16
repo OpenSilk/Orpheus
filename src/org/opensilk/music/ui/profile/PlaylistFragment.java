@@ -92,7 +92,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
             uri = Uris.EXTERNAL_MEDIASTORE;
             projection = Projections.LOCAL_SONG;
             selection = Selections.LAST_ADDED;
-            selectionArgs = SelectionArgs.LAST_ADDED(System.currentTimeMillis() / 1000 - (4 * 3600 * 24 * 7));
+            selectionArgs = SelectionArgs.LAST_ADDED();
             sortOrder = SortOrder.LAST_ADDED;
         } else { //User generated playlist
             uri = Uris.PLAYLIST(mPlaylist.mPlaylistId);
