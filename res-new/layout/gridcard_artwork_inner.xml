@@ -34,15 +34,14 @@
         android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingRight="8dp"
-        android:paddingLeft="8dp"
-        android:minHeight="48dp">
+        android:minHeight="58dp">
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -63,11 +62,9 @@
 
         <ImageButton
             android:id="@+id/card_overflow_button"
-            android:layout_width="36dp"
             android:layout_height="match_parent"
-            style="@style/Orpheus.MenuButton"
-            android:src="@drawable/ic_menu_overflow_card_holo_dark"
-            android:contentDescription="@null" />
+            android:layout_width="wrap_content"
+            style="@style/Orpheus.MenuButton.Card"/>
 
     </LinearLayout>
 

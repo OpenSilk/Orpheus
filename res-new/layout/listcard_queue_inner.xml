@@ -62,10 +62,8 @@
     <!-- OverflowButton -->
     <org.opensilk.music.widgets.CardOverflowButton
         android:id="@+id/card_overflow_button"
-        android:layout_width="48dp"
-        android:layout_height="@dimen/list_card_thumbnail"
-        android:paddingRight="20dp"
-        style="@style/Orpheus.MenuButton"
-        android:contentDescription="@null" />
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        style="@style/Orpheus.MenuButton.Card"/>
 
 </LinearLayout>

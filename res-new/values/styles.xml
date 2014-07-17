@@ -140,11 +140,22 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="Orpheus.MenuButton" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+    <style name="Orpheus.MenuButton" parent="Widget.AppCompat.ActionButton.Overflow">
         <item name="android:layout_gravity">right|center_vertical</item>
+        <item name="android:src">@drawable/ic_menu_moreoverflow_holo_dark</item>
+    </style>
+
+    <style name="Orpheus.MenuButton.Card">
+        <item name="android:background">?android:selectableItemBackground</item>
+        <item name="android:src">@drawable/ic_menu_overflow_card_holo_dark</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingRight">8dip</item>
+        <item name="android:paddingStart">8dip</item>
+        <item name="android:paddingEnd">8dip</item>
+        <item name="android:minWidth">36dp</item>
+        <item name="android:minHeight">48dp</item>
         <item name="android:gravity">center</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:scaleType">center</item>
     </style>
 
     <style name="Orpheus.MenuButton.MediaRouter">

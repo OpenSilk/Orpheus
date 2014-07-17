@@ -86,16 +86,22 @@
 
                 <org.opensilk.music.widgets.RepeatingImageButton
                     android:id="@+id/header_action_button_previous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@string/accessibility_prev"/>
 
                 <org.opensilk.music.widgets.PlayPauseButton
                     android:id="@+id/header_action_button_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@string/accessibility_play"/>
 
                 <org.opensilk.music.widgets.RepeatingImageButton
                     android:id="@+id/header_action_button_next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@string/accessibility_next"/>
 
@@ -113,11 +119,15 @@
 
                 <org.opensilk.music.widgets.QueueButton
                     android:id="@+id/header_switch_queue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@null"/>
 
                 <org.opensilk.music.widgets.HeaderOverflowButton
                     android:id="@+id/header_overflow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/Orpheus.MenuButton"
                     android:contentDescription="@null" />
 

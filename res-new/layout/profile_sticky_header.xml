@@ -61,9 +61,9 @@
 
         <ImageButton
             android:id="@+id/profile_header_overflow"
-            style="@style/Orpheus.MenuButton"
-            android:src="@drawable/ic_menu_overflow_card_holo_dark"
-            android:contentDescription="@null" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Orpheus.MenuButton"/>
 
     </LinearLayout>
 
