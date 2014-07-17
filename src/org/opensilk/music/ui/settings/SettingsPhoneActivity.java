@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 
 import com.andrew.apollo.R;
@@ -14,7 +16,7 @@ import hugo.weaving.DebugLog;
 /**
  * Created by andrew on 2/28/14.
  */
-public class SettingsPhoneActivity extends Activity {
+public class SettingsPhoneActivity extends ActionBarActivity {
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -24,6 +26,10 @@ public class SettingsPhoneActivity extends Activity {
         setTheme(themeHelper.getTheme());
         setContentView(R.layout.settings_fragment_activity);
 
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_action_arrow_left_white);
+
         if (savedInstanceState == null) {
             //Load the main fragment
             getFragmentManager().beginTransaction()
@@ -31,7 +37,6 @@ public class SettingsPhoneActivity extends Activity {
                     .commit();
         }
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
