@@ -36,6 +36,7 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui.cards.PlaylistCard;
 import org.opensilk.music.ui.cards.SongPlaylistCard;
+import org.opensilk.music.ui.cards.handler.PlaylistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
 import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
@@ -230,14 +231,18 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
         return mPlaylist.mPlaylistId == -2;
     }
 
+    private PlaylistCardClickHandler mPlaylistHandler;
     private SongCardClickHandler mSongHandler;
 
     private void registerHandlers() {
+        mPlaylistHandler = getObjectGraph().get(PlaylistCardClickHandler.class);
         mSongHandler = getObjectGraph().get(SongCardClickHandler.class);
+        mBus.register(mPlaylistHandler);
         mBus.register(mSongHandler);
     }
 
     private void unregisterHandlers() {
+        mBus.unregister(mPlaylistHandler);
         mBus.unregister(mSongHandler);
     }
 }

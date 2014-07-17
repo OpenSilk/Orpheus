@@ -32,6 +32,7 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
+import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.home.adapter.SongAdapter;
 import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.SongGroupLoader;
@@ -167,14 +168,18 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
         mAdapter.swapCursor(null);
     }
 
+    private SongGroupCardClickHandler mSongGroupHandler;
     private SongCardClickHandler mSongHandler;
 
     private void registerHandlers() {
+        mSongGroupHandler = getObjectGraph().get(SongGroupCardClickHandler.class);
         mSongHandler = getObjectGraph().get(SongCardClickHandler.class);
+        mBus.register(mSongGroupHandler);
         mBus.register(mSongHandler);
     }
 
     private void unregisterHandlers() {
+        mBus.unregister(mSongGroupHandler);
         mBus.unregister(mSongHandler);
     }
 }
