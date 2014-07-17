@@ -81,7 +81,6 @@ public class SongQueueCard extends AbsBundleableCard<RecentSong> {
     @Override
     protected void onCreatePopupMenu(PopupMenu m) {
         m.inflate(R.menu.popup_play_next);
-        m.inflate(R.menu.popup_remove_from_queue); //XXX different from SongCard
         if (mData.isLocal) {
             m.inflate(R.menu.popup_add_to_playlist);
             m.inflate(R.menu.popup_more_by_artist);

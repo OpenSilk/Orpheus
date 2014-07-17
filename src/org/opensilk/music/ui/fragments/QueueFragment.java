@@ -396,15 +396,6 @@ public class QueueFragment extends ScopedDaggerFragment implements
                         }
                     };
                     break;
-                case REMOVE_FROM_QUEUE:
-                    c = new Command() {
-                        @Override
-                        public CharSequence execute() {
-                            MusicUtils.removeQueueItem(song.recentId);
-                            return null;
-                        }
-                    };
-                    break;
                 case ADD_TO_PLAYLIST:
                     if (song.isLocal) {
                         try {
