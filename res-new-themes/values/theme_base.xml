@@ -37,8 +37,6 @@
 
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
-        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
-        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
 
         <item name="android:colorBackground">@drawable/background_holo_light</item>
@@ -57,8 +55,6 @@
     <style name="Theme.Profile.Light" parent="Theme.Profile.LightBase">
         <!-- should make pre-kitkat selectable items have the grey isntead of blue -->
         <item name="android:selectableItemBackground">@drawable/selectable_background_orpheus</item>
-        <item name="android:textAppearanceListItem">@style/TextAppearanceList.Title</item>
-        <item name="android:textAppearanceListItemSmall">@style/TextAppearanceList.SubTitle</item>
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
 
         <item name="android:colorBackground">@drawable/background_holo_light</item>

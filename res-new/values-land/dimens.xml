@@ -19,7 +19,7 @@
     <!-- Profile -->
     <!-- 40% sw -->
     <dimen name="profile_header_height">160dp</dimen>
-    <dimen name="profile_sticky_header_height">48dp</dimen>
+    <dimen name="profile_sticky_header_height">56dp</dimen>
 
     <!-- Daydream -->
     <dimen name="dream_art_size">200dp</dimen>

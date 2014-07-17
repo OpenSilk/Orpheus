@@ -20,15 +20,16 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:minHeight="?android:listPreferredItemHeight">
 
     <TextView
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
         android:id="@+id/card_title"
-        android:layout_marginLeft="16dp"
-        android:textAppearance="?android:textAppearanceListItem"
+        android:textAppearance="@style/TextAppearanceList.Title"
         style="@style/SingleLineTextView" />
 
     <TextView
@@ -36,8 +37,8 @@
         android:layout_height="wrap_content"
         android:gravity="right"
         android:id="@+id/card_subtitle"
-        android:layout_marginRight="8dp"
-        android:textAppearance="?android:textAppearanceListItemSmall"
+        android:paddingRight="4dp"
+        android:textAppearance="@style/TextAppearanceList.SubTitle"
         style="@style/SingleLineTextView" />
 
     <!-- OverflowButton -->
@@ -45,6 +46,7 @@
         android:id="@+id/card_overflow_button"
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
+        android:paddingRight="16dp"
         style="@style/Orpheus.MenuButton.Card"/>
 
 </LinearLayout>

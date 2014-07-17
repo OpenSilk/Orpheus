@@ -20,7 +20,7 @@
     xmlns:card="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <org.opensilk.music.widgets.ColorCodedThumbnail
         android:id="@+id/folder_thumb"
@@ -29,13 +29,17 @@
         android:background="@android:color/transparent"
         android:textAppearance="?android:textAppearanceLarge"
         android:textSize="32sp"
-        style="@style/Orpheus.Thumbnail"/>
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="16dp"/>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
         android:orientation="vertical"
         android:gravity="center_vertical">
 
@@ -48,14 +52,15 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:id="@+id/card_title"
-                android:textAppearance="?android:textAppearanceListItem"
+                android:textAppearance="@style/TextAppearanceList.Title"
                 style="@style/SingleLineTextView" />
 
             <TextView
                 android:id="@+id/card_info1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceListItemSmall"
+                android:paddingRight="4dp"
+                android:textAppearance="@style/TextAppearanceList.SubTitle"
                 style="@style/SingleLineTextView"
                 android:visibility="gone"/>
 
@@ -70,14 +75,15 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:id="@+id/card_subtitle"
-                android:textAppearance="?android:textAppearanceListItemSmall"
+                android:textAppearance="@style/TextAppearanceList.SubTitle"
                 style="@style/SingleLineTextView" />
 
             <TextView
                 android:id="@+id/card_info2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceListItemSmall"
+                android:paddingRight="4dp"
+                android:textAppearance="@style/TextAppearanceList.SubTitle"
                 style="@style/SingleLineTextView"
                 android:visibility="gone"/>
 
@@ -90,6 +96,7 @@
         android:id="@+id/card_overflow_button"
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
+        android:paddingRight="16dp"
         style="@style/Orpheus.MenuButton.Card"/>
 
 </LinearLayout>

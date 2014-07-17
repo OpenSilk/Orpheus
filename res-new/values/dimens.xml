@@ -10,13 +10,13 @@
     <!-- og 3dp -->
     <dimen name="card_shadow_height">4dp</dimen>
     <!-- og 8dp -->
-    <dimen name="list_card_padding_left">4dp</dimen>
+    <dimen name="list_card_padding_left">0dp</dimen>
     <!-- og 8dp -->
-    <dimen name="list_card_padding_right">4dp</dimen>
+    <dimen name="list_card_padding_right">0dp</dimen>
     <!-- og 6dp -->
-    <dimen name="list_card_padding_bottom">4dp</dimen>
+    <dimen name="list_card_padding_bottom">0dp</dimen>
     <!-- og 2dp -->
-    <dimen name="list_card_padding_top">4dp</dimen>
+    <dimen name="list_card_padding_top">0dp</dimen>
 
     <!--
         ===Card Grid===
@@ -80,5 +80,5 @@
     <!--
         Profile
     -->
-    <dimen name="profile_sticky_header_height">56dp</dimen>
+    <dimen name="profile_sticky_header_height">72dp</dimen>
 </resources>

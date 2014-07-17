@@ -18,6 +18,7 @@ package org.opensilk.music.ui.cards;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
@@ -34,6 +35,8 @@ public class FolderPickerCard extends AbsBasicCard<FileItem> {
 
     @InjectView(R.id.folder_thumb)
     protected ColorCodedThumbnail mThumbnail;
+    @InjectView(R.id.card_info2)
+    protected TextView mInfo2;
 
     public FolderPickerCard(Context context, FileItem data) {
         super(context, data, R.layout.listcard_folderpicker_inner);
@@ -53,8 +56,11 @@ public class FolderPickerCard extends AbsBasicCard<FileItem> {
         if (mData.getMediaType() != FileItem.MediaType.UP_DIRECTORY) {
             mCardSubTitle.setVisibility(View.VISIBLE);
             mCardSubTitle.setText(FileItemUtil.prettyPrintSize(getContext(), mData.getSize(), mData.getMediaType()));
+            mInfo2.setVisibility(View.VISIBLE);
+            mInfo2.setText(FileItemUtil.prettyPrintDate(getContext(), mData.getDate()));
         } else {
             mCardSubTitle.setVisibility(View.GONE);
+            mInfo2.setVisibility(View.GONE);
         }
         mThumbnail.init(mData.getTitle());
     }

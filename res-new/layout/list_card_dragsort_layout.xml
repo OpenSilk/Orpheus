@@ -18,17 +18,18 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/card_drag_element"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="8dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:scaleType="center"
         android:src="@drawable/card_drag"/>
 
     <it.gmariotti.cardslib.library.view.CardView
