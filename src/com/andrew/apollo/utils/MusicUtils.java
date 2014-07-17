@@ -1316,109 +1316,13 @@ public final class MusicUtils {
     }
 
     /**
-     * @param context The {@link Context} to sue
-     * @param playlistId The playlist Id
-     * @return The track list for a playlist
-     */
-    public static LocalSong[] getLocalSongListForPlaylist(final Context context, final long playlistId) {
-        Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId),
-                Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG,
-                SelectionArgs.LOCAL_SONG,
-                MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER);
-        if (cursor != null) {
-            final LocalSong[] list = new LocalSong[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                int ii=0;
-                do {
-                    list[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-            return list;
-        }
-        return sEmptyLocalSongList;
-    }
-
-    /**
      * Plays a user created playlist.
      *
      * @param context The {@link Context} to use.
      * @param playlistId The playlist Id.
      */
     public static void playPlaylist(final Context context, final long playlistId, final boolean forceShuffle) {
-        playAllSongs(context, getLocalSongListForPlaylist(context, playlistId), 0, forceShuffle);
-    }
-
-    /**
-     * @param cursor The {@link Cursor} used to gather the list in our favorites
-     *            database
-     * @return The song list for the favorite playlist
-     */
-    public final static long[] getSongListForFavoritesCursor(Cursor cursor) {
-//        if (cursor == null) {
-            return sEmptyList;
-//        }
-//        final int len = cursor.getCount();
-//        final long[] list = new long[len];
-//        cursor.moveToFirst();
-//        int colidx = -1;
-//        try {
-//            colidx = cursor.getColumnIndexOrThrow(FavoriteColumns.ID);
-//        } catch (final Exception ignored) {
-//        }
-//        for (int i = 0; i < len; i++) {
-//            list[i] = cursor.getLong(colidx);
-//            cursor.moveToNext();
-//        }
-//        cursor.close();
-//        cursor = null;
-//        return list;
-    }
-
-    /**
-     * @param context The {@link Context} to use
-     * @return The song list from our favorites database
-     */
-    public final static long[] getSongListForFavorites(final Context context) {
-//        Cursor cursor = FavoritesLoader.makeFavoritesCursor(context);
-//        if (cursor != null) {
-//            final long[] list = getSongListForFavoritesCursor(cursor);
-//            cursor.close();
-//            cursor = null;
-//            return list;
-//        }
-        return sEmptyList;
-    }
-
-    /**
-     * Play the songs that have been marked as favorites.
-     *
-     * @param context The {@link Context} to use
-     */
-    public static void playFavorites(final Context context, final boolean forceShuffle) {
-        playAll(context, getSongListForFavorites(context), 0, forceShuffle);
-    }
-
-    /**
-     * @param context The {@link Context} to use
-     * @return The song list for the last added playlist
-     */
-    public static LocalSong[] getLocalSongListForLastAdded(final Context context) {
-        final Cursor cursor = CursorHelpers.makeLastAddedCursor(context);
-        if (cursor != null) {
-            final LocalSong[] list = new LocalSong[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                int ii=0;
-                do {
-                    list[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-            return list;
-        }
-        return sEmptyLocalSongList;
+        playAllSongs(context, CursorHelpers.getLocalSongListForPlaylist(context, playlistId), 0, forceShuffle);
     }
 
     /**
@@ -1427,7 +1331,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use
      */
     public static void playLastAdded(final Context context, final boolean forceShuffle) {
-        playAllSongs(context, getLocalSongListForLastAdded(context), 0, forceShuffle);
+        playAllSongs(context, CursorHelpers.getLocalSongListForLastAdded(context), 0, forceShuffle);
     }
 
     /**

@@ -36,6 +36,7 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
@@ -95,9 +96,9 @@ public class PlaylistCardClickHandler {
                     public CharSequence execute() {
                         LocalSong[] list;
                         if (playlist.mPlaylistId == -2) {
-                            list = MusicUtils.getLocalSongListForLastAdded(getActivity());
+                            list = CursorHelpers.getLocalSongListForLastAdded(getActivity());
                         } else {
-                            list = MusicUtils.getLocalSongListForPlaylist(getActivity(), playlist.mPlaylistId);
+                            list = CursorHelpers.getLocalSongListForPlaylist(getActivity(), playlist.mPlaylistId);
                         }
                         return MusicUtils.addSongsToQueueSilent(getActivity(), list);
                     }

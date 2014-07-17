@@ -47,6 +47,14 @@ import java.util.Arrays;
  */
 public class CursorHelpers {
 
+    private static final long[] sEmptyList;
+    private static final LocalSong[] sEmptySongList;
+
+    static {
+        sEmptyList = new long[0];
+        sEmptySongList = new LocalSong[0];
+    }
+
     private CursorHelpers() {
         // static
     }
@@ -300,7 +308,7 @@ public class CursorHelpers {
 
     public static long[] getSongIdsForCursor(Cursor cursor) {
         if (cursor == null) {
-            return new long[0];
+            return sEmptyList;
         }
         final int len = cursor.getCount();
         final long[] list = new long[len];
@@ -333,7 +341,7 @@ public class CursorHelpers {
             cursor = null;
             return mList;
         }
-        return new long[0];
+        return sEmptyList;
     }
 
     public static LocalSong[] getLocalSongListForAlbum(final Context context, final long id) {
@@ -348,13 +356,50 @@ public class CursorHelpers {
             if (cursor.moveToFirst()) {
                 int ii=0;
                 do {
-                    songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                    songs[ii++] = makeLocalSongFromCursor(context, cursor);
                 } while (cursor.moveToNext());
             }
             cursor.close();
             return songs;
         }
-        return new LocalSong[0];
+        return sEmptySongList;
+    }
+
+    public static LocalSong[] getLocalSongListForPlaylist(Context context, long playlistId) {
+        Cursor cursor = context.getContentResolver().query(
+                Uris.PLAYLIST(playlistId),
+                Projections.PLAYLIST_SONGS,
+                Selections.LOCAL_SONG,
+                SelectionArgs.LOCAL_SONG,
+                SortOrder.PLAYLIST_SONGS);
+        if (cursor != null) {
+            final LocalSong[] list = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii=0;
+                do {
+                    list[ii++] = makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return list;
+        }
+        return sEmptySongList;
+    }
+
+    public static LocalSong[] getLocalSongListForLastAdded(Context context) {
+        final Cursor cursor = makeLastAddedCursor(context);
+        if (cursor != null) {
+            final LocalSong[] list = new LocalSong[cursor.getCount()];
+            if (cursor.moveToFirst()) {
+                int ii=0;
+                do {
+                    list[ii++] = makeLocalSongFromCursor(context, cursor);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return list;
+        }
+        return sEmptySongList;
     }
 
     public static Uri generateDataUri(long songId) {
@@ -367,11 +412,11 @@ public class CursorHelpers {
 
     static long[] fromCsv(String csv) {
         if (csv == null) {
-            return new long[0];
+            return sEmptyList;
         }
         final String[] strings = csv.split(",");
         if (strings == null || strings.length == 0) {
-            return new long[0];
+            return sEmptyList;
         }
         final long[] ids = new long[strings.length];
         for (int ii=0; ii< strings.length; ii++) {
