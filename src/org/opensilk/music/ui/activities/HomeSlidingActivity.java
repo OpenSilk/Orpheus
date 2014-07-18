@@ -204,11 +204,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!isDrawerOpen()) {
-            // search option
-            getMenuInflater().inflate(R.menu.search, menu);
-
             restoreActionBar();
-
             return super.onCreateOptionsMenu(menu);
         } else {
             showGlobalContextActionBar();
@@ -221,13 +217,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        switch (item.getItemId()) {
-            case R.id.menu_search:
-                NavUtils.openSearch(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

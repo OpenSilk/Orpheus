@@ -18,12 +18,7 @@
 package org.opensilk.music.ui.home;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.ContentUris;
-import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -34,27 +29,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.menu.RenamePlaylist;
-import com.andrew.apollo.model.Genre;
-import com.andrew.apollo.model.LocalAlbum;
-import com.andrew.apollo.model.LocalArtist;
-import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.model.Playlist;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.api.model.Song;
-import org.opensilk.music.dialogs.AddToPlaylistDialog;
-import org.opensilk.music.ui.cards.event.AlbumCardClick;
-import org.opensilk.music.ui.cards.event.ArtistCardClick;
-import org.opensilk.music.ui.cards.event.GenreCardClick;
-import org.opensilk.music.ui.cards.event.PlaylistCardClick;
-import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
 import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.GenreCardClickHandler;
@@ -63,8 +41,6 @@ import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.home.adapter.HomePagerAdapter;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
-import org.opensilk.music.util.Command;
-import org.opensilk.music.util.CommandRunner;
 import org.opensilk.music.widgets.SlidingTabLayout;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
@@ -185,23 +161,21 @@ public class HomeFragment extends ScopedDaggerFragment {
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         if (!mDrawerHelper.isDrawerOpen()) {
+            inflater.inflate(R.menu.search, menu);
             // Party shuffle
             inflater.inflate(R.menu.party_shuffle, menu);
-            // Shuffle all
-//        inflater.inflate(R.menu.shuffle, menu);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_search:
+                //TODO
+                return true;
             case R.id.menu_party_shuffle:
                 // Starts autoshuffle mode
                 MusicUtils.startPartyShuffle();
-                return true;
-            case R.id.menu_shuffle:
-                // Shuffle all the songs
-                MusicUtils.shuffleAll(getActivity());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

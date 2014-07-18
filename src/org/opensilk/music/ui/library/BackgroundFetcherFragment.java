@@ -25,6 +25,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.andrew.apollo.R;
+
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
@@ -206,8 +208,11 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
             try {
                 RemoteLibrary l = mLibrary.getService();
                 if (l != null) {
-                    l.listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId, STEP, bundle, result);
-                    result.waitForComplete();
+                    int apiVersion = l.getApiVersion();
+                    if (apiVersion >= OrpheusApi.API_010) {
+                        l.listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId, STEP, bundle, result);
+                        result.waitForComplete();
+                    }
                 } //else what todo?
             } catch (RemoteException |InterruptedException e) {
                 //pass

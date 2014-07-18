@@ -80,6 +80,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     private SongCardClickHandler mSongClickHandler;
 
     private boolean mFromSavedInstance;
+    private int mCapabilities;
 
     public static LibraryFragment newInstance(PluginInfo p) {
         LibraryFragment f = new LibraryFragment();
@@ -181,6 +182,25 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         outState.putString("library_id", mLibraryIdentity);
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        if ((mCapabilities & OrpheusApi.Abilities.SEARCH) > 0) {
+            inflater.inflate(R.menu.search, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_search:
+                //TODO
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     /*
      * Abstract Methods
      */
@@ -211,6 +231,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public void onConnected() {
         if (!mFromSavedInstance) {
             try {
+                resolveCapabilities();
                 if (TextUtils.isEmpty(mLibraryIdentity)) {
                     Intent i = new Intent();
                     mLibrary.getService().getLibraryChooserIntent(i);
@@ -244,6 +265,15 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                 .replace(R.id.container, f)
                 .addToBackStack(folderId)
                 .commit();
+    }
+
+    private void resolveCapabilities() {
+        try {
+            mCapabilities = mLibrary.getService().getCapabilities();
+            getActivity().invalidateOptionsMenu();
+        } catch (RemoteException|NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     class FragmentBusMonitor {

@@ -64,8 +64,11 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
             mLoadingInProgress = true;
             RemoteLibrary l = mLibrary.getService();
             if (l != null) {
-                l.browseFolders(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId,
-                        STEP, mPaginationBundle, new ResultCallback(this));
+                final int apiVersion = l.getApiVersion();
+                if (apiVersion >= OrpheusApi.API_010) {
+                    l.browseFolders(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId,
+                            STEP, mPaginationBundle, new ResultCallback(this));
+                }
             } //else what todo?
         } catch (RemoteException ex) {
             ex.printStackTrace();
