@@ -28,7 +28,6 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.meta.LibraryInfo;
 
 import org.opensilk.music.ui.home.CardListGridFragment;
-import org.opensilk.music.ui.library.adapter.FolderGridArrayAdapter;
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
 import org.opensilk.music.ui.modules.DrawerHelper;
@@ -117,15 +116,7 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     }
 
     protected LibraryAdapter createAdapter() {
-        if (wantGridView()) {
-            return new FolderGridArrayAdapter(getActivity(), mLibrary, mLibraryInfo, this, (DaggerInjector)getParentFragment());
-        } else {
-            return new FolderListArrayAdapter(getActivity(), mLibrary, mLibraryInfo, this, (DaggerInjector)getParentFragment());
-        }
-    }
-
-    public boolean wantGridView() {
-        return false; //TODO
+        return new FolderListArrayAdapter(getActivity(), mLibrary, mLibraryInfo, this, (DaggerInjector)getParentFragment());
     }
 
     /*
@@ -144,7 +135,7 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
 
     @Override
     public int getListViewLayout() {
-        return wantGridView() ? R.layout.card_gridview : R.layout.card_listview;
+        return R.layout.card_listview;
     }
 
     @Override

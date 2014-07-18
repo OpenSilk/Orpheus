@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.meta.LibraryInfo;
 
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -53,6 +54,8 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter implem
     protected Callback mCallback;
     protected boolean mFirstLoadComplete;
 
+    protected final Card mLoadingCard;
+
     protected AbsEndlessListArrayAdapter(Context context, RemoteLibraryHelper library,
                                          LibraryInfo libraryInfo, Callback callback) {
         super(context, new ArrayList<Card>());
@@ -62,6 +65,7 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter implem
         mLibrary = library;
         mLibraryInfo = libraryInfo;
         mCallback = callback;
+        mLoadingCard = new Card(getContext(), R.layout.listcard_loading_inner);
     }
 
     @Override
@@ -79,8 +83,15 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter implem
 
     protected void maybeLoadMore(int position) {
         if (!mLoadingInProgress && !mEndOfResults) {
-            if ((getCount() - 1) == position) {
-                getMore();
+            if (getCount() > 0 && getItem(getCount()-1) == mLoadingCard) {
+                if (getCount()-2 == position) {
+                    getMore();
+                }
+            } else {
+                if ((getCount()-1) == position) {
+                    add(mLoadingCard);
+                    getMore();
+                }
             }
         }
     }

@@ -112,6 +112,9 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
         }
         mPaginationBundle = paginationBundle;
         mLoadingInProgress = false;
+        if (getCount() > 0 && getItem(getCount()-1) == mLoadingCard) {
+            remove(mLoadingCard);
+        }
         if (items.size() > 0) {
             addItems(items);
         }

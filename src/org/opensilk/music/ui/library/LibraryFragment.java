@@ -155,30 +155,6 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        if (!mDrawerHelper.isDrawerOpen()) {
-            inflater.inflate(R.menu.view_as, menu);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_view_as_simple:
-                //TODO
-                initFolderFragment();
-                return true;
-            case R.id.menu_view_as_grid:
-                //TODO
-                initFolderFragment();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
     //@DebugLog
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
