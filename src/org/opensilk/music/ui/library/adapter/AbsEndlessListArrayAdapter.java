@@ -23,7 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.meta.LibraryInfo;
+import org.opensilk.music.api.meta.LibraryInfo;
 
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui.cards.AbsBundleableCard;

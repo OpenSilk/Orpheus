@@ -25,7 +25,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.meta.LibraryInfo;
+import org.opensilk.music.api.meta.LibraryInfo;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 

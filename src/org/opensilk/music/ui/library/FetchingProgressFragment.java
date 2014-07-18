@@ -24,7 +24,7 @@ import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.meta.LibraryInfo;
+import org.opensilk.music.api.meta.LibraryInfo;
 
 import org.opensilk.music.ui.library.BackgroundFetcherFragment.Action;
 

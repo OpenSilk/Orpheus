@@ -25,7 +25,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.meta.LibraryInfo;
+import org.opensilk.music.api.meta.LibraryInfo;
 
 import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;

@@ -20,7 +20,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 
-import com.andrew.apollo.meta.LibraryInfo;
+import org.opensilk.music.api.meta.LibraryInfo;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;

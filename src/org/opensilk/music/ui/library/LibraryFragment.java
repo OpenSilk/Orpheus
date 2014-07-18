@@ -31,7 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.meta.LibraryInfo;
+import org.opensilk.music.api.meta.LibraryInfo;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
