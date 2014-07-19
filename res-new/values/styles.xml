@@ -28,10 +28,6 @@
         <item name="android:layout_marginTop">?attr/actionBarSize</item>
     </style>
 
-    <style name="CardGridView">
-        <item name="android:numColumns">@integer/grid_cols_vertical</item>
-    </style>
-
     <!-- common dragsort options -->
     <style name="DragSortList">
         <!-- Setup dragsort options-->

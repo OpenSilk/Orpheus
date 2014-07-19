@@ -50,9 +50,4 @@ public class PlaylistFragment extends BasePagerFragment {
         return true;
     }
 
-    @Override
-    public int getListViewLayout() {
-        return wantGridView() ? R.layout.card_staggeredgridview : R.layout.card_listview;
-    }
-
 }

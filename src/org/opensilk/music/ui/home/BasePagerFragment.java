@@ -136,7 +136,7 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
 
     @Override
     public int getListViewLayout() {
-        return wantGridView() ? R.layout.card_gridview : R.layout.card_listview;
+        return wantGridView() ? R.layout.card_staggeredgridview : R.layout.card_listview;
     }
 
     @Override

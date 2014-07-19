@@ -17,15 +17,7 @@
 
 <!--Nexus 7-->
 <resources>
-    <!--600 - 24 - 6*4 = 552
-        552/3 - 54 = 130 -->
-    <dimen name="grid_card_thumbheight">130dp</dimen>
-
     <dimen name="list_card_thumbnail">72dp</dimen>
-    <dimen name="list_card_thumbnail_large">152dp</dimen>
-
-    <!-- 70% of window width -->
-    <dimen name="profile_header_height">336dp</dimen>
 
     <!-- Settings grid-->
     <dimen name="settings_grid_width">184dp</dimen>

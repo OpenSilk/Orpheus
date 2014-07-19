@@ -16,10 +16,6 @@
   -->
 
 <resources>
-    <!--1280 - 560 - 24 - 4*8 = 664
-        664/4 - 54 = 112-->
-    <dimen name="grid_card_thumbheight">112dp</dimen>
-
     <!--Landscape layout-->
     <dimen name="panel_width">560dp</dimen>
 </resources>

@@ -17,13 +17,6 @@
 
 <!-- Nexus 5 portrait (n4 is 380)-->
 <resources>
-    <!--360 - 24 - 4*4 = 320
-        320/2 - 60 = 100 -->
-    <dimen name="grid_card_thumbheight">100dp</dimen>
-
-    <!-- 70% of sw -->
-    <dimen name="profile_header_height">252dp</dimen>
-
     <!-- Settings grid-->
     <dimen name="settings_grid_width">170dp</dimen>
     <dimen name="settings_grid_height">170dp</dimen>

@@ -112,7 +112,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.topmargin_container, container, false);
+        View v = inflater.inflate(R.layout.blank_framelayout_topmargin, container, false);
         return v;
     }
 

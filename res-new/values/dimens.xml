@@ -19,24 +19,9 @@
     <dimen name="list_card_padding_top">0dp</dimen>
 
     <!--
-        ===Card Grid===
-    -->
-
-    <!-- approx card width - 60
-        fastscroll i think is 24dp so this is
-        320 - 24 - 4*4 = 280
-        280/2 - 60 = 124 -->
-    <dimen name="grid_card_thumbheight">80dp</dimen>
-
-    <dimen name="grid_card_horizontal_spacing">2dp</dimen>
-    <dimen name="grid_card_vertical_spacing">2dp</dimen>
-
-    <!--
         ===Card List===
     -->
-
     <dimen name="list_card_thumbnail">60dp</dimen>
-    <dimen name="list_card_thumbnail_large">125dp</dimen>
 
     <!-- Panel -->
 
@@ -44,10 +29,6 @@
     <dimen name="panel_header_thumbnail_size">60dp</dimen>
     <!-- want this to be half panel_header_height - panel_header_thumbnail_size -->
     <dimen name="panel_header_thumbnail_margin">4dp</dimen>
-
-    <!-- Profile -->
-    <!-- 70% of sw -->
-    <dimen name="profile_header_height">224dp</dimen>
 
     <!-- Settings grid-->
     <dimen name="settings_grid_width">150dp</dimen>

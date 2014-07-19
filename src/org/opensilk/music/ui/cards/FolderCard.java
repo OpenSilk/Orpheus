@@ -98,6 +98,6 @@ public class FolderCard extends AbsBundleableCard<Folder> {
 
     @Override
     protected int getGridLayout() {
-        return R.layout.gridcard_folder_inner;
+        throw new UnsupportedOperationException("Can't do grids");
     }
 }

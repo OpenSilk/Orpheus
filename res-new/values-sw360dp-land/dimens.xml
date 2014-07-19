@@ -16,13 +16,6 @@
   -->
 
 <resources>
-    <!--640 - 42 - 24 - 4*8 = 542
-        542/4 - 60 = 75-->
-    <dimen name="grid_card_thumbheight">80dp</dimen>
-
-    <!-- 40% sw -->
-    <dimen name="profile_header_height">144dp</dimen>
-
     <!-- Daydream -->
     <dimen name="dream_art_size">220dp</dimen>
 </resources>
