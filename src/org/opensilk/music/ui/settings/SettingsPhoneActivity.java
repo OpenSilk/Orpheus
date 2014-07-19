@@ -51,6 +51,14 @@ public class SettingsPhoneActivity extends ActionBarActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (getFragmentManager().popBackStackImmediate()) {
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
     //@DebugLog
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Fragment f = getFragmentManager().findFragmentByTag(SettingsDonateFragment.class.getName());

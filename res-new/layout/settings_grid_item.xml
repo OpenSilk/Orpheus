@@ -10,7 +10,8 @@
             android:id="@+id/grid_item_icon"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"/>
 
         <TextView
             android:id="@+id/grid_item_text"
