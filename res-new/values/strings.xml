@@ -141,4 +141,6 @@
 
     <string name="menu_refresh">Refresh</string>
     <string name="all_songs">All songs</string>
+    <string name="menu_library_settings">Library settings</string>
+    <string name="menu_change_source">Change source</string>
 </resources>

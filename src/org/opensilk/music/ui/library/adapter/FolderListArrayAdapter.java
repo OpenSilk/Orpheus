@@ -40,6 +40,7 @@ import org.opensilk.silkdagger.DaggerInjector;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
@@ -135,6 +136,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
         }
 
         @Override
+        @DebugLog
         public void success(final List<Bundle> items, final Bundle paginationBundle) throws RemoteException {
             final FolderListArrayAdapter a = adapter.get();
             if (a != null) {
@@ -148,6 +150,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
         }
 
         @Override
+        @DebugLog
         public void failure(int code, String reason) throws RemoteException {
             //TODO
 //            mPaginationBundle = null;

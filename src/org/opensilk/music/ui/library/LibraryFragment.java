@@ -18,6 +18,8 @@ package org.opensilk.music.ui.library;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
@@ -32,7 +34,8 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import org.opensilk.music.api.meta.LibraryInfo;
-import com.andrew.apollo.utils.MusicUtils;
+
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -40,15 +43,14 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
-import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.music.util.PluginSettings;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -62,6 +64,7 @@ import javax.inject.Inject;
 public class LibraryFragment extends ScopedDaggerFragment implements BackButtonListener, RemoteLibraryHelper.ConnectionListener {
 
     public static final int REQUEST_LIBRARY = 1001;
+    public static final int REQUEST_SETTINGS = 1002;
     public static final String ARG_LIBRARY_INFO = "argLibraryInfo";
 
     @Inject @ForActivity
@@ -72,6 +75,8 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     protected Bus mFragmentBus;
     @Inject @ForFragment
     protected RemoteLibraryHelper mLibrary;
+
+    protected PluginSettings mSettings;
 
     private PluginInfo mPluginInfo;
     private String mLibraryIdentity;
@@ -96,6 +101,8 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         mPluginInfo = getArguments().getParcelable("plugininfo");
         // Bind the remote service
         mLibrary.acquireService(mPluginInfo.componentName, this);
+        // settings
+        mSettings = new PluginSettings(getActivity(), mPluginInfo.componentName);
         // register with bus
         mFragmentMonitor = new FragmentBusMonitor();
         mSongClickHandler = getObjectGraph().get(SongCardClickHandler.class);
@@ -106,7 +113,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
             mFromSavedInstance = true;
             mLibraryIdentity = savedInstanceState.getString("library_id");
         } else {
-            // TODO save / get from prefs
+            mLibraryIdentity = mSettings.getDefaultSource();
         }
     }
 
@@ -166,10 +173,13 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                         throw new RuntimeException("Library chooser must set EXTRA_LIBRARY_ID");
                     }
                     mLibraryIdentity = id;
+                    mSettings.setDefaultSource(mLibraryIdentity);
                     initFolderFragment();
                 } else {
                     //TODO
                 }
+                break;
+            case REQUEST_SETTINGS:
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
@@ -185,16 +195,54 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        if ((mCapabilities & OrpheusApi.Abilities.SEARCH) > 0) {
-            inflater.inflate(R.menu.search, menu);
+        if (!mDrawerHelper.isDrawerOpen()) {
+            // search
+            if ((mCapabilities & OrpheusApi.Abilities.SEARCH) != 0) {
+                inflater.inflate(R.menu.search, menu);
+            }
+
+            Resources res= null;
+            try {
+                res = getActivity().getPackageManager()
+                        .getResourcesForApplication(mPluginInfo.componentName.getPackageName());
+            } catch (PackageManager.NameNotFoundException ignored) {}
+
+            // device selection
+            inflater.inflate(R.menu.change_source, menu);
+            if (res != null) {
+                try {
+                    String change = res.getString(res.getIdentifier("menu_change_source",
+                            "string", mPluginInfo.componentName.getPackageName()));
+                    menu.findItem(R.id.menu_change_source).setTitle(change);
+                } catch (Resources.NotFoundException ignored) {}
+            }
+
+            // settings
+            if ((mCapabilities & OrpheusApi.Abilities.SETTINGS) != 0) {
+                inflater.inflate(R.menu.library_settings, menu);
+                if (res != null) {
+                    try {
+                        String settings = res.getString(res.getIdentifier("menu_library_settings",
+                                "string", mPluginInfo.componentName.getPackageName()));
+                        menu.findItem(R.id.menu_library_settings).setTitle(settings);
+                    } catch (Resources.NotFoundException ignored) {}
+                }
+            }
+
+
         }
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_search:
-                //TODO
+            case R.id.menu_change_source:
+                mSettings.clearDefaultSource();
+                NavUtils.openLibrary(getActivity(), mPluginInfo);
+                return true;
+            case R.id.menu_library_settings:
+                openLibrarySettings();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -235,8 +283,10 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                 if (TextUtils.isEmpty(mLibraryIdentity)) {
                     Intent i = new Intent();
                     mLibrary.getService().getLibraryChooserIntent(i);
-                    i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
-                    startActivityForResult(i, REQUEST_LIBRARY);
+                    if (i.getComponent() != null) {
+                        i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
+                        startActivityForResult(i, REQUEST_LIBRARY);
+                    }
                 } else {
                     initFolderFragment();
                 }
@@ -265,6 +315,20 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                 .replace(R.id.container, f)
                 .addToBackStack(folderId)
                 .commit();
+    }
+
+    private void openLibrarySettings() {
+        try {
+            Intent i = new Intent();
+            mLibrary.getService().getSettingsIntent(i);
+            if (i.getComponent() != null) {
+                i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
+                i.putExtra(OrpheusApi.EXTRA_LIBRARY_ID, mLibraryIdentity);
+                startActivityForResult(i, REQUEST_SETTINGS);
+            }
+        } catch (RemoteException|NullPointerException e) {
+            //TODO
+        }
     }
 
     private void resolveCapabilities() {
