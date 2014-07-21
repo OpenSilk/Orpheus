@@ -17,13 +17,17 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import com.andrew.apollo.R;
 import com.squareup.otto.Bus;
 
+import org.opensilk.filebrowser.FileItem;
+import org.opensilk.filebrowser.FileItemUtil;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
@@ -45,6 +49,8 @@ public class FolderCard extends AbsBundleableCard<Folder> {
 
     @InjectView(R.id.folder_thumb)
     ColorCodedThumbnail mThumbnail;
+    @InjectView(R.id.card_info2)
+    TextView mInfo2;
 
     public FolderCard(Context context, Folder data) {
         this(context, data, R.layout.listcard_folder_inner);
@@ -67,8 +73,23 @@ public class FolderCard extends AbsBundleableCard<Folder> {
     @Override
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
-        mCardSubTitle.setVisibility(View.GONE);
-        mThumbnail.init(mData.name != null ? mData.name : "DIR");
+        if (mData.childCount > 0) {
+            mCardSubTitle.setVisibility(View.VISIBLE);
+            mCardSubTitle.setText(FileItemUtil.prettyPrintSize(getContext(), mData.childCount, FileItem.MediaType.DIRECTORY));
+        } else {
+            mCardSubTitle.setVisibility(View.GONE);
+        }
+        if (!TextUtils.isEmpty(mData.date)) {
+            mInfo2.setVisibility(View.VISIBLE);
+            mInfo2.setText(mData.date);
+            if (mCardSubTitle.getVisibility() == View.GONE) {
+                mCardSubTitle.setVisibility(View.VISIBLE);
+                mCardSubTitle.setText(" ");
+            }
+        } else {
+            mInfo2.setVisibility(View.GONE);
+        }
+        mThumbnail.init(mData.name);
     }
 
     @Override

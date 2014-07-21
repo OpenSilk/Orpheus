@@ -18,6 +18,7 @@ package org.opensilk.music.ui.library;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -40,7 +41,7 @@ public class RemoteLibraryHelperImpl implements RemoteLibraryHelper, ServiceConn
 
     @Inject
     public RemoteLibraryHelperImpl(@ForActivity Context context) {
-        this.context = context;
+        this.context = new ContextWrapper(context);
     }
 
     public void acquireService(ComponentName component, ConnectionListener listener) {
@@ -70,6 +71,8 @@ public class RemoteLibraryHelperImpl implements RemoteLibraryHelper, ServiceConn
     @Override
     public void onServiceDisconnected(ComponentName name) {
         this.service = null;
-        // todo
+        if (callback != null) {
+            callback.onConnectionBroke();
+        }
     }
 }

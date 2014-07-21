@@ -26,6 +26,7 @@ import org.opensilk.music.api.RemoteLibrary;
 public interface RemoteLibraryHelper {
     public interface ConnectionListener {
         public void onConnected();
+        public void onConnectionBroke();
     }
     public void acquireService(ComponentName component, ConnectionListener listener);
     public void releaseService();

@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -57,6 +58,9 @@ import org.opensilk.silkdagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import javax.inject.Inject;
+
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 6/14/14.
@@ -197,7 +201,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         super.onCreateOptionsMenu(menu, inflater);
         if (!mDrawerHelper.isDrawerOpen()) {
             // search
-            if ((mCapabilities & OrpheusApi.Abilities.SEARCH) != 0) {
+            if ((mCapabilities & OrpheusApi.Ability.SEARCH) != 0) {
                 inflater.inflate(R.menu.search, menu);
             }
 
@@ -218,7 +222,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
             }
 
             // settings
-            if ((mCapabilities & OrpheusApi.Abilities.SETTINGS) != 0) {
+            if ((mCapabilities & OrpheusApi.Ability.SETTINGS) != 0) {
                 inflater.inflate(R.menu.library_settings, menu);
                 if (res != null) {
                     try {
@@ -238,8 +242,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_change_source:
-                mSettings.clearDefaultSource();
-                NavUtils.openLibrary(getActivity(), mPluginInfo);
+                relaunchLibraryFragment();
                 return true;
             case R.id.menu_library_settings:
                 openLibrarySettings();
@@ -296,6 +299,17 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         }
     }
 
+    @Override
+    public void onConnectionBroke() {
+        Timber.d("onConnectionBroke");
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mLibrary.acquireService(mPluginInfo.componentName, LibraryFragment.this);
+            }
+        }, 3000);
+    }
+
     private void initFolderFragment() {
         final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null);
         Fragment f = FolderFragment.newInstance(li);
@@ -315,6 +329,11 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
                 .replace(R.id.container, f)
                 .addToBackStack(folderId)
                 .commit();
+    }
+
+    public void relaunchLibraryFragment() {
+        mSettings.clearDefaultSource();
+        NavUtils.openLibrary(getActivity(), mPluginInfo);
     }
 
     private void openLibrarySettings() {

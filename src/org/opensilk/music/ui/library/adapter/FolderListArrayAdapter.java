@@ -17,6 +17,8 @@
 package org.opensilk.music.ui.library.adapter;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 
@@ -48,7 +50,8 @@ import it.gmariotti.cardslib.library.internal.Card;
  */
 public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
-    private DaggerInjector mInjector;
+    private final DaggerInjector mInjector;
+    private int mRetryAttempts;
 
     public FolderListArrayAdapter(Context context,
                                   RemoteLibraryHelper library,
@@ -57,23 +60,32 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                                   DaggerInjector injector) {
         super(context, library, libraryInfo, callback);
         mInjector = injector;
+        mRetryAttempts = 0;
     }
 
     //@DebugLog
     protected void getMore() {
         try {
+            if (mRetryAttempts > 4) {
+                throw new RemoteException();
+            }
             mLoadingInProgress = true;
             RemoteLibrary l = mLibrary.getService();
             if (l != null) {
                 final int apiVersion = l.getApiVersion();
-                if (apiVersion >= OrpheusApi.API_010) {
+                //TODO api check
+                {
                     l.browseFolders(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId,
                             STEP, mPaginationBundle, new ResultCallback(this));
                 }
-            } //else what todo?
+            } else {
+                throw new RemoteException();
+            }
         } catch (RemoteException ex) {
             ex.printStackTrace();
-            mLoadingInProgress = false;
+            if (mCallback != null) {
+                mCallback.onLoadingFailure(false);
+            }
         }
     }
 
@@ -111,6 +123,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
     }
 
     protected void processResult(List<Bundle> items, Bundle paginationBundle) {
+        mRetryAttempts = 0;
         if (paginationBundle == null) {
             mEndOfResults = true;
         }
@@ -152,9 +165,46 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
         @Override
         @DebugLog
         public void failure(int code, String reason) throws RemoteException {
-            //TODO
-//            mPaginationBundle = null;
-//            mLoadingInProgress = false;
+            if (code == OrpheusApi.Error.RETRY) {
+                final FolderListArrayAdapter a = adapter.get();
+                if (a != null) {
+                    a.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            a.mRetryAttempts++;
+                            a.getMore();
+                        }
+                    });
+                }
+            } else if (code == OrpheusApi.Error.NETWORK) {
+                final FolderListArrayAdapter a = adapter.get();
+                if (a != null) {
+                    a.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ConnectivityManager cm = (ConnectivityManager) a.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                            NetworkInfo info = cm.getActiveNetworkInfo();
+                            if (info != null && info.isConnectedOrConnecting()) {
+                                a.mRetryAttempts++;
+                                a.getMore();
+                            } //else TODO
+                        }
+                    });
+                }
+            } else {
+                final int err = code;
+                final FolderListArrayAdapter a = adapter.get();
+                if (a != null) {
+                    a.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (a.mCallback != null) {
+                                a.mCallback.onLoadingFailure(err == OrpheusApi.Error.AUTH_FAILURE);
+                            }
+                        }
+                    });
+                }
+            }
         }
     }
 

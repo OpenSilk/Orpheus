@@ -20,13 +20,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <android.support.v4.widget.ContentLoadingProgressBar
+    <ProgressBar
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/loading_progress"
         android:padding="8dp"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="?android:progressBarStyle"/>
+        style="?android:progressBarStyleSmall"/>
 
 </FrameLayout>

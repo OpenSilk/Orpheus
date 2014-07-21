@@ -24,6 +24,7 @@ import android.os.Bundle;
 public interface LibraryAdapter {
     public interface Callback {
         public void onFirstLoadComplete();
+        public void onLoadingFailure(boolean relaunchPicker);
     }
     public void saveInstanceState(Bundle outState);
     public void restoreInstanceState(Bundle inState);

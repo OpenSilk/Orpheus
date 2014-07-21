@@ -155,6 +155,11 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
         ApolloUtils.execute(false, task);
     }
 
+    @Override
+    public void onConnectionBroke() {
+        task.cancel(true);
+    }
+
     /*
      * Abstract methods
      */
@@ -209,7 +214,8 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
                 RemoteLibrary l = mLibrary.getService();
                 if (l != null) {
                     int apiVersion = l.getApiVersion();
-                    if (apiVersion >= OrpheusApi.API_010) {
+                    //TODO version check
+                    {
                         l.listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId, STEP, bundle, result);
                         result.waitForComplete();
                     }

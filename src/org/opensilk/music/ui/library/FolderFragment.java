@@ -25,12 +25,15 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.NavUtils;
+
 import org.opensilk.music.api.meta.LibraryInfo;
 
 import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
 import org.opensilk.music.ui.modules.DrawerHelper;
+import org.opensilk.music.util.PluginSettings;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -103,6 +106,7 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
+                setListShown(false);
                 mAdapter.startLoad();
                 return true;
         }
@@ -127,6 +131,13 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     //@DebugLog
     public void onFirstLoadComplete() {
         setListShown(true);
+    }
+
+    @Override
+    public void onLoadingFailure(boolean relaunchPicker) {
+        if (relaunchPicker) {
+            ((LibraryFragment) getParentFragment()).relaunchLibraryFragment();
+        } //else TODO
     }
 
     /*
