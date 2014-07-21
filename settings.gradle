@@ -1,3 +1,4 @@
+include ':app'
+include ':api'
 include ':../SilkCastService:library'
-include ':../OrpheusApi:api'
 include ':../SilkFileBrowser:lib_sfb'
