@@ -24,11 +24,6 @@
     android:layout_gravity="top"
     android:layout_alignParentTop="true">
 
-    <org.opensilk.music.widgets.AudioVisualizationView
-        android:id="@+id/visualizer_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

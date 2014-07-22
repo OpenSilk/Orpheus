@@ -28,15 +28,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/settings_interface_visualizations_category">
-
-        <CheckBoxPreference
-            android:key="pref_visualizations"
-            android:title="@string/settings_interface_visualizations_title"
-            android:summary="@string/settings_interface_visualizations_summary"
-            android:defaultValue="true" />
-
-    </PreferenceCategory>
-
 </PreferenceScreen>

@@ -99,10 +99,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
      * Panel Header
      */
     private PanelHeaderLayout mPanelHeader;
-    //Visualizer object
-    private Visualizer mVisualizer;
-    //Visualization view
-    private AudioVisualizationView mVisualizerView;
     // Previous button
     private RepeatingImageButton mHeaderPrevButton;
     //play/pause
@@ -203,17 +199,11 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         updatePlaybackControls();
         // Current info
         updateNowPlayingInfo();
-        // update visualizer
-        if (mVisualizer == null) {
-            initVisualizer();
-        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        //Disable visualizer
-        destroyVisualizer();
     }
 
     @Override
@@ -291,10 +281,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         mArtBackground = (FullScreenArtworkImageView) v.findViewById(R.id.panel_background_art);
 //        mArtBackground.installListener(mPanelHeader);
 
-        //Visualizer view
-        mVisualizerView = (AudioVisualizationView) v.findViewById(R.id.visualizer_view);
-        mVisualizerView.setVisibility(View.GONE);
-
         // Previous button
         mHeaderPrevButton = (RepeatingImageButton) v.findViewById(R.id.header_action_button_previous);
         // Set the repeat listener for the previous button
@@ -367,76 +353,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         mFooterProgress.setOnSeekBarChangeListener(this);
     }
 
-    /**
-     * Initializes visualizer
-     */
-    //@DebugLog
-    private void initVisualizer() {
-        if (MusicUtils.getAudioSessionId() != ERROR_BAD_VALUE) {
-            try {
-                if (mVisualizer != null) {
-                    Log.e(TAG, "initVisualizer() called with active visualizer");
-                    destroyVisualizer();
-                }
-                mVisualizer = new Visualizer(MusicUtils.getAudioSessionId());
-                mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-                mVisualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-                    public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) {
-                        mVisualizerView.updateVisualizer(bytes);
-                        //Log.d("VisualizerView", "Visualizer bytes:" + bytes.toString());
-                    }
-
-                    public void onFftDataCapture(Visualizer visualizer, byte[] bytes, int samplingRate) { }
-                }, Math.min(Visualizer.getMaxCaptureRate()/2, 7000), true, false);
-                updateVisualizerState();
-            } catch (RuntimeException e) {
-                // Go without.
-                e.printStackTrace();
-                mVisualizer = null;
-            }
-        } //else wait for service bind
-    }
-
-    /**
-     * Releases the visualizer
-     */
-    //@DebugLog
-    private void destroyVisualizer() {
-        if (mVisualizer != null) {
-            mVisualizer.release();
-            mVisualizer = null;
-        }
-    }
-
-    /**
-     * Enables or disables visualizer depending on playback state
-     */
-    //@DebugLog
-    private void updateVisualizerState() {
-        if (mVisualizer != null && mVisualizerView != null) {
-            if (!mQueueShowing && MusicUtils.isPlaying() && !MusicUtils.isRemotePlayback() &&
-                    PreferenceUtils.getInstance(mActivity).showVisualizations()) {
-                try {
-                    if (!mVisualizer.getEnabled()) {
-                        mVisualizer.setEnabled(true);
-                    }
-                    mVisualizerView.setVisibility(View.VISIBLE);
-                } catch (IllegalStateException e) {
-                    destroyVisualizer();
-                }
-            } else {
-                try {
-                    if (mVisualizer.getEnabled()) {
-                        mVisualizer.setEnabled(false);
-                    }
-                } catch (IllegalStateException e) {
-                    destroyVisualizer();
-                }
-                mVisualizerView.setVisibility(View.GONE);
-            }
-        } //else wait for create and service bind
-    }
-
     public void pushQueueFragment() {
         mActivity.getSupportFragmentManager().beginTransaction()
                 .add(R.id.panel_middle_content, new QueueFragment(), "queue")
@@ -467,7 +383,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
             mFooterTotalTime.setVisibility(View.VISIBLE);
         }
         mHeaderQueueButton.setQueueShowing(mQueueShowing);
-        updateVisualizerState();
     }
 
     /**
@@ -828,8 +743,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
             // Set the play and pause image
             mHeaderPlayPauseButton.updateState();
             mFooterPlayPauseButton.updateState();
-            // update visualizer
-            updateVisualizerState();
         }
 
         @Subscribe
@@ -851,12 +764,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                 updatePlaybackControls();
                 // Current info
                 updateNowPlayingInfo();
-                // Setup visualizer
-                if (mVisualizer == null) {
-                    initVisualizer();
-                }
-            } else {
-                destroyVisualizer();
             }
         }
 
