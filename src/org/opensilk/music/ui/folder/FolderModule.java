@@ -34,6 +34,7 @@ import dagger.Provides;
         addsTo = HomeModule.class,
         injects = {
                 FolderFragment.class,
+                FolderChildFragment.class,
         },
         complete = false,
         includes = CardModule.class

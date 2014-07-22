@@ -31,8 +31,8 @@ import javax.inject.Singleton;
 @Singleton
 public class AppPreferences {
 
-    public static final String PREF_DEFAULT_MEDIA_FOLDER = "pref_default_media_folder";
-
+    public static final String PREF_DEFAULT_MEDIA_FOLDER = "default_media_folder";
+    public static final String PREF_LAST_FOLDER_BROWSER_PATH = "last_folder_browser_path";
 
     private SharedPreferences prefs;
 

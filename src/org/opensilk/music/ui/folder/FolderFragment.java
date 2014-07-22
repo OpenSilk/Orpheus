@@ -19,20 +19,26 @@ package org.opensilk.music.ui.folder;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.filebrowser.FileBrowserArgs;
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.MediaProviderUtil;
+import org.opensilk.music.AppPreferences;
+import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.FileItemCardClick;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
@@ -55,14 +61,15 @@ import javax.inject.Inject;
 public class FolderFragment extends ScopedDaggerFragment implements BackButtonListener {
 
     @Inject @ForActivity
-    ActionBarController mActionBarController;
-    @Inject @ForActivity
     DrawerHelper mDrawerHelper;
+    @Inject
+    AppPreferences mSettings;
 
     @Inject @ForFragment
     Bus mBus;
 
     private FileBrowserArgs mBrowserArgs;
+    private String mLastPath;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,7 +79,18 @@ public class FolderFragment extends ScopedDaggerFragment implements BackButtonLi
         mediaTypes.add(FileItem.MediaType.AUDIO);
         mediaTypes.add(FileItem.MediaType.DIRECTORY);
         mBrowserArgs.setMediaTypes(mediaTypes);
-        mBrowserArgs.setPath(FolderPickerActivity.SDCARD_ROOT);//TODO save restore previous
+
+        if (savedInstanceState != null) {
+            mLastPath = savedInstanceState.getString("start_path");
+        } else {
+            mLastPath = mSettings.getString(AppPreferences.PREF_LAST_FOLDER_BROWSER_PATH, null);
+        }
+        if (!TextUtils.isEmpty(mLastPath)) {
+            mBrowserArgs.setPath(mLastPath);
+        } else {
+            mBrowserArgs.setPath(FolderPickerActivity.SDCARD_ROOT);
+        }
+
         registerHandlers();
     }
 
@@ -85,8 +103,6 @@ public class FolderFragment extends ScopedDaggerFragment implements BackButtonLi
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (savedInstanceState == null) {
-            mActionBarController.setTitle(FolderPickerActivity.makeTitle(mBrowserArgs.getPath()));
-            mActionBarController.setSubTitle(FolderPickerActivity.makeSubtitle(mBrowserArgs.getPath()));
             FolderChildFragment f = FolderChildFragment.newInstance(mBrowserArgs);
             getChildFragmentManager().beginTransaction()
                     .replace(R.id.container, f)
@@ -95,9 +111,21 @@ public class FolderFragment extends ScopedDaggerFragment implements BackButtonLi
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        mSettings.putString(AppPreferences.PREF_LAST_FOLDER_BROWSER_PATH, mLastPath);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         unregisterHandlers();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("start_path", mLastPath);
     }
 
     FileItemCardHandler mFileCardHandler;
@@ -230,10 +258,15 @@ public class FolderFragment extends ScopedDaggerFragment implements BackButtonLi
                     };
                     break;
                 case ADD_TO_PLAYLIST:
+                    AddToPlaylistDialog.newInstance(new long[]{file.getId()})
+                            .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
                     return;
                 case SET_RINGTONE:
+                    MusicUtils.setRingtone(getActivity(), file.getId());
                     return;
                 case DELETE:
+                    DeleteDialog.newInstance(file.getTitle(), new long[]{file.getId()}, null)
+                            .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
                     return;
             }
             if (c != null) {
@@ -242,15 +275,14 @@ public class FolderFragment extends ScopedDaggerFragment implements BackButtonLi
         }
 
         private void goToFolder(FileItem file, boolean addToBackstack) {
-            mActionBarController.setTitle(FolderPickerActivity.makeTitle(file.getPath()));
-            mActionBarController.setSubTitle(FolderPickerActivity.makeSubtitle(file.getPath()));
             FragmentTransaction ft = getChildFragmentManager().beginTransaction()
                     .replace(R.id.container,
-                            FolderChildFragment.newInstance(mBrowserArgs.setPath(file.getPath())));
+                            FolderChildFragment.newInstance(FileBrowserArgs.copy(mBrowserArgs).setPath(file.getPath())));
             if (addToBackstack) {
                 ft.addToBackStack(null);
             }
             ft.commit();
+            mLastPath = file.getPath();
         }
     }
 

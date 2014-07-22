@@ -18,8 +18,11 @@ package org.opensilk.music.ui.folder;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 
 import com.andrew.apollo.R;
@@ -29,13 +32,19 @@ import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.FileItemArrayLoader;
 import org.opensilk.music.ui.cards.FileItemCard;
 import org.opensilk.music.ui.home.CardListGridFragment;
+import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import timber.log.Timber;
 
 /**
  * Created by drew on 7/2/14.
@@ -43,6 +52,9 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 public class FolderChildFragment extends CardListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
 
     protected static final int LOADER = 0;
+
+    @Inject @ForActivity
+    ActionBarController mActionBarController;
 
     protected DaggerInjector mInjector;
     private CardArrayAdapter mAdapter;
@@ -60,6 +72,7 @@ public class FolderChildFragment extends CardListGridFragment implements LoaderM
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mInjector = (DaggerInjector) getParentFragment();
+        mInjector.inject(this);
     }
 
     @Override
@@ -72,12 +85,18 @@ public class FolderChildFragment extends CardListGridFragment implements LoaderM
     }
 
     @Override
-    //@DebugLog
     public void onViewCreated(View view, Bundle savedInstanceState) {
         setEmptyText(getEmptyText());
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
         setListShown(false);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mActionBarController.setTitle(FolderPickerActivity.makeTitle(mBrowserArgs.getPath()));
+        mActionBarController.setSubTitle(FolderPickerActivity.makeSubtitle(mBrowserArgs.getPath()));
     }
 
     @Override
@@ -90,6 +109,12 @@ public class FolderChildFragment extends CardListGridFragment implements LoaderM
     public void onDetach() {
         super.onDetach();
         mInjector = null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
     }
 
     protected CharSequence getEmptyText() {
