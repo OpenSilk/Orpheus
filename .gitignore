@@ -1,5 +1,3 @@
-git rm -r --cached bin
-git rm -r --cached gen
 build
 .idea
 .gradle
