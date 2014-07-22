@@ -91,10 +91,10 @@ android {
 
 }
 
-//configurations.all {
-//    // check for updates every build
-//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-//}
+configurations.all {
+    // check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
 
 dependencies {
     compile 'com.android.support:support-v4:20.+'
@@ -120,9 +120,13 @@ dependencies {
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
     compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
 
+    compile 'org.opensilk:silkcastservice:0.2.0-SNAPSHOT@aar'
+    compile 'org.opensilk:silkfilebrowser:0.1.0-SNAPSHOT@aar'
+//    compile project(':../SilkCastService:library')
+//    compile project(':../SilkFileBrowser:lib_sfb')
+
     compile project(':api')
-    compile project(':../SilkCastService:library')
-    compile project(':../SilkFileBrowser:lib_sfb')
+
     compile fileTree(dir: '../libs', include: ['*.jar'])
 
 }
