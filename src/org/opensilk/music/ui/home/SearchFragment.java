@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.fragments;
+package org.opensilk.music.ui.home;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ContentUris;
@@ -46,9 +47,16 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 
+import org.opensilk.music.ui.home.adapter.SearchAdapter;
+import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.util.Uris;
+import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.silkdagger.support.ScopedDaggerFragment;
+
+import javax.inject.Inject;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
@@ -57,16 +65,16 @@ import it.gmariotti.cardslib.library.view.CardListView;
 /**
  * Created by drew on 3/4/14.
  */
-public class SearchFragment extends Fragment implements
+public class SearchFragment extends ScopedDaggerFragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
         SearchView.OnQueryTextListener {
 
+    @Inject @ForActivity
+    protected DrawerHelper mDrawerHelper;
+
     private String mFilterString;
-
     private ListView mListView;
-
     private SearchAdapter mAdapter;
-
     private SearchView mSearchView;
 
     // From MediaProvider data1 and data2 only have values for artists
@@ -86,7 +94,7 @@ public class SearchFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Initialize the adapter
-        mAdapter = new SearchAdapter(getActivity());
+        mAdapter = new SearchAdapter(getActivity(), this);
         if (savedInstanceState != null) {
             mFilterString = savedInstanceState.getString("query");
         }
@@ -106,9 +114,6 @@ public class SearchFragment extends Fragment implements
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
-        ActionBarActivity activity = (ActionBarActivity) getActivity();
-        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
     @Override
@@ -132,25 +137,24 @@ public class SearchFragment extends Fragment implements
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+        if (!mDrawerHelper.isDrawerOpen()) {
+            // remove old search item
+            menu.removeItem(R.id.menu_search);
 
-        // make room for search
-        menu.removeItem(R.id.media_route_menu_item);
-        // remove old search item
-        menu.removeItem(R.id.menu_search);
-
-        // Search view
-        inflater.inflate(R.menu.searchview, menu);
-        MenuItem searchItem = menu.findItem(R.id.menu_searchview);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        mSearchView.setOnQueryTextListener(this);
-        mSearchView.setIconified(false);
-        if (!TextUtils.isEmpty(mFilterString)) {
-            mSearchView.setQuery(mFilterString, false);
+            // Search view
+            inflater.inflate(R.menu.searchview, menu);
+            MenuItem searchItem = menu.findItem(R.id.menu_searchview);
+            mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            mSearchView.setOnQueryTextListener(this);
+            mSearchView.setIconified(false);
+            if (!TextUtils.isEmpty(mFilterString)) {
+                mSearchView.setQuery(mFilterString, false);
+            }
+            // Add voice search
+            final SearchManager searchManager = (SearchManager)getActivity().getSystemService(Context.SEARCH_SERVICE);
+            final SearchableInfo searchableInfo = searchManager.getSearchableInfo(getActivity().getComponentName());
+            mSearchView.setSearchableInfo(searchableInfo);
         }
-        // Add voice search
-        final SearchManager searchManager = (SearchManager)getActivity().getSystemService(Context.SEARCH_SERVICE);
-        final SearchableInfo searchableInfo = searchManager.getSearchableInfo(getActivity().getComponentName());
-        mSearchView.setSearchableInfo(searchableInfo);
     }
 
     @Override
@@ -176,7 +180,9 @@ public class SearchFragment extends Fragment implements
      */
     public void onNewQuery(String query) {
         mFilterString = query;
-        mSearchView.setQuery(query, false);
+        if (mSearchView != null) {
+            mSearchView.setQuery(query, false);
+        }
         getLoaderManager().restartLoader(0, null, this);
         hideKeyboard();
     }
@@ -207,13 +213,6 @@ public class SearchFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-        if (data == null || data.isClosed()) {
-            // Set the empty text
-//            final TextView empty = (TextView)findViewById(R.id.empty);
-//            empty.setText(getString(R.string.empty_search));
-//            mGridView.setEmptyView(empty);
-            return;
-        }
         mAdapter.swapCursor(data);
     }
 
@@ -248,67 +247,20 @@ public class SearchFragment extends Fragment implements
         return true;
     }
 
-    private static final class SearchAdapter extends CardCursorAdapter {
+    /*
+     * Abstract Methods
+     */
 
-        public SearchAdapter(Context context) {
-            super(context, null, 0);
-            setInnerViewTypeCount(2);
-        }
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new HomeModule(),
+        };
+    }
 
-        @Override
-        protected Card getCardFromCursor(Cursor cursor) {
-            // Get the MIME type
-            final String mimetype = cursor.getString(cursor
-                    .getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-
-            if (mimetype.equals("artist")) {
-                // get id
-                final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-                // Get the artist name
-                final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
-                // Get the album count
-                final int albumCount = cursor.getInt(cursor.getColumnIndexOrThrow("data1"));
-                // Get the song count
-                final int songCount = cursor.getInt(cursor.getColumnIndexOrThrow("data2"));
-                // Build artist
-                final LocalArtist artist = new LocalArtist(id, name, songCount, albumCount);
-                // return artist list card
-//                CardArtistList card = new CardArtistList(getContext(), artist);
-//                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
-//                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
-//                return card;
-            } else if (mimetype.equals("album")) {
-                // Get the Id of the album
-                final String id = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-                // Get the album name
-                final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
-                // Get the artist nam
-                final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
-                // generate artwork uri
-                final Uri artworkUri = ContentUris.withAppendedId(Uris.ARTWORK_URI, Long.decode(id));
-                // Build the album as best we can
-                final Album album = new Album(id, name, artist, 0, null, artworkUri);
-                // return album list card
-//                CardAlbumList card = new CardAlbumList(getContext(), album);
-//                card.setThumbSize(getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large),
-//                        getContext().getResources().getDimensionPixelSize(R.dimen.list_card_thumbnail_large));
-//                return card;
-            } else { /* audio */
-                // get id
-                final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-                // Get the track name
-                final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-                // Get the album name
-                final String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-                // get artist name
-                final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-                // build the song as best we can
-//                final LocalSong song = new LocalSong(id, name, artist, album, 0, 0);
-                // return song list card
-                return null;//new CardSongList(getContext(), song);
-            }
-            return null;
-        }
+    @Override
+    protected DaggerInjector getParentInjector(Activity activity) {
+        return (DaggerInjector) activity;
     }
 
 }

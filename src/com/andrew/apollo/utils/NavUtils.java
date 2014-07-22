@@ -35,7 +35,7 @@ import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.activities.ProfileSlidingActivity;
 import org.opensilk.music.ui.folder.FolderFragment;
-import org.opensilk.music.ui.fragments.SearchFragment;
+import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.settings.SettingsPhoneActivity;

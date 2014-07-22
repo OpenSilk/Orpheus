@@ -38,6 +38,7 @@ import dagger.Provides;
                 HomeFragment.class,
                 PlaylistFragment.class,
                 HomeRecentFragment.class,
+                SearchFragment.class,
                 SongFragment.class,
         },
         includes = CardModule.class,

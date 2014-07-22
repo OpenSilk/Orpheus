@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Bus;
 
@@ -171,7 +172,7 @@ public class HomeFragment extends ScopedDaggerFragment {
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_search:
-                //TODO
+                NavUtils.openSearch(getActivity());
                 return true;
             case R.id.menu_party_shuffle:
                 // Starts autoshuffle mode

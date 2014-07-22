@@ -77,7 +77,12 @@ public class SongCard extends AbsBundleableCard<Song> {
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         if (getSimpleLayout() == getInnerLayout()) {
-            mCardSubTitle.setText(MusicUtils.makeTimeString(getContext(), mData.duration));
+            if (mData.duration > 0) {
+                mCardSubTitle.setVisibility(View.VISIBLE);
+                mCardSubTitle.setText(MusicUtils.makeTimeString(getContext(), mData.duration));
+            } else {
+                mCardSubTitle.setVisibility(View.GONE);
+            }
         } else {
             mCardSubTitle.setText(mData.artistName);
         }

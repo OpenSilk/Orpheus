@@ -29,7 +29,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
@@ -45,14 +44,12 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
 import com.andrew.apollo.utils.PreferenceUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Bus;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
-import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PanelStateChanged;
@@ -60,16 +57,11 @@ import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
-import org.opensilk.music.ui.fragments.SearchFragment;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.Locale;
-
-import javax.inject.Inject;
-
-import hugo.weaving.DebugLog;
 
 import static android.app.SearchManager.QUERY;
 import static org.opensilk.cast.CastMessage.*;
