@@ -20,6 +20,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.meta.LibraryInfo;
@@ -51,7 +53,7 @@ import it.gmariotti.cardslib.library.internal.Card;
 public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
     private final DaggerInjector mInjector;
-    private int mRetryAttempts;
+    protected int mRetryAttempts;
 
     public FolderListArrayAdapter(Context context,
                                   RemoteLibraryHelper library,
@@ -174,7 +176,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                             a.mRetryAttempts++;
                             a.getMore();
                         }
-                    });
+                    }, 1000);
                 }
             } else if (code == OrpheusApi.Error.NETWORK) {
                 final FolderListArrayAdapter a = adapter.get();
@@ -189,7 +191,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                                 a.getMore();
                             } //else TODO
                         }
-                    });
+                    }, 1000);
                 }
             } else {
                 final int err = code;

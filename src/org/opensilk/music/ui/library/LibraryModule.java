@@ -34,6 +34,7 @@ import dagger.Provides;
         injects = {
                 LibraryFragment.class,
                 FolderFragment.class,
+                SearchFragment.class,
         },
         addsTo = HomeModule.class,
         complete = false,

@@ -19,6 +19,8 @@ package org.opensilk.music.ui.library.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -56,16 +58,16 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter implem
 
     protected final Card mLoadingCard;
 
+    protected final Handler mHandler;
+
     protected AbsEndlessListArrayAdapter(Context context, RemoteLibraryHelper library,
                                          LibraryInfo libraryInfo, Callback callback) {
         super(context, new ArrayList<Card>());
-        if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("Context must be from activity");
-        }
         mLibrary = library;
         mLibraryInfo = libraryInfo;
         mCallback = callback;
         mLoadingCard = new Card(getContext(), R.layout.listcard_loading_inner);
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     @Override
@@ -97,8 +99,11 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter implem
     }
 
     protected void runOnUiThread(Runnable r) {
-        Activity activity = (Activity) getContext();
-        activity.runOnUiThread(r);
+        mHandler.post(r);
+    }
+
+    protected void runOnUiThread(Runnable r, long ms) {
+        mHandler.postDelayed(r, ms);
     }
 
     protected abstract void getMore();

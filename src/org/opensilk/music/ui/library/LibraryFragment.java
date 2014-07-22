@@ -241,6 +241,9 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_search:
+                openSearchFragment();
+                return true;
             case R.id.menu_change_source:
                 relaunchLibraryFragment();
                 return true;
@@ -328,6 +331,14 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         getChildFragmentManager().beginTransaction()
                 .replace(R.id.container, f)
                 .addToBackStack(folderId)
+                .commit();
+    }
+
+    public void openSearchFragment() {
+        getChildFragmentManager().beginTransaction()
+                .replace(R.id.container,SearchFragment.newInstance(
+                        new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null)))
+                .addToBackStack("search")
                 .commit();
     }
 
