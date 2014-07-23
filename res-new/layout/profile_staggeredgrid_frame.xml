@@ -20,10 +20,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        android:layout_height="match_parent"
+    <it.gmariotti.cardslib.library.extra.staggeredgrid.view.CardGridStaggeredView
+        xmlns:card="http://schemas.android.com/apk/res-auto"
+        android:id="@android:id/list"
         android:layout_width="match_parent"
-        layout="@layout/card_staggeredgridview"/>
+        android:layout_height="match_parent"
+        card:item_margin="2dp"
+        card:column_count_portrait="@integer/profile_grid_cols_vertical"
+        card:column_count_landscape="@integer/profile_grid_cols_horizontal"
+        card:list_card_layout_resourceID="@layout/grid_card_layout"
+        />
 
     <include
         android:layout_height="wrap_content"
