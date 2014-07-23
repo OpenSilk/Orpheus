@@ -22,17 +22,13 @@ import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.CursorAdapter;
-import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.SortOrder;
 
-import org.opensilk.music.ui.home.loader.SongLoader;
-import org.opensilk.music.ui.cards.CardShuffle;
-import org.opensilk.music.ui.cards.views.ThemedCardView;
 import org.opensilk.music.ui.home.adapter.SongAdapter;
+import org.opensilk.music.ui.home.loader.SongLoader;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 

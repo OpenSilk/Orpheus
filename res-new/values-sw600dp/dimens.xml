@@ -17,8 +17,6 @@
 
 <!--Nexus 7-->
 <resources>
-    <dimen name="list_card_thumbnail">72dp</dimen>
-
     <!-- Settings grid-->
     <dimen name="settings_grid_width">184dp</dimen>
     <dimen name="settings_grid_height">184dp</dimen>
