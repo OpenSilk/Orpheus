@@ -176,7 +176,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                             a.mRetryAttempts++;
                             a.getMore();
                         }
-                    }, 1000);
+                    }, a.mRetryAttempts > 0 ? 1000 * a.mRetryAttempts : 1000);
                 }
             } else if (code == OrpheusApi.Error.NETWORK) {
                 final FolderListArrayAdapter a = adapter.get();
@@ -191,7 +191,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                                 a.getMore();
                             } //else TODO
                         }
-                    }, 1000);
+                    }, a.mRetryAttempts > 0 ? 1000 * a.mRetryAttempts : 1000);
                 }
             } else {
                 final int err = code;
