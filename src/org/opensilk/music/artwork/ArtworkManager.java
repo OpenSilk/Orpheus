@@ -128,7 +128,7 @@ public class ArtworkManager {
     private void initDiskCache() {
         final int size = mPreferences.imageCacheSizeBytes();
         if (D) Log.d(TAG, "L2Cache=" + (size / 1024 / 1024) + "MB");
-        mL2Cache = new BitmapDiskLruCache(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
+        mL2Cache = BitmapDiskLruCache.open(CacheUtil.getCacheDir(mContext, DISK_CACHE_DIRECTORY),
                 size, Bitmap.CompressFormat.PNG, 100);
     }
 

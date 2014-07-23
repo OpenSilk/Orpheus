@@ -36,10 +36,10 @@ public class CacheUtil {
      * @return The cache directory
      */
     public static File getCacheDir(final Context context, final String uniqueName) {
-        // getExternalCacheDir(context) returns null if external storage is not ready
-        final File cachePath = context.getExternalCacheDir() != null
-                ? context.getExternalCacheDir()
-                : context.getCacheDir();
+        File cachePath = context.getExternalCacheDir();
+        if (cachePath == null || !cachePath.canWrite()) {
+            cachePath = context.getCacheDir();
+        }
         return new File(cachePath, uniqueName);
     }
 

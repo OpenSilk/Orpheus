@@ -1,6 +1,7 @@
 
 package org.opensilk.music.artwork.cache;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -30,13 +31,19 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
 
     public static final Object sDecodeLock = new Object();
 
-    public BitmapDiskLruCache(File diskCacheDir, int diskCacheSize, Bitmap.CompressFormat compressFormat, int quality) {
+    private BitmapDiskLruCache(File diskCacheDir, int diskCacheSize, Bitmap.CompressFormat compressFormat, int quality) throws IOException {
+        mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
+        mCompressFormat = compressFormat;
+        mCompressQuality = quality;
+
+    }
+
+    public static BitmapDiskLruCache open(File diskCacheDir, int diskCacheSize, Bitmap.CompressFormat compressFormat, int quality) {
         try {
-            mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
-            mCompressFormat = compressFormat;
-            mCompressQuality = quality;
+            return new BitmapDiskLruCache(diskCacheDir, diskCacheSize, compressFormat, quality);
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
