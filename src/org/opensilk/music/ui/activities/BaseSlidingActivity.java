@@ -101,6 +101,8 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
 
     protected boolean mIsLargeLandscape;
 
+    private boolean mIsResumed;
+
     // This is injected by subclasses
     private Bus mActivityBus;
 
@@ -219,6 +221,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
     @Override
     protected void onResume() {
         super.onResume();
+        mIsResumed = true;
         // Start scanning for routes
         if (isCastingEnabled) {
             mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
@@ -231,6 +234,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
     @Override
     protected void onPause() {
         super.onPause();
+        mIsResumed = false;
         if (isCastingEnabled) {
             // stop scanning for routes
             mMediaRouter.removeCallback(mMediaRouterCallback);
@@ -541,7 +545,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
                     break;
                 case CAST_FAILED:
                     // notify if possible
-                    if (MusicUtils.isForeground()) {
+                    if (activity.mIsResumed) {
                         switch (msg.arg1) {
                             case (R.string.failed_load):
                                 new AlertDialog.Builder(activity)
