@@ -17,5 +17,5 @@
 
 <resources>
     <integer name="grid_cols_vertical">4</integer>
-    <integer name="grid_cols_horizontal">4</integer>
+    <integer name="grid_cols_horizontal">7</integer>
 </resources>

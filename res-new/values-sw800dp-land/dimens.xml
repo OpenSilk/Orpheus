@@ -16,6 +16,6 @@
   -->
 
 <resources>
-    <!--Landscape layout-->
-    <dimen name="panel_width">560dp</dimen>
+    <dimen name="listview_marginRight">128dp</dimen>
+    <dimen name="listview_marginLeft">128dp</dimen>
 </resources>

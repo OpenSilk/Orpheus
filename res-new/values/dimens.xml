@@ -57,4 +57,7 @@
         Profile
     -->
     <dimen name="profile_sticky_header_height">72dp</dimen>
+
+    <dimen name="listview_marginRight">0dp</dimen>
+    <dimen name="listview_marginLeft">0dp</dimen>
 </resources>

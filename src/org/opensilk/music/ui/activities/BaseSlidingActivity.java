@@ -159,7 +159,7 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         // Get panel fragment reference
         mNowPlayingFragment = (NowPlayingFragment) getSupportFragmentManager().findFragmentById(R.id.now_playing_fragment);
 
-        mIsLargeLandscape = findViewById(R.id.landscape_dummy) != null;
+        mIsLargeLandscape = false;
         // Pinn the sliding pane open on landscape layouts
         if (mIsLargeLandscape && savedInstanceState == null) {
             mSlidingPanel.setSlidingEnabled(false);

@@ -17,5 +17,5 @@
 
 <resources>
     <integer name="grid_cols_vertical">3</integer>
-    <integer name="grid_cols_horizontal">3</integer>
+    <integer name="grid_cols_horizontal">6</integer>
 </resources>
