@@ -50,6 +50,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Bus;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
+import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PanelStateChanged;
@@ -58,10 +59,13 @@ import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.home.SearchFragment;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 import static android.app.SearchManager.QUERY;
 import static org.opensilk.cast.CastMessage.*;
@@ -69,7 +73,7 @@ import static org.opensilk.cast.CastMessage.*;
 /**
  *
  */
-public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity implements
+public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implements
         ServiceConnection,
         SlidingUpPanelLayout.PanelSlideListener {
 
@@ -103,16 +107,14 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
 
     private boolean mIsResumed;
 
-    // This is injected by subclasses
-    private Bus mActivityBus;
+    @Inject
+    protected ArtworkService mArtworkService;
+    @Inject @ForActivity
+    protected Bus mActivityBus;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // nasty hack to workaround daggers inability
-        // to inject abstract classes
-        mActivityBus = provideBus();
 
         // Set the layout
         setContentView(getLayoutId());
@@ -131,6 +133,9 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         // get preferences
         mPreferences = PreferenceUtils.getInstance(this);
 
+        // cancel any pending clear cache request
+        mArtworkService.cancelCacheClear();
+
         // Bind Apollo's service
         mToken = MusicUtils.bindToService(this, this);
 
@@ -148,9 +153,6 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
                             //.addControlCategory(MediaControlIntent.CATEGORY_LIVE_AUDIO)
                     .build();
         }
-
-        // Update count for donate dialog
-        IabUtil.incrementAppLaunchCount(BaseSlidingActivity.this);
 
         // Initialize the sliding pane
         mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
@@ -270,6 +272,11 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         if (mCastServiceToken != null) {
             RemoteCastServiceManager.unbindFromService(mCastServiceToken);
             mCastServiceToken = null;
+        }
+
+        if (isFinishing()) {
+            // schedule cache clear
+            mArtworkService.scheduleCacheClear();
         }
 
     }
@@ -435,8 +442,14 @@ public abstract class BaseSlidingActivity extends ScopedDaggerActionBarActivity 
         return mIsLargeLandscape;
     }
 
-    protected abstract int getLayoutId();
-    protected abstract Bus provideBus();
+    protected int getLayoutId() {
+        throw new UnsupportedOperationException("Subclass must override getLayoutId()");
+    }
+
+    @Override
+    protected Object[] getModules() {
+        throw new UnsupportedOperationException("Subclass must override getModules()");
+    }
 
     /**
      * Handle mediarouter callbacks, responsible for keeping our mediarouter instance

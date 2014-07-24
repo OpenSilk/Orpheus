@@ -27,6 +27,7 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.MediaRouteButton;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -181,7 +182,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        IabUtil.queryDonateAsync(getActivity());
     }
 
     @Override
@@ -670,8 +670,10 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                         String albumartist = MusicUtils.getAlbumArtistName();
                         if (albumartist == null) albumartist = artistname;
                         String albumname = MusicUtils.getAlbumName();
-                        shareIntent.putExtra(Intent.EXTRA_STREAM,
-                                ArtworkProvider.createArtworkUri(albumartist, albumname));
+                        if (!TextUtils.isEmpty(albumartist) && !TextUtils.isEmpty(albumname)) {
+                            shareIntent.putExtra(Intent.EXTRA_STREAM,
+                                    ArtworkProvider.createArtworkUri(albumartist, albumname));
+                        }
                         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
                     } else {
                         //TODO toast
@@ -767,16 +769,6 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
             }
         }
 
-        //@DebugLog
-        @Subscribe
-        public void onIABResult(IABQueryResult r) {
-            if (r.error == IABQueryResult.Error.NO_ERROR) {
-                if (!r.isApproved) {
-                    IabUtil.maybeShowDonateDialog(getActivity());
-                }
-            }
-            //TODO handle faliurs
-        }
     }
 
     class ActivityBusMonitor {

@@ -40,9 +40,13 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.artwork.ArtworkService;
+import org.opensilk.music.bus.EventBus;
+import org.opensilk.music.bus.events.IABQueryResult;
+import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.nav.adapter.NavAdapter;
 import org.opensilk.music.ui.nav.loader.NavLoader;
 import org.opensilk.music.ui.library.LibraryFragment;
@@ -58,6 +62,7 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import hugo.weaving.DebugLog;
 
 /**
  *
@@ -66,14 +71,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         LoaderManager.LoaderCallbacks<List<PluginInfo>>,
         DrawerHelper {
 
-    /**
-     * Remember the position of the selected item.
-     */
     private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
-
-    /**
-     * Helper component that ties the action bar to the navigation drawer.
-     */
     private ActionBarDrawerToggle mDrawerToggle;
 
     @InjectView(R.id.drawer_layout)
@@ -83,16 +81,12 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     @InjectView(R.id.drawer_container)
     View mDrawerContainerView;
 
+    private GlobalBusMonitor mBusMonitor;
     private NavAdapter mDrawerAdapter;
 
     private int mCurrentSelectedPosition = 0;
     private CharSequence mTitle;
     private CharSequence mSubTitle;
-
-    @Inject
-    protected ArtworkService mArtworkService;
-    @Inject @ForActivity
-    protected Bus mActivityBus; // See comment in BaseSlidingActivity;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -101,8 +95,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
         ButterKnife.inject(this);
 
-        // cancel any pending clear cache request
-        mArtworkService.cancelCacheClear();
+        // Update count for donate dialog
+        IabUtil.incrementAppLaunchCount(this);
 
         // Init drawer adapter
         mDrawerAdapter = new NavAdapter(this);
@@ -170,15 +164,18 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
             });
         }
 
+        // register with global bus
+        mBusMonitor = new GlobalBusMonitor();
+        EventBus.getInstance().register(mBusMonitor);
+
+        // check for donations
+        IabUtil.queryDonateAsync(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isFinishing()) {
-            // schedule cache clear
-            mArtworkService.scheduleCacheClear();
-        }
+        EventBus.getInstance().unregister(mBusMonitor);
     }
 
     @Override
@@ -308,11 +305,6 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     }
 
     @Override
-    protected Bus provideBus() {
-        return mActivityBus;
-    }
-
-    @Override
     protected Object[] getModules() {
         return new Object[] {
                 new ActivityModule(this),
@@ -348,6 +340,19 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     public void onLoaderReset(Loader<List<PluginInfo>> loader) {
         mDrawerAdapter.clear();
         mDrawerAdapter.addAll(NavAdapter.makeDefaultNavList(this));
+    }
+
+    class GlobalBusMonitor {
+        @DebugLog
+        @Subscribe
+        public void onIABResult(IABQueryResult r) {
+            if (r.error == IABQueryResult.Error.NO_ERROR) {
+                if (!r.isApproved) {
+                    IabUtil.maybeShowDonateDialog(HomeSlidingActivity.this);
+                }
+            }
+            //TODO handle faliurs
+        }
     }
 
 }

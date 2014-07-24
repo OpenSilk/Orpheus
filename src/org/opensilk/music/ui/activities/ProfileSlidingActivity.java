@@ -50,9 +50,6 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     public static final String ACTION_GENRE = "open_genre";
     public static final String ACTION_SONG_GROUP = "open_song_group";
 
-    @Inject @ForActivity
-    protected Bus mActivityBus; //See comment in BaseSlidingActivity
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeHelper.getInstance(this).getProfileTheme());
@@ -124,11 +121,6 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     @Override
     protected int getLayoutId() {
         return R.layout.activity_profilesliding;
-    }
-
-    @Override
-    protected Bus provideBus() {
-        return mActivityBus;
     }
 
     @Override
