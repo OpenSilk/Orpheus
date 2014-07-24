@@ -263,8 +263,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
             mDrawerLayout.closeDrawer(mDrawerContainerView);
         }
         Runnable action = mDrawerAdapter.getItem(position).action;
-        if (action != null) {
-            runOnUiThread(action);
+        if (action != null && mIsResumed) {
+            action.run();
         }
     }
 

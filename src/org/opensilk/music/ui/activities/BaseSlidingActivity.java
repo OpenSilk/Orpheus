@@ -105,7 +105,7 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
 
     protected boolean mIsLargeLandscape;
 
-    private boolean mIsResumed;
+    protected boolean mIsResumed;
 
     @Inject
     protected ArtworkService mArtworkService;
