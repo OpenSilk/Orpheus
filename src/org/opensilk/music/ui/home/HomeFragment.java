@@ -31,9 +31,9 @@ import android.view.ViewGroup;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Bus;
 
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
 import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.GenreCardClickHandler;
@@ -67,6 +67,8 @@ public class HomeFragment extends ScopedDaggerFragment {
     ActionBarController mActionBarHelper;
     @Inject @ForFragment
     Bus mFragmentBus;
+    @Inject
+    AppPreferences mSettings;
 
     @InjectView(R.id.pager)
     ViewPager mViewPager;
@@ -74,7 +76,6 @@ public class HomeFragment extends ScopedDaggerFragment {
     SlidingTabLayout mTabs;
 
     private HomePagerAdapter mPagerAdapter;
-    private PreferenceUtils mPreferences;
 
     protected AlbumCardClickHandler mAlbumHandler;
     protected ArtistCardClickHandler mArtistHandler;
@@ -86,13 +87,10 @@ public class HomeFragment extends ScopedDaggerFragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get the preferences
-        mPreferences = PreferenceUtils.getInstance(getActivity());
-
         // Initialize the adapter
         mPagerAdapter = new HomePagerAdapter(getActivity(), getChildFragmentManager());
 
-        List<MusicFragment> pages = mPreferences.getHomePages();
+        List<MusicFragment> pages = mSettings.getHomePages();
 
         if (pages == null || pages.size() < 1) {
             final MusicFragment[] mFragments = MusicFragment.values();
@@ -127,7 +125,7 @@ public class HomeFragment extends ScopedDaggerFragment {
         // Offscreen pager loading limit
 //        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount() - 1);
         // Start on the last page the user was on
-        mViewPager.setCurrentItem(mPreferences.getStartPage());
+        mViewPager.setCurrentItem(mSettings.getInt(AppPreferences.START_PAGE, AppPreferences.DEFAULT_PAGE));
     }
 
     @Override
@@ -143,7 +141,7 @@ public class HomeFragment extends ScopedDaggerFragment {
     public void onPause() {
         super.onPause();
         // Save the last page the use was on
-        mPreferences.setStartPage(mViewPager.getCurrentItem());
+        mSettings.putInt(AppPreferences.START_PAGE, mViewPager.getCurrentItem());
     }
 
     @Override

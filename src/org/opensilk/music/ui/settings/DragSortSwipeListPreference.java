@@ -23,6 +23,8 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.mobeta.android.dslv.DragSortListView;
 
+import org.opensilk.music.AppPreferences;
+import org.opensilk.music.GraphHolder;
 import org.opensilk.music.ui.home.MusicFragment;
 
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ public class DragSortSwipeListPreference extends DialogPreference implements
 
     private DragSortSwipeListAdapter mAdapter;
     private ArrayList<MusicFragment> mCurrentClassList;
+    private AppPreferences mSettings;
 
     public DragSortSwipeListPreference(Context context) {
         this(context, null);
@@ -45,6 +48,8 @@ public class DragSortSwipeListPreference extends DialogPreference implements
     public DragSortSwipeListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setDialogLayoutResource(R.layout.drag_sort_swipe_list_preference);
+        // TODO real inject
+        mSettings = GraphHolder.get(context).getObj(AppPreferences.class);
     }
 
     @Override
@@ -56,7 +61,7 @@ public class DragSortSwipeListPreference extends DialogPreference implements
                 if (mCurrentClassList.size() < 1) {
                     //Error dialog here
                 } else {
-                    PreferenceUtils.getInstance(getContext()).setHomePages(mCurrentClassList);
+                    mSettings.setHomePages(mCurrentClassList);
                     // We're only using the OnPreferenceChangeListener to restart.
                     callChangeListener(null);
 //                    Log.d("TAG", mAdapter.getItems().toString());
@@ -72,7 +77,7 @@ public class DragSortSwipeListPreference extends DialogPreference implements
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
 
-        List<MusicFragment> savedPages = PreferenceUtils.getInstance(getContext()).getHomePages();
+        List<MusicFragment> savedPages = mSettings.getHomePages();
         if (savedPages == null) {
             savedPages = Arrays.asList(MusicFragment.values());
         }

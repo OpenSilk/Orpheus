@@ -26,23 +26,26 @@ import android.view.View;
 import android.widget.CursorAdapter;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.AppPreferences;
 import org.opensilk.silkdagger.DaggerInjector;
+
+import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 6/28/14.
  */
-public abstract class BasePagerFragment extends CardListGridFragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class BasePagerFragment extends CardListGridFragment implements LoaderManager.LoaderCallbacks<Cursor>{
 
     protected static final int LOADER = 0;
 
-    protected DaggerInjector mInjector;
+    @Inject
+    protected AppPreferences mSettings;
 
+    protected DaggerInjector mInjector;
     protected CursorAdapter mAdapter;
-    protected PreferenceUtils mPreferences;
 
     @Override
     public void onAttach(Activity activity) {
@@ -55,7 +58,6 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
     //@DebugLog
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPreferences = PreferenceUtils.getInstance(getActivity());
         mAdapter = createAdapter();
         // Start the loader
         getLoaderManager().initLoader(LOADER, null, this);
@@ -85,7 +87,6 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
     public void onDestroy() {
         super.onDestroy();
         mAdapter = null;
-        mPreferences = null;
     }
 
     @Override
@@ -107,12 +108,22 @@ public abstract class BasePagerFragment extends CardListGridFragment implements 
         return getString(R.string.empty_music);
     }
 
-    protected abstract CursorAdapter createAdapter();
-    protected abstract boolean wantGridView();
+    protected CursorAdapter createAdapter() {
+        throw new UnsupportedOperationException("Subclass must override createAdapter()");
+    }
+
+    protected boolean wantGridView() {
+        throw new UnsupportedOperationException("Subclass must override wantGridView()");
+    }
 
     /*
      * Loader Callbacks
      */
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        throw new UnsupportedOperationException("Subclass must override onCreateLoader()");
+    }
 
     @Override
     @DebugLog

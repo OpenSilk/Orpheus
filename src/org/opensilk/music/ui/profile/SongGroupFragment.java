@@ -33,7 +33,6 @@ import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
-import org.opensilk.music.ui.home.adapter.SongAdapter;
 import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.SongGroupLoader;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
@@ -78,7 +77,7 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
         super.onCreate(savedInstanceState);
         mSongGroup = getArguments().getParcelable(Config.EXTRA_DATA);
         mAdapter = new SongCollectionAdapter(getActivity(), this, false,
-                Uris.EXTERNAL_MEDIASTORE,
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.SONG_GROUP(mSongGroup.songIds),
                 SelectionArgs.SONG_GROUP,

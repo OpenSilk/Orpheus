@@ -90,7 +90,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
         final String[] selectionArgs;
         final String sortOrder;
         if (isLastAdded()) {
-            uri = Uris.EXTERNAL_MEDIASTORE;
+            uri = Uris.EXTERNAL_MEDIASTORE_MEDIA;
             projection = Projections.LOCAL_SONG;
             selection = Selections.LAST_ADDED;
             selectionArgs = SelectionArgs.LAST_ADDED();

@@ -28,6 +28,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.SortOrder;
 
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.ui.home.adapter.AlbumGridAdapter;
 import org.opensilk.music.ui.home.adapter.AlbumListAdapter;
 import org.opensilk.music.ui.home.loader.AlbumLoader;
@@ -35,8 +36,6 @@ import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
-
-import static com.andrew.apollo.utils.PreferenceUtils.ALBUM_LAYOUT;
 
 /**
  * Created by drew on 6/28/14.
@@ -58,31 +57,31 @@ public class AlbumFragment extends BasePagerFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sort_by_az:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_A_Z);
+                mSettings.putString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z);
                 refresh();
                 return true;
             case R.id.menu_sort_by_za:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_Z_A);
+                mSettings.putString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_Z_A);
                 refresh();
                 return true;
             case R.id.menu_sort_by_artist:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_ARTIST);
+                mSettings.putString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_ARTIST);
                 refresh();
                 return true;
             case R.id.menu_sort_by_year:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_YEAR);
+                mSettings.putString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_YEAR);
                 refresh();
                 return true;
             case R.id.menu_sort_by_number_of_songs:
-                mPreferences.setAlbumSortOrder(SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                mSettings.putString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
                 refresh();
                 return true;
             case R.id.menu_view_as_simple:
-                mPreferences.setAlbumLayout("simple");
+                mSettings.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.SIMPLE);
                 NavUtils.goHome(getActivity());
                 return true;
             case R.id.menu_view_as_grid:
-                mPreferences.setAlbumLayout("grid");
+                mSettings.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.GRID);
                 NavUtils.goHome(getActivity());
                 return true;
         }
@@ -91,7 +90,7 @@ public class AlbumFragment extends BasePagerFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AlbumLoader(getActivity());
+        return new AlbumLoader(getActivity(), mSettings.getString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z));
     }
 
     @Override
@@ -105,7 +104,7 @@ public class AlbumFragment extends BasePagerFragment {
 
     @Override
     public boolean wantGridView() {
-        return !mPreferences.isSimpleLayout(ALBUM_LAYOUT, getActivity());
+        return mSettings.getString(AppPreferences.ALBUM_LAYOUT, AppPreferences.GRID).equals(AppPreferences.GRID);
     }
 
 }

@@ -16,26 +16,20 @@
 
 package org.opensilk.music.ui.home;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
-import hugo.weaving.DebugLog;
-import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 /**

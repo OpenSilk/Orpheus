@@ -33,7 +33,7 @@ public class PlaylistSongLoader extends CursorLoader {
     public PlaylistSongLoader(Context context, long playlistId) {
         super(context);
         if (isLastAdded(playlistId)) {
-            setUri(Uris.EXTERNAL_MEDIASTORE);
+            setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);
             setProjection(Projections.LOCAL_SONG);
             setSelection(Selections.LAST_ADDED);
             setSelectionArgs(SelectionArgs.LAST_ADDED());

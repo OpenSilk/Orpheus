@@ -21,8 +21,6 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.widget.CursorAdapter;
 
-import com.andrew.apollo.R;
-
 import org.opensilk.music.ui.home.adapter.GenreGridAdapter;
 import org.opensilk.music.ui.home.loader.GenreLoader;
 

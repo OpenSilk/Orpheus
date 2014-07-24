@@ -58,4 +58,7 @@ public class GraphHolder implements DaggerInjector {
         return graph;
     }
 
+    public <T> T getObj(Class<T> cls) {
+        return getObjectGraph().get(cls);
+    }
 }

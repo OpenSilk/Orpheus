@@ -17,25 +17,23 @@
 package org.opensilk.music.ui.home.loader;
 
 import android.content.Context;
-import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
-import com.andrew.apollo.utils.PreferenceUtils;
-
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.Uris;
 
 /**
  * Created by drew on 2/18/14.
  */
 public class ArtistLoader extends CursorLoader {
 
-    public ArtistLoader(Context context) {
+    public ArtistLoader(Context context, String sortOrder) {
         super(context);
-        setUri(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI);
+        setUri(Uris.EXTERNAL_MEDIASTORE_ARTISTS);
         setProjection(Projections.LOCAL_ARTIST);
         setSelection(null);
         setSelectionArgs(null);
-        setSortOrder(PreferenceUtils.getInstance(getContext()).getArtistSortOrder());
+        setSortOrder(sortOrder);
     }
 
 }

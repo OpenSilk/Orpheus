@@ -34,6 +34,7 @@ import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.utils.PreferenceUtils;
 
+import org.opensilk.music.GraphHolder;
 import org.opensilk.music.MusicApp;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Album;
@@ -198,7 +199,7 @@ public class CursorHelpers {
     }
 
     public static Cursor makeLastAddedCursor(final Context context) {
-        return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LAST_ADDED,
                 SelectionArgs.LAST_ADDED(),
@@ -206,17 +207,20 @@ public class CursorHelpers {
     }
 
     public static Cursor makeSongCursor(final Context context) {
-        return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
+        final String sortOrder = settings.getString(AppPreferences.SONG_SORT_ORDER,
+                com.andrew.apollo.utils.SortOrder.SongSortOrder.SONG_A_Z);
+        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_SONG,
                 SelectionArgs.LOCAL_SONG,
-                PreferenceUtils.getInstance(context).getSongSortOrder());
+                sortOrder);
     }
 
     public static Cursor makeSingleLocalSongCursor(final Context context, long id) {
         String [] selectionArgs = Arrays.copyOf(SelectionArgs.LOCAL_SONG, SelectionArgs.LOCAL_SONG.length+1);
         selectionArgs[selectionArgs.length-1] = String.valueOf(id);
-        return context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_SONG + " AND " + MediaStore.Audio.Media._ID + "=?",
                 selectionArgs,
@@ -224,7 +228,7 @@ public class CursorHelpers {
     }
 
     public static String getAlbumArtist(Context context, long albumId) {
-        Cursor c = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+        Cursor c = context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_ALBUMS,
                 new String[]{ MediaStore.Audio.Albums.ARTIST },
                 MediaStore.Audio.Albums._ID + "=?",
                 new String[]{ String.valueOf(albumId) },
@@ -241,13 +245,13 @@ public class CursorHelpers {
 
     public static Cursor getCursorForAutoShuffle(Context context) {
         String selection = Selections.LOCAL_SONG;
-        AppPreferences prefs = ((DaggerInjector) context.getApplicationContext()).getObjectGraph().get(AppPreferences.class);
-        String deffldr = prefs.getString(AppPreferences.PREF_DEFAULT_MEDIA_FOLDER, null);
+        AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
+        String deffldr = settings.getString(AppPreferences.PREF_DEFAULT_MEDIA_FOLDER, null);
         if (!TextUtils.isEmpty(deffldr)) {
             selection += " AND " + MediaStore.Audio.Media.DATA + " like '" + deffldr + "%'";
         }
         return context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 new String[]{BaseColumns._ID},
                 selection,
                 SelectionArgs.LOCAL_SONG,
@@ -256,7 +260,7 @@ public class CursorHelpers {
 
     public static Cursor makeArtistSongsCursor(Context context, long artistId) {
         return context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_SONG + " AND " + MediaStore.Audio.Media.ARTIST_ID + "=?",
                 new String[]{SelectionArgs.LOCAL_SONG[0], SelectionArgs.LOCAL_SONG[1], String.valueOf(artistId)},
@@ -265,7 +269,7 @@ public class CursorHelpers {
 
     public static Cursor makeLocalAlbumsCursor(Context context, long[] albumIds) {
         return context.getContentResolver().query(
-                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                Uris.EXTERNAL_MEDIASTORE_ALBUMS,
                 Projections.LOCAL_ALBUM,
                 Selections.LOCAL_ALBUMS(albumIds),
                 null,
@@ -279,7 +283,7 @@ public class CursorHelpers {
     }
 
     public static Cursor makeLocalArtistAlbumsCursor(Context context, long artistId) {
-        return context.getContentResolver().query(MediaStore.Audio.Artists.Albums.getContentUri("external", artistId),
+        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(artistId),
                 Projections.LOCAL_ALBUM,
                 null, null,
                 MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
@@ -330,7 +334,7 @@ public class CursorHelpers {
 
     public static long[] getSongIdsForAlbum(Context context, long albumid) {
         Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.ID_ONLY,
                 Selections.LOCAL_ALBUM_SONGS,
                 SelectionArgs.LOCAL_ALBUM_SONGS(albumid),
@@ -403,7 +407,7 @@ public class CursorHelpers {
     }
 
     public static Uri generateDataUri(long songId) {
-        return ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId);
+        return ContentUris.withAppendedId(Uris.EXTERNAL_MEDIASTORE_MEDIA, songId);
     }
 
     public static Uri generateArtworkUri(long albumId) {

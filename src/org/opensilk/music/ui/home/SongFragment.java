@@ -27,6 +27,7 @@ import android.widget.CursorAdapter;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.SortOrder;
 
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.ui.home.adapter.SongAdapter;
 import org.opensilk.music.ui.home.loader.SongLoader;
 import org.opensilk.music.ui.modules.DrawerHelper;
@@ -53,31 +54,31 @@ public class SongFragment extends BasePagerFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sort_by_az:
-                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
+                mSettings.putString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z);
                 refresh();
                 return true;
             case R.id.menu_sort_by_za:
-                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_Z_A);
+                mSettings.putString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_Z_A);
                 refresh();
                 return true;
             case R.id.menu_sort_by_artist:
-                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_ARTIST);
+                mSettings.putString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_ARTIST);
                 refresh();
                 return true;
             case R.id.menu_sort_by_album:
-                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_ALBUM);
+                mSettings.putString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_ALBUM);
                 refresh();
                 return true;
             case R.id.menu_sort_by_year:
-                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_YEAR);
+                mSettings.putString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_YEAR);
                 refresh();
                 return true;
             case R.id.menu_sort_by_duration:
-                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_DURATION);
+                mSettings.putString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_DURATION);
                 refresh();
                 return true;
             case R.id.menu_sort_by_filename:
-                mPreferences.setSongSortOrder(SortOrder.SongSortOrder.SONG_FILENAME);
+                mSettings.putString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_FILENAME);
                 refresh();
                 return true;
         }
@@ -86,7 +87,7 @@ public class SongFragment extends BasePagerFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new SongLoader(getActivity());
+        return new SongLoader(getActivity(), mSettings.getString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z));
     }
 
     @Override

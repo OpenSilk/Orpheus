@@ -24,8 +24,13 @@ import android.provider.MediaStore;
  */
 public class Uris {
     public static final Uri ARTWORK_URI = Uri.parse("content://media/external/audio/albumart");
-    public static final Uri EXTERNAL_MEDIASTORE = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-    public static final Uri LOCAL_ALBUM_SONGS = EXTERNAL_MEDIASTORE;
+    public static final Uri EXTERNAL_MEDIASTORE_MEDIA = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+    public static final Uri EXTERNAL_MEDIASTORE_ALBUMS = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
+    public static final Uri EXTERNAL_MEDIASTORE_ARTISTS = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI;
+    public static Uri EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(long artistId) {
+        return MediaStore.Audio.Artists.Albums.getContentUri("external", artistId);
+    }
+    public static final Uri LOCAL_ALBUM_SONGS = EXTERNAL_MEDIASTORE_MEDIA;
     public static Uri PLAYLIST(long playlistId) {
         return  MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
     }

@@ -17,7 +17,6 @@
 package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
-import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
 import org.opensilk.music.util.Projections;
@@ -33,7 +32,7 @@ public class SongGroupLoader extends CursorLoader {
 
     public SongGroupLoader(Context context, long[] songIds) {
         super(context);
-        setUri(Uris.EXTERNAL_MEDIASTORE);
+        setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);
         setProjection(Projections.LOCAL_SONG);
         setSelection(Selections.SONG_GROUP(songIds));
         setSelectionArgs(SelectionArgs.SONG_GROUP);

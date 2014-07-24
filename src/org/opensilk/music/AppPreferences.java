@@ -19,8 +19,18 @@ package org.opensilk.music;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.JsonReader;
+import android.util.JsonWriter;
 
+import com.andrew.apollo.utils.Lists;
+
+import org.opensilk.music.ui.home.MusicFragment;
 import org.opensilk.silkdagger.qualifier.ForApplication;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,7 +42,21 @@ import javax.inject.Singleton;
 public class AppPreferences {
 
     public static final String PREF_DEFAULT_MEDIA_FOLDER = "default_media_folder";
+
     public static final String PREF_LAST_FOLDER_BROWSER_PATH = "last_folder_browser_path";
+
+    public static final int DEFAULT_PAGE = 2;
+    public static final String START_PAGE = "start_page";
+    public static final String HOME_PAGES = "pref_home_pages";
+
+    public static final String ARTIST_SORT_ORDER = "artist_sort_order";
+    public static final String ALBUM_SORT_ORDER = "album_sort_order";
+    public static final String SONG_SORT_ORDER = "song_sort_order";
+
+    public static final String ARTIST_LAYOUT = "artist_layout";
+    public static final String ALBUM_LAYOUT = "album_layout";
+    public static final String SIMPLE = "simple";
+    public static final String GRID = "grid";
 
     private SharedPreferences prefs;
 
@@ -79,5 +103,56 @@ public class AppPreferences {
 
     public void remove(String key) {
         prefs.edit().remove(key).apply();
+    }
+
+
+    /**
+     * @return List of class names for home pager fragments
+     */
+    public final List<MusicFragment> getHomePages() {
+        String pgs = getString(HOME_PAGES, null);
+        if (pgs == null) {
+            return null;
+        }
+        List<MusicFragment> pages = Lists.newArrayList();
+        JsonReader jw = new JsonReader(new StringReader(pgs));
+        try {
+            jw.beginArray();
+            while (jw.hasNext()) {
+                pages.add(MusicFragment.valueOf(jw.nextString()));
+            }
+            jw.endArray();
+        } catch (IOException |IllegalArgumentException e) {
+            remove(HOME_PAGES);
+            return null;
+        } finally {
+            try {
+                jw.close();
+            } catch (IOException ignored) { }
+        }
+        return pages;
+    }
+
+    /**
+     * Saves fragment class names for home pager
+     * @param pages
+     */
+    public final void setHomePages(List<MusicFragment> pages) {
+        StringWriter sw = new StringWriter(400);
+        JsonWriter jw = new JsonWriter(sw);
+        try {
+            jw.beginArray();
+            for (MusicFragment p : pages) {
+                jw.value(p.toString());
+            }
+            jw.endArray();
+            putString(HOME_PAGES, sw.toString());
+        } catch (IOException e) {
+            remove(HOME_PAGES);
+        } finally {
+            try {
+                jw.close();
+            } catch (IOException ignored) { }
+        }
     }
 }

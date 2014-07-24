@@ -37,35 +37,14 @@ import java.util.List;
  */
 public final class PreferenceUtils {
 
-    /* Default start page (Artist page) */
-    public static final int DEFFAULT_PAGE = 2;
-
-    /* Saves the last page the pager was on in {@link MusicBrowserPhoneFragment} */
-    public static final String START_PAGE = "start_page";
-
-    // Sort order for the artist list
-    public static final String ARTIST_SORT_ORDER = "artist_sort_order";
-
     // Sort order for the artist song list
     public static final String ARTIST_SONG_SORT_ORDER = "artist_song_sort_order";
 
     // Sort order for the artist album list
     public static final String ARTIST_ALBUM_SORT_ORDER = "artist_album_sort_order";
 
-    // Sort order for the album list
-    public static final String ALBUM_SORT_ORDER = "album_sort_order";
-
     // Sort order for the album song list
     public static final String ALBUM_SONG_SORT_ORDER = "album_song_sort_order";
-
-    // Sort order for the song list
-    public static final String SONG_SORT_ORDER = "song_sort_order";
-
-    // Sets the type of layout to use for the artist list
-    public static final String ARTIST_LAYOUT = "artist_layout";
-
-    // Sets the type of layout to use for the album list
-    public static final String ALBUM_LAYOUT = "album_layout";
 
     // Sets the type of layout to use for the recent list
     public static final String RECENT_LAYOUT = "recent_layout";
@@ -103,8 +82,7 @@ public final class PreferenceUtils {
     //Key whether or not to show visualizations.
     public static final String SHOW_VISUALIZATIONS = "pref_visualizations";
 
-    //Key for home screen pages
-    public static final String HOME_PAGES = "pref_home_pages";
+
 
     private static PreferenceUtils sInstance;
 
@@ -157,34 +135,6 @@ public final class PreferenceUtils {
     }
 
     /**
-     * Saves the current page the user is on when they close the app.
-     * 
-     * @param value The last page the pager was on when the onDestroy is called
-     *            in {@link MusicBrowserPhoneFragment}.
-     */
-    public void setStartPage(final int value) {
-        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(final Void... unused) {
-                final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putInt(START_PAGE, value);
-                editor.apply();
-
-                return null;
-            }
-        }, (Void[])null);
-    }
-
-    /**
-     * Returns the last page the user was on when the app was exited.
-     * 
-     * @return The page to start on when the app is opened.
-     */
-    public final int getStartPage() {
-        return mPreferences.getInt(START_PAGE, DEFFAULT_PAGE);
-    }
-
-    /**
      * Sets theme used by themehelper to choose resources
      * @param themeStyle
      */
@@ -200,58 +150,6 @@ public final class PreferenceUtils {
      */
     public final ThemeStyle getThemeStyle() {
         return ThemeStyle.valueOf(mPreferences.getString(THEME_STYLE, ThemeStyle.ORPHEUS.toString()));
-    }
-
-    /**
-     * @return List of class names for home pager fragments
-     */
-    public final List<MusicFragment> getHomePages() {
-        String pgs = mPreferences.getString(HOME_PAGES, null);
-        if (pgs == null) {
-            return null;
-        }
-        List<MusicFragment> pages = Lists.newArrayList();
-        JsonReader jw = new JsonReader(new StringReader(pgs));
-        try {
-            jw.beginArray();
-            while (jw.hasNext()) {
-                pages.add(MusicFragment.valueOf(jw.nextString()));
-            }
-            jw.endArray();
-        } catch (IOException|IllegalArgumentException e) {
-            e.printStackTrace();
-            mPreferences.edit().remove(HOME_PAGES).apply();
-            return null;
-        } finally {
-            try {
-                jw.close();
-            } catch (IOException ignored) { }
-        }
-        return pages;
-    }
-
-    /**
-     * Saves fragment class names for home pager
-     * @param pages
-     */
-    public final void setHomePages(List<MusicFragment> pages) {
-        StringWriter sw = new StringWriter(400);
-        JsonWriter jw = new JsonWriter(sw);
-        try {
-            jw.beginArray();
-            for (MusicFragment p : pages) {
-                jw.value(p.toString());
-            }
-            jw.endArray();
-            mPreferences.edit().putString(HOME_PAGES, sw.toString()).commit();
-        } catch (IOException e) {
-            e.printStackTrace();
-            mPreferences.edit().remove(HOME_PAGES).commit();
-        } finally {
-            try {
-                jw.close();
-            } catch (IOException ignored) { }
-        }
     }
 
     /**
@@ -348,22 +246,6 @@ public final class PreferenceUtils {
     }
 
     /**
-     * Sets the sort order for the artist list.
-     * 
-     * @param value The new sort order
-     */
-    public void setArtistSortOrder(final String value) {
-        setSortOrder(ARTIST_SORT_ORDER, value);
-    }
-
-    /**
-     * @return The sort order used for the artist list in {@link ArtistFragment}
-     */
-    public final String getArtistSortOrder() {
-        return mPreferences.getString(ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z);
-    }
-
-    /**
      * Sets the sort order for the artist song list.
      * 
      * @param value The new sort order
@@ -400,22 +282,6 @@ public final class PreferenceUtils {
     }
 
     /**
-     * Sets the sort order for the album list.
-     * 
-     * @param value The new sort order
-     */
-    public void setAlbumSortOrder(final String value) {
-        setSortOrder(ALBUM_SORT_ORDER, value);
-    }
-
-    /**
-     * @return The sort order used for the album list in {@link AlbumFragment}
-     */
-    public final String getAlbumSortOrder() {
-        return mPreferences.getString(ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z);
-    }
-
-    /**
      * Sets the sort order for the album song list.
      * 
      * @param value The new sort order
@@ -431,22 +297,6 @@ public final class PreferenceUtils {
     public final String getAlbumSongSortOrder() {
         return mPreferences.getString(ALBUM_SONG_SORT_ORDER,
                 SortOrder.AlbumSongSortOrder.SONG_TRACK_LIST);
-    }
-
-    /**
-     * Sets the sort order for the song list.
-     * 
-     * @param value The new sort order
-     */
-    public void setSongSortOrder(final String value) {
-        setSortOrder(SONG_SORT_ORDER, value);
-    }
-
-    /**
-     * @return The sort order used for the song list in {@link SongFragment}
-     */
-    public final String getSongSortOrder() {
-        return mPreferences.getString(SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z);
     }
 
     /**
@@ -466,24 +316,6 @@ public final class PreferenceUtils {
                 return null;
             }
         }, (Void[])null);
-    }
-
-    /**
-     * Sets the layout type for the artist list
-     * 
-     * @param value The new layout type
-     */
-    public void setArtistLayout(final String value) {
-        setLayoutType(ARTIST_LAYOUT, value);
-    }
-
-    /**
-     * Sets the layout type for the album list
-     * 
-     * @param value The new layout type
-     */
-    public void setAlbumLayout(final String value) {
-        setLayoutType(ALBUM_LAYOUT, value);
     }
 
     /**
