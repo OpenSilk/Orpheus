@@ -24,9 +24,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.service.dreams.DreamService;
-import android.service.dreams.IDreamService;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -43,8 +41,7 @@ import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.dream.views.IDreamView;
 
 import java.lang.reflect.Field;
-
-import hugo.weaving.DebugLog;
+import java.lang.reflect.Method;
 
 /**
  * Created by drew on 4/4/14.
@@ -212,18 +209,22 @@ public class DayDreamService extends DreamService {
         public void onServiceConnected(ComponentName name, IBinder service) {
             isBoundToAltDream = true;
             try {
-                IDreamService dreamService = IDreamService.Stub.asInterface(service);
+                // Bind the service
+                Class stub = Class.forName("android.service.dreams.IDreamService$Stub");
+                Method asIface = stub.getDeclaredMethod("asInterface", IBinder.class);
+                Object dreamService = asIface.invoke(null, service);
                 // Get super
                 Class s = DayDreamService.class.getSuperclass();
-                // pull out the WindowToken
-                // this is the token passed from the DreamManager
-                Field f = s.getDeclaredField("mWindowToken");
-                f.setAccessible(true);
+                // pull out the WindowToken, this is the token passed from the DreamManager
+                Field windowToken = s.getDeclaredField("mWindowToken");
+                windowToken.setAccessible(true);
                 // extract the actual IBinder
-                IBinder token = (IBinder) f.get(DayDreamService.this);
+                IBinder token = (IBinder) windowToken.get(DayDreamService.this);
                 // forward our token to the alt dream service
-                dreamService.attach(token);
-            } catch (NoSuchFieldException|IllegalAccessException|NullPointerException|RemoteException e) {
+                Class iDreamService = Class.forName("android.service.dreams.IDreamService");
+                Method attach = iDreamService.getDeclaredMethod("attach", IBinder.class);
+                attach.invoke(dreamService, token);
+            } catch (Exception e) {
                 e.printStackTrace();
                 setupSaverView();
             }
