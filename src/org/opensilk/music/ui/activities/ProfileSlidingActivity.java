@@ -16,7 +16,7 @@
 
 package org.opensilk.music.ui.activities;
 
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -26,18 +26,13 @@ import android.view.WindowManager;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.ThemeHelper;
-import com.squareup.otto.Bus;
 
 import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
 import org.opensilk.music.ui.profile.PlaylistFragment;
 import org.opensilk.music.ui.profile.SongGroupFragment;
-import org.opensilk.silkdagger.qualifier.ForActivity;
-
-import javax.inject.Inject;
 
 /**
  * Created by drew on 6/20/14.
@@ -52,7 +47,7 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(ThemeHelper.getInstance(this).getProfileTheme());
+        setTheme(ThemeHelper.getInstance(this).getPanelDialogTheme());
 //        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR);
         setupFauxDialog();
         super.onCreate(savedInstanceState);
@@ -60,8 +55,11 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(null);
         actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        //hacks cant set null FIXME real drawable so we can get some padding
+        actionBar.setHomeAsUpIndicator(R.drawable.blank);
         actionBar.setTitle(" ");
-        actionBar.setIcon(R.drawable.ic_action_cancel_white);
+        actionBar.setIcon(ThemeHelper.isDialog(this) ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
         Fragment f = null;
@@ -92,8 +90,7 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     // Thanks dashclock for this
     private void setupFauxDialog() {
         // Check if this should be a dialog
-        TypedValue tv = new TypedValue();
-        if (!getTheme().resolveAttribute(R.attr.isDialog, tv, true) || tv.data == 0) {
+        if (!ThemeHelper.isDialog(this)) {
             return;
         }
 

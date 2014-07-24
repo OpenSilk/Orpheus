@@ -16,10 +16,6 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:exitFadeDuration="@android:integer/config_mediumAnimTime">
-
-    <item android:state_activated="true" android:drawable="@drawable/list_focused_holo"/>
-    <item android:state_pressed="true" android:drawable="@drawable/list_pressed_holo_dark"/>
-    <item android:drawable="@color/app_background_dark"/>
-</selector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/transparent"/>
+</shape>

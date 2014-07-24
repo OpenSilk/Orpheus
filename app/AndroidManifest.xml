@@ -49,7 +49,6 @@
 
     <application
         android:name="org.opensilk.music.MusicApp"
-        android:theme="@style/Theme.AppCompat.Light"
         android:allowBackup="true"
         android:hardwareAccelerated="@bool/config_hardwareAccelerated"
         android:icon="@drawable/ic_launcher"
@@ -68,7 +67,7 @@
         <!-- The God Activity -->
         <activity
             android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
-            android:theme="@style/Theme.Default.Panel"
+            android:theme="@style/Theme.Light.Panel"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
@@ -144,26 +143,24 @@
         </activity>
 
         <activity android:name="org.opensilk.music.ui.activities.ProfileSlidingActivity"
-            android:theme="@style/Theme.Default.Panel.Profile">
+            android:theme="@style/Theme.Dialog.Light.Panel">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <!-- Used to set options -->
         <activity
-            android:name="org.opensilk.music.ui.settings.SettingsPhoneActivity"
+            android:name="org.opensilk.music.ui.settings.SettingsActivity"
             android:label="@string/menu_settings"
-            android:icon="@drawable/ic_settings" />
-
-        <activity
-            android:name="org.opensilk.music.ui.settings.SettingsTabletActivity"
-            android:label="@string/menu_settings"
-            android:icon="@drawable/ic_settings" />
+            android:theme="@style/Theme.Dialog.Light">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+        </activity>
 
         <activity
             android:name="org.opensilk.music.appwidgets.MusicWidgetSettings"
             android:label="@string/widget_settings_label"
-            android:icon="@drawable/ic_settings">
+            android:theme="@style/Theme.Light">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>

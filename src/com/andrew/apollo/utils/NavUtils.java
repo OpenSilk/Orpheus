@@ -38,7 +38,7 @@ import org.opensilk.music.ui.folder.FolderFragment;
 import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.library.LibraryFragment;
-import org.opensilk.music.ui.settings.SettingsPhoneActivity;
+import org.opensilk.music.ui.settings.SettingsActivity;
 
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 
@@ -221,7 +221,7 @@ public final class NavUtils {
     }
 
     public static void openSettings(Activity activity) {
-        activity.startActivityForResult(new Intent(activity, SettingsPhoneActivity.class), 0);
+        activity.startActivityForResult(new Intent(activity, SettingsActivity.class), 0);
     }
 
     public static void openLibrary(FragmentActivity activity, PluginInfo info) {

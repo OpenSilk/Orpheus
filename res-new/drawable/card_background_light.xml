@@ -19,7 +19,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     android:exitFadeDuration="@android:integer/config_mediumAnimTime">
 
-    <item android:state_activated="true" android:drawable="@drawable/list_focused_blupheus"/>
-    <item android:state_pressed="true" android:drawable="@drawable/list_pressed_orpheus"/>
+    <item android:state_activated="true" android:drawable="@drawable/list_focused_holo"/>
+    <item android:state_pressed="true" android:drawable="@drawable/list_pressed_holo_light"/>
     <item android:drawable="@color/app_background_light"/>
 </selector>

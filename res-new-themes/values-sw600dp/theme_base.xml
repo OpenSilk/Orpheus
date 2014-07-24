@@ -16,7 +16,8 @@
   -->
 
 <resources>
-    <style name="Theme.Profile.LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
+
+    <style name="Theme.Dialog.LightBase" parent="Theme.LightBase">
         <item name="isDialog">true</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -24,7 +25,7 @@
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
-    <style name="Theme.Profile.DarkBase" parent="Theme.AppCompat">
+    <style name="Theme.Dialog.DarkBase" parent="Theme.DarkBase">
         <item name="isDialog">true</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowContentOverlay">@null</item>

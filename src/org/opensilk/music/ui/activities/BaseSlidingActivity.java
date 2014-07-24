@@ -119,11 +119,6 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
         // Set the layout
         setContentView(getLayoutId());
 
-        // Setup action bar
-//        ActionBar ab = getSupportActionBar();
-//        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-//        ab.setDisplayShowTitleEnabled(true);
-
         // Fade it in
         //overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 

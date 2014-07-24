@@ -11,7 +11,7 @@ import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.IABQueryResult;
-import org.opensilk.music.ui.settings.SettingsPhoneActivity;
+import org.opensilk.music.ui.settings.SettingsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +85,7 @@ public class IabUtil {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        context.startActivity(new Intent(context, SettingsPhoneActivity.class)
+                        context.startActivity(new Intent(context, SettingsActivity.class)
                                 .setAction("open_donate"));
                     }
                 })

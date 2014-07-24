@@ -119,7 +119,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
-        actionBar.setIcon(new ColorDrawable(android.R.color.transparent));
+        actionBar.setTitle(" ");
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.

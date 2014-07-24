@@ -4,7 +4,9 @@ package org.opensilk.music.ui.settings;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.support.v7.app.ActionBarActivity;
 
+import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 /**
@@ -29,9 +31,9 @@ public abstract class SettingsFragment extends PreferenceFragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (mTitle != null && mIconRes != 0) {
-            getActivity().getActionBar().setTitle(mTitle);
-            getActivity().getActionBar().setIcon(mIconRes);
+        if (mTitle != null) {
+            ActionBarActivity activity = (ActionBarActivity) getActivity();
+            activity.getSupportActionBar().setTitle(mTitle);
         }
     }
 

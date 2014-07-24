@@ -17,6 +17,7 @@
 package com.andrew.apollo.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -58,9 +59,6 @@ public class ThemeHelper {
         mActiveTheme = mPreferences.getThemeStyle();
     }
 
-    /**
-     * @return Theme style used for panel activity
-     */
     public final int getPanelTheme() {
         //Set theme
         switch (mActiveTheme) {
@@ -88,35 +86,32 @@ public class ThemeHelper {
         return -1;
     }
 
-    public final int getProfileTheme() {
+    public final int getPanelDialogTheme() {
         switch (mActiveTheme) {
             case ORPHEUS:
-                return R.style.Theme_Orpheus_Profile;
+                return R.style.Theme_Dialog_Orpheus_Panel;
             case BLUPHEUS:
-                return R.style.Theme_Blupheus_Profile;
+                return R.style.Theme_Dialog_Blupheus_Panel;
             case REPHEUS:
-                return R.style.Theme_Repheus_Profile;
+                return R.style.Theme_Dialog_Repheus_Panel;
             case GREPHEUS:
-                return R.style.Theme_Grepheus_Profile;
+                return R.style.Theme_Dialog_Grepheus_Panel;
             case PURPHEUS:
-                return R.style.Theme_Purpheus_Profile;
+                return R.style.Theme_Dialog_Purpheus_Panel;
             case ORPHEUSDARK:
-                return R.style.Theme_OrpheusDark_Profile;
+                return R.style.Theme_Dialog_OrpheusDark_Panel;
             case BLUPHEUSDARK:
-                return R.style.Theme_BlupheusDark_Profile;
+                return R.style.Theme_Dialog_BlupheusDark_Panel;
             case REPHEUSDARK:
-                return R.style.Theme_RepheusDark_Profile;
+                return R.style.Theme_Dialog_RepheusDark_Panel;
             case GREPHEUSDARK:
-                return R.style.Theme_GrepheusDark_Profile;
+                return R.style.Theme_Dialog_GrepheusDark_Panel;
             case PURPHEUSDARK:
-                return R.style.Theme_PurpheusDark_Profile;
+                return R.style.Theme_Dialog_PurpheusDark_Panel;
         }
         return -1;
     }
 
-    /**
-     * @return Theme style used for ordinary activities
-     */
     public final int getTheme() {
         //Set theme
         switch (mActiveTheme) {
@@ -144,16 +139,37 @@ public class ThemeHelper {
         return -1;
     }
 
-    /**
-     * @return current theme color
-     */
+    public final int getDialogTheme() {
+        //Set theme
+        switch (mActiveTheme) {
+            case ORPHEUS:
+                return R.style.Theme_Dialog_Orpheus;
+            case BLUPHEUS:
+                return R.style.Theme_Dialog_Blupheus;
+            case REPHEUS:
+                return R.style.Theme_Dialog_Repheus;
+            case GREPHEUS:
+                return R.style.Theme_Dialog_Grepheus;
+            case PURPHEUS:
+                return R.style.Theme_Dialog_Purpheus;
+            case ORPHEUSDARK:
+                return R.style.Theme_Dialog_OrpheusDark;
+            case BLUPHEUSDARK:
+                return R.style.Theme_Dialog_BlupheusDark;
+            case REPHEUSDARK:
+                return R.style.Theme_Dialog_RepheusDark;
+            case GREPHEUSDARK:
+                return R.style.Theme_Dialog_GrepheusDark;
+            case PURPHEUSDARK:
+                return R.style.Theme_Dialog_PurpheusDark;
+        }
+        return -1;
+    }
+
     public final int getThemePrimaryColor() {
         return getThemePrimaryColor(mActiveTheme);
     }
 
-    /**
-     * @return theme color for style
-     */
     public final int getThemePrimaryColor(ThemeStyle style) {
         switch (style) {
             case ORPHEUS:
@@ -175,18 +191,8 @@ public class ThemeHelper {
         return -1;
     }
 
-    /**
-     * @return theme name
-     */
     public final String getThemeName() {
         return mActiveTheme.name();
-    }
-
-    /**
-     * @return drawable used for action bar background
-     */
-    public static Drawable getActionBarBackground(Context context) {
-        return new ColorDrawable(getPrimaryColor(context));
     }
 
     public static int getPrimaryColor(Context context) {
@@ -208,7 +214,7 @@ public class ThemeHelper {
     }
 
     public final Drawable getPrimaryColorShuffleButtonDrawable() {
-        return themeDrawable(R.drawable.ic_action_playback_shuffle_white);
+        return themeDrawable(R.drawable.ic_action_playback_shuffle_black);
     }
 
     public final Drawable getPrimaryColorRepeatButtonDrawable() {
@@ -219,23 +225,10 @@ public class ThemeHelper {
         return themeDrawable(R.drawable.ic_action_playback_repeat_1_black);
     }
 
-    /**
-     * Themes drawable resource to current theme color
-     *
-     * @param resId
-     * @return
-     */
     public final Drawable themeDrawable(int resId) {
         return themeDrawable(mContext, resId, getThemePrimaryColor());
     }
 
-    /**
-     * Themes drawable resource to given color
-     *
-     * @param resId
-     * @param newColor
-     * @return
-     */
     public static Drawable themeDrawable(Context context, int resId, int newColor) {
         final Drawable maskDrawable = context.getResources().getDrawable(resId);
         if (!(maskDrawable instanceof BitmapDrawable)) {
@@ -257,6 +250,11 @@ public class ThemeHelper {
         canvas.drawRect(0, 0, width, height, maskedPaint);
 
         return new BitmapDrawable(context.getResources(), outBitmap);
+    }
+
+    public static boolean isDialog(Context context) {
+        TypedValue tv = new TypedValue();
+        return context.getTheme().resolveAttribute(R.attr.isDialog, tv, true) && tv.data != 0;
     }
 
     /**

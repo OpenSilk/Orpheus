@@ -18,8 +18,8 @@
 <!--Nexus 7-->
 <resources>
     <!-- Settings grid-->
-    <dimen name="settings_grid_width">184dp</dimen>
-    <dimen name="settings_grid_height">184dp</dimen>
+    <dimen name="settings_grid_width">200dp</dimen>
+    <dimen name="settings_grid_height">200dp</dimen>
 
     <!-- Daydream -->
     <dimen name="dream_art_size">400dp</dimen>
