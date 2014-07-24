@@ -33,6 +33,9 @@ import dagger.Provides;
         library = true,
         includes = {
                 ArtworkModule.class,
+        },
+        injects = {
+                AppPreferences.class,
         }
 )
 public class GlobalModule {
@@ -50,4 +53,8 @@ public class GlobalModule {
         return appContext;
     }
 
+    @Provides @Singleton
+    public AppPreferences provideAppPreferences(@ForApplication Context context) {
+        return new AppPreferences(context);
+    }
 }

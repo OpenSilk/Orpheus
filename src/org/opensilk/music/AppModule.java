@@ -30,10 +30,7 @@ import dagger.Provides;
  */
 @Module (
         library = true,
-        addsTo = GlobalModule.class,
-        injects = {
-                AppPreferences.class,
-        }
+        addsTo = GlobalModule.class
 )
 public class AppModule {
 
@@ -46,11 +43,6 @@ public class AppModule {
     @Provides @Singleton @ForApplication
     public MusicApp provideApplication() {
         return app;
-    }
-
-    @Provides @Singleton
-    public AppPreferences provideAppPreferences(@ForApplication Context context) {
-        return new AppPreferences(context);
     }
 
 }
