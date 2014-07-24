@@ -19,6 +19,7 @@ package org.opensilk.music.ui.cards;
 import android.content.Context;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
@@ -35,6 +36,7 @@ import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
 import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -65,6 +67,14 @@ public class SongGroupCard extends AbsGenericCard<LocalSongGroup> {
                 mBus.post(new SongGroupCardClick(CardEvent.OPEN, mData));
             }
         });
+    }
+
+    @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        mArtwork2 = ButterKnife.findById(view, R.id.artwork_thumb2);
+        mArtwork3 = ButterKnife.findById(view, R.id.artwork_thumb3);
+        mArtwork4 = ButterKnife.findById(view, R.id.artwork_thumb4);
+        super.setupInnerViewElements(parent, view);
     }
 
     @Override
