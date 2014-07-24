@@ -60,9 +60,8 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(null);
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_action_arrow_left_white);
         actionBar.setTitle(" ");
-        actionBar.setIcon(new ColorDrawable(android.R.color.transparent));
+        actionBar.setIcon(R.drawable.ic_action_cancel_white);
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
         Fragment f = null;
