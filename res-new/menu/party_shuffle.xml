@@ -21,7 +21,8 @@
 
     <item
         android:id="@+id/menu_party_shuffle"
-        app:showAsAction="never"
+        android:icon="@drawable/ic_action_playback_shuffle_white"
+        app:showAsAction="ifRoom"
         android:title="@string/menu_party_shuffle"/>
 
 </menu>
