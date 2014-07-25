@@ -200,6 +200,8 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         if (!mDrawerHelper.isDrawerOpen()) {
+            // set title (hacks)
+            mActionBarHelper.setTitle(mPluginInfo.title);
             // search
             if ((mCapabilities & OrpheusApi.Ability.SEARCH) != 0) {
                 inflater.inflate(R.menu.search, menu);
