@@ -209,4 +209,16 @@
         <item name="android:ellipsize">end</item>
     </style>
 
+    <!--SETTINGS-->
+    <style name="SettingsGridBase">
+        <item name="android:numColumns">2</item>
+    </style>
+
+    <style name="SettingsGrid" parent="SettingsGridBase">
+        <item name="android:stretchMode">columnWidth</item>
+        <item name="android:verticalSpacing">8dp</item>
+        <item name="android:horizontalSpacing">8dp</item>
+        <item name="android:scrollbars">none</item>
+    </style>
+
 </resources>

@@ -31,9 +31,7 @@ public class SettingsMainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.settings_gridview, container, false);
-
-        mGridView = (GridView) v.findViewById(R.id.settings_grid);
+        mGridView = (GridView) inflater.inflate(R.layout.settings_gridview, container, false);
         final SettingsAdapter adapter = new SettingsAdapter(getActivity());
 
         mGridView.setAdapter(adapter);
@@ -50,7 +48,7 @@ public class SettingsMainFragment extends Fragment {
             }
         });
 
-        return v;
+        return mGridView;
     }
 
     @Override

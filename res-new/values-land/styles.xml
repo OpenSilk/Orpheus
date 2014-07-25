@@ -15,9 +15,9 @@
   ~ limitations under the License.
   -->
 
-<!-- Nexus 5 portrait (n4 is 380)-->
 <resources>
-    <!-- Settings grid-->
-    <dimen name="settings_grid_width">170dp</dimen>
-    <dimen name="settings_grid_height">170dp</dimen>
+    <!--SETTINGS-->
+    <style name="SettingsGridBase">
+        <item name="android:numColumns">3</item>
+    </style>
 </resources>
