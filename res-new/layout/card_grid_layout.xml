@@ -41,7 +41,8 @@
             android:id="@+id/card_main_content_layout"
             style="@style/card.content_outer_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:foreground="?android:selectableItemBackground"/>
 
     </LinearLayout>
 

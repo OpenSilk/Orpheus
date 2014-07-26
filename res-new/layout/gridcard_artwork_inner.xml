@@ -18,8 +18,7 @@
 <org.opensilk.music.widgets.SquareFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:foreground="?android:selectableItemBackground">
+    android:layout_height="match_parent">
 
     <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
         android:id="@+id/artwork_thumb"
