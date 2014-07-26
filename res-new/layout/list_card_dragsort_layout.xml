@@ -32,7 +32,7 @@
         android:scaleType="center"
         android:src="@drawable/card_drag"/>
 
-    <it.gmariotti.cardslib.library.view.CardView
+    <org.opensilk.music.ui.cards.views.ThemedCardView
         android:id="@+id/list_cardId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
