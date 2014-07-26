@@ -67,7 +67,7 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
                 player.setDataSource(path);
             }
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            player.prepare();
+            player.prepareAsync();
         } catch (IOException |IllegalArgumentException|SecurityException|IllegalStateException todo) {
             return false;
         }
