@@ -70,6 +70,7 @@ public class NavAdapter extends ArrayAdapter<NavItem> {
     }
 
     public void addPlugins(Collection<PluginInfo> infos) {
+        insert(new NavItem(Type.HEADER, getContext().getString(R.string.drawer_library), null), getCount()-1);
         for (final PluginInfo info : infos) {
             insert(new NavItem(Type.ITEM, info.title, new Runnable() {
                 @Override
@@ -95,13 +96,13 @@ public class NavAdapter extends ArrayAdapter<NavItem> {
                 NavUtils.openFoldersFragment((FragmentActivity) context);
             }
         }));
-        navItems.add(new NavItem(Type.HEADER, context.getString(R.string.drawer_library), null));
         navItems.add(new NavItem(Type.HEADER, context.getString(R.string.menu_settings), new Runnable() {
             @Override
             public void run() {
                 NavUtils.openSettings((FragmentActivity) context);
             }
         }));
+        // XXX when adding new items be sure to update addPlugins();
         return navItems;
     }
 
