@@ -24,6 +24,8 @@ import android.util.JsonWriter;
 
 import com.andrew.apollo.utils.Lists;
 
+import org.opensilk.cast.util.CastPreferences;
+import org.opensilk.cast.util.Utils;
 import org.opensilk.music.ui.home.MusicFragment;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
@@ -58,10 +60,15 @@ public class AppPreferences {
     public static final String SIMPLE = "simple";
     public static final String GRID = "grid";
 
-    private SharedPreferences prefs;
+    // Note not for default shared prefs
+    public static final String KEY_CAST_ENABLED = "pref_cast_enabled";
+
+    private final Context appContext;
+    private final SharedPreferences prefs;
 
     @Inject
     public AppPreferences(@ForApplication Context context) {
+        appContext = context;
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
@@ -154,5 +161,21 @@ public class AppPreferences {
                 jw.close();
             } catch (IOException ignored) { }
         }
+    }
+
+    public void setCastEnabled(boolean enabled) {
+        setCastEnabled(appContext, enabled);
+    }
+
+    public static void setCastEnabled(Context context, boolean enabled) {
+        CastPreferences.putBoolean(context, KEY_CAST_ENABLED, enabled);
+    }
+
+    public boolean isCastEnabled() {
+        return isCastEnabled(appContext);
+    }
+
+    public static boolean isCastEnabled(Context context) {
+        return CastPreferences.getBoolean(context, KEY_CAST_ENABLED, true);
     }
 }

@@ -15,7 +15,6 @@ import android.text.TextUtils;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
@@ -39,11 +38,10 @@ public class SettingsAudioFragment extends SettingsFragment implements
 
     private static final String PREF_EQUALIZER = "pref_equalizer";
     private static final String PREF_DEFAULT_FOLDER = AppPreferences.PREF_DEFAULT_MEDIA_FOLDER;
+    private static final String PREF_CASTING = AppPreferences.KEY_CAST_ENABLED;
 
     @Inject
-    protected AppPreferences mAppPreferences;
-    // TODO migrate to AppPreferences;
-    private PreferenceUtils mPreferences;
+    protected AppPreferences mSettings;
     private Preference mEqualizer;
     private CheckBoxPreference mCasting;
     private Preference mDefaultFolder;
@@ -64,22 +62,21 @@ public class SettingsAudioFragment extends SettingsFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings_audio);
-        mPreferences = PreferenceUtils.getInstance(getActivity());
         mPrefSet = getPreferenceScreen();
         mEqualizer = mPrefSet.findPreference(PREF_EQUALIZER);
         mEqualizer.setOnPreferenceClickListener(this);
         resolveEqualizer();
-        mCasting = (CheckBoxPreference) mPrefSet.findPreference(PreferenceUtils.KEY_CAST_ENABLED);
-        mCasting.setChecked(mPreferences.isCastEnabled());
+        mCasting = (CheckBoxPreference) mPrefSet.findPreference(PREF_CASTING);
+        mCasting.setChecked(mSettings.isCastEnabled());
         mCasting.setOnPreferenceChangeListener(this);
         if (ConnectionResult.SUCCESS != GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity())) {
-            mPreferences.setCastEnabled(false);
+            mSettings.setCastEnabled(false);
             mCasting.setChecked(false);
             mCasting.setEnabled(false);
             mCasting.setSummary(R.string.settings_gms_unavailable);
         }
         mDefaultFolder = mPrefSet.findPreference(PREF_DEFAULT_FOLDER);
-        String folder = mAppPreferences.getString(PREF_DEFAULT_FOLDER, null);
+        String folder = mSettings.getString(PREF_DEFAULT_FOLDER, null);
         if (!TextUtils.isEmpty(folder)) {
             mDefaultFolder.setSummary(folder);
         }
@@ -101,7 +98,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
             return true;
         } else if (preference == mDefaultFolder) {
             Intent i = new Intent(getActivity(), FolderPickerActivity.class);
-            String folder = mAppPreferences.getString(PREF_DEFAULT_FOLDER, null);
+            String folder = mSettings.getString(PREF_DEFAULT_FOLDER, null);
             if (!TextUtils.isEmpty(folder)) {
                 i.putExtra(FolderPickerActivity.EXTRA_DIR, folder);
             }
@@ -118,11 +115,11 @@ public class SettingsAudioFragment extends SettingsFragment implements
                 final String folder = data.getStringExtra(FolderPickerActivity.EXTRA_DIR);
                 if (!TextUtils.isEmpty(folder)) {
                     mDefaultFolder.setSummary(folder);
-                    mAppPreferences.putString(PREF_DEFAULT_FOLDER, folder);
+                    mSettings.putString(PREF_DEFAULT_FOLDER, folder);
                 }
             } else  {
                 mDefaultFolder.setSummary(getString(R.string.settings_storage_default_folder_summary));
-                mAppPreferences.remove(PREF_DEFAULT_FOLDER);
+                mSettings.remove(PREF_DEFAULT_FOLDER);
             }
         }
     }
@@ -130,7 +127,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference == mCasting) {
-            mPreferences.setCastEnabled((Boolean) newValue);
+            mSettings.setCastEnabled((Boolean) newValue);
             mCasting.setChecked((Boolean) newValue);
             doRestart();
             return false;

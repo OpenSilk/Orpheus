@@ -43,20 +43,19 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.MusicUtils.ServiceToken;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Bus;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
-import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.silkdagger.qualifier.ForActivity;
@@ -101,8 +100,6 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
     protected boolean isCastingEnabled;
     protected boolean killServiceOnExit;
 
-    protected PreferenceUtils mPreferences;
-
     protected boolean mIsLargeLandscape;
 
     protected boolean mIsResumed;
@@ -111,6 +108,8 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
     protected ArtworkService mArtworkService;
     @Inject @ForActivity
     protected Bus mActivityBus;
+    @Inject
+    protected AppPreferences mSettings;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -125,16 +124,13 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
         // Control the media volume
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        // get preferences
-        mPreferences = PreferenceUtils.getInstance(this);
-
         // cancel any pending clear cache request
         mArtworkService.cancelCacheClear();
 
         // Bind Apollo's service
         mToken = MusicUtils.bindToService(this, this);
 
-        isCastingEnabled = mPreferences.isCastEnabled();
+        isCastingEnabled = mSettings.isCastEnabled();
 
         if (isCastingEnabled) {
             // Bind cast service

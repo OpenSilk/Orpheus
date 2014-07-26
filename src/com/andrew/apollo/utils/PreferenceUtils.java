@@ -15,19 +15,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.JsonReader;
-import android.util.JsonWriter;
 
 import com.andrew.apollo.R;
-
-import org.opensilk.cast.util.Utils;
-import org.opensilk.music.cast.CastUtils;
-import org.opensilk.music.ui.home.MusicFragment;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.List;
 
 /**
  * A collection of helpers designed to get and set various preferences across
@@ -73,16 +62,11 @@ public final class PreferenceUtils {
     // Boolean to use dark themes
     public static final String PREF_DARK_THEME = "pref_dark_theme";
 
-    // Key used to determine if casting should be enabled
-    public static final String KEY_CAST_ENABLED = "pref_cast_enabled";
-
     // Key to decide whether we prefer high quality art
     public static final String USE_LOW_RESOLUTION_ART = "pref_low_resolution";
 
     //Key whether or not to show visualizations.
     public static final String SHOW_VISUALIZATIONS = "pref_visualizations";
-
-
 
     private static PreferenceUtils sInstance;
 
@@ -358,29 +342,6 @@ public final class PreferenceUtils {
         final String grid = "grid";
         final String defaultValue = "simple";
         return mPreferences.getString(which, defaultValue).equals(grid);
-    }
-
-    /**
-     * Saves cast enabled pref to cast prefs
-     * @param enabled
-     */
-    public void setCastEnabled(boolean enabled) {
-        Utils.saveBooleanToPreference(mContext, KEY_CAST_ENABLED, enabled);
-    }
-
-    /**
-     * @return true if casting is enabled
-     */
-    public boolean isCastEnabled() {
-        return Utils.getBooleanFromPreference(mContext, KEY_CAST_ENABLED, true);
-    }
-
-    /**
-     * Static method for service
-     * @return true if casting is enabled
-     */
-    public static boolean isCastEnabled(Context context) {
-        return Utils.getBooleanFromPreference(context.getApplicationContext(), KEY_CAST_ENABLED, true);
     }
 
     /**

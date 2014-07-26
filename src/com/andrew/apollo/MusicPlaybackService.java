@@ -33,7 +33,6 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.MediaMetadataRetriever;
-import android.media.MediaPlayer;
 import android.media.RemoteControlClient;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
@@ -41,15 +40,12 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.support.v7.media.MediaRouter;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -60,42 +56,26 @@ import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
-import com.google.android.gms.cast.ApplicationMetadata;
-import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaStatus;
-import com.google.android.gms.cast.RemoteMediaPlayer;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.ResultCallback;
 
 import org.opensilk.cast.callbacks.IMediaCastConsumer;
-import org.opensilk.cast.callbacks.MediaCastConsumerImpl;
-import org.opensilk.cast.exceptions.CastException;
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.LocalCastServiceManager;
-import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
-import org.opensilk.cast.util.Utils;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
-import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.CastWebServer;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
-import java.util.Random;
-import java.util.TreeSet;
 
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
@@ -588,7 +568,7 @@ public class MusicPlaybackService extends Service {
         mPlayer = new LocalMusicPlayer(this);
         mPlayer.setHandler(mPlayerHandler);
 
-        isCastingEnabled = PreferenceUtils.isCastEnabled(this);
+        isCastingEnabled = AppPreferences.isCastEnabled(this);
         if (isCastingEnabled) {
             // Bind to the cast service
             mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);
