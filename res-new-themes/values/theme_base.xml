@@ -21,13 +21,13 @@
 
     <style name="Theme.LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- kitkat style selectables -->
-        <item name="android:selectableItemBackground">@drawable/item_background_holo_light</item>
+        <!--<item name="android:selectableItemBackground">@drawable/item_background_holo_light</item>-->
         <item name="android:popupMenuStyle">@style/PopupMenu.Light</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Light</item>
         <!-- ActionBar overrides -->
         <item name="android:actionBarStyle">@style/ActionBar.Light</item>
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
-        <item name="android:actionBarItemBackground">@drawable/item_background_holo_dark</item> <!--dark on purpose-->
+        <!--<item name="android:actionBarItemBackground">@drawable/item_background_holo_dark</item> &lt;!&ndash;dark on purpose&ndash;&gt;-->
         <!--<item name="android:actionDropDownStyle">@style/DropDownNav.RepheusDark</item>-->
         <!-- Disable shadow on action bar-->
         <item name="android:windowContentOverlay">@null</item>
@@ -65,13 +65,13 @@
 
     <style name="Theme.DarkBase" parent="Theme.AppCompat">
         <!-- kitkat style selectables -->
-        <item name="android:selectableItemBackground">@drawable/item_background_holo_dark</item>
+        <!--<item name="android:selectableItemBackground">@drawable/item_background_holo_dark</item>-->
         <item name="android:popupMenuStyle">@style/PopupMenu.Dark</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Dark</item>
         <!-- ActionBar overrides -->
         <item name="android:actionBarStyle">@style/ActionBar.Dark</item>
         <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
-        <item name="android:actionBarItemBackground">@drawable/item_background_holo_dark</item>
+        <!--<item name="android:actionBarItemBackground">@drawable/item_background_holo_dark</item>-->
         <!--<item name="android:actionDropDownStyle">@style/DropDownNav.RepheusDark</item>-->
         <!-- Disable shadow on action bar-->
         <item name="android:windowContentOverlay">@null</item>
@@ -143,11 +143,11 @@
 
     <!-- Dropdown list styles -->
     <style name="DropDownListView.Light" parent="Widget.AppCompat.Light.ListView.DropDown">
-        <item name="android:listSelector">@drawable/item_background_holo_light</item>
+        <!--<item name="android:listSelector">@drawable/item_background_holo_light</item>-->
     </style>
 
     <style name="DropDownListView.Dark" parent="Widget.AppCompat.ListView.DropDown">
-        <item name="android:listSelector">@drawable/item_background_holo_dark</item>
+        <!--<item name="android:listSelector">@drawable/item_background_holo_dark</item>-->
     </style>
 
     <!-- Drop down nav styles -->
