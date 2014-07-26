@@ -1,4 +1,4 @@
-include ':app'
+include ':app', ':appwear'
 include ':api'
 //include ':../SilkCastService:library'
 //include ':../SilkFileBrowser:lib_sfb'
