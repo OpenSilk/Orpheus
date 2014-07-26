@@ -529,7 +529,7 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
                     Log.d(TAG, "onApplicationConnectionFailed(): failed due to: " + errorMsg);
                     resetDefaultMediaRoute(activity);
                     // notify if possible
-                    if (MusicUtils.isForeground()) {
+                    if (activity.mIsResumed) {
                         new AlertDialog.Builder(activity)
                                 .setTitle(R.string.cast_error)
                                 .setMessage(String.format(Locale.getDefault(),
