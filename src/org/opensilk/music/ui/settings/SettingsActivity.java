@@ -1,20 +1,15 @@
 package org.opensilk.music.ui.settings;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.MenuItem;
 import android.view.WindowManager;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
-
-import hugo.weaving.DebugLog;
 
 /**
  * Created by andrew on 2/28/14.
@@ -24,18 +19,12 @@ public class SettingsActivity extends ActionBarActivity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ThemeHelper themeHelper = ThemeHelper.getInstance(this);
-        setTheme(themeHelper.getDialogTheme());
-
+        setTheme(ThemeHelper.getInstance(this).getDialogTheme());
         setupFauxDialog();
-
         setContentView(R.layout.settings_fragment_activity);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-        //hacks cant set null FIXME real drawable so we can get some padding
         actionBar.setHomeAsUpIndicator(R.drawable.blank);
         actionBar.setIcon(ThemeHelper.isDialog(this) ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);
 

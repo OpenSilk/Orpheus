@@ -25,8 +25,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
@@ -50,19 +52,19 @@ public class FolderPickerActivity extends ActionBarActivity implements Card.OnCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(ThemeHelper.getInstance(this).getTheme());
+        setTheme(ThemeHelper.getInstance(this).getDialogTheme());
+        setupFauxDialog();
         setContentView(R.layout.blank_framelayout);
 
         setResult(RESULT_CANCELED, getIntent());
 
         String action = getIntent().getStringExtra(EXTRA_DIR);
         ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.blank);
+        actionBar.setIcon(R.drawable.ic_action_arrow_left_white);
         actionBar.setTitle(makeTitle(action));
         actionBar.setSubtitle(makeSubtitle(action));
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_action_arrow_left_white);
-        actionBar.setTitle(" ");
-        actionBar.setIcon(new ColorDrawable(android.R.color.transparent));
 
         if (savedInstanceState == null) {
             FolderPickerFragment f = FolderPickerFragment.newInstance(action);
@@ -140,6 +142,29 @@ public class FolderPickerActivity extends ActionBarActivity implements Card.OnCa
         } else {
             return path;
         }
+    }
+
+    // Thanks dashclock for this
+    private void setupFauxDialog() {
+        // Check if this should be a dialog
+        if (!ThemeHelper.isDialog(this)) {
+            return;
+        }
+
+        // Should be a dialog; set up the window parameters.
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+
+        WindowManager.LayoutParams params = getWindow().getAttributes();
+        params.width = getResources().getDimensionPixelSize(R.dimen.profile_dialog_width);
+        params.height = Math.min(
+                getResources().getDimensionPixelSize(R.dimen.profile_dialog_max_height),
+                dm.heightPixels * 7 / 8);
+        params.alpha = 1.0f;
+        params.dimAmount = 0.5f;
+        getWindow().setAttributes(params);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
+                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
 }

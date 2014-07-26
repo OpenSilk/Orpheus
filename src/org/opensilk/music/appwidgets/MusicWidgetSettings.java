@@ -16,6 +16,7 @@
 
 package org.opensilk.music.appwidgets;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * Created by andrew on 4/3/14.
@@ -54,7 +57,12 @@ public class MusicWidgetSettings extends Activity implements AdapterView.OnItemS
         super.onCreate(savedInstanceState);
         setContentView(R.layout.widget_settings);
 
+        ActionBar actionBar = getActionBar();
+        actionBar.setIcon(R.drawable.ic_action_cancel_white);
+        actionBar.setHomeButtonEnabled(true);
+
         mContext = this;
+        setResult(RESULT_CANCELED);
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
@@ -110,6 +118,18 @@ public class MusicWidgetSettings extends Activity implements AdapterView.OnItemS
                 finish();
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                setResult(RESULT_CANCELED);
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

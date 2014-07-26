@@ -55,8 +55,6 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(null);
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-        //hacks cant set null FIXME real drawable so we can get some padding
         actionBar.setHomeAsUpIndicator(R.drawable.blank);
         actionBar.setTitle(" ");
         actionBar.setIcon(ThemeHelper.isDialog(this) ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);

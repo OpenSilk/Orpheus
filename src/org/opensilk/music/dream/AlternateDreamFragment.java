@@ -51,8 +51,6 @@ public class AlternateDreamFragment extends PreferenceFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
-
         addPreferencesFromResource(R.xml.blank_prefscreen);
         // Pull saved dream
         activeDream = DreamPrefs.getAltDreamComponent(getActivity());

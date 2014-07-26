@@ -16,6 +16,7 @@
 
 package org.opensilk.music.dream;
 
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.view.MenuItem;
@@ -47,7 +48,9 @@ public class DreamSettings extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getActionBar();
+        actionBar.setIcon(R.drawable.ic_action_arrow_left_white);
+        actionBar.setHomeButtonEnabled(true);
         mToken = MusicUtils.bindToService(this, null);
     }
 

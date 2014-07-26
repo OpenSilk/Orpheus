@@ -125,6 +125,7 @@
     <string name="widget_large_style_two">Style two</string>
 
     <!--Daydream-->
+    <string name="dream_settings">Orpheus Daydream</string>
     <string name="dream_settings_alt_dream">Alternate dream</string>
     <string name="dream_settings_choose_dream">Style</string>
     <string name="dream_settings_configure">Configure</string>
