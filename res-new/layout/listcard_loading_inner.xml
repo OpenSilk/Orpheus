@@ -21,7 +21,6 @@
     android:layout_height="wrap_content">
 
     <ProgressBar
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/loading_progress"
         android:padding="8dp"
         android:layout_gravity="center"

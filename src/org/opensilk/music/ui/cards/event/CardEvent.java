@@ -27,7 +27,6 @@ public enum CardEvent {
     PLAY_ALL(R.id.popup_play_all),
     SHUFFLE_ALL(R.id.popup_shuffle_all),
     ADD_TO_QUEUE(R.id.popup_add_to_queue),
-    REMOVE_FROM_QUEUE(R.id.popup_remove_from_queue),
     ADD_TO_PLAYLIST(R.id.popup_add_to_playlist),
     SET_RINGTONE(R.id.popup_set_ringtone),
     MORE_BY_ARTIST(R.id.popup_more_by_artist),

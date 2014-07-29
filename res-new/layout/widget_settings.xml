@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
     <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
@@ -60,42 +54,34 @@
             <ImageView
                 android:id="@+id/widget_preview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp" />
+
+            <LinearLayout android:id="@+id/button_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="?android:buttonBarStyle">
+
+                <Button
+                    android:id="@+id/button_cancel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@android:string/cancel"
+                    style="?android:buttonBarButtonStyle" />
+                <Button
+                    android:id="@+id/button_okay"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@android:string/ok"
+                    style="?android:buttonBarButtonStyle" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </ScrollView>
 
-    <View android:id="@+id/bottom_horizontal_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:background="?android:attr/dividerHorizontal"/>
-
-    <LinearLayout android:id="@+id/button_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="?android:attr/buttonBarStyle">
-
-        <Button
-            android:id="@+id/button_cancel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cancel"
-            android:background="?android:attr/selectableItemBackground" />
-        <Button
-            android:id="@+id/button_okay"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/okay"
-            android:background="?android:attr/selectableItemBackground" />
-
-    </LinearLayout>
-
-</LinearLayout>

@@ -25,16 +25,6 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Shortcut Activity theme -->
-    <style name="Theme.Transparent" parent="@android:style/Theme.Holo.NoActionBar">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">false</item>
-    </style>
-
     <!-- Notification bar event text -->
     <style name="NotificationText">
         <item name="android:layout_width">match_parent</item>
@@ -72,55 +62,6 @@
 
     <style name="NotificationAction.Collapse" parent="@style/NotificationAction">
         <item name="android:src">@drawable/btn_notification_collapse</item>
-    </style>
-
-    <!-- Bottom Action Bar TextViews -->
-    <style name="BottomActionBarText">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:paddingLeft">5dp</item>
-        <item name="android:gravity">top|left|center</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textSize">@dimen/text_size_extra_micro</item>
-    </style>
-
-    <style name="BottomActionBarLineOne" parent="@style/BottomActionBarText">
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="BottomActionBarLineTwo" parent="@style/BottomActionBarText"></style>
-
-    <!-- Bottom Action Bar Image Buttons -->
-    <style name="BottomActionBarItem">
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:gravity">center|right</item>
-        <item name="android:paddingLeft">@dimen/bottom_action_bar_item_padding_left</item>
-        <item name="android:paddingRight">@dimen/bottom_action_bar_item_padding_right</item>
-        <item name="android:scaleType">centerInside</item>
-    </style>
-
-    <style name="BottomActionBarItem.Previous" parent="@style/BottomActionBarItem">
-        <item name="android:contentDescription">@string/accessibility_prev</item>
-    </style>
-
-    <style name="BottomActionBarItem.Next" parent="@style/BottomActionBarItem">
-        <item name="android:contentDescription">@string/accessibility_next</item>
-    </style>
-
-    <style name="BottomActionBarItem.Play" parent="@style/BottomActionBarItem">
-        <item name="android:contentDescription">@string/accessibility_play</item>
-    </style>
-
-    <style name="BottomActionBarItem.Shuffle" parent="@style/BottomActionBarItem">
-        <item name="android:contentDescription">@string/accessibility_shuffle</item>
-    </style>
-
-    <style name="BottomActionBarItem.Repeat" parent="@style/BottomActionBarItem">
-        <item name="android:contentDescription">@string/accessibility_repeat</item>
     </style>
 
 </resources>

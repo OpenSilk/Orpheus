@@ -19,7 +19,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/drop_shadow_light">
+    android:background="@drawable/drop_shadow_dark">
 
     <ImageView
         android:id="@+id/widget_album_art"
@@ -32,14 +32,14 @@
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         android:orientation="horizontal"
-        android:background="#96000000">
+        android:background="@color/transparent_black">
 
         <ImageButton
             android:id="@+id/widget_previous"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground"
+            android:background="?android:selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_prev"
             android:src="@drawable/ic_action_playback_prev_white" />
@@ -49,7 +49,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground"
+            android:background="?android:selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_play"
             android:src="@drawable/ic_action_playback_play_white" />
@@ -59,7 +59,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackground"
+            android:background="?android:selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_next"
             android:src="@drawable/ic_action_playback_next_white" />

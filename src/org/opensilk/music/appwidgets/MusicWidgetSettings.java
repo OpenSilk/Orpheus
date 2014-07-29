@@ -38,6 +38,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 /**
  * Created by andrew on 4/3/14.
  */
+@SuppressWarnings("AppCompatMethod")
 public class MusicWidgetSettings extends Activity implements AdapterView.OnItemSelectedListener {
 
     public static final String PREFS_NAME = "WidgetPreferences";

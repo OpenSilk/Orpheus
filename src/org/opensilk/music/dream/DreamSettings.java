@@ -31,6 +31,7 @@ import java.util.List;
 /**
  * Created by drew on 4/4/14.
  */
+@SuppressWarnings("AppCompatMethod")
 public class DreamSettings extends PreferenceActivity {
 
     static final String[] VALID_FRAGMENTS;

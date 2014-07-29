@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import com.andrew.apollo.R;
 
+import java.util.Locale;
+
 import timber.log.Timber;
 
 /**
@@ -79,7 +81,7 @@ public class ColorCodedThumbnail extends TextView {
             if (title.equals("..")) {
                 setText(title);
             } else {
-                Character c = title.toUpperCase().charAt(0);
+                Character c = title.toUpperCase(Locale.US).charAt(0);
                 setText(c.toString());
                 if (c.compareTo('A') < 0 && c.compareTo('0') >= 0) {
                     color = COLORS.get(COLORS.keyAt(Integer.valueOf(c.toString())));

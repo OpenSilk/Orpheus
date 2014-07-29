@@ -21,7 +21,7 @@ public class SettingsActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setTheme(ThemeHelper.getInstance(this).getDialogTheme());
         setupFauxDialog();
-        setContentView(R.layout.settings_fragment_activity);
+        setContentView(R.layout.blank_framelayout);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -31,7 +31,7 @@ public class SettingsActivity extends ActionBarActivity {
         if (savedInstanceState == null) {
             //Load the main fragment
             getFragmentManager().beginTransaction()
-                    .replace(R.id.settings_content, new SettingsMainFragment())
+                    .replace(R.id.main, new SettingsMainFragment())
                     .commit();
         }
 

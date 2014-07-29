@@ -29,7 +29,6 @@
         android:layout_height="?actionBarSize"/>
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/sticky_header"
         android:orientation="horizontal"
         android:layout_width="match_parent"

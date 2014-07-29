@@ -42,7 +42,7 @@ public class SettingsMainFragment extends Fragment {
                 String tag = adapter.mFragments.get(position).className;
                 getFragmentManager().beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .replace(R.id.settings_content, frag, tag)
+                    .replace(R.id.main, frag, tag)
                     .addToBackStack(null)
                     .commit();
             }

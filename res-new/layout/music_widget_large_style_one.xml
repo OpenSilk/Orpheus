@@ -19,7 +19,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/drop_shadow_light">
+    android:background="@drawable/drop_shadow_dark">
 
     <ImageView
         android:id="@+id/widget_album_art"
@@ -27,23 +27,19 @@
         android:layout_height="match_parent"
         android:scaleType="fitXY"/>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
         <LinearLayout
             android:layout_height="match_parent"
             android:layout_width="@dimen/music_widget_large_button_bar_width"
             android:orientation="vertical"
-            android:background="#96000000">
+            android:layout_gravity="left"
+            android:background="@color/transparent_black">
 
             <ImageButton
                 android:id="@+id/widget_previous"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_prev"
                 android:src="@drawable/ic_action_playback_prev_white" />
@@ -53,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_play"
                 android:src="@drawable/ic_action_playback_play_white" />
@@ -63,7 +59,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_next"
                 android:src="@drawable/ic_action_playback_next_white" />
@@ -73,25 +69,28 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/music_widget_mini_button_bar_height"
-            android:layout_weight="1"
             android:orientation="vertical"
             android:layout_gravity="bottom"
-            android:background="#96000000">
-
-            <TextView
-                android:id="@+id/widget_artist_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:singleLine="true"
-                android:ellipsize="marquee" />
+            android:layout_marginLeft="@dimen/music_widget_large_button_bar_width"
+            android:layout_marginRight="@dimen/music_widget_large_button_bar_width"
+            android:gravity="center"
+            android:background="@color/transparent_black">
 
             <TextView
                 android:id="@+id/widget_song_title"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:ellipsize="marquee" />
+                android:ellipsize="marquee"
+                android:textAppearance="@android:style/TextAppearance.Holo"/>
+
+            <TextView
+                android:id="@+id/widget_artist_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAppearance="@android:style/TextAppearance.Holo.Small"/>
 
         </LinearLayout>
         
@@ -100,14 +99,14 @@
             android:layout_width="@dimen/music_widget_large_button_bar_width"
             android:layout_gravity="right"
             android:orientation="vertical"
-            android:background="#96000000">
+            android:background="@color/transparent_black">
 
             <ImageButton
                 android:id="@+id/widget_shuffle"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_shuffle"
                 android:src="@drawable/ic_action_playback_shuffle_white" />
@@ -125,11 +124,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_repeat"
                 android:src="@drawable/ic_action_playback_repeat_white" />
 
         </LinearLayout>
-    </LinearLayout>
+
 </FrameLayout>

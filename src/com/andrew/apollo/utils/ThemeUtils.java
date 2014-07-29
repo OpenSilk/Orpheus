@@ -255,7 +255,7 @@ public class ThemeUtils {
      * @param favorite The favorites action.
      */
     public void setFavoriteIcon(final Menu favorite) {
-        final MenuItem favoriteAction = favorite.findItem(R.id.menu_favorite);
+        final MenuItem favoriteAction = null;// favorite.findItem(R.id.menu_favorite);
         final String favoriteIconId = "ic_action_favorite";
         if (MusicUtils.isFavorite()) {
             setMenuItemColor(favoriteAction, "favorite_selected", favoriteIconId);

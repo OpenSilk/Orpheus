@@ -20,35 +20,64 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@drawable/drop_shadow_light">
+    android:background="@drawable/drop_shadow_dark">
 
     <ImageView
         android:id="@+id/widget_album_art"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop" />
+        android:layout_width="@dimen/music_widget_small_artwork_size"
+        android:layout_height="@dimen/music_widget_small_artwork_size"
+        android:layout_gravity="center_vertical"
+        android:scaleType="fitCenter" />
 
     <LinearLayout
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center_vertical">
 
         <LinearLayout
-            android:layout_height="0dp"
-            android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:layout_gravity="bottom"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:orientation="horizontal"
-            android:background="#CC000000">
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp">
+
+            <TextView
+                android:id="@+id/widget_song_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAppearance="@android:style/TextAppearance.Holo"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dash"/>
+
+            <TextView
+                android:id="@+id/widget_artist_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAppearance="@android:style/TextAppearance.Holo.Small"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/widget_previous"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_prev"
                 android:src="@drawable/ic_action_playback_prev_white" />
@@ -58,7 +87,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_play"
                 android:src="@drawable/ic_action_playback_play_white" />
@@ -68,36 +97,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_next"
                 android:src="@drawable/ic_action_playback_next_white" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_height="0dp"
-            android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:background="#CC000000">
-
-            <TextView
-                android:id="@+id/widget_artist_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:singleLine="true"
-                android:ellipsize="marquee" />
-
-            <TextView
-                android:id="@+id/widget_song_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:singleLine="true"
-                android:ellipsize="marquee" />
 
         </LinearLayout>
 

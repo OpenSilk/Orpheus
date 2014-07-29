@@ -5,12 +5,12 @@
     <string name="app_name" translatable="false">Orpheus</string>
 
     <!-- ################ GENERAL ################ -->
-    <string name="okay">Okay</string>
     <string name="add">Add</string>
     <string name="accessibility_select">select</string>
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="empty"> </string>
+    <string name="dash"> - </string>
 
     <!-- Menus -->
     <string name="menu_party_shuffle">Party shuffle</string>
