@@ -274,6 +274,8 @@ public class QueueFragment extends ScopedDaggerFragment implements
                 mLastPosition.index += (activeIndex - mLastPosition.prevActiveIndex);
                 if (mLastPosition.index < 0) {
                     mLastPosition.index = 0;
+                } else if (mLastPosition.index >= mAdapter.getCount()) {
+                    mLastPosition.index = mAdapter.getCount() - 1;
                 }
             }
         }
