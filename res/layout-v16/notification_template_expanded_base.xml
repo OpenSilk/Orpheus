@@ -38,7 +38,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@+id/notification_expanded_base_image"
-        android:divider="?android:listDivider"
         android:dividerPadding="@dimen/notification_expanded_buttons_divider_padding"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -74,14 +73,6 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_action_playback_next_white" />
     </LinearLayout>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="1dp"
-        android:layout_above="@+id/notification_expanded_buttons"
-        android:layout_alignParentRight="true"
-        android:layout_toRightOf="@+id/notification_expanded_base_image"
-        android:background="?android:dividerHorizontal" />
 
     <ImageButton
         android:id="@+id/notification_expanded_base_collapse"
