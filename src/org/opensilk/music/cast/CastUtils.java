@@ -20,24 +20,16 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.RemoteException;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
 import android.support.v7.media.MediaRouter;
 
-import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicProvider;
-import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
 
-import org.opensilk.cast.manager.BaseCastManager;
-import org.opensilk.cast.manager.BaseCastManager.ReconnectionStatus;
-import org.opensilk.cast.util.Utils;
-import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 
@@ -70,6 +62,15 @@ public class CastUtils {
             } catch (final RemoteException ignored) {
             }
         }
+    }
+
+    public static float getRemoteVolume() {
+        if (sCastService != null) {
+            try {
+                return sCastService.getCastManager().getVolume();
+            } catch (RemoteException ignored) {}
+        }
+        return 1.0f;
     }
 
     /**

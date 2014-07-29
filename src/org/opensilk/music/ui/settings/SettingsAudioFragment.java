@@ -18,6 +18,7 @@ import com.andrew.apollo.utils.NavUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.AppModule;
 import org.opensilk.music.ui.folder.FolderPickerActivity;
 import org.opensilk.music.AppPreferences;
@@ -38,7 +39,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
 
     private static final String PREF_EQUALIZER = "pref_equalizer";
     private static final String PREF_DEFAULT_FOLDER = AppPreferences.PREF_DEFAULT_MEDIA_FOLDER;
-    private static final String PREF_CASTING = AppPreferences.KEY_CAST_ENABLED;
+    private static final String PREF_CASTING = CastPreferences.KEY_CAST_ENABLED;
 
     @Inject
     protected AppPreferences mSettings;
@@ -67,10 +68,10 @@ public class SettingsAudioFragment extends SettingsFragment implements
         mEqualizer.setOnPreferenceClickListener(this);
         resolveEqualizer();
         mCasting = (CheckBoxPreference) mPrefSet.findPreference(PREF_CASTING);
-        mCasting.setChecked(mSettings.isCastEnabled());
+        mCasting.setChecked(CastPreferences.getBoolean(getActivity(), PREF_CASTING, true));
         mCasting.setOnPreferenceChangeListener(this);
         if (ConnectionResult.SUCCESS != GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity())) {
-            mSettings.setCastEnabled(false);
+            CastPreferences.putBoolean(getActivity(), PREF_CASTING, false);
             mCasting.setChecked(false);
             mCasting.setEnabled(false);
             mCasting.setSummary(R.string.settings_gms_unavailable);
@@ -127,7 +128,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference == mCasting) {
-            mSettings.setCastEnabled((Boolean) newValue);
+            CastPreferences.putBoolean(getActivity(), PREF_CASTING, (Boolean) newValue);
             mCasting.setChecked((Boolean) newValue);
             doRestart();
             return false;

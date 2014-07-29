@@ -30,6 +30,7 @@ import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
+import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.cast.CastUtils;
 
@@ -56,16 +57,13 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
     private void restoreRemoteVolumeLevel() {
         try {
             double curVol = mCastManager.getVolume();
-            float oldVol = Utils.getFloatFromPreference(mService, BaseCastManager.PREFS_KEY_REMOTE_VOLUME);
-            if (oldVol == Float.MIN_VALUE) return; //No preference
+            float oldVol = CastPreferences.getFloat(mService, CastPreferences.KEY_REMOTE_VOLUME, 1.0f);
             if (oldVol != curVol) {
                 mCastManager.setVolume(oldVol);
             }
         } catch (Exception ignored) {
         }
     }
-
-
 
     /**
      * Called when we disconnect or think we are disconnectetd from the cast device

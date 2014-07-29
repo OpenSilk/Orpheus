@@ -63,7 +63,7 @@ import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
 import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.LocalCastServiceManager;
 import org.opensilk.cast.manager.MediaCastManager;
-import org.opensilk.music.AppPreferences;
+import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
@@ -568,7 +568,7 @@ public class MusicPlaybackService extends Service {
         mPlayer = new LocalMusicPlayer(this);
         mPlayer.setHandler(mPlayerHandler);
 
-        isCastingEnabled = AppPreferences.isCastEnabled(this);
+        isCastingEnabled = CastPreferences.getBoolean(this, CastPreferences.KEY_CAST_ENABLED, true);
         if (isCastingEnabled) {
             // Bind to the cast service
             mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);

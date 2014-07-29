@@ -60,9 +60,6 @@ public class AppPreferences {
     public static final String SIMPLE = "simple";
     public static final String GRID = "grid";
 
-    // Note not for default shared prefs
-    public static final String KEY_CAST_ENABLED = "pref_cast_enabled";
-
     private final Context appContext;
     private final SharedPreferences prefs;
 
@@ -163,19 +160,4 @@ public class AppPreferences {
         }
     }
 
-    public void setCastEnabled(boolean enabled) {
-        setCastEnabled(appContext, enabled);
-    }
-
-    public static void setCastEnabled(Context context, boolean enabled) {
-        CastPreferences.putBoolean(context, KEY_CAST_ENABLED, enabled);
-    }
-
-    public boolean isCastEnabled() {
-        return isCastEnabled(appContext);
-    }
-
-    public static boolean isCastEnabled(Context context) {
-        return CastPreferences.getBoolean(context, KEY_CAST_ENABLED, true);
-    }
 }

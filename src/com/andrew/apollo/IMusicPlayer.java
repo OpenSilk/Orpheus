@@ -41,4 +41,5 @@ public interface IMusicPlayer {
     public void setNextDataSource(String path);
     public void setHandler(Handler handler);
     public void setVolume(float volume);
+    public float getMaxVolume();
 }

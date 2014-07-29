@@ -49,6 +49,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Bus;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
+import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.bus.EventBus;
@@ -130,7 +131,7 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
         // Bind Apollo's service
         mToken = MusicUtils.bindToService(this, this);
 
-        isCastingEnabled = mSettings.isCastEnabled();
+        isCastingEnabled = CastPreferences.getBoolean(this, CastPreferences.KEY_CAST_ENABLED, true);
 
         if (isCastingEnabled) {
             // Bind cast service

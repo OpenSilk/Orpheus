@@ -31,7 +31,9 @@ import org.opensilk.cast.callbacks.MediaCastConsumerImpl;
 import org.opensilk.cast.exceptions.CastException;
 import org.opensilk.cast.exceptions.NoConnectionException;
 import org.opensilk.cast.exceptions.TransientNetworkDisconnectionException;
+import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
+import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.cast.CastUtils;
 
 import hugo.weaving.DebugLog;
@@ -221,6 +223,12 @@ public class CastMusicPlayer implements IMusicPlayer {
         } catch (TransientNetworkDisconnectionException e) {
             Log.w(TAG, "setVolume(1) TransientNetworkDisconnection");
         }
+    }
+
+    @Override
+    public float getMaxVolume() {
+        // TODO find reasonable way to cache this value
+        return CastPreferences.getFloat(mService, CastPreferences.KEY_REMOTE_VOLUME, 1.0f);
     }
 
     /**

@@ -124,6 +124,11 @@ public class LocalMusicPlayer implements IMusicPlayer {
         mPlayer.setVolume(volume);
     }
 
+    @Override
+    public float getMaxVolume() {
+        return 1.0f;
+    }
+
     public void release() {
         mPlayer.release();
     }
