@@ -92,16 +92,16 @@ public final class MusicPlayerHandler extends Handler {
 
         switch (msg.what) {
             case FADEDOWN:
-                mCurrentVolume -= .05f;
-                if (mCurrentVolume > .2f) {
+                mCurrentVolume -= 0.1f;
+                if (mCurrentVolume > 0.2f) {
                     sendEmptyMessageDelayed(FADEDOWN, 10);
                 } else {
-                    mCurrentVolume = .2f;
+                    mCurrentVolume = 0.2f;
                 }
                 service.getPlayer().setVolume(mCurrentVolume);
                 break;
             case FADEUP:
-                mCurrentVolume += .01f;
+                mCurrentVolume += 0.01f;
                 if (mCurrentVolume < service.getPlayer().getMaxVolume()) {
                     sendEmptyMessageDelayed(FADEUP, 10);
                 } else {
