@@ -17,6 +17,14 @@
 
 <changelog bulletedList="true">
 
+    <changelogversion versionName="0.5.0">
+        <changelogtext>New plugin api for network libraries. Upnp and Drive plugins published.</changelogtext>
+        <changelogtext>Updated UI with some Material Design elements</changelogtext>
+        <changelogtext>Folder browsing</changelogtext>
+        <changelogtext>Setting to restrict Party Shuffle to specific folder</changelogtext>
+        <changelogtext>Orpheus is now free / donation supported</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="0.4.3">
         <changelogtext>Fix services running all the time</changelogtext>
         <changelogtext>Orpheus now shows in Simple Last.fm Scrobbler enabled apps list</changelogtext>
