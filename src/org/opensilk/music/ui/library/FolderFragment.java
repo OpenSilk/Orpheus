@@ -137,7 +137,10 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     public void onLoadingFailure(boolean relaunchPicker) {
         if (relaunchPicker) {
             ((LibraryFragment) getParentFragment()).relaunchLibraryFragment();
-        } //else TODO
+        } else {
+            //TODO show error
+            setListShown(true);
+        }
     }
 
     /*
