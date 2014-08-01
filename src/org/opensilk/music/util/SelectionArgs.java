@@ -37,6 +37,8 @@ public class SelectionArgs {
     public static final String[] PLAYLIST_MEMBER;
     public static final String[] PLAYLIST_SONGS;
     public static final String[] SONG_GROUP;
+    public static final String[] LOCAL_ALBUM;
+    public static final String[] LOCAL_ARTIST;
 
     static {
         LOCAL_SONG = new String[] {"1","''"};
@@ -45,5 +47,7 @@ public class SelectionArgs {
         PLAYLIST_MEMBER = LOCAL_SONG;
         PLAYLIST_SONGS = LOCAL_SONG;
         SONG_GROUP = LOCAL_SONG;
+        LOCAL_ALBUM = new String[] {"''"};
+        LOCAL_ARTIST = new String[] {"''"};
     }
 }

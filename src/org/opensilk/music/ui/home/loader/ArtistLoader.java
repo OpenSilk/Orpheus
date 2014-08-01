@@ -20,6 +20,8 @@ import android.content.Context;
 import android.support.v4.content.CursorLoader;
 
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.SelectionArgs;
+import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.Uris;
 
 /**
@@ -31,8 +33,8 @@ public class ArtistLoader extends CursorLoader {
         super(context);
         setUri(Uris.EXTERNAL_MEDIASTORE_ARTISTS);
         setProjection(Projections.LOCAL_ARTIST);
-        setSelection(null);
-        setSelectionArgs(null);
+        setSelection(Selections.LOCAL_ARTIST);
+        setSelectionArgs(SelectionArgs.LOCAL_ARTIST);
         setSortOrder(sortOrder);
     }
 

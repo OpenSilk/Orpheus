@@ -30,7 +30,7 @@ public class Selections {
     public static final String LOCAL_ARTIST_SONGS;
     public static String LOCAL_ALBUMS(long[] albumIds) {
         final StringBuilder selection = new StringBuilder();
-        selection.append(MediaStore.Audio.Albums._ID + " IN (");
+        selection.append(BaseColumns._ID + " IN (");
         for (int i = 0; i < albumIds.length; i++) {
             selection.append(albumIds[i]);
             if (i < albumIds.length - 1) {
@@ -45,7 +45,7 @@ public class Selections {
     public static final String PLAYLIST_MEMBER;
     public static String SONG_GROUP(long[] songIds) {
         final StringBuilder selection = new StringBuilder();
-        selection.append(MediaStore.Audio.Media._ID + " IN (");
+        selection.append(BaseColumns._ID + " IN (");
         for (int i = 0; i < songIds.length; i++) {
             selection.append(songIds[i]);
             if (i < songIds.length - 1) {
@@ -55,14 +55,18 @@ public class Selections {
         selection.append(")");
         return LOCAL_SONG + " AND " + selection.toString();
     }
+    public static final String LOCAL_ALBUM;
+    public static final String LOCAL_ARTIST;
 
     static {
         LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";
         LOCAL_ALBUM_SONGS = LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.ALBUM_ID + "=?";
-        LAST_ADDED = LOCAL_SONG + " AND " + MediaStore.Audio.Media.DATE_ADDED + ">?";
+        LAST_ADDED = LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.DATE_ADDED + ">?";
         LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=?";
-        GENRE = MediaStore.Audio.Genres.NAME + "!=?";
+        GENRE = MediaStore.Audio.GenresColumns.NAME + "!=?";
         GENRE_MEMBER = LOCAL_SONG;
         PLAYLIST_MEMBER = LOCAL_SONG;
+        LOCAL_ALBUM = MediaStore.Audio.AlbumColumns.ALBUM + "!=?";
+        LOCAL_ARTIST = MediaStore.Audio.ArtistColumns.ARTIST + "!=?";
     }
 }

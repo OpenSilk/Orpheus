@@ -69,7 +69,9 @@ public class BasePagerFragment extends CardListGridFragment implements LoaderMan
         setEmptyText(getEmptyText());
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
-        setListShown(false);
+        if (mAdapter.isEmpty()) {
+            setListShown(false);
+        }
 //        if (!wantGridView()) {
 //            // reset dividers for CardListView
 //            ((ListView) getListView()).setDividerHeight((int)(1 * getResources().getDisplayMetrics().density));
@@ -131,7 +133,9 @@ public class BasePagerFragment extends CardListGridFragment implements LoaderMan
         mAdapter.swapCursor(data);
         //seems to be required for staggeredgrid
         mAdapter.notifyDataSetChanged();
-        setListShown(true);
+        if (isResumed()) {
+            setListShown(true);
+        }
     }
 
     @Override

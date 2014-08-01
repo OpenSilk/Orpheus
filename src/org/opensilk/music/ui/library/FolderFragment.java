@@ -139,7 +139,9 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
             ((LibraryFragment) getParentFragment()).relaunchLibraryFragment();
         } else {
             //TODO show error
-            setListShown(true);
+            if (isResumed()) {
+                setListShown(true);
+            }
         }
     }
 
