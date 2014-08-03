@@ -28,6 +28,7 @@ import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
+import com.bugsense.trace.BugSenseHandler;
 
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.artwork.ArtworkManager;
@@ -75,6 +76,12 @@ public class MusicApp extends Application implements DaggerInjector {
     //@DebugLog
     public void onCreate() {
         super.onCreate();
+
+        if (DEBUG) {
+            BugSenseHandler.initAndStartSession(this, "751fd228");
+        } else {
+            BugSenseHandler.initAndStartSession(this, "7c67fe46");
+        }
 
         mGraphHolder = GraphHolder.get(this);
         mScopedGraphe = mGraphHolder.getObjectGraph().plus(new AppModule(this));

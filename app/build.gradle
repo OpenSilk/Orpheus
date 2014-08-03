@@ -139,6 +139,8 @@ dependencies {
 //    compile project(':../SilkCastService:library')
 //    compile project(':../SilkFileBrowser:lib_sfb')
 
+    compile 'com.bugsense.trace:bugsense:3.6.1'
+
     compile project(':api')
 
     compile fileTree(dir: '../libs', include: ['*.jar'])
