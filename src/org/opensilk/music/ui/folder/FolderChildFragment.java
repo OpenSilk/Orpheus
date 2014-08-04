@@ -89,7 +89,9 @@ public class FolderChildFragment extends CardListGridFragment implements LoaderM
         setEmptyText(getEmptyText());
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
-        setListShown(false);
+        if (mAdapter.isEmpty()) {
+            setListShown(false);
+        }
     }
 
     @Override
@@ -142,7 +144,9 @@ public class FolderChildFragment extends CardListGridFragment implements LoaderM
             }
             mAdapter.addAll(cards);
         }
-        setListShown(true);
+        if (isViewCreated()) {
+            setListShown(true);
+        }
     }
 
     @Override

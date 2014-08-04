@@ -172,6 +172,14 @@ public abstract class CardListGridFragment extends Fragment {
     }
 
     /**
+     * Sanity check for setListShown()
+     * @return true if getView != null
+     */
+    public boolean isViewCreated() {
+        return getView() != null;
+    }
+
+    /**
      * The default content for a ListFragment has a TextView that can
      * be shown when the list is empty.  If you would like to have it
      * shown, call this method to supply the text it should use.

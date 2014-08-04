@@ -125,7 +125,9 @@ public class SearchFragment extends CardListGridFragment implements
 
     @Override
     public boolean onQueryTextSubmit(String s) {
-        setListShown(false);
+        if (isViewCreated()) {
+            setListShown(false);
+        }
         mAdapter.query(s);
         return true;
     }
@@ -141,14 +143,21 @@ public class SearchFragment extends CardListGridFragment implements
 
     @Override
     public void onFirstLoadComplete() {
-        setListShown(true);
+        if (isViewCreated()) {
+            setListShown(true);
+        }
     }
 
     @Override
     public void onLoadingFailure(boolean relaunchPicker) {
         if (relaunchPicker) {
             ((LibraryFragment) getParentFragment()).relaunchLibraryFragment();
-        } //else TODO
+        } else {
+            //TODO show error
+            if (isViewCreated()) {
+                setListShown(true);
+            }
+        }
     }
 
     /*

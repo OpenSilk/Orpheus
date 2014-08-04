@@ -106,7 +106,9 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-                setListShown(false);
+                if (isViewCreated()) {
+                    setListShown(false);
+                }
                 mAdapter.startLoad();
                 return true;
         }
@@ -130,7 +132,9 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     @Override
     //@DebugLog
     public void onFirstLoadComplete() {
-        setListShown(true);
+        if (isViewCreated()) {
+            setListShown(true);
+        }
     }
 
     @Override
@@ -139,7 +143,7 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
             ((LibraryFragment) getParentFragment()).relaunchLibraryFragment();
         } else {
             //TODO show error
-            if (isResumed()) {
+            if (isViewCreated()) {
                 setListShown(true);
             }
         }

@@ -133,7 +133,7 @@ public class BasePagerFragment extends CardListGridFragment implements LoaderMan
         mAdapter.swapCursor(data);
         //seems to be required for staggeredgrid
         mAdapter.notifyDataSetChanged();
-        if (isResumed()) {
+        if (isViewCreated()) {
             setListShown(true);
         }
     }

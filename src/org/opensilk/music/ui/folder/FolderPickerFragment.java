@@ -77,7 +77,9 @@ public class FolderPickerFragment extends CardListGridFragment implements Loader
         setEmptyText("No folders");
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
-        setListShown(false);
+        if (mAdapter.isEmpty()) {
+            setListShown(false);
+        }
     }
 
     @Override
@@ -97,17 +99,22 @@ public class FolderPickerFragment extends CardListGridFragment implements Loader
 
     @Override
     public void onLoadFinished(Loader<List<FileItem>> loader, List<FileItem> data) {
-        mAdapter.clear();
         if (data == null || data.size() == 0) {
+            mAdapter.clear();
             return;
         }
-        if (isResumed()) setListShown(false);
+        if (!mAdapter.isEmpty() && isViewCreated()) {
+            setListShown(false);
+        }
+        mAdapter.clear();
         List<Card> cards = new ArrayList<>(data.size());
         for (FileItem item : data) {
             cards.add(new FolderPickerCard(getActivity(), item));
         }
         mAdapter.addAll(cards);
-        setListShown(true);
+        if (isViewCreated()) {
+            setListShown(true);
+        }
     }
 
     @Override
