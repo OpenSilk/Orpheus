@@ -57,14 +57,14 @@ public class SettingsMainFragment extends Fragment {
         ActionBarActivity activity = (ActionBarActivity) getActivity();
         activity.getSupportActionBar().setTitle(R.string.settings_title);
 
-        Intent intent = getActivity().getIntent();
+        final Intent intent = getActivity().getIntent();
         if (intent != null && intent.getAction() != null) {
             if ("open_donate".equals(intent.getAction())) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mGridView.getOnItemClickListener().onItemClick(null, null, mGridView.getAdapter().getCount()-1, 0);
-                        getActivity().setIntent(null);
+                        mGridView.getOnItemClickListener().onItemClick(null, null, mGridView.getAdapter().getCount()-2, 0);
+                        getActivity().setIntent(intent.setAction(null));
                     }
                 });
             }
@@ -88,10 +88,6 @@ public class SettingsMainFragment extends Fragment {
                     mContext.getString(R.string.settings_data_category),
                     R.drawable.ic_settings_data_light,
                     R.drawable.ic_settings_data_dark));
-            mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
-                    mContext.getString(R.string.settings_about_category),
-                    R.drawable.ic_settings_about_light,
-                    R.drawable.ic_settings_about_dark));
             mFragments.add(new Holder(SettingsAudioFragment.class.getName(),
                     mContext.getString(R.string.settings_audio_title),
                     R.drawable.ic_settings_audio_light,
@@ -105,6 +101,10 @@ public class SettingsMainFragment extends Fragment {
                     mContext.getString(R.string.settings_donate),
                     R.drawable.ic_settings_donate_light,
                     R.drawable.ic_settings_donate_dark));
+            mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
+                    mContext.getString(R.string.settings_about_category),
+                    R.drawable.ic_settings_about_light,
+                    R.drawable.ic_settings_about_dark));
         }
 
         @Override
