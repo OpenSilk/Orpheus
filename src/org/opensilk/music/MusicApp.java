@@ -35,11 +35,12 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkServiceImpl;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
-import org.opensilk.silkdagger.DaggerApplication;
 import org.opensilk.silkdagger.DaggerInjector;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import dagger.ObjectGraph;
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
@@ -89,6 +90,8 @@ public class MusicApp extends Application implements DaggerInjector {
         if (DEBUG) {
             // Plant the forest
             Timber.plant(new Timber.DebugTree());
+        } else {
+            Timber.plant(new ReleaseTree());
         }
 
         /*
@@ -171,5 +174,35 @@ public class MusicApp extends Application implements DaggerInjector {
         DisplayMetrics metrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(metrics);
         return Math.min(metrics.widthPixels, metrics.heightPixels);
+    }
+
+    private static class ReleaseTree extends Timber.HollowTree {
+        private static final Pattern ANONYMOUS_CLASS = Pattern.compile("\\$\\d+$");
+
+        private static String createTag() {
+            String tag = new Throwable().getStackTrace()[5].getClassName();
+            Matcher m = ANONYMOUS_CLASS.matcher(tag);
+            if (m.find()) {
+                tag = m.replaceAll("");
+            }
+            return tag.substring(tag.lastIndexOf('.') + 1);
+        }
+
+        private static String formatString(String message, Object... args) {
+            // If no varargs are supplied, treat it as a request to log the string without formatting.
+            return args.length == 0 ? message : String.format(message, args);
+        }
+
+        private static void sendException(Throwable t, String message, Object... args) {
+            try {
+                BugSenseHandler.sendExceptionMessage(createTag(), formatString(message, args), new Exception(t));
+            } catch (Exception ignored) {/*safety*/}
+        }
+
+        @Override
+        public void e(Throwable t, String message, Object... args) {
+            sendException(t, message, args);
+        }
+
     }
 }
