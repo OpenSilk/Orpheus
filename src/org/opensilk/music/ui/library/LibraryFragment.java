@@ -320,7 +320,11 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
         Fragment f = FolderFragment.newInstance(li);
         FragmentManager fm = getChildFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
-            fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            try {
+                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            } catch (IllegalStateException e) {
+                Timber.e(e, "initFolderFragment()::popBackStackImmediate");
+            }
         }
         fm.beginTransaction()
                 .replace(R.id.container, f)
