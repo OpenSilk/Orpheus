@@ -1200,16 +1200,10 @@ public class MusicPlaybackService extends Service {
                 mCursor = openCursorAndGoToFirst(uri, Projections.RECENT_SONGS, selection, selectionArgs);
             }
         } else {
-            throw new IllegalArgumentException("I havent don that part yet");
+            Cursor c = openCursorAndGoToFirst(uri, Projections.LOCAL_SONG, selection, selectionArgs);
+            long id = MusicProviderUtil.insertSong(this, CursorHelpers.makeLocalSongFromCursor(this, c));
+            updateCursor(id);
         }
-
-//        long albumId = getAlbumId();
-//        if (albumId >= 0) {
-//            mAlbumCursor = openCursorAndGoToFirst(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-//                    ALBUM_PROJECTION, "_id=?", new String[] {String.valueOf(albumId)});
-//        } else {
-//            mAlbumCursor = null;
-//        }
     }
 
     private Cursor openCursorAndGoToFirst(Uri uri, String[] projection,
