@@ -34,4 +34,9 @@ public class Uris {
     public static Uri PLAYLIST(long playlistId) {
         return  MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
     }
+    public static final Uri EXTERNAL_MEDIASTORE_PLAYLISTS = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
+    public static final Uri EXTERNAL_MEDIASTORE_GENRES = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI;
+    public static Uri GENRE(long genreId) {
+        return MediaStore.Audio.Genres.Members.getContentUri("external", genreId);
+    }
 }

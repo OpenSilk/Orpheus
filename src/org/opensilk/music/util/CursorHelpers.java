@@ -42,6 +42,10 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.silkdagger.DaggerInjector;
 
 import java.util.Arrays;
+import java.util.Collection;
+
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 2/22/14.
@@ -50,109 +54,83 @@ public class CursorHelpers {
 
     private static final long[] sEmptyList;
     private static final LocalSong[] sEmptySongList;
+    private static final String sEmptyString;
 
     static {
         sEmptyList = new long[0];
         sEmptySongList = new LocalSong[0];
+        sEmptyString = new String("");
     }
 
     private CursorHelpers() {
         // static
     }
 
-    /**
-     * Creates a Song object from a cursor created with makeSongCursor
-     * @param cursor cursor created with makeSongCursor
-     * @return new Song object
-     */
-    public static LocalSong makeLocalSongFromCursor(Context context, Cursor cursor) {
+    public static LocalSong makeLocalSongFromCursor(Context context, final Cursor c) {
         // Copy the song Id
-        final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+        final long id = getLongOrZero(c, BaseColumns._ID);
         // Copy the song name
-        final String songName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.TITLE));
+        final String songName = getStringOrEmpty(c, MediaStore.Audio.AudioColumns.TITLE);
         // Copy the artist name
-        final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+        final String artist = getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST);
         // Copy the album name
-        final String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+        final String album = getStringOrNull(c, MediaStore.Audio.AudioColumns.ALBUM);
         // Copy the album id
-        final long albumId = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM_ID));
+        final long albumId = getLongOrZero(c, MediaStore.Audio.AudioColumns.ALBUM_ID);
         // find the album artist
-        String albumArtist = null;// getAlbumArtist(context, albumId);
+//        String albumArtist = null;// getAlbumArtist(context, albumId);
 //        if (TextUtils.isEmpty(albumArtist)) albumArtist = artist;
         // Copy the duration
-        final long duration = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DURATION));
+        final long duration = getLongOrZero(c, MediaStore.Audio.AudioColumns.DURATION);
         // Make the duration label
-        final int seconds = (int) (duration / 1000);
+        final int seconds = (int) (duration > 0 ? (duration / 1000) : 0);
         // get data uri
         final Uri dataUri = generateDataUri(id);
         // generate artwork uri
-        final Uri artworkUri = generateArtworkUri(albumId);
+        final Uri artworkUri = albumId > 0 ? generateArtworkUri(albumId) : null;
         // mime
-        final String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.MIME_TYPE));
-        return new LocalSong(id, songName, album, artist, albumArtist, albumId, seconds, dataUri, artworkUri, mimeType);
+        final String mimeType = getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE);
+        return new LocalSong(id, songName, album, artist, /*albumArtist*/ null, albumId, seconds, dataUri, artworkUri, mimeType);
     }
 
-    public static RecentSong makeRecentSongFromRecentCursor(Cursor c) {
-        final String identity = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.IDENTITY));
-        final String name = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.NAME));
-        final String albumName = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_NAME));
-        final String artistName = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ARTIST_NAME));
-        final String albumArtistName = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_ARTIST_NAME));
-        final String albumIdentity = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_IDENTITY));
-        final int duration = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.DURATION));
-        final Uri dataUri = Uri.parse(c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.DATA_URI)));
-        String artString = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.ARTWORK_URI));
+    public static RecentSong makeRecentSongFromRecentCursor(final Cursor c) {
+        final String identity = getStringOrEmpty(c, MusicStore.Cols.IDENTITY);
+        final String name = getStringOrEmpty(c, MusicStore.Cols.NAME);
+        final String albumName = getStringOrNull(c, MusicStore.Cols.ALBUM_NAME);
+        final String artistName = getStringOrNull(c, MusicStore.Cols.ARTIST_NAME);
+        final String albumArtistName = getStringOrNull(c, MusicStore.Cols.ALBUM_ARTIST_NAME);
+        final String albumIdentity = getStringOrNull(c, MusicStore.Cols.ALBUM_IDENTITY);
+        final int duration = getIntOrZero(c, MusicStore.Cols.DURATION);
+        final Uri dataUri = Uri.parse(getStringOrEmpty(c, MusicStore.Cols.DATA_URI));
+        String artString = getStringOrNull(c, MusicStore.Cols.ARTWORK_URI);
         final Uri artworkUri;
         if (TextUtils.isEmpty(artString)) {
             artworkUri = null;
         } else {
             artworkUri = Uri.parse(artString);
         }
-        final String mimeType = c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.MIME_TYPE));
-        final long recentid = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
-        final boolean isLocal = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.ISLOCAL)) == 1;
-        final int playcount = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.PLAYCOUNT));
-        final long lastplayed = c.getLong(c.getColumnIndexOrThrow(MusicStore.Cols.LAST_PLAYED));
+        final String mimeType = getStringOrNull(c, MusicStore.Cols.MIME_TYPE);
+        final long recentid = getLongOrZero(c, MusicStore.Cols._ID);
+        final boolean isLocal = getIntOrZero(c, MusicStore.Cols.ISLOCAL) == 1;
+        final int playcount = getIntOrZero(c, MusicStore.Cols.PLAYCOUNT);
+        final long lastplayed = getLongOrZero(c, MusicStore.Cols.LAST_PLAYED);
         return new RecentSong(identity, name, albumName, artistName, albumArtistName, albumIdentity, duration,
                 dataUri, artworkUri, mimeType, recentid, isLocal, playcount, lastplayed);
     }
 
-    /**
-     * Creates album from given cursor
-     *
-     * @param c cursor created with makeAlbumCursor
-     * @return new Album
-     */
-    public static Album makeAlbumFromCursor(final Cursor c) {
-        // Copy the album id
-        final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
-        // Copy the album name
-        final String albumName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM));
-        // Copy the artist name
-        final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ARTIST));
-        // Copy the number of songs
-        final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS));
-        // Copy the release year
-        final String year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.FIRST_YEAR));
-        // generate artwork Uri
-        final Uri artworkUri = generateArtworkUri(Long.decode(id));
-        // Create a new album
-        return new Album(id, albumName, artist, songCount, year, artworkUri);
-    }
-
     public static LocalAlbum makeLocalAlbumFromCursor(final Cursor c) {
         // Copy the album id
-        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        final long id = getLongOrZero(c, BaseColumns._ID);
         // Copy the album name
-        final String albumName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ALBUM));
+        final String albumName = getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ALBUM);
         // Copy the artist name
-        final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ARTIST));
+        final String artist = getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ARTIST);
         // Copy the number of songs
-        final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS));
+        final int songCount = getIntOrZero(c, MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS);
         // Copy the release year
-        String year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.FIRST_YEAR));
+        String year = getStringOrNull(c, MediaStore.Audio.AlbumColumns.FIRST_YEAR);
         if (TextUtils.isEmpty(year)) {
-            year = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.LAST_YEAR));
+            year = getStringOrNull(c, MediaStore.Audio.AlbumColumns.LAST_YEAR);
         }
         // generate artwork Uri
         final Uri artworkUri = generateArtworkUri(id);
@@ -167,35 +145,53 @@ public class CursorHelpers {
      */
     public static LocalArtist makeLocalArtistFromCursor(final Cursor c) {
         // Copy the artist id
-        final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
+        final long id = getLongOrZero(c, BaseColumns._ID);
         // Copy the artist name
-        final String artistName = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.ARTIST));
+        final String artistName = getStringOrEmpty(c, MediaStore.Audio.ArtistColumns.ARTIST);
         // Copy the number of albums
-        final int albumCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS));
+        final int albumCount = getIntOrZero(c, MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS);
         // Copy the number of songs
-        final int songCount = c.getInt(c.getColumnIndexOrThrow(MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS));
+        final int songCount = getIntOrZero(c, MediaStore.Audio.ArtistColumns.NUMBER_OF_TRACKS);
         // Create a new artist
         return new LocalArtist(id, artistName, albumCount, songCount);
     }
 
     public static Genre makeGenreFromCursor(final Cursor c) {
-        final long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
-        final String name= c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
-        final int songNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
-        final int albumNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-        final long[] songs = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)));
-        final long[] albums = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)));
+        final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
+        final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
+        final int songNumber = getIntOrZero(c, MusicStore.GroupCols.SONG_COUNT);
+        final int albumNumber = getIntOrZero(c, MusicStore.GroupCols.ALBUM_COUNT);
+        final long[] songs = fromCsv(getStringOrNull(c, MusicStore.GroupCols.SONG_IDS));
+        final long[] albums = fromCsv(getStringOrNull(c, MusicStore.GroupCols.ALBUM_IDS));
         return new Genre(id, name, songNumber, albumNumber, songs, albums);
     }
 
     public static Playlist makePlaylistFromCursor(final Cursor c) {
-        final long id = c.getLong(c.getColumnIndexOrThrow(MusicStore.GroupCols._ID));
-        final String name= c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.NAME));
-        final int songNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_COUNT));
-        final int albumNumber = c.getInt(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_COUNT));
-        final long[] songs = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.SONG_IDS)));
-        final long[] albums = fromCsv(c.getString(c.getColumnIndexOrThrow(MusicStore.GroupCols.ALBUM_IDS)));
+        final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
+        final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
+        final int songNumber = getIntOrZero(c, MusicStore.GroupCols.SONG_COUNT);
+        final int albumNumber = getIntOrZero(c, MusicStore.GroupCols.ALBUM_COUNT);
+        final long[] songs = fromCsv(getStringOrNull(c, MusicStore.GroupCols.SONG_IDS));
+        final long[] albums = fromCsv(getStringOrNull(c, MusicStore.GroupCols.ALBUM_IDS));
         return new Playlist(id, name, songNumber, albumNumber, songs, albums);
+    }
+
+    public static Cursor makePlaylistCursor(Context context) {
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_PLAYLISTS,
+                Projections.PLAYLIST,
+                Selections.PLAYLIST,
+                SelectionArgs.PLAYLIST,
+                SortOrder.PLAYLIST);
+    }
+
+    public static Cursor makePlaylistMembersCursor(Context context, long playlistid) {
+        return context.getContentResolver().query(
+                Uris.PLAYLIST(playlistid),
+                Projections.PLAYLIST_MEMBER,
+                Selections.PLAYLIST_MEMBER,
+                SelectionArgs.PLAYLIST_MEMBER,
+                SortOrder.PLAYLIST_SONGS);
     }
 
     public static Cursor makeLastAddedCursor(final Context context) {
@@ -203,7 +199,25 @@ public class CursorHelpers {
                 Projections.LOCAL_SONG,
                 Selections.LAST_ADDED,
                 SelectionArgs.LAST_ADDED(),
-                MediaStore.Audio.Media.DATE_ADDED + " DESC");
+                MediaStore.Audio.AudioColumns.DATE_ADDED + " DESC");
+    }
+
+    public static Cursor makeGenreCursor(Context context) {
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_GENRES,
+                Projections.GENRE,
+                Selections.GENRE,
+                SelectionArgs.GENRE,
+                MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+    }
+
+    public static Cursor makeGenreMembersCursor(Context context, long genereId) {
+        return context.getContentResolver().query(
+                Uris.GENRE(genereId),
+                Projections.GENRE_MEMBER,
+                Selections.GENRE_MEMBER,
+                SelectionArgs.GENRE_MEMBER,
+                MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
     }
 
     public static Cursor makeSongCursor(final Context context) {
@@ -218,29 +232,29 @@ public class CursorHelpers {
     }
 
     public static Cursor makeSingleLocalSongCursor(final Context context, long id) {
-        String [] selectionArgs = Arrays.copyOf(SelectionArgs.LOCAL_SONG, SelectionArgs.LOCAL_SONG.length+1);
-        selectionArgs[selectionArgs.length-1] = String.valueOf(id);
         return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG + " AND " + MediaStore.Audio.Media._ID + "=?",
-                selectionArgs,
+                Selections.LOCAL_SONG + " AND " + BaseColumns._ID + "=" + String.valueOf(id),
+                SelectionArgs.LOCAL_SONG,
                 null);
     }
 
     public static String getAlbumArtist(Context context, long albumId) {
         Cursor c = context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_ALBUMS,
-                new String[]{ MediaStore.Audio.Albums.ARTIST },
-                MediaStore.Audio.Albums._ID + "=?",
+                new String[]{ MediaStore.Audio.AlbumColumns.ARTIST },
+                BaseColumns._ID + "=?",
                 new String[]{ String.valueOf(albumId) },
                 null);
-        String artist = null;
         if (c != null) {
-            if (c.moveToFirst()) {
-                artist = c.getString(0);
+            try {
+                if (c.moveToFirst()) {
+                    return getStringOrNull(c, BaseColumns._ID);
+                }
+            } finally {
+                c.close();
             }
-            c.close();
         }
-        return artist;
+        return null;
     }
 
     public static Cursor getCursorForAutoShuffle(Context context) {
@@ -248,44 +262,46 @@ public class CursorHelpers {
         AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
         String deffldr = settings.getString(AppPreferences.PREF_DEFAULT_MEDIA_FOLDER, null);
         if (!TextUtils.isEmpty(deffldr)) {
-            selection += " AND " + MediaStore.Audio.Media.DATA + " like '" + deffldr + "%'";
+            selection += " AND " + MediaStore.Audio.AudioColumns.DATA + " like '" + deffldr + "%'";
         }
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                new String[]{BaseColumns._ID},
+                Projections.ID_ONLY,
                 selection,
                 SelectionArgs.LOCAL_SONG,
-                null);
+                BaseColumns._ID);
     }
 
     public static Cursor makeArtistSongsCursor(Context context, long artistId) {
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG + " AND " + MediaStore.Audio.Media.ARTIST_ID + "=?",
-                new String[]{SelectionArgs.LOCAL_SONG[0], SelectionArgs.LOCAL_SONG[1], String.valueOf(artistId)},
-                PreferenceUtils.getInstance(context).getArtistSongSortOrder());
+                Selections.LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=" + String.valueOf(artistId),
+                SelectionArgs.LOCAL_SONG,
+                SortOrder.LOCAL_ARTIST_SONGS);
     }
 
     public static Cursor makeLocalAlbumsCursor(Context context, long[] albumIds) {
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_ALBUMS,
                 Projections.LOCAL_ALBUM,
-                Selections.LOCAL_ALBUMS(albumIds),
-                null,
-                MediaStore.Audio.Albums.ALBUM_KEY);
+                Selections.LOCAL_ALBUM + " AND " + Selections.LOCAL_ALBUMS(albumIds),
+                SelectionArgs.LOCAL_ALBUM,
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
     }
 
-    public static ArtInfo makeArtInfoFromLocalAlbumCursor(Cursor c) {
-        return new ArtInfo(c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)),
-                c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)),
-                generateArtworkUri(c.getLong(c.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID))));
+    public static ArtInfo makeArtInfoFromLocalAlbumCursor(final Cursor c) {
+        return new ArtInfo(getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ARTIST),
+                getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ALBUM),
+                generateArtworkUri(getLongOrZero(c, BaseColumns._ID)));
     }
 
     public static Cursor makeLocalArtistAlbumsCursor(Context context, long artistId) {
-        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(artistId),
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(artistId),
                 Projections.LOCAL_ALBUM,
-                null, null,
+                Selections.LOCAL_ALBUM,
+                SelectionArgs.LOCAL_ALBUM,
                 MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
     }
 
@@ -298,38 +314,47 @@ public class CursorHelpers {
                 sortOrder);
         if (c != null) {
             LocalSong[] list = new LocalSong[c.getCount()];
-            if (c.moveToFirst()) {
-                int ii=0;
-                do {
-                    list[ii++] = makeLocalSongFromCursor(context, c);
-                } while (c.moveToNext());
+            try {
+                if (c.moveToFirst()) {
+                    int ii=0;
+                    do {
+                        list[ii++] = makeLocalSongFromCursor(context, c);
+                    } while (c.moveToNext());
+                }
+                return list;
+            } finally {
+                c.close();
             }
-            c.close();
-            return list;
         }
-        return new LocalSong[0];
+        return sEmptySongList;
     }
 
-    public static long[] getSongIdsForCursor(Cursor cursor) {
-        if (cursor == null) {
-            return sEmptyList;
+    public static long[] getSongIdsForCursor(final Cursor c) {
+        if (c != null) {
+            try {
+                if (c.moveToFirst()) {
+                    int colidx = -1;
+                    try {
+                        colidx = c.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+                    } catch (IllegalArgumentException e) {
+                        try {
+                            colidx = c.getColumnIndexOrThrow(BaseColumns._ID);
+                        } catch (IllegalArgumentException e1) {
+                            return sEmptyList;
+                        }
+                    }
+                    long[] list = new long[c.getCount()];
+                    int ii = 0;
+                    do {
+                       list[ii++] = c.getLong(colidx);
+                    } while (c.moveToNext());
+                    return list;
+                }
+            } finally {
+                c.close();
+            }
         }
-        final int len = cursor.getCount();
-        final long[] list = new long[len];
-        cursor.moveToFirst();
-        int columnIndex = -1;
-        try {
-            columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-        } catch (final IllegalArgumentException notaplaylist) {
-            columnIndex = cursor.getColumnIndexOrThrow(BaseColumns._ID);
-        }
-        for (int i = 0; i < len; i++) {
-            list[i] = cursor.getLong(columnIndex);
-            cursor.moveToNext();
-        }
-        cursor.close();
-        cursor = null;
-        return list;
+        return sEmptyList;
     }
 
     public static long[] getSongIdsForAlbum(Context context, long albumid) {
@@ -356,15 +381,18 @@ public class CursorHelpers {
                 SelectionArgs.LOCAL_ALBUM_SONGS(id),
                 SortOrder.LOCAL_ALBUM_SONGS);
         if (cursor != null) {
-            LocalSong[] songs = new LocalSong[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                int ii=0;
-                do {
-                    songs[ii++] = makeLocalSongFromCursor(context, cursor);
-                } while (cursor.moveToNext());
+            try {
+                LocalSong[] songs = new LocalSong[cursor.getCount()];
+                if (cursor.moveToFirst()) {
+                    int ii=0;
+                    do {
+                        songs[ii++] = makeLocalSongFromCursor(context, cursor);
+                    } while (cursor.moveToNext());
+                }
+                return songs;
+            } finally {
+                cursor.close();
             }
-            cursor.close();
-            return songs;
         }
         return sEmptySongList;
     }
@@ -377,15 +405,18 @@ public class CursorHelpers {
                 SelectionArgs.LOCAL_SONG,
                 SortOrder.PLAYLIST_SONGS);
         if (cursor != null) {
-            final LocalSong[] list = new LocalSong[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                int ii=0;
-                do {
-                    list[ii++] = makeLocalSongFromCursor(context, cursor);
-                } while (cursor.moveToNext());
+            try {
+                final LocalSong[] list = new LocalSong[cursor.getCount()];
+                if (cursor.moveToFirst()) {
+                    int ii=0;
+                    do {
+                        list[ii++] = makeLocalSongFromCursor(context, cursor);
+                    } while (cursor.moveToNext());
+                }
+                return list;
+            } finally {
+                cursor.close();
             }
-            cursor.close();
-            return list;
         }
         return sEmptySongList;
     }
@@ -393,15 +424,18 @@ public class CursorHelpers {
     public static LocalSong[] getLocalSongListForLastAdded(Context context) {
         final Cursor cursor = makeLastAddedCursor(context);
         if (cursor != null) {
-            final LocalSong[] list = new LocalSong[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                int ii=0;
-                do {
-                    list[ii++] = makeLocalSongFromCursor(context, cursor);
-                } while (cursor.moveToNext());
+            try {
+                final LocalSong[] list = new LocalSong[cursor.getCount()];
+                if (cursor.moveToFirst()) {
+                    int ii=0;
+                    do {
+                        list[ii++] = makeLocalSongFromCursor(context, cursor);
+                    } while (cursor.moveToNext());
+                }
+                return list;
+            } finally {
+                cursor.close();
             }
-            cursor.close();
-            return list;
         }
         return sEmptySongList;
     }
@@ -414,8 +448,44 @@ public class CursorHelpers {
         return ContentUris.withAppendedId(Uris.ARTWORK_URI, albumId);
     }
 
+    public static String getStringOrEmpty(Cursor c, String col) {
+        try {
+            return c.getString(c.getColumnIndexOrThrow(col));
+        } catch (IllegalArgumentException e) {
+            Timber.e(e, "getStringOrEmpty("+col+")");
+            return sEmptyString;
+        }
+    }
+
+    public static String getStringOrNull(Cursor c, String col) {
+        try {
+            return c.getString(c.getColumnIndexOrThrow(col));
+        } catch (IllegalArgumentException e) {
+            Timber.e(e, "getStringOrNull("+col+")");
+            return null;
+        }
+    }
+
+    public static long getLongOrZero(Cursor c, String col) {
+        try {
+            return c.getLong(c.getColumnIndexOrThrow(col));
+        } catch (IllegalArgumentException e) {
+            Timber.e(e, "getLongOrZero("+col+")");
+            return 0;
+        }
+    }
+
+    public static int getIntOrZero(Cursor c, String col) {
+        try {
+            return c.getInt(c.getColumnIndexOrThrow(col));
+        } catch (IllegalArgumentException e) {
+            Timber.e(e, "getIntOrZero("+col+")");
+            return 0;
+        }
+    }
+
     static long[] fromCsv(String csv) {
-        if (csv == null) {
+        if (TextUtils.isEmpty(csv)) {
             return sEmptyList;
         }
         final String[] strings = csv.split(",");
@@ -431,6 +501,21 @@ public class CursorHelpers {
             }
         }
         return ids;
+    }
+
+    public static String toCsv(Collection<String> collection) {
+        if (collection == null || collection.size() == 0) {
+            return sEmptyString;
+        }
+        StringBuilder songsIdsCsv = new StringBuilder();
+        int ii = collection.size();
+        for (String s : collection) {
+            songsIdsCsv.append(s);
+            if (ii --> 1) {
+                songsIdsCsv.append(",");
+            }
+        }
+        return songsIdsCsv.toString();
     }
 
 }

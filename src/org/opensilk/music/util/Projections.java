@@ -104,7 +104,7 @@ public class Projections {
                 MusicStore.GroupCols.ALBUM_IDS,
         };
         GENRE = new String[] {
-                MediaStore.Audio.Genres._ID,
+                BaseColumns._ID,
                 MediaStore.Audio.Genres.NAME,
         };
         GENRE_MEMBER = new String[] {
@@ -112,7 +112,7 @@ public class Projections {
                 MediaStore.Audio.Genres.Members.ALBUM_ID,
         };
         PLAYLIST = new String[] {
-                MediaStore.Audio.Playlists._ID,
+                BaseColumns._ID,
                 MediaStore.Audio.Playlists.NAME,
         };
         PLAYLIST_MEMBER = new String[] {

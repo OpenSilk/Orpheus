@@ -57,6 +57,7 @@ public class Selections {
     }
     public static final String LOCAL_ALBUM;
     public static final String LOCAL_ARTIST;
+    public static final String PLAYLIST;
 
     static {
         LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";
@@ -68,5 +69,6 @@ public class Selections {
         PLAYLIST_MEMBER = LOCAL_SONG;
         LOCAL_ALBUM = MediaStore.Audio.AlbumColumns.ALBUM + "!=?";
         LOCAL_ARTIST = MediaStore.Audio.ArtistColumns.ARTIST + "!=?";
+        PLAYLIST = MediaStore.Audio.Playlists.NAME + "!=?";
     }
 }
