@@ -17,8 +17,8 @@
 
 <changelog bulletedList="true">
 
-    <changelogversion versionName="0.5.1">
-        <changelogtext>Fix potential crash</changelogtext>
+    <changelogversion versionName="0.5.+">
+        <changelogtext>Address some crashes</changelogtext>
     </changelogversion>
 
     <changelogversion versionName="0.5.0">
@@ -29,17 +29,11 @@
         <changelogtext>Orpheus is now free / donation supported</changelogtext>
     </changelogversion>
 
-    <changelogversion versionName="0.4.3">
+    <changelogversion versionName="0.4.+">
+        <changelogtext>Fix crash on pre kitkat devices</changelogtext>
+        <changelogtext>ICS fixes</changelogtext>
         <changelogtext>Fix services running all the time</changelogtext>
         <changelogtext>Orpheus now shows in Simple Last.fm Scrobbler enabled apps list</changelogtext>
-    </changelogversion>
-
-    <changelogversion versionName="0.4.2">
-        <changelogtext>ICS fixes</changelogtext>
-    </changelogversion>
-
-    <changelogversion versionName="0.4.1">
-        <changelogtext>Fix crash on pre kitkat devices</changelogtext>
     </changelogversion>
 
     <changelogversion versionName="0.4.0">
@@ -55,7 +49,7 @@
         <changelogtext>Fix a memory leak</changelogtext>
     </changelogversion>
 
-    <changelogversion versionName="0.3.1">
+    <changelogversion versionName="0.3.+">
         <changelogtext>Bug fixes</changelogtext>
         <changelogtext>Share intent from now playing menu now sends album art</changelogtext>
     </changelogversion>
@@ -78,7 +72,7 @@
         <changelogtext>Add album and artist info to casting</changelogtext>
     </changelogversion>
 
-    <changelogversion versionName="0.1.1">
+    <changelogversion versionName="0.1.+">
         <changelogtext>Address a couple crashes.</changelogtext>
     </changelogversion>
 
