@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import timber.log.Timber;
+
 /**
  * Created by drew on 6/8/14.
  */
@@ -120,7 +122,7 @@ public class PluginUtil {
     public static void setPluginDisabled(Context context, ComponentName plugin) {
         List<ComponentName> disabledPlugins = readDisabledPlugins(context);
         for (ComponentName cn : disabledPlugins) {
-            if (cn.equals(cn)) {
+            if (plugin.equals(cn)) {
                 return;
             }
         }
@@ -132,6 +134,7 @@ public class PluginUtil {
         List<ComponentName> list = new ArrayList<>();
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String json = sp.getString(PREF_DISABLED_PLUGINS, null);
+        Timber.d("Read disabled plugins=" + json);
         if (json != null) {
             JsonReader jr = new JsonReader(new StringReader(json));
             try {
@@ -162,6 +165,7 @@ public class PluginUtil {
                 jw.value(cn.flattenToString());
             }
             jw.endArray();
+            Timber.d("Write disabled plugins="+sw.toString());
             sp.edit().putString(PREF_DISABLED_PLUGINS, sw.toString()).apply();
         } catch (IOException e) {
             sp.edit().remove(PREF_DISABLED_PLUGINS).apply();
@@ -170,14 +174,6 @@ public class PluginUtil {
                 jw.close();
             } catch (IOException ignored) {}
         }
-    }
-
-    public static PluginInfo getDefaultPluginInfo(Context context) {
-        CharSequence title = context.getString(R.string.drawer_device);
-        CharSequence description = "Play music stored on sdcard";
-//        device.icon = context.getResources().getDrawable(R.drawable.ic_launcher);
-        ComponentName componentName = new ComponentName(context, HomeFragment.class);
-        return new PluginInfo(title, description, componentName);
     }
 
 }
