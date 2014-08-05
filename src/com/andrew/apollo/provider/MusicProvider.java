@@ -389,9 +389,7 @@ public class MusicProvider extends ContentProvider {
                         albumids = CursorHelpers.toCsv(albums);
                     }
                 }
-                if (!TextUtils.isEmpty(name)) {
-                    c.addRow(new Object[] {id, name, numSongs, numAlbums, songids, albumids});
-                }
+                c.addRow(new Object[] {id, name, numSongs, numAlbums, songids, albumids});
             } while (playlists.moveToNext());
         }
         if (playlists != null) {
