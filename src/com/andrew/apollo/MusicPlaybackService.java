@@ -1681,14 +1681,24 @@ public class MusicPlaybackService extends Service {
         }
         editor.putInt("repeatmode", mRepeatMode);
         editor.putInt("shufflemode", mShuffleMode);
+        editor.putInt("schemaversion", PREF_VERSION);
         editor.apply();
     }
+
+    /**
+     * Increment value when pref schema changes
+     */
+    private static final int PREF_VERSION = 2;
 
     /**
      * Reloads the queue as the user left it the last time they stopped using
      * Apollo
      */
     private void reloadQueue() {
+        int ver = mPreferences.getInt("schemaversion", 0);
+        if (ver < PREF_VERSION) {
+            return;
+        }
         String q = null;
         int id = mCardId;
         if (mPreferences.contains("cardid")) {
