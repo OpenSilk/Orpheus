@@ -248,7 +248,7 @@ public class CursorHelpers {
         if (c != null) {
             try {
                 if (c.moveToFirst()) {
-                    return getStringOrNull(c, BaseColumns._ID);
+                    return getStringOrNull(c, MediaStore.Audio.AlbumColumns.ARTIST);
                 }
             } finally {
                 c.close();
