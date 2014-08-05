@@ -1587,7 +1587,8 @@ public class MusicPlaybackService extends Service {
             mRemoteControlClient
                     .editMetadata(true)
                     .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName())
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST, getAlbumArtistName())
+                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
+                            !TextUtils.isEmpty(getAlbumArtistName()) ? getAlbumArtistName() : getArtistName())
                     .putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, getAlbumName())
                     .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName())
                     .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, duration())
@@ -2614,14 +2615,22 @@ public class MusicPlaybackService extends Service {
      */
     //@DebugLog
     public Bitmap getAlbumArt() {
-        return mArtworkUtil.getArtwork(getAlbumArtistName(), getAlbumName());
+        String artist = getAlbumArtistName();
+        if (TextUtils.isEmpty(artist)) {
+            artist = getArtistName();
+        }
+        return mArtworkUtil.getArtwork(artist, getAlbumName());
     }
 
     /**
      * @return thumbnail for the current album.
      */
     public Bitmap getAlbumArtThumbnail() {
-        return mArtworkUtil.getArtworkThumbnail(getAlbumArtistName(), getAlbumName());
+        String artist = getAlbumArtistName();
+        if (TextUtils.isEmpty(artist)) {
+            artist = getArtistName();
+        }
+        return mArtworkUtil.getArtworkThumbnail(artist, getAlbumName());
     }
 
     /**

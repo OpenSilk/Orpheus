@@ -32,6 +32,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
+import android.text.TextUtils;
 import android.widget.RemoteViews;
 
 import com.andrew.apollo.MusicPlaybackService;
@@ -134,6 +135,9 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     private void updateWidget(int appId, int startId, int widgetType) {
         String albumName = MusicUtils.getAlbumName();
         String albumArtistName = MusicUtils.getAlbumArtistName();
+        if (TextUtils.isEmpty(albumArtistName)) {
+            albumArtistName = MusicUtils.getArtistName();
+        }
         mArtistName = MusicUtils.getArtistName();
         mTrackName = MusicUtils.getTrackName();
         mShuffleMode = MusicUtils.getShuffleMode();

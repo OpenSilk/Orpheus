@@ -668,7 +668,9 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                         shareIntent.setType("text/plain");
                         shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
                         String albumartist = MusicUtils.getAlbumArtistName();
-                        if (albumartist == null) albumartist = artistname;
+                        if (TextUtils.isEmpty(albumartist)) {
+                            albumartist = artistname;
+                        }
                         String albumname = MusicUtils.getAlbumName();
                         if (!TextUtils.isEmpty(albumartist) && !TextUtils.isEmpty(albumname)) {
                             shareIntent.putExtra(Intent.EXTRA_STREAM,
