@@ -1997,7 +1997,12 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return Uri.parse(mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.DATA_URI)));
+            final String uri = CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.DATA_URI);
+            if (TextUtils.isEmpty(uri)) {
+                return null;
+            } else {
+                return Uri.parse(uri);
+            }
         }
     }
 
@@ -2011,7 +2016,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_NAME));
+            return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ALBUM_NAME);
         }
     }
 
@@ -2025,7 +2030,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.NAME));
+            return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.NAME);
         }
     }
 
@@ -2039,7 +2044,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ARTIST_NAME));
+            return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ARTIST_NAME);
         }
     }
 
@@ -2053,7 +2058,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_ARTIST_NAME));
+            return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ALBUM_ARTIST_NAME);
         }
     }
 
@@ -2067,7 +2072,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return -1;
             }
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ALBUM_IDENTITY));
+            return CursorHelpers.getLongOrZero(mCursor, MusicStore.Cols.ALBUM_IDENTITY);
         }
     }
 
@@ -2095,7 +2100,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            return mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.MIME_TYPE));
+            return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.MIME_TYPE);
         }
     }
 
@@ -2108,11 +2113,12 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return null;
             }
-            String uri = mCursor.getString(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ARTWORK_URI));
-            if (uri != null) {
+            final String uri = CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ARTWORK_URI);
+            if (TextUtils.isEmpty(uri)) {
+                return null;
+            } else {
                 return Uri.parse(uri);
             }
-            return null;
         }
     }
 
@@ -2136,7 +2142,7 @@ public class MusicPlaybackService extends Service {
             if (mCursor == null || mCursor.isClosed()) {
                 return false;
             }
-            return mCursor.getInt(mCursor.getColumnIndexOrThrow(MusicStore.Cols.ISLOCAL)) == 1;
+            return CursorHelpers.getIntOrZero(mCursor, MusicStore.Cols.ISLOCAL) == 1;
         }
     }
 
