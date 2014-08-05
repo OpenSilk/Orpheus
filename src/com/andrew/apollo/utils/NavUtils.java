@@ -40,6 +40,8 @@ import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.settings.SettingsActivity;
 
+import timber.log.Timber;
+
 import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 
 
@@ -232,7 +234,11 @@ public final class NavUtils {
 
     public static void maybeClearBackstack(FragmentManager fm) {
         if (fm.getBackStackEntryCount() > 0) {
-            fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            try {
+                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            } catch (IllegalStateException e) {
+                Timber.e(e, "maybeClearBackstack()::popBackStackImmediate");
+            }
         }
     }
 }
