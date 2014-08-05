@@ -20,11 +20,13 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.andrew.apollo.BuildConfig;
+import com.andrew.apollo.R;
 
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
@@ -32,6 +34,7 @@ import org.opensilk.music.artwork.cache.BitmapLruCache;
 import java.io.IOException;
 
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Helper class for MusicPlaybackService to request and manage
@@ -71,6 +74,10 @@ public class ArtworkProviderUtil {
         mL1Cache = new BitmapLruCache(lruThumbCacheSize);
     }
 
+    private Bitmap getDefaultArt() {
+        return ((BitmapDrawable) mContext.getResources().getDrawable(R.drawable.default_artwork)).getBitmap();
+    }
+
     /**
      * Fetches artwork from the ArtworkProvider, attempts to get fullscreen
      * artwork first, on failure tries to get a thumbnail
@@ -82,7 +89,7 @@ public class ArtworkProviderUtil {
     //@DebugLog
     public Bitmap getArtwork(String artistName, String albumName) {
         if (artistName == null || albumName == null) {
-            return null;
+            return getDefaultArt();
         }
         final String cacheKey = makeCacheKey(artistName, albumName,"LARGE");
         final Uri artworkUri = ArtworkProvider.createArtworkUri(artistName, albumName);
@@ -102,12 +109,17 @@ public class ArtworkProviderUtil {
      */
     //@DebugLog
     public Bitmap getArtworkThumbnail(String artistName, String albumName) {
+        Timber.d("getArtworkThumbnail("+artistName+", "+albumName+")");
         if (artistName == null || albumName == null) {
-            return null;
+            return getDefaultArt();
         }
         final String cacheKey = makeCacheKey(artistName, albumName, "THUMB");
         final Uri artworkUri = ArtworkProvider.createArtworkThumbnailUri(artistName, albumName);
-        return queryArtworkProvider(artworkUri, cacheKey);
+        Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
+        if (bitmap == null) {
+            bitmap = getDefaultArt();
+        }
+        return bitmap;
     }
 
     /**

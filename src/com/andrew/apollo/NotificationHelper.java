@@ -95,7 +95,7 @@ public class NotificationHelper {
         mNotification = new NotificationCompat.Builder(mService)
                 .setSmallIcon(R.drawable.stat_notify_music)
                 .setContentIntent(getPendingIntent())
-                .setPriority(Notification.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContent(mNotificationTemplate)
                 .build();
         // Control playback from the notification
