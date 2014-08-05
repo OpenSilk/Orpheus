@@ -124,7 +124,7 @@ public class CursorHelpers {
         // Copy the album name
         final String albumName = getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ALBUM);
         // Copy the artist name
-        final String artist = getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ARTIST);
+        final String artist = getStringOrNull(c, MediaStore.Audio.AlbumColumns.ARTIST);
         // Copy the number of songs
         final int songCount = getIntOrZero(c, MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS);
         // Copy the release year
@@ -291,8 +291,8 @@ public class CursorHelpers {
     }
 
     public static ArtInfo makeArtInfoFromLocalAlbumCursor(final Cursor c) {
-        return new ArtInfo(getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ARTIST),
-                getStringOrEmpty(c, MediaStore.Audio.AlbumColumns.ALBUM),
+        return new ArtInfo(getStringOrNull(c, MediaStore.Audio.AlbumColumns.ARTIST),
+                getStringOrNull(c, MediaStore.Audio.AlbumColumns.ALBUM),
                 generateArtworkUri(getLongOrZero(c, BaseColumns._ID)));
     }
 
