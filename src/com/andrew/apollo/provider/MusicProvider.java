@@ -163,8 +163,6 @@ public class MusicProvider extends ContentProvider {
                     }
                     if (c != null) {
                         c.close();
-                    } else {
-                        db.close();
                     }
                 }
 
@@ -252,8 +250,6 @@ public class MusicProvider extends ContentProvider {
                     }
                     if (c != null) {
                         c.close();
-                    } else {
-                        db.close();
                     }
                 }
 
