@@ -405,7 +405,7 @@ public class MusicProvider extends ContentProvider {
     }
 
     @DebugLog
-    protected void updateGroupCacheCache(Cursor c, String tableName, Uri updateUri) {
+    protected synchronized void updateGroupCacheCache(Cursor c, String tableName, Uri updateUri) {
         boolean wasupdated = false;
         // Add new
         if (c != null) {
