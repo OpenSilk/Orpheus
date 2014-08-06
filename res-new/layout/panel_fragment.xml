@@ -24,7 +24,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:clickable="true"
-    android:focusable="false">
+    android:focusable="false"
+    android:background="?android:colorBackground">
 
     <!--album art background -->
     <org.opensilk.music.widgets.FullScreenArtworkImageView

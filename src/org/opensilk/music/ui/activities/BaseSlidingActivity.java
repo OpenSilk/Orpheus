@@ -34,6 +34,7 @@ import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,6 +67,8 @@ import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 import javax.inject.Inject;
+
+import timber.log.Timber;
 
 import static android.app.SearchManager.QUERY;
 import static org.opensilk.cast.CastMessage.*;
@@ -100,8 +103,6 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
     private boolean mTransientNetworkDisconnection = false;
     protected boolean isCastingEnabled;
     protected boolean killServiceOnExit;
-
-    protected boolean mIsLargeLandscape;
 
     protected boolean mIsResumed;
 
@@ -155,13 +156,6 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
         // Get panel fragment reference
         mNowPlayingFragment = (NowPlayingFragment) getSupportFragmentManager().findFragmentById(R.id.now_playing_fragment);
 
-        mIsLargeLandscape = false;
-        // Pinn the sliding pane open on landscape layouts
-        if (mIsLargeLandscape && savedInstanceState == null) {
-            mSlidingPanel.setSlidingEnabled(false);
-            mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.EXPANDED);
-            mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
-        }
     }
 
     @Override
@@ -276,31 +270,15 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean("panel_open", mSlidingPanel.isExpanded());
+        outState.putBoolean("panel_open", mSlidingPanel.isPanelExpanded());
         outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
-        outState.putBoolean("panel_needs_collapse", mIsLargeLandscape);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
-            if (mIsLargeLandscape) {
-                // Coming from portrait, need to pin the panel open
-                mSlidingPanel.setSlidingEnabled(false);
-                mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.EXPANDED);
-                mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
-                if (savedInstanceState.getBoolean("queue_showing", false)) {
-                    mNowPlayingFragment.onQueueVisibilityChanged(true);
-                }
-            } else if (savedInstanceState.getBoolean("panel_needs_collapse", false)) {
-                // Coming back from landscape we should collapse the panel
-                mSlidingPanel.setInitialState(SlidingUpPanelLayout.SlideState.COLLAPSED);
-                mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_COLLAPSE));
-                if (savedInstanceState.getBoolean("queue_showing", false)) {
-                    mNowPlayingFragment.popQueueFragment();
-                }
-            } else if (savedInstanceState.getBoolean("panel_open", false)) {
+            if (savedInstanceState.getBoolean("panel_open", false)) {
                 mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.onQueueVisibilityChanged(true);
@@ -335,12 +313,7 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
 
     @Override
     public void onBackPressed() {
-        if (mIsLargeLandscape) {
-            // We don't close the panel on landscape
-            if (!getSupportFragmentManager().popBackStackImmediate()) {
-                finish();
-            }
-        } else if (mSlidingPanel.isExpanded()) {
+        if (mSlidingPanel.isPanelExpanded()) {
             maybeClosePanel();
         } else {
             super.onBackPressed();
@@ -370,13 +343,15 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
 
     @Override
     public void onPanelSlide(View panel, float slideOffset) {
-        //Dont hide action bar on tablets
-        if (mIsLargeLandscape) {
-            return;
-        }
-        if (slideOffset < 0.2) {
-            if (getSupportActionBar().isShowing()) {
-                getSupportActionBar().hide();
+        if (slideOffset > 0.84) {
+            TypedValue out = new TypedValue();
+            getTheme().resolveAttribute(R.attr.actionBarSize, out, true);
+            final int actionBarSize = TypedValue.complexToDimensionPixelSize(out.data, getResources().getDisplayMetrics());
+            Timber.d("actionBarSize=" + actionBarSize + " panelTop=" + panel.getTop());
+            if (panel.getTop() < actionBarSize) {
+                if (getSupportActionBar().isShowing()) {
+                    getSupportActionBar().hide();
+                }
             }
         } else {
             if (!getSupportActionBar().isShowing()) {
@@ -400,19 +375,20 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
         //not implemented
     }
 
+    @Override
+    public void onPanelHidden(View panel) {
+
+    }
+
     public void maybeClosePanel() {
-        // On tablets panel is pinned open
-        if (mIsLargeLandscape) {
-            return;
-        }
-        if (mSlidingPanel.isExpanded()) {
-            mSlidingPanel.collapsePane();
+        if (mSlidingPanel.isPanelExpanded()) {
+            mSlidingPanel.collapsePanel();
         }
     }
 
     public void maybeOpenPanel() {
-        if (!mSlidingPanel.isExpanded()) {
-            mSlidingPanel.expandPane();
+        if (!mSlidingPanel.isPanelExpanded()) {
+            mSlidingPanel.expandPanel();
         }
     }
 
@@ -420,18 +396,10 @@ public class BaseSlidingActivity extends ScopedDaggerActionBarActivity implement
      * Hides action bar if panel is expanded
      */
     protected void maybeHideActionBar() {
-        //Dont hide action bar on tablets
-        if (mIsLargeLandscape) {
-            return;
-        }
-        if (mSlidingPanel.isExpanded()
+        if (mSlidingPanel.isPanelExpanded()
                 && getSupportActionBar().isShowing()) {
             getSupportActionBar().hide();
         }
-    }
-
-    public boolean isLargeLandscape() {
-        return mIsLargeLandscape;
     }
 
     protected int getLayoutId() {

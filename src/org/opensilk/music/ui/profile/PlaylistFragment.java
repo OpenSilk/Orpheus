@@ -22,13 +22,16 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.ApolloUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.mobeta.android.dslv.DragSortListView;
 import com.squareup.otto.Bus;
 
@@ -153,6 +156,9 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
                 playlistCard.onOverflowClicked(v);
             }
         });
+        if (!ThemeHelper.isDialog(getActivity())) {
+            ((ListView) mList).addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.list_footer, null));
+        }
         // set list adapter
         mList.setAdapter(mAdapter);
     }

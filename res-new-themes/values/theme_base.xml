@@ -42,8 +42,6 @@
     <style name="Theme.Light.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
-        <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/shadow_above</item>
     </style>
 
     <style name="Theme.Dialog.LightBase" parent="Theme.LightBase">
@@ -57,8 +55,6 @@
     <style name="Theme.Dialog.Light.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
-        <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/shadow_above</item>
     </style>
 
     <!--Common styles for dark theme-->
@@ -85,8 +81,6 @@
     <style name="Theme.Dark.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
-        <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/shadow_above_light</item>
     </style>
 
     <style name="Theme.Dialog.DarkBase" parent="Theme.DarkBase">
@@ -100,8 +94,6 @@
     <style name="Theme.Dialog.Dark.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
-        <!--Sliding pane shadow-->
-        <item name="shadowDrawable">@drawable/shadow_above_light</item>
     </style>
 
     <!-- End common themes -->

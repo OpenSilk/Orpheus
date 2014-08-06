@@ -18,11 +18,13 @@ package org.opensilk.music.ui.library;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
@@ -83,6 +85,7 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        ((ListView) getListView()).addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.list_footer, null));
         setListAdapter((ArrayAdapter) mAdapter);
         if (mAdapter.isOnFirstLoad()) {
             setListShown(false);

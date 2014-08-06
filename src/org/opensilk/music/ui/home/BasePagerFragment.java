@@ -22,10 +22,13 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CursorAdapter;
+import android.widget.ListView;
 
 import com.andrew.apollo.R;
+import com.etsy.android.grid.StaggeredGridView;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -68,6 +71,11 @@ public class BasePagerFragment extends CardListGridFragment implements LoaderMan
     public void onViewCreated(View view, Bundle savedInstanceState) {
         setEmptyText(getEmptyText());
         super.onViewCreated(view, savedInstanceState);
+        if (wantGridView()) {
+            ((StaggeredGridView) getListView()).addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.list_footer, null));
+        } else {
+            ((ListView) getListView()).addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.list_footer, null));
+        }
         setListAdapter(mAdapter);
         if (mAdapter.isEmpty()) {
             setListShown(false);

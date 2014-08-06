@@ -45,12 +45,19 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     public static final String ACTION_GENRE = "open_genre";
     public static final String ACTION_SONG_GROUP = "open_song_group";
 
+    private boolean mIsDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeHelper.getInstance(this).getPanelDialogTheme());
 //        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR);
         setupFauxDialog();
         super.onCreate(savedInstanceState);
+
+        if (mIsDialog) {
+            //Hack, TODO remove completely
+            mSlidingPanel.hidePanel();
+        }
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(null);
@@ -106,6 +113,8 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                 WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+
+        mIsDialog = true;
     }
 
     /*

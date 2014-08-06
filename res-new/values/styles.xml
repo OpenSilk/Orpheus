@@ -118,6 +118,12 @@
         <item name="android:gravity">left|center_vertical</item>
     </style>
 
+    <!-- PANEL -->
+    <style name="SlidingPanel">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
     <!--PANEL HEADER-->
 
     <style name="TextAppearancePanelHeaderBase" parent="@android:style/TextAppearance.Holo.Medium">

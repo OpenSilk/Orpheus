@@ -33,8 +33,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
-        sothree:collapsedHeight="@dimen/panel_header_height"
-        sothree:shadowHeight="@dimen/shadow_height">
+        sothree:panelHeight="@dimen/panel_header_height"
+        sothree:overlay="true">
 
         <!-- main content -->
         <FrameLayout
@@ -47,8 +47,8 @@
             android:id="@+id/now_playing_fragment"
             android:name="org.opensilk.music.ui.fragments.NowPlayingFragment"
             tools:layout="@layout/panel_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_gravity="center_horizontal"
+            style="@style/SlidingPanel"/>
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 

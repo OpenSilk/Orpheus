@@ -18,15 +18,17 @@ package org.opensilk.music.ui.profile;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.artwork.ArtworkImageView;
@@ -108,6 +110,9 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
                 albumCard.onOverflowClicked(v);
             }
         });
+        if (!ThemeHelper.isDialog(getActivity())) {
+            ((ListView) mList).addFooterView(LayoutInflater.from(getActivity()).inflate(R.layout.list_footer, null));
+        }
         // set list adapter
         mList.setAdapter(mAdapter);
     }

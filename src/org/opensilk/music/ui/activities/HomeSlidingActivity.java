@@ -220,7 +220,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     @Override
     //@DebugLog
     public void onBackPressed() {
-        if (!mIsLargeLandscape && mSlidingPanel.isExpanded()) {
+        if (mSlidingPanel.isPanelExpanded()) {
             maybeClosePanel();
         } else {
             Fragment f = getSupportFragmentManager().findFragmentByTag("library");
@@ -239,18 +239,14 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
     @Override
     public void onPanelExpanded(View panel) {
-        if (!mIsLargeLandscape) {
-            // The drawer interferes with the queue swipe to remove
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerContainerView);
-        }
+        // The drawer interferes with the queue swipe to remove
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawerContainerView);
         super.onPanelExpanded(panel);
     }
 
     @Override
     public void onPanelCollapsed(View panel) {
-        if (!mIsLargeLandscape) {
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mDrawerContainerView);
-        }
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mDrawerContainerView);
         super.onPanelCollapsed(panel);
     }
 
