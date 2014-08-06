@@ -287,7 +287,6 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public void onConnected() {
         if (!mFromSavedInstance) {
             try {
-                resolveCapabilities();
                 if (TextUtils.isEmpty(mLibraryIdentity)) {
                     Intent i = new Intent();
                     mLibrary.getService().getLibraryChooserIntent(i);
@@ -316,6 +315,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     }
 
     private void initFolderFragment() {
+        resolveCapabilities();
         final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null);
         Fragment f = FolderFragment.newInstance(li);
         FragmentManager fm = getChildFragmentManager();
