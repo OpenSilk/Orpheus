@@ -26,7 +26,6 @@ public class SortOrder {
     public static final String SONG_GROUP;
     public static final String LAST_ADDED;
     public static final String PLAYLIST_SONGS;
-    public static final String PLAYLIST;
     public static final String LOCAL_ARTIST_SONGS;
 
     static {
@@ -34,7 +33,6 @@ public class SortOrder {
         SONG_GROUP = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
         LAST_ADDED = MediaStore.Audio.Media.DATE_ADDED + " DESC";
         PLAYLIST_SONGS = MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER;
-        PLAYLIST = MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER;
         LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.ALBUM + ", " + LOCAL_ALBUM_SONGS;
     }
 }

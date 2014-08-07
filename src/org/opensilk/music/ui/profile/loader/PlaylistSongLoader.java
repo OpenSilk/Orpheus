@@ -41,8 +41,8 @@ public class PlaylistSongLoader extends CursorLoader {
         } else { //User generated playlist
             setUri(Uris.PLAYLIST(playlistId));
             setProjection(Projections.PLAYLIST_SONGS);
-            setSelection(Selections.LOCAL_SONG);
-            setSelectionArgs(SelectionArgs.LOCAL_SONG);
+            setSelection(Selections.PLAYLIST_SONGS);
+            setSelectionArgs(SelectionArgs.PLAYLIST_SONGS);
             setSortOrder(SortOrder.PLAYLIST_SONGS);
         }
     }

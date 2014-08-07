@@ -58,6 +58,7 @@ public class Selections {
     public static final String LOCAL_ALBUM;
     public static final String LOCAL_ARTIST;
     public static final String PLAYLIST;
+    public static final String PLAYLIST_SONGS;
 
     static {
         LOCAL_SONG = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.TITLE + "!=?";
@@ -65,10 +66,11 @@ public class Selections {
         LAST_ADDED = LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.DATE_ADDED + ">?";
         LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.IS_MUSIC + "=? AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=?";
         GENRE = MediaStore.Audio.GenresColumns.NAME + "!=?";
-        GENRE_MEMBER = LOCAL_SONG;
-        PLAYLIST_MEMBER = LOCAL_SONG;
+        GENRE_MEMBER = MediaStore.Audio.Genres.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Genres.Members.TITLE + "!=?";
+        PLAYLIST_MEMBER = MediaStore.Audio.Playlists.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Playlists.Members.TITLE + "!=?";
         LOCAL_ALBUM = MediaStore.Audio.AlbumColumns.ALBUM + "!=?";
         LOCAL_ARTIST = MediaStore.Audio.ArtistColumns.ARTIST + "!=?";
         PLAYLIST = MediaStore.Audio.Playlists.NAME + "!=?";
+        PLAYLIST_SONGS = MediaStore.Audio.Playlists.Members.IS_MUSIC + "=? AND " + MediaStore.Audio.Playlists.Members.TITLE + "!=?";
     }
 }

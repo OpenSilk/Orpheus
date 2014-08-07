@@ -21,6 +21,9 @@ package org.opensilk.music.util;
  */
 public class SelectionArgs {
 
+    private static final String[] ONE_AND_EMPTY;
+    private static final String[] EMPTY;
+
     public static final String[] LOCAL_SONG;
     public static String[] LOCAL_ALBUM_SONGS(final long albumId) {
         return new String[] {"1", "''", String.valueOf(albumId)};
@@ -42,14 +45,17 @@ public class SelectionArgs {
     public static final String[] PLAYLIST;
 
     static {
-        LOCAL_SONG = new String[] {"1","''"};
-        GENRE = new String[] {"''"};
-        GENRE_MEMBER = LOCAL_SONG;
-        PLAYLIST_MEMBER = LOCAL_SONG;
-        PLAYLIST_SONGS = LOCAL_SONG;
-        SONG_GROUP = LOCAL_SONG;
-        LOCAL_ALBUM = new String[] {"''"};
-        LOCAL_ARTIST = new String[] {"''"};
-        PLAYLIST = new String[] {"''"};
+        ONE_AND_EMPTY = new String[]{"1","''"};
+        EMPTY = new String[]{"''"};
+
+        LOCAL_SONG = ONE_AND_EMPTY;
+        GENRE = EMPTY;
+        GENRE_MEMBER = ONE_AND_EMPTY;
+        PLAYLIST_MEMBER = ONE_AND_EMPTY;
+        PLAYLIST_SONGS = ONE_AND_EMPTY;
+        SONG_GROUP = ONE_AND_EMPTY;
+        LOCAL_ALBUM = EMPTY;
+        LOCAL_ARTIST = EMPTY;
+        PLAYLIST = EMPTY;
     }
 }

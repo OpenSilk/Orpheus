@@ -72,12 +72,12 @@ public class Projections {
         PLAYLIST_SONGS = new String[] {
                 //MediaStore.Audio.Playlists.Members._ID,
                 MediaStore.Audio.Playlists.Members.AUDIO_ID + " AS _id ",
-                MediaStore.Audio.AudioColumns.TITLE,
-                MediaStore.Audio.AudioColumns.ARTIST,
-                MediaStore.Audio.AudioColumns.ALBUM,
-                MediaStore.Audio.AudioColumns.ALBUM_ID,
-                MediaStore.Audio.AudioColumns.DURATION,
-                MediaStore.Audio.AudioColumns.MIME_TYPE,
+                MediaStore.Audio.Playlists.Members.TITLE,
+                MediaStore.Audio.Playlists.Members.ARTIST,
+                MediaStore.Audio.Playlists.Members.ALBUM,
+                MediaStore.Audio.Playlists.Members.ALBUM_ID,
+                MediaStore.Audio.Playlists.Members.DURATION,
+                MediaStore.Audio.Playlists.Members.MIME_TYPE,
         };
         RECENT_SONGS = new String[] {
                 MusicStore.Cols._ID,

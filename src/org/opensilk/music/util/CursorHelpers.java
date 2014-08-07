@@ -182,7 +182,7 @@ public class CursorHelpers {
                 Projections.PLAYLIST,
                 Selections.PLAYLIST,
                 SelectionArgs.PLAYLIST,
-                SortOrder.PLAYLIST);
+                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
     }
 
     public static Cursor makePlaylistMembersCursor(Context context, long playlistid) {
@@ -199,7 +199,7 @@ public class CursorHelpers {
                 Projections.LOCAL_SONG,
                 Selections.LAST_ADDED,
                 SelectionArgs.LAST_ADDED(),
-                MediaStore.Audio.AudioColumns.DATE_ADDED + " DESC");
+                SortOrder.LAST_ADDED);
     }
 
     public static Cursor makeGenreCursor(Context context) {
@@ -401,8 +401,8 @@ public class CursorHelpers {
         Cursor cursor = context.getContentResolver().query(
                 Uris.PLAYLIST(playlistId),
                 Projections.PLAYLIST_SONGS,
-                Selections.LOCAL_SONG,
-                SelectionArgs.LOCAL_SONG,
+                Selections.PLAYLIST_SONGS,
+                SelectionArgs.PLAYLIST_SONGS,
                 SortOrder.PLAYLIST_SONGS);
         if (cursor != null) {
             try {
