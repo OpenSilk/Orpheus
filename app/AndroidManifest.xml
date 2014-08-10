@@ -142,7 +142,7 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <activity android:name="org.opensilk.music.ui.activities.ProfileSlidingActivity"
+        <activity android:name="org.opensilk.music.ui.activities.ProfileDialogActivity"
             android:theme="@style/Theme.Dialog.Light.Panel">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>

@@ -16,17 +16,12 @@
 
 package org.opensilk.music.ui.activities;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
-import android.util.DisplayMetrics;
-import android.util.TypedValue;
-import android.view.WindowManager;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.ArtistFragment;
@@ -37,7 +32,7 @@ import org.opensilk.music.ui.profile.SongGroupFragment;
 /**
  * Created by drew on 6/20/14.
  */
-public class ProfileSlidingActivity extends BaseSlidingActivity {
+public class ProfileDialogActivity extends BaseDialogActivity {
 
     public static final String ACTION_ARTIST = "open_artist";
     public static final String ACTION_ALBUM = "open_album";
@@ -45,26 +40,12 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
     public static final String ACTION_GENRE = "open_genre";
     public static final String ACTION_SONG_GROUP = "open_song_group";
 
-    private boolean mIsDialog;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(ThemeHelper.getInstance(this).getPanelDialogTheme());
-//        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR);
-        setupFauxDialog();
         super.onCreate(savedInstanceState);
 
-        if (mIsDialog) {
-            //Hack, TODO remove completely
-            mSlidingPanel.hidePanel();
-        }
-
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setBackgroundDrawable(null);
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.blank);
-        actionBar.setTitle(" ");
-        actionBar.setIcon(ThemeHelper.isDialog(this) ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);
+        mActionBarHelper.setBackground(null);
+        mActionBarHelper.setTitle(" ");
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
         Fragment f = null;
@@ -90,40 +71,6 @@ public class ProfileSlidingActivity extends BaseSlidingActivity {
                     .commit();
         }
 
-    }
-
-    // Thanks dashclock for this
-    private void setupFauxDialog() {
-        // Check if this should be a dialog
-        if (!ThemeHelper.isDialog(this)) {
-            return;
-        }
-
-        // Should be a dialog; set up the window parameters.
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.width = getResources().getDimensionPixelSize(R.dimen.profile_dialog_width);
-        params.height = Math.min(
-                getResources().getDimensionPixelSize(R.dimen.profile_dialog_max_height),
-                dm.heightPixels * 7 / 8);
-        params.alpha = 1.0f;
-        params.dimAmount = 0.5f;
-        getWindow().setAttributes(params);
-
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-        mIsDialog = true;
-    }
-
-    /*
-     * Abstract methods
-     */
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.activity_profilesliding;
     }
 
     @Override

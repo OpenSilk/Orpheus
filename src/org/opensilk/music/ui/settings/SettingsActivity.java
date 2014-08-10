@@ -11,22 +11,17 @@ import android.view.WindowManager;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
+import org.opensilk.music.ui.activities.ActivityModule;
+import org.opensilk.music.ui.activities.BaseDialogActivity;
+
 /**
  * Created by andrew on 2/28/14.
  */
-public class SettingsActivity extends ActionBarActivity {
+public class SettingsActivity extends BaseDialogActivity {
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(ThemeHelper.getInstance(this).getDialogTheme());
-        setupFauxDialog();
-        setContentView(R.layout.blank_framelayout);
-
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.blank);
-        actionBar.setIcon(ThemeHelper.isDialog(this) ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);
 
         if (savedInstanceState == null) {
             //Load the main fragment
@@ -57,26 +52,10 @@ public class SettingsActivity extends ActionBarActivity {
         }
     }
 
-    // Thanks dashclock for this
-    private void setupFauxDialog() {
-        // Check if this should be a dialog
-        if (!ThemeHelper.isDialog(this)) {
-            return;
-        }
-
-        // Should be a dialog; set up the window parameters.
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.width = getResources().getDimensionPixelSize(R.dimen.profile_dialog_width);
-        params.height = Math.min(
-                getResources().getDimensionPixelSize(R.dimen.profile_dialog_max_height),
-                dm.heightPixels * 7 / 8);
-        params.alpha = 1.0f;
-        params.dimAmount = 0.5f;
-        getWindow().setAttributes(params);
-
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new ActivityModule(this),
+        };
     }
 }

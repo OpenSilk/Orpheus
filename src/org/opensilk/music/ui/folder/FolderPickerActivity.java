@@ -34,14 +34,19 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.filebrowser.FileItem;
+import org.opensilk.music.ui.activities.ActivityModule;
+import org.opensilk.music.ui.activities.BaseDialogActivity;
 import org.opensilk.music.ui.cards.FolderPickerCard;
+import org.opensilk.silkdagger.qualifier.ForActivity;
+
+import javax.inject.Inject;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 7/13/14.
  */
-public class FolderPickerActivity extends ActionBarActivity implements Card.OnCardClickListener, Card.OnLongCardClickListener {
+public class FolderPickerActivity extends BaseDialogActivity implements Card.OnCardClickListener, Card.OnLongCardClickListener {
 
     public static final String EXTRA_DIR = "start_dir";
     public static final String SDCARD_ROOT;
@@ -52,19 +57,14 @@ public class FolderPickerActivity extends ActionBarActivity implements Card.OnCa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(ThemeHelper.getInstance(this).getDialogTheme());
-        setupFauxDialog();
-        setContentView(R.layout.blank_framelayout);
 
         setResult(RESULT_CANCELED, getIntent());
 
-        String action = getIntent().getStringExtra(EXTRA_DIR);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.blank);
-        actionBar.setIcon(R.drawable.ic_action_arrow_left_white);
-        actionBar.setTitle(makeTitle(action));
-        actionBar.setSubtitle(makeSubtitle(action));
+        // non traditional up nav, we just want to go back
+        mActionBarHelper.enableHomeAsUp(R.drawable.blank, R.drawable.ic_action_arrow_left_white);
+        final String action = getIntent().getStringExtra(EXTRA_DIR);
+        mActionBarHelper.setTitle(makeTitle(action));
+        mActionBarHelper.setSubTitle(makeSubtitle(action));
 
         if (savedInstanceState == null) {
             FolderPickerFragment f = FolderPickerFragment.newInstance(action);
@@ -84,6 +84,13 @@ public class FolderPickerActivity extends ActionBarActivity implements Card.OnCa
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    protected Object[] getModules() {
+        return new Object[] {
+                new ActivityModule(this),
+        };
     }
 
     @Override
@@ -142,29 +149,6 @@ public class FolderPickerActivity extends ActionBarActivity implements Card.OnCa
         } else {
             return path;
         }
-    }
-
-    // Thanks dashclock for this
-    private void setupFauxDialog() {
-        // Check if this should be a dialog
-        if (!ThemeHelper.isDialog(this)) {
-            return;
-        }
-
-        // Should be a dialog; set up the window parameters.
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.width = getResources().getDimensionPixelSize(R.dimen.profile_dialog_width);
-        params.height = Math.min(
-                getResources().getDimensionPixelSize(R.dimen.profile_dialog_max_height),
-                dm.heightPixels * 7 / 8);
-        params.alpha = 1.0f;
-        params.dimAmount = 0.5f;
-        getWindow().setAttributes(params);
-
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
     }
 
 }

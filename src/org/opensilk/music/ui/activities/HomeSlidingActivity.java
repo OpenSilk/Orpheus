@@ -18,11 +18,9 @@
 package org.opensilk.music.ui.activities;
 
 import android.content.res.Configuration;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
@@ -33,35 +31,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.ThemeHelper;
-import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.artwork.ArtworkService;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.IABQueryResult;
 import org.opensilk.music.iab.IabUtil;
-import org.opensilk.music.ui.nav.adapter.NavAdapter;
-import org.opensilk.music.ui.nav.loader.NavLoader;
-import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.music.ui.nav.adapter.NavAdapter;
+import org.opensilk.music.ui.nav.loader.NavLoader;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.OnClick;
 import hugo.weaving.DebugLog;
 
 /**
@@ -90,13 +77,9 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
-        setTheme(ThemeHelper.getInstance(this).getPanelTheme());
         super.onCreate(savedInstanceState);
 
         ButterKnife.inject(this);
-
-        // Update count for donate dialog
-        IabUtil.incrementAppLaunchCount(this);
 
         // Init drawer adapter
         mDrawerAdapter = new NavAdapter(this);
@@ -168,6 +151,8 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         mBusMonitor = new GlobalBusMonitor();
         EventBus.getInstance().register(mBusMonitor);
 
+        // Update count for donate dialog
+        IabUtil.incrementAppLaunchCount(this);
         // check for donations
         IabUtil.queryDonateAsync(this);
     }
@@ -176,6 +161,10 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getInstance().unregister(mBusMonitor);
+        if (isFinishing()) {
+            // schedule cache clear
+            mArtworkService.scheduleCacheClear();
+        }
     }
 
     @Override

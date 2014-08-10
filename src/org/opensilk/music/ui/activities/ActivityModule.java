@@ -23,10 +23,11 @@ import android.support.v7.app.ActionBarActivity;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.AppModule;
-
+import org.opensilk.music.ui.folder.FolderPickerActivity;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.ActionBarControllerImpl;
+import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Singleton;
@@ -41,8 +42,10 @@ import dagger.Provides;
         injects = {
                 ActionBarControllerImpl.class,
                 HomeSlidingActivity.class,
-                ProfileSlidingActivity.class,
+                ProfileDialogActivity.class,
                 NowPlayingFragment.class,
+                SettingsActivity.class,
+                FolderPickerActivity.class,
         },
         addsTo = AppModule.class,
         library = true

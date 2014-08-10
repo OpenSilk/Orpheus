@@ -33,7 +33,7 @@ import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
-import org.opensilk.music.ui.activities.ProfileSlidingActivity;
+import org.opensilk.music.ui.activities.ProfileDialogActivity;
 import org.opensilk.music.ui.folder.FolderFragment;
 import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.music.ui.home.HomeFragment;
@@ -67,7 +67,7 @@ public final class NavUtils {
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, artist);
 
-        startProfileActivity(context, ProfileSlidingActivity.ACTION_ARTIST, b);
+        startProfileActivity(context, ProfileDialogActivity.ACTION_ARTIST, b);
     }
 
     /**
@@ -83,9 +83,9 @@ public final class NavUtils {
 
         // Completely insane method to prevent 'endless profiles' resulting
         // from clicking the artwork thumbnail in the sliding pane over and over
-        if (context instanceof ProfileSlidingActivity) {
-            ProfileSlidingActivity activity = (ProfileSlidingActivity) context;
-            if (ProfileSlidingActivity.ACTION_ALBUM.equals(activity.getIntent().getAction())) {
+        if (context instanceof ProfileDialogActivity) {
+            ProfileDialogActivity activity = (ProfileDialogActivity) context;
+            if (ProfileDialogActivity.ACTION_ALBUM.equals(activity.getIntent().getAction())) {
                 Bundle b2 = activity.getIntent().getBundleExtra(Config.EXTRA_DATA);
                 if (b2 != null) {
                     LocalAlbum a = b2.getParcelable(Config.EXTRA_DATA);
@@ -98,7 +98,7 @@ public final class NavUtils {
             }
         }
 
-        startProfileActivity(context, ProfileSlidingActivity.ACTION_ALBUM, b);
+        startProfileActivity(context, ProfileDialogActivity.ACTION_ALBUM, b);
     }
 
     /**
@@ -125,7 +125,7 @@ public final class NavUtils {
         bundle.putString(Config.NAME, playlistName);
         bundle.putParcelable(Config.EXTRA_DATA, playlist);
 
-        startProfileActivity(context, ProfileSlidingActivity.ACTION_PLAYLIST, bundle);
+        startProfileActivity(context, ProfileDialogActivity.ACTION_PLAYLIST, bundle);
     }
 
     /**
@@ -141,13 +141,13 @@ public final class NavUtils {
         bundle.putString(Config.NAME, genre.mGenreName);
         bundle.putParcelable(Config.EXTRA_DATA, genre);
 
-        startProfileActivity(context, ProfileSlidingActivity.ACTION_GENRE, bundle);
+        startProfileActivity(context, ProfileDialogActivity.ACTION_GENRE, bundle);
     }
 
     public static void openSongGroupProfile(Context context, LocalSongGroup songGroup) {
         final Bundle b = new Bundle();
         b.putParcelable(Config.EXTRA_DATA, songGroup);
-        startProfileActivity(context, ProfileSlidingActivity.ACTION_SONG_GROUP, b);
+        startProfileActivity(context, ProfileDialogActivity.ACTION_SONG_GROUP, b);
     }
 
     /**
@@ -166,7 +166,7 @@ public final class NavUtils {
      * @param bundle
      */
     public static void startProfileActivity(final Context context, final String action, final Bundle bundle) {
-        context.startActivity(new Intent(context, ProfileSlidingActivity.class)
+        context.startActivity(new Intent(context, ProfileDialogActivity.class)
                 .setAction(action).putExtra(Config.EXTRA_DATA, bundle));
     }
 

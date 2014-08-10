@@ -16,10 +16,14 @@
 
 package org.opensilk.music.ui.modules;
 
+import android.graphics.drawable.Drawable;
+
 /**
  * Created by drew on 6/16/14.
  */
 public interface ActionBarController {
     public void setTitle(CharSequence title);
     public void setSubTitle(CharSequence subTitle);
+    public void enableHomeAsUp(int upIndicator, int icon);
+    public void setBackground(Drawable background);
 }

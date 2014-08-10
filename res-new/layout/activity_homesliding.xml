@@ -67,7 +67,7 @@
         android:layout_height="match_parent"
         android:background="?android:colorBackground"
         android:layout_gravity="left"
-        android:layout_marginTop="?actionBarSize">
+        android:paddingTop="?actionBarSize">
 
         <ImageView
             android:layout_width="match_parent"

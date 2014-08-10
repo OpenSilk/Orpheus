@@ -16,6 +16,7 @@
 
 package org.opensilk.music.ui.modules;
 
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
@@ -47,5 +48,19 @@ public class ActionBarControllerImpl implements ActionBarController {
     public void setSubTitle(CharSequence subTitle) {
         ActionBar ab = activity.getSupportActionBar();
         ab.setSubtitle(subTitle);
+    }
+
+    @Override
+    public void enableHomeAsUp(int upIndicator, int icon) {
+        ActionBar ab = activity.getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setHomeAsUpIndicator(upIndicator);
+        ab.setIcon(icon);
+    }
+
+    @Override
+    public void setBackground(Drawable background) {
+        ActionBar ab = activity.getSupportActionBar();
+        ab.setBackgroundDrawable(background);
     }
 }
