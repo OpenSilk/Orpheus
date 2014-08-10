@@ -17,15 +17,25 @@
   ~  *****************************************************************************
   -->
 
-<it.gmariotti.cardslib.library.view.CardListView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card="http://schemas.android.com/apk/res-auto"
-    android:id="@android:id/list"
-    android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent"
-    android:layout_marginRight="@dimen/listview_marginRight"
-    android:layout_marginLeft="@dimen/listview_marginLeft"
-    android:scrollbars="none"
-    card:list_card_layout_resourceID="@layout/list_card_layout"
-    style="@style/ActionBarOverlayTopMarginContent"/>
-    <!--^^^using ActionBarOverlay so need margin equal to height of actionBar-->
+    android:layout_width="match_parent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="?colorPrimary"/>
+
+    <it.gmariotti.cardslib.library.view.CardListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginRight="@dimen/listview_marginRight"
+        android:layout_marginLeft="@dimen/listview_marginLeft"
+        android:scrollbars="none"
+        card:list_card_layout_resourceID="@layout/list_card_layout"/>
+
+</LinearLayout>

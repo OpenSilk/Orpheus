@@ -17,7 +17,7 @@
 
 <resources>
     <!-- PANEL -->
-    <style name="SlidingPanel">
+    <style name="SlidingPanel" parent="SlidingPanelBase">
         <item name="android:layout_height">500dp</item>
         <item name="android:layout_width">500dp</item>
     </style>

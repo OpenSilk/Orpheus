@@ -17,9 +17,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    style="@style/ActionBarOverlayTopMarginContent">
-    <!--^^^using ActionBarOverlay so need margin equal to height of actionBar-->
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="?colorPrimary"/>
 
     <org.opensilk.music.widgets.SlidingTabLayout
         android:id="@+id/tab_bar"

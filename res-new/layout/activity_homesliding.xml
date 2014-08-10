@@ -27,7 +27,6 @@
     <!-- As the main content view, the view below consumes the entire
          space available using match_parent in both dimensions. -->
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:sothree="http://schemas.android.com/apk/res-auto"
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
@@ -42,13 +41,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- Sliding content -->
-        <fragment
-            android:id="@+id/now_playing_fragment"
-            android:name="org.opensilk.music.ui.fragments.NowPlayingFragment"
-            tools:layout="@layout/panel_fragment"
-            android:layout_gravity="center_horizontal"
-            style="@style/SlidingPanel"/>
+        <FrameLayout
+            style="@style/SlidingPanel">
+
+            <!-- Sliding content -->
+            <fragment
+                android:id="@+id/now_playing_fragment"
+                android:name="org.opensilk.music.ui.fragments.NowPlayingFragment"
+                tools:layout="@layout/panel_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </FrameLayout>
+
+
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 

@@ -42,6 +42,8 @@
     <style name="Theme.Light.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+        <!-- Panel background -->
+        <item name="nowPlayingBackground">@drawable/drop_shadow_light</item>
     </style>
 
     <style name="Theme.Dialog.LightBase" parent="Theme.LightBase">
@@ -71,7 +73,6 @@
         <!--<item name="android:actionDropDownStyle">@style/DropDownNav.RepheusDark</item>-->
         <!-- Disable shadow on action bar-->
         <item name="android:windowContentOverlay">@null</item>
-        <!-- Default palette -->
     </style>
 
     <style name="Theme.Dark" parent="Theme.DarkBase">
@@ -81,6 +82,8 @@
     <style name="Theme.Dark.Panel">
         <!--needed to allow sliding up pane-->
         <item name="windowActionBarOverlay">true</item>
+        <!-- Panel background -->
+        <item name="nowPlayingBackground">@drawable/drop_shadow_dark</item>
     </style>
 
     <style name="Theme.Dialog.DarkBase" parent="Theme.DarkBase">
@@ -105,7 +108,7 @@
 
     <!-- action bar styles -->
     <style name="ActionBar.Light" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">?colorPrimary</item>
+        <item name="android:background">@null</item>
         <item name="android:backgroundStacked">?colorPrimary</item>
         <item name="android:backgroundSplit">?colorPrimary</item>
         <item name="android:icon">@drawable/blank</item>
@@ -115,7 +118,7 @@
     </style>
 
     <style name="ActionBar.Dark" parent="Widget.AppCompat.ActionBar.Solid">
-        <item name="android:background">?colorPrimary</item>
+        <item name="android:background">@null</item>
         <item name="android:backgroundStacked">?colorPrimary</item>
         <item name="android:backgroundSplit">?colorPrimary</item>
         <item name="android:icon">@drawable/blank</item>

@@ -36,7 +36,7 @@
     <fragment
         android:id="@+id/now_playing_fragment"
         android:name="org.opensilk.music.ui.fragments.NowPlayingFragment"
-        android:layout_gravity="center_horizontal"
-        style="@style/SlidingPanel"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

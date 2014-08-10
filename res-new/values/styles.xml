@@ -22,12 +22,6 @@
         <!--namespace-->
     </style>
 
-    <!-- push down main content area to compensate for ActionBarOverlay-->
-    <!-- disabled in layout-land where ActionBarOverlayTopMarginOuter applies-->
-    <style name="ActionBarOverlayTopMarginContent">
-        <item name="android:layout_marginTop">?attr/actionBarSize</item>
-    </style>
-
     <!-- common dragsort options -->
     <style name="DragSortList">
         <!-- Setup dragsort options-->
@@ -119,7 +113,13 @@
     </style>
 
     <!-- PANEL -->
-    <style name="SlidingPanel">
+    <style name="SlidingPanelBase">
+        <item name="android:layout_gravity">center_horizontal</item>
+        <!--set in themes-->
+        <item name="android:background">?nowPlayingBackground</item>
+    </style>
+
+    <style name="SlidingPanel" parent="SlidingPanelBase">
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_width">match_parent</item>
     </style>
