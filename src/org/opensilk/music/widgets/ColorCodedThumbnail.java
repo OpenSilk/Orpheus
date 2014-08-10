@@ -80,18 +80,19 @@ public class ColorCodedThumbnail extends TextView {
         if (!TextUtils.isEmpty(title)) {
             if (title.equals("..")) {
                 setText(title);
+                color = R.color.red;
             } else {
                 Character c = title.toUpperCase(Locale.US).charAt(0);
                 setText(c.toString());
-                if (c.compareTo('A') < 0 && c.compareTo('0') >= 0) {
-                    color = COLORS.get(COLORS.keyAt(Integer.valueOf(c.toString())));
-                } else {
+                if (c.compareTo('A') >= 0 && c.compareTo('Z') <= 0) {
                     color = COLORS.get(c);
+                } else if (c.compareTo('0') >= 0 && c.compareTo('9') <= 0) {
+                    color = COLORS.get(COLORS.keyAt(Integer.valueOf(c.toString())));
                 }
             }
         }
         if (color == null) {
-            color = R.color.red;
+            color = R.color.gray;
         }
         setBackgroundColor(getResources().getColor(color));
     }
