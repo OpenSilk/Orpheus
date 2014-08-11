@@ -231,6 +231,15 @@ public class CastMusicPlayer implements IMusicPlayer {
         return CastPreferences.getFloat(mService, CastPreferences.KEY_REMOTE_VOLUME, 1.0f);
     }
 
+    public boolean isConnected() {
+        try {
+            mCastManager.checkConnectivity();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /**
      * Initiates remote playback for current track
      */

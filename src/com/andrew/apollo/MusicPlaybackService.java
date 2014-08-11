@@ -937,7 +937,7 @@ public class MusicPlaybackService extends Service {
             Timber.w("Current player is local player");
             return;
         }
-        if (mCastPlayer != null && mCastPlayer.isInitialized()) {
+        if (mCastPlayer != null && mCastPlayer.isInitialized() && mCastPlayer.isConnected()) {
             mLastKnowPosition = mCastPlayer.position();
         }
         if (!isRemotePlayback()) {
