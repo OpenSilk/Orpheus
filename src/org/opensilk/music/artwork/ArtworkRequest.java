@@ -36,6 +36,7 @@ import com.android.volley.VolleyError;
 import org.apache.commons.io.IOUtils;
 import org.opensilk.music.api.meta.ArtInfo;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -377,18 +378,15 @@ public class ArtworkRequest implements IArtworkRequest {
         protected Response<Bitmap> doInBackground(Void... params) {
             if (D) Log.d(TAG, "Searching mediastore for " + mCacheKey);
             InputStream in = null;
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
                 final Uri uri = mArtInfo.artworkUri;
                 in = mManager.mContext.getContentResolver().openInputStream(uri);
-                IOUtils.copy(in, out);
-                final NetworkResponse response = new NetworkResponse(out.toByteArray());
+                final NetworkResponse response = new NetworkResponse(IOUtils.toByteArray(in));
                 return fauxRequest.parseNetworkResponse(response);
-            } catch (IOException|IllegalStateException e) {
+            } catch (IOException|IllegalStateException|OutOfMemoryError e) {
                 return Response.error(new VolleyError(e));
             } finally {
                 IOUtils.closeQuietly(in);
-                IOUtils.closeQuietly(out);
             }
         }
 
