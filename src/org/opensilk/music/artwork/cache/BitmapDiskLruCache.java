@@ -114,7 +114,7 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
             } else {
                 editor.abort();
             }
-        } catch (IOException e) {
+        } catch (IOException|IllegalStateException e) {
             try {
                 if (editor != null) {
                     editor.abort();
