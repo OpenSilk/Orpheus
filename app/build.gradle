@@ -19,7 +19,7 @@ apply plugin: 'hugo'
 // Versioning
 def versionMajor = 0
 def versionMinor = 5
-def versionPatch = 3
+def versionPatch = 4
 def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
 assert(versionMinor < 100) // Double digits

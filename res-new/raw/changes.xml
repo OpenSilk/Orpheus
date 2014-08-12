@@ -19,6 +19,7 @@
 
     <changelogversion versionName="0.5.+">
         <changelogtext>Address some crashes</changelogtext>
+        <changelogtext>Update tablet layout</changelogtext>
     </changelogversion>
 
     <changelogversion versionName="0.5.0">
