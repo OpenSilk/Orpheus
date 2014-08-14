@@ -97,6 +97,7 @@ public class CastWebServer extends NanoHTTPD {
         mContext = context;
         // get the lock
         mWifiLock = ((WifiManager) mContext.getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "CastServer");
+        mWifiLock.setReferenceCounted(false);
         // arbitrary size might increase as needed;
         mEtagCache = new LruCache<>(20);
         mBytePool = new ByteArrayPool(2*1024*1024);
@@ -110,7 +111,9 @@ public class CastWebServer extends NanoHTTPD {
 
     @Override
     public void stop() {
-        mWifiLock.release();
+        if (mWifiLock.isHeld()) {
+            mWifiLock.release();
+        }
         super.stop();
     }
 

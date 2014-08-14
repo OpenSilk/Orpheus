@@ -866,7 +866,9 @@ public class MusicPlaybackService extends Service {
      * releases wakelock
      */
     void releaseWakeLock() {
-        mWakeLock.release();
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
     }
 
     /**
