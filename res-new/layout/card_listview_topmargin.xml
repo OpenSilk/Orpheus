@@ -33,9 +33,7 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginRight="@dimen/listview_marginRight"
-        android:layout_marginLeft="@dimen/listview_marginLeft"
-        android:scrollbars="none"
-        card:list_card_layout_resourceID="@layout/list_card_layout"/>
+        card:list_card_layout_resourceID="@layout/list_card_layout"
+        style="@style/CardListView"/>
 
 </LinearLayout>
