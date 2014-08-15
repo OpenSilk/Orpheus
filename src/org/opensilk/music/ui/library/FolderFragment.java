@@ -27,7 +27,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.LibraryInfo;
 
@@ -35,7 +34,6 @@ import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
 import org.opensilk.music.ui.modules.DrawerHelper;
-import org.opensilk.music.util.PluginSettings;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
@@ -101,6 +99,11 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (!mDrawerHelper.isDrawerOpen()) {
+            if (mLibraryInfo.currentFolderId != null) {
+                inflater.inflate(R.menu.popup_play_all, menu);
+                inflater.inflate(R.menu.popup_shuffle_all, menu);
+                inflater.inflate(R.menu.popup_add_to_queue, menu);
+            }
             inflater.inflate(R.menu.refresh, menu);
         }
     }
@@ -108,6 +111,15 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.popup_play_all:
+                doBackgroundWork(mLibraryInfo, BackgroundFetcherFragment.Action.PLAY_ALL);
+                return true;
+            case R.id.popup_shuffle_all:
+                doBackgroundWork(mLibraryInfo, BackgroundFetcherFragment.Action.SHUFFLE_ALL);
+                return true;
+            case R.id.popup_add_to_queue:
+                doBackgroundWork(mLibraryInfo, BackgroundFetcherFragment.Action.ADD_QUEUE);
+                return true;
             case R.id.menu_refresh:
                 if (isViewCreated()) {
                     setListShown(false);
@@ -126,6 +138,11 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
 
     protected LibraryAdapter createAdapter() {
         return new FolderListArrayAdapter(getActivity(), mLibrary, mLibraryInfo, this, (DaggerInjector)getParentFragment());
+    }
+
+    protected void doBackgroundWork(LibraryInfo info, BackgroundFetcherFragment.Action action) {
+        FetchingProgressFragment.newInstance(info, action)
+                .show(getActivity().getSupportFragmentManager(), FetchingProgressFragment.FRAGMENT_TAG);
     }
 
     /*
