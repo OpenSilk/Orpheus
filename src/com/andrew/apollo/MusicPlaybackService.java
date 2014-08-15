@@ -1203,8 +1203,11 @@ public class MusicPlaybackService extends Service {
             }
         } else {
             Cursor c = openCursorAndGoToFirst(uri, Projections.LOCAL_SONG, selection, selectionArgs);
-            long id = MusicProviderUtil.insertSong(this, CursorHelpers.makeLocalSongFromCursor(this, c));
-            updateCursor(id);
+            if (c != null) {
+                long id = MusicProviderUtil.insertSong(this, CursorHelpers.makeLocalSongFromCursor(this, c));
+                c.close();
+                updateCursor(id);
+            }
         }
     }
 
