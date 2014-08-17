@@ -1985,9 +1985,9 @@ public class MusicPlaybackService extends Service {
         mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
                 MediaButtonIntentReceiver.class.getName()));
 
-        setNextTrack();
-
         if (mPlayer.isInitialized()) {
+            setNextTrack();
+
             final long duration = mPlayer.duration();
             if (mRepeatMode != REPEAT_CURRENT && duration > 2000
                     && mPlayer.position() >= duration - 2000) {
