@@ -601,9 +601,8 @@ public final class MusicUtils {
 
         try {
             mService.stop();
-            if (mService.openFile(filename)) {
-                mService.play();
-            }
+            mService.openFile(filename);
+            mService.play();
         } catch (final RemoteException ignored) {
         }
     }
