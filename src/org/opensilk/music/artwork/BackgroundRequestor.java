@@ -23,6 +23,7 @@ import com.andrew.apollo.BuildConfig;
 import com.android.volley.Request;
 
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.util.PriorityAsyncTask;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -39,14 +40,9 @@ public class BackgroundRequestor {
     private static final String TAG = "BGR";
     private static final boolean D = BuildConfig.DEBUG;
 
-    static ThreadPoolExecutor EXECUTOR;
-
-    static {
-        initExecutor();
-    }
-
-    static void initExecutor() {
-        EXECUTOR = new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    public static void execute(Runnable runnable) {
+        // Piggyback on PriorityAsyncTask thread pool
+        PriorityAsyncTask.execute(runnable, PriorityAsyncTask.Priority.LOW);
     }
 
     public static void add(ArtInfo artInfo, ArtworkType imageType) {

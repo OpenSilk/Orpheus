@@ -24,12 +24,13 @@ import android.widget.Toast;
 /**
  * Created by drew on 6/28/14.
  */
-public class CommandRunner extends AsyncTask<Void, Void, CharSequence> {
+public class CommandRunner extends PriorityAsyncTask<Void, Void, CharSequence> {
 
     private Context context;
     private Command command;
 
     public CommandRunner(Context context, Command command) {
+        super(Priority.IMMEDIATE);
         this.context = context;
         this.command = command;
     }

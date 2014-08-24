@@ -97,12 +97,12 @@ public class DeleteDialog extends DialogFragment {
                         // Remove the items from the image cache
 //                        mFetcher.removeFromCache(key); //TODO
                         // Delete the selected item(s)
-                        ApolloUtils.execute(false, new CommandRunner(getActivity(), new Command() {
+                        new CommandRunner(getActivity(), new Command() {
                             @Override
                             public CharSequence execute() {
                                 return MusicUtils.deleteTracks(getActivity(), mItemList);
                             }
-                        }));
+                        }).execute();
 //                        if (getActivity() instanceof DeleteDialogCallback) {
 //                            ((DeleteDialogCallback)getActivity()).onDelete(mItemList);
 //                        }

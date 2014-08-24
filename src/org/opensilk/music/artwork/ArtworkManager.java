@@ -146,7 +146,6 @@ public class ArtworkManager {
         if (sArtworkManager != null) {
             RequestQueueFactory.destroy(sArtworkManager.mApiQueue);
             RequestQueueFactory.destroy(sArtworkManager.mImageQueue);
-            BackgroundRequestor.EXECUTOR.shutdownNow();
             sArtworkManager.mL1Cache.evictAll();
             sArtworkManager.mL2Cache.close();
             sArtworkManager = null;
@@ -190,8 +189,6 @@ public class ArtworkManager {
     //@DebugLog
     public static synchronized boolean clearCaches() {
         if (sArtworkManager != null) {
-            BackgroundRequestor.EXECUTOR.shutdownNow();
-            BackgroundRequestor.initExecutor();
             sArtworkManager.mApiQueue.cancelAll(new RequestQueue.RequestFilter() {
                 @Override
                 public boolean apply(Request<?> request) {

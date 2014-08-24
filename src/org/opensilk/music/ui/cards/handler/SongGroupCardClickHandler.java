@@ -91,7 +91,7 @@ public class SongGroupCardClickHandler {
                 return;
         }
         if (command != null) {
-            ApolloUtils.execute(false, new CommandRunner(getActivity(), command));
+            new CommandRunner(getActivity(), command).execute();
         }
     }
 }

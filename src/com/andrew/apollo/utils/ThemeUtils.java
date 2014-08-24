@@ -11,7 +11,6 @@
 
 package com.andrew.apollo.utils;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -28,13 +27,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
@@ -133,15 +127,7 @@ public class ThemeUtils {
      * @param packageName The package name of the theme to be set.
      */
     public void setThemePackageName(final String packageName) {
-        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(final Void... unused) {
-                final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putString(PACKAGE_NAME, packageName);
-                editor.apply();
-                return null;
-            }
-        }, (Void[])null);
+        mPreferences.edit().putString(PACKAGE_NAME, packageName).apply();
     }
 
     /**

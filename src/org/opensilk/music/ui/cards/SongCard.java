@@ -88,7 +88,7 @@ public class SongCard extends AbsBundleableCard<Song> {
         }
         if (mArtwork != null) {
             if (mData instanceof LocalSong) {
-                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), new long[]{((LocalSong) mData).albumId}, mArtwork));
+                new MultipleArtworkLoaderTask(getContext(), new long[]{((LocalSong) mData).albumId}, mArtwork).execute();
             } else {
                 String artist = mData.albumArtistName;
                 if (TextUtils.isEmpty(artist)) {

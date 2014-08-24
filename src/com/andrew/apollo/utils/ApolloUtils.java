@@ -39,7 +39,11 @@ import android.widget.Toast;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 
+import org.opensilk.music.util.PriorityAsyncTask;
+
 import java.util.concurrent.RejectedExecutionException;
+
+import timber.log.Timber;
 
 /**
  * Mostly general and UI helpers.
@@ -98,33 +102,6 @@ public final class ApolloUtils {
     public static final boolean isLandscape(final Context context) {
         final int orientation = context.getResources().getConfiguration().orientation;
         return orientation == Configuration.ORIENTATION_LANDSCAPE;
-    }
-
-    /**
-     * Execute an {@link AsyncTask} on a thread pool
-     * 
-     * @param forceSerial True to force the task to run in serial order
-     * @param task Task to execute
-     * @param args Optional arguments to pass to
-     *            {@link AsyncTask#execute(Object[])}
-     * @param <T> Task argument type
-     */
-    @SuppressLint("NewApi")
-    public static <T> void execute(final boolean forceSerial, final AsyncTask<T, ?, ?> task,
-            final T... args) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.DONUT) {
-            throw new UnsupportedOperationException(
-                    "This class can only be used on API 4 and newer.");
-        }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB || forceSerial) {
-            task.execute(args);
-        } else {
-            try {
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, args);
-            } catch (RejectedExecutionException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     /**

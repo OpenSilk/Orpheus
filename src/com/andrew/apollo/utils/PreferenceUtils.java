@@ -142,16 +142,7 @@ public final class PreferenceUtils {
      * @param value The new theme color to use.
      */
     public void setDefaultThemeColor(final int value) {
-        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(final Void... unused) {
-                final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putInt(DEFAULT_THEME_COLOR, value);
-                editor.apply();
-
-                return null;
-            }
-        }, (Void[])null);
+        mPreferences.edit().putInt(DEFAULT_THEME_COLOR, value).apply();
     }
 
     public boolean wantDarkTheme() {
@@ -217,16 +208,7 @@ public final class PreferenceUtils {
      * @param value The new sort order
      */
     private void setSortOrder(final String key, final String value) {
-        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(final Void... unused) {
-                final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putString(key, value);
-                editor.apply();
-
-                return null;
-            }
-        }, (Void[])null);
+        mPreferences.edit().putString(key, value).apply();
     }
 
     /**
@@ -290,16 +272,7 @@ public final class PreferenceUtils {
      * @param value The new layout type
      */
     private void setLayoutType(final String key, final String value) {
-        ApolloUtils.execute(false, new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(final Void... unused) {
-                final SharedPreferences.Editor editor = mPreferences.edit();
-                editor.putString(key, value);
-                editor.apply();
-
-                return null;
-            }
-        }, (Void[])null);
+        mPreferences.edit().putString(key, value).apply();
     }
 
     /**

@@ -35,9 +35,8 @@ import com.android.volley.VolleyError;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.util.PriorityAsyncTask;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -47,7 +46,6 @@ import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.MusicEntry;
 import de.umass.lastfm.opensilk.Fetch;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
-import hugo.weaving.DebugLog;
 
 /**
  * A wrapper class for a volley request that acts as an interface
@@ -93,7 +91,7 @@ public class ArtworkRequest implements IArtworkRequest {
      */
     public void start() {
         if (mManager != null) {
-            ApolloUtils.execute(false, new CheckDiskCacheTask());
+            new CheckDiskCacheTask().execute();
         } else {
             // Defer posting error until after ArtworkLoader returns from get()
             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -146,7 +144,7 @@ public class ArtworkRequest implements IArtworkRequest {
             mManager.mApiQueue.add(mCurrentRequest);
         } else if (tryMediaStore) {
             if (isLocalArtwork()) {
-                ApolloUtils.execute(false, new MediaStoreTask(false));
+                new MediaStoreTask(false).execute();
             } else {
                 queueImageRequest(mArtInfo.artworkUri);
             }
@@ -173,7 +171,7 @@ public class ArtworkRequest implements IArtworkRequest {
      * @param url
      */
     private void queueImageRequest(final String url) {
-        ApolloUtils.execute(false, new QueueImageRequestTask(url));
+        new QueueImageRequestTask(url).execute();
     }
 
     //@DebugLog
@@ -270,7 +268,7 @@ public class ArtworkRequest implements IArtworkRequest {
                 }
             }
             // Add to the disk cache
-            BackgroundRequestor.EXECUTOR.execute(
+            BackgroundRequestor.execute(
                     new BackgroundRequestor.AddToCacheRunnable(diskCache, cacheKey, response)
             );
         }
@@ -279,7 +277,11 @@ public class ArtworkRequest implements IArtworkRequest {
     /**
      * Async task to check our disk cache, if not present we call into volley
      */
-    class CheckDiskCacheTask extends AsyncTask<Void, Void, Bitmap> {
+    class CheckDiskCacheTask extends PriorityAsyncTask<Void, Void, Bitmap> {
+
+        CheckDiskCacheTask() {
+            super();
+        }
 
         @Override
         protected Bitmap doInBackground(Void... params) {
@@ -307,7 +309,7 @@ public class ArtworkRequest implements IArtworkRequest {
                                     queueAlbumRequest(true);
                                 } else {
                                     if (isLocalArtwork()) {
-                                        ApolloUtils.execute(false, new MediaStoreTask(true));
+                                        new MediaStoreTask(true).execute();
                                     } else {
                                         queueImageRequest(mArtInfo.artworkUri);
                                     }
@@ -318,7 +320,7 @@ public class ArtworkRequest implements IArtworkRequest {
                             //Not connected and dont want downloaded art, just check mediastore
                             } else {
                                 if (isLocalArtwork()) {
-                                    ApolloUtils.execute(false, new MediaStoreTask(false));
+                                    new MediaStoreTask(false).execute();
                                 } else {
                                     notifyError(new VolleyError("No network connection for remote Uri"));
                                 }
@@ -334,7 +336,7 @@ public class ArtworkRequest implements IArtworkRequest {
                     } else if (mArtInfo.artworkUri != null) {
                         if (isLocalArtwork()) {
                             // route local uris through the contentprovider
-                            ApolloUtils.execute(false, new MediaStoreTask(false));
+                            new MediaStoreTask(false).execute();
                         } else {
                             // assuming remote uris here
                             queueImageRequest(mArtInfo.artworkUri);
@@ -352,11 +354,12 @@ public class ArtworkRequest implements IArtworkRequest {
      * AsyncTask to check media store for album art, on error will call
      * into volley if requested
      */
-    class MediaStoreTask extends AsyncTask<Void, Void, Response<Bitmap>> {
+    class MediaStoreTask extends PriorityAsyncTask<Void, Void, Response<Bitmap>> {
         final boolean tryNetwork;
         final ArtworkImageRequest fauxRequest;
 
         MediaStoreTask(boolean tryNetwork) {
+            super();
             this.tryNetwork = tryNetwork;
             ImageResponseListener listener = new ImageResponseListener(mCacheKey,
                     mManager.mL2Cache, mImageListener, mImageErrorListener);
@@ -396,7 +399,7 @@ public class ArtworkRequest implements IArtworkRequest {
                 fauxRequest.deliverResponse(response.result);
                 if (mImageType.equals(ArtworkType.THUMBNAIL)) {
                     // Check if LARGE type exists in cache
-                    BackgroundRequestor.EXECUTOR.execute(new BackgroundRequestor.CheckCacheRunnable(
+                    BackgroundRequestor.execute(new BackgroundRequestor.CheckCacheRunnable(
                             mManager.mL2Cache, mArtInfo, ArtworkType.LARGE
                     ));
                 }
@@ -417,11 +420,12 @@ public class ArtworkRequest implements IArtworkRequest {
      * a THUMBNAIL. If not found we will send a second request to volley
      * for the LARGE artwork
      */
-    class QueueImageRequestTask extends AsyncTask<Void, Void, Boolean> {
+    class QueueImageRequestTask extends PriorityAsyncTask<Void, Void, Boolean> {
         final String url;
         final String altKey;
 
         QueueImageRequestTask(final String url) {
+            super();
             this.url = url;
             this.altKey = ArtworkLoader.getCacheKey(mArtInfo, ArtworkType.LARGE);
         }
@@ -512,7 +516,7 @@ public class ArtworkRequest implements IArtworkRequest {
         public void onErrorResponse(VolleyError error) {
             if (tryMediaStore) {
                 if (isLocalArtwork()) {
-                    ApolloUtils.execute(false, new MediaStoreTask(false));
+                    new MediaStoreTask(false).execute();
                 } else {
                     queueImageRequest(mArtInfo.artworkUri);
                 }

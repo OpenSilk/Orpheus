@@ -72,7 +72,7 @@ public class SongCollectionCard extends SongCard {
                         return null;
                     }
                 };
-                ApolloUtils.execute(false, new CommandRunner(getContext(), c));
+                new CommandRunner(getContext(), c).execute();
             }
         });
     }

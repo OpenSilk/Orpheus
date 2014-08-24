@@ -85,11 +85,11 @@ public class SongGroupCard extends AbsGenericCard<LocalSongGroup> {
         mCardSubTitle.setText(l2);
         if (mData.albumIds.length > 0){
             if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
-                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4));
+                new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4).execute();
             } else if (mArtwork2 != null) {
-                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork, mArtwork2));
+                new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork, mArtwork2).execute();
             } else {
-                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork));
+                new MultipleArtworkLoaderTask(getContext(), mData.albumIds, mArtwork).execute();
             }
         }
     }

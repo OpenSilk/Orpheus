@@ -202,13 +202,13 @@ public class QueueFragment extends ScopedDaggerFragment implements
     public void remove(final int which) {
         final Card c = mAdapter.getItem(which);
         mAdapter.remove(c);
-        ApolloUtils.execute(false, new CommandRunner(getActivity(), new Command() {
+        new CommandRunner(getActivity(), new Command() {
             @Override
             public CharSequence execute() {
                 MusicUtils.removeQueueItem(((SongQueueCard) c).getData().recentId);
                 return null;
             }
-        }));
+        }).execute();
     }
 
     /*
@@ -223,13 +223,13 @@ public class QueueFragment extends ScopedDaggerFragment implements
         mAdapter.insert(c, to);
         mAdapter.setNotifyOnChange(true);
         mAdapter.notifyDataSetChanged();
-        ApolloUtils.execute(false, new CommandRunner(getActivity(), new Command() {
+        new CommandRunner(getActivity(), new Command() {
             @Override
             public CharSequence execute() {
                 MusicUtils.moveQueueItem(from, to);
                 return null;
             }
-        }));
+        }).execute();
     }
 
     /**
@@ -445,7 +445,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
                     return;
             }
             if (c != null) {
-                ApolloUtils.execute(false, new CommandRunner(getActivity(), c));
+                new CommandRunner(getActivity(), c).execute();
             }
         }
 

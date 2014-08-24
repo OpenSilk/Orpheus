@@ -26,26 +26,19 @@ import android.support.v4.app.FragmentActivity;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 
-import org.opensilk.music.AppModule;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
-import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.qualifier.ForFragment;
-import org.opensilk.silkdagger.support.ScopedDaggerFragment;
+import org.opensilk.music.util.PriorityAsyncTask;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
-import dagger.Module;
 import hugo.weaving.DebugLog;
 
 /**
@@ -68,7 +61,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
     private LibraryInfo mLibraryInfo;
     private Action mAction;
 
-    FetcherTask task;
+    PriorityAsyncTask task;
     int numadded = 0;
 
 //    @Inject @ForFragment
@@ -151,8 +144,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
     @Override
     @DebugLog
     public void onConnected() {
-        task = new FetcherTask(mAction);
-        ApolloUtils.execute(false, task);
+        task = new FetcherTask(mAction).execute();
     }
 
     @Override
@@ -191,7 +183,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
     /**
      *
      */
-    class FetcherTask extends AsyncTask<Void, Void, Void> {
+    class FetcherTask extends PriorityAsyncTask<Void, Void, Void> {
 
         final Action action;
         final Bundle bundle;
@@ -202,6 +194,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
         }
 
         FetcherTask(Action action, Bundle bundle) {
+            super(Priority.IMMEDIATE);
             this.action = action;
             this.bundle = bundle;
             this.result = new ListResult();
@@ -278,7 +271,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
                         break;
                 }
                 if (c != null) {
-                    ApolloUtils.execute(false, new CommandRunner(getActivity(), c));
+                    new CommandRunner(getActivity(), c).execute();
                 }
                 numadded += result.songs.length;
                 if (result.paginationBundle != null) {
@@ -291,8 +284,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
                             if (mListener != null) {
                                 mListener.onMessageUpdated(mMessage);
                             }
-                            task = new FetcherTask(Action.ADD_QUEUE, result.paginationBundle);
-                            ApolloUtils.execute(false, task);
+                            task = new FetcherTask(Action.ADD_QUEUE, result.paginationBundle).execute();
                         }
                     });
                 } else {

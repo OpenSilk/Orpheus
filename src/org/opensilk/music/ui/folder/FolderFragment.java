@@ -29,8 +29,6 @@ import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -40,7 +38,6 @@ import org.opensilk.filebrowser.MediaProviderUtil;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.dialogs.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.FileItemCardClick;
-import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.util.Command;
@@ -270,7 +267,7 @@ public class FolderFragment extends ScopedDaggerFragment implements BackButtonLi
                     return;
             }
             if (c != null) {
-                ApolloUtils.execute(false, new CommandRunner(getActivity(), c));
+                new CommandRunner(getActivity(), c).execute();
             }
         }
 

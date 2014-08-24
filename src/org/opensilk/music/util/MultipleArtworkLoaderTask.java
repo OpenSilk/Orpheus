@@ -30,12 +30,13 @@ import java.util.Set;
 /**
  * Created by drew on 7/11/14.
  */
-public class MultipleArtworkLoaderTask extends AsyncTask<Void, Void, Set<ArtInfo>> {
+public class MultipleArtworkLoaderTask extends PriorityAsyncTask<Void, Void, Set<ArtInfo>> {
     private final Context context;
     private final long[] albumIds;
     private final ArtworkImageView[] views;
 
     public MultipleArtworkLoaderTask(Context context, long[] albumIds, ArtworkImageView... views) {
+        super();
         this.context = context;
         this.albumIds = albumIds;
         this.views = views;

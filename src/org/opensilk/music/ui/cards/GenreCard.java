@@ -83,11 +83,11 @@ public class GenreCard extends AbsGenericCard<Genre> {
         mCardSubTitle.setText(l2);
         if (mData.mAlbumNumber > 0){
             if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
-                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4));
+                new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4).execute();
             } else if (mArtwork2 != null) {
-                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2));
+                new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2).execute();
             } else {
-                ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork));
+                new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork).execute();
             }
         }
     }

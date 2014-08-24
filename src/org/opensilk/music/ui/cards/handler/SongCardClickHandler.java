@@ -109,7 +109,7 @@ public class SongCardClickHandler {
                 return;
         }
         if (c != null) {
-            ApolloUtils.execute(false, new CommandRunner(getActivity(), c));
+            new CommandRunner(getActivity(), c).execute();
         }
     }
 

@@ -90,11 +90,11 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
         mHeroImage3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
         mHeroImage4 = ButterKnife.findById(mHeroContainer, R.id.hero_image4);
         if (mHeroImage4 != null && mHeroImage3 != null && mHeroImage2 != null) {
-            ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getActivity(), mGenre.mAlbumIds, mHeroImage, mHeroImage2, mHeroImage3, mHeroImage4));
+            new MultipleArtworkLoaderTask(getActivity(), mGenre.mAlbumIds, mHeroImage, mHeroImage2, mHeroImage3, mHeroImage4).execute();
         } else if (mHeroImage2 != null) {
-            ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getActivity(), mGenre.mAlbumIds, mHeroImage, mHeroImage2));
+            new MultipleArtworkLoaderTask(getActivity(), mGenre.mAlbumIds, mHeroImage, mHeroImage2).execute();
         } else {
-            ApolloUtils.execute(false, new MultipleArtworkLoaderTask(getActivity(), mGenre.mAlbumIds, mHeroImage));
+            new MultipleArtworkLoaderTask(getActivity(), mGenre.mAlbumIds, mHeroImage).execute();
         }
         // Load header text
         mInfoTitle = ButterKnife.findById(mStickyHeader, R.id.info_title);
