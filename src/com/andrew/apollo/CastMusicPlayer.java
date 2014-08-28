@@ -156,7 +156,7 @@ public class CastMusicPlayer implements IMusicPlayer {
                 mCastManager.pause();
             }
         } catch (CastException|NoConnectionException e) {
-            handleCastError(e);
+//            handleCastError(e); // will couse infinite loop TODO handle better
         } catch (TransientNetworkDisconnectionException e) {
             Log.w(TAG, "stop(1) TransientNetworkDisconnection");
         } catch (IllegalStateException e) {
