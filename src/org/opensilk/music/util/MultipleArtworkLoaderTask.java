@@ -24,7 +24,11 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,13 +37,16 @@ import java.util.Set;
 public class MultipleArtworkLoaderTask extends PriorityAsyncTask<Void, Void, Set<ArtInfo>> {
     private final Context context;
     private final long[] albumIds;
-    private final ArtworkImageView[] views;
+    private final List<WeakReference<ArtworkImageView>> views;
 
     public MultipleArtworkLoaderTask(Context context, long[] albumIds, ArtworkImageView... views) {
         super();
         this.context = context;
         this.albumIds = albumIds;
-        this.views = views;
+        this.views = new ArrayList<>(views.length);
+        for (ArtworkImageView view : views) {
+            this.views.add(new WeakReference<>(view));
+        }
     }
 
     @Override
@@ -51,7 +58,7 @@ public class MultipleArtworkLoaderTask extends PriorityAsyncTask<Void, Void, Set
                 do {
                     ArtInfo info = CursorHelpers.makeArtInfoFromLocalAlbumCursor(c);
                     artInfos.add(info);
-                } while (c.moveToNext() && artInfos.size() <= views.length);
+                } while (c.moveToNext() && artInfos.size() <= views.size());
             }
             c.close();
         }
@@ -61,11 +68,12 @@ public class MultipleArtworkLoaderTask extends PriorityAsyncTask<Void, Void, Set
 
     @Override
     protected void onPostExecute(Set<ArtInfo> artInfos) {
-        if (artInfos.size() >= views.length) {
-            int ii=0;
-            for (ArtInfo info : artInfos) {
-                ArtworkManager.loadImage(info, views[ii++]);
-                if (ii==views.length) break;
+        final Iterator<ArtInfo> infos = artInfos.iterator();
+        final Iterator<WeakReference<ArtworkImageView>> views = this.views.iterator();
+        while (infos.hasNext() && views.hasNext()) {
+            ArtworkImageView view = views.next().get();
+            if (view != null) {
+                ArtworkManager.loadImage(infos.next(), view);
             }
         }
     }
