@@ -452,7 +452,7 @@ public class CursorHelpers {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException e) {
-            Timber.e(e, "getStringOrEmpty("+col+")");
+//            Timber.e(e, "getStringOrEmpty("+col+")");
             return sEmptyString;
         }
     }
@@ -461,7 +461,7 @@ public class CursorHelpers {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException e) {
-            Timber.e(e, "getStringOrNull("+col+")");
+//            Timber.e(e, "getStringOrNull("+col+")");
             return null;
         }
     }
@@ -470,7 +470,7 @@ public class CursorHelpers {
         try {
             return c.getLong(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException e) {
-            Timber.e(e, "getLongOrZero("+col+")");
+//            Timber.e(e, "getLongOrZero("+col+")");
             return 0;
         }
     }
@@ -479,7 +479,7 @@ public class CursorHelpers {
         try {
             return c.getInt(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException e) {
-            Timber.e(e, "getIntOrZero("+col+")");
+//            Timber.e(e, "getIntOrZero("+col+")");
             return 0;
         }
     }
