@@ -1,16 +1,11 @@
 
 package org.opensilk.music.util;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
-
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
 
 import java.util.Arrays;
 
@@ -19,7 +14,6 @@ import java.util.Arrays;
  * to allow quering mediastore for audio ids and have
  * the cursor iterate in the original order of the ids given
  */
-@SuppressLint("NewApi")
 public class OrderPreservingCursor extends AbstractCursor {
 
     private final Context mContext;
@@ -40,6 +34,7 @@ public class OrderPreservingCursor extends AbstractCursor {
      * @param context The {@link Context} to use
      */
     public OrderPreservingCursor(final Context context, long[] ids) {
+        super();
         mContext = context;
         mQuery = ids;
         makeNowPlayingCursor();
@@ -214,6 +209,10 @@ public class OrderPreservingCursor extends AbstractCursor {
             }
         }
         selection.append(")");
+
+        if (mContext == null) {
+            return;
+        }
 
         mDelegateCursor = mContext.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
