@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.UriMatcher;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
@@ -34,6 +35,7 @@ import android.util.Log;
 import com.andrew.apollo.BuildConfig;
 
 import org.opensilk.music.GraphHolder;
+import org.opensilk.music.util.PriorityAsyncTask;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -88,6 +90,13 @@ public class ArtworkProvider extends ContentProvider {
         mGraphHolder = GraphHolder.get(getContext());
         mGraphHolder.inject(this);
         return true;
+    }
+
+    @Override
+    public void attachInfo(Context context, ProviderInfo info) {
+        super.attachInfo(context, info);
+        //Background tasks will fail without
+        PriorityAsyncTask.init();
     }
 
     @Override
