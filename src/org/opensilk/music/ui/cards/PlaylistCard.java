@@ -32,6 +32,7 @@ import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.PlaylistCardClick;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
+import org.opensilk.music.util.PriorityAsyncTask;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -54,6 +55,8 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
     protected ArtworkImageView mArtwork2;
     protected ArtworkImageView mArtwork3;
     protected ArtworkImageView mArtwork4;
+
+    private PriorityAsyncTask mArtLoaderTask;
 
     public PlaylistCard(Context context, Playlist data) {
         super(context, data, determiteLayout(data));
@@ -83,13 +86,30 @@ public class PlaylistCard extends AbsGenericCard<Playlist> {
         mCardSubTitle.setText(MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber));
         if (mData.mAlbumNumber > 0) {
             if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
-                new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4).execute();
+                mArtLoaderTask = new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4).execute();
             } else if (mArtwork2 != null) {
-                new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2).execute();
+                mArtLoaderTask = new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2).execute();
             } else {
-                new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork).execute();
+                mArtLoaderTask = new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork).execute();
             }
         }
+    }
+
+    @Override
+    protected void cleanupViews() {
+        super.cleanupViews();
+        mArtwork2 = null;
+        mArtwork3 = null;
+        mArtwork4 = null;
+    }
+
+    @Override
+    protected void cancelPendingTasks() {
+        if (mArtLoaderTask != null) mArtLoaderTask.cancel(false);
+        if (mArtwork != null) mArtwork.cancelRequest();
+        if (mArtwork2 != null) mArtwork2.cancelRequest();
+        if (mArtwork3 != null) mArtwork3.cancelRequest();
+        if (mArtwork4 != null) mArtwork4.cancelRequest();
     }
 
     @Override

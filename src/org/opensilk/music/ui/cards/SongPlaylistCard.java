@@ -55,6 +55,12 @@ public class SongPlaylistCard extends SongCollectionCard {
     }
 
     @Override
+    protected void cleanupViews() {
+        super.cleanupViews();
+        mDragHandle = null;
+    }
+
+    @Override
     protected void onCreatePopupMenu(PopupMenu m) {
         super.onCreatePopupMenu(m);
         m.getMenu().removeItem(R.id.popup_delete);

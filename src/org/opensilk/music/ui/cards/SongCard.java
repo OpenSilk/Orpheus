@@ -36,6 +36,7 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
+import org.opensilk.music.util.PriorityAsyncTask;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
@@ -52,6 +53,8 @@ public class SongCard extends AbsBundleableCard<Song> {
     Bus mBus; //Injected by adapter
 
     protected ArtworkImageView mArtwork;
+
+    private PriorityAsyncTask mArtLoaderTask;
 
     public SongCard(Context context, Song song) {
         super(context, song, R.layout.listcard_artwork_inner);
@@ -88,7 +91,7 @@ public class SongCard extends AbsBundleableCard<Song> {
         }
         if (mArtwork != null) {
             if (mData instanceof LocalSong) {
-                new MultipleArtworkLoaderTask(getContext(), new long[]{((LocalSong) mData).albumId}, mArtwork).execute();
+                mArtLoaderTask = new MultipleArtworkLoaderTask(getContext(), new long[]{((LocalSong) mData).albumId}, mArtwork).execute();
             } else {
                 String artist = mData.albumArtistName;
                 if (TextUtils.isEmpty(artist)) {
@@ -97,6 +100,18 @@ public class SongCard extends AbsBundleableCard<Song> {
                 ArtworkManager.loadImage(new ArtInfo(artist, mData.albumName, mData.artworkUri), mArtwork);
             }
         }
+    }
+
+    @Override
+    protected void cleanupViews() {
+        super.cleanupViews();
+        mArtwork = null;
+    }
+
+    @Override
+    protected void cancelPendingTasks() {
+        if (mArtLoaderTask != null) mArtLoaderTask.cancel(false);
+        if (mArtwork != null) mArtwork.cancelRequest();
     }
 
     @Override

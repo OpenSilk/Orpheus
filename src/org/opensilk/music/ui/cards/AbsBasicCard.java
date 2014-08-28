@@ -49,11 +49,27 @@ public abstract class AbsBasicCard<D> extends Card {
     protected abstract int getListLayout();
     protected abstract int getGridLayout();
 
+    public void onViewDetachedFromWindow() {
+        cancelPendingTasks();
+        cleanupViews();
+    }
+
+    public void onViewRecycled() {
+        cancelPendingTasks();
+        cleanupViews();
+    }
 
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         ButterKnife.inject(this, view);
         onInnerViewSetup();
+    }
+
+    protected void cleanupViews() {
+        ButterKnife.reset(this);
+    }
+
+    protected void cancelPendingTasks() {
     }
 
     public D getData() {
