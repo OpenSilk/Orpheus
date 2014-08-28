@@ -386,7 +386,7 @@ public class ArtworkRequest implements IArtworkRequest {
                 in = mManager.mContext.getContentResolver().openInputStream(uri);
                 final NetworkResponse response = new NetworkResponse(IOUtils.toByteArray(in));
                 return fauxRequest.parseNetworkResponse(response);
-            } catch (IOException|IllegalStateException|OutOfMemoryError e) {
+            } catch (Exception e) { //too many to keep track of
                 return Response.error(new VolleyError(e));
             } finally {
                 IOUtils.closeQuietly(in);
