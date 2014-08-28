@@ -21,6 +21,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -35,6 +36,7 @@ import com.andrew.apollo.BuildConfig;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.util.CursorHelpers;
+import org.opensilk.music.util.PriorityAsyncTask;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
@@ -93,28 +95,6 @@ public class MusicProvider extends ContentProvider {
                 .appendPath(String.valueOf(genreId)).appendPath("albums").build();
     }
 
-    private final Executor mBackgroundExecutor = new ThreadPoolExecutor(0, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>(),
-            new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    return new Thread(new BackgroundRunnable(r));
-                }
-            }
-    );
-
-    static class BackgroundRunnable implements Runnable {
-        private final Runnable r;
-        BackgroundRunnable(Runnable r) {
-            this.r = r;
-        }
-        @Override
-        public void run() {
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            r.run();
-        }
-    }
-
     private ObjectGraph mObjectGraph;
     private MusicStore mStore;
 
@@ -123,6 +103,13 @@ public class MusicProvider extends ContentProvider {
         mObjectGraph = ObjectGraph.create(new ProviderModule(getContext()));
         mStore = mObjectGraph.get(MusicStore.class);
         return true;
+    }
+
+    @Override
+    public void attachInfo(Context context, ProviderInfo info) {
+        super.attachInfo(context, info);
+        //Background tasks will fail without
+        PriorityAsyncTask.init();
     }
 
     @Override
@@ -158,7 +145,7 @@ public class MusicProvider extends ContentProvider {
                                 updateGenreCache();
                             }
                         };
-                        mBackgroundExecutor.execute(r);
+                        PriorityAsyncTask.execute(r, PriorityAsyncTask.Priority.LOW);
                         break;
                     }
                     if (c != null) {
@@ -178,7 +165,7 @@ public class MusicProvider extends ContentProvider {
                         updateGenreCache();
                     }
                 };
-                mBackgroundExecutor.execute(r1);
+                PriorityAsyncTask.execute(r1, PriorityAsyncTask.Priority.LOW);;
 
                 break;
             case 3: // Genre albums
@@ -245,7 +232,7 @@ public class MusicProvider extends ContentProvider {
                                 updatePlaylistCache();
                             }
                         };
-                        mBackgroundExecutor.execute(r2);
+                        PriorityAsyncTask.execute(r2, PriorityAsyncTask.Priority.LOW);
                         break;
                     }
                     if (c != null) {
@@ -265,7 +252,7 @@ public class MusicProvider extends ContentProvider {
                         updatePlaylistCache();
                     }
                 };
-                mBackgroundExecutor.execute(r3);
+                PriorityAsyncTask.execute(r3, PriorityAsyncTask.Priority.LOW);
                 break;
         }
         if (c != null) {
