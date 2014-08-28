@@ -1579,7 +1579,13 @@ public class MusicPlaybackService extends Service {
         } else if (what.equals(PLAYSTATE_CHANGED)) {
             mRemoteControlClient.setPlaybackState(playState);
         } else if (what.equals(META_CHANGED) || what.equals(QUEUE_CHANGED)) {
-            Bitmap albumArt = getAlbumArt();
+            Bitmap albumArt;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                //Kitkat has fullscreen artwork
+                albumArt = getAlbumArt();
+            } else {
+                albumArt = getAlbumArtThumbnail();
+            }
             if (albumArt != null) {
                 // RemoteControlClient wants to recycle the bitmaps thrown at it, so we need
                 // to make sure not to hand out our cache copy
