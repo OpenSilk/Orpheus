@@ -17,13 +17,11 @@ package org.opensilk.music.artwork;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
@@ -53,18 +51,10 @@ public class ArtworkImageView extends ImageView {
 
     private ArtworkType mImageType;
 
-    /** Array used in transition drawable */
-    private Drawable[] mDrawables = new Drawable[2];
-
     /**
      * Resource ID of the image to be used as a placeholder until the network image is loaded.
      */
     private int mDefaultImageId;
-
-    /**
-     * Resource ID of the image to be used if the network response fails.
-     */
-    private int mErrorImageId;
 
     /** Local copy of the ImageLoader. */
     private ArtworkLoader mImageLoader;
@@ -72,7 +62,7 @@ public class ArtworkImageView extends ImageView {
     /** Current ImageContainer. (either in-flight or finished) */
     private ImageContainer mImageContainer;
 
-    private Palette.PaletteAsyncListener mListener;
+    private Palette.PaletteAsyncListener mPaletteListener;
 
     public ArtworkImageView(Context context) {
         this(context, null);
@@ -104,8 +94,6 @@ public class ArtworkImageView extends ImageView {
         }
         mArtInfo = info;
         mImageLoader = imageLoader;
-        // reinitialize the first layer
-        mDrawables[0] = new ColorDrawable(getResources().getColor(R.color.transparent));
         // The URL has potentially changed. See if we need to load it.
         loadImageIfNecessary(false);
     }
@@ -133,16 +121,8 @@ public class ArtworkImageView extends ImageView {
         mDefaultImageId = defaultImage;
     }
 
-    /**
-     * Sets the error image resource ID to be used for this view in the event that the image
-     * requested fails to load.
-     */
-    public void setErrorImageResId(int errorImage) {
-        mErrorImageId = errorImage;
-    }
-
     public void installListener(Palette.PaletteAsyncListener l) {
-        mListener = l;
+        mPaletteListener = l;
     }
 
     /**
@@ -204,9 +184,26 @@ public class ArtworkImageView extends ImageView {
     private void setDefaultImageOrNull() {
         if (mDefaultImageId != 0) {
             setImageResource(mDefaultImageId);
+            if (mPaletteListener != null) {
+                mPaletteListener.onGenerated(null);
+            }
         } else {
             resetImage();
         }
+    }
+
+    //@DebugLog
+    public void cancelRequest() {
+        if (mImageContainer != null) {
+            // If the view was bound to an image request, cancel it and clear
+            // out the image from the view.
+            mImageContainer.cancelRequest();
+            resetImage();
+            // also clear out the container so we can reload the image if necessary.
+            mImageContainer = null;
+        }
+        // clear listener ref
+        mPaletteListener = null;
     }
 
     @Override
@@ -217,16 +214,7 @@ public class ArtworkImageView extends ImageView {
 
     @Override
     protected void onDetachedFromWindow() {
-        if (mImageContainer != null) {
-            // If the view was bound to an image request, cancel it and clear
-            // out the image from the view.
-            mImageContainer.cancelRequest();
-            resetImage();
-            // also clear out the container so we can reload the image if necessary.
-            mImageContainer = null;
-        }
-        // clear listener ref
-        mListener = null;
+        cancelRequest();
         super.onDetachedFromWindow();
     }
 
@@ -252,9 +240,7 @@ public class ArtworkImageView extends ImageView {
                 Timber.w("Reference was null");
                 return;
             }
-            if (v.mErrorImageId != 0) {
-                v.setImageResource(v.mErrorImageId);
-            }
+            v.setDefaultImageOrNull();
         }
 
         @Override
@@ -283,30 +269,26 @@ public class ArtworkImageView extends ImageView {
                 if (isImmediate) {
                     v.setImageBitmap(response.getBitmap());
                 } else {
-                    v.mDrawables[1] = new BitmapDrawable(v.getResources(), response.getBitmap());
-                    final TransitionDrawable transitionDrawable = new TransitionDrawable(v.mDrawables);
+                    final Drawable[] drawables = new Drawable[] {
+                            v.getResources().getDrawable(v.mDefaultImageId),
+                            new BitmapDrawable(v.getResources(), response.getBitmap())
+                    };
+                    final TransitionDrawable transitionDrawable = new TransitionDrawable(drawables);
                     transitionDrawable.setCrossFadeEnabled(true);
                     v.setImageDrawable(transitionDrawable);
                     transitionDrawable.startTransition(340);
                 }
-                if (v.mListener != null) {
-                    Palette.generateAsync(response.getBitmap(), v.mListener);
+                if (v.mPaletteListener != null) {
+                    Palette.generateAsync(response.getBitmap(), v.mPaletteListener);
                 }
             } else if (v.mDefaultImageId != 0) {
                 // We missed the L1 cache set the default drawable as fist
-                // layer of transition drawable for smoother effect
-                v.mDrawables[0] = v.getResources().getDrawable(v.mDefaultImageId);
                 if (isImmediate) {
-                    v.setImageResource(v.mDefaultImageId);
+                    v.setDefaultImageOrNull();
                 } else {
-                    // Fade in the default image
-                    Drawable[] drawables = new Drawable[2];
-                    drawables[0] = new ColorDrawable(v.getResources().getColor(R.color.transparent));
-                    drawables[1] = v.mDrawables[0];
-                    TransitionDrawable transitionDrawable = new TransitionDrawable(drawables);
-                    transitionDrawable.setCrossFadeEnabled(true);
-                    v.setImageDrawable(transitionDrawable);
-                    transitionDrawable.startTransition(280);
+                    v.setAlpha(0f);
+                    v.animate().alpha(1.0f).setDuration(280).start();
+                    v.setDefaultImageOrNull();
                 }
             }
         }
