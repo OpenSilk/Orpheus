@@ -93,10 +93,12 @@ public class MusicProviderUtil {
             ContentValues values = new ContentValues();
             values.put(MusicStore.Cols.PLAYCOUNT, ++playcount);
             values.put(MusicStore.Cols.LAST_PLAYED, System.currentTimeMillis());
-            int count = context.getContentResolver().update(MusicProvider.RECENTS_URI,
-                    values,
-                    BaseColumns._ID + "=?",
-                    new String[]{ String.valueOf(id) });
+            try {
+                int count = context.getContentResolver().update(MusicProvider.RECENTS_URI,
+                        values,
+                        BaseColumns._ID + "=?",
+                        new String[]{ String.valueOf(id) });
+            } catch (Exception ignored) {} // This isnt that important so just dont crash
         }
     }
 
