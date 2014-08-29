@@ -10,6 +10,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.ui.cards.AbsBasicCard;
 
 import butterknife.ButterKnife;
 import it.gmariotti.cardslib.library.view.CardView;
@@ -78,24 +79,21 @@ public class ThemedCardView extends CardView implements Palette.PaletteAsyncList
             }
         }
     }
-    /*
-    new Palette.PaletteAsyncListener() {
-            @Override
-            public void onGenerated(Palette palette) {
-                View parent = (View) getParent();
-                if (parent != null) {
-                    View overlay = parent.findViewById(R.id.griditem_desc_overlay);
-                    if (overlay != null) {
-                        PaletteItem item = palette.getDarkVibrantColor();
-                        if (item == null) {
-                            item = palette.getVibrantColor();
-                        }
-                        if (item != null) {
-                            overlay.setBackgroundColor(item.getRgb());
-                        }
-                    }
-                }
-            }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        if (mCard != null && (mCard instanceof AbsBasicCard<?>)) {
+            ((AbsBasicCard<?>) mCard).onViewDetachedFromWindow();
         }
-     */
+        super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void setRecycle(boolean isRecycle) {
+        super.setRecycle(isRecycle);
+        if (isRecycle && mCard != null && (mCard instanceof AbsBasicCard<?>)) {
+            ((AbsBasicCard<?>) mCard).onViewRecycled();
+        }
+    }
+
 }
