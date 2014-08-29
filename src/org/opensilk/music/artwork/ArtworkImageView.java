@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.AsyncTask;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -26,7 +27,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
 import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.R;
 import com.android.volley.VolleyError;
 
 import org.opensilk.music.api.meta.ArtInfo;
@@ -63,6 +63,7 @@ public class ArtworkImageView extends ImageView {
     private ImageContainer mImageContainer;
 
     private Palette.PaletteAsyncListener mPaletteListener;
+    private AsyncTask mPaletteTask;
 
     public ArtworkImageView(Context context) {
         this(context, null);
@@ -202,6 +203,10 @@ public class ArtworkImageView extends ImageView {
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
         }
+        if (mPaletteTask != null) {
+            mPaletteTask.cancel(true);
+            mPaletteTask = null;
+        }
         // clear listener ref
         mPaletteListener = null;
     }
@@ -236,11 +241,9 @@ public class ArtworkImageView extends ImageView {
         @Override
         public void onErrorResponse(VolleyError error) {
             ArtworkImageView v = reference.get();
-            if (v == null) {
-                Timber.w("Reference was null");
-                return;
+            if (v != null) {
+                v.setDefaultImageOrNull();
             }
-            v.setDefaultImageOrNull();
         }
 
         @Override
@@ -269,25 +272,29 @@ public class ArtworkImageView extends ImageView {
                 if (isImmediate) {
                     v.setImageBitmap(response.getBitmap());
                 } else {
-                    final Drawable[] drawables = new Drawable[] {
+                    final TransitionDrawable transition = new TransitionDrawable(new Drawable[] {
+                            // we arent immediate so we assume, weve already been called
+                            // with a null bitmap and the default image is loaded
                             v.getResources().getDrawable(v.mDefaultImageId),
                             new BitmapDrawable(v.getResources(), response.getBitmap())
-                    };
-                    final TransitionDrawable transitionDrawable = new TransitionDrawable(drawables);
-                    transitionDrawable.setCrossFadeEnabled(true);
-                    v.setImageDrawable(transitionDrawable);
-                    transitionDrawable.startTransition(340);
+                    });
+                    transition.setCrossFadeEnabled(true);
+                    transition.startTransition(300);
+                    v.setImageDrawable(transition);
                 }
                 if (v.mPaletteListener != null) {
-                    Palette.generateAsync(response.getBitmap(), v.mPaletteListener);
+                    v.mPaletteTask = Palette.generateAsync(response.getBitmap(), v.mPaletteListener);
                 }
             } else if (v.mDefaultImageId != 0) {
                 // We missed the L1 cache set the default drawable as fist
                 if (isImmediate) {
                     v.setDefaultImageOrNull();
                 } else {
+                    // no image is set yet (we hope) so we can prevent jank
+                    // if the image is pulled from the cache before the animation
+                    // finishes by animating the view instead of the drawable
                     v.setAlpha(0f);
-                    v.animate().alpha(1.0f).setDuration(280).start();
+                    v.animate().alpha(1.0f).setDuration(200).start();
                     v.setDefaultImageOrNull();
                 }
             }
