@@ -20,6 +20,8 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.PaletteItem;
@@ -35,11 +37,11 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.etsy.android.grid.StaggeredGridView;
 
+import org.opensilk.music.util.PaletteUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import butterknife.ButterKnife;
-import hugo.weaving.DebugLog;
 
 /**
  * Detail view that mimics the io2014 app
@@ -59,10 +61,10 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
     protected View mStickyHeader;
     protected View mHeaderDummy;
 
-    // background for headerDummy, animates once header sticks
-    private ClipDrawable mDrawable;
     // determines when to animate the dummy views drawable
     private boolean mIsStuck = false;
+    // starting color of sticky header
+    private int mPreviousPaletteColor;
     // stores sticky header color for save instance
     private int mPaletteColor;
 
@@ -71,9 +73,9 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mIsStuck = savedInstanceState.getBoolean("was_stuck");
-            mPaletteColor = savedInstanceState.getInt("palette_color");
+            mPreviousPaletteColor = mPaletteColor = savedInstanceState.getInt("palette_color");
         } else {
-            mPaletteColor = ThemeHelper.getAccentColor(getActivity());
+            mPreviousPaletteColor = mPaletteColor = ThemeHelper.getAccentColor(getActivity());
         }
     }
 
@@ -106,7 +108,7 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
             throw new RuntimeException("List must extend ListView or StaggeredGridView");
         }
         mList.setOnScrollListener(mScrollListener);
-        initPalette();
+        initPalette(false);
     }
 
     @Override
@@ -117,15 +119,13 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
     }
 
     @Override
-    @DebugLog
     public void onGenerated(Palette palette) {
-        PaletteItem item = palette.getVibrantColor();
-        if (item == null) {
-            item = palette.getMutedColor();
-        }
+        PaletteItem item = PaletteUtil.getBackgroundItem(palette);
         if (item != null) {
             mPaletteColor = item.getRgb();
-            initPalette();
+        }
+        if (mPaletteColor != mPreviousPaletteColor) {
+            initPalette(true);
         }
     }
 
@@ -137,26 +137,36 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
         return R.layout.profile_staggeredgrid_frame;
     }
 
-    private void initPalette() {
-        mDrawable = new ClipDrawable(new ColorDrawable(mPaletteColor), Gravity.BOTTOM, ClipDrawable.VERTICAL);
+    private void initPalette(boolean animate) {
+        final ClipDrawable dummyBackground = new ClipDrawable(new ColorDrawable(mPaletteColor),
+                Gravity.BOTTOM, ClipDrawable.VERTICAL);
         if (mIsStuck) {
-            mDrawable.setLevel(10000);
+            dummyBackground.setLevel(10000);
         } else {
-            mDrawable.setLevel(0);
+            dummyBackground.setLevel(0);
         }
-        mHeaderDummy.setBackgroundDrawable(mDrawable);
-        mStickyHeader.setBackgroundDrawable(new ColorDrawable(mPaletteColor));
+        mHeaderDummy.setBackgroundDrawable(dummyBackground);
+        if (animate) {
+            final TransitionDrawable stickyBackground = new TransitionDrawable(new Drawable[] {
+                    new ColorDrawable(mPreviousPaletteColor),
+                    new ColorDrawable(mPaletteColor),
+            });
+            stickyBackground.startTransition(200);
+            mStickyHeader.setBackgroundDrawable(stickyBackground);
+        } else {
+            mStickyHeader.setBackgroundColor(mPaletteColor);
+        }
     }
 
-    private ValueAnimator makeSlideAnimator(final float start, float end) {
-        final ValueAnimator animator = ValueAnimator.ofFloat(start, end);
+    private ValueAnimator makeSlideAnimator(int start, int end, final ClipDrawable drawable) {
+        final ValueAnimator animator = ValueAnimator.ofInt(start, end);
+        animator.setDuration(100);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                float value = (Float) animation.getAnimatedValue();
-                final int level = (int) (value*10000.0f);
-                if (mDrawable != null) {
-                    mDrawable.setLevel(level);
+                final int value = (Integer) animation.getAnimatedValue();
+                if (drawable != null) {
+                    drawable.setLevel(value);
                 }
             }
         });
@@ -187,12 +197,10 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
             mStickyHeaderContainer.setTranslationY(Math.max(pos,0));
             if (pos < 0 && !mIsStuck) {
                 mIsStuck = true;
-                ValueAnimator animator = makeSlideAnimator(0.0f, 1.0f);
-                animator.start();
+                makeSlideAnimator(0, 10000, (ClipDrawable)mHeaderDummy.getBackground()).start();
             } else if (pos > 0 && mIsStuck) {
                 mIsStuck = false;
-                ValueAnimator animator = makeSlideAnimator(1.0f, 0.0f);
-                animator.start();
+                makeSlideAnimator(10000, 0, (ClipDrawable)mHeaderDummy.getBackground()).start();
             }
         }
     };
