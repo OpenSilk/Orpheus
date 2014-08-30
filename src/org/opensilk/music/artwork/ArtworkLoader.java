@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Helper that handles loading and caching images from remote URLs.
@@ -138,7 +139,7 @@ public class ArtworkLoader {
         // Try to look up the request in the cache of remote images.
         Bitmap cachedBitmap = mCache.getBitmap(cacheKey);
         if (cachedBitmap != null) {
-            if (D) Log.d(TAG, "L1Cache hit: " + cacheKey);
+            Timber.i("L1Cache hit: " + cacheKey);
             // Return the cached bitmap.
             ImageContainer container = new ImageContainer(cachedBitmap, artInfo, null, null);
             imageListener.onResponse(container, true);
@@ -279,8 +280,8 @@ public class ArtworkLoader {
                 // check to see if it is already batched for delivery.
                 request = mBatchedResponses.get(mCacheKey);
                 if (request != null) {
-                    request.removeContainerAndCancelIfNecessary(this);
-                    if (request.mContainers.size() == 0) {
+                    boolean canceled = request.removeContainerAndCancelIfNecessary(this);
+                    if (canceled) {
                         mBatchedResponses.remove(mCacheKey);
                     }
                 }
