@@ -163,9 +163,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // register the busses
-        mGlobalMonitor = new GlobalBusMonitor();
-        EventBus.getInstance().register(mGlobalMonitor);
+        // register the activity buss
         mActivityMonitor = new ActivityBusMonitor();
         mActivityBus.register(mActivityMonitor);
         // Initialize the handler used to update the current time
@@ -187,6 +185,8 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     @Override
     public void onStart() {
         super.onStart();
+        mGlobalMonitor = new GlobalBusMonitor();
+        EventBus.getInstance().register(mGlobalMonitor);
     }
 
     @Override
@@ -209,6 +209,9 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     @Override
     public void onStop() {
         super.onStop();
+        // unregister the global bus
+        EventBus.getInstance().unregister(mGlobalMonitor);
+        mGlobalMonitor = null;
     }
 
     @Override
@@ -218,8 +221,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
 
     @Override
     public void onDestroy() {
-        // Unregister the busses
-        EventBus.getInstance().unregister(mGlobalMonitor);
+        // Unregister the activity bus
         mActivityBus.unregister(mActivityMonitor);
         // clear messages so we won't prevent gc
         mTimeHandler.removeMessages(REFRESH_TIME);
