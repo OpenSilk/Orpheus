@@ -26,7 +26,6 @@ import android.widget.TextView;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalSongGroup;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.artwork.ArtworkImageView;
@@ -92,7 +91,7 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
         super.onViewCreated(view, savedInstanceState);
         // hero image
         mHeroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        mHeroImage.installListener(this);
+        mHeroImage.setPaletteListener(this);
         // Load header images
         mHeroImage2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
         mHeroImage3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);

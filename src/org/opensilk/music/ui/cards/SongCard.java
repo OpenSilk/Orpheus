@@ -111,7 +111,6 @@ public class SongCard extends AbsBundleableCard<Song> {
     @Override
     protected void cancelPendingTasks() {
         if (mArtLoaderTask != null) mArtLoaderTask.cancel(false);
-        if (mArtwork != null) mArtwork.cancelRequest();
     }
 
     @Override

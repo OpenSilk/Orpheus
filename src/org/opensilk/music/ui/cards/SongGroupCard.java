@@ -108,10 +108,6 @@ public class SongGroupCard extends AbsGenericCard<LocalSongGroup> {
     @Override
     protected void cancelPendingTasks() {
         if (mArtLoaderTask != null) mArtLoaderTask.cancel(false);
-        if (mArtwork != null) mArtwork.cancelRequest();
-        if (mArtwork2 != null) mArtwork2.cancelRequest();
-        if (mArtwork3 != null) mArtwork3.cancelRequest();
-        if (mArtwork4 != null) mArtwork4.cancelRequest();
     }
 
     @Override

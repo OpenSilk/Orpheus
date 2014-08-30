@@ -33,8 +33,6 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkLoader.ImageContainer;
 import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
 
-import java.lang.ref.WeakReference;
-
 import timber.log.Timber;
 
 /**
@@ -47,21 +45,17 @@ public class ArtworkImageView extends ImageView {
     private static final String TAG = ArtworkImageView.class.getSimpleName();
     private static final boolean D = BuildConfig.DEBUG;
 
+    // information for current request
     private ArtInfo mArtInfo;
-
-    private ArtworkType mImageType;
-
-    /**
-     * Resource ID of the image to be used as a placeholder until the network image is loaded.
-     */
-    private int mDefaultImageId;
-
-    /** Local copy of the ImageLoader. */
-    private ArtworkLoader mImageLoader;
-
-    /** Current ImageContainer. (either in-flight or finished) */
+    // image type to pass to ArtworkLoader
+    private ArtworkType mArtworkType;
+    // Resource ID of the image to be used as a placeholder until the network image is loaded.
+    private int mDefaultImageId = -1;
+    // Local copy of the ArtworkLoader.
+    private ArtworkLoader mArtworkLoader;
+    // Current ImageContainer. (either in-flight or finished)
     private ImageContainer mImageContainer;
-
+    // palette
     private Palette.PaletteAsyncListener mPaletteListener;
     private AsyncTask mPaletteTask;
 
@@ -82,19 +76,12 @@ public class ArtworkImageView extends ImageView {
      * immediately either set the cached image (if available) or the default image specified by
      * {@link org.opensilk.music.artwork.ArtworkImageView#setDefaultImageResId(int)} on the view.
      *
-     * NOTE: If applicable, {@link org.opensilk.music.artwork.ArtworkImageView#setDefaultImageResId(int)} and
-     * {@link org.opensilk.music.artwork.ArtworkImageView#setErrorImageResId(int)} should be called prior to calling
-     * this function.
-     *
-     * @param url The URL that should be loaded into this ImageView.
-     * @param imageLoader ImageLoader that will be used to make the request.
+     * NOTE: If applicable, {@link org.opensilk.music.artwork.ArtworkImageView#setDefaultImageResId(int)}
+     * should be called prior to calling this function.
      */
     public void setImageInfo(ArtInfo info, ArtworkLoader imageLoader) {
-        if (info == null) {
-            throw new NullPointerException("ArtInfo cannot be null");
-        }
         mArtInfo = info;
-        mImageLoader = imageLoader;
+        mArtworkLoader = imageLoader;
         // The URL has potentially changed. See if we need to load it.
         loadImageIfNecessary(false);
     }
@@ -104,14 +91,14 @@ public class ArtworkImageView extends ImageView {
      * downsample the fetched bitmap as needed to reduce size/ memory consumption.
      */
     public void setImageType(ArtworkType imageType) {
-        mImageType = imageType;
+        mArtworkType = imageType;
     }
 
     /**
-     * @return requested bitmap width
+     * @return requested bitmap size
      */
-    public ArtworkType getImageType() {
-        return mImageType;
+    public ArtworkType getArtworkType() {
+        return mArtworkType;
     }
 
     /**
@@ -122,7 +109,11 @@ public class ArtworkImageView extends ImageView {
         mDefaultImageId = defaultImage;
     }
 
-    public void installListener(Palette.PaletteAsyncListener l) {
+    /**
+     * Sets the Palette listener to be called when image is loaded
+     */
+    public void setPaletteListener(Palette.PaletteAsyncListener l) {
+        cancelPaletteTask();
         mPaletteListener = l;
     }
 
@@ -149,66 +140,61 @@ public class ArtworkImageView extends ImageView {
                 || (TextUtils.isEmpty(mArtInfo.artistName)
                     && TextUtils.isEmpty(mArtInfo.albumName)
                     && mArtInfo.artworkUri == null)) {
-            if (mImageContainer != null) {
-                mImageContainer.cancelRequest();
-                mImageContainer = null;
-            }
+            Timber.i("Nothing to load. Setting default image");
+            cancelRequest();
             setDefaultImageOrNull();
             return;
         }
 
         // if there was an old request in this view, check if it needs to be canceled.
         if (mImageContainer != null && mImageContainer.getCacheKey() != null) {
-            if (mImageContainer.getCacheKey().equals(ArtworkLoader.getCacheKey(mArtInfo, mImageType))) {
+            if (mImageContainer.getCacheKey().equals(ArtworkLoader.getCacheKey(mArtInfo, mArtworkType))) {
                 // if the request is from the same URL, return.
                 return;
             } else {
                 // if there is a pre-existing request, cancel it if it's fetching a different URL.
-                mImageContainer.cancelRequest();
-//                setDefaultImageOrNull();
+                cancelRequest();
                 resetImage();
             }
         }
 
         // The pre-existing content of this view didn't match the current URL. Load the new image
-        // from the network.
-        ImageContainer newContainer = mImageLoader.get(mArtInfo, new ResponseListener(this, isInLayoutPass), mImageType);
-
-        // update the ImageContainer to be the new bitmap container.
-        mImageContainer = newContainer;
+        // from the network and update the ImageContainer to be the new bitmap container.
+        mImageContainer = mArtworkLoader.get(mArtInfo, new ResponseListener(isInLayoutPass), mArtworkType);
     }
 
     private void resetImage() {
-        setImageBitmap(null);
+        setImageDrawable(null);
     }
 
-    private void setDefaultImageOrNull() {
-        if (mDefaultImageId != 0) {
+    public void setDefaultImageOrNull() {
+        if (mDefaultImageId != -1) {
             setImageResource(mDefaultImageId);
-            if (mPaletteListener != null) {
-                mPaletteListener.onGenerated(null);
-            }
         } else {
             resetImage();
         }
     }
 
-    //@DebugLog
     public void cancelRequest() {
         if (mImageContainer != null) {
             // If the view was bound to an image request, cancel it and clear
             // out the image from the view.
+            Timber.i("Canceling old Request");
             mImageContainer.cancelRequest();
+            // clear out the image from the view.
             resetImage();
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
         }
+        cancelPaletteTask();
+    }
+
+    public void cancelPaletteTask() {
         if (mPaletteTask != null) {
+            Timber.i("Canceling old Palette task");
             mPaletteTask.cancel(true);
             mPaletteTask = null;
         }
-        // clear listener ref
-        mPaletteListener = null;
     }
 
     @Override
@@ -220,6 +206,8 @@ public class ArtworkImageView extends ImageView {
     @Override
     protected void onDetachedFromWindow() {
         cancelRequest();
+        // clear listener ref
+        mPaletteListener = null;
         super.onDetachedFromWindow();
     }
 
@@ -229,37 +217,29 @@ public class ArtworkImageView extends ImageView {
         invalidate();
     }
 
-    private static class ResponseListener implements ImageListener {
-        private final WeakReference<ArtworkImageView> reference;
+    private class ResponseListener implements ImageListener {
         private boolean isInLayoutPass;
+        private boolean isDefaultImageSet;
 
-        private ResponseListener(ArtworkImageView imageView, boolean isInLayoutPass) {
-            this.reference = new WeakReference<>(imageView);
+        private ResponseListener(boolean isInLayoutPass) {
             this.isInLayoutPass = isInLayoutPass;
+            this.isDefaultImageSet = false;
         }
 
         @Override
         public void onErrorResponse(VolleyError error) {
-            ArtworkImageView v = reference.get();
-            if (v != null) {
-                v.setDefaultImageOrNull();
-            }
+            setDefaultImageOrNull();
         }
 
         @Override
         public void onResponse(final ImageContainer response, final boolean isImmediate) {
-            ArtworkImageView v = reference.get();
-            if (v == null) {
-                Timber.w("Reference was null");
-                return;
-            }
             // If this was an immediate response that was delivered inside of a layout
             // pass do not set the image immediately as it will trigger a requestLayout
             // inside of a layout. Instead, defer setting the image by posting back to
             // the main thread.
             if (isImmediate && isInLayoutPass) {
                 isInLayoutPass = false;
-                v.post(new Runnable() {
+                post(new Runnable() {
                     @Override
                     public void run() {
                         onResponse(response, isImmediate);
@@ -270,32 +250,41 @@ public class ArtworkImageView extends ImageView {
 
             if (response.getBitmap() != null) {
                 if (isImmediate) {
-                    v.setImageBitmap(response.getBitmap());
-                } else {
+                    setImageBitmap(response.getBitmap());
+                } else if (isDefaultImageSet) {
+                    // we found the image in l2 cache or online, animate the switch from default
                     final TransitionDrawable transition = new TransitionDrawable(new Drawable[] {
                             // we arent immediate so we assume, weve already been called
                             // with a null bitmap and the default image is loaded
-                            v.getResources().getDrawable(v.mDefaultImageId),
-                            new BitmapDrawable(v.getResources(), response.getBitmap())
+                            getResources().getDrawable(mDefaultImageId),
+                            new BitmapDrawable(getResources(), response.getBitmap())
                     });
                     transition.setCrossFadeEnabled(true);
                     transition.startTransition(300);
-                    v.setImageDrawable(transition);
-                }
-                if (v.mPaletteListener != null) {
-                    v.mPaletteTask = Palette.generateAsync(response.getBitmap(), v.mPaletteListener);
-                }
-            } else if (v.mDefaultImageId != 0) {
-                // We missed the L1 cache set the default drawable as fist
-                if (isImmediate) {
-                    v.setDefaultImageOrNull();
+                    setImageDrawable(transition);
                 } else {
-                    // no image is set yet (we hope) so we can prevent jank
-                    // if the image is pulled from the cache before the animation
-                    // finishes by animating the view instead of the drawable
-                    v.setAlpha(0f);
-                    v.animate().alpha(1.0f).setDuration(200).start();
-                    v.setDefaultImageOrNull();
+                    // we found the image but the default image was never set
+                    Timber.w("Something weird happened! We forgot to set the default image first.");
+                    setAlpha(0f);
+                    animate().alpha(1.0f).setDuration(200).start();
+                    setImageBitmap(response.getBitmap());
+                }
+                if (mPaletteListener != null) {
+                    mPaletteTask = Palette.generateAsync(response.getBitmap(), mPaletteListener);
+                    // release our listener ref
+                    mPaletteListener = null;
+                }
+            } else if (mDefaultImageId != -1) {
+                if (isImmediate) {
+                    // We missed the L1 cache set the default drawable
+                    setDefaultImageOrNull();
+                    isDefaultImageSet = true;
+                } else if (!isDefaultImageSet) {
+                    // we couldnt find the image, fade in default drawable
+                    setAlpha(0f);
+                    animate().alpha(1.0f).setDuration(200).start();
+                    setDefaultImageOrNull();
+                    isDefaultImageSet = true;
                 }
             }
         }

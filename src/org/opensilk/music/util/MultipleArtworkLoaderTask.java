@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import timber.log.Timber;
+
 /**
  * Created by drew on 7/11/14.
  */
@@ -45,6 +47,8 @@ public class MultipleArtworkLoaderTask extends PriorityAsyncTask<Void, Void, Set
         this.albumIds = albumIds;
         this.views = new ArrayList<>(views.length);
         for (ArtworkImageView view : views) {
+            // Recycled view hack to prevent previous image from showing on slow devices
+            view.setImageInfo(null, null);
             this.views.add(new WeakReference<>(view));
         }
     }

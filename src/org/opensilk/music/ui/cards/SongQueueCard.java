@@ -79,11 +79,6 @@ public class SongQueueCard extends AbsBundleableCard<RecentSong> {
     }
 
     @Override
-    protected void cancelPendingTasks() {
-        if (mArtwork != null) mArtwork.cancelRequest();
-    }
-
-    @Override
     protected void onCreatePopupMenu(PopupMenu m) {
         m.inflate(R.menu.popup_play_next);
         if (mData.isLocal) {

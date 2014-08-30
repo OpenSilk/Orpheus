@@ -28,7 +28,6 @@ import android.widget.TextView;
 import com.andrew.apollo.Config;
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.Playlist;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.mobeta.android.dslv.DragSortListView;
 import com.squareup.otto.Bus;
 
@@ -126,7 +125,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
         }
         // hero image
         mHeroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        mHeroImage.installListener(this);
+        mHeroImage.setPaletteListener(this);
         // Load header images
         mHeroImage2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
         mHeroImage3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);

@@ -80,7 +80,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
         super.onViewCreated(view, savedInstanceState);
         // hero image
         mHeroImage = (ArtworkImageView) mHeroContainer.findViewById(R.id.hero_image);
-        mHeroImage.installListener(this);
+        mHeroImage.setPaletteListener(this);
         // Load header images
         ArtworkManager.loadArtistImage(mArtist.name, mHeroImage);
         // Load header text

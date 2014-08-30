@@ -86,11 +86,6 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
     }
 
     @Override
-    protected void cancelPendingTasks() {
-        if (mArtwork != null) mArtwork.cancelRequest();
-    }
-
-    @Override
     protected void onCreatePopupMenu(PopupMenu m) {
         m.inflate(R.menu.popup_play_all);
         m.inflate(R.menu.popup_shuffle_all);

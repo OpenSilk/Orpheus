@@ -1,6 +1,5 @@
 package org.opensilk.music.ui.cards.views;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -63,7 +62,7 @@ public class ThemedCardView extends CardView implements Palette.PaletteAsyncList
             setDescOverlayBackground(mDescOverlayDefaultColor, false);
             ArtworkImageView img = ButterKnife.findById(this, R.id.artwork_thumb);
             if (img != null) {
-                img.installListener(this);
+                img.setPaletteListener(this);
             }
         }
     }

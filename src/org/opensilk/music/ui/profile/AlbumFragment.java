@@ -18,7 +18,6 @@ package org.opensilk.music.ui.profile;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
@@ -90,7 +89,7 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
         super.onViewCreated(view, savedInstanceState);
         // hero image
         mHeroImage = (ArtworkImageView) mHeroContainer.findViewById(R.id.hero_image);
-        mHeroImage.installListener(this);
+        mHeroImage.setPaletteListener(this);
         // Load header images
         ArtworkManager.loadAlbumImage(mAlbum.artistName, mAlbum.name, CursorHelpers.generateArtworkUri(mAlbum.albumId), mHeroImage);
         // Load header text
