@@ -19,6 +19,7 @@ package org.opensilk.music.widgets;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -47,8 +48,10 @@ import hugo.weaving.DebugLog;
 public class PanelHeaderLayout extends FrameLayout {
 
     private static final int TRANSITION_DURATION = 200;
+    private static final int LIGHT_BG_ALHPA = 0xcc;
+    private static final int DARK_BG_ALHPA = 0x99;
 
-    private TransitionDrawable mBackground;
+    private int mBackgroundAlpha;
     private boolean isOpen;
     private FrameLayout mHeaderMenubar;
 
@@ -60,23 +63,16 @@ public class PanelHeaderLayout extends FrameLayout {
         this(context, attrs, 0);
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public PanelHeaderLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
         if (isLightTheme) {
-            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_light);
+            mBackgroundAlpha = LIGHT_BG_ALHPA;
+            setBackgroundColor(getResources().getColor(R.color.app_background_light));
         } else {
-            mBackground = (TransitionDrawable) getResources().getDrawable(R.drawable.header_background_dark);
-        }
-        mBackground.setId(1, 0x333);
-        mBackground.setCrossFadeEnabled(true);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            //noinspection deprecation
-            setBackgroundDrawable(mBackground);
-        } else {
-            setBackground(mBackground);
+            mBackgroundAlpha = DARK_BG_ALHPA;
+            setBackgroundColor(getResources().getColor(R.color.app_background_dark));
         }
     }
 
@@ -93,13 +89,9 @@ public class PanelHeaderLayout extends FrameLayout {
         isOpen = false;
     }
 
-    public void updateBackground(int color) {
-        mBackground.setDrawableByLayerId(0x333, new ColorDrawable(ThemeHelper.setColorAlpha(color, 0xB3))); //70%
-    }
-
     public void transitionToClosed() {
         if (isOpen) {
-            mBackground.reverseTransition(TRANSITION_DURATION * 2);
+            setBackgroundAlpha(mBackgroundAlpha, 0xff);
             mButtonBarOpen.setVisibility(GONE);
             mButtonBarClosed.setVisibility(VISIBLE);
             isOpen = false;
@@ -108,7 +100,7 @@ public class PanelHeaderLayout extends FrameLayout {
 
     public void transitionToOpen() {
         if (!isOpen) {
-            mBackground.startTransition(TRANSITION_DURATION * 2);
+            setBackgroundAlpha(0xff, mBackgroundAlpha);
             mButtonBarClosed.setVisibility(GONE);
             mButtonBarOpen.setVisibility(VISIBLE);
             isOpen = true;
@@ -116,18 +108,30 @@ public class PanelHeaderLayout extends FrameLayout {
     }
 
     public void makeClosed() {
-        mBackground.resetTransition();
+        getBackground().setAlpha(0xff);
         mButtonBarOpen.setVisibility(GONE);
         mButtonBarClosed.setVisibility(VISIBLE);
         isOpen = false;
     }
 
     public void makeOpen() {
-        mBackground.resetTransition();
-        mBackground.startTransition(0);
+        getBackground().setAlpha(mBackgroundAlpha);
         mButtonBarOpen.setVisibility(VISIBLE);
         mButtonBarClosed.setVisibility(GONE);
         isOpen = true;
+    }
+
+    private void setBackgroundAlpha(int from, int to) {
+        ValueAnimator animator = ValueAnimator.ofInt(from, to);
+//        animator.setDuration(TRANSITION_DURATION * 2);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                final int value = (Integer) animation.getAnimatedValue();
+                getBackground().setAlpha(value);
+            }
+        });
+        animator.start();
     }
 
     private Interpolator accelerator = new AccelerateInterpolator();
