@@ -142,6 +142,8 @@ dependencies {
 
     compile 'com.bugsense.trace:bugsense:3.6.1'
 
+    compile 'com.triggertrap:seekarc:1.0-SNAPSHOT@aar'
+
     compile project(':api')
 
     compile fileTree(dir: '../libs', include: ['*.jar'])

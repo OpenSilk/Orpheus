@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -32,6 +33,7 @@ import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.dialogs.SleepTimerDialog;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.activities.ProfileDialogActivity;
 import org.opensilk.music.ui.folder.FolderFragment;
@@ -240,5 +242,9 @@ public final class NavUtils {
                 Timber.e(e, "maybeClearBackstack()::popBackStackImmediate");
             }
         }
+    }
+
+    public static void openSleepTimerDialog(FragmentActivity context) {
+        new SleepTimerDialog().show(context.getSupportFragmentManager(), "SleepTimer");
     }
 }

@@ -34,6 +34,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.andrew.apollo.R;
+import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.meta.PluginInfo;
@@ -191,6 +192,7 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!isDrawerOpen()) {
             restoreActionBar();
+            getMenuInflater().inflate(R.menu.sleep_timer, menu);
             return super.onCreateOptionsMenu(menu);
         } else {
             showGlobalContextActionBar();
@@ -203,7 +205,13 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.menu_sleep_timer:
+                NavUtils.openSleepTimerDialog(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
