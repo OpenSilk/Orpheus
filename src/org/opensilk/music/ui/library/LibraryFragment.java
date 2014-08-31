@@ -316,28 +316,32 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
     private void initFolderFragment() {
         resolveCapabilities();
-        final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null);
-        Fragment f = FolderFragment.newInstance(li);
-        FragmentManager fm = getChildFragmentManager();
-        if (fm.getBackStackEntryCount() > 0) {
-            try {
-                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            } catch (IllegalStateException e) {
-                Timber.e(e, "initFolderFragment()::popBackStackImmediate");
+        if (isResumed()) {
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null);
+            Fragment f = FolderFragment.newInstance(li);
+            FragmentManager fm = getChildFragmentManager();
+            if (fm.getBackStackEntryCount() > 0) {
+                try {
+                    fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                } catch (IllegalStateException e) {
+                    Timber.e(e, "initFolderFragment()::popBackStackImmediate");
+                }
             }
+            fm.beginTransaction()
+                    .replace(R.id.container, f)
+                    .commit();
         }
-        fm.beginTransaction()
-                .replace(R.id.container, f)
-                .commit();
     }
 
     private void pushFolderFragment(String folderId) {
-        final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, folderId);
-        Fragment f = FolderFragment.newInstance(li);
-        getChildFragmentManager().beginTransaction()
-                .replace(R.id.container, f)
-                .addToBackStack(folderId)
-                .commit();
+        if (isResumed()) {
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, folderId);
+            Fragment f = FolderFragment.newInstance(li);
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.container, f)
+                    .addToBackStack(folderId)
+                    .commit();
+        }
     }
 
     public void openSearchFragment() {
