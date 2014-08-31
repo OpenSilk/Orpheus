@@ -22,61 +22,28 @@ import it.gmariotti.cardslib.library.view.CardView;
 /**
  * Created by drew on 3/17/14.
  */
-public class ThemedCardView extends CardView implements Palette.PaletteAsyncListener {
-
-    private static final int DESC_OVERLAY_ALPHA = 0xcc;
-    protected int mDescOverlayDefaultColor;
-    protected View mDescOverlay;
+public class ThemedCardView extends CardView {
 
     public ThemedCardView(Context context) {
         super(context);
-        getOverlayColor(context);
     }
 
     public ThemedCardView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        getOverlayColor(context);
     }
 
     public ThemedCardView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        getOverlayColor(context);
-    }
-
-    void getOverlayColor(Context context) {
-        mDescOverlayDefaultColor = ThemeHelper.setColorAlpha(ThemeHelper.getAccentColor(context), DESC_OVERLAY_ALPHA);
     }
 
     @Override
-    protected void buildUI() {
-        super.buildUI();
+    protected void retrieveLayoutIDs() {
+        super.retrieveLayoutIDs();
         boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
         if (isLightTheme) {
             changeBackgroundResourceId(R.drawable.card_background_light);
         } else {
             changeBackgroundResourceId(R.drawable.card_background_dark);
-        }
-        mDescOverlay = findViewById(R.id.griditem_desc_overlay);
-        if (mDescOverlay != null) {
-            //reset color for recycle
-            setDescOverlayBackground(mDescOverlayDefaultColor, false);
-            ArtworkImageView img = ButterKnife.findById(this, R.id.artwork_thumb);
-            if (img != null) {
-                img.setPaletteListener(this);
-            }
-        }
-    }
-
-    @Override
-    public void onGenerated(Palette palette) {
-        if (mDescOverlay != null) {
-            PaletteItem item = PaletteUtil.getBackgroundItem(palette);
-            if (item != null) {
-                final int backgroundColor = ThemeHelper.setColorAlpha(item.getRgb(), DESC_OVERLAY_ALPHA);
-                if (backgroundColor != mDescOverlayDefaultColor) {
-                    setDescOverlayBackground(backgroundColor, true);
-                }
-            }
         }
     }
 
@@ -96,18 +63,4 @@ public class ThemedCardView extends CardView implements Palette.PaletteAsyncList
         }
     }
 
-    protected void setDescOverlayBackground(int color, boolean animate) {
-        if (mDescOverlay != null) {
-            if (animate) {
-                final TransitionDrawable overlayBackground = new TransitionDrawable(new Drawable[] {
-                        new ColorDrawable(mDescOverlayDefaultColor),
-                        new ColorDrawable(color),
-                });
-                overlayBackground.startTransition(200);
-                mDescOverlay.setBackgroundDrawable(overlayBackground);
-            } else {
-                mDescOverlay.setBackgroundColor(color);
-            }
-        }
-    }
 }

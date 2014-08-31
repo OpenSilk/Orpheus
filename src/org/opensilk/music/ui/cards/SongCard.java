@@ -17,6 +17,7 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,6 +54,7 @@ public class SongCard extends AbsBundleableCard<Song> {
     Bus mBus; //Injected by adapter
 
     protected ArtworkImageView mArtwork;
+    protected View mDescOverlay;
 
     private PriorityAsyncTask mArtLoaderTask;
 
@@ -73,6 +75,7 @@ public class SongCard extends AbsBundleableCard<Song> {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         mArtwork = ButterKnife.findById(view, R.id.artwork_thumb);
+        mDescOverlay = ButterKnife.findById(view, R.id.griditem_desc_overlay);
         super.setupInnerViewElements(parent, view);
     }
 
@@ -90,6 +93,9 @@ public class SongCard extends AbsBundleableCard<Song> {
             mCardSubTitle.setText(mData.artistName);
         }
         if (mArtwork != null) {
+            if (isGridStyle()) {
+                mArtwork.setPaletteListener(GridOverlayHelper.create(getContext(), mDescOverlay));
+            }
             if (mData instanceof LocalSong) {
                 mArtLoaderTask = new MultipleArtworkLoaderTask(getContext(), new long[]{((LocalSong) mData).albumId}, mArtwork).execute();
             } else {
@@ -105,7 +111,10 @@ public class SongCard extends AbsBundleableCard<Song> {
     @Override
     protected void cleanupViews() {
         super.cleanupViews();
-        mArtwork = null;
+        if (mArtwork != null) {
+            mArtwork.setPaletteListener(null);
+            mArtwork = null;
+        }
     }
 
     @Override

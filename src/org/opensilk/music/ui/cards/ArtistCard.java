@@ -17,9 +17,11 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
@@ -37,6 +39,7 @@ import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
 import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -50,6 +53,8 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
+    // no inject
+    protected View mDescOverlay;
 
     public ArtistCard(Context context, Artist data) {
         super(context, data, R.layout.listcard_artwork_inner);
@@ -63,6 +68,14 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
                 mBus.post(new ArtistCardClick(CardEvent.OPEN, mData));
             }
         });
+    }
+
+    @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        if (isGridStyle()) {
+            mDescOverlay = ButterKnife.findById(view, R.id.griditem_desc_overlay);
+        }
+        super.setupInnerViewElements(parent, view);
     }
 
     @Override
@@ -82,7 +95,16 @@ public class ArtistCard extends AbsBundleableCard<Artist> {
         } else {
             mCardSubTitle.setVisibility(View.GONE);
         }
+        if (isGridStyle()) {
+            mArtwork.setPaletteListener(GridOverlayHelper.create(getContext(), mDescOverlay));
+        }
         ArtworkManager.loadImage(new ArtInfo(mData.name, null, null), mArtwork);
+    }
+
+    @Override
+    protected void cleanupViews() {
+        mArtwork.setPaletteListener(null);
+        super.cleanupViews();
     }
 
     @Override

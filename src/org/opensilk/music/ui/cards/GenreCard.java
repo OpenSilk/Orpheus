@@ -17,6 +17,7 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.support.v7.graphics.Palette;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,7 @@ public class GenreCard extends AbsGenericCard<Genre> {
     protected ArtworkImageView mArtwork2;
     protected ArtworkImageView mArtwork3;
     protected ArtworkImageView mArtwork4;
+    protected View mDescOverlay;
 
     private PriorityAsyncTask mArtLoaderTask;
 
@@ -76,6 +78,7 @@ public class GenreCard extends AbsGenericCard<Genre> {
         mArtwork2 = ButterKnife.findById(view, R.id.artwork_thumb2);
         mArtwork3 = ButterKnife.findById(view, R.id.artwork_thumb3);
         mArtwork4 = ButterKnife.findById(view, R.id.artwork_thumb4);
+        mDescOverlay = ButterKnife.findById(view, R.id.griditem_desc_overlay);
         super.setupInnerViewElements(parent, view);
     }
 
@@ -85,6 +88,9 @@ public class GenreCard extends AbsGenericCard<Genre> {
                 + ", " + MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, mData.mSongNumber);
         mCardSubTitle.setText(l2);
         if (mData.mAlbumNumber > 0){
+            if (isGridStyle()) {
+                mArtwork.setPaletteListener(GridOverlayHelper.create(getContext(), mDescOverlay));
+            }
             if (mArtwork4 != null && mArtwork3 != null && mArtwork2 != null) {
                 mArtLoaderTask = new MultipleArtworkLoaderTask(getContext(), mData.mAlbumIds, mArtwork, mArtwork2, mArtwork3, mArtwork4).execute();
             } else if (mArtwork2 != null) {
@@ -97,6 +103,7 @@ public class GenreCard extends AbsGenericCard<Genre> {
 
     @Override
     protected void cleanupViews() {
+        mArtwork.setPaletteListener(null);
         super.cleanupViews();
         mArtwork2 = null;
         mArtwork3 = null;

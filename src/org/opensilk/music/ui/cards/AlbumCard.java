@@ -17,13 +17,16 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.ArtInfo;
@@ -36,6 +39,7 @@ import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
 import butterknife.InjectView;
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -49,6 +53,8 @@ public class AlbumCard extends AbsBundleableCard<Album> {
 
     @InjectView(R.id.artwork_thumb)
     protected ArtworkImageView mArtwork;
+    // no inject
+    protected View mDescOverlay;
 
     public AlbumCard(Context context, Album data) {
         super(context, data, R.layout.listcard_artwork_inner);
@@ -65,6 +71,14 @@ public class AlbumCard extends AbsBundleableCard<Album> {
     }
 
     @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        if (isGridStyle()) {
+            mDescOverlay = ButterKnife.findById(view, R.id.griditem_desc_overlay);
+        }
+        super.setupInnerViewElements(parent, view);
+    }
+
+    @Override
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
         if (!TextUtils.isEmpty(mData.artistName)) {
@@ -73,7 +87,16 @@ public class AlbumCard extends AbsBundleableCard<Album> {
         } else {
             mCardSubTitle.setVisibility(View.GONE);
         }
+        if (isGridStyle()) {
+            mArtwork.setPaletteListener(GridOverlayHelper.create(getContext(), mDescOverlay));
+        }
         ArtworkManager.loadImage(new ArtInfo(mData.artistName, mData.name, mData.artworkUri), mArtwork);
+    }
+
+    @Override
+    protected void cleanupViews() {
+        mArtwork.setPaletteListener(null);
+        super.cleanupViews();
     }
 
     @Override
