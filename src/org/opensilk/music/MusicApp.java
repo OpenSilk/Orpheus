@@ -17,8 +17,11 @@
 
 package org.opensilk.music;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
@@ -65,6 +68,11 @@ public class MusicApp extends Application implements DaggerInjector {
     public static int sDefaultThumbnailWidthPx;
 
     /**
+     * Disable some features depending on device type
+     */
+    public static boolean sIsLowEndHardware;
+
+    /**
      * Contains the object graph, we use a singleton instance
      * to obtain the graph so we can inject our countent providers
      * which will be created before onCreate() is called.
@@ -99,6 +107,7 @@ public class MusicApp extends Application implements DaggerInjector {
          */
         sDefaultMaxImageWidthPx = getMinDisplayWidth(getApplicationContext());
         sDefaultThumbnailWidthPx = convertDpToPx(getApplicationContext(), DEFAULT_THUMBNAIL_SIZE_DP);
+        sIsLowEndHardware = isLowEndHardware(getApplicationContext());
 
         /*
          * XXXX Note to future drew. DO NOT INIT SINGLETONS HERE. They will be created twice!
@@ -174,6 +183,15 @@ public class MusicApp extends Application implements DaggerInjector {
         DisplayMetrics metrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(metrics);
         return Math.min(metrics.widthPixels, metrics.heightPixels);
+    }
+
+    public static boolean isLowEndHardware(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            ActivityManager am = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+            return am.isLowRamDevice();
+        } else {
+            return Runtime.getRuntime().availableProcessors() == 1;
+        }
     }
 
     private static class ReleaseTree extends Timber.HollowTree {

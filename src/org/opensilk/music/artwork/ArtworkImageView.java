@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import com.andrew.apollo.BuildConfig;
 import com.android.volley.VolleyError;
 
+import org.opensilk.music.MusicApp;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkLoader.ImageContainer;
 import org.opensilk.music.artwork.ArtworkLoader.ImageListener;
@@ -113,8 +114,10 @@ public class ArtworkImageView extends ImageView {
      * Sets the Palette listener to be called when image is loaded
      */
     public void setPaletteListener(Palette.PaletteAsyncListener l) {
-        cancelPaletteTask();
-        mPaletteListener = l;
+        if (!MusicApp.sIsLowEndHardware) {
+            cancelPaletteTask();
+            mPaletteListener = l;
+        }
     }
 
     /**
