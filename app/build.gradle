@@ -130,10 +130,10 @@ dependencies {
     compile 'com.squareup.dagger:dagger:1.2.+'
     compile 'org.opensilk.silkdagger:libsilkdagger:0.2.2-SNAPSHOT@aar'
 
-//    compile 'com.sothree.slidinguppanel:library:1.0.0-SNAPSHOT@aar'
-    compile project(':../AndroidSlidingUpPanel:library')
+    compile 'com.sothree.slidinguppanel:library:2.0-SNAPSHOT@aar'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
     compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
+    compile 'com.triggertrap:seekarc:1.0-SNAPSHOT@aar'
 
     compile 'org.opensilk:silkcastservice:0.2.2-SNAPSHOT@aar'
     compile 'org.opensilk:silkfilebrowser:0.1.1-SNAPSHOT@aar'
@@ -141,8 +141,6 @@ dependencies {
 //    compile project(':../SilkFileBrowser:lib_sfb')
 
     compile 'com.bugsense.trace:bugsense:3.6.1'
-
-    compile 'com.triggertrap:seekarc:1.0-SNAPSHOT@aar'
 
     compile project(':api')
 
