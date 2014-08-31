@@ -25,14 +25,18 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.text.TextUtils;
+import android.view.Display;
+import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.andrew.apollo.MusicPlaybackService;
@@ -45,6 +49,8 @@ import org.opensilk.music.ui.activities.HomeSlidingActivity;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 3/31/14.
@@ -73,6 +79,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     private int mRepeatMode;
     private boolean mIsPlaying;
     private Bitmap mArtwork;
+    private int mAllocUpperBound;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -98,6 +105,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         if (mUpdateLooper != null) {
             mUpdateHandler = new Handler(mUpdateLooper);
         }
+        mAllocUpperBound = computeMaximumWidgetBitmapMemory();
     }
 
     @Override
@@ -144,10 +152,25 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         mRepeatMode = MusicUtils.getRepeatMode();
         mIsPlaying = MusicUtils.isPlaying();
         mArtwork = mArtworkProvider.getArtworkThumbnail(albumArtistName, albumName);
-
+        final int bitmapSize = getBitmapSize(mArtwork);
+        Timber.i("Artwork size = %d, allocSize = %d, free = %d", bitmapSize, mAllocUpperBound, mAllocUpperBound - bitmapSize);
+        if (bitmapSize >= mAllocUpperBound) {
+            Timber.i("Artwork too large: %d > %d", bitmapSize, mAllocUpperBound);
+            try {
+                Bitmap tmp = Bitmap.createScaledBitmap(mArtwork, mArtwork.getWidth()/2, mArtwork.getHeight()/2, false);
+                Timber.i("Artwork scaled down: new size = %d", getBitmapSize(tmp));
+                mArtwork = tmp;
+            } catch (OutOfMemoryError e) {
+                return;
+            }
+        }
         RemoteViews views = createView(appId, widgetType);
         if (views != null) {
-            mAppWidgetManager.updateAppWidget(appId, views);
+            try {
+                mAppWidgetManager.updateAppWidget(appId, views);
+            } catch (IllegalArgumentException e) {
+                Timber.e(e, "Failed to update widget %d", appId);
+            }
         }
         stopSelf(startId); //Will shut us down when last item is processed
     }
@@ -275,6 +298,21 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         return PendingIntent.getService(context, 0, intent, 0);
     }
 
+    private int computeMaximumWidgetBitmapMemory() {
+        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return 6 * size.x *size.y;
+    }
+
+    private static int getBitmapSize(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            return bitmap.getAllocationByteCount();
+        } else {
+            return bitmap.getByteCount();
+        }
+    }
 
     /*
      * Service Connection callbacks
