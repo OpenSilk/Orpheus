@@ -208,8 +208,6 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         }
 
         RemoteViews views = new RemoteViews(getPackageName(), layoutId);
-        ComponentName serviceName = new ComponentName(this, MusicPlaybackService.class);
-        PendingIntent pendingIntent;
 
         /* Album artwork -- set for all widgets */
         if (mArtwork != null) {
@@ -218,7 +216,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
             views.setImageViewResource(R.id.widget_album_art, R.drawable.default_artwork);
         }
         if (widget.compareTo(MusicWidget.ULTRA_MINI) > 0) {
-            pendingIntent = PendingIntent.getActivity(this, 0,
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
                     new Intent(this, HomeSlidingActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_album_art, pendingIntent);
         }
@@ -226,34 +224,24 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         /* Pause / Play -- set for all widgets */
         views.setImageViewResource(R.id.widget_play, mIsPlaying ?
                 R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
-        pendingIntent = buildPendingIntent(this, MusicPlaybackService.TOGGLEPAUSE_ACTION, serviceName);
-        views.setOnClickPendingIntent(R.id.widget_play, pendingIntent);
-
-        if (widget == MusicWidget.ULTRA_MINI) { // Ultra Mini only
-            views.setOnClickPendingIntent(R.id.widget_mask, pendingIntent);
-        }
+        views.setOnClickPendingIntent(R.id.widget_play, buildPendingIntent(MusicPlaybackService.TOGGLEPAUSE_ACTION));
 
         /* Next / Prev */
         if (widget.compareTo(MusicWidget.MINI) >= 0) { // Mini, Small, Large
-            pendingIntent = buildPendingIntent(this, MusicPlaybackService.PREVIOUS_ACTION, serviceName);
-            views.setOnClickPendingIntent(R.id.widget_previous, pendingIntent);
-            pendingIntent = buildPendingIntent(this, MusicPlaybackService.NEXT_ACTION, serviceName);
-            views.setOnClickPendingIntent(R.id.widget_next, pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_previous, buildPendingIntent(MusicPlaybackService.PREVIOUS_ACTION));
+            views.setOnClickPendingIntent(R.id.widget_next, buildPendingIntent(MusicPlaybackService.NEXT_ACTION));
         }
 
         /* Artist name and song title */
         if (widget.compareTo(MusicWidget.SMALL) >= 0) { //Small, Large
-
             views.setTextViewText(R.id.widget_artist_name, mArtistName);
             views.setTextViewText(R.id.widget_song_title, mTrackName);
         }
 
         /* Shuffle / Repeat */
         if (widget == MusicWidget.LARGE) {
-            pendingIntent = buildPendingIntent(this, MusicPlaybackService.SHUFFLE_ACTION, serviceName);
-            views.setOnClickPendingIntent(R.id.widget_shuffle, pendingIntent);
-            pendingIntent = buildPendingIntent(this, MusicPlaybackService.REPEAT_ACTION, serviceName);
-            views.setOnClickPendingIntent(R.id.widget_repeat, pendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_shuffle, buildPendingIntent(MusicPlaybackService.SHUFFLE_ACTION));
+            views.setOnClickPendingIntent(R.id.widget_repeat, buildPendingIntent(MusicPlaybackService.REPEAT_ACTION));
 
             Drawable drawable;
 
@@ -291,11 +279,9 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         return views;
     }
 
-    protected PendingIntent buildPendingIntent(Context context, String action,
-                                               ComponentName serviceName) {
-        Intent intent = new Intent(action);
-        intent.setComponent(serviceName);
-        return PendingIntent.getService(context, 0, intent, 0);
+    protected PendingIntent buildPendingIntent(String action) {
+        Intent intent = new Intent(action).setComponent(new ComponentName(this, MusicPlaybackService.class));
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private int computeMaximumWidgetBitmapMemory() {
