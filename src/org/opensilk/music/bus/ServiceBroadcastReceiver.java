@@ -35,6 +35,8 @@ import org.opensilk.music.bus.events.QueueChanged;
 import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.muzei.MuzeiService;
 
+import timber.log.Timber;
+
 import static com.google.android.apps.muzei.api.internal.ProtocolConstants.ACTION_HANDLE_COMMAND;
 import static com.google.android.apps.muzei.api.internal.ProtocolConstants.EXTRA_COMMAND_ID;
 
@@ -52,6 +54,7 @@ public class ServiceBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
+        Timber.d("Received action=%s", action);
         if (action != null) {
             switch (action) {
                 case MusicPlaybackService.META_CHANGED:
