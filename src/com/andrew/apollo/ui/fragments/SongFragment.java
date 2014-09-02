@@ -12,13 +12,11 @@
 package com.andrew.apollo.ui.fragments;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
-import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -272,11 +270,7 @@ public class SongFragment extends Fragment implements LoaderCallbacks<List<Song>
     @Override
     public void onItemClick(final AdapterView<?> parent, final View view, final int position,
             final long id) {
-        Cursor cursor = SongLoader.makeSongCursor(getActivity());
-        final long[] list = MusicUtils.getSongListForCursor(cursor);
-        MusicUtils.playAll(getActivity(), list, position, false);
-        cursor.close();
-        cursor = null;
+        MusicUtils.playAllFromUserItemClick(getActivity(), mAdapter, position);
     }
 
     /**
