@@ -12,7 +12,6 @@
 package com.andrew.apollo.ui.fragments.profile;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
@@ -285,14 +284,7 @@ public class FavoriteFragment extends Fragment implements LoaderCallbacks<List<S
     @Override
     public void onItemClick(final AdapterView<?> parent, final View view, final int position,
             final long id) {
-        if (position == 0) {
-            return;
-        }
-        Cursor cursor = FavoritesLoader.makeFavoritesCursor(getActivity());
-        final long[] list = MusicUtils.getSongListForCursor(cursor);
-        MusicUtils.playAll(getActivity(), list, position - 1, false);
-        cursor.close();
-        cursor = null;
+        MusicUtils.playAllFromUserItemClick(getActivity(), mAdapter, position);
     }
 
     /**

@@ -36,6 +36,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.SubMenu;
+import android.widget.ArrayAdapter;
 
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
@@ -45,6 +46,7 @@ import com.andrew.apollo.loaders.LastAddedLoader;
 import com.andrew.apollo.loaders.PlaylistLoader;
 import com.andrew.apollo.loaders.SongLoader;
 import com.andrew.apollo.menu.FragmentMenuItems;
+import com.andrew.apollo.model.Song;
 import com.andrew.apollo.provider.FavoritesStore;
 import com.andrew.apollo.provider.FavoritesStore.FavoriteColumns;
 import com.andrew.apollo.provider.RecentStore;
@@ -52,8 +54,6 @@ import com.devspark.appmsg.AppMsg;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Formatter;
-import java.util.Locale;
 import java.util.WeakHashMap;
 
 /**
@@ -1366,4 +1366,33 @@ public final class MusicUtils {
         // Notify the lists to update
         refresh();
     }
+
+    public static void playAllFromUserItemClick(final Context context,
+            final ArrayAdapter<Song> adapter, final int position) {
+        if (adapter.getViewTypeCount() > 1 && position == 0) {
+            return;
+        }
+        final long[] list = MusicUtils.getSongListForAdapter(adapter);
+        int pos = adapter.getViewTypeCount() > 1 ? position - 1 : position;
+        if (list.length == 0) {
+            pos = 0;
+        }
+        MusicUtils.playAll(context, list, pos, false);
+    }
+
+    private static final long[] getSongListForAdapter(ArrayAdapter<Song> adapter) {
+        if (adapter == null) {
+            return sEmptyList;
+        }
+        long[] list = {};
+        if (adapter != null) {
+            int count = adapter.getCount() - (adapter.getViewTypeCount() > 1 ? 1 : 0);
+            list = new long[count];
+            for (int i = 0; i < count; i++) {
+                list[i] = ((Song) adapter.getItem(i)).mSongId;
+            }
+        }
+        return list;
+    }
+
 }

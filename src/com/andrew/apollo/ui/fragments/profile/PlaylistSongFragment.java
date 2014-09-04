@@ -12,7 +12,6 @@
 package com.andrew.apollo.ui.fragments.profile;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -316,15 +315,7 @@ public class PlaylistSongFragment extends Fragment implements LoaderCallbacks<Li
     @Override
     public void onItemClick(final AdapterView<?> parent, final View view, final int position,
             final long id) {
-        if (position == 0) {
-            return;
-        }
-        Cursor cursor = PlaylistSongLoader.makePlaylistSongCursor(getActivity(),
-                getArguments().getLong(Config.ID));
-        final long[] list = MusicUtils.getSongListForCursor(cursor);
-        MusicUtils.playAll(getActivity(), list, position - 1, false);
-        cursor.close();
-        cursor = null;
+        MusicUtils.playAllFromUserItemClick(getActivity(), mAdapter, position);
     }
 
     /**
