@@ -215,7 +215,13 @@ public final class PreferenceUtils {
      * @return The sort order used for the artist list in {@link ArtistFragment}
      */
     public final String getArtistSortOrder() {
-        return mPreferences.getString(ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z);
+        // This is only to prevent return an invalid field name caused by bug BUGDUMP-21136
+        final String defaultSortKey = SortOrder.ArtistSortOrder.ARTIST_A_Z;
+        String key = mPreferences.getString(ARTIST_SORT_ORDER, defaultSortKey);
+        if (key.equals(SortOrder.ArtistSongSortOrder.SONG_FILENAME)) {
+            key = defaultSortKey;
+        }
+        return key;
     }
 
     /**
