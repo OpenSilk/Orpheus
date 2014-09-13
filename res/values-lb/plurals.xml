@@ -17,6 +17,10 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <plurals name="Nartists">
+    <item quantity="one"><xliff:g id="count">%d</xliff:g> Artist</item>
+    <item quantity="other"><xliff:g id="count">%d</xliff:g> Artisten</item>
+  </plurals>
   <plurals name="Nalbums">
     <item quantity="one"><xliff:g id="count">%d</xliff:g> Album</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> Albumen</item>
@@ -24,5 +28,13 @@
   <plurals name="Nsongs">
     <item quantity="one"><xliff:g id="count">%d</xliff:g> Lidd</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> Lidder</item>
+  </plurals>
+  <plurals name="NNNtracksfromplaylist">
+    <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> Lidd aus der Playlist erausgeholl.</item>
+    <item quantity="other"><xliff:g id="number" example="1">%d</xliff:g> Lidder aus der Playlist erausgeholl.</item>
+  </plurals>
+  <plurals name="NNNtracksdeleted">
+    <item quantity="one"><xliff:g id="songs_to_delete" example="1">%d</xliff:g> Lidd gouf geläscht.</item>
+    <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g> Lidder goufe geläscht.</item>
   </plurals>
 </resources>
