@@ -35,6 +35,7 @@ import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.home.SearchFragment;
 
+import butterknife.ButterKnife;
 import timber.log.Timber;
 
 import static android.app.SearchManager.QUERY;
@@ -59,7 +60,7 @@ public class BaseSlidingActivity extends BaseActivity implements
         super.onCreate(savedInstanceState);
 
         // Initialize the sliding pane
-        mSlidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+        mSlidingPanel = ButterKnife.findById(this, R.id.sliding_layout);
         mSlidingPanel.setDragView(findViewById(R.id.panel_header));
         mSlidingPanel.setPanelSlideListener(this);
         mSlidingPanel.setEnableDragViewTouchEvents(true);

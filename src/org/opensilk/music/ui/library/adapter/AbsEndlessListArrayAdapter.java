@@ -152,7 +152,7 @@ public abstract class AbsEndlessListArrayAdapter extends CardArrayAdapter implem
     }
 
     public Bundleable getItemData(int position) {
-        return ((AbsBundleableCard) getItem(position)).getData();
+        return ((AbsBundleableCard<?>) getItem(position)).getData();
     }
 
     public boolean isOnFirstLoad() {
