@@ -32,7 +32,7 @@ import org.opensilk.music.ui.profile.SongGroupFragment;
 /**
  * Created by drew on 6/20/14.
  */
-public class ProfileDialogActivity extends BaseDialogActivity {
+public class ProfileDialogActivity extends BaseSlidingDialogActivity {
 
     public static final String ACTION_ARTIST = "open_artist";
     public static final String ACTION_ALBUM = "open_album";

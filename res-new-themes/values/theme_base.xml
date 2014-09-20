@@ -52,12 +52,15 @@
     </style>
 
     <style name="Theme.Dialog.Light" parent="Theme.Dialog.LightBase">
-
+        <item name="colorPrimary">@android:color/white</item>
     </style>
 
     <style name="Theme.Dialog.Light.Panel">
-        <!--needed to allow sliding up pane-->
+        <!-- ActionBar overrides -->
+        <item name="android:actionBarStyle">@style/ActionBar.Light.Panel</item>
         <item name="windowActionBarOverlay">true</item>
+        <!-- Panel background -->
+        <item name="nowPlayingBackground">@drawable/drop_shadow_light</item>
     </style>
 
     <!--Common styles for dark theme-->
@@ -93,12 +96,15 @@
     </style>
 
     <style name="Theme.Dialog.Dark" parent="Theme.Dialog.DarkBase">
-
+        <item name="colorPrimary">@android:color/black</item>
     </style>
 
     <style name="Theme.Dialog.Dark.Panel">
-        <!--needed to allow sliding up pane-->
+        <!-- ActionBar overrides -->
+        <item name="android:actionBarStyle">@style/ActionBar.Dark.Panel</item>
         <item name="windowActionBarOverlay">true</item>
+        <!-- Panel background -->
+        <item name="nowPlayingBackground">@drawable/drop_shadow_dark</item>
     </style>
 
     <!-- End common themes -->
