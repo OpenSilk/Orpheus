@@ -34,7 +34,6 @@
     <string name="menu_play_all">Play all</string>
     <string name="menu_sort_by">Sort by</string>
     <string name="menu_shop">Shop for themes</string>
-    <string name="menu_clear_recents">Clear recent</string>
     <string name="menu_clear_queue">Clear queue</string>
     <string name="menu_save_queue">Save queue</string>
     <string name="menu_share">Share</string>
@@ -50,7 +49,6 @@
     <string name="add_to_favorites">Add to favorites</string>
     <string name="add_to_queue">Add to queue</string>
     <string name="remove_from_favorites">Remove from favorites</string>
-    <string name="remove_from_recent">Remove from recent</string>
     <string name="remove_from_queue">Remove from queue</string>
 
     <!-- Sort orders -->
@@ -115,7 +113,6 @@
     <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> pinned to your home screen</string>
     <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> could not be pinned to your home screen</string>
     <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' set as ringtone</string>
-    <string name="playlist_renamed">Playlist renamed</string>
     <string name="theme_set"><xliff:g id="name">%s</xliff:g> set as the theme</string>
 
     <!-- Settings -->
