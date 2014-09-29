@@ -22,6 +22,7 @@
         <changelogtext>Update tablet layout</changelogtext>
         <changelogtext>Add sleep timer</changelogtext>
         <changelogtext>Improve list scrolling performance</changelogtext>
+        <changelogtext>Add now playing panel back to profiles</changelogtext>
     </changelogversion>
 
     <changelogversion versionName="0.5.0">
