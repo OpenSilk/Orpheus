@@ -17,16 +17,15 @@
 package org.opensilk.music.ui.cards;
 
 import android.content.Context;
-import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;
 
@@ -55,6 +54,7 @@ public class SongCard extends AbsBundleableCard<Song> {
 
     protected ArtworkImageView mArtwork;
     protected View mDescOverlay;
+    protected TextView mCardInfo1;
 
     private PriorityAsyncTask mArtLoaderTask;
 
@@ -76,21 +76,25 @@ public class SongCard extends AbsBundleableCard<Song> {
     public void setupInnerViewElements(ViewGroup parent, View view) {
         mArtwork = ButterKnife.findById(view, R.id.artwork_thumb);
         mDescOverlay = ButterKnife.findById(view, R.id.griditem_desc_overlay);
+        if (getSimpleLayout() == getInnerLayout()) {
+            mCardInfo1 = ButterKnife.findById(view, R.id.card_info1);
+        }
         super.setupInnerViewElements(parent, view);
     }
 
     @Override
     protected void onInnerViewSetup() {
         mCardTitle.setText(mData.name);
+        mCardSubTitle.setText(mData.artistName);
         if (getSimpleLayout() == getInnerLayout()) {
-            if (mData.duration > 0) {
-                mCardSubTitle.setVisibility(View.VISIBLE);
-                mCardSubTitle.setText(MusicUtils.makeTimeString(getContext(), mData.duration));
-            } else {
-                mCardSubTitle.setVisibility(View.GONE);
+            if (mCardInfo1 != null) {
+                if (mData.duration > 0) {
+                    mCardInfo1.setVisibility(View.VISIBLE);
+                    mCardInfo1.setText(MusicUtils.makeTimeString(getContext(), mData.duration));
+                } else {
+                    mCardInfo1.setVisibility(View.GONE);
+                }
             }
-        } else {
-            mCardSubTitle.setText(mData.artistName);
         }
         if (mArtwork != null) {
             if (isGridStyle()) {
