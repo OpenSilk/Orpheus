@@ -131,6 +131,11 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
+    <style name="SlidingPanelDialog" parent="SlidingPanelBase">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
     <!--PANEL HEADER-->
 
     <style name="TextAppearancePanelHeaderBase" parent="@android:style/TextAppearance.Holo.Medium">

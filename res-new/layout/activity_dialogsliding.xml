@@ -34,7 +34,7 @@
         android:layout_height="match_parent" />
 
     <FrameLayout
-        style="@style/SlidingPanel">
+        style="@style/SlidingPanelDialog">
 
         <!-- Sliding content -->
         <fragment
