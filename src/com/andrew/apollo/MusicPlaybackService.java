@@ -394,6 +394,8 @@ public class MusicPlaybackService extends Service {
 
     private int mNextPlayPos = -1;
 
+    private long mLastKnowPosition = 0;
+
     private int mOpenFailedCounter = 0;
 
     private int mMediaMountedCount = 0;
@@ -2335,11 +2337,12 @@ public class MusicPlaybackService extends Service {
             if (player != null && player.isInitialized()) {
                 final long duration = duration();
                 // if not repeating and only 2 seconds left in current track goToNext
-                if (mRepeatMode != REPEAT_CURRENT && duration > 2000
-                        && player.position() >= duration - 2000) {
-                    gotoNext(true);
-                    return;
-                }
+// TODO revisit (causing Stack Overflow: circumstances unknown)
+//                if (mRepeatMode != REPEAT_CURRENT && duration > 2000
+//                        && player.position() >= duration - 2000) {
+//                    gotoNext(true);
+//                    return;
+//                }
 
                 player.play();
                 mPlayerHandler.removeMessages(MusicPlayerHandler.FADEDOWN);
@@ -2758,8 +2761,6 @@ public class MusicPlaybackService extends Service {
             mCastManager = null;
         }
     };
-
-    private long mLastKnowPosition;
 
     /**
      * When the ui is running the progress bar updater task will
