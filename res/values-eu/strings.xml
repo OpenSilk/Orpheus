@@ -29,7 +29,6 @@
   <string name="menu_play_all">Dena erreproduzitu</string>
   <string name="menu_sort_by">Honela ordenatu</string>
   <string name="menu_shop">Gaiak deskargatu</string>
-  <string name="menu_clear_recents">Berrikiak garbitu</string>
   <string name="menu_clear_queue">Ilara garbitu</string>
   <string name="menu_save_queue">Ilara gorde</string>
   <string name="menu_share">Elkarbanatu</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Gogokoetara gehitu</string>
   <string name="add_to_queue">Ilarara gehitu</string>
   <string name="remove_from_favorites">Gogokoetatik kendu</string>
-  <string name="remove_from_recent">Berrikietatik kendu</string>
   <string name="remove_from_queue">Ilaratik kendu</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> mahaigainera gehituta</string>
   <string name="could_not_be_pinned_to_home_screen">Ezin izan da <xliff:g id="name">%s</xliff:g> mahaigainera gehitu</string>
   <string name="set_as_ringtone">\u00AB<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\u00BB dei doinu bezala ezarrita</string>
-  <string name="playlist_renamed">Zerrenda berrizendatua</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> gai bezala ezarria</string>
   <string name="settings_ui_category">Itxura</string>
   <string name="settings_storage_category">Biltegiratzea</string>

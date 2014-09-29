@@ -29,7 +29,6 @@
   <string name="menu_play_all">Αναπαραγωγή όλων</string>
   <string name="menu_sort_by">Ταξινόμηση κατά</string>
   <string name="menu_shop">Κατάστημα για θέματα</string>
-  <string name="menu_clear_recents">Εκκαθάριση πρόσφατων</string>
   <string name="menu_clear_queue">Εκκαθάριση ουράς</string>
   <string name="menu_save_queue">Αποθήκευση ουράς</string>
   <string name="menu_share">Κοινή χρήση</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Προσθήκη στα αγαπημένα</string>
   <string name="add_to_queue">Προσθήκη στην ουρά</string>
   <string name="remove_from_favorites">Αφαίρεση από τα αγαπημένα</string>
-  <string name="remove_from_recent">Αφαίρεση από τα πρόσφατα</string>
   <string name="remove_from_queue">Αφαίρεση από την ουρά</string>
   <string name="sort_order_entry_az">Α-Ω</string>
   <string name="sort_order_entry_za">Ω-Α</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> καρφιτσώθηκε στην αρχική οθόνη σας</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> δεν μπορεί να καρφιτσωθεί στην αρχική οθόνη σας</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' ορίστηκε ως ήχος κλήσης</string>
-  <string name="playlist_renamed">Η λίστα μετονομάστηκε</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> ορίστηκε ως θέμα</string>
   <string name="settings_ui_category">Διεπαφή</string>
   <string name="settings_storage_category">Αποθηκευτικός χώρος</string>

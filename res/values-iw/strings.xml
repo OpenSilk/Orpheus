@@ -29,7 +29,6 @@
   <string name="menu_play_all">נגן את כולם</string>
   <string name="menu_sort_by">מיין על פי</string>
   <string name="menu_shop">קנה ערכות נושא</string>
-  <string name="menu_clear_recents">נקה רשימת אחרונים</string>
   <string name="menu_clear_queue">נקה תור השמעה</string>
   <string name="menu_save_queue">שמור תור השמעה</string>
   <string name="menu_share">שתף</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">הוסף למועדפים</string>
   <string name="add_to_queue">הוסף לתור השמעה</string>
   <string name="remove_from_favorites">הסר מרשימת מועדפים</string>
-  <string name="remove_from_recent">הסר מרשימת האחרונים</string>
   <string name="remove_from_queue">הסר מתור השמעה</string>
   <string name="sort_order_entry_az">א-ת</string>
   <string name="sort_order_entry_za">ת-א</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> הוצמד למסך הבית</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> לא הצליח להיצמד למסך הבית</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g> נקבע כצלצול</string>
-  <string name="playlist_renamed">שם רשימת ההשמעה שונה</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> קבע כערכת נושא</string>
   <string name="settings_ui_category">ממשק</string>
   <string name="settings_storage_category">זיכרון</string>

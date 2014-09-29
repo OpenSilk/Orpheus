@@ -29,7 +29,6 @@
   <string name="menu_play_all">全部播放</string>
   <string name="menu_sort_by">排序方式</string>
   <string name="menu_shop">购买主题</string>
-  <string name="menu_clear_recents">清除最近播放列表</string>
   <string name="menu_clear_queue">清除队列</string>
   <string name="menu_save_queue">保存队列</string>
   <string name="menu_share">分享</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">添加到收藏夹</string>
   <string name="add_to_queue">添加到队列</string>
   <string name="remove_from_favorites">从收藏夹移除</string>
-  <string name="remove_from_recent">从最近播放列表移除</string>
   <string name="remove_from_queue">从队列移除</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>已固定到主屏幕</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>不能被固定到主屏幕</string>
   <string name="set_as_ringtone">\"<xliff:g id="name" example="警钟">%s</xliff:g>\" 设置为铃声</string>
-  <string name="playlist_renamed">播放列表已被重命名</string>
   <string name="theme_set">主题已设置为<xliff:g id="name">%s</xliff:g></string>
   <string name="settings_ui_category">界面</string>
   <string name="settings_storage_category">存储</string>

@@ -29,7 +29,6 @@
   <string name="menu_play_all">Putar semua</string>
   <string name="menu_sort_by">Urut berdasarkan</string>
   <string name="menu_shop">Beli tema</string>
-  <string name="menu_clear_recents">Hapus recent</string>
   <string name="menu_clear_queue">Bersihkan antrian</string>
   <string name="menu_save_queue">Simpan antrian</string>
   <string name="menu_share">Bagikan</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Tambahkan ke favorit</string>
   <string name="add_to_queue">Tambahkan ke antrian</string>
   <string name="remove_from_favorites">Hapus dari favorit</string>
-  <string name="remove_from_recent">Hapus dari terakhir</string>
   <string name="remove_from_queue">Hapus dari antrian</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> disematkan ke layar beranda anda</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> tidak dapat disematkan ke layar beranda anda</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' dijadikan sebagai nada dering</string>
-  <string name="playlist_renamed">Nama daftar putar diganti</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> dijadikan sebagai tema</string>
   <string name="settings_ui_category">Antarmuka</string>
   <string name="settings_storage_category">Penyimpanan</string>

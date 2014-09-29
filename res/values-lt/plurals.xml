@@ -17,11 +17,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="one"><xliff:g id="count">%d</xliff:g> artistas</item>
-    <item quantity="few"><xliff:g id="count">%d</xliff:g> artistai</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> artistų</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="one"><xliff:g id="count">%d</xliff:g> albumas</item>
     <item quantity="few"><xliff:g id="count">%d</xliff:g> albumai</item>
@@ -31,11 +26,6 @@
     <item quantity="one"><xliff:g id="count">%d</xliff:g> daina</item>
     <item quantity="few"><xliff:g id="count">%d</xliff:g> dainos</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> dainų</item>
-  </plurals>
-  <plurals name="Ngenres">
-    <item quantity="one"><xliff:g id="count">%d</xliff:g> žanras</item>
-    <item quantity="few"><xliff:g id="count">%d</xliff:g> žanrai</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> žanrų</item>
   </plurals>
   <plurals name="NNNtrackstoplaylist">
     <item quantity="one"><xliff:g id="number" example="27">%d</xliff:g> daina įtraukta į grojaraštį.</item>
@@ -51,11 +41,6 @@
     <item quantity="one"><xliff:g id="number" example="27">%d</xliff:g> daina įtraukta į eilę.</item>
     <item quantity="few"><xliff:g id="number" example="27">%d</xliff:g> dainos įtrauktos į eilę.</item>
     <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> dainų įtraukta į eilę.</item>
-  </plurals>
-  <plurals name="NNNtrackstofavorites">
-    <item quantity="one"><xliff:g id="number" example="27">%d</xliff:g> daina įtraukta į mėgstamas.</item>
-    <item quantity="few"><xliff:g id="number" example="27">%d</xliff:g> dainos įtrauktos į mėgstamas.</item>
-    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> dainų įtraukta į mėgstamas.</item>
   </plurals>
   <plurals name="NNNtracksdeleted">
     <item quantity="one"><xliff:g id="songs_to_delete">%d</xliff:g> daina pašalinta.</item>

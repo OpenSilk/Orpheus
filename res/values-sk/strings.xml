@@ -29,7 +29,6 @@
   <string name="menu_play_all">Prehrať všetko</string>
   <string name="menu_sort_by">Zoradiť podľa</string>
   <string name="menu_shop">Obchod s témami</string>
-  <string name="menu_clear_recents">Vyčistiť nedávne</string>
   <string name="menu_clear_queue">Vyčistiť poradie</string>
   <string name="menu_save_queue">Uložiť poradie</string>
   <string name="menu_share">Zdieľať</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Pridať do obľúbených</string>
   <string name="add_to_queue">Pridať do poradia</string>
   <string name="remove_from_favorites">Odstrániť z obľúbených</string>
-  <string name="remove_from_recent">Odstrániť z nedávnych</string>
   <string name="remove_from_queue">Odstrániť z poradia</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen">Skladba <xliff:g id="name">%s</xliff:g> bola pripnutá na domovskú obrazovku</string>
   <string name="could_not_be_pinned_to_home_screen">Skladba <xliff:g id="name">%s</xliff:g> nemohla byť pripnutá na domovskú obrazovku</string>
   <string name="set_as_ringtone">Skladba \'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' bola nastavená ako zvonenie</string>
-  <string name="playlist_renamed">Zoznam skladieb bol premenovaný</string>
   <string name="theme_set">Téma <xliff:g id="name">%s</xliff:g> bola nastavená ako téma aplikácie</string>
   <string name="settings_ui_category">Rozhranie</string>
   <string name="settings_storage_category">Ukladací priestor</string>

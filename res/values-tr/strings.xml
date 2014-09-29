@@ -29,7 +29,6 @@
   <string name="menu_play_all">Hepsini oynat</string>
   <string name="menu_sort_by">Sırala...</string>
   <string name="menu_shop">Tema satın al</string>
-  <string name="menu_clear_recents">Son öğeleri temizle</string>
   <string name="menu_clear_queue">Kuyruğu temizle</string>
   <string name="menu_save_queue">Kuyruğu kaydet</string>
   <string name="menu_share">Paylaş</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Favorilere ekle</string>
   <string name="add_to_queue">Kuyruğa ekle</string>
   <string name="remove_from_favorites">Favorilerden kaldır</string>
-  <string name="remove_from_recent">En son listesinden kaldır</string>
   <string name="remove_from_queue">Kuyruktan kaldır</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ana ekranınıza tutturuldu</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ana ekranınıza tutturalamadı</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' zil sesi olarak ayarlandı</string>
-  <string name="playlist_renamed">Çalma listesi yeniden adlandırıldı</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> tema olarak ayarlandı</string>
   <string name="settings_ui_category">Arayüz</string>
   <string name="settings_storage_category">Depolama</string>

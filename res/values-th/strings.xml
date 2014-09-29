@@ -29,7 +29,6 @@
   <string name="menu_play_all">เล่นทั้งหมด</string>
   <string name="menu_sort_by">เรียงโดย</string>
   <string name="menu_shop">เลือกซื้อธีม</string>
-  <string name="menu_clear_recents">ล้างรายการล่าสุด</string>
   <string name="menu_clear_queue">ล้างคิว</string>
   <string name="menu_save_queue">บันทึกคิว</string>
   <string name="menu_share">แบ่งบัน</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">เพิ่มไปยังรายการโปรด</string>
   <string name="add_to_queue">เพิ่มไปยังคิว</string>
   <string name="remove_from_favorites">นำออกจากรายการโปรด</string>
-  <string name="remove_from_recent">นำออกจากรายการล่าสุด</string>
   <string name="remove_from_queue">นำออกจากคิว</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ปักหมุดไปยังหน้าจอหลักของคุณ</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ไม่สามารถปักหมุดไปยังหน้าจอหลักของคุณได้</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' ตั้งเป็นเสียงเรียกเข้า</string>
-  <string name="playlist_renamed">เปลี่ยนชื่อรายการเพลง</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g>  ตั้งเป็นชื่อธีม</string>
   <string name="settings_ui_category">หน้าตา</string>
   <string name="settings_storage_category">แหล่งเก็บข้อมูล</string>

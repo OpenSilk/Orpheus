@@ -29,7 +29,6 @@
   <string name="menu_play_all">すべて再生</string>
   <string name="menu_sort_by">並べ替え</string>
   <string name="menu_shop">テーマショップ</string>
-  <string name="menu_clear_recents">履歴を消去</string>
   <string name="menu_clear_queue">キューを消去</string>
   <string name="menu_save_queue">キューを保存</string>
   <string name="menu_share">共有</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">お気に入りに追加</string>
   <string name="add_to_queue">キューに追加</string>
   <string name="remove_from_favorites">お気に入りから削除</string>
-  <string name="remove_from_recent">履歴から削除</string>
   <string name="remove_from_queue">キューから削除</string>
   <string name="sort_order_entry_az">昇順</string>
   <string name="sort_order_entry_za">降順</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>をホーム画面に追加しました</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>をホーム画面に追加できませんでした</string>
   <string name="set_as_ringtone">｢<xliff:g id="name" example="Alarm Bell">%s</xliff:g>｣を着信音として設定しました</string>
-  <string name="playlist_renamed">プレイリストの名前を変更しました</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g>をテーマとして設定しました</string>
   <string name="settings_ui_category">インターフェース</string>
   <string name="settings_storage_category">ストレージ</string>

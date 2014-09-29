@@ -17,11 +17,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="one">1 umělec</item>
-    <item quantity="few"><xliff:g id="count">%d</xliff:g> umělci</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> umělců</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="one">1 album</item>
     <item quantity="few"><xliff:g id="count">%d</xliff:g> alba</item>
@@ -31,11 +26,6 @@
     <item quantity="one">1 skladba</item>
     <item quantity="few"><xliff:g id="count">%d</xliff:g> skladby</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> skladeb</item>
-  </plurals>
-  <plurals name="Ngenres">
-    <item quantity="one">1 žánr</item>
-    <item quantity="few"><xliff:g id="count">%d</xliff:g> žánry</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> žánrů</item>
   </plurals>
   <plurals name="NNNtrackstoplaylist">
     <item quantity="one">Do seznamu skladeb byla přidána jedna skladba.</item>
@@ -51,11 +41,6 @@
     <item quantity="one">Do fronty byla přidána jedna skladba.</item>
     <item quantity="few">Do fronty byly přidány <xliff:g id="number" example="2">%d</xliff:g> skladby.</item>
     <item quantity="other">Do fronty bylo přidáno <xliff:g id="number" example="27">%d</xliff:g> skladeb.</item>
-  </plurals>
-  <plurals name="NNNtrackstofavorites">
-    <item quantity="one">Do oblíbených byla přidána jedna skladba.</item>
-    <item quantity="few">Do oblíbených byly přidány <xliff:g id="number" example="2">%d</xliff:g> skladby.</item>
-    <item quantity="other">Do oblíbených bylo přidáno <xliff:g id="number" example="27">%d</xliff:g> skladeb.</item>
   </plurals>
   <plurals name="NNNtracksdeleted">
     <item quantity="one">Smazána jedna skladba.</item>

@@ -29,7 +29,6 @@
   <string name="menu_play_all">Összes lejátszása</string>
   <string name="menu_sort_by">Rendezés</string>
   <string name="menu_shop">Témák keresése</string>
-  <string name="menu_clear_recents">Legutóbbiak törlése</string>
   <string name="menu_clear_queue">Lejátszási sor törlése</string>
   <string name="menu_save_queue">Lejátszási sor elmentése</string>
   <string name="menu_share">Megosztás</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Kedvencekhez ad</string>
   <string name="add_to_queue">Lejátszási sorhoz ad</string>
   <string name="remove_from_favorites">Törlés a kedvencekből</string>
-  <string name="remove_from_recent">Törlés a legutóbbiakból</string>
   <string name="remove_from_queue">Törlés a lejátszási sorból</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> felvéve a kezdőképernyőre</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> nem lett felvéve a kezdőképernyőre</string>
   <string name="set_as_ringtone">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" beállítva csengőhangként</string>
-  <string name="playlist_renamed">Lejátszási lista átnevezve</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> beállítva témaként</string>
   <string name="settings_ui_category">Felhasználói felület</string>
   <string name="settings_storage_category">Tárhely</string>

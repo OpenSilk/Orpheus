@@ -29,7 +29,6 @@
   <string name="menu_play_all">Reprodueix tot</string>
   <string name="menu_sort_by">Ordena per</string>
   <string name="menu_shop">Compra per temes</string>
-  <string name="menu_clear_recents">Neteja els recents</string>
   <string name="menu_clear_queue">Neteja la cua</string>
   <string name="menu_save_queue">Desa la cua</string>
   <string name="menu_share">Comparteix</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Afegeix als preferits</string>
   <string name="add_to_queue">Afegeix a la cua</string>
   <string name="remove_from_favorites">Treu dels preferits</string>
-  <string name="remove_from_recent">Treu dels recents</string>
   <string name="remove_from_queue">Treu de la cua</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> fixat a la teva pantalla d\'inici</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> no s\'ha pogut fixar a la teva pantalla d\'inici</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' fixat com a to de trucada</string>
-  <string name="playlist_renamed">Llista de reproducció reanomenada</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> com a tema</string>
   <string name="settings_ui_category">Interfície</string>
   <string name="settings_storage_category">Emmagatzematge</string>

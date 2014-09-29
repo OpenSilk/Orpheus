@@ -29,7 +29,6 @@
   <string name="menu_play_all">Пусти све</string>
   <string name="menu_sort_by">Сортирај по</string>
   <string name="menu_shop">Купи тему</string>
-  <string name="menu_clear_recents">Избриши недавне</string>
   <string name="menu_clear_queue">Избриши редослед</string>
   <string name="menu_save_queue">Сачувај редослед</string>
   <string name="menu_share">Дели</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Додај у омиљене</string>
   <string name="add_to_queue">Додај у редослед</string>
   <string name="remove_from_favorites">Уклони из омиљених</string>
-  <string name="remove_from_recent">Уклони из недавних</string>
   <string name="remove_from_queue">Уклони из редоследа</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> додато на твој почетни екран</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> није могуће додати на твој почетни екран</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' постављено као тон звона</string>
-  <string name="playlist_renamed">Плејлиста преименована</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> постављено као тема</string>
   <string name="settings_ui_category">Интерфејс</string>
   <string name="settings_storage_category">Складиште</string>

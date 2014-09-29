@@ -29,7 +29,6 @@
   <string name="menu_play_all">Reproducir todo</string>
   <string name="menu_sort_by">Ordenar por</string>
   <string name="menu_shop">Descargar temas</string>
-  <string name="menu_clear_recents">Borrar recientes</string>
   <string name="menu_clear_queue">Borrar cola</string>
   <string name="menu_save_queue">Guardar cola</string>
   <string name="menu_share">Compartir</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Añadir a favoritos</string>
   <string name="add_to_queue">Añadir a la cola</string>
   <string name="remove_from_favorites">Quitar de favoritos</string>
-  <string name="remove_from_recent">Quitar de recientes</string>
   <string name="remove_from_queue">Quitar de la cola</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> añadida al escritorio</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> no ha podido ser añadida al escritorio</string>
   <string name="set_as_ringtone">\u00AB<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\u00BB establecida como tono de llamada</string>
-  <string name="playlist_renamed">Lista renombrada</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> establecido como tema</string>
   <string name="settings_ui_category">Apariencia</string>
   <string name="settings_storage_category">Almacenamiento</string>

@@ -17,17 +17,11 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="other"><xliff:g id="count">%d</xliff:g>人のアーティスト</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="other"><xliff:g id="count">%d</xliff:g>枚のアルバム</item>
   </plurals>
   <plurals name="Nsongs">
     <item quantity="other"><xliff:g id="count">%d</xliff:g>曲</item>
-  </plurals>
-  <plurals name="Ngenres">
-    <item quantity="other"><xliff:g id="count">%d</xliff:g>個のジャンル</item>
   </plurals>
   <plurals name="NNNtrackstoplaylist">
     <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g>曲をプレイリストに追加しました。</item>
@@ -37,9 +31,6 @@
   </plurals>
   <plurals name="NNNtrackstoqueue">
     <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g>曲をキューに追加しました。</item>
-  </plurals>
-  <plurals name="NNNtrackstofavorites">
-    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g>曲をお気に入りに追加しました。</item>
   </plurals>
   <plurals name="NNNtracksdeleted">
     <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g>曲を削除しました。</item>

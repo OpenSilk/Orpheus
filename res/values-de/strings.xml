@@ -29,7 +29,6 @@
   <string name="menu_play_all">Alle wiedergeben</string>
   <string name="menu_sort_by">Sortieren</string>
   <string name="menu_shop">Designs beziehen</string>
-  <string name="menu_clear_recents">\"Kürzlich gehört\" leeren</string>
   <string name="menu_clear_queue">Warteschlange leeren</string>
   <string name="menu_save_queue">Warteschlange speichern</string>
   <string name="menu_share">Teilen</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
   <string name="add_to_queue">Zur Warteschlange hinzufügen</string>
   <string name="remove_from_favorites">Aus Favoriten entfernen</string>
-  <string name="remove_from_recent">Aus \"Kürzlich gehört\" entfernen</string>
   <string name="remove_from_queue">Aus Warteschlange entfernen</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> zum Startbildschirm hinzugefügt</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> konnte nicht zum Startbildschirm hinzugefügt werden</string>
   <string name="set_as_ringtone">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" wurde als Klingelton gesetzt</string>
-  <string name="playlist_renamed">Wiedergabeliste umbenannt</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> wurde als Design eingestellt</string>
   <string name="settings_ui_category">Oberfläche</string>
   <string name="settings_storage_category">Speicher</string>

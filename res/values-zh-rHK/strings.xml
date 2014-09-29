@@ -29,7 +29,6 @@
   <string name="menu_play_all">全部播放</string>
   <string name="menu_sort_by">排序依據</string>
   <string name="menu_shop">購買主題</string>
-  <string name="menu_clear_recents">清除最近播放</string>
   <string name="menu_clear_queue">清除佇列</string>
   <string name="menu_save_queue">儲存佇列</string>
   <string name="menu_share">分享</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">新增到最愛收藏中</string>
   <string name="add_to_queue">新增到佇列中</string>
   <string name="remove_from_favorites">從最愛收藏中移除</string>
-  <string name="remove_from_recent">從最近播放中移除</string>
   <string name="remove_from_queue">從佇列中移除</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> 已釘選到你的主螢幕</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> 無法被釘選到你的主螢幕</string>
   <string name="set_as_ringtone">「<xliff:g id="name" example="Alarm Bell">%s</xliff:g>」設為鈴聲</string>
-  <string name="playlist_renamed">已重新命名播放清單</string>
   <string name="theme_set">主題已設定為 <xliff:g id="name">%s</xliff:g></string>
   <string name="settings_ui_category">介面</string>
   <string name="settings_storage_category">儲存</string>

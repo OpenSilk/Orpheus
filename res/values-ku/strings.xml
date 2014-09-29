@@ -29,7 +29,6 @@
   <string name="menu_play_all">لێدانی هه‌مووی</string>
   <string name="menu_sort_by">ڕیزکردن به‌پێی</string>
   <string name="menu_shop">کڕینی باکگراوه‌ند</string>
-  <string name="menu_clear_recents">پاککردنه‌وه‌ی تازه‌کان</string>
   <string name="menu_clear_queue">پاککردنه‌وه‌ی ڕیزه‌کان</string>
   <string name="menu_save_queue">پاشه‌که‌وتکردنی ڕیزه‌کان</string>
   <string name="menu_share">به‌شداریپێکردن</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">زیادکردن بۆ په‌سه‌ندکراوه‌کان</string>
   <string name="add_to_queue">زیادکردن بۆ ڕیزکراوه‌کان</string>
   <string name="remove_from_favorites">سڕینه‌وه‌ له‌ په‌سه‌ندکراوه‌کان</string>
-  <string name="remove_from_recent">سڕینه‌وه‌ له‌ تازه‌کان</string>
   <string name="remove_from_queue">سڕینه‌وه‌ له‌ ڕیزه‌کان</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> کرایه‌ سه‌ر ڕوونماکه‌ت</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ناتوانرێ بخرێته‌ سه‌ر ڕوونماکه‌ت</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' خستنه‌ سه‌ر زه‌نگ</string>
-  <string name="playlist_renamed">ناوی لیستی لێدان گۆڕا</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> خستنه‌ سه‌ر باکگراوه‌ند</string>
   <string name="settings_ui_category">ڕووکار</string>
   <string name="settings_storage_category">بیرگەی</string>

@@ -29,7 +29,6 @@
   <string name="menu_play_all">Toista kaikki</string>
   <string name="menu_sort_by">Lajittelujärjestys</string>
   <string name="menu_shop">Osta teemoja</string>
-  <string name="menu_clear_recents">Tyhjennä äskettäin kuunnellut</string>
   <string name="menu_clear_queue">Tyhjennä jono</string>
   <string name="menu_save_queue">Tallenna jono</string>
   <string name="menu_share">Jaa</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Lisää suosikkeihin</string>
   <string name="add_to_queue">Lisää jonoon</string>
   <string name="remove_from_favorites">Poista suosikeista</string>
-  <string name="remove_from_recent">Poista äskettäin kuunnelluista</string>
   <string name="remove_from_queue">Poista jonosta</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> lisätty kotinäytölle</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> - ei voitu lisätä kotinäytölle</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' asetettu soittoääneksi</string>
-  <string name="playlist_renamed">Soittolista nimetty uudelleen</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> asetettu teemaksi</string>
   <string name="settings_ui_category">Käyttöliittymä</string>
   <string name="settings_storage_category">Tallennustila</string>

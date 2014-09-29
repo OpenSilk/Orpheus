@@ -29,7 +29,6 @@
   <string name="menu_play_all">Redă tot</string>
   <string name="menu_sort_by">Sortare după</string>
   <string name="menu_shop">Magazin pentru teme</string>
-  <string name="menu_clear_recents">Curăță recent</string>
   <string name="menu_clear_queue">Curăță în așteptare</string>
   <string name="menu_save_queue">Salvare în așteptare</string>
   <string name="menu_share">Distribuie</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Adaugă la favorite</string>
   <string name="add_to_queue">Adaugă la lista de așteptare</string>
   <string name="remove_from_favorites">Elimină din favorite</string>
-  <string name="remove_from_recent">Elimină din recente</string>
   <string name="remove_from_queue">Elimină din lista de așteptare</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> fixată în ecranul dvs acasă</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> nu s-a putut fixa în ecranul dvs acasă</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' setare ca ton de apel</string>
-  <string name="playlist_renamed">Listă de redare redenumită</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> setare ca temă</string>
   <string name="settings_ui_category">Interfața</string>
   <string name="settings_storage_category">Spațiul de stocare</string>

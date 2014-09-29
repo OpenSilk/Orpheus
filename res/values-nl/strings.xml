@@ -29,7 +29,6 @@
   <string name="menu_play_all">Alles afspelen</string>
   <string name="menu_sort_by">Sorteren op</string>
   <string name="menu_shop">Zoeken naar thema\'s</string>
-  <string name="menu_clear_recents">Recente items wissen</string>
   <string name="menu_clear_queue">Wachtrij wissen</string>
   <string name="menu_save_queue">Wachtrij opslaan</string>
   <string name="menu_share">Delen</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Toevoegen aan favorieten</string>
   <string name="add_to_queue">Toevoegen aan wachtrij</string>
   <string name="remove_from_favorites">Verwijderen uit favorieten</string>
-  <string name="remove_from_recent">Verwijderen uit recente</string>
   <string name="remove_from_queue">Verwijderen uit wachtrij</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen">\'<xliff:g id="name">%s</xliff:g>\' geplaatst op uw startscherm</string>
   <string name="could_not_be_pinned_to_home_screen">Kan \'<xliff:g id="name">%s</xliff:g>\' niet plaatsen op uw startscherm</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' ingesteld als beltoon</string>
-  <string name="playlist_renamed">Naam afspeellijst gewijzigd</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> ingesteld als thema</string>
   <string name="settings_ui_category">Uiterlijk</string>
   <string name="settings_storage_category">Opslag</string>

@@ -29,7 +29,6 @@
   <string name="menu_play_all">Speel almal</string>
   <string name="menu_sort_by">Sorteer volgens</string>
   <string name="menu_shop">Koop temas</string>
-  <string name="menu_clear_recents">Vee items uit</string>
   <string name="menu_clear_queue">Vee lys uit</string>
   <string name="menu_save_queue">Stoor speellys</string>
   <string name="menu_share">Deel</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Voeg by gunstellinge</string>
   <string name="add_to_queue">Voeg by lys</string>
   <string name="remove_from_favorites">Verwyder vanuit gunstellinge</string>
-  <string name="remove_from_recent">Verwyder vanuit onlangse lys</string>
   <string name="remove_from_queue">Verwyder vanuit lys</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> vasgepen op tuisskerm</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> kon nie vasgepen word op tuisskerm nie</string>
   <string name="set_as_ringtone">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" gestel as luitoon</string>
-  <string name="playlist_renamed">Speellys is hernoem</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> stel as tema</string>
   <string name="settings_ui_category">Koppelvlak</string>
   <string name="settings_storage_category">Berging</string>

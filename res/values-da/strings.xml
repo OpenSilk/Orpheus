@@ -29,7 +29,6 @@
   <string name="menu_play_all">Afspil alle</string>
   <string name="menu_sort_by">Sortér efter</string>
   <string name="menu_shop">Hent temaer</string>
-  <string name="menu_clear_recents">Ryd seneste</string>
   <string name="menu_clear_queue">Ryd kø</string>
   <string name="menu_save_queue">Gem kø</string>
   <string name="menu_share">Del</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Tilføj til favoritter</string>
   <string name="add_to_queue">Tilføj til kø</string>
   <string name="remove_from_favorites">Fjern fra favoritter</string>
-  <string name="remove_from_recent">Fjern fra seneste</string>
   <string name="remove_from_queue">Fjern fra kø</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> fastgjort til din startskærm</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> kunne ikke fastgøres til din startskærm</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' sat som ringetone</string>
-  <string name="playlist_renamed">Playliste omdøbt</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> sat som temaet</string>
   <string name="settings_ui_category">Brugerflade</string>
   <string name="settings_storage_category">Lagring</string>

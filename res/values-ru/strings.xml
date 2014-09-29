@@ -29,7 +29,6 @@
   <string name="menu_play_all">Воспроизвести все</string>
   <string name="menu_sort_by">Сортировать по</string>
   <string name="menu_shop">Темы в Play Маркете</string>
-  <string name="menu_clear_recents">Очистить недавние</string>
   <string name="menu_clear_queue">Очистить очередь</string>
   <string name="menu_save_queue">Сохранить очередь</string>
   <string name="menu_share">Опубликовать сведения</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Добавить в избранное</string>
   <string name="add_to_queue">Добавить в очередь</string>
   <string name="remove_from_favorites">Удалить из избранного</string>
-  <string name="remove_from_recent">Удалить из недавних</string>
   <string name="remove_from_queue">Удалить из очереди</string>
   <string name="sort_order_entry_az">Алфавиту</string>
   <string name="sort_order_entry_za">Алфавиту в обр. порядке</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen">Ярлык «<xliff:g id="name">%s</xliff:g>» добавлен на главный экран.</string>
   <string name="could_not_be_pinned_to_home_screen">Невозможно добавить «<xliff:g id="name">%s</xliff:g>» на главный экран.</string>
   <string name="set_as_ringtone">Трек «<xliff:g id="name" example="Alarm Bell">%s</xliff:g>» установлен как рингтон.</string>
-  <string name="playlist_renamed">Плейлист переименован</string>
   <string name="theme_set">Тема «<xliff:g id="name">%s</xliff:g>» установлена</string>
   <string name="settings_ui_category">Интерфейс</string>
   <string name="settings_storage_category">Память</string>

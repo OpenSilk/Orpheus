@@ -17,10 +17,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="one"><xliff:g id="count">%d</xliff:g> Artist</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> Artisten</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="one"><xliff:g id="count">%d</xliff:g> Album</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> Albumen</item>

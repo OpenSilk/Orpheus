@@ -17,10 +17,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="one">1 artista</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> artistas</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="one">1 álbum</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> álbuns</item>
@@ -28,10 +24,6 @@
   <plurals name="Nsongs">
     <item quantity="one">1 música</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> músicas</item>
-  </plurals>
-  <plurals name="Ngenres">
-    <item quantity="one">1 gênero</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> gêneros</item>
   </plurals>
   <plurals name="NNNtrackstoplaylist">
     <item quantity="one">1 música adicionada à lista de reprodução.</item>
@@ -44,10 +36,6 @@
   <plurals name="NNNtrackstoqueue">
     <item quantity="one">1 música adicionada à fila.</item>
     <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> músicas adicionadas à fila.</item>
-  </plurals>
-  <plurals name="NNNtrackstofavorites">
-    <item quantity="one">1 música adicionada aos Favoritos.</item>
-    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> músicas adicionadas aos Favoritos.</item>
   </plurals>
   <plurals name="NNNtracksdeleted">
     <item quantity="one">1 música foi excluída.</item>

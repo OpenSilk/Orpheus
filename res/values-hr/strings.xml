@@ -29,7 +29,6 @@
   <string name="menu_play_all">Sviraj sve</string>
   <string name="menu_sort_by">Sortiraj po</string>
   <string name="menu_shop">Trgovina za teme</string>
-  <string name="menu_clear_recents">Očisti nedavno</string>
   <string name="menu_clear_queue">Očisti red</string>
   <string name="menu_save_queue">Spremi red</string>
   <string name="menu_share">Dijeli</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Dodaj u favorite</string>
   <string name="add_to_queue">Dodaj u red</string>
   <string name="remove_from_favorites">Ukloni iz favorita</string>
-  <string name="remove_from_recent">Ukloni iz nedavnih</string>
   <string name="remove_from_queue">Ukloni iz reda</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> pribodeno na vaš home screen</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ne može biti pribodeno na vaš home screen</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' postavi kao melodiju zvona</string>
-  <string name="playlist_renamed">Playlista preimenovana</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> postavi kao temu</string>
   <string name="settings_ui_category">Sučelje</string>
   <string name="settings_storage_category">Pohrana</string>

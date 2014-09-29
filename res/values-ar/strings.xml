@@ -29,7 +29,6 @@
   <string name="menu_play_all">تشغيل الكل</string>
   <string name="menu_sort_by">الترتيب حسب</string>
   <string name="menu_shop">متجر للمواضيع</string>
-  <string name="menu_clear_recents">مسح الأخيرة</string>
   <string name="menu_clear_queue">مسح قائمة انتظار</string>
   <string name="menu_save_queue">حفظ قائمة الانتظار</string>
   <string name="menu_share">مشاركة</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">إضافة إلى المفضلة</string>
   <string name="add_to_queue">إضافة إلى قائمة الانتظار</string>
   <string name="remove_from_favorites">إزالة من المفضلة</string>
-  <string name="remove_from_recent">إزالة من الأخيرة</string>
   <string name="remove_from_queue">إزالة من قائمة انتظار</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> مثبت على الشاشة الرئيسية</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> لا يمكن أن تكون معلقة للشاشة الرئيسية</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' تعيين كنغمة رنين</string>
-  <string name="playlist_renamed">تم إعادة تسميته قائمة التشغيل</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> تعيين كموضوع</string>
   <string name="settings_ui_category">واجهة المستخدم</string>
   <string name="settings_storage_category">التخزين</string>

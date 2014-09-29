@@ -17,11 +17,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="one"><xliff:g id="count">%d</xliff:g> виконавець</item>
-    <item quantity="few"><xliff:g id="count">%d</xliff:g> виконавця</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> виконавців</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="one"><xliff:g id="count">%d</xliff:g> альбом</item>
     <item quantity="few"><xliff:g id="count">%d</xliff:g> альбоми</item>
@@ -31,11 +26,6 @@
     <item quantity="one"><xliff:g id="count">%d</xliff:g> пісня</item>
     <item quantity="few"><xliff:g id="count">%d</xliff:g> пісні</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> пісень</item>
-  </plurals>
-  <plurals name="Ngenres">
-    <item quantity="one"><xliff:g id="count">%d</xliff:g> жанр</item>
-    <item quantity="few"><xliff:g id="count">%d</xliff:g> жанри</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> жанрів</item>
   </plurals>
   <plurals name="NNNtrackstoplaylist">
     <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> композиція додана в список.</item>
@@ -51,11 +41,6 @@
     <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> композиція додана в чергу.</item>
     <item quantity="few"><xliff:g id="number" example="27">%d</xliff:g> композиції додано в чергу.</item>
     <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> композицій додано в чергу.</item>
-  </plurals>
-  <plurals name="NNNtrackstofavorites">
-    <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> композиція додана в Улюблене.</item>
-    <item quantity="few"><xliff:g id="number" example="27">%d</xliff:g> композиції додано в Улюблене.</item>
-    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> композицій додано в Улюблене.</item>
   </plurals>
   <plurals name="NNNtracksdeleted">
     <item quantity="one"><xliff:g id="songs_to_delete" example="1">%d</xliff:g> композиція видалена.</item>

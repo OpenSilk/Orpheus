@@ -29,7 +29,6 @@
   <string name="menu_play_all">Грати все</string>
   <string name="menu_sort_by">Сортувати по</string>
   <string name="menu_shop">Теми</string>
-  <string name="menu_clear_recents">Очистити недавні</string>
   <string name="menu_clear_queue">Очистити чергу</string>
   <string name="menu_save_queue">Зберегти чергу</string>
   <string name="menu_share">Поділитись</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Додати в улюблені</string>
   <string name="add_to_queue">Додати до черги</string>
   <string name="remove_from_favorites">Видалити з улюблених</string>
-  <string name="remove_from_recent">Видалити з недавніх</string>
   <string name="remove_from_queue">Видалити з черги</string>
   <string name="sort_order_entry_az">А-Я</string>
   <string name="sort_order_entry_za">Я-А</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> додано на робочий стіл</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> не можна додати на робочий стіл</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' встановити мелодією</string>
-  <string name="playlist_renamed">Список переіменовано</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> встановлено як тему</string>
   <string name="settings_ui_category">Інтерфейс</string>
   <string name="settings_storage_category">Сховище</string>

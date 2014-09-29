@@ -17,10 +17,6 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="one"><xliff:g id="count">%d</xliff:g> esitaja</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> esitajat</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="one"><xliff:g id="count">%d</xliff:g> album</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> albumit</item>
@@ -28,10 +24,6 @@
   <plurals name="Nsongs">
     <item quantity="one"><xliff:g id="count">%d</xliff:g> laul</item>
     <item quantity="other"><xliff:g id="count">%d</xliff:g> laulu</item>
-  </plurals>
-  <plurals name="Ngenres">
-    <item quantity="one"><xliff:g id="count">%d</xliff:g> žanr</item>
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> žanri</item>
   </plurals>
   <plurals name="NNNtrackstoplaylist">
     <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> laul on lisatud esitusloendisse.</item>
@@ -44,10 +36,6 @@
   <plurals name="NNNtrackstoqueue">
     <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> laul on järjekorda lisatud.</item>
     <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> laulu on järjekorda lisatud.</item>
-  </plurals>
-  <plurals name="NNNtrackstofavorites">
-    <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> laul on lisatud Lemmikutesse.</item>
-    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> laulu on lisatud Lemmikutesse.</item>
   </plurals>
   <plurals name="NNNtracksdeleted">
     <item quantity="one"><xliff:g id="songs_to_delete" example="1">%d</xliff:g> laul on kustutatud.</item>

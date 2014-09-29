@@ -29,7 +29,6 @@
   <string name="menu_play_all">모두 재생</string>
   <string name="menu_sort_by">정렬</string>
   <string name="menu_shop">테마 샵</string>
-  <string name="menu_clear_recents">최근 목록 비우기</string>
   <string name="menu_clear_queue">대기목록 비우기</string>
   <string name="menu_save_queue">대기목록 저장</string>
   <string name="menu_share">공유</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">즐겨찾기에 추가</string>
   <string name="add_to_queue">대기목록에 추가</string>
   <string name="remove_from_favorites">즐겨찾기에서 제거</string>
-  <string name="remove_from_recent">최근 목록에서 제거</string>
   <string name="remove_from_queue">대기목록에서 제거</string>
   <string name="sort_order_entry_az">오름차순</string>
   <string name="sort_order_entry_za">내림차순</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>을(를) 홈 화면에 추가했습니다</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>을(를) 홈 화면에 추가하지 못했습니다</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\'을(를) 벨소리로 지정했습니다</string>
-  <string name="playlist_renamed">재생목록의 이름을 변경했습니다</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g>을(를) 테마로 설정했습니다</string>
   <string name="settings_ui_category">인터페이스</string>
   <string name="settings_storage_category">저장소</string>

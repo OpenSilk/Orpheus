@@ -29,7 +29,6 @@
   <string name="menu_play_all">Spela alla</string>
   <string name="menu_sort_by">Sortera efter</string>
   <string name="menu_shop">Fler teman</string>
-  <string name="menu_clear_recents">Rensa Nya</string>
   <string name="menu_clear_queue">Rensa kö</string>
   <string name="menu_save_queue">Spara kö</string>
   <string name="menu_share">Dela</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Lägg till favoriter</string>
   <string name="add_to_queue">Lägg till kö</string>
   <string name="remove_from_favorites">Ta bort från Favoriter</string>
-  <string name="remove_from_recent">Ta bort från nya</string>
   <string name="remove_from_queue">Ta bort från kö</string>
   <string name="sort_order_entry_az">A-Ö</string>
   <string name="sort_order_entry_za">Ö-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> fästes vid din hemskärm</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> kunde inte fästas vid din hemskärm</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' vald som ringsignal</string>
-  <string name="playlist_renamed">Spellistan omdöpt</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g> vald som tema</string>
   <string name="settings_ui_category">Gränssnitt</string>
   <string name="settings_storage_category">Lagring</string>

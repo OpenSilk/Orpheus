@@ -29,7 +29,6 @@
   <string name="menu_play_all">Esita kõik</string>
   <string name="menu_sort_by">Sorteeri</string>
   <string name="menu_shop">Külasta teemapoodi</string>
-  <string name="menu_clear_recents">Kustuta hiljutised</string>
   <string name="menu_clear_queue">Kustuta järjekord</string>
   <string name="menu_save_queue">Salvesta järjekord</string>
   <string name="menu_share">Jaga</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Lisa lemmikutesse</string>
   <string name="add_to_queue">Lisa järjekorda</string>
   <string name="remove_from_favorites">Eemalda lemmikutest</string>
-  <string name="remove_from_recent">Eemalda hiljutistest</string>
   <string name="remove_from_queue">Eemalda järjekorrast</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> on kinnitatud avakuvale</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ei saa kinnitada avakuvale</string>
   <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' kasuta telefoni helinana</string>
-  <string name="playlist_renamed">Esitusloend on ümbernimetatud</string>
   <string name="theme_set"><xliff:g id="name">%s</xliff:g>kasuta teemana</string>
   <string name="settings_ui_category">Liides</string>
   <string name="settings_storage_category">Salvestuskoht</string>

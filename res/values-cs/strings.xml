@@ -29,7 +29,6 @@
   <string name="menu_play_all">Přehrát vše</string>
   <string name="menu_sort_by">Řadit podle\u2026</string>
   <string name="menu_shop">Obchod s motivy</string>
-  <string name="menu_clear_recents">Vyčistit nedávné</string>
   <string name="menu_clear_queue">Vyčistit frontu</string>
   <string name="menu_save_queue">Uložit frontu</string>
   <string name="menu_share">Sdílet\u2026</string>
@@ -43,7 +42,6 @@
   <string name="add_to_favorites">Přidat do oblíbených</string>
   <string name="add_to_queue">Přidat do fronty</string>
   <string name="remove_from_favorites">Odebrat z oblíbených</string>
-  <string name="remove_from_recent">Odebrat z nedávných</string>
   <string name="remove_from_queue">Odebrat z fronty</string>
   <string name="sort_order_entry_az">A-Z</string>
   <string name="sort_order_entry_za">Z-A</string>
@@ -95,7 +93,6 @@
   <string name="pinned_to_home_screen">\u201a<xliff:g id="name">%s</xliff:g>\u2018 přidána na plochu</string>
   <string name="could_not_be_pinned_to_home_screen">\u201a<xliff:g id="name">%s</xliff:g>\u2018 nelze přidat na plochu</string>
   <string name="set_as_ringtone">\u201a<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\u2018 nastaven jako vyzvánění</string>
-  <string name="playlist_renamed">Seznam skladeb přejmenován</string>
   <string name="theme_set">\u201a<xliff:g id="name">%s</xliff:g>\u2018 nastaveno jako aktivní motiv</string>
   <string name="settings_ui_category">Rozhraní</string>
   <string name="settings_storage_category">Úložiště</string>

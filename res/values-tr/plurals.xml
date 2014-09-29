@@ -17,17 +17,11 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <plurals name="Nartists">
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> sanatçı</item>
-  </plurals>
   <plurals name="Nalbums">
     <item quantity="other"><xliff:g id="count">%d</xliff:g> albüm</item>
   </plurals>
   <plurals name="Nsongs">
     <item quantity="other"><xliff:g id="count">%d</xliff:g> şarkı</item>
-  </plurals>
-  <plurals name="Ngenres">
-    <item quantity="other"><xliff:g id="count">%d</xliff:g> tür</item>
   </plurals>
   <plurals name="NNNtrackstoplaylist">
     <item quantity="other"><xliff:g id="number" example="1">%d</xliff:g> şarkı çalma listesine eklendi.</item>
@@ -37,9 +31,6 @@
   </plurals>
   <plurals name="NNNtrackstoqueue">
     <item quantity="other"><xliff:g id="number" example="1">%d</xliff:g> şarkı kuyruğa eklendi.</item>
-  </plurals>
-  <plurals name="NNNtrackstofavorites">
-    <item quantity="other"><xliff:g id="number" example="1">%d</xliff:g> şarkı Favorilere eklendi.</item>
   </plurals>
   <plurals name="NNNtracksdeleted">
     <item quantity="other"><xliff:g id="songs_to_delete" example="1">%d</xliff:g> şarkı silindi.</item>
