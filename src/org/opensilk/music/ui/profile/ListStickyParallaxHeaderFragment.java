@@ -60,6 +60,7 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
     protected View mStickyHeaderContainer;
     protected View mStickyHeader;
     protected View mHeaderDummy;
+    protected View mListFooter;
 
     // determines when to animate the dummy views drawable
     private boolean mIsStuck = false;
@@ -95,6 +96,8 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
         mListHeader = inflater.inflate(getHeaderLayout(), null/*null or listview explodes*/, false);
         // hero container containing images
         mHeroContainer = ButterKnife.findById(mListHeader, R.id.hero_container);
+        // list footer
+        mListFooter = inflater.inflate(R.layout.list_footer, null, false);
         return frame;
     }
 
@@ -102,8 +105,10 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if (mList instanceof ListView) {
             ((ListView) mList).addHeaderView(mListHeader);
+            ((ListView) mList).addFooterView(mListFooter);
         } else if (mList instanceof StaggeredGridView) {
             ((StaggeredGridView) mList).addHeaderView(mListHeader);
+            ((StaggeredGridView) mList).addFooterView(mListFooter);
         } else {
             throw new RuntimeException("List must extend ListView or StaggeredGridView");
         }
