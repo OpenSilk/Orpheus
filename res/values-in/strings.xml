@@ -17,7 +17,7 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="page_recent">Recent</string>
+  <string name="page_recent">Terbaru</string>
   <string name="page_artists">Artis</string>
   <string name="page_albums">Album</string>
   <string name="page_songs">Lagu</string>
@@ -75,7 +75,7 @@
   <string name="context_menu_more_by_artist">Lebih banyak oleh artis</string>
   <string name="context_menu_rename_playlist">Ganti nama</string>
   <string name="context_menu_delete">Hapus</string>
-  <string name="context_menu_fetch_album_art">Mengambil album art</string>
+  <string name="context_menu_fetch_album_art">Mengambil seni album</string>
   <string name="context_menu_fetch_artist_image">Mengambil gambar artis</string>
   <string name="context_menu_open_in_play_store">Buka di Play Store</string>
   <string name="context_menu_remove_from_recent">Hapus dari terakhir</string>
@@ -108,7 +108,7 @@
   <string name="settings_delete_cache_title">Hapus cache</string>
   <string name="settings_delete_cache_summary">Hapus semua cache gambar</string>
   <string name="settings_download_only_on_wifi_title">Unduh hanya melalui Wi-Fi</string>
-  <string name="settings_download_only_on_wifi_summary">Untuk mengurangi biaya operator, jangan unduh melalui jaringan selular</string>
+  <string name="settings_download_only_on_wifi_summary">Untuk mengurangi biaya operator, jangan unduh melalui jaringan seluler</string>
   <string name="settings_download_missing_artwork_title">Unduh seni album yang hilang</string>
   <string name="settings_download_artist_images_title">Unduh gambar artis yang hilang</string>
   <string name="settings_open_source_licenses">Lisensi sumber terbuka</string>
