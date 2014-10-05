@@ -24,16 +24,20 @@ import org.opensilk.filebrowser.FileItem;
 import org.opensilk.music.loader.FileItemLoader;
 import org.opensilk.music.loader.LoaderCallback;
 import org.opensilk.music.ui.folder.FolderPickerActivity;
+import org.opensilk.music.ui2.main.GodScreen;
 
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import flow.Flow;
 import flow.Layout;
 import mortar.Blueprint;
 import mortar.ViewPresenter;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
@@ -63,7 +67,7 @@ public class FolderScreen implements Blueprint {
 
     @dagger.Module(
             injects = FolderView.class,
-            complete = false
+            addsTo = GodScreen.Module.class
     )
     public static class Module {
 
@@ -79,12 +83,15 @@ public class FolderScreen implements Blueprint {
         }
     }
 
+    @Singleton
     public static class Presenter extends ViewPresenter<FolderView> implements LoaderCallback<FileItem> {
 
+        final Flow flow;
         final FileItemLoader loader;
 
         @Inject
-        public Presenter(FileItemLoader loader) {
+        public Presenter(Flow flow, FileItemLoader loader) {
+            this.flow = flow;
             this.loader = loader;
         }
 
@@ -107,6 +114,11 @@ public class FolderScreen implements Blueprint {
                 v.getAdapter().clear();
                 v.getAdapter().addAll(items);
             }
+        }
+
+        public void go(FileItem item) {
+            Timber.v("go(%s)", item);
+            flow.goTo(new FolderScreen(item.getPath()));
         }
 
     }

@@ -67,6 +67,7 @@ public abstract class FlowControl<S extends Blueprint, V extends View & CanShowS
         //noinspection unchecked
         S newScreen = (S) backstack.current().getScreen();
         showScreen(newScreen, direction);
+        callback.onComplete();
     }
 
     public boolean onRetreatSelected() {

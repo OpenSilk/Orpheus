@@ -78,7 +78,7 @@ public class NavView extends ListView {
                 if (parent.getCount() == position + 1) {
                     presenter.openSettings(getContext());
                 } else {
-                    presenter.go(((Item) parent.getItemAtPosition(position)).screen);
+                    presenter.go(getAdapter().getItem(position).screen);
                 }
             }
         });
@@ -137,7 +137,7 @@ public class NavView extends ListView {
             return getItem(position).type.ordinal();
         }
 
-        public void load(Collection<PluginInfo> infos) {
+        public void loadPlugins(Collection<PluginInfo> infos) {
             add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_device), null));
             add(new Item(Item.Type.ITEM, getContext().getString(R.string.music), new GalleryScreen()));
             add(new Item(Item.Type.ITEM, getContext().getString(R.string.folders), new FolderScreen()));

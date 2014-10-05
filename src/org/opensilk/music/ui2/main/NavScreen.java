@@ -31,6 +31,7 @@ import org.opensilk.music.loader.PluginInfoLoader;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import flow.Flow;
 import flow.Layout;
@@ -57,13 +58,14 @@ public class NavScreen implements Blueprint {
     }
 
     @dagger.Module(
-            addsTo = GodScreen.Module.class,
-            injects = NavView.class
+            injects = NavView.class,
+            addsTo = GodScreen.Module.class
     )
     public static class Module {
 
     }
 
+    @Singleton
     public static class Presenter extends ViewPresenter<NavView> implements LoaderCallback<PluginInfo> {
 
         final Flow flow;
@@ -90,7 +92,10 @@ public class NavScreen implements Blueprint {
         @Override
         public void onLoadComplete(List<PluginInfo> items) {
             NavView v = getView();
-            if (v != null) v.getAdapter().load(items);
+            if (v != null) {
+                v.getAdapter().clear();
+                v.getAdapter().loadPlugins(items);
+            }
         }
 
         public void go(Blueprint screen) {

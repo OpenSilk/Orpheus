@@ -18,6 +18,8 @@ package org.opensilk.music.ui2.folder;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -28,14 +30,17 @@ import org.opensilk.filebrowser.FileItem;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import flow.Flow;
 import mortar.Mortar;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
  */
 public class FolderView extends ListView {
 
-    @Inject FolderScreen.Presenter presenter;
+    @Inject
+    FolderScreen.Presenter presenter;
 
     public FolderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,6 +62,13 @@ public class FolderView extends ListView {
     public void setup() {
         Adapter adapter = new Adapter(getContext());
         setAdapter(adapter);
+        setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Timber.v("onItemClick");
+                presenter.go(getAdapter().getItem(position));
+            }
+        });
     }
 
     @Override

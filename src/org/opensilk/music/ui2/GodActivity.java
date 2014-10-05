@@ -29,6 +29,7 @@ public class GodActivity extends ActionBarActivity {
 
     protected MortarActivityScope mActivityScope;
 
+    Flow mFlow;
     ActionBarDrawerToggle mDrawerToggle;
 
     @Override
@@ -42,6 +43,8 @@ public class GodActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_god);
         ButterKnife.inject(this);
+
+        mFlow = mGodView.getFlow();
 
         doDrawerSetup();
     }
@@ -93,6 +96,12 @@ public class GodActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mFlow.goBack()) return;
+        super.onBackPressed();
     }
 
     @Override

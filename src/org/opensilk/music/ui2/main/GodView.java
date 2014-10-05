@@ -36,6 +36,7 @@ import flow.Layouts;
 import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarScope;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/3/14.
@@ -119,6 +120,7 @@ public class GodView extends DrawerLayout implements CanShowScreen<Blueprint>, H
         }
 
         public void showScreen(S screen, Flow.Direction direction) {
+            Timber.v("showScreen()");
             MortarScope myScope = Mortar.getScope(context);
             MortarScope newChildScope = myScope.requireChild(screen);
 
@@ -129,6 +131,7 @@ public class GodView extends DrawerLayout implements CanShowScreen<Blueprint>, H
                 MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
                 if (oldChildScope.getName().equals(screen.getMortarScopeName())) {
                     // If it's already showing, short circuit.
+                    Timber.v("Short circuit");
                     return;
                 }
 
