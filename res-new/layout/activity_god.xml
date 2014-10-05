@@ -29,16 +29,30 @@
         xmlns:sothree="http://schemas.android.com/apk/res-auto"
         android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="bottom"
         sothree:panelHeight="68dp"
         sothree:overlay="true">
 
-        <!-- main content -->
-        <FrameLayout
-            android:id="@+id/main"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:background="?colorPrimary"/>
+
+            <!-- main content -->
+            <FrameLayout
+                android:id="@+id/main"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -46,8 +60,6 @@
             android:background="?android:colorBackground">
 
         </FrameLayout>
-
-
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 

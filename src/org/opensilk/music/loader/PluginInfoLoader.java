@@ -37,7 +37,7 @@ import javax.inject.Singleton;
  * Created by drew on 10/5/14.
  */
 @Singleton
-public class NavLoader implements AsyncLoader<PluginInfo>, LoaderCallback<PluginInfo> {
+public class PluginInfoLoader implements AsyncLoader<PluginInfo> {
 
     final Context context;
     final Set<LoaderCallback<PluginInfo>> callbacks;
@@ -45,7 +45,7 @@ public class NavLoader implements AsyncLoader<PluginInfo>, LoaderCallback<Plugin
     final List<PluginInfo> previousInfos;
 
     @Inject
-    public NavLoader(@ForApplication Context context) {
+    public PluginInfoLoader(@ForApplication Context context) {
         this.context = context;
         callbacks = new HashSet<>();
         previousInfos = new ArrayList<>();
@@ -62,7 +62,7 @@ public class NavLoader implements AsyncLoader<PluginInfo>, LoaderCallback<Plugin
         if (task == null) {
             task = new LoaderTask<PluginInfo>(context, this) {
                 @Override
-                protected List<PluginInfo> doInBackground(Void... params) {
+                protected List<PluginInfo> doInBackground(Object... params) {
                     List<PluginInfo> list = new ArrayList<>();
                     List<PluginInfo> extPlugins = PluginUtil.getActivePlugins(context);
                     if (extPlugins != null && !extPlugins.isEmpty()) {

@@ -45,7 +45,7 @@ import mortar.MortarScope;
 public class GalleryView extends LinearLayout {
 
     @Inject
-    GalleryPresenter presenter;
+    GalleryScreen.Presenter presenter;
     @InjectView(R.id.tab_bar)
     SlidingTabLayout tabBar;
     @InjectView(R.id.pager)

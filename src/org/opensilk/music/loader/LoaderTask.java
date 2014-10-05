@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Created by drew on 10/5/14.
  */
-public abstract class LoaderTask<T> extends PriorityAsyncTask<Void, Void, List<T>> {
+public abstract class LoaderTask<T> extends PriorityAsyncTask<Object, Void, List<T>> {
 
     final Context context;
     final LoaderCallback<T> callback;

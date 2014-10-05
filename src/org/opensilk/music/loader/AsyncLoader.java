@@ -19,6 +19,6 @@ package org.opensilk.music.loader;
 /**
  * Created by drew on 10/5/14.
  */
-public interface AsyncLoader<T> {
+public interface AsyncLoader<T> extends LoaderCallback<T> {
     public void loadAsync(LoaderCallback<T> callback);
 }

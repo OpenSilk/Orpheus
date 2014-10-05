@@ -17,10 +17,17 @@
 
 package org.opensilk.music.ui2.gallery;
 
+import android.os.Bundle;
+
 import com.andrew.apollo.R;
+
+import java.util.Arrays;
+
+import javax.inject.Inject;
 
 import flow.Layout;
 import mortar.Blueprint;
+import mortar.ViewPresenter;
 
 /**
  * Created by drew on 10/3/14.
@@ -42,6 +49,27 @@ public class GalleryScreen implements Blueprint {
             injects = GalleryView.class
     )
     public static class Module {
+
+    }
+
+    public static class Presenter extends ViewPresenter<GalleryView> {
+
+        @Inject
+        public Presenter() {
+
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+            //TODO settings
+            getView().setup(Arrays.asList(Page.values()), 4);
+        }
+
+        @Override
+        protected void onSave(Bundle outState) {
+            super.onSave(outState);
+        }
 
     }
 

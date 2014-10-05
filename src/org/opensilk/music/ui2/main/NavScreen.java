@@ -26,13 +26,12 @@ import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.loader.LoaderCallback;
-import org.opensilk.music.loader.NavLoader;
+import org.opensilk.music.loader.PluginInfoLoader;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import dagger.Provides;
 import flow.Flow;
 import flow.Layout;
 import mortar.Blueprint;
@@ -68,10 +67,10 @@ public class NavScreen implements Blueprint {
     public static class Presenter extends ViewPresenter<NavView> implements LoaderCallback<PluginInfo> {
 
         final Flow flow;
-        final NavLoader loader;
+        final PluginInfoLoader loader;
 
         @Inject
-        public Presenter(Flow flow, NavLoader loader) {
+        public Presenter(Flow flow, PluginInfoLoader loader) {
             this.flow = flow;
             this.loader = loader;
         }

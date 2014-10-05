@@ -32,6 +32,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.ui2.folder.FolderScreen;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 
 import java.util.ArrayList;
@@ -139,7 +140,7 @@ public class NavView extends ListView {
         public void load(Collection<PluginInfo> infos) {
             add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_device), null));
             add(new Item(Item.Type.ITEM, getContext().getString(R.string.music), new GalleryScreen()));
-//            add(new Item(Item.Type.ITEM, context.getString(R.string.folders), new FolderScreen()));
+            add(new Item(Item.Type.ITEM, getContext().getString(R.string.folders), new FolderScreen()));
             if (infos != null) {
                 add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_library), null));
                 for (final PluginInfo info : infos) {

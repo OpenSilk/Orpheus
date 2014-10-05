@@ -31,7 +31,7 @@ import mortar.Mortar;
 public class AlbumView extends ListView {
 
     @Inject
-    AlbumPresenter presenter;
+    AlbumScreen.Presenter presenter;
 
     public AlbumView(Context context, AttributeSet attrs) {
         super(context, attrs);
