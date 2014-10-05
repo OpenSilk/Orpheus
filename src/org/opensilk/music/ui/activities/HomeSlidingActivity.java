@@ -82,60 +82,11 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
         ButterKnife.inject(this);
 
-        // Init drawer adapter
-        mDrawerAdapter = new NavAdapter(this);
-        mDrawerListView.setAdapter(mDrawerAdapter);
-        // Start loader
-        getSupportLoaderManager().initLoader(0, null, this);
-
-        // set up the drawer's list view with items and click listener
-        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
-            }
-        });
-
-        // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
-
         // setup action bar
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setTitle(" ");
-
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the navigation drawer and the action bar app icon.
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                    /* host Activity */
-                mDrawerLayout,                    /* DrawerLayout object */
-                R.drawable.ic_navigation_drawer,             /* nav drawer image to replace 'Up' caret */
-                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-        };
-
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        // Defer code dependent on restoration of previous instance state.
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
 
         // Load the music browser fragment
         if (savedInstanceState == null) {
@@ -179,39 +130,6 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Forward the new configuration the drawer toggle component.
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!isDrawerOpen()) {
-            restoreActionBar();
-            getMenuInflater().inflate(R.menu.sleep_timer, menu);
-            return super.onCreateOptionsMenu(menu);
-        } else {
-            showGlobalContextActionBar();
-            return false;
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        switch (item.getItemId()) {
-            case R.id.menu_sleep_timer:
-                NavUtils.openSleepTimerDialog(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override

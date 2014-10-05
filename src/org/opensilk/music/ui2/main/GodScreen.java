@@ -17,8 +17,11 @@
 
 package org.opensilk.music.ui2.main;
 
+import android.content.Context;
+import android.view.View;
+
 import org.opensilk.music.AppModule;
-import org.opensilk.music.R;
+import com.andrew.apollo.R;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 
 import javax.inject.Inject;
@@ -33,7 +36,7 @@ import mortar.Blueprint;
 /**
  * Created by drew on 10/3/14.
  */
-@Layout(R.layout.activity_main)
+@Layout(R.layout.activity_god)
 public class GodScreen implements Blueprint {
 
     @Override
@@ -50,7 +53,8 @@ public class GodScreen implements Blueprint {
             addsTo = AppModule.class,
             injects = {
                     GodView.class
-            }
+            },
+            library = true
     )
     public static class Module {
 

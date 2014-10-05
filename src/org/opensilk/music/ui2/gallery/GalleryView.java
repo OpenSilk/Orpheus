@@ -24,7 +24,7 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import org.opensilk.music.R;
+import com.andrew.apollo.R;
 import org.opensilk.music.widgets.SlidingTabLayout;
 
 import java.util.Arrays;

@@ -18,18 +18,19 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import org.opensilk.music.R;
+import com.andrew.apollo.R;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import flow.Flow;
 import flow.Layouts;
 import mortar.Blueprint;
@@ -39,10 +40,12 @@ import mortar.MortarScope;
 /**
  * Created by drew on 10/3/14.
  */
-public class GodView extends DrawerLayout implements CanShowScreen<Blueprint> {
+public class GodView extends DrawerLayout implements CanShowScreen<Blueprint>, HasDrawer {
 
     @Inject
     GodScreen.Presenter presenter;
+
+    @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
 
     ScreenConductor<Blueprint> screenMaestro;
 
@@ -54,16 +57,23 @@ public class GodView extends DrawerLayout implements CanShowScreen<Blueprint> {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        ButterKnife.inject(this);
         screenMaestro = new ScreenConductor<>(getContext(),
                 ButterKnife.<FrameLayout>findById(this, R.id.main));
         presenter.takeView(this);
-        addDrawerView();
+        //add navlist
+        ScreenConductor.addChild(getContext(), new NavScreen(), mNavContainer);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         presenter.dropView(this);
+    }
+
+    public void setup() {
+        setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
     }
 
     public Flow getFlow() {
@@ -75,8 +85,9 @@ public class GodView extends DrawerLayout implements CanShowScreen<Blueprint> {
         if (screenMaestro != null) screenMaestro.showScreen(screen, direction);
     }
 
-    public void addDrawerView() {
-        ScreenConductor.addChild(getContext(), new DrawerScreen(), ButterKnife.<ViewGroup>findById(this, R.id.drawer_container));
+    @Override
+    public boolean isDrawerOpen() {
+        return mNavContainer != null && isDrawerOpen(mNavContainer);
     }
 
     /**

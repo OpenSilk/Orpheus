@@ -21,6 +21,7 @@ import android.content.Context;
 import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
 
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.util.MarkedForRemoval;
 import org.opensilk.music.util.PluginUtil;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.List;
 /**
  * Created by drew on 6/16/14.
  */
+@MarkedForRemoval
 public class NavLoader extends WrappedAsyncTaskLoader<List<PluginInfo>> {
 
     public NavLoader(Context context) {

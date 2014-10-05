@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.nav;
+package org.opensilk.music.loader;
 
-import org.opensilk.music.util.MarkedForRemoval;
+import android.content.Context;
+
+import org.opensilk.music.util.PriorityAsyncTask;
+
+import java.util.List;
 
 /**
- * Created by drew on 7/15/14.
+ * Created by drew on 10/5/14.
  */
-@MarkedForRemoval
-public class NavItem {
+public abstract class LoaderTask<T> extends PriorityAsyncTask<Void, Void, List<T>> {
 
-    public enum Type {
-        HEADER,
-        ITEM,
+    final Context context;
+    final LoaderCallback<T> callback;
+
+    public LoaderTask(Context context, LoaderCallback<T> callback) {
+        super();
+        this.context = context;
+        this.callback = callback;
     }
 
-    public final Type type;
-    public final CharSequence title;
-    public final Runnable action;
-
-    public NavItem(Type type, CharSequence title, Runnable action) {
-        this.type = type;
-        this.title = title;
-        this.action = action;
+    @Override
+    protected void onPostExecute(List<T> etems) {
+        callback.onLoadComplete(etems);
     }
 
 }

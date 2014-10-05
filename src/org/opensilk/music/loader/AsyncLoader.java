@@ -14,29 +14,11 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.nav;
-
-import org.opensilk.music.util.MarkedForRemoval;
+package org.opensilk.music.loader;
 
 /**
- * Created by drew on 7/15/14.
+ * Created by drew on 10/5/14.
  */
-@MarkedForRemoval
-public class NavItem {
-
-    public enum Type {
-        HEADER,
-        ITEM,
-    }
-
-    public final Type type;
-    public final CharSequence title;
-    public final Runnable action;
-
-    public NavItem(Type type, CharSequence title, Runnable action) {
-        this.type = type;
-        this.title = title;
-        this.action = action;
-    }
-
+public interface AsyncLoader<T> {
+    public void loadAsync(LoaderCallback<T> callback);
 }

@@ -17,16 +17,22 @@
 
 package org.opensilk.music.ui2.main;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 
-import org.opensilk.music.R;
-import org.opensilk.music.ui2.gallery.GalleryScreen;
+import com.andrew.apollo.R;
+import com.andrew.apollo.utils.NavUtils;
 
-import java.util.Arrays;
+import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.loader.LoaderCallback;
+import org.opensilk.music.loader.NavLoader;
+
 import java.util.List;
 
 import javax.inject.Inject;
 
+import dagger.Provides;
 import flow.Flow;
 import flow.Layout;
 import mortar.Blueprint;
@@ -39,7 +45,7 @@ import mortar.ViewPresenter;
  * Created by drew on 10/4/14.
  */
 @Layout(R.layout.drawer_list)
-public class DrawerScreen implements Blueprint {
+public class NavScreen implements Blueprint {
 
     @Override
     public String getMortarScopeName() {
@@ -53,30 +59,28 @@ public class DrawerScreen implements Blueprint {
 
     @dagger.Module(
             addsTo = GodScreen.Module.class,
-            injects = DrawerView.class
+            injects = NavView.class
     )
     public static class Module {
 
     }
 
-    public static class Presenter extends ViewPresenter<DrawerView> {
-
-        private static List<String> sItems = Arrays.asList(
-                "Gallery",
-                "Folders"
-        );
+    public static class Presenter extends ViewPresenter<NavView> implements LoaderCallback<PluginInfo> {
 
         final Flow flow;
+        final NavLoader loader;
 
         @Inject
-        public Presenter(Flow flow) {
+        public Presenter(Flow flow, NavLoader loader) {
             this.flow = flow;
+            this.loader = loader;
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            getView().setup(sItems);
+            getView().setup();
+            loader.loadAsync(this);
         }
 
         @Override
@@ -84,14 +88,18 @@ public class DrawerScreen implements Blueprint {
             super.onSave(outState);
         }
 
-        public void go(int pos) {
-            switch (pos) {
-                case 0:
-                    flow.replaceTo(new GalleryScreen());
-                    break;
-                case 1:
-                    break;
-            }
+        @Override
+        public void onLoadComplete(List<PluginInfo> items) {
+            NavView v = getView();
+            if (v != null) v.getAdapter().load(items);
+        }
+
+        public void go(Blueprint screen) {
+            flow.replaceTo(screen);
+        }
+
+        public void openSettings(Context context) {
+            NavUtils.openSettings((Activity)context);
         }
     }
 }

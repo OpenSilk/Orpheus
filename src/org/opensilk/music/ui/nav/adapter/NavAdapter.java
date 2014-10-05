@@ -32,6 +32,7 @@ import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.nav.NavItem;
 import org.opensilk.music.ui.nav.NavItem.Type;
+import org.opensilk.music.util.MarkedForRemoval;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import java.util.List;
 /**
  * Created by drew on 7/15/14.
  */
+@MarkedForRemoval
 public class NavAdapter extends ArrayAdapter<NavItem> {
 
     public NavAdapter(Context context) {
