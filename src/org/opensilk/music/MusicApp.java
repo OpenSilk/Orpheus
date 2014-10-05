@@ -44,6 +44,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import dagger.ObjectGraph;
+import mortar.Mortar;
+import mortar.MortarScope;
 import timber.log.Timber;
 
 /**
@@ -81,6 +83,8 @@ public class MusicApp extends Application implements DaggerInjector {
 
     private ObjectGraph mScopedGraphe;
 
+    protected MortarScope mRootScope;
+
     @Override
     //@DebugLog
     public void onCreate() {
@@ -94,6 +98,7 @@ public class MusicApp extends Application implements DaggerInjector {
 
         mGraphHolder = GraphHolder.get(this);
         mScopedGraphe = mGraphHolder.getObjectGraph().plus(new AppModule(this));
+        mRootScope = Mortar.createRootScope(BuildConfig.DEBUG, mScopedGraphe);
 
         if (DEBUG) {
             // Plant the forest
@@ -128,6 +133,14 @@ public class MusicApp extends Application implements DaggerInjector {
     @Override
     public ObjectGraph getObjectGraph() {
         return mScopedGraphe;
+    }
+
+    @Override
+    public Object getSystemService(String name) {
+        if (Mortar.isScopeSystemService(name)) {
+            return mRootScope;
+        }
+        return super.getSystemService(name);
     }
 
     private void enableStrictMode() {

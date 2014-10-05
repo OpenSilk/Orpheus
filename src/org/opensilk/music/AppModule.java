@@ -18,12 +18,17 @@ package org.opensilk.music;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.opensilk.music.util.GsonParcer;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import flow.Parcer;
 
 /**
  * Created by drew on 6/16/14.
@@ -43,6 +48,18 @@ public class AppModule {
     @Provides @Singleton @ForApplication
     public MusicApp provideApplication() {
         return app;
+    }
+
+    // Flow backstack
+
+    @Provides @Singleton
+    public Gson provideGson() {
+        return new GsonBuilder().create();
+    }
+
+    @Provides @Singleton
+    public Parcer<Object> provideParcer(Gson gson) {
+        return new GsonParcer<Object>(gson);
     }
 
 }
