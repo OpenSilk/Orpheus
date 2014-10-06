@@ -18,10 +18,8 @@ package org.opensilk.music.loader;
 
 import android.content.Context;
 
-import org.opensilk.filebrowser.FileBrowserArgs;
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.MediaProviderUtil;
-import org.opensilk.filebrowser.WrappedAsyncTaskLoader;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.HashSet;
@@ -38,7 +36,6 @@ public class FileItemLoader implements AsyncLoader<FileItem> {
     final Context context;
     final String directory;
     LoaderTask<FileItem> task;
-    LoaderCallback<FileItem> callback;
 
     final static Set<Integer> MEDIA_TYPES = new HashSet<>();
     static {
@@ -53,10 +50,9 @@ public class FileItemLoader implements AsyncLoader<FileItem> {
     }
 
     @Override
-    public void loadAsync(LoaderCallback<FileItem> callback) {
-        this.callback = callback;
-        if (task == null) {
-            task = new LoaderTask<FileItem>(context, this) {
+    public void loadAsync(Callback<FileItem> callback) {
+        if (task == null || task.isCancelled() || task.isFinished()) {
+            task = new LoaderTask<FileItem>(context, callback) {
                 @Override
                 protected List<FileItem> doInBackground(Object... params) {
                     final String directory = (String) params[0];
@@ -64,16 +60,14 @@ public class FileItemLoader implements AsyncLoader<FileItem> {
                 }
             };
             task.execute(directory);
+        } else {
+            task.addListener(callback);
         }
     }
 
     @Override
-    public void onLoadComplete(List<FileItem> items) {
-        if (callback != null) {
-            callback.onLoadComplete(items);
-            callback = null;
-        }
-        task = null;
+    public void cancel() {
+        if (task != null) task.cancel(true);
     }
 
 }

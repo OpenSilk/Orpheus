@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loader;
+package org.opensilk.music.ui2.library;
 
-import java.util.List;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.widget.ListView;
 
 /**
  * Created by drew on 10/5/14.
  */
-public interface AsyncLoader<T> {
-    public interface Callback<T> {
-        public void onDataFetched(List<T> items);
+public class LibraryView extends ListView {
+
+    public LibraryView(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
-    public void loadAsync(Callback<T> callback);
-    public void cancel();
+
 }

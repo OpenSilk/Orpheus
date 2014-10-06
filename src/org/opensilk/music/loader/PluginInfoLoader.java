@@ -36,31 +36,20 @@ import javax.inject.Singleton;
 /**
  * Created by drew on 10/5/14.
  */
-@Singleton
 public class PluginInfoLoader implements AsyncLoader<PluginInfo> {
 
     final Context context;
-    final Set<LoaderCallback<PluginInfo>> callbacks;
     LoaderTask<PluginInfo> task;
-    final List<PluginInfo> previousInfos;
 
     @Inject
     public PluginInfoLoader(@ForApplication Context context) {
         this.context = context;
-        callbacks = new HashSet<>();
-        previousInfos = new ArrayList<>();
     }
 
     @Override
-    public void loadAsync(LoaderCallback<PluginInfo> callback) {
-        //return cached copy
-        if (!previousInfos.isEmpty()) {
-            callback.onLoadComplete(previousInfos);
-        }
-        // prepare new query
-        callbacks.add(callback);
-        if (task == null) {
-            task = new LoaderTask<PluginInfo>(context, this) {
+    public void loadAsync(Callback<PluginInfo> callback) {
+        if (task == null || task.isCancelled() || task.isFinished()) {
+            task = new LoaderTask<PluginInfo>(context, callback) {
                 @Override
                 protected List<PluginInfo> doInBackground(Object... params) {
                     List<PluginInfo> list = new ArrayList<>();
@@ -73,19 +62,14 @@ public class PluginInfoLoader implements AsyncLoader<PluginInfo> {
                 }
             };
             task.execute();
+        } else {
+            task.addListener(callback);
         }
     }
 
     @Override
-    public void onLoadComplete(List<PluginInfo> items) {
-        previousInfos.clear();
-        previousInfos.addAll(items);
-        final Iterator<LoaderCallback<PluginInfo>> iterator = callbacks.iterator();
-        while (iterator.hasNext()) {
-            iterator.next().onLoadComplete(items);
-            iterator.remove();
-        }
-        task = null;
+    public void cancel() {
+        if (task != null) task.cancel(true);
     }
 
 }

@@ -21,10 +21,14 @@ import java.util.List;
 /**
  * Created by drew on 10/5/14.
  */
-public interface AsyncLoader<T> {
+public interface EndlessRemoteAsyncLoader<T> {
     public interface Callback<T> {
         public void onDataFetched(List<T> items);
+        public void onMoreDataFetched(List<T> items);
+        public void onConnectionAvailable();
     }
+    public void loadMoreAsync(Callback<T> callback);
     public void loadAsync(Callback<T> callback);
-    public void cancel();
+    public void connect();
+    public void disconnect();
 }

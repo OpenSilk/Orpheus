@@ -14,93 +14,95 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.folder;
+package org.opensilk.music.ui2.library;
 
 import android.os.Bundle;
 
-import com.andrew.apollo.R;
-
 import org.opensilk.filebrowser.FileItem;
-import org.opensilk.music.loader.AsyncLoader;
+import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.api.model.spi.Bundleable;
+import org.opensilk.music.loader.EndlessAsyncLoader;
+import org.opensilk.music.loader.EndlessRemoteAsyncLoader;
 import org.opensilk.music.loader.FileItemLoader;
-import org.opensilk.music.ui.folder.FolderPickerActivity;
+import org.opensilk.music.loader.LibraryLoader;
+import org.opensilk.music.ui2.folder.FolderView;
 import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.ui2.main.GodScreen;
-import org.opensilk.music.ui2.main.GodView;
 
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import dagger.Module;
 import dagger.Provides;
 import flow.Flow;
-import flow.Layout;
 import mortar.Blueprint;
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
  */
-@Layout(R.layout.folder_list)
-public class FolderScreen implements Blueprint {
+public class LibraryScreen implements Blueprint {
 
-    final String directory;
+    final PluginInfo plugin;
 
-    public FolderScreen() {
-        this(FolderPickerActivity.SDCARD_ROOT);
-    }
-
-    public FolderScreen(String directory) {
-        this.directory = directory;
+    public LibraryScreen(PluginInfo plugin) {
+        this.plugin = plugin;
     }
 
     @Override
     public String getMortarScopeName() {
-        return getClass().getName() + directory;
+        return getClass().getName() + plugin.componentName;
     }
 
     @Override
     public Object getDaggerModule() {
-        return new Module(this);
+        return null;
     }
 
     @dagger.Module(
-            injects = FolderView.class,
-            addsTo = GodScreen.Module.class
+            injects = LibraryView.class,
+            addsTo = God.Module.class,
+            library = true
     )
     public static class Module {
 
-        final FolderScreen screen;
+        final LibraryScreen screen;
 
-        public Module(FolderScreen screen) {
+        public Module(LibraryScreen screen) {
             this.screen = screen;
         }
 
         @Provides
-        public String provideDirectory() {
-            return screen.directory;
+        public PluginInfo provideLibrary() {
+            return screen.plugin;
         }
+
     }
 
     @Singleton
-    public static class Presenter extends ViewPresenter<FolderView> implements AsyncLoader.Callback<FileItem> {
+    public static class Presenter extends ViewPresenter<LibraryView> implements EndlessRemoteAsyncLoader.Callback<Bundleable> {
 
         final Flow flow;
-        final FileItemLoader loader;
+        final LibraryLoader loader;
 
         @Inject
-        public Presenter(Flow flow, FileItemLoader loader) {
+        public Presenter(Flow flow, LibraryLoader loader) {
             this.flow = flow;
             this.loader = loader;
         }
 
         @Override
+        protected void onEnterScope(MortarScope scope) {
+            super.onEnterScope(scope);
+            loader.connect();
+        }
+
+        @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            getView().setup();
             loader.loadAsync(this);
         }
 
@@ -110,18 +112,29 @@ public class FolderScreen implements Blueprint {
         }
 
         @Override
-        public void onDataFetched(List<FileItem> items) {
-            FolderView v = getView();
-            if (v != null) {
-                v.getAdapter().clear();
-                v.getAdapter().addAll(items);
-            }
+        protected void onExitScope() {
+            super.onExitScope();
+            loader.disconnect();
         }
 
-        public void go(FileItem item) {
-            Timber.v("go(%s)", item);
-            flow.goTo(new FolderScreen(item.getPath()));
+        @Override
+        public void onDataFetched(List<Bundleable> items) {
+
+        }
+
+        @Override
+        public void onMoreDataFetched(List<Bundleable> items) {
+
+        }
+
+        @Override
+        public void onConnectionAvailable() {
+
+        }
+
+        public void go() {
         }
 
     }
+
 }

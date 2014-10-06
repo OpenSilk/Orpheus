@@ -20,7 +20,9 @@ import android.content.Context;
 
 import org.opensilk.music.util.PriorityAsyncTask;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by drew on 10/5/14.
@@ -28,17 +30,28 @@ import java.util.List;
 public abstract class LoaderTask<T> extends PriorityAsyncTask<Object, Void, List<T>> {
 
     final Context context;
-    final LoaderCallback<T> callback;
+    final Set<AsyncLoader.Callback<T>> callbacks;
 
-    public LoaderTask(Context context, LoaderCallback<T> callback) {
+    public LoaderTask(Context context, AsyncLoader.Callback<T> callback) {
         super();
         this.context = context;
-        this.callback = callback;
+        callbacks = new HashSet<>();
+        callbacks.add(callback);
+    }
+
+    public void addListener(AsyncLoader.Callback<T> callback) {
+        callbacks.add(callback);
+    }
+
+    public boolean isFinished() {
+        return getStatus() == Status.FINISHED;
     }
 
     @Override
     protected void onPostExecute(List<T> etems) {
-        callback.onLoadComplete(etems);
+        for (AsyncLoader.Callback<T> callback : callbacks) {
+            callback.onDataFetched(etems);
+        }
     }
 
 }

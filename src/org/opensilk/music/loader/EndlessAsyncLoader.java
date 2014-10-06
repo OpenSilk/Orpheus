@@ -21,10 +21,9 @@ import java.util.List;
 /**
  * Created by drew on 10/5/14.
  */
-public interface AsyncLoader<T> {
-    public interface Callback<T> {
-        public void onDataFetched(List<T> items);
+public interface EndlessAsyncLoader<T> extends AsyncLoader<T> {
+    public interface Callback<T> extends AsyncLoader.Callback<T> {
+        public void onMoreDataFetched(List<T> items);
     }
-    public void loadAsync(Callback<T> callback);
-    public void cancel();
+    public void loadMoreAsync(Callback<T> callback);
 }

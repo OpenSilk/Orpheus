@@ -59,8 +59,8 @@ public class GalleryView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        presenter.takeView(this);
         ButterKnife.inject(this);
+        presenter.takeView(this);
     }
 
     @Override

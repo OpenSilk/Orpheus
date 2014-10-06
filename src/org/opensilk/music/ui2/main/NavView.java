@@ -34,6 +34,7 @@ import com.andrew.apollo.utils.NavUtils;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.folder.FolderScreen;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
+import org.opensilk.music.ui2.library.LibraryScreen;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -144,7 +145,7 @@ public class NavView extends ListView {
             if (infos != null) {
                 add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_library), null));
                 for (final PluginInfo info : infos) {
-//                add(new Item(Item.Type.ITEM, info.title, new LibraryScreen(info)));
+                    add(new Item(Item.Type.ITEM, info.title, new LibraryScreen(info)));
                 }
             }
             add(new Item(Item.Type.HEADER, getContext().getString(R.string.menu_settings), null));

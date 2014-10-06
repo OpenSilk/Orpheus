@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loader;
+package org.opensilk.music.ui2.main;
 
-import org.opensilk.music.api.meta.PluginInfo;
-
-import dagger.Module;
+import mortar.MortarScope;
 
 /**
  * Created by drew on 10/5/14.
  */
-@Module(
-        complete = false
-)
-public class LoaderModule  {
-
+public interface HasScope {
+    MortarScope getScope();
 }

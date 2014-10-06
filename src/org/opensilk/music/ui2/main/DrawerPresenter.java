@@ -14,17 +14,31 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.loader;
+package org.opensilk.music.ui2.main;
 
-import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import mortar.MortarScope;
+import mortar.Presenter;
 
 /**
  * Created by drew on 10/5/14.
  */
-public interface AsyncLoader<T> {
-    public interface Callback<T> {
-        public void onDataFetched(List<T> items);
+@Singleton
+public class DrawerPresenter extends Presenter<DrawerPresenter.Owner> {
+
+    public interface Owner extends HasScope {
+
     }
-    public void loadAsync(Callback<T> callback);
-    public void cancel();
+
+    @Inject
+    public DrawerPresenter() {
+        super();
+    }
+
+    @Override
+    protected MortarScope extractScope(Owner view) {
+        return null;
+    }
 }

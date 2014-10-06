@@ -25,7 +25,7 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.loader.LoaderCallback;
+import org.opensilk.music.loader.AsyncLoader;
 import org.opensilk.music.loader.PluginInfoLoader;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public class NavScreen implements Blueprint {
     }
 
     @Singleton
-    public static class Presenter extends ViewPresenter<NavView> implements LoaderCallback<PluginInfo> {
+    public static class Presenter extends ViewPresenter<NavView> implements AsyncLoader.Callback<PluginInfo> {
 
         final Flow flow;
         final PluginInfoLoader loader;
@@ -90,7 +90,7 @@ public class NavScreen implements Blueprint {
         }
 
         @Override
-        public void onLoadComplete(List<PluginInfo> items) {
+        public void onDataFetched(List<PluginInfo> items) {
             NavView v = getView();
             if (v != null) {
                 v.getAdapter().clear();
