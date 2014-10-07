@@ -17,9 +17,6 @@
 
 package org.opensilk.music.ui2.main;
 
-import android.content.Context;
-import android.view.View;
-
 import org.opensilk.music.AppModule;
 import com.andrew.apollo.R;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
@@ -52,7 +49,7 @@ public class GodScreen implements Blueprint {
     @dagger.Module(
             addsTo = AppModule.class,
             injects = {
-                    GodView.class
+                    DrawerView.class
             },
             library = true
     )
@@ -66,7 +63,7 @@ public class GodScreen implements Blueprint {
     }
 
     @Singleton
-    public static class Presenter extends FlowControl<Blueprint, GodView> {
+    public static class Presenter extends FlowControl<Blueprint, DrawerView> {
 
         @Inject
         Presenter(Parcer<Object> flowParcer) {

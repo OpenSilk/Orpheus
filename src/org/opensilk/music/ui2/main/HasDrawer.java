@@ -20,5 +20,9 @@ package org.opensilk.music.ui2.main;
  * Created by drew on 10/5/14.
  */
 public interface HasDrawer {
-    public boolean isDrawerOpen();
+    boolean isDrawerOpen();
+    void closeDrawer();
+    void openDrawer();
+    void lockDrawer();
+    void unlockDrawer();
 }

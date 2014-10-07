@@ -32,53 +32,56 @@ import javax.inject.Inject;
 /**
  * Created by drew on 10/5/14.
  */
-public class LibraryConnection implements ServiceConnection {
+public class PluginConnection implements ServiceConnection {
 
-    public interface Callback {
-        public void onConnected();
+    public interface Listener {
+        public void onConnectionEstablished();
+        public void onConnectionLost();
     }
 
     final Context context;
     final PluginInfo plugin;
 
     RemoteLibrary libraryConnection;
-    boolean isConnected;
-    Callback connectionCallback;
-
+    boolean connected;
+    Listener connectionListener;
 
     @Inject
-    public LibraryConnection(@ForApplication Context context, PluginInfo plugin) {
+    public PluginConnection(@ForApplication Context context, PluginInfo plugin) {
         this.context = new ContextWrapper(context);
         this.plugin = plugin;
     }
 
-    public boolean isConnected() {
-        if (isConnected && libraryConnection != null) {
-            return true;
-        } else {
-            return false;
-        }
+    public RemoteLibrary getConnection() {
+        return libraryConnection;
     }
 
-    public void connect() {
+    public boolean isConnected() {
+        return connected && libraryConnection != null;
+    }
+
+    public void connect(Listener listener) {
+        connectionListener = listener;
         context.startService(new Intent().setComponent(plugin.componentName));
         context.bindService(new Intent().setComponent(plugin.componentName), this, 0);
     }
 
     public void disconnect() {
-        context.unbindService(this);
+        connectionListener = null;
+        if (isConnected()) context.unbindService(this);
     }
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         libraryConnection = RemoteLibrary.Stub.asInterface(service);
-        isConnected = true;
+        connected = true;
+        if (connectionListener != null) connectionListener.onConnectionEstablished();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
         libraryConnection = null;
-        isConnected = false;
-
+        connected = false;
+        if (connectionListener != null) connectionListener.onConnectionLost();
     }
 }

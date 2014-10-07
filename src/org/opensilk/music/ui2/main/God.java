@@ -57,7 +57,6 @@ public class God implements Blueprint {
 
     @dagger.Module(
             addsTo = AppModule.class,
-            injects = GodActivity.class,
             library = true
     )
     public static class Module {

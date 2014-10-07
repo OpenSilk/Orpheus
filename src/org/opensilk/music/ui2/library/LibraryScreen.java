@@ -18,7 +18,10 @@ package org.opensilk.music.ui2.library;
 
 import android.os.Bundle;
 
+import com.andrew.apollo.R;
+
 import org.opensilk.filebrowser.FileItem;
+import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.loader.EndlessAsyncLoader;
@@ -26,6 +29,7 @@ import org.opensilk.music.loader.EndlessRemoteAsyncLoader;
 import org.opensilk.music.loader.FileItemLoader;
 import org.opensilk.music.loader.LibraryLoader;
 import org.opensilk.music.ui2.folder.FolderView;
+import org.opensilk.music.ui2.main.DrawerView;
 import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.ui2.main.GodScreen;
 
@@ -36,6 +40,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Flow;
+import flow.Layout;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -44,27 +49,28 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/5/14.
  */
+@Layout(R.layout.library_list)
 public class LibraryScreen implements Blueprint {
 
-    final PluginInfo plugin;
+    final LibraryInfo info;
 
-    public LibraryScreen(PluginInfo plugin) {
-        this.plugin = plugin;
+    public LibraryScreen(LibraryInfo info) {
+        this.info = info;
     }
 
     @Override
     public String getMortarScopeName() {
-        return getClass().getName() + plugin.componentName;
+        return getClass().getName() + info.libraryComponent;
     }
 
     @Override
     public Object getDaggerModule() {
-        return null;
+        return new Module(this);
     }
 
     @dagger.Module(
             injects = LibraryView.class,
-            addsTo = God.Module.class,
+            addsTo = GodScreen.Module.class,
             library = true
     )
     public static class Module {
@@ -76,8 +82,8 @@ public class LibraryScreen implements Blueprint {
         }
 
         @Provides
-        public PluginInfo provideLibrary() {
-            return screen.plugin;
+        public LibraryInfo provideLibraryInfo() {
+            return screen.info;
         }
 
     }

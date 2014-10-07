@@ -14,41 +14,38 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.main;
+package org.opensilk.music.ui2.library;
 
 import android.content.Context;
+import android.util.AttributeSet;
+import android.widget.LinearLayout;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-import mortar.MortarScope;
-import mortar.Presenter;
+import mortar.Mortar;
 
 /**
- * Created by drew on 10/5/14.
+ * Created by drew on 10/6/14.
  */
-@Singleton
-public class DrawerPresenter extends Presenter<DrawerPresenter.Delegate> {
-
-    public interface Delegate extends HasScope {
-        void closeDrawer();
-        void disableDrawer(boolean hideIndicator);
-        void enableDrawer();
-    }
+public class PluginView extends LinearLayout {
 
     @Inject
-    public DrawerPresenter() {
-        super();
+    PluginScreen.Presenter presenter;
+
+    public PluginView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        Mortar.inject(getContext(), this);
     }
 
     @Override
-    protected MortarScope extractScope(Delegate view) {
-        return view.getScope();
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        presenter.takeView(this);
     }
 
-    public void closeDrawer() {
-        Delegate d = getView();
-        if (d == null) return;
-        d.closeDrawer();
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        presenter.dropView(this);
     }
 }

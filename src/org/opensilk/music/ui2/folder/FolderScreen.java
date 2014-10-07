@@ -24,16 +24,13 @@ import org.opensilk.filebrowser.FileItem;
 import org.opensilk.music.loader.AsyncLoader;
 import org.opensilk.music.loader.FileItemLoader;
 import org.opensilk.music.ui.folder.FolderPickerActivity;
-import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.ui2.main.GodScreen;
-import org.opensilk.music.ui2.main.GodView;
 
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import dagger.Module;
 import dagger.Provides;
 import flow.Flow;
 import flow.Layout;

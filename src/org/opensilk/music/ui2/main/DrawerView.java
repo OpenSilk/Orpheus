@@ -17,9 +17,12 @@
 
 package org.opensilk.music.ui2.main;
 
+import android.app.Activity;
 import android.content.Context;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,16 +44,17 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/3/14.
  */
-public class GodView extends DrawerLayout implements CanShowScreen<Blueprint>, HasDrawer {
+public class DrawerView extends DrawerLayout implements CanShowScreen<Blueprint> {
 
     @Inject
     GodScreen.Presenter presenter;
 
-    @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
+    @InjectView(R.id.drawer_container) ViewGroup navContainer;
 
     ScreenConductor<Blueprint> screenMaestro;
+    ActionBarDrawerToggle drawerToggle;
 
-    public GodView(Context context, AttributeSet attrs) {
+    public DrawerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
     }
@@ -63,7 +67,7 @@ public class GodView extends DrawerLayout implements CanShowScreen<Blueprint>, H
                 ButterKnife.<FrameLayout>findById(this, R.id.main));
         presenter.takeView(this);
         //add navlist
-        ScreenConductor.addChild(getContext(), new NavScreen(), mNavContainer);
+        ScreenConductor.addChild(getContext(), new NavScreen(), navContainer);
     }
 
     @Override
@@ -72,23 +76,66 @@ public class GodView extends DrawerLayout implements CanShowScreen<Blueprint>, H
         presenter.dropView(this);
     }
 
+    @Override
+    public void showScreen(Blueprint screen, Flow.Direction direction) {
+        if (screenMaestro != null) screenMaestro.showScreen(screen, direction);
+    }
+
     public void setup() {
         setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
+        setupToggle();
     }
 
     public Flow getFlow() {
         return presenter.getFlow();
     }
 
-    @Override
-    public void showScreen(Blueprint screen, Flow.Direction direction) {
-        if (screenMaestro != null) screenMaestro.showScreen(screen, direction);
+    public boolean isDrawerOpen() {
+        return navContainer != null && isDrawerOpen(navContainer);
     }
 
-    @Override
-    public boolean isDrawerOpen() {
-        return mNavContainer != null && isDrawerOpen(mNavContainer);
+    public void closeDrawer() {
+        if (isDrawerOpen()) closeDrawer(navContainer);
+    }
+
+    public void lockDrawer() {
+        setDrawerLockMode(LOCK_MODE_LOCKED_CLOSED, navContainer);
+    }
+
+    public void unlockDrawer() {
+        setDrawerLockMode(LOCK_MODE_UNLOCKED, navContainer);
+    }
+
+    private void setupToggle() {
+        // ActionBarDrawerToggle ties together the the proper interactions
+        // between the navigation drawer and the action bar app icon.
+        drawerToggle = new ActionBarDrawerToggle(
+                (ActionBarActivity) getContext(),                    /* host Activity */
+                this,                    /* DrawerLayout object */
+                R.drawable.ic_navigation_drawer,             /* nav drawer image to replace 'Up' caret */
+                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+        ) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                ((ActionBarActivity) getContext()).supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                ((ActionBarActivity) getContext()).supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+        };
+        setDrawerListener(drawerToggle);
+        // Defer code dependent on restoration of previous instance state.
+        post(new Runnable() {
+            @Override
+            public void run() {
+                drawerToggle.syncState();
+            }
+        });
     }
 
     /**

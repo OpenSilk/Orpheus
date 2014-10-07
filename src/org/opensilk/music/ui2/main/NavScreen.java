@@ -20,6 +20,7 @@ package org.opensilk.music.ui2.main;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
@@ -69,11 +70,13 @@ public class NavScreen implements Blueprint {
     public static class Presenter extends ViewPresenter<NavView> implements AsyncLoader.Callback<PluginInfo> {
 
         final Flow flow;
+        final DrawerPresenter drawerPresenter;
         final PluginInfoLoader loader;
 
         @Inject
-        public Presenter(Flow flow, PluginInfoLoader loader) {
+        public Presenter(Flow flow, DrawerPresenter drawerPresenter, PluginInfoLoader loader) {
             this.flow = flow;
+            this.drawerPresenter = drawerPresenter;
             this.loader = loader;
         }
 
@@ -99,7 +102,11 @@ public class NavScreen implements Blueprint {
         }
 
         public void go(Blueprint screen) {
-            flow.replaceTo(screen);
+            if(screen!=null) {
+                drawerPresenter.closeDrawer();
+                flow.replaceTo(screen);
+
+            }
         }
 
         public void openSettings(Context context) {

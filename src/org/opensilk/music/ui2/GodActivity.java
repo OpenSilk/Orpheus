@@ -11,9 +11,10 @@ import android.view.View;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.ui2.main.NavView;
+import org.opensilk.music.ui2.main.ActionBarPresenter;
+import org.opensilk.music.ui2.main.DrawerPresenter;
 import org.opensilk.music.ui2.main.GodScreen;
-import org.opensilk.music.ui2.main.GodView;
+import org.opensilk.music.ui2.main.DrawerView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -21,11 +22,13 @@ import flow.Flow;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 import mortar.MortarScope;
+import timber.log.Timber;
 
 
-public class GodActivity extends ActionBarActivity {
+public class GodActivity extends ActionBarActivity implements ActionBarPresenter.Owner {
 
-    @InjectView(R.id.drawer_layout) GodView mGodView;
+    @InjectView(R.id.drawer_layout)
+    DrawerView mDrawerView;
 
     protected MortarActivityScope mActivityScope;
 
@@ -44,7 +47,7 @@ public class GodActivity extends ActionBarActivity {
         setContentView(R.layout.activity_god);
         ButterKnife.inject(this);
 
-        mFlow = mGodView.getFlow();
+        mFlow = mDrawerView.getFlow();
 
         doDrawerSetup();
     }
@@ -53,6 +56,7 @@ public class GodActivity extends ActionBarActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (isFinishing()) {
+            Timber.d("Destroying Activity scope");
             MortarScope parentScope = Mortar.getScope(getApplication());
             parentScope.destroyChild(mActivityScope);
             mActivityScope = null;
@@ -74,7 +78,7 @@ public class GodActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!isDrawerOpen()) {
+        if (!mDrawerView.isDrawerOpen()) {
 //            restoreActionBar();
             getMenuInflater().inflate(R.menu.sleep_timer, menu);
             return super.onCreateOptionsMenu(menu);
@@ -112,40 +116,12 @@ public class GodActivity extends ActionBarActivity {
         return super.getSystemService(name);
     }
 
-    public boolean isDrawerOpen() {
-        return mGodView != null && mGodView.isDrawerOpen();
-    }
-
     private void doDrawerSetup() {
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the navigation drawer and the action bar app icon.
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                    /* host Activity */
-                mGodView,                    /* DrawerLayout object */
-                R.drawable.ic_navigation_drawer,             /* nav drawer image to replace 'Up' caret */
-                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
 
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-        };
-        mGodView.setDrawerListener(mDrawerToggle);
-        // Defer code dependent on restoration of previous instance state.
-        mGodView.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
     }
 
+    @Override
+    public MortarScope getScope() {
+        return null;
+    }
 }
