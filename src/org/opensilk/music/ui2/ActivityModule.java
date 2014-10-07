@@ -18,9 +18,13 @@ package org.opensilk.music.ui2;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.squareup.otto.Bus;
 
+import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.util.GsonParcer;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -34,6 +38,11 @@ import flow.Parcer;
         injects = GodActivity.class
 )
 public class ActivityModule {
+
+    @Provides @Singleton @Named("activity")
+    public Bus provideEventBus() {
+        return new Bus("activity");
+    }
 
     // Flow backstack
 

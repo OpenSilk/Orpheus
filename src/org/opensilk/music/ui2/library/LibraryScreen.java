@@ -62,7 +62,7 @@ public class LibraryScreen implements Blueprint {
 
     @dagger.Module(
             injects = LibraryView.class,
-            addsTo = God.Module.class,
+            addsTo = PluginScreen.Module.class,
             library = true
     )
     public static class Module {

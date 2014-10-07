@@ -16,6 +16,7 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,16 +24,23 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 
 import com.andrew.apollo.R;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.ui2.event.ActivityResult;
+import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.main.DrawerView;
 import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.util.PluginSettings;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
@@ -40,6 +48,7 @@ import flow.Layout;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/6/14.
@@ -94,20 +103,24 @@ public class PluginScreen implements Blueprint {
         final PluginConnection connection;
         final PluginInfo plugin;
         final PluginSettings settings;
+        final Bus bus;
 
         String libraryIdentity;
         boolean loaded;
 
         @Inject
-        public Presenter(@ForApplication Context context, PluginInfo plugin, PluginConnection connection) {
+        public Presenter(@ForApplication Context context, PluginInfo plugin,
+                         PluginConnection connection, @Named("activity") Bus bus) {
             this.connection = connection;
             this.plugin = plugin;
             this.settings = new PluginSettings(context, plugin.componentName);
+            this.bus = bus;
         }
 
         @Override
         protected void onEnterScope(MortarScope scope) {
             super.onEnterScope(scope);
+            bus.register(this);
             connection.connect(this);
         }
 
@@ -133,6 +146,7 @@ public class PluginScreen implements Blueprint {
         @Override
         protected void onExitScope() {
             super.onExitScope();
+            bus.unregister(this);
             connection.disconnect();
         }
 
@@ -144,8 +158,7 @@ public class PluginScreen implements Blueprint {
                         Intent i = new Intent();
                         getLibraryConnection().getLibraryChooserIntent(i);
                         if (i.getComponent() != null) {
-//                            i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
-//                            startActivityForResult(i, REQUEST_LIBRARY);
+                            bus.post(new StartActivityForResult(i, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
                         }
                     } else {
                         openLibrary();
@@ -159,6 +172,28 @@ public class PluginScreen implements Blueprint {
         @Override
         public void onConnectionLost() {
 
+        }
+
+        @Subscribe
+        public void onActivityResultEvent(ActivityResult res) {
+            switch (res.reqCode) {
+                case StartActivityForResult.PLUGIN_REQUEST_LIBRARY:
+                    if (res.resultCode == Activity.RESULT_OK) {
+                        final String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
+                        if (TextUtils.isEmpty(id)) {
+                            Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
+                            return;
+                        }
+                        libraryIdentity = id;
+                        settings.setDefaultSource(libraryIdentity);
+                        onConnectionEstablished();
+                    } else {
+                        //TODO
+                    }
+                    break;
+                case StartActivityForResult.PLUGIN_REQUEST_SETTINGS:
+                    break;
+            }
         }
 
         private void openLibrary() {

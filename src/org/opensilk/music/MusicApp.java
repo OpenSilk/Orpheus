@@ -91,7 +91,7 @@ public class MusicApp extends Application implements DaggerInjector {
         super.onCreate();
 
         if (DEBUG) {
-            BugSenseHandler.initAndStartSession(this, "751fd228");
+//            BugSenseHandler.initAndStartSession(this, "751fd228");
         } else {
             BugSenseHandler.initAndStartSession(this, "7c67fe46");
         }

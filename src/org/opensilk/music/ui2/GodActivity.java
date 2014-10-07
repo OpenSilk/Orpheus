@@ -1,6 +1,7 @@
 package org.opensilk.music.ui2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -12,11 +13,19 @@ import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.ThemeHelper;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
+import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.ui2.event.ActivityResult;
+import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.main.DrawerView;
 import org.opensilk.music.ui2.main.God;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -33,7 +42,10 @@ import timber.log.Timber;
 public class GodActivity extends ActionBarActivity implements
         Flow.Listener {
 
-    @Inject God.Presenter mGodPresenter;
+    @Inject @Named("activity")
+    Bus mBus;
+    @Inject
+    God.Presenter mGodPresenter;
 
     @InjectView(R.id.drawer_layout)
     DrawerView mDrawerView;
@@ -52,7 +64,9 @@ public class GodActivity extends ActionBarActivity implements
         mActivityScope.onCreate(savedInstanceState);
         Mortar.inject(this, this);
 
+        mBus.register(this);
         mGodPresenter.takeView(this);
+
         mFlow = mGodPresenter.getFlow();
 
         setContentView(R.layout.activity_god);
@@ -66,6 +80,7 @@ public class GodActivity extends ActionBarActivity implements
     protected void onDestroy() {
         super.onDestroy();
 
+        mBus.unregister(this);
         if (mGodPresenter != null) mGodPresenter.dropView(this);
 
         if (isFinishing()) {
@@ -127,6 +142,24 @@ public class GodActivity extends ActionBarActivity implements
             return mActivityScope;
         }
         return super.getSystemService(name);
+    }
+
+    @Subscribe
+    public void onStartActivityForResultEvent(StartActivityForResult req) {
+        req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(this));
+        startActivityForResult(req.intent, req.code);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case StartActivityForResult.PLUGIN_REQUEST_LIBRARY:
+            case StartActivityForResult.PLUGIN_REQUEST_SETTINGS:
+                mBus.post(new ActivityResult(data, requestCode, resultCode));
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     //Flow

@@ -90,6 +90,7 @@ public class FolderScreen implements Blueprint {
 
         @Inject
         public Presenter(Flow flow, FileItemLoader loader) {
+            Timber.v("new Presenter");
             this.flow = flow;
             this.loader = loader;
         }
