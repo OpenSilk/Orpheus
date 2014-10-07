@@ -23,18 +23,17 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 
 import com.andrew.apollo.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
-import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.main.DrawerView;
-import org.opensilk.music.ui2.main.GodScreen;
+import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.util.PluginSettings;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Layout;
@@ -65,7 +64,7 @@ public class PluginScreen implements Blueprint {
     }
 
     @dagger.Module (
-            addsTo = GodScreen.Module.class,
+            addsTo = God.Module.class,
             injects = PluginView.class,
             library = true
     )
@@ -89,6 +88,7 @@ public class PluginScreen implements Blueprint {
 
     }
 
+    @Singleton
     public static class Presenter extends ViewPresenter<PluginView> implements PluginConnection.Listener {
 
         final PluginConnection connection;

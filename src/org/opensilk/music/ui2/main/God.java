@@ -66,10 +66,15 @@ public class God implements Blueprint {
             return presenter.getFlow();
         }
 
+        @Provides
+        public Activity provideActivity(Presenter presenter) {
+            return presenter.getActivity();
+        }
+
     }
 
     @Singleton
-    public static class Presenter extends mortar.Presenter<GodActivity> implements Flow.Listener {
+    public static class Presenter extends mortar.Presenter<GodActivity> {
         static final String FLOW_KEY = "FLOW_KEY";
 
         final Parcer<Object> parcer;
@@ -83,7 +88,7 @@ public class God implements Blueprint {
 
         @Override
         protected MortarScope extractScope(GodActivity view) {
-            return null;// view.getScope();
+            return view.getScope();
         }
 
         @Override
@@ -99,10 +104,9 @@ public class God implements Blueprint {
                     backstack = Backstack.fromUpChain(new GalleryScreen());
                 }
 
-                flow = new Flow(backstack, this);
+                flow = new Flow(backstack, getView());
             }
 
-            showScreen((Blueprint) flow.getBackstack().current().getScreen(), null);
         }
 
         @Override
@@ -111,30 +115,12 @@ public class God implements Blueprint {
             outState.putParcelable(FLOW_KEY, flow.getBackstack().getParcelable(parcer));
         }
 
-        @Override
-        public void go(Backstack backstack, Flow.Direction direction,
-                                 Flow.Callback callback) {
-            Blueprint newScreen = (Blueprint) backstack.current().getScreen();
-            showScreen(newScreen, direction);
-            callback.onComplete();
-        }
-
-        public boolean onRetreatSelected() {
-            return getFlow().goBack();
-        }
-
-        public boolean onUpSelected() {
-            return getFlow().goUp();
-        }
-
-        protected void showScreen(Blueprint newScreen, Flow.Direction flowDirection) {
-            GodActivity view = getView();
-            if (view == null) return;
-//            view.showScreen(newScreen, flowDirection);
-        }
-
         public final Flow getFlow() {
             return flow;
+        }
+
+        public GodActivity getActivity() {
+            return getView();
         }
 
     }

@@ -20,7 +20,6 @@ package org.opensilk.music.ui2.main;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
@@ -60,7 +59,7 @@ public class NavScreen implements Blueprint {
 
     @dagger.Module(
             injects = NavView.class,
-            addsTo = GodScreen.Module.class
+            addsTo = God.Module.class
     )
     public static class Module {
 

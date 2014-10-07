@@ -20,18 +20,11 @@ import android.os.Bundle;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.filebrowser.FileItem;
 import org.opensilk.music.api.meta.LibraryInfo;
-import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.loader.EndlessAsyncLoader;
 import org.opensilk.music.loader.EndlessRemoteAsyncLoader;
-import org.opensilk.music.loader.FileItemLoader;
 import org.opensilk.music.loader.LibraryLoader;
-import org.opensilk.music.ui2.folder.FolderView;
-import org.opensilk.music.ui2.main.DrawerView;
 import org.opensilk.music.ui2.main.God;
-import org.opensilk.music.ui2.main.GodScreen;
 
 import java.util.List;
 
@@ -44,7 +37,6 @@ import flow.Layout;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
@@ -70,7 +62,7 @@ public class LibraryScreen implements Blueprint {
 
     @dagger.Module(
             injects = LibraryView.class,
-            addsTo = GodScreen.Module.class,
+            addsTo = God.Module.class,
             library = true
     )
     public static class Module {

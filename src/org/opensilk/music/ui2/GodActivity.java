@@ -1,5 +1,6 @@
 package org.opensilk.music.ui2;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -7,30 +8,37 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
-import org.opensilk.music.ui2.main.ActionBarPresenter;
-import org.opensilk.music.ui2.main.DrawerPresenter;
-import org.opensilk.music.ui2.main.GodScreen;
 import org.opensilk.music.ui2.main.DrawerView;
+import org.opensilk.music.ui2.main.God;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import flow.Backstack;
 import flow.Flow;
+import flow.Layouts;
+import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 import mortar.MortarScope;
 import timber.log.Timber;
 
 
-public class GodActivity extends ActionBarActivity implements ActionBarPresenter.Owner {
+public class GodActivity extends ActionBarActivity implements
+        Flow.Listener {
+
+    @Inject God.Presenter mGodPresenter;
 
     @InjectView(R.id.drawer_layout)
     DrawerView mDrawerView;
 
-    protected MortarActivityScope mActivityScope;
+    MortarActivityScope mActivityScope;
 
     Flow mFlow;
     ActionBarDrawerToggle mDrawerToggle;
@@ -40,21 +48,26 @@ public class GodActivity extends ActionBarActivity implements ActionBarPresenter
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());
-        mActivityScope = Mortar.requireActivityScope(parentScope, new GodScreen());
+        mActivityScope = Mortar.requireActivityScope(parentScope, new God());
         mActivityScope.onCreate(savedInstanceState);
-//        Mortar.inject(this, this);
+        Mortar.inject(this, this);
+
+        mGodPresenter.takeView(this);
+        mFlow = mGodPresenter.getFlow();
 
         setContentView(R.layout.activity_god);
         ButterKnife.inject(this);
 
-        mFlow = mDrawerView.getFlow();
+        showScreen((Blueprint) mFlow.getBackstack().current().getScreen(), null);
 
-        doDrawerSetup();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if (mGodPresenter != null) mGodPresenter.dropView(this);
+
         if (isFinishing()) {
             Timber.d("Destroying Activity scope");
             MortarScope parentScope = Mortar.getScope(getApplication());
@@ -116,12 +129,49 @@ public class GodActivity extends ActionBarActivity implements ActionBarPresenter
         return super.getSystemService(name);
     }
 
-    private void doDrawerSetup() {
-
-    }
-
+    //Flow
     @Override
-    public MortarScope getScope() {
-        return null;
+    public void go(Backstack nextBackstack, Flow.Direction direction, Flow.Callback callback) {
+        Blueprint newScreen = (Blueprint) nextBackstack.current().getScreen();
+        showScreen(newScreen, direction);
+        callback.onComplete();
     }
+
+    public void showScreen(Blueprint screen, Flow.Direction direction) {
+        Timber.v("showScreen()");
+        ViewGroup container = mDrawerView.getMainView();
+
+        MortarScope myScope = mActivityScope;
+        MortarScope newChildScope = myScope.requireChild(screen);
+
+        View oldChild = mDrawerView.getMainView().getChildAt(0);
+        View newChild;
+
+        if (oldChild != null) {
+            MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
+            if (oldChildScope.getName().equals(screen.getMortarScopeName())) {
+                // If it's already showing, short circuit.
+                Timber.v("Short circuit");
+                return;
+            }
+
+            myScope.destroyChild(oldChildScope);
+        }
+
+        // Create the new child.
+        Context childContext = newChildScope.createContext(this);
+        newChild = Layouts.createView(childContext, screen);
+
+//        setAnimation(direction, oldChild, newChild);
+
+        // Out with the old, in with the new.
+        if (oldChild != null) container.removeView(oldChild);
+        container.addView(newChild);
+    }
+
+    //God
+    public MortarScope getScope() {
+        return mActivityScope;
+    }
+
 }

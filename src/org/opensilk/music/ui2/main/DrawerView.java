@@ -17,7 +17,6 @@
 
 package org.opensilk.music.ui2.main;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -46,9 +45,6 @@ import timber.log.Timber;
  */
 public class DrawerView extends DrawerLayout implements CanShowScreen<Blueprint> {
 
-    @Inject
-    GodScreen.Presenter presenter;
-
     @InjectView(R.id.drawer_container) ViewGroup navContainer;
 
     ScreenConductor<Blueprint> screenMaestro;
@@ -56,7 +52,7 @@ public class DrawerView extends DrawerLayout implements CanShowScreen<Blueprint>
 
     public DrawerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Mortar.inject(getContext(), this);
+//        Mortar.inject(getContext(), this);
     }
 
     @Override
@@ -65,7 +61,6 @@ public class DrawerView extends DrawerLayout implements CanShowScreen<Blueprint>
         ButterKnife.inject(this);
         screenMaestro = new ScreenConductor<>(getContext(),
                 ButterKnife.<FrameLayout>findById(this, R.id.main));
-        presenter.takeView(this);
         //add navlist
         ScreenConductor.addChild(getContext(), new NavScreen(), navContainer);
     }
@@ -73,7 +68,6 @@ public class DrawerView extends DrawerLayout implements CanShowScreen<Blueprint>
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        presenter.dropView(this);
     }
 
     @Override
@@ -86,8 +80,8 @@ public class DrawerView extends DrawerLayout implements CanShowScreen<Blueprint>
         setupToggle();
     }
 
-    public Flow getFlow() {
-        return presenter.getFlow();
+    public ViewGroup getMainView() {
+        return ButterKnife.<FrameLayout>findById(this, R.id.main);
     }
 
     public boolean isDrawerOpen() {
