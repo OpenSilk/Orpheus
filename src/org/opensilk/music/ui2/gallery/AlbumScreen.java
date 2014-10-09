@@ -17,15 +17,33 @@
 
 package org.opensilk.music.ui2.gallery;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 
 import com.andrew.apollo.R;
+
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.loader.mediastore.AlbumsLoader;
+import org.opensilk.music.ui2.main.God;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import flow.Layout;
 import mortar.Blueprint;
+import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.observers.Subscribers;
+import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/3/14.
@@ -44,6 +62,7 @@ public class AlbumScreen implements Blueprint {
     }
 
     @dagger.Module (
+            addsTo = God.Module.class,
             injects = AlbumView.class
     )
     public static class Module {
@@ -52,21 +71,83 @@ public class AlbumScreen implements Blueprint {
 
     public static class Presenter extends ViewPresenter<AlbumView> {
 
-        @Inject
-        public Presenter() {
+        final AlbumsLoader loader;
+        final Observable<Album> observable;
+        final Subscriber<Album> subscriber;
+        final Action0 changeListener;
+        final List<Album> list;
 
+        @Inject
+        public Presenter(AlbumsLoader loader) {
+            this.loader = loader;
+            this.observable = loader.getObservable();
+            this.subscriber = Subscribers.from(new Observer<Album>() {
+                @Override
+                public void onCompleted() {
+                    AlbumView v = getView();
+                    if (v == null) return;
+                    v.makeAdapter(list);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Timber.e(e, "AlbumsLoader");
+                }
+
+                @Override
+                public void onNext(Album album) {
+                    list.add(album);
+                }
+            });
+            this.changeListener = new Action0() {
+                @Override
+                public void call() {
+                    if (getView() != null) subscribe();
+                }
+            };
+            this.list = new ArrayList<>();
+        }
+
+        @Override
+        protected void onEnterScope(MortarScope scope) {
+            super.onEnterScope(scope);
+            loader.registerChangeListener(changeListener);
+        }
+
+        @Override
+        protected void onExitScope() {
+            super.onExitScope();
+            loader.unregisterChangeListener(changeListener);
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
+//            if (!list.isEmpty()) getView().makeAdapter(list);
+            subscribe();
         }
 
         @Override
         protected void onSave(Bundle outState) {
             super.onSave(outState);
+            subscriber.unsubscribe();
         }
 
+        private void subscribe() {
+            list.clear();
+            observable.subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(subscriber);
+        }
+
+        public View.OnClickListener makeOverflowListener(final Context context, final Album album) {
+            return new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            };
+        }
     }
 
 }

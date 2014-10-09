@@ -25,6 +25,7 @@ import javax.inject.Singleton;
 import mortar.Mortar;
 import mortar.MortarScope;
 import mortar.Presenter;
+import rx.functions.Action0;
 
 /**
  * Created by drew on 10/5/14.

@@ -20,7 +20,8 @@
     xmlns:card="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="?android:listPreferredItemHeightLarge">
+    android:layout_height="?android:listPreferredItemHeightLarge"
+    android:focusable="false">
 
     <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
         android:id="@+id/artwork_thumb"
@@ -57,6 +58,7 @@
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
         android:paddingRight="16dp"
+        android:paddingEnd="16dp"
         style="@style/Orpheus.MenuButton.Card"/>
 
 </LinearLayout>
