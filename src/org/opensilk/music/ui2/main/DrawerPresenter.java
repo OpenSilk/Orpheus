@@ -16,8 +16,6 @@
 
 package org.opensilk.music.ui2.main;
 
-import android.content.Context;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -28,9 +26,10 @@ import mortar.Presenter;
  * Created by drew on 10/5/14.
  */
 @Singleton
-public class DrawerPresenter extends Presenter<DrawerPresenter.Delegate> {
+public class DrawerPresenter extends Presenter<DrawerPresenter.View> {
 
-    public interface Delegate extends HasScope {
+    public interface View extends HasScope {
+        void openDrawer();
         void closeDrawer();
         void disableDrawer(boolean hideIndicator);
         void enableDrawer();
@@ -42,13 +41,32 @@ public class DrawerPresenter extends Presenter<DrawerPresenter.Delegate> {
     }
 
     @Override
-    protected MortarScope extractScope(Delegate view) {
+    protected MortarScope extractScope(View view) {
         return view.getScope();
     }
 
-    public void closeDrawer() {
-        Delegate d = getView();
-        if (d == null) return;
-        d.closeDrawer();
+    public void openDrawer() {
+        View v = getView();
+        if (v == null) return;
+        v.openDrawer();
     }
+
+    public void closeDrawer() {
+        View v = getView();
+        if (v == null) return;
+        v.closeDrawer();
+    }
+
+    public void disableDrawer(boolean hideIndicator) {
+        View v = getView();
+        if (v == null) return;
+        v.disableDrawer(hideIndicator);
+    }
+
+    public void enableDrawer() {
+        View v = getView();
+        if (v == null) return;
+        v.enableDrawer();
+    }
+
 }

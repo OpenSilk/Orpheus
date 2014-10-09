@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
@@ -20,9 +23,10 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.ui2.main.DrawerPresenter;
 import org.opensilk.music.ui2.main.DrawerView;
 import org.opensilk.music.ui2.main.God;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.music.ui2.main.NavScreen;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,15 +44,22 @@ import timber.log.Timber;
 
 
 public class GodActivity extends ActionBarActivity implements
-        Flow.Listener {
+        Flow.Listener,
+        DrawerPresenter.View {
 
     @Inject @Named("activity")
     Bus mBus;
     @Inject
     God.Presenter mGodPresenter;
+    @Inject
+    DrawerPresenter mDrawerPresenter;
 
     @InjectView(R.id.drawer_layout)
-    DrawerView mDrawerView;
+    DrawerLayout mDrawerLayout;
+    @InjectView(R.id.drawer_container)
+    ViewGroup mNavContainer;
+    @InjectView(R.id.main)
+    ViewGroup mMainContainer;
 
     MortarActivityScope mActivityScope;
 
@@ -66,11 +77,15 @@ public class GodActivity extends ActionBarActivity implements
 
         mBus.register(this);
         mGodPresenter.takeView(this);
+        mDrawerPresenter.takeView(this);
 
         mFlow = mGodPresenter.getFlow();
 
         setContentView(R.layout.activity_god);
         ButterKnife.inject(this);
+
+        setupDrawer();
+        setupNavigation();
 
         showScreen((Blueprint) mFlow.getBackstack().current().getScreen(), null);
 
@@ -80,8 +95,9 @@ public class GodActivity extends ActionBarActivity implements
     protected void onDestroy() {
         super.onDestroy();
 
-        mBus.unregister(this);
+        if (mBus != null) mBus.unregister(this);
         if (mGodPresenter != null) mGodPresenter.dropView(this);
+        if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
 
         if (isFinishing()) {
             Timber.d("Destroying Activity scope");
@@ -106,13 +122,13 @@ public class GodActivity extends ActionBarActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mDrawerView.isDrawerOpen()) {
+        if (isDrawerOpen()) {
+//            showGlobalContextActionBar();
+            return false;
+        } else {
 //            restoreActionBar();
             getMenuInflater().inflate(R.menu.sleep_timer, menu);
             return super.onCreateOptionsMenu(menu);
-        } else {
-//            showGlobalContextActionBar();
-            return false;
         }
     }
 
@@ -172,12 +188,10 @@ public class GodActivity extends ActionBarActivity implements
 
     public void showScreen(Blueprint screen, Flow.Direction direction) {
         Timber.v("showScreen()");
-        ViewGroup container = mDrawerView.getMainView();
 
-        MortarScope myScope = mActivityScope;
-        MortarScope newChildScope = myScope.requireChild(screen);
+        MortarScope newChildScope = mActivityScope.requireChild(screen);
 
-        View oldChild = mDrawerView.getMainView().getChildAt(0);
+        View oldChild = mMainContainer.getChildAt(0);
         View newChild;
 
         if (oldChild != null) {
@@ -188,7 +202,7 @@ public class GodActivity extends ActionBarActivity implements
                 return;
             }
 
-            myScope.destroyChild(oldChildScope);
+            mActivityScope.destroyChild(oldChildScope);
         }
 
         // Create the new child.
@@ -198,13 +212,88 @@ public class GodActivity extends ActionBarActivity implements
 //        setAnimation(direction, oldChild, newChild);
 
         // Out with the old, in with the new.
-        if (oldChild != null) container.removeView(oldChild);
-        container.addView(newChild);
+        if (oldChild != null) mMainContainer.removeView(oldChild);
+        mMainContainer.addView(newChild);
     }
 
-    //God
+    /*
+     * HasScope
+     */
+
     public MortarScope getScope() {
         return mActivityScope;
+    }
+
+    /*
+     * DrawerPresenter.View
+     */
+
+    @Override
+    public void openDrawer() {
+        if (!isDrawerOpen()) mDrawerLayout.openDrawer(mNavContainer);
+    }
+
+    public void closeDrawer() {
+        if (isDrawerOpen()) mDrawerLayout.closeDrawer(mNavContainer);
+    }
+
+    @Override
+    public void disableDrawer(boolean hideIndicator) {
+        if (mDrawerToggle != null) mDrawerToggle.setDrawerIndicatorEnabled(!hideIndicator);
+        closeDrawer();
+        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mNavContainer);
+    }
+
+    @Override
+    public void enableDrawer() {
+        if (mDrawerToggle != null) mDrawerToggle.setDrawerIndicatorEnabled(true);
+        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mNavContainer);
+    }
+
+    // Drawer Helpers
+
+    private boolean isDrawerOpen() {
+        return mNavContainer != null && mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mNavContainer);
+    }
+
+    private void setupDrawer() {
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        // ActionBarDrawerToggle ties together the the proper interactions
+        // between the navigation drawer and the action bar app icon.
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                    /* host Activity */
+                mDrawerLayout,                    /* DrawerLayout object */
+                R.drawable.ic_navigation_drawer,             /* nav drawer image to replace 'Up' caret */
+                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+        ) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+        };
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        // Defer code dependent on restoration of previous instance state.
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
+    }
+
+    private void setupNavigation() {
+        Blueprint navScreen = new NavScreen();
+        MortarScope newChildScope = mActivityScope.requireChild(navScreen);
+        View newChild = Layouts.createView(newChildScope.createContext(this), navScreen);
+        mNavContainer.addView(newChild);
     }
 
 }
