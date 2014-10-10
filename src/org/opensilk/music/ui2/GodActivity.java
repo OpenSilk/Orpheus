@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,10 +19,12 @@ import android.widget.FrameLayout;
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.main.DrawerPresenter;
@@ -46,7 +50,8 @@ import timber.log.Timber;
 
 public class GodActivity extends ActionBarActivity implements
         Flow.Listener,
-        DrawerPresenter.View {
+        DrawerPresenter.View,
+        SlidingUpPanelLayout.PanelSlideListener {
 
     @Inject @Named("activity")
     Bus mBus;
@@ -55,12 +60,14 @@ public class GodActivity extends ActionBarActivity implements
     @Inject
     DrawerPresenter mDrawerPresenter;
 
-    @InjectView(R.id.drawer_layout) @Optional
+    @InjectView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container)
     ViewGroup mNavContainer;
     @InjectView(R.id.main)
     ViewGroup mMainContainer;
+    @InjectView(R.id.sliding_layout)
+    SlidingUpPanelLayout mSlidingPanel;
 
     MortarActivityScope mActivityScope;
 
@@ -89,6 +96,8 @@ public class GodActivity extends ActionBarActivity implements
         setupDrawer();
         setupNavigation();
 
+        setupSlindingPanel();
+
         showScreen((Blueprint) mFlow.getBackstack().current().getScreen(), null);
 
     }
@@ -110,9 +119,28 @@ public class GodActivity extends ActionBarActivity implements
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        maybeHideActionBar();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mActivityScope.onSaveInstanceState(outState);
+        outState.putBoolean("panel_open", mSlidingPanel.isPanelExpanded());
+//        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState.getBoolean("panel_open", false)) {
+//            mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+//            if (savedInstanceState.getBoolean("queue_showing", false)) {
+//                mNowPlayingFragment.onQueueVisibilityChanged(true);
+//            }
+        }
     }
 
     @Override
@@ -150,8 +178,13 @@ public class GodActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed() {
-        if (mFlow.goBack()) return;
-        super.onBackPressed();
+        if (isDrawerOpen()) {
+            closeDrawer();
+        } else if (mSlidingPanel.isPanelExpanded()) {
+            maybeClosePanel();
+        } else if (!mFlow.goBack()) {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -298,5 +331,79 @@ public class GodActivity extends ActionBarActivity implements
         View newChild = Layouts.createView(newChildScope.createContext(this), navScreen);
         mNavContainer.addView(newChild);
     }
+
+        /*
+     * implement SlidingUpPanelLayout.PanelSlideListener
+     */
+
+    @Override
+    public void onPanelSlide(View panel, float slideOffset) {
+        if (slideOffset > 0.84) {
+            TypedValue out = new TypedValue();
+            getTheme().resolveAttribute(R.attr.actionBarSize, out, true);
+            final int actionBarSize = TypedValue.complexToDimensionPixelSize(out.data, getResources().getDisplayMetrics());
+            Timber.d("actionBarSize=" + actionBarSize + " panelTop=" + panel.getTop());
+            if (panel.getTop() < actionBarSize) {
+                if (getSupportActionBar().isShowing()) {
+                    getSupportActionBar().hide();
+                }
+            }
+        } else {
+            if (!getSupportActionBar().isShowing()) {
+                getSupportActionBar().show();
+            }
+        }
+    }
+
+    @Override
+    public void onPanelExpanded(View panel) {
+//        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
+        disableDrawer(false);
+    }
+
+    @Override
+    public void onPanelCollapsed(View panel) {
+//        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
+        enableDrawer();
+    }
+
+    @Override
+    public void onPanelAnchored(View panel) {
+        //not implemented
+    }
+
+    @Override
+    public void onPanelHidden(View panel) {
+
+    }
+
+    // panel helpers
+
+    public void maybeClosePanel() {
+        if (mSlidingPanel.isPanelExpanded()) {
+            mSlidingPanel.collapsePanel();
+        }
+    }
+
+    public void maybeOpenPanel() {
+        if (!mSlidingPanel.isPanelExpanded()) {
+            mSlidingPanel.expandPanel();
+        }
+    }
+
+    private void setupSlindingPanel() {
+        mSlidingPanel.setDragView(findViewById(R.id.panel_header));
+        mSlidingPanel.setPanelSlideListener(this);
+        mSlidingPanel.setEnableDragViewTouchEvents(true);
+    }
+
+    protected void maybeHideActionBar() {
+        if (mSlidingPanel.isPanelExpanded()
+                && getSupportActionBar().isShowing()) {
+            getSupportActionBar().hide();
+        }
+    }
+
+
 
 }
