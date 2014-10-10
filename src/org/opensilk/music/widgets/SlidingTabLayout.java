@@ -18,6 +18,7 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
@@ -67,6 +68,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private static final int TAB_VIEW_PADDING_DIPS = 12;
     private static final int TAB_VIEW_TEXT_SIZE_SP = 14;
     private static final int UNSELECTED_TEXT_COLOR_ALPHA = 0x99;
+    private static final int UNSELECTED_TEXT_COLOR_ALPHA_LIGHT = 0x8C;
 
     private int mTitleOffset;
     private int mSelectedTextColor;
@@ -96,13 +98,26 @@ public class SlidingTabLayout extends HorizontalScrollView {
         // Make sure that the Tab Strips fills this View
         setFillViewport(true);
 
+        boolean lightStyle = false;
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SlidingTabLayout, defStyle, 0);
+        if (a != null) {
+            lightStyle = a.getBoolean(R.styleable.SlidingTabLayout_lightStyle, false);
+            a.recycle();
+        }
+
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.colorPrimary, outValue, true);
         final int themePrimaryColor =  outValue.data;
-        setBackgroundColor(themePrimaryColor);
 
-        mSelectedTextColor = context.getResources().getColor(android.R.color.white);
-        mUnselectedTextColor = SlidingTabStrip.setColorAlpha(mSelectedTextColor, UNSELECTED_TEXT_COLOR_ALPHA);
+        if (lightStyle) {
+            mSelectedTextColor = themePrimaryColor;
+            mUnselectedTextColor = SlidingTabStrip.setColorAlpha(
+                    context.getResources().getColor(android.R.color.black), UNSELECTED_TEXT_COLOR_ALPHA_LIGHT);
+        } else {
+            setBackgroundColor(themePrimaryColor);
+            mSelectedTextColor = context.getResources().getColor(android.R.color.white);
+            mUnselectedTextColor = SlidingTabStrip.setColorAlpha(mSelectedTextColor, UNSELECTED_TEXT_COLOR_ALPHA);
+        }
 
         mTitleOffset = (int) (TITLE_OFFSET_DIPS * getResources().getDisplayMetrics().density);
 
@@ -175,6 +190,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TAB_VIEW_TEXT_SIZE_SP);
         textView.setTypeface(Typeface.DEFAULT_BOLD);
         textView.setTextColor(mUnselectedTextColor);
+        textView.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.abc_action_bar_default_height));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // If we're running on Honeycomb or newer, then we can use the Theme's
