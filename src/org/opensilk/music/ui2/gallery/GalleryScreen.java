@@ -18,8 +18,13 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.SparseArray;
+import android.view.View;
 
 import com.andrew.apollo.R;
+
+import org.opensilk.music.ui2.util.ViewStateSaver;
 
 import java.util.Arrays;
 
@@ -28,6 +33,7 @@ import javax.inject.Inject;
 import flow.Layout;
 import mortar.Blueprint;
 import mortar.ViewPresenter;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/3/14.
@@ -54,6 +60,9 @@ public class GalleryScreen implements Blueprint {
 
     public static class Presenter extends ViewPresenter<GalleryView> {
 
+        boolean viewSaved;
+        boolean viewRestored;
+
         @Inject
         public Presenter() {
 
@@ -61,14 +70,26 @@ public class GalleryScreen implements Blueprint {
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
+            Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
-            //TODO settings
+
             getView().setup(Arrays.asList(Page.values()), 4);
+            if (!viewRestored) {
+                ViewStateSaver.restore(getView(), savedInstanceState, "pager");
+                viewRestored = true;
+            }
         }
 
         @Override
         protected void onSave(Bundle outState) {
+            Timber.v("onSave(%s)", outState);
             super.onSave(outState);
+            if (getView() != null) {
+                if (!viewSaved) {
+                    ViewStateSaver.save(getView(), outState, "pager");
+                    viewSaved = true;
+                }
+            }
         }
 
     }

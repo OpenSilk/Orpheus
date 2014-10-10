@@ -15,4 +15,7 @@
     <declare-styleable name="NowPlaying">
         <attr name="nowPlayingBackground" format="reference"/>
     </declare-styleable>
+    <declare-styleable name="SlidingTabLayout">
+        <attr name="lightStyle" format="boolean"/>
+    </declare-styleable>
 </resources>

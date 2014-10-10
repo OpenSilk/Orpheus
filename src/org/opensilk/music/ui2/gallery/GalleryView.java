@@ -18,9 +18,11 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -53,12 +55,14 @@ public class GalleryView extends LinearLayout {
 
     public GalleryView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        if (isInEditMode()) return;
         Mortar.inject(context, this);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        if (isInEditMode()) return;
         ButterKnife.inject(this);
         presenter.takeView(this);
     }
@@ -74,6 +78,18 @@ public class GalleryView extends LinearLayout {
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(startPage);
         tabBar.setViewPager(viewPager);
+    }
+
+    @Override
+    public void saveHierarchyState(SparseArray<Parcelable> container) {
+        super.saveHierarchyState(container);
+//        viewPager.saveHierarchyState(container);
+    }
+
+    @Override
+    public void restoreHierarchyState(SparseArray<Parcelable> container) {
+        super.restoreHierarchyState(container);
+//        viewPager.restoreHierarchyState(container);
     }
 
     public static class Adapter extends PagerAdapter {

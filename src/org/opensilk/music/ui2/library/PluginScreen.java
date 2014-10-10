@@ -119,6 +119,7 @@ public class PluginScreen implements Blueprint {
 
         @Override
         protected void onEnterScope(MortarScope scope) {
+            Timber.v("onEnterScope");
             super.onEnterScope(scope);
             bus.register(this);
             connection.connect(this);
@@ -145,6 +146,7 @@ public class PluginScreen implements Blueprint {
 
         @Override
         protected void onExitScope() {
+            Timber.v("onExitScope");
             super.onExitScope();
             bus.unregister(this);
             connection.disconnect();
@@ -171,7 +173,7 @@ public class PluginScreen implements Blueprint {
 
         @Override
         public void onConnectionLost() {
-
+            //TODO
         }
 
         @Subscribe
@@ -182,6 +184,7 @@ public class PluginScreen implements Blueprint {
                         final String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
                         if (TextUtils.isEmpty(id)) {
                             Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
+                            //TODO notify user
                             return;
                         }
                         libraryIdentity = id;

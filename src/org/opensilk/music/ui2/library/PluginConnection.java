@@ -29,6 +29,8 @@ import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 /**
  * Created by drew on 10/5/14.
  */
@@ -48,6 +50,7 @@ public class PluginConnection implements ServiceConnection {
 
     @Inject
     public PluginConnection(@ForApplication Context context, PluginInfo plugin) {
+        Timber.v("new PluginConnection()");
         this.context = new ContextWrapper(context);
         this.plugin = plugin;
     }

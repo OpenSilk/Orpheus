@@ -19,48 +19,59 @@
 <android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- As the main content view, the view below consumes the entire
-         space available using match_parent in both dimensions. -->
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout
-        xmlns:sothree="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/sliding_layout"
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="bottom"
-        sothree:panelHeight="68dp"
-        sothree:overlay="true">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <View
+            android:layout_gravity="top"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="120dp"
+            android:background="?colorPrimary"/>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
-                android:background="?colorPrimary"/>
-
-            <!-- main content -->
-            <FrameLayout
-                android:id="@+id/main"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
+        <com.sothree.slidinguppanel.SlidingUpPanelLayout
+            xmlns:sothree="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/sliding_layout"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="600dp"
             android:layout_height="match_parent"
-            android:background="?android:colorBackground">
+            android:gravity="bottom"
+            sothree:panelHeight="68dp"
+            sothree:overlay="true">
 
-        </FrameLayout>
+            <!-- this wrapper is a hack
+                 TODO add proper layout_marginTop to SlidingPanel-->
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+                <!-- main content -->
+                <FrameLayout
+                    android:id="@+id/main"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="?actionBarSize"
+                    android:background="?android:colorBackground"/>
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?colorPrimary">
+
+            </FrameLayout>
+
+        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+
+    </FrameLayout>
+
 
     <!-- The drawer is given a fixed width in dp and extends the full height of
          the container. -->
@@ -80,5 +91,7 @@
             android:src="@drawable/orpheus_logo_record"/>
 
     </LinearLayout>
+
+
 
 </android.support.v4.widget.DrawerLayout>

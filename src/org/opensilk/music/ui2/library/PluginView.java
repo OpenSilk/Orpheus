@@ -48,4 +48,5 @@ public class PluginView extends LinearLayout {
         super.onDetachedFromWindow();
         presenter.dropView(this);
     }
+
 }

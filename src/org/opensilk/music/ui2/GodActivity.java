@@ -33,6 +33,7 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.Optional;
 import flow.Backstack;
 import flow.Flow;
 import flow.Layouts;
@@ -54,7 +55,7 @@ public class GodActivity extends ActionBarActivity implements
     @Inject
     DrawerPresenter mDrawerPresenter;
 
-    @InjectView(R.id.drawer_layout)
+    @InjectView(R.id.drawer_layout) @Optional
     DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container)
     ViewGroup mNavContainer;
@@ -68,6 +69,7 @@ public class GodActivity extends ActionBarActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(ThemeHelper.getInstance(this).getPanelTheme());
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());
@@ -117,7 +119,7 @@ public class GodActivity extends ActionBarActivity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Forward the new configuration the drawer toggle component.
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        if (mDrawerToggle != null) mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -134,7 +136,7 @@ public class GodActivity extends ActionBarActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
         switch (item.getItemId()) {
@@ -257,6 +259,7 @@ public class GodActivity extends ActionBarActivity implements
     }
 
     private void setupDrawer() {
+        if (mDrawerLayout == null) return;
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.

@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.View;
 
 import com.andrew.apollo.R;
@@ -26,6 +27,7 @@ import com.andrew.apollo.R;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.loader.mediastore.AlbumsLoader;
 import org.opensilk.music.ui2.main.God;
+import org.opensilk.music.ui2.util.ViewStateSaver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +77,8 @@ public class AlbumScreen implements Blueprint {
         final Observable<Album> observable;
         final Subscriber<Album> subscriber;
         final Action0 changeListener;
-        final List<Album> list;
+        final ArrayList<Album> list;
+
 
         @Inject
         public Presenter(AlbumsLoader loader) {
@@ -122,14 +125,25 @@ public class AlbumScreen implements Blueprint {
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
+            Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
-//            if (!list.isEmpty()) getView().makeAdapter(list);
-            subscribe();
+            if (!list.isEmpty()) getView().makeAdapter(list);
+            ViewStateSaver.restore(getView(), savedInstanceState, "albumview");
+            if (list.isEmpty()) subscribe();
         }
+
+        boolean saved;
 
         @Override
         protected void onSave(Bundle outState) {
+            Timber.v("onSave(%s)", outState);
             super.onSave(outState);
+            if (getView() != null) {
+                if (!saved) {
+                    ViewStateSaver.save(getView(), outState, "albumview");
+                    saved = true;
+                }
+            }
             subscriber.unsubscribe();
         }
 
