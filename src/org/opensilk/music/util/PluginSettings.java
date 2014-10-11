@@ -20,9 +20,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.silkdagger.qualifier.ForApplication;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Created by drew on 7/19/14.
  */
+@Singleton
 public class PluginSettings {
 
     public static final String PREF_DEFAULT_SOURCE = "def_source";
@@ -33,6 +40,10 @@ public class PluginSettings {
         prefs = context.getSharedPreferences("plugin_"+componentName.flattenToString().replaceAll("/", "_"), Context.MODE_PRIVATE);
     }
 
+    @Inject
+    public PluginSettings(@ForApplication Context context, PluginInfo pluginInfo) {
+        this(context, pluginInfo.componentName);
+    }
 
     public void setDefaultSource(String identity) {
         prefs.edit().putString(PREF_DEFAULT_SOURCE, identity).apply();

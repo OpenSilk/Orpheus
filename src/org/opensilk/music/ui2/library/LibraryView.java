@@ -18,7 +18,10 @@ package org.opensilk.music.ui2.library;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -65,6 +68,17 @@ public class LibraryView extends ListView {
         Adapter adapter = new Adapter(getContext());
         adapter.addAll(result.items);
         setAdapter(adapter);
+        setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                presenter.go(getAdapter().getItem(position));
+            }
+        });
+    }
+
+    @Override
+    public Adapter getAdapter() {
+        return (Adapter) super.getAdapter();
     }
 
     public static class Adapter extends ArrayAdapter<Bundleable> {

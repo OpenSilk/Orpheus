@@ -39,15 +39,21 @@ import org.opensilk.music.util.PluginSettings;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import flow.Flow;
 import flow.Layout;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import timber.log.Timber;
 
 /**
@@ -100,20 +106,21 @@ public class PluginScreen implements Blueprint {
     @Singleton
     public static class Presenter extends ViewPresenter<PluginView> implements PluginConnection.Listener {
 
+        final Flow flow;
         final PluginConnection connection;
         final PluginInfo plugin;
         final PluginSettings settings;
         final Bus bus;
 
         String libraryIdentity;
-        boolean loaded;
 
         @Inject
-        public Presenter(@ForApplication Context context, PluginInfo plugin,
-                         PluginConnection connection, @Named("activity") Bus bus) {
+        public Presenter(PluginConnection connection, Flow flow, PluginInfo plugin,
+                         PluginSettings settings, @Named("activity") Bus bus) {
             this.connection = connection;
+            this.flow = flow;
             this.plugin = plugin;
-            this.settings = new PluginSettings(context, plugin.componentName);
+            this.settings = settings;
             this.bus = bus;
         }
 
@@ -132,9 +139,8 @@ public class PluginScreen implements Blueprint {
             if (savedInstanceState != null) {
                 libraryIdentity = savedInstanceState.getString("library_id");
             } else {
-                libraryIdentity = settings.getDefaultSource();
+//                libraryIdentity = settings.getDefaultSource();
             }
-            loaded = true;
             if (connection.isConnected()) {
                 onConnectionEstablished();
             }
@@ -145,7 +151,6 @@ public class PluginScreen implements Blueprint {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             outState.putString("library_id", libraryIdentity);
-            loaded = false;
         }
 
         @Override
@@ -159,7 +164,7 @@ public class PluginScreen implements Blueprint {
         @Override
         public void onConnectionEstablished() {
             Timber.v("onConnectionEstablished()");
-            if (loaded) {
+            if (getView() != null) {
                 try {
                     if (TextUtils.isEmpty(libraryIdentity)) {
                         Intent i = new Intent();
@@ -180,7 +185,14 @@ public class PluginScreen implements Blueprint {
 
         @Override
         public void onConnectionLost() {
-            //TODO
+            Observable.timer(3, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            connection.connect(Presenter.this);
+                        }
+                    });
+//            flow.resetTo(new PluginScreen(plugin));
         }
 
         @Subscribe
@@ -211,6 +223,7 @@ public class PluginScreen implements Blueprint {
         private void openLibrary() {
             Timber.v("openLibrary()");
             LibraryInfo info = new LibraryInfo(libraryIdentity, plugin.componentName, null);
+//            flow.goTo(new LibraryScreen(info));
             DrawerView.ScreenConductor.addChild(getView().getContext(), new LibraryScreen(info), getView());
         }
 

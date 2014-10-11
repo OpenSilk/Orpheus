@@ -21,6 +21,10 @@ import android.os.Bundle;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.api.model.Artist;
+import org.opensilk.music.api.model.Folder;
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.loader.EndlessRemoteAsyncLoader;
 import org.opensilk.music.ui2.main.God;
@@ -36,7 +40,10 @@ import flow.Layout;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
+import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 /**
@@ -86,11 +93,13 @@ public class LibraryScreen implements Blueprint {
 
         final Flow flow;
         final LibraryLoader loader;
+        final LibraryInfo info;
 
         @Inject
-        public Presenter(Flow flow, LibraryLoader loader) {
+        public Presenter(Flow flow, LibraryLoader loader, LibraryInfo info) {
             this.flow = flow;
             this.loader = loader;
+            this.info = info;
         }
 
         @Override
@@ -121,6 +130,87 @@ public class LibraryScreen implements Blueprint {
         @Override
         protected void onExitScope() {
             super.onExitScope();
+        }
+
+        public void go(Bundleable item) {
+            //FRP thingy to avoid final
+            Observable<Bundleable> og = Observable.just(item);
+            // we need to convert the generic Bundleable into an action we can use
+            // to proceed to the next screen, we first create separate observables
+            // for each type of object, that filters for that type, then casts to
+            // the appropriate type, and finally maps the type into a generic action0
+            // that moves us into the next screen
+            Observable<? extends Action0> folder = og.filter(new Func1<Bundleable, Boolean>() {
+                @Override
+                public Boolean call(Bundleable bundleable) {
+                    return (bundleable instanceof Folder);
+                }
+            }).cast(Folder.class).flatMap(new Func1<Folder, Observable<? extends Action0>>() {
+                @Override
+                public Observable<? extends Action0> call(final Folder folder) {
+                    return Observable.just(new Action0() {
+                        @Override
+                        public void call() {
+                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, folder.identity)));
+                        }
+                    });
+                }
+            });
+            Observable<? extends Action0> song = og.filter(new Func1<Bundleable, Boolean>() {
+                @Override
+                public Boolean call(Bundleable bundleable) {
+                    return (bundleable instanceof Song);
+                }
+            }).cast(Song.class).flatMap(new Func1<Song, Observable<? extends Action0>>() {
+                @Override
+                public Observable<? extends Action0> call(final Song song) {
+                    return Observable.just(new Action0() {
+                        @Override
+                        public void call() {
+                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, song.identity)));
+                        }
+                    });
+                }
+            });
+            Observable<? extends Action0> artist = og.filter(new Func1<Bundleable, Boolean>() {
+                @Override
+                public Boolean call(Bundleable bundleable) {
+                    return (bundleable instanceof Artist);
+                }
+            }).cast(Artist.class).flatMap(new Func1<Artist, Observable<? extends Action0>>() {
+                @Override
+                public Observable<? extends Action0> call(final Artist artist) {
+                    return Observable.just(new Action0() {
+                        @Override
+                        public void call() {
+                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, artist.identity)));
+                        }
+                    });
+                }
+            });
+            Observable<? extends Action0> album = og.filter(new Func1<Bundleable, Boolean>() {
+                @Override
+                public Boolean call(Bundleable bundleable) {
+                    return (bundleable instanceof Album);
+                }
+            }).cast(Album.class).flatMap(new Func1<Album, Observable<? extends Action0>>() {
+                @Override
+                public Observable<? extends Action0> call(final Album album) {
+                    return Observable.just(new Action0() {
+                        @Override
+                        public void call() {
+                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, album.identity)));
+                        }
+                    });
+                }
+            });
+            // finally merge the previous Observables into a single operation
+            Observable.merge(folder, song, artist, album).subscribe(new Action1<Action0>() {
+                @Override
+                public void call(Action0 action0) {
+                    action0.call();
+                }
+            });
         }
 
     }
