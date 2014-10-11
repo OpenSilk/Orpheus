@@ -18,15 +18,59 @@ package org.opensilk.music.ui2.library;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import org.opensilk.music.api.model.spi.Bundleable;
+
+import javax.inject.Inject;
+
+import mortar.Mortar;
 
 /**
  * Created by drew on 10/5/14.
  */
 public class LibraryView extends ListView {
 
+    @Inject
+    LibraryScreen.Presenter presenter;
+
     public LibraryView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        Mortar.inject(getContext(), this);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        presenter.takeView(this);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        presenter.takeView(this);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        presenter.dropView(this);
+    }
+
+    LibraryLoader.Result lastResult;
+
+    public void makeAdapter(LibraryLoader.Result result) {
+        lastResult = result;
+        Adapter adapter = new Adapter(getContext());
+        adapter.addAll(result.items);
+        setAdapter(adapter);
+    }
+
+    public static class Adapter extends ArrayAdapter<Bundleable> {
+        public Adapter(Context context) {
+            super(context, android.R.layout.simple_list_item_1);
+        }
     }
 
 }

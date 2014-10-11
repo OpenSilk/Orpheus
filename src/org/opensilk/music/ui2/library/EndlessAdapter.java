@@ -14,15 +14,29 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.gallery;
+package org.opensilk.music.ui2.library;
 
-import android.content.CursorLoader;
+import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+
+import org.opensilk.music.api.model.spi.Bundleable;
 
 /**
- * Created by drew on 10/9/14.
+ * Created by drew on 10/10/14.
  */
-public class AlbumLoader {
+public class EndlessAdapter extends ArrayAdapter<Bundleable> {
 
+    boolean endofResults;
 
+    public EndlessAdapter(Context context) {
+        super(context, -1);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        return super.getView(position, convertView, parent);
+    }
 
 }

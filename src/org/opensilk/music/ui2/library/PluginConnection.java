@@ -28,12 +28,14 @@ import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
  */
+@Singleton
 public class PluginConnection implements ServiceConnection {
 
     public interface Listener {

@@ -44,11 +44,16 @@ import javax.inject.Singleton;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Action2;
+import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.internal.operators.OnSubscribeCache;
 import rx.observers.Observers;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/8/14.
@@ -70,10 +75,12 @@ public class AlbumsLoader {
         this.changeListeners = new HashSet<>();
     }
 
-    public Observable<Album> getObservable() {
+    public Observable<List<Album>> getObservable() {
         return Observable.create(new Observable.OnSubscribe<Album>() {
+            // Querys the mediastore and publishes the Albums
             @Override
             public void call(Subscriber<? super Album> subscriber) {
+//                Timber.v("Album Observable: called on: %s", Thread.currentThread().getName());
                 Cursor c = context.getContentResolver().query(
                         Uris.EXTERNAL_MEDIASTORE_ALBUMS,
                         Projections.LOCAL_ALBUM,
@@ -97,7 +104,20 @@ public class AlbumsLoader {
                 c.close();
                 subscriber.onCompleted();
             }
-        });
+        })
+        // collects the album objects into a list and publishes the complete list as
+        // a single onNext() call
+        .collect(new ArrayList<Album>(), new Action2<List<Album>, Album>() {
+            @Override
+            public void call(List<Album> albums, Album album) {
+//                Timber.v("Albums Collector called on: %s", Thread.currentThread().getName());
+                albums.add(album);
+            }
+        })
+        // want Query on an io thread
+        .subscribeOn(Schedulers.io())
+        // want the final List to be published on the main thread
+        .observeOn(AndroidSchedulers.mainThread());
     }
 
     public void registerChangeListener(Action0 l) {

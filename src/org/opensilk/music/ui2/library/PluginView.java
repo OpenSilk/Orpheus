@@ -44,6 +44,12 @@ public class PluginView extends LinearLayout {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        presenter.takeView(this);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         presenter.dropView(this);

@@ -23,7 +23,6 @@ import com.andrew.apollo.R;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.loader.EndlessRemoteAsyncLoader;
-import org.opensilk.music.loader.LibraryLoader;
 import org.opensilk.music.ui2.main.God;
 
 import java.util.List;
@@ -37,6 +36,8 @@ import flow.Layout;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.functions.Action1;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
@@ -81,7 +82,7 @@ public class LibraryScreen implements Blueprint {
     }
 
     @Singleton
-    public static class Presenter extends ViewPresenter<LibraryView> implements EndlessRemoteAsyncLoader.Callback<Bundleable> {
+    public static class Presenter extends ViewPresenter<LibraryView> {
 
         final Flow flow;
         final LibraryLoader loader;
@@ -94,14 +95,22 @@ public class LibraryScreen implements Blueprint {
 
         @Override
         protected void onEnterScope(MortarScope scope) {
+            Timber.v("onEnterScope");
             super.onEnterScope(scope);
-            loader.connect();
+
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            loader.loadAsync(this);
+            loader.getObservable(null).subscribe(new Action1<LibraryLoader.Result>() {
+                @Override
+                public void call(LibraryLoader.Result result) {
+                    LibraryView v = getView();
+                    if (v == null) return;
+                    v.makeAdapter(result);
+                }
+            });
         }
 
         @Override
@@ -112,25 +121,6 @@ public class LibraryScreen implements Blueprint {
         @Override
         protected void onExitScope() {
             super.onExitScope();
-            loader.disconnect();
-        }
-
-        @Override
-        public void onDataFetched(List<Bundleable> items) {
-
-        }
-
-        @Override
-        public void onMoreDataFetched(List<Bundleable> items) {
-
-        }
-
-        @Override
-        public void onConnectionAvailable() {
-
-        }
-
-        public void go() {
         }
 
     }

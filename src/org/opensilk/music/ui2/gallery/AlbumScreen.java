@@ -74,22 +74,18 @@ public class AlbumScreen implements Blueprint {
     public static class Presenter extends ViewPresenter<AlbumView> {
 
         final AlbumsLoader loader;
-        final Observable<Album> observable;
-        final Subscriber<Album> subscriber;
+        final Observable<List<Album>> observable;
+        final Subscriber<List<Album>> subscriber;
         final Action0 changeListener;
-        final ArrayList<Album> list;
-
 
         @Inject
         public Presenter(AlbumsLoader loader) {
             this.loader = loader;
             this.observable = loader.getObservable();
-            this.subscriber = Subscribers.from(new Observer<Album>() {
+            this.subscriber = Subscribers.from(new Observer<List<Album>>() {
                 @Override
                 public void onCompleted() {
-                    AlbumView v = getView();
-                    if (v == null) return;
-                    v.makeAdapter(list);
+
                 }
 
                 @Override
@@ -98,8 +94,10 @@ public class AlbumScreen implements Blueprint {
                 }
 
                 @Override
-                public void onNext(Album album) {
-                    list.add(album);
+                public void onNext(List<Album> albums) {
+                    AlbumView v = getView();
+                    if (v == null) return;
+                    v.makeAdapter(albums);
                 }
             });
             this.changeListener = new Action0() {
@@ -108,7 +106,6 @@ public class AlbumScreen implements Blueprint {
                     if (getView() != null) subscribe();
                 }
             };
-            this.list = new ArrayList<>();
         }
 
         @Override
@@ -127,9 +124,8 @@ public class AlbumScreen implements Blueprint {
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
-            if (!list.isEmpty()) getView().makeAdapter(list);
             ViewStateSaver.restore(getView(), savedInstanceState, "albumview");
-            if (list.isEmpty()) subscribe();
+            subscribe();
         }
 
         boolean saved;
@@ -148,10 +144,7 @@ public class AlbumScreen implements Blueprint {
         }
 
         private void subscribe() {
-            list.clear();
-            observable.subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(subscriber);
+            observable.subscribe(subscriber);
         }
 
         public View.OnClickListener makeOverflowListener(final Context context, final Album album) {

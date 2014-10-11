@@ -25,11 +25,11 @@ import mortar.Blueprint;
  * Created by drew on 10/3/14.
  */
 public enum Page {
-    PLAYLIST(AlbumScreen.class, R.string.page_playlists),
+//    PLAYLIST(AlbumScreen.class, R.string.page_playlists),
     //    RECENT(R.string.page_recent),
-    ARTIST(AlbumScreen.class, R.string.page_artists),
-    ALBUM(AlbumScreen.class, R.string.page_albums),
-    SONG(AlbumScreen.class, R.string.page_songs),
+//    ARTIST(AlbumScreen.class, R.string.page_artists),
+//    ALBUM(AlbumScreen.class, R.string.page_albums),
+//    SONG(AlbumScreen.class, R.string.page_songs),
     GENRE(AlbumScreen.class, R.string.page_genres);
 
     public final Class<? extends Blueprint> clazz;

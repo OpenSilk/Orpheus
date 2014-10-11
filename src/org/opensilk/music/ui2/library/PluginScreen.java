@@ -90,10 +90,10 @@ public class PluginScreen implements Blueprint {
             return screen.plugin;
         }
 
-        @Provides
-        public RemoteLibrary provideLibraryConnection(Presenter presenter) {
-            return presenter.getLibraryConnection();
-        }
+//        @Provides
+//        public PluginConnection providePluginConnection(Presenter presenter) {
+//            return presenter.getConnection();
+//        }
 
     }
 
@@ -127,9 +127,12 @@ public class PluginScreen implements Blueprint {
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
+            Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
             if (savedInstanceState != null) {
                 libraryIdentity = savedInstanceState.getString("library_id");
+            } else {
+                libraryIdentity = settings.getDefaultSource();
             }
             loaded = true;
             if (connection.isConnected()) {
@@ -139,6 +142,7 @@ public class PluginScreen implements Blueprint {
 
         @Override
         protected void onSave(Bundle outState) {
+            Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             outState.putString("library_id", libraryIdentity);
             loaded = false;
@@ -154,11 +158,13 @@ public class PluginScreen implements Blueprint {
 
         @Override
         public void onConnectionEstablished() {
+            Timber.v("onConnectionEstablished()");
             if (loaded) {
                 try {
                     if (TextUtils.isEmpty(libraryIdentity)) {
                         Intent i = new Intent();
-                        getLibraryConnection().getLibraryChooserIntent(i);
+                        if (!connection.isConnected()) throw new RemoteException();
+                        connection.getConnection().getLibraryChooserIntent(i);
                         if (i.getComponent() != null) {
                             bus.post(new StartActivityForResult(i, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
                         }
@@ -166,6 +172,7 @@ public class PluginScreen implements Blueprint {
                         openLibrary();
                     }
                 } catch (RemoteException e) {
+                    //TODO
                     e.printStackTrace();
                 }
             }
@@ -178,6 +185,7 @@ public class PluginScreen implements Blueprint {
 
         @Subscribe
         public void onActivityResultEvent(ActivityResult res) {
+            Timber.v("onActivityResultEvent");
             switch (res.reqCode) {
                 case StartActivityForResult.PLUGIN_REQUEST_LIBRARY:
                     if (res.resultCode == Activity.RESULT_OK) {
@@ -191,6 +199,7 @@ public class PluginScreen implements Blueprint {
                         settings.setDefaultSource(libraryIdentity);
                         onConnectionEstablished();
                     } else {
+                        Timber.e("Activity returned bad result");
                         //TODO
                     }
                     break;
@@ -200,12 +209,13 @@ public class PluginScreen implements Blueprint {
         }
 
         private void openLibrary() {
+            Timber.v("openLibrary()");
             LibraryInfo info = new LibraryInfo(libraryIdentity, plugin.componentName, null);
             DrawerView.ScreenConductor.addChild(getView().getContext(), new LibraryScreen(info), getView());
         }
 
-        public RemoteLibrary getLibraryConnection() {
-            return connection.getConnection();
+        public PluginConnection getConnection() {
+            return connection;
         }
     }
 
