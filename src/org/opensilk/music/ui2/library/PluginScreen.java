@@ -31,6 +31,7 @@ import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.ui2.core.FlowOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.main.DrawerView;
@@ -46,8 +47,10 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import flow.Backstack;
 import flow.Flow;
 import flow.Layout;
+import flow.Parcer;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -96,17 +99,16 @@ public class PluginScreen implements Blueprint {
             return screen.plugin;
         }
 
-//        @Provides
-//        public PluginConnection providePluginConnection(Presenter presenter) {
-//            return presenter.getConnection();
-//        }
+        @Provides @Named("plugin")
+        public Flow provideFlow(Presenter presenter) {
+            return presenter.getFlow();
+        }
 
     }
 
     @Singleton
-    public static class Presenter extends ViewPresenter<PluginView> implements PluginConnection.Listener {
+    public static class Presenter extends FlowOwner<Blueprint, PluginView> implements PluginConnection.Listener {
 
-        final Flow flow;
         final PluginConnection connection;
         final PluginInfo plugin;
         final PluginSettings settings;
@@ -115,13 +117,18 @@ public class PluginScreen implements Blueprint {
         String libraryIdentity;
 
         @Inject
-        public Presenter(PluginConnection connection, Flow flow, PluginInfo plugin,
+        public Presenter(Parcer<Object> parcer, PluginConnection connection, PluginInfo plugin,
                          PluginSettings settings, @Named("activity") Bus bus) {
+            super(parcer);
             this.connection = connection;
-            this.flow = flow;
             this.plugin = plugin;
             this.settings = settings;
             this.bus = bus;
+        }
+
+        @Override
+        protected Blueprint getFirstScreen() {
+            return null; //Defer flo creation
         }
 
         @Override
@@ -133,7 +140,7 @@ public class PluginScreen implements Blueprint {
         }
 
         @Override
-        protected void onLoad(Bundle savedInstanceState) {
+        public void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
             if (savedInstanceState != null) {
@@ -147,7 +154,7 @@ public class PluginScreen implements Blueprint {
         }
 
         @Override
-        protected void onSave(Bundle outState) {
+        public void onSave(Bundle outState) {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             outState.putString("library_id", libraryIdentity);
@@ -222,14 +229,16 @@ public class PluginScreen implements Blueprint {
 
         private void openLibrary() {
             Timber.v("openLibrary()");
-            LibraryInfo info = new LibraryInfo(libraryIdentity, plugin.componentName, null);
-//            flow.goTo(new LibraryScreen(info));
-            DrawerView.ScreenConductor.addChild(getView().getContext(), new LibraryScreen(info), getView());
+            if (flow == null) {
+                LibraryInfo info = new LibraryInfo(libraryIdentity, plugin.componentName, null);
+                LibraryScreen screen = new LibraryScreen(info);
+                Backstack backstack = Backstack.single(screen);
+                flow = new Flow(backstack, this);
+                showScreen((Blueprint) flow.getBackstack().current().getScreen(), null);
+            }
+//            DrawerView.ScreenConductor.addChild(getView().getContext(), new LibraryScreen(info), getView());
         }
 
-        public PluginConnection getConnection() {
-            return connection;
-        }
     }
 
 }

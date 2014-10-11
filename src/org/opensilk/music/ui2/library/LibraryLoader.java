@@ -58,7 +58,7 @@ public class LibraryLoader {
 
     public Observable<Result> getObservable(Bundle previousPaginationBundle) {
         return Observable
-                // FPR thing to get around using final
+                // FRP thing to get around using final
                 .just(previousPaginationBundle)
                 // transform the bundle into the observable we want
                 .flatMap(new Func1<Bundle, Observable<Result>>() {

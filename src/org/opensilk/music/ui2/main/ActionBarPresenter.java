@@ -16,16 +16,15 @@
 
 package org.opensilk.music.ui2.main;
 
-import android.content.Context;
 import android.os.Bundle;
+
+import org.opensilk.music.ui2.core.HasScope;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import mortar.Mortar;
 import mortar.MortarScope;
 import mortar.Presenter;
 import rx.functions.Action0;

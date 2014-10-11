@@ -29,7 +29,7 @@ import android.widget.FrameLayout;
 
 import com.andrew.apollo.R;
 
-import javax.inject.Inject;
+import org.opensilk.music.ui2.core.CanShowScreen;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

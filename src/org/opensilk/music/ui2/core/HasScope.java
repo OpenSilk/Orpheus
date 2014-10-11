@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.main;
+package org.opensilk.music.ui2.core;
+
+import mortar.MortarScope;
 
 /**
  * Created by drew on 10/5/14.
  */
-public interface HasDrawer {
-    boolean isDrawerOpen();
-    void closeDrawer();
-    void openDrawer();
-    void lockDrawer();
-    void unlockDrawer();
+public interface HasScope {
+    MortarScope getScope();
 }

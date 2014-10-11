@@ -31,8 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom"
-        sothree:panelHeight="68dp"
-        sothree:overlay="true">
+        sothree:panelHeight="68dp">
 
         <LinearLayout
             android:orientation="vertical"

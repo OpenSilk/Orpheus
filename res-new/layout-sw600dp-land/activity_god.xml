@@ -19,7 +19,7 @@
 <android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
+    android:id="@id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -30,18 +30,26 @@
         <View
             android:layout_gravity="top"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="?actionBarSize"
+            android:background="?colorPrimary"/>
+
+        <!--Ridiculous hack cause theres not really
+            a way to say ?actionBarSize * 2 -->
+        <View
+            android:layout_gravity="top"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_marginTop="?actionBarSize"
             android:background="?colorPrimary"/>
 
         <com.sothree.slidinguppanel.SlidingUpPanelLayout
             xmlns:sothree="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/sliding_layout"
+            android:id="@id/sliding_layout"
             android:layout_gravity="center_horizontal"
             android:layout_width="600dp"
             android:layout_height="match_parent"
             android:gravity="bottom"
-            sothree:panelHeight="68dp"
-            sothree:overlay="true">
+            sothree:panelHeight="68dp">
 
             <!-- this wrapper is a hack
                  TODO add proper layout_marginTop to SlidingPanel-->
@@ -52,7 +60,7 @@
 
                 <!-- main content -->
                 <FrameLayout
-                    android:id="@+id/main"
+                    android:id="@id/main"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="?actionBarSize"

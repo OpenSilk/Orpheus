@@ -1,5 +1,5 @@
 
-package org.opensilk.music.ui2.main;
+package org.opensilk.music.ui2.core;
 
 import flow.Flow;
 import mortar.Blueprint;

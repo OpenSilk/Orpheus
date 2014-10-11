@@ -26,24 +26,27 @@ import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.loader.EndlessRemoteAsyncLoader;
-import org.opensilk.music.ui2.main.God;
-
-import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Flow;
 import flow.Layout;
+import hugo.weaving.DebugLog;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Notification;
 import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -60,7 +63,7 @@ public class LibraryScreen implements Blueprint {
 
     @Override
     public String getMortarScopeName() {
-        return getClass().getName() + info.libraryComponent;
+        return getClass().getName() + info.toString();
     }
 
     @Override
@@ -95,31 +98,29 @@ public class LibraryScreen implements Blueprint {
         final LibraryLoader loader;
         final LibraryInfo info;
 
+        final ResultObserver observer;
+
         @Inject
-        public Presenter(Flow flow, LibraryLoader loader, LibraryInfo info) {
+        public Presenter(@Named("plugin") Flow flow, LibraryLoader loader, LibraryInfo info) {
             this.flow = flow;
             this.loader = loader;
             this.info = info;
+
+            observer = new ResultObserver();
         }
 
         @Override
         protected void onEnterScope(MortarScope scope) {
             Timber.v("onEnterScope");
             super.onEnterScope(scope);
-
         }
+
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            loader.getObservable(null).subscribe(new Action1<LibraryLoader.Result>() {
-                @Override
-                public void call(LibraryLoader.Result result) {
-                    LibraryView v = getView();
-                    if (v == null) return;
-                    v.makeAdapter(result);
-                }
-            });
+            getView().setup();
+            subscribe(null);
         }
 
         @Override
@@ -132,7 +133,20 @@ public class LibraryScreen implements Blueprint {
             super.onExitScope();
         }
 
+        @DebugLog
+        public boolean fetchMore(Bundle token) {
+            if (!observer.complete) return false;
+            subscribe(token);
+            return true;
+        }
+
+        private void subscribe(Bundle token) {
+            observer.complete = false;
+            loader.getObservable(token).subscribe(observer);
+        }
+
         public void go(Bundleable item) {
+            Timber.v("go(%s)", item);
             //FRP thingy to avoid final
             Observable<Bundleable> og = Observable.just(item);
             // we need to convert the generic Bundleable into an action we can use
@@ -143,6 +157,7 @@ public class LibraryScreen implements Blueprint {
             Observable<? extends Action0> folder = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
+                    Timber.v("filter folder");
                     return (bundleable instanceof Folder);
                 }
             }).cast(Folder.class).flatMap(new Func1<Folder, Observable<? extends Action0>>() {
@@ -159,6 +174,7 @@ public class LibraryScreen implements Blueprint {
             Observable<? extends Action0> song = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
+                    Timber.v("filter song");
                     return (bundleable instanceof Song);
                 }
             }).cast(Song.class).flatMap(new Func1<Song, Observable<? extends Action0>>() {
@@ -175,6 +191,7 @@ public class LibraryScreen implements Blueprint {
             Observable<? extends Action0> artist = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
+                    Timber.v("filter artist");
                     return (bundleable instanceof Artist);
                 }
             }).cast(Artist.class).flatMap(new Func1<Artist, Observable<? extends Action0>>() {
@@ -191,6 +208,7 @@ public class LibraryScreen implements Blueprint {
             Observable<? extends Action0> album = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
+                    Timber.v("filter album");
                     return (bundleable instanceof Album);
                 }
             }).cast(Album.class).flatMap(new Func1<Album, Observable<? extends Action0>>() {
@@ -205,12 +223,40 @@ public class LibraryScreen implements Blueprint {
                 }
             });
             // finally merge the previous Observables into a single operation
-            Observable.merge(folder, song, artist, album).subscribe(new Action1<Action0>() {
-                @Override
-                public void call(Action0 action0) {
-                    action0.call();
-                }
-            });
+            Observable.merge(folder, song, artist, album)
+                    .first()
+                    .subscribeOn(Schedulers.computation())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Action0>() {
+                        @Override
+                        public void call(Action0 action0) {
+                            Timber.v("call action0");
+                            action0.call();
+                        }
+                    });
+        }
+
+        private class ResultObserver implements Observer<LibraryLoader.Result> {
+
+            boolean complete;
+
+            @Override
+            public void onCompleted() {
+                complete = true;
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(LibraryLoader.Result result) {
+                Timber.v("onNext called from:" + Thread.currentThread().getName());
+                LibraryView v = getView();
+                if (v == null) return;
+                v.getAdapter().onNewResult(result);
+            }
         }
 
     }

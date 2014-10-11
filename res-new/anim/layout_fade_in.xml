@@ -16,10 +16,6 @@
   ~ limitations under the License.
   -->
 
-<org.opensilk.music.ui2.library.PluginView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/library_container"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"/>
+<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
+    android:delay="30%"
+    android:animation="@android:anim/fade_in"/>
