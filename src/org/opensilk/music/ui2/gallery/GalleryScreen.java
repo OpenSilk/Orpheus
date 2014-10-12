@@ -32,6 +32,7 @@ import javax.inject.Inject;
 
 import flow.Layout;
 import mortar.Blueprint;
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 import timber.log.Timber;
 
@@ -60,12 +61,21 @@ public class GalleryScreen implements Blueprint {
 
     public static class Presenter extends ViewPresenter<GalleryView> {
 
-        boolean viewSaved;
-        boolean viewRestored;
-
         @Inject
         public Presenter() {
+            Timber.v("new Presenter(Gallery)");
+        }
 
+        @Override
+        protected void onEnterScope(MortarScope scope) {
+            Timber.v("onEnterScope()");
+            super.onEnterScope(scope);
+        }
+
+        @Override
+        protected void onExitScope() {
+            Timber.v("onExitScope()");
+            super.onExitScope();
         }
 
         @Override
@@ -74,10 +84,7 @@ public class GalleryScreen implements Blueprint {
             super.onLoad(savedInstanceState);
 
             getView().setup(Arrays.asList(Page.values()), 4);
-            if (!viewRestored) {
-                ViewStateSaver.restore(getView(), savedInstanceState, "pager");
-                viewRestored = true;
-            }
+            ViewStateSaver.restore(getView(), savedInstanceState, "pager");
         }
 
         @Override
@@ -85,10 +92,7 @@ public class GalleryScreen implements Blueprint {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             if (getView() != null) {
-                if (!viewSaved) {
-                    ViewStateSaver.save(getView(), outState, "pager");
-                    viewSaved = true;
-                }
+                ViewStateSaver.save(getView(), outState, "pager");
             }
         }
 

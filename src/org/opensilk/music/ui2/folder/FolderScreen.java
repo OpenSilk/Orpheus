@@ -35,6 +35,7 @@ import dagger.Provides;
 import flow.Flow;
 import flow.Layout;
 import mortar.Blueprint;
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 import timber.log.Timber;
 
@@ -90,13 +91,26 @@ public class FolderScreen implements Blueprint {
 
         @Inject
         public Presenter(Flow flow, FileItemLoader loader) {
-            Timber.v("new Presenter");
+            Timber.v("new Presenter(Folder)");
             this.flow = flow;
             this.loader = loader;
         }
 
         @Override
+        protected void onEnterScope(MortarScope scope) {
+            Timber.v("onEnterScope()");
+            super.onEnterScope(scope);
+        }
+
+        @Override
+        protected void onExitScope() {
+            Timber.v("onExitScope()");
+            super.onExitScope();
+        }
+
+        @Override
         protected void onLoad(Bundle savedInstanceState) {
+            Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
             getView().setup();
             loader.loadAsync(this);
@@ -104,6 +118,7 @@ public class FolderScreen implements Blueprint {
 
         @Override
         protected void onSave(Bundle outState) {
+            Timber.v("onSave(%s)", outState);
             super.onSave(outState);
         }
 

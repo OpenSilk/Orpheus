@@ -88,14 +88,14 @@ public class GodActivity extends ActionBarActivity implements
         mActivityScope.onCreate(savedInstanceState);
         Mortar.inject(this, this);
 
+        setContentView(R.layout.activity_god);
+        ButterKnife.inject(this);
+
         mBus.register(this);
         mGodPresenter.takeView(this);
         mDrawerPresenter.takeView(this);
 
         mFlow = mGodPresenter.getFlow();
-
-        setContentView(R.layout.activity_god);
-        ButterKnife.inject(this);
 
         setupDrawer();
         setupNavigation();
@@ -250,6 +250,7 @@ public class GodActivity extends ActionBarActivity implements
         MortarScope newChildScope = mActivityScope.requireChild(screen);
 
         View oldChild = mMainContainer.getChildAt(0);
+        Timber.d("Num children=%d", mMainContainer.getChildCount());
         View newChild;
 
         if (oldChild != null) {
