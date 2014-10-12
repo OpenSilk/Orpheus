@@ -27,6 +27,8 @@ import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.ui2.library.PluginConnectionManager;
+import org.opensilk.music.ui2.library.PluginScreen;
 import org.opensilk.music.ui2.main.DrawerPresenter;
 import org.opensilk.music.ui2.main.DrawerView;
 import org.opensilk.music.ui2.main.God;
@@ -59,6 +61,8 @@ public class GodActivity extends ActionBarActivity implements
     God.Presenter mGodPresenter;
     @Inject
     DrawerPresenter mDrawerPresenter;
+    @Inject
+    PluginConnectionManager mPluginConnectionManager;
 
     @InjectView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
@@ -111,7 +115,9 @@ public class GodActivity extends ActionBarActivity implements
         if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
 
         if (isFinishing()) {
-            Timber.d("Destroying Activity scope");
+            Timber.d("Activity is finishing()");
+            mPluginConnectionManager.onDestroy();
+
             MortarScope parentScope = Mortar.getScope(getApplication());
             parentScope.destroyChild(mActivityScope);
             mActivityScope = null;
@@ -119,9 +125,26 @@ public class GodActivity extends ActionBarActivity implements
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        mPluginConnectionManager.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mPluginConnectionManager.onPause();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         maybeHideActionBar();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @Override
@@ -198,7 +221,7 @@ public class GodActivity extends ActionBarActivity implements
     @Subscribe
     public void onStartActivityForResultEvent(StartActivityForResult req) {
         req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(this));
-        startActivityForResult(req.intent, req.code);
+        startActivityForResult(req.intent, req.reqCode);
     }
 
     @Override

@@ -47,12 +47,12 @@ import timber.log.Timber;
 public class LibraryLoader {
 
     final int STEP = 30;
-    final PluginConnection connection;
+    final PluginConnectionManager connectionManager;
     final LibraryInfo info;
 
     @Inject
-    public LibraryLoader(PluginConnection connection, LibraryInfo info) {
-        this.connection = connection;
+    public LibraryLoader(PluginConnectionManager connectionManager, LibraryInfo info) {
+        this.connectionManager = connectionManager;
         this.info = info;
     }
 
@@ -64,21 +64,26 @@ public class LibraryLoader {
                 .flatMap(new Func1<Bundle, Observable<Result>>() {
                     @Override
                     public Observable<Result> call(final Bundle bundle) {
-//                        Timber.v("Flatmap Func1: called On: %s", Thread.currentThread().getName());
-                        RemoteLibrary service = connection.getConnection();
-                        if (service == null) return Observable.error(new RemoteException());
-                        ResultFuture resultFuture = new ResultFuture();
-                        try {
-                            service.browseFolders(info.libraryId, info.currentFolderId, STEP, bundle, resultFuture);
-                        } catch (RemoteException e) {
-                            return Observable.error(e);
-                        }
-                        // wraps our future into an Observable
-                        return Observable.from(resultFuture);
+                        // grab our connection and map in to the result
+                        return connectionManager.bind(info.libraryComponent)
+                                .flatMap(new Func1<RemoteLibrary, Observable<Result>>() {
+                                    @Override
+                                    public Observable<Result> call(RemoteLibrary remoteLibrary) {
+                                        Timber.v("Flatmap Func1: called On: %s", Thread.currentThread().getName());
+                                        ResultFuture resultFuture = new ResultFuture();
+                                        try {
+                                            remoteLibrary.browseFolders(info.libraryId, info.currentFolderId, STEP, bundle, resultFuture);
+                                        } catch (RemoteException e) {
+                                            // remove the library so we can try to rebind on retry
+                                            connectionManager.onException(info.libraryComponent);
+                                            return Observable.error(e);
+                                        }
+                                        // wraps our future into an Observable
+                                        return Observable.from(resultFuture, Schedulers.io());
+                                    }
+                                });
                     }
                 })
-                // so Future.get() will block on a background thread
-                .subscribeOn(Schedulers.io())
                 // onNext(Result) gets called on ui thread
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -124,7 +129,7 @@ public class LibraryLoader {
 
         @Override
         public boolean isDone() {
-            return false;
+            return mResultReceived;
         }
 
         @Override

@@ -26,6 +26,7 @@ import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
+import org.opensilk.music.ui2.main.God;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -73,7 +74,7 @@ public class LibraryScreen implements Blueprint {
 
     @dagger.Module(
             injects = LibraryView.class,
-            addsTo = PluginScreen.Module.class,
+            addsTo = God.Module.class,
             library = true
     )
     public static class Module {
@@ -101,7 +102,7 @@ public class LibraryScreen implements Blueprint {
         final ResultObserver observer;
 
         @Inject
-        public Presenter(@Named("plugin") Flow flow, LibraryLoader loader, LibraryInfo info) {
+        public Presenter(Flow flow, LibraryLoader loader, LibraryInfo info) {
             this.flow = flow;
             this.loader = loader;
             this.info = info;
@@ -145,6 +146,8 @@ public class LibraryScreen implements Blueprint {
             loader.getObservable(token).subscribe(observer);
         }
 
+        // I know this seems ridiculous an if else block would be more sane
+        // but im still trying to learn how FRP works and wanted to do this with it.
         public void go(Bundleable item) {
             Timber.v("go(%s)", item);
             //FRP thingy to avoid final
@@ -157,85 +160,92 @@ public class LibraryScreen implements Blueprint {
             Observable<? extends Action0> folder = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
-                    Timber.v("filter folder");
+//                    Timber.v("filter folder");
                     return (bundleable instanceof Folder);
                 }
-            }).cast(Folder.class).flatMap(new Func1<Folder, Observable<? extends Action0>>() {
+            }).cast(Folder.class).map(new Func1<Folder, Action0>() {
                 @Override
-                public Observable<? extends Action0> call(final Folder folder) {
-                    return Observable.just(new Action0() {
+                public Action0 call(final Folder folder) {
+                    return new Action0() {
                         @Override
                         public void call() {
                             flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, folder.identity)));
                         }
-                    });
+                    };
                 }
             });
             Observable<? extends Action0> song = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
-                    Timber.v("filter song");
+//                    Timber.v("filter song");
                     return (bundleable instanceof Song);
                 }
-            }).cast(Song.class).flatMap(new Func1<Song, Observable<? extends Action0>>() {
+            }).cast(Song.class).map(new Func1<Song, Action0>() {
                 @Override
-                public Observable<? extends Action0> call(final Song song) {
-                    return Observable.just(new Action0() {
+                public Action0 call(final Song song) {
+                    return new Action0() {
                         @Override
                         public void call() {
                             flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, song.identity)));
                         }
-                    });
+                    };
                 }
             });
             Observable<? extends Action0> artist = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
-                    Timber.v("filter artist");
+//                    Timber.v("filter artist");
                     return (bundleable instanceof Artist);
                 }
-            }).cast(Artist.class).flatMap(new Func1<Artist, Observable<? extends Action0>>() {
+            }).cast(Artist.class).map(new Func1<Artist, Action0>() {
                 @Override
-                public Observable<? extends Action0> call(final Artist artist) {
-                    return Observable.just(new Action0() {
+                public Action0 call(final Artist artist) {
+                    return new Action0() {
                         @Override
                         public void call() {
                             flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, artist.identity)));
                         }
-                    });
+                    };
                 }
             });
             Observable<? extends Action0> album = og.filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
-                    Timber.v("filter album");
+//                    Timber.v("filter album");
                     return (bundleable instanceof Album);
                 }
-            }).cast(Album.class).flatMap(new Func1<Album, Observable<? extends Action0>>() {
+            }).cast(Album.class).map(new Func1<Album, Action0>() {
                 @Override
-                public Observable<? extends Action0> call(final Album album) {
-                    return Observable.just(new Action0() {
+                public Action0 call(final Album album) {
+                    return new Action0() {
                         @Override
                         public void call() {
                             flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, album.identity)));
                         }
-                    });
+                    };
                 }
             });
             // finally merge the previous Observables into a single operation
             Observable.merge(folder, song, artist, album)
+                    // since we only started with one item we can safely just grab
+                    // the first Action0 that is emmited
                     .first()
-                    .subscribeOn(Schedulers.computation())
+                    // I think it will already be observed on main
+                    // In fact the whole thing /should/ be synchronous
+                    // but just in case
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Action0>() {
                         @Override
                         public void call(Action0 action0) {
-                            Timber.v("call action0");
+//                            Timber.v("call action0");
                             action0.call();
                         }
                     });
         }
 
+        // we re use this so we cant use a subscriber
+        // not that it matters since you cant cancel an Observable created from
+        // a future (noted for future reference (damn puns))
         private class ResultObserver implements Observer<LibraryLoader.Result> {
 
             boolean complete;
@@ -247,7 +257,8 @@ public class LibraryScreen implements Blueprint {
 
             @Override
             public void onError(Throwable e) {
-
+                Timber.e(e, "LibraryLoader.Result Observer");
+                //TODO
             }
 
             @Override

@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.otto.Bus;
 
+import org.opensilk.music.AppModule;
 import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.util.GsonParcer;
 import org.opensilk.silkdagger.qualifier.ForActivity;
@@ -35,7 +36,8 @@ import flow.Parcer;
  * Created by drew on 10/6/14.
  */
 @Module (
-        injects = GodActivity.class
+        injects = GodActivity.class,
+        complete = false
 )
 public class ActivityModule {
 

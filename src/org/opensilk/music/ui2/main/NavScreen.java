@@ -25,8 +25,12 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.loader.AsyncLoader;
 import org.opensilk.music.loader.PluginInfoLoader;
+import org.opensilk.music.ui2.folder.FolderScreen;
+import org.opensilk.music.ui2.gallery.GalleryScreen;
+import org.opensilk.music.ui2.library.LibraryScreen;
 
 import java.util.List;
 
@@ -37,6 +41,10 @@ import flow.Flow;
 import flow.Layout;
 import mortar.Blueprint;
 import mortar.ViewPresenter;
+import rx.Observable;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Note to self: we arent embedding this listview in order to obtain the GodView's flow
@@ -101,11 +109,50 @@ public class NavScreen implements Blueprint {
         }
 
         public void go(Blueprint screen) {
-            if(screen!=null) {
-                drawerPresenter.closeDrawer();
-                flow.replaceTo(screen);
+            if (screen == null) return;
+//            Observable<Blueprint> oo = Observable.just(screen);
+//            Observable<Action0> galleryNfolders = oo.filter(new Func1<Blueprint, Boolean>() {
+//                @Override
+//                public Boolean call(Blueprint blueprint) {
+//                    return (blueprint instanceof FolderScreen) || (blueprint instanceof GalleryScreen);
+//                }
+//            }).map(new Func1<Blueprint, Action0>() {
+//                @Override
+//                public Action0 call(final Blueprint blueprint) {
+//                    return new Action0() {
+//                        @Override
+//                        public void call() {
+//                            flow.replaceTo(blueprint);
+//                        }
+//                    };
+//                }
+//            });
+//            Observable<Action0> plugins = oo.filter(new Func1<Blueprint, Boolean>() {
+//                @Override
+//                public Boolean call(Blueprint blueprint) {
+//                    return (blueprint instanceof LibraryScreen);
+//                }
+//            }).cast(LibraryScreen.class).map(new Func1<LibraryScreen, Action0>() {
+//                @Override
+//                public Action0 call(LibraryScreen libraryScreen) {
+//                    return new Action0() {
+//                        @Override
+//                        public void call() {
+//
+//                        }
+//                    };
+//                }
+//            });
 
-            }
+//            Observable.merge(galleryNfolders, plugins).subscribe(new Action1<Action0>() {
+//                @Override
+//                public void call(Action0 action0) {
+//                    drawerPresenter.closeDrawer();
+//                    action0.call();
+//                }
+//            });
+            drawerPresenter.closeDrawer();
+            flow.replaceTo(screen);
         }
 
         public void openSettings(Context context) {

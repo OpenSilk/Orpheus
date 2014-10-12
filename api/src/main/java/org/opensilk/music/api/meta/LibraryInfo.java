@@ -37,6 +37,11 @@ public class LibraryInfo implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return "["+libraryId+","+libraryComponent.flattenToString()+","+currentFolderId+"]";
+    }
+
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(libraryId);
         dest.writeString(libraryComponent.flattenToString());

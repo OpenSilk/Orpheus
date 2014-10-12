@@ -72,8 +72,7 @@ public class NavView extends ListView {
     }
 
     public void setup() {
-        Adapter adapter = new Adapter(getContext());
-        setAdapter(adapter);
+        setAdapter(new Adapter(getContext()));
         setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

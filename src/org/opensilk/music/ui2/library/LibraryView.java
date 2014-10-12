@@ -72,8 +72,9 @@ public class LibraryView extends ListView {
     }
 
     public void setup() {
+        //Causes fucked up problems when fast scrolling and the loader simlutaneously adds new items
 //        addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.list_footer, null));
-        setAdapter(new Adapter(getContext(), presenter));
+        setAdapter(new LibraryAdapter(getContext(), presenter));
         setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -83,75 +84,11 @@ public class LibraryView extends ListView {
     }
 
     @Override
-    public Adapter getAdapter() {
+    public LibraryAdapter getAdapter() {
         if (super.getAdapter() instanceof HeaderViewListAdapter) {
-            return (Adapter) ((HeaderViewListAdapter)super.getAdapter()).getWrappedAdapter();
+            return (LibraryAdapter) ((HeaderViewListAdapter)super.getAdapter()).getWrappedAdapter();
         }
-        return (Adapter) super.getAdapter();
-    }
-
-    public static class Adapter extends ArrayAdapter<Bundleable> {
-
-        private static class LoadingItem implements Bundleable {
-            @Override
-            public Bundle toBundle() {
-                return null;
-            }
-
-            @Override
-            public String toString() {
-                return "Loading";
-            }
-        }
-
-        final LibraryScreen.Presenter presenter;
-        LibraryLoader.Result lastResult;
-
-        final LoadingItem loadingItem;
-        boolean hasLoadingItem = false;
-
-        public Adapter(Context context, LibraryScreen.Presenter presenter) {
-            super(context, android.R.layout.simple_list_item_1);
-            this.presenter = presenter;
-            loadingItem = new LoadingItem();
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            maybeGetMore(position);
-            return super.getView(position, convertView, parent);
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return 2;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return (getItem(position) instanceof LoadingItem) ? 1 : 0;
-        }
-
-        public void onNewResult(LibraryLoader.Result result) {
-            lastResult = result;
-            if (hasLoadingItem) {
-                remove(loadingItem);
-                hasLoadingItem = false;
-            }
-            if (!lastResult.items.isEmpty()) addAll(lastResult.items);
-        }
-
-        private boolean maybeGetMore(int position) {
-            if (hasLoadingItem) return false;
-            if (lastResult == null || lastResult.token == null) return false ;
-            if (getCount() == 0 || (getCount()-1) != position) return false ;
-            if (presenter.fetchMore(lastResult.token)) {
-                hasLoadingItem = true;
-                add(loadingItem);
-                return true;
-            }
-            return false;
-        }
+        return (LibraryAdapter) super.getAdapter();
     }
 
 }

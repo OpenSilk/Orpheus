@@ -55,6 +55,8 @@ import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import timber.log.Timber;
@@ -65,7 +67,7 @@ import timber.log.Timber;
 @Layout(R.layout.library)
 public class PluginScreen implements Blueprint {
 
-    final PluginInfo plugin;
+    public final PluginInfo plugin;
 
     public PluginScreen(PluginInfo plugin) {
         this.plugin = plugin;
@@ -99,36 +101,28 @@ public class PluginScreen implements Blueprint {
             return screen.plugin;
         }
 
-        @Provides @Named("plugin")
-        public Flow provideFlow(Presenter presenter) {
-            return presenter.getFlow();
-        }
-
     }
 
     @Singleton
-    public static class Presenter extends FlowOwner<Blueprint, PluginView> implements PluginConnection.Listener {
+    public static class Presenter extends ViewPresenter<PluginView> {
 
-        final PluginConnection connection;
         final PluginInfo plugin;
         final PluginSettings settings;
+        final PluginConnectionManager connectionManager;
         final Bus bus;
+        final Flow flow;
 
         String libraryIdentity;
 
         @Inject
-        public Presenter(Parcer<Object> parcer, PluginConnection connection, PluginInfo plugin,
-                         PluginSettings settings, @Named("activity") Bus bus) {
-            super(parcer);
-            this.connection = connection;
+        public Presenter(PluginInfo plugin, PluginSettings settings,
+                         PluginConnectionManager connectionManager,
+                         @Named("activity") Bus bus, Flow flow) {
             this.plugin = plugin;
             this.settings = settings;
+            this.connectionManager = connectionManager;
             this.bus = bus;
-        }
-
-        @Override
-        protected Blueprint getFirstScreen() {
-            return null; //Defer flo creation
+            this.flow = flow;
         }
 
         @Override
@@ -136,7 +130,7 @@ public class PluginScreen implements Blueprint {
             Timber.v("onEnterScope");
             super.onEnterScope(scope);
             bus.register(this);
-            connection.connect(this);
+            connectionManager.bind(plugin.componentName); //gets the ball rolling
         }
 
         @Override
@@ -148,9 +142,7 @@ public class PluginScreen implements Blueprint {
             } else {
 //                libraryIdentity = settings.getDefaultSource();
             }
-            if (connection.isConnected()) {
-                onConnectionEstablished();
-            }
+            connect();
         }
 
         @Override
@@ -165,18 +157,24 @@ public class PluginScreen implements Blueprint {
             Timber.v("onExitScope");
             super.onExitScope();
             bus.unregister(this);
-            connection.disconnect();
         }
 
-        @Override
-        public void onConnectionEstablished() {
+        void connect() {
+            connectionManager.bind(plugin.componentName).subscribe(new Action1<RemoteLibrary>() {
+                @Override
+                public void call(RemoteLibrary remoteLibrary) {
+                    onConnectionEstablished(remoteLibrary);
+                }
+            });
+        }
+
+        void onConnectionEstablished(RemoteLibrary remoteLibrary) {
             Timber.v("onConnectionEstablished()");
             if (getView() != null) {
                 try {
                     if (TextUtils.isEmpty(libraryIdentity)) {
                         Intent i = new Intent();
-                        if (!connection.isConnected()) throw new RemoteException();
-                        connection.getConnection().getLibraryChooserIntent(i);
+                        remoteLibrary.getLibraryChooserIntent(i);
                         if (i.getComponent() != null) {
                             bus.post(new StartActivityForResult(i, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
                         }
@@ -188,18 +186,6 @@ public class PluginScreen implements Blueprint {
                     e.printStackTrace();
                 }
             }
-        }
-
-        @Override
-        public void onConnectionLost() {
-            Observable.timer(3, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Long>() {
-                        @Override
-                        public void call(Long aLong) {
-                            connection.connect(Presenter.this);
-                        }
-                    });
-//            flow.resetTo(new PluginScreen(plugin));
         }
 
         @Subscribe
@@ -216,7 +202,7 @@ public class PluginScreen implements Blueprint {
                         }
                         libraryIdentity = id;
                         settings.setDefaultSource(libraryIdentity);
-                        onConnectionEstablished();
+                        connect();
                     } else {
                         Timber.e("Activity returned bad result");
                         //TODO
@@ -229,14 +215,9 @@ public class PluginScreen implements Blueprint {
 
         private void openLibrary() {
             Timber.v("openLibrary()");
-            if (flow == null) {
-                LibraryInfo info = new LibraryInfo(libraryIdentity, plugin.componentName, null);
-                LibraryScreen screen = new LibraryScreen(info);
-                Backstack backstack = Backstack.single(screen);
-                flow = new Flow(backstack, this);
-                showScreen((Blueprint) flow.getBackstack().current().getScreen(), null);
-            }
-//            DrawerView.ScreenConductor.addChild(getView().getContext(), new LibraryScreen(info), getView());
+            LibraryInfo info = new LibraryInfo(libraryIdentity, plugin.componentName, null);
+            LibraryScreen screen = new LibraryScreen(info);
+            flow.goTo(screen);
         }
 
     }

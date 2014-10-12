@@ -26,11 +26,11 @@ public class StartActivityForResult {
     public static final int PLUGIN_REQUEST_SETTINGS = 1002;
 
     public final Intent intent;
-    public final int code;
+    public final int reqCode;
 
-    public StartActivityForResult(Intent intent, int code) {
+    public StartActivityForResult(Intent intent, int reqCode) {
         this.intent = intent;
-        this.code = code;
+        this.reqCode = reqCode;
     }
 
 }
