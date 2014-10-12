@@ -16,6 +16,10 @@
   -->
 
 <resources>
+    <declare-styleable name="ThemeColors">
+        <attr name="colorPrimary" format="color"/>
+        <attr name="colorAccent" format="color"/>
+    </declare-styleable>
     <declare-styleable name="ProfileTheme">
         <attr name="isDialog" format="boolean" />
     </declare-styleable>

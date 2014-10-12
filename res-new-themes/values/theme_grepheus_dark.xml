@@ -18,51 +18,23 @@
 <resources>
 
     <style name="Theme.GrepheusDark" parent="Theme.Dark">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarGrepheusDark</item>
-        <item name="android:seekBarStyle">@style/SeekBarGrepheusDark</item>
-
         <item name="colorPrimary">@color/app_color_grepheus</item>
         <item name="colorAccent">@color/app_color_grepheus_complement</item>
     </style>
 
     <style name="Theme.GrepheusDark.Panel" parent="Theme.Dark.Panel">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarGrepheusDark</item>
-        <item name="android:seekBarStyle">@style/SeekBarGrepheusDark</item>
-
         <item name="colorPrimary">@color/app_color_grepheus</item>
         <item name="colorAccent">@color/app_color_grepheus_complement</item>
     </style>
 
     <style name="Theme.Dialog.GrepheusDark" parent="Theme.Dialog.Dark">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarGrepheusDark</item>
-        <item name="android:seekBarStyle">@style/SeekBarGrepheusDark</item>
-
         <item name="colorPrimary">@color/app_color_grepheus</item>
         <item name="colorAccent">@color/app_color_grepheus_complement</item>
     </style>
 
     <style name="Theme.Dialog.GrepheusDark.Panel" parent="Theme.Dialog.Dark.Panel">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarGrepheusDark</item>
-        <item name="android:seekBarStyle">@style/SeekBarGrepheusDark</item>
-
         <item name="colorPrimary">@color/app_color_grepheus</item>
         <item name="colorAccent">@color/app_color_grepheus_complement</item>
-    </style>
-
-    <!-- Generated with http://android-holo-colors.com -->
-    <style name="ProgressBarGrepheusDark" parent="android:Widget.Holo.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/grepheus_dark_progress_horizontal_holo_dark</item>
-        <item name="android:indeterminateDrawable">@drawable/grepheus_progress_indeterminate_horizontal_holo_light</item>
-    </style>
-
-    <style name="SeekBarGrepheusDark" parent="android:Widget.Holo.SeekBar">
-        <item name="android:progressDrawable">@drawable/grepheus_dark_scrubber_progress_horizontal_holo_dark</item>
-        <item name="android:indeterminateDrawable">@drawable/grepheus_dark_scrubber_progress_horizontal_holo_dark</item>
-        <item name="android:thumb">@drawable/grepheus_scrubber_control_selector_holo_light</item>
     </style>
 
 </resources>

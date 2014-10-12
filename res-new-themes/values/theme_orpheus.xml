@@ -18,51 +18,23 @@
 <resources>
 
     <style name="Theme.Orpheus" parent="Theme.Light">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheus</item>
-        <item name="android:seekBarStyle">@style/SeekBarOrpheus</item>
-
         <item name="colorPrimary">@color/app_color_orpheus</item>
         <item name="colorAccent">@color/app_color_orpheus_complement</item>
     </style>
 
     <style name="Theme.Orpheus.Panel" parent="Theme.Light.Panel">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheus</item>
-        <item name="android:seekBarStyle">@style/SeekBarOrpheus</item>
-
         <item name="colorPrimary">@color/app_color_orpheus</item>
         <item name="colorAccent">@color/app_color_orpheus_complement</item>
     </style>
 
     <style name="Theme.Dialog.Orpheus" parent="Theme.Dialog.Light">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheus</item>
-        <item name="android:seekBarStyle">@style/SeekBarOrpheus</item>
-
         <item name="colorPrimary">@color/app_color_orpheus</item>
         <item name="colorAccent">@color/app_color_orpheus_complement</item>
     </style>
 
     <style name="Theme.Dialog.Orpheus.Panel" parent="Theme.Dialog.Light.Panel">
-        <!-- Generated with http://android-holo-colors.com -->
-        <item name="android:progressBarStyleHorizontal">@style/ProgressBarOrpheus</item>
-        <item name="android:seekBarStyle">@style/SeekBarOrpheus</item>
-
         <item name="colorPrimary">@color/app_color_orpheus</item>
         <item name="colorAccent">@color/app_color_orpheus_complement</item>
-    </style>
-
-    <!-- Generated with http://android-holo-colors.com -->
-    <style name="ProgressBarOrpheus" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/orpheus_progress_horizontal_holo_light</item>
-        <item name="android:indeterminateDrawable">@drawable/orpheus_progress_indeterminate_horizontal_holo_light</item>
-    </style>
-
-    <style name="SeekBarOrpheus" parent="android:Widget.Holo.Light.SeekBar">
-        <item name="android:progressDrawable">@drawable/orpheus_scrubber_progress_horizontal_holo_light</item>
-        <item name="android:indeterminateDrawable">@drawable/orpheus_scrubber_progress_horizontal_holo_light</item>
-        <item name="android:thumb">@drawable/orpheus_scrubber_control_selector_holo_light</item>
     </style>
 
 </resources>
