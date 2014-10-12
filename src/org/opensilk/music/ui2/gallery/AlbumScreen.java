@@ -64,7 +64,7 @@ public class AlbumScreen implements Blueprint {
     }
 
     @dagger.Module (
-            addsTo = God.Module.class,
+            addsTo = GalleryScreen.Module.class,
             injects = AlbumView.class
     )
     public static class Module {

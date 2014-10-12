@@ -7,14 +7,12 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
@@ -24,22 +22,20 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
-import org.opensilk.music.ui2.library.PluginScreen;
 import org.opensilk.music.ui2.main.DrawerPresenter;
-import org.opensilk.music.ui2.main.DrawerView;
 import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.ui2.main.NavScreen;
+
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
 import flow.Backstack;
 import flow.Flow;
 import flow.Layouts;
@@ -77,6 +73,9 @@ public class GodActivity extends ActionBarActivity implements
 
     Flow mFlow;
     ActionBarDrawerToggle mDrawerToggle;
+    boolean mConfigurationChangeIncoming;
+    String mScopeName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,18 +83,18 @@ public class GodActivity extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());
-        mActivityScope = Mortar.requireActivityScope(parentScope, new God());
+        mActivityScope = Mortar.requireActivityScope(parentScope, new God(getScopeName()));
         mActivityScope.onCreate(savedInstanceState);
         Mortar.inject(this, this);
+
+        mBus.register(this);
+        mGodPresenter.takeView(this);
+        mFlow = mGodPresenter.getFlow();
 
         setContentView(R.layout.activity_god);
         ButterKnife.inject(this);
 
-        mBus.register(this);
-        mGodPresenter.takeView(this);
         mDrawerPresenter.takeView(this);
-
-        mFlow = mGodPresenter.getFlow();
 
         setupDrawer();
         setupNavigation();
@@ -107,6 +106,12 @@ public class GodActivity extends ActionBarActivity implements
     }
 
     @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        mConfigurationChangeIncoming = true;
+        return mActivityScope.getName();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -114,12 +119,13 @@ public class GodActivity extends ActionBarActivity implements
         if (mGodPresenter != null) mGodPresenter.dropView(this);
         if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
 
-        if (isFinishing()) {
+        if (!mConfigurationChangeIncoming) {
             Timber.d("Activity is finishing()");
             mPluginConnectionManager.onDestroy();
-
-            MortarScope parentScope = Mortar.getScope(getApplication());
-            parentScope.destroyChild(mActivityScope);
+            if (!mActivityScope.isDestroyed()) {
+                MortarScope parentScope = Mortar.getScope(getApplication());
+                parentScope.destroyChild(mActivityScope);
+            }
             mActivityScope = null;
         }
     }
@@ -236,6 +242,14 @@ public class GodActivity extends ActionBarActivity implements
         }
     }
 
+    private String getScopeName() {
+        if (mScopeName == null) mScopeName = (String) getLastCustomNonConfigurationInstance();
+        if (mScopeName == null) {
+            mScopeName = UUID.randomUUID().toString();
+        }
+        return mScopeName;
+    }
+
     //Flow
     @Override
     public void go(Backstack nextBackstack, Flow.Direction direction, Flow.Callback callback) {
@@ -247,31 +261,25 @@ public class GodActivity extends ActionBarActivity implements
     public void showScreen(Blueprint screen, Flow.Direction direction) {
         Timber.v("showScreen()");
 
-        MortarScope newChildScope = mActivityScope.requireChild(screen);
-
-        View oldChild = mMainContainer.getChildAt(0);
-        Timber.d("Num children=%d", mMainContainer.getChildCount());
-        View newChild;
-
-        if (oldChild != null) {
-            MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
-            if (oldChildScope.getName().equals(screen.getMortarScopeName())) {
-                // If it's already showing, short circuit.
-                Timber.v("Short circuit");
-                return;
+        for (int i=0; i<mMainContainer.getChildCount(); i++) {
+            Timber.v("removing old child ", i);
+            View oldChild = mMainContainer.getChildAt(i);
+            if (oldChild != null) {
+                MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
+//                if (oldChildScope.getName().equals(screen.getMortarScopeName())) {
+//                    // If it's already showing, short circuit.
+//                    Timber.v("Short circuit");
+//                    return;
+//                }
+                mActivityScope.destroyChild(oldChildScope);
+                mMainContainer.removeView(oldChild);
             }
-
-            mActivityScope.destroyChild(oldChildScope);
         }
 
         // Create the new child.
+        MortarScope newChildScope = mActivityScope.requireChild(screen);
         Context childContext = newChildScope.createContext(this);
-        newChild = Layouts.createView(childContext, screen);
-
-//        setAnimation(direction, oldChild, newChild);
-
-        // Out with the old, in with the new.
-        if (oldChild != null) mMainContainer.removeView(oldChild);
+        View newChild = Layouts.createView(childContext, screen);
         mMainContainer.addView(newChild);
     }
 

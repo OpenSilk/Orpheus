@@ -24,6 +24,7 @@ import android.view.View;
 
 import com.andrew.apollo.R;
 
+import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 
 import java.util.Arrays;
@@ -53,6 +54,7 @@ public class GalleryScreen implements Blueprint {
     }
 
     @dagger.Module (
+            addsTo = God.Module.class,
             injects = GalleryView.class
     )
     public static class Module {

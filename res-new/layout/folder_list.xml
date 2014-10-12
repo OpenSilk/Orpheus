@@ -18,7 +18,6 @@
 
 <org.opensilk.music.ui2.folder.FolderView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/list"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-</org.opensilk.music.ui2.folder.FolderView>
+    android:layout_height="match_parent"/>

@@ -45,9 +45,21 @@ import mortar.Presenter;
  */
 public class God implements Blueprint {
 
+    /**
+     * Required for a race condition cause by Android when a new scope is created
+     * before the old one is destroyed
+     * <p/>
+     * https://github.com/square/mortar/issues/87#issuecomment-43849264
+     */
+    final String scopename;
+
+    public God(String scopename) {
+        this.scopename = scopename;
+    }
+
     @Override
     public String getMortarScopeName() {
-        return getClass().getName();
+        return getClass().getName() + scopename;
     }
 
     @Override
