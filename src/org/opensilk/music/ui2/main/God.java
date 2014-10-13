@@ -24,7 +24,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.opensilk.music.AppModule;
-import org.opensilk.music.ui2.ActivityModule;
 import org.opensilk.music.ui2.GodActivity;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.util.GsonParcer;
@@ -70,8 +69,7 @@ public class God implements Blueprint {
 
     @dagger.Module(
             addsTo = AppModule.class,
-            library = true,
-            includes = ActivityModule.class
+            library = true
     )
     public static class Module {
 

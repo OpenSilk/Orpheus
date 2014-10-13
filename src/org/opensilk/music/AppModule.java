@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.opensilk.music.ui2.ActivityModule;
-import org.opensilk.music.ui3.LauncherActivity;
 import org.opensilk.music.util.GsonParcer;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
@@ -37,8 +36,8 @@ import flow.Parcer;
  */
 @Module (
         library = true,
-        addsTo = GlobalModule.class
-//        includes = ActivityModule.class
+        addsTo = GlobalModule.class,
+        includes = ActivityModule.class
 )
 public class AppModule {
 
