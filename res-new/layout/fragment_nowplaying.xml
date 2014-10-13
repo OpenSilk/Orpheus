@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/panel_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/app_background_light"
+    android:clickable="true"
+    android:focusable="false">
+
+    <!--album art background -->
+    <org.opensilk.music.widgets.SquareFullScreenArtworkImageView
+        android:id="@+id/panel_background_art"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null"/>
+
+    <!-- header -->
+    <LinearLayout
+        android:id="@+id/panel_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/panel_header_height"
+        android:layout_gravity="top"
+        tools:background="@color/app_background_light"
+        android:layout_alignParentTop="true">
+
+        <!--<org.opensilk.music.widgets.SquareThumbnailArtworkImageView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="@dimen/panel_header_height"-->
+            <!--android:contentDescription="@null"-->
+            <!--style="@style/Orpheus.Thumbnail"/>-->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/header_progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-6dp"
+                style="?android:progressBarStyleHorizontal"
+                android:max="1000"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:id="@+id/track_artist_info"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/header_track_info1"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        tools:text="Track Title"
+                        android:textAppearance="@style/TextAppearancePanelHeader.Title"
+                        style="@style/SingleLineTextView"/>
+
+                    <TextView
+                        android:id="@+id/header_artist_info1"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        tools:text="Artist Name"
+                        android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
+                        style="@style/SingleLineTextView"/>
+
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/header_action_button_previous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:src="@drawable/ic_action_playback_prev_black"
+                    style="@style/PlaybackControlButton"
+                    android:contentDescription="@string/accessibility_prev"/>
+
+                <ImageView
+                    android:id="@+id/header_action_button_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    tools:src="@drawable/ic_action_playback_play_black"
+                    style="@style/PlaybackControlButton"
+                    android:contentDescription="@string/accessibility_play"/>
+
+                <ImageButton
+                    android:id="@+id/header_action_button_next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:src="@drawable/ic_action_playback_next_black"
+                    style="@style/PlaybackControlButton"
+                    android:contentDescription="@string/accessibility_next"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:baselineAligned="false"-->
+            <!--android:orientation="horizontal">-->
+
+            <!-- album art thumb -->
+            <!--<org.opensilk.music.widgets.ThumbnailArtworkImageView-->
+            <!--android:id="@+id/header_album_art"-->
+            <!--android:layout_width="@dimen/panel_header_thumbnail_size"-->
+            <!--android:layout_height="@dimen/panel_header_thumbnail_size"-->
+            <!--android:layout_margin="@dimen/panel_header_thumbnail_margin"-->
+            <!--style="@style/Orpheus.Thumbnail"-->
+            <!--android:contentDescription="@null"/>-->
+
+            <!-- Track title / artist
+            this is the anchor for sliding -->
+
+
+            <!--<FrameLayout-->
+                <!--android:id="@+id/header_menu_bar"-->
+                <!--android:animateLayoutChanges="true"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="match_parent">-->
+
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/header_closed_button_bar"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="match_parent">-->
+
+                    <!--<org.opensilk.music.widgets.RepeatingImageButton-->
+                        <!--android:id="@+id/header_action_button_previous"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--style="@style/Orpheus.MenuButton"-->
+                        <!--android:contentDescription="@string/accessibility_prev"/>-->
+
+                    <!--<org.opensilk.music.widgets.PlayPauseButton-->
+                        <!--android:id="@+id/header_action_button_play"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--style="@style/Orpheus.MenuButton"-->
+                        <!--android:contentDescription="@string/accessibility_play"/>-->
+
+                    <!--<org.opensilk.music.widgets.RepeatingImageButton-->
+                        <!--android:id="@+id/header_action_button_next"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--style="@style/Orpheus.MenuButton"-->
+                        <!--android:contentDescription="@string/accessibility_next"/>-->
+
+                <!--</LinearLayout>-->
+
+                <!--<LinearLayout-->
+                    <!--android:id="@+id/header_open_button_bar"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="match_parent">-->
+
+                    <!--<android.support.v7.app.MediaRouteButton-->
+                    <!--style="@style/Orpheus.MenuButton.MediaRouter"-->
+                    <!--mediarouter:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"-->
+                    <!--android:id="@+id/panel_mediarouter"/>-->
+
+                    <!--<org.opensilk.music.widgets.QueueButton-->
+                        <!--android:id="@+id/header_switch_queue"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--style="@style/Orpheus.MenuButton"-->
+                        <!--android:contentDescription="@null"/>-->
+
+                    <!--<org.opensilk.music.widgets.HeaderOverflowButton-->
+                        <!--android:id="@+id/header_overflow"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--style="@style/Orpheus.MenuButton"-->
+                        <!--android:contentDescription="@null" />-->
+
+                <!--</LinearLayout>-->
+
+            <!--</FrameLayout>-->
+
+        <!--</LinearLayout>-->
+
+    </LinearLayout>
+
+    <!-- footer -->
+    <LinearLayout
+        android:id="@+id/panel_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingTop="24dp"
+        android:gravity="center"
+        android:layout_gravity="bottom"
+        android:layout_alignParentBottom="true">
+        <!--^^Extra top padding here to compensate for 16dp overhang of seekbar-->
+
+        <ImageButton
+            android:id="@+id/footer_action_button_shuffle"
+            android:contentDescription="@string/accessibility_shuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:src="@drawable/ic_action_playback_shuffle_black"
+            style="?buttonBarButtonStyle"/>
+
+        <ImageButton
+            android:id="@+id/footer_action_button_previous"
+            android:contentDescription="@string/accessibility_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:src="@drawable/ic_action_playback_prev_black"
+            style="@style/PlaybackControlButton"/>
+
+        <ImageButton
+            android:id="@+id/footer_action_button_play"
+            android:contentDescription="@string/accessibility_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:src="@drawable/ic_action_playback_play_black"
+            style="@style/PlaybackControlButton"/>
+
+        <ImageButton
+            android:id="@+id/footer_action_button_next"
+            android:contentDescription="@string/accessibility_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:src="@drawable/ic_action_playback_next_black"
+            style="@style/PlaybackControlButton"/>
+
+        <ImageButton
+            android:id="@+id/footer_action_button_repeat"
+            android:contentDescription="@string/accessibility_repeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:src="@drawable/ic_action_playback_repeat_black"
+            style="@style/PlaybackControlButton"/>
+
+    </LinearLayout>
+
+    <!-- Used to show/hide the QueueFragment -->
+    <FrameLayout
+        android:id="@+id/panel_middle_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/panel_header"
+        android:layout_above="@id/panel_footer"/>
+
+    <!-- Our scrubber height is 32dp making the seekbar view
+         32dp so as a hack to get the bar to sit on the edge
+         of the footer we set a negative bottom margin -->
+    <org.opensilk.music.ui3.theme.widget.CompatSeekBar
+        android:id="@+id/footer_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/panel_footer"
+        android:layout_marginBottom="-16dp"
+        android:gravity="center_vertical"
+        android:padding="0dp"
+        android:max="1000" />
+
+    <!-- current playtime -->
+    <TextView
+        android:id="@+id/footer_player_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/footer_progress_bar"
+        android:layout_alignParentLeft="true"
+        android:gravity="left"
+        android:paddingLeft="16dp"
+        android:textAppearance="@style/TextAppearancePlayTime"/>
+
+    <!-- total playtime -->
+    <TextView
+        android:id="@+id/footer_player_total_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/footer_progress_bar"
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:paddingRight="16dp"
+        android:textAppearance="@style/TextAppearancePlayTime"/>
+
+</RelativeLayout>

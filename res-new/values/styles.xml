@@ -188,9 +188,9 @@
     <!--PANEL FOOTER-->
 
     <style name="PlaybackControlButton" parent="@android:style/Widget.Holo.Button.Borderless">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_height">46dp</item>
+        <!--<item name="android:layout_width">0dp</item>-->
+        <!--<item name="android:layout_weight">1</item>-->
+        <!--<item name="android:layout_height">46dp</item>-->
         <item name="android:scaleType">centerInside</item>
     </style>
 
