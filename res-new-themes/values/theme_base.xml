@@ -22,17 +22,19 @@
     <style name="Theme.LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- kitkat style selectables -->
         <!--<item name="android:selectableItemBackground">@drawable/item_background_holo_light</item>-->
-        <item name="android:popupMenuStyle">@style/PopupMenu.Light</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light</item>
+        <!--<item name="popupMenuStyle">@style/Widget.AppCompat.Light.PopupMenu</item>-->
+        <item name="listPopupWindowStyle">@style/Widget.AppCompat.Light.ListPopupWindow</item>
+        <item name="dropDownListViewStyle">@style/Widget.AppCompat.Light.ListView.DropDown</item>
         <!-- ActionBar overrides -->
-        <item name="android:actionBarStyle">@style/ActionBar.Light</item>
-        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
+        <!--<item name="android:actionBarStyle">@style/ActionBar.Light</item>-->
+        <!--<item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>-->
         <!--<item name="android:actionBarItemBackground">@drawable/item_background_holo_dark</item> &lt;!&ndash;dark on purpose&ndash;&gt;-->
         <!--<item name="android:actionDropDownStyle">@style/DropDownNav.RepheusDark</item>-->
         <!-- Disable shadow on action bar-->
         <item name="android:windowContentOverlay">@null</item>
         <!-- Light.DarkActionBar specific -->
-        <item name="android:actionBarWidgetTheme">@style/Theme.LightBase.Widget</item>
+        <item name="actionBarWidgetTheme">@style/Theme.LightBase.Widget</item>
+        <item name="android:actionBarWidgetTheme">?actionBarWidgetTheme</item>
     </style>
 
     <style name="Theme.Light" parent="Theme.LightBase">
@@ -170,10 +172,13 @@
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
     <style name="Theme.LightBase.Widget" parent="@style/Theme.AppCompat">
-        <item name="android:popupMenuStyle">@style/PopupMenu.Light</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Light</item>
-        <item name="android:textColor">@android:color/primary_text_light</item>
-        <item name="android:listDivider">@drawable/list_divider_holo_light</item>
+        <item name="popupMenuStyle">@style/Widget.AppCompat.Light.PopupMenu</item>
+        <item name="listPopupWindowStyle">@style/Widget.AppCompat.Light.ListPopupWindow</item>
+        <item name="dropDownListViewStyle">@style/Widget.AppCompat.Light.ListView.DropDown</item>
+        <!--<item name="android:popupMenuStyle">@style/PopupMenu.Light</item>-->
+        <!--<item name="android:dropDownListViewStyle">@style/DropDownListView.Light</item>-->
+        <!--<item name="android:textColor">@android:color/primary_text_light</item>-->
+        <!--<item name="android:listDivider">@drawable/list_divider_holo_light</item>-->
     </style>
 
 </resources>
