@@ -70,7 +70,7 @@ public class AlbumFragment extends ListGridFragment {
     }
 
     boolean wantGridView() {
-
+        return true;
     }
 
     @Override

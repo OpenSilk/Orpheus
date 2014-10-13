@@ -52,7 +52,7 @@ public enum GalleryPages {
     private Class<? extends Fragment> mFragmentClass;
     private int mTitleResource;
 
-    private MusicFragment(final Class<? extends Fragment> fragmentClass,
+    private GalleryPages(final Class<? extends Fragment> fragmentClass,
                           final int titleResource) {
         mFragmentClass = fragmentClass;
         mTitleResource = titleResource;
