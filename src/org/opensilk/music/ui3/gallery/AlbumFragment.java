@@ -44,7 +44,7 @@ public class AlbumFragment extends ListGridFragment {
 
     }
 
-    @Inject
+//    @Inject
     AppPreferences mSettings;
 
     @Override

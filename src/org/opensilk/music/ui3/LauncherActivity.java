@@ -47,10 +47,10 @@ public class LauncherActivity extends ScopedDaggerActionBarActivity {
             complete = false
     )
     public static class Module {
-        @Provides @Singleton @ForActivity
-        public Bus provideEventBus() {
-            return new Bus("activity");
-        }
+//        @Provides @Singleton @ForActivity
+//        public Bus provideEventBus() {
+//            return new Bus("activity");
+//        }
     }
 
 
@@ -59,15 +59,6 @@ public class LauncherActivity extends ScopedDaggerActionBarActivity {
         setTheme(ThemeHelper.getInstance(this).getPanelTheme());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ProgressBar progress = ButterKnife.findById(this, R.id.progress);
-        progress.getProgressDrawable().setColorFilter(getResources().getColor(android.R.color.holo_purple), PorterDuff.Mode.SRC_IN);
-        progress.setProgress(500);
-        SeekBar seek = ButterKnife.findById(this, R.id.seek);
-
-        Themer.themeSeekBar(seek);
-//        seek.getProgressDrawable().setColorFilter(getResources().getColor(android.R.color.holo_purple), PorterDuff.Mode.SRC_IN);
-        seek.setProgress(500);
-//        seek.getThumb().setColorFilter(getResources().getColor(android.R.color.holo_purple), PorterDuff.Mode.SRC_IN);
     }
 
     @Override

@@ -72,7 +72,7 @@ public class PagerFragment extends ScopedDaggerFragment {
 
     }
 
-    @Inject
+//    @Inject
     AppPreferences mSettings;
 
     @InjectView(R.id.pager)

@@ -34,6 +34,7 @@ import javax.inject.Inject;
  * Created by drew on 10/12/14.
  */
 public class GenreFragment extends ListGridFragment {
+
     @dagger.Module(
             addsTo = PagerFragment.Module.class,
             injects = GenreFragment.class
@@ -42,7 +43,7 @@ public class GenreFragment extends ListGridFragment {
 
     }
 
-    @Inject
+//    @Inject
     AppPreferences mSettings;
 
     @Override
