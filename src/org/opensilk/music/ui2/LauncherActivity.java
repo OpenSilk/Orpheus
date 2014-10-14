@@ -36,6 +36,7 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.Optional;
 import flow.Flow;
 import flow.Layouts;
 import mortar.Blueprint;
@@ -62,7 +63,7 @@ public class LauncherActivity extends ActionBarActivity implements
     ViewGroup mNavContainer;
     @InjectView(R.id.main)
     MainView mMainView;
-    @InjectView(R.id.sliding_layout) //@Optional
+    @InjectView(R.id.sliding_layout) @Optional
     SlidingUpPanelLayout mSlidingPanel;
 
     MortarActivityScope mActivityScope;
@@ -85,7 +86,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
         mBus.register(this);
 
-        setContentView(R.layout.activity_god);
+        setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
 
         mFlow = mMainView.getFlow();

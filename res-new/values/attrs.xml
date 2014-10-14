@@ -15,10 +15,10 @@
     </declare-styleable>
     <!--FloatingACtionButton-->
     <declare-styleable name="FloatingActionButton">
-        <attr name="colorPressed" format="color"/>
-        <attr name="colorNormal" format="color"/>
-        <attr name="icon" format="reference"/>
-        <attr name="size" format="enum">
+        <attr name="fabColorPressed" format="color"/>
+        <attr name="fabColorNormal" format="color"/>
+        <attr name="fabIcon" format="reference"/>
+        <attr name="fabSize" format="enum">
             <enum name="normal" value="0"/>
             <enum name="mini" value="1"/>
         </attr>

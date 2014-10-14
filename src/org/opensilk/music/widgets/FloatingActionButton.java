@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2014 Jerzy Chalupski
+    Copyright (C) 2014 OpenSilk Productions LLC
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -48,6 +49,9 @@ import android.widget.ImageButton;
 
 import com.andrew.apollo.R;
 
+/**
+ *
+ */
 public class FloatingActionButton extends ImageButton {
 
     public static final int SIZE_NORMAL = 0;
@@ -115,10 +119,10 @@ public class FloatingActionButton extends ImageButton {
         TypedArray attr = context.obtainStyledAttributes(attributeSet, R.styleable.FloatingActionButton, 0, 0);
         if (attr != null) {
             try {
-                mColorNormal = attr.getColor(R.styleable.FloatingActionButton_colorNormal, getColor(android.R.color.holo_blue_dark));
-                mColorPressed = attr.getColor(R.styleable.FloatingActionButton_colorPressed, getColor(android.R.color.holo_blue_light));
-                mSize = attr.getInt(R.styleable.FloatingActionButton_size, SIZE_NORMAL);
-                mIcon = attr.getResourceId(R.styleable.FloatingActionButton_icon, 0);
+                mColorNormal = attr.getColor(R.styleable.FloatingActionButton_fabColorNormal, getColor(android.R.color.holo_blue_dark));
+                mColorPressed = attr.getColor(R.styleable.FloatingActionButton_fabColorPressed, getColor(android.R.color.holo_blue_light));
+                mSize = attr.getInt(R.styleable.FloatingActionButton_fabSize, SIZE_NORMAL);
+                mIcon = attr.getResourceId(R.styleable.FloatingActionButton_fabIcon, 0);
             } finally {
                 attr.recycle();
             }
