@@ -16,36 +16,23 @@
 
 package org.opensilk.music.ui2.main;
 
-import android.app.Activity;
-import android.content.Context;
-import android.os.Bundle;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.opensilk.music.AppModule;
-import org.opensilk.music.ui2.GodActivity;
 import org.opensilk.music.ui2.core.FlowOwner;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
-import org.opensilk.music.util.GsonParcer;
-import org.opensilk.silkdagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Provides;
-import flow.Backstack;
 import flow.Flow;
 import flow.Parcer;
 import mortar.Blueprint;
-import mortar.MortarScope;
-import mortar.Presenter;
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
  */
-public class God implements Blueprint {
+public class MainScreen implements Blueprint {
 
     /**
      * Required for a race condition cause by Android when a new scope is created
@@ -55,7 +42,7 @@ public class God implements Blueprint {
      */
     final String scopename;
 
-    public God(String scopename) {
+    public MainScreen(String scopename) {
         this.scopename = scopename;
     }
 

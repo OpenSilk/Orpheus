@@ -24,7 +24,7 @@ import org.opensilk.filebrowser.FileItem;
 import org.opensilk.music.loader.AsyncLoader;
 import org.opensilk.music.loader.FileItemLoader;
 import org.opensilk.music.ui.folder.FolderPickerActivity;
-import org.opensilk.music.ui2.main.God;
+import org.opensilk.music.ui2.main.MainScreen;
 
 import java.util.List;
 
@@ -67,7 +67,7 @@ public class FolderScreen implements Blueprint {
 
     @dagger.Module(
             injects = FolderView.class,
-            addsTo = God.Module.class
+            addsTo = MainScreen.Module.class
     )
     public static class Module {
 

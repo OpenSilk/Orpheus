@@ -1,6 +1,5 @@
 package org.opensilk.music.ui2;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -26,7 +25,7 @@ import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerPresenter;
-import org.opensilk.music.ui2.main.God;
+import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.NavScreen;
 
@@ -37,7 +36,6 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import flow.Backstack;
 import flow.Flow;
 import flow.Layouts;
 import mortar.Blueprint;
@@ -47,7 +45,7 @@ import mortar.MortarScope;
 import timber.log.Timber;
 
 
-public class GodActivity extends ActionBarActivity implements
+public class LauncherActivity extends ActionBarActivity implements
         DrawerPresenter.View,
         SlidingUpPanelLayout.PanelSlideListener {
 
@@ -81,7 +79,7 @@ public class GodActivity extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());
-        mActivityScope = Mortar.requireActivityScope(parentScope, new God(getScopeName()));
+        mActivityScope = Mortar.requireActivityScope(parentScope, new MainScreen(getScopeName()));
         mActivityScope.onCreate(savedInstanceState);
         Mortar.inject(this, this);
 

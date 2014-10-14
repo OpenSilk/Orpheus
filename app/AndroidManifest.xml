@@ -64,7 +64,7 @@
             android:name="android.app.default_searchable"
             android:value="org.opensilk.music.ui.activities.HomeSlidingActivity" />
 
-        <activity android:name="org.opensilk.music.ui2.GodActivity"
+        <activity android:name="org.opensilk.music.ui2.LauncherActivity"
             android:theme="@style/Theme.Light.Panel"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"/>
@@ -72,7 +72,7 @@
         <!-- The God Activity -->
         <activity-alias
             android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
-            android:targetActivity="org.opensilk.music.ui2.GodActivity">
+            android:targetActivity="org.opensilk.music.ui2.LauncherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.MUSIC_PLAYER" />

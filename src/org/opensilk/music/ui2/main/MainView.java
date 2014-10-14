@@ -35,7 +35,7 @@ import mortar.Mortar;
 public class MainView extends FrameLayout implements CanShowScreen<Blueprint> {
 
     @Inject
-    God.Presenter presenter;
+    MainScreen.Presenter presenter;
 
     final ScreenConductor<Blueprint> screenConductor;
 

@@ -18,13 +18,10 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.SparseArray;
-import android.view.View;
 
 import com.andrew.apollo.R;
 
-import org.opensilk.music.ui2.main.God;
+import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 
 import java.util.Arrays;
@@ -54,7 +51,7 @@ public class GalleryScreen implements Blueprint {
     }
 
     @dagger.Module (
-            addsTo = God.Module.class,
+            addsTo = MainScreen.Module.class,
             injects = GalleryView.class
     )
     public static class Module {

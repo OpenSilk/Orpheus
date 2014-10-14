@@ -17,7 +17,6 @@
 package org.opensilk.music.ui2.library;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -31,33 +30,21 @@ import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui2.core.FlowOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
-import org.opensilk.music.ui2.main.DrawerView;
-import org.opensilk.music.ui2.main.God;
+import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.util.PluginSettings;
-import org.opensilk.silkdagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.qualifier.ForApplication;
-
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
-import flow.Backstack;
 import flow.Flow;
 import flow.Layout;
-import flow.Parcer;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import timber.log.Timber;
 
@@ -84,7 +71,7 @@ public class PluginScreen implements Blueprint {
     }
 
     @dagger.Module (
-            addsTo = God.Module.class,
+            addsTo = MainScreen.Module.class,
             injects = PluginView.class,
             library = true
     )

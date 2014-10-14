@@ -26,10 +26,9 @@ import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.ui2.main.God;
+import org.opensilk.music.ui2.main.MainScreen;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
@@ -39,15 +38,12 @@ import hugo.weaving.DebugLog;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
-import rx.Notification;
 import rx.Observable;
 import rx.Observer;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -74,7 +70,7 @@ public class LibraryScreen implements Blueprint {
 
     @dagger.Module(
             injects = LibraryView.class,
-            addsTo = God.Module.class,
+            addsTo = MainScreen.Module.class,
             library = true
     )
     public static class Module {

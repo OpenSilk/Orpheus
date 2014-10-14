@@ -25,12 +25,8 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.loader.AsyncLoader;
 import org.opensilk.music.loader.PluginInfoLoader;
-import org.opensilk.music.ui2.folder.FolderScreen;
-import org.opensilk.music.ui2.gallery.GalleryScreen;
-import org.opensilk.music.ui2.library.LibraryScreen;
 
 import java.util.List;
 
@@ -41,10 +37,6 @@ import flow.Flow;
 import flow.Layout;
 import mortar.Blueprint;
 import mortar.ViewPresenter;
-import rx.Observable;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.functions.Func1;
 
 /**
  * Note to self: we arent embedding this listview in order to obtain the GodView's flow
@@ -67,7 +59,7 @@ public class NavScreen implements Blueprint {
 
     @dagger.Module(
             injects = NavView.class,
-            addsTo = God.Module.class
+            addsTo = MainScreen.Module.class
     )
     public static class Module {
 

@@ -19,17 +19,14 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.View;
 
 import com.andrew.apollo.R;
 
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.loader.mediastore.AlbumsLoader;
-import org.opensilk.music.ui2.main.God;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -41,10 +38,8 @@ import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.observers.Subscribers;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
