@@ -31,42 +31,37 @@ public abstract class FlowOwner<S extends Blueprint, V extends View & CanShowScr
 
     private final Parcer<Object> parcer;
 
-    protected Flow flow;
+    private Flow flow;
 
     protected FlowOwner(Parcer<Object> parcer) {
         this.parcer = parcer;
     }
 
-    @Override
-    public void onLoad(Bundle savedInstanceState) {
+    @Override public void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
 
         if (flow == null) {
-            Backstack backstack = null;
+            Backstack backstack;
 
             if (savedInstanceState != null) {
                 backstack = Backstack.from(savedInstanceState.getParcelable(FLOW_KEY), parcer);
             } else {
-                S screen = getFirstScreen();
-                if (screen != null) backstack = Backstack.fromUpChain(getFirstScreen());
+                backstack = Backstack.fromUpChain(getFirstScreen());
             }
 
-            if (backstack != null) flow = new Flow(backstack, this);
+            flow = new Flow(backstack, this);
         }
 
-        if (flow != null)
-            //noinspection unchecked
-            showScreen((S) flow.getBackstack().current().getScreen(), null);
+        //noinspection unchecked
+        showScreen((S) flow.getBackstack().current().getScreen(), null);
     }
 
-    @Override
-    public void onSave(Bundle outState) {
+    @Override public void onSave(Bundle outState) {
         super.onSave(outState);
-        if (flow != null) outState.putParcelable(FLOW_KEY, flow.getBackstack().getParcelable(parcer));
+        outState.putParcelable(FLOW_KEY, flow.getBackstack().getParcelable(parcer));
     }
 
-    @Override
-    public void go(Backstack backstack, Flow.Direction flowDirection, Flow.Callback callback) {
+    @Override public void go(Backstack backstack, Flow.Direction flowDirection, Flow.Callback callback) {
         //noinspection unchecked
         S newScreen = (S) backstack.current().getScreen();
         showScreen(newScreen, flowDirection);
@@ -92,9 +87,6 @@ public abstract class FlowOwner<S extends Blueprint, V extends View & CanShowScr
         return flow;
     }
 
-    /**
-     * Returns the first screen shown by this presenter.
-     */
+    /** Returns the first screen shown by this presenter. */
     protected abstract S getFirstScreen();
-
 }

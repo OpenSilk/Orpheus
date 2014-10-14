@@ -37,7 +37,8 @@ import flow.Parcer;
  */
 @Module (
         injects = GodActivity.class,
-        complete = false
+        complete = false,
+        library = true
 )
 public class ActivityModule {
 

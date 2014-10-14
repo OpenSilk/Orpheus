@@ -27,6 +27,7 @@ import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerPresenter;
 import org.opensilk.music.ui2.main.God;
+import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.NavScreen;
 
 import java.util.UUID;
@@ -47,14 +48,11 @@ import timber.log.Timber;
 
 
 public class GodActivity extends ActionBarActivity implements
-        Flow.Listener,
         DrawerPresenter.View,
         SlidingUpPanelLayout.PanelSlideListener {
 
     @Inject @Named("activity")
     Bus mBus;
-    @Inject
-    God.Presenter mGodPresenter;
     @Inject
     DrawerPresenter mDrawerPresenter;
     @Inject
@@ -65,8 +63,8 @@ public class GodActivity extends ActionBarActivity implements
     @InjectView(R.id.drawer_container)
     ViewGroup mNavContainer;
     @InjectView(R.id.main)
-    ViewGroup mMainContainer;
-    @InjectView(R.id.sliding_layout)
+    MainView mMainView;
+    @InjectView(R.id.sliding_layout) //@Optional
     SlidingUpPanelLayout mSlidingPanel;
 
     MortarActivityScope mActivityScope;
@@ -88,21 +86,17 @@ public class GodActivity extends ActionBarActivity implements
         Mortar.inject(this, this);
 
         mBus.register(this);
-        mGodPresenter.takeView(this);
-        mFlow = mGodPresenter.getFlow();
 
         setContentView(R.layout.activity_god);
         ButterKnife.inject(this);
 
+        mFlow = mMainView.getFlow();
         mDrawerPresenter.takeView(this);
 
         setupDrawer();
         setupNavigation();
 
         setupSlindingPanel();
-
-        showScreen((Blueprint) mFlow.getBackstack().current().getScreen(), null);
-
     }
 
     @Override
@@ -116,7 +110,6 @@ public class GodActivity extends ActionBarActivity implements
         super.onDestroy();
 
         if (mBus != null) mBus.unregister(this);
-        if (mGodPresenter != null) mGodPresenter.dropView(this);
         if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
 
         if (!mConfigurationChangeIncoming) {
@@ -209,7 +202,7 @@ public class GodActivity extends ActionBarActivity implements
     public void onBackPressed() {
         if (isDrawerOpen()) {
             closeDrawer();
-        } else if (mSlidingPanel.isPanelExpanded()) {
+        } else if (isPanelOpen()) {
             maybeClosePanel();
         } else if (!mFlow.goBack()) {
             super.onBackPressed();
@@ -248,39 +241,6 @@ public class GodActivity extends ActionBarActivity implements
             mScopeName = UUID.randomUUID().toString();
         }
         return mScopeName;
-    }
-
-    //Flow
-    @Override
-    public void go(Backstack nextBackstack, Flow.Direction direction, Flow.Callback callback) {
-        Blueprint newScreen = (Blueprint) nextBackstack.current().getScreen();
-        showScreen(newScreen, direction);
-        callback.onComplete();
-    }
-
-    public void showScreen(Blueprint screen, Flow.Direction direction) {
-        Timber.v("showScreen()");
-
-        for (int i=0; i<mMainContainer.getChildCount(); i++) {
-            Timber.v("removing old child ", i);
-            View oldChild = mMainContainer.getChildAt(i);
-            if (oldChild != null) {
-                MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
-//                if (oldChildScope.getName().equals(screen.getMortarScopeName())) {
-//                    // If it's already showing, short circuit.
-//                    Timber.v("Short circuit");
-//                    return;
-//                }
-                mActivityScope.destroyChild(oldChildScope);
-                mMainContainer.removeView(oldChild);
-            }
-        }
-
-        // Create the new child.
-        MortarScope newChildScope = mActivityScope.requireChild(screen);
-        Context childContext = newChildScope.createContext(this);
-        View newChild = Layouts.createView(childContext, screen);
-        mMainContainer.addView(newChild);
     }
 
     /*
@@ -411,31 +371,34 @@ public class GodActivity extends ActionBarActivity implements
 
     // panel helpers
 
+    public boolean isPanelOpen() {
+        return mSlidingPanel != null && mSlidingPanel.isPanelExpanded();
+    }
+
     public void maybeClosePanel() {
-        if (mSlidingPanel.isPanelExpanded()) {
+        if (mSlidingPanel != null && mSlidingPanel.isPanelExpanded()) {
             mSlidingPanel.collapsePanel();
         }
     }
 
     public void maybeOpenPanel() {
-        if (!mSlidingPanel.isPanelExpanded()) {
+        if (mSlidingPanel != null && !mSlidingPanel.isPanelExpanded()) {
             mSlidingPanel.expandPanel();
         }
     }
 
-    private void setupSlindingPanel() {
-        mSlidingPanel.setDragView(findViewById(R.id.panel_header));
-        mSlidingPanel.setPanelSlideListener(this);
-        mSlidingPanel.setEnableDragViewTouchEvents(true);
-    }
-
     protected void maybeHideActionBar() {
-        if (mSlidingPanel.isPanelExpanded()
+        if (mSlidingPanel != null && mSlidingPanel.isPanelExpanded()
                 && getSupportActionBar().isShowing()) {
             getSupportActionBar().hide();
         }
     }
 
-
+    private void setupSlindingPanel() {
+        if (mSlidingPanel == null) return;
+        mSlidingPanel.setDragView(findViewById(R.id.panel_header));
+        mSlidingPanel.setPanelSlideListener(this);
+        mSlidingPanel.setEnableDragViewTouchEvents(true);
+    }
 
 }
