@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.andrew.apollo.R;
 
@@ -32,7 +33,7 @@ import hugo.weaving.DebugLog;
 /**
  * Created by drew on 10/14/14.
  */
-public class FloatingActionButtonFrameLayout extends FrameLayout {
+public class FloatingActionButtonRelativeLayout extends RelativeLayout {
 
     final ViewDragHelper dragHelper;
 
@@ -40,7 +41,7 @@ public class FloatingActionButtonFrameLayout extends FrameLayout {
     int horizontalRange;
     int draggingState;
 
-    public FloatingActionButtonFrameLayout(Context context, AttributeSet attrs) {
+    public FloatingActionButtonRelativeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         dragHelper = ViewDragHelper.create(this, new DragHelperCallback());
     }

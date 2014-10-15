@@ -45,6 +45,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
+import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageButton;
 
 import com.andrew.apollo.R;
@@ -53,6 +56,10 @@ import com.andrew.apollo.R;
  *
  */
 public class FloatingActionButton extends ImageButton {
+
+    public interface OnDoubleClickListener {
+        void onDoubleClick(View view);
+    }
 
     public static final int SIZE_NORMAL = 0;
     public static final int SIZE_MINI = 1;
@@ -71,8 +78,8 @@ public class FloatingActionButton extends ImageButton {
     private float mShadowOffset;
     private int mDrawableSize;
 
+    private OnDoubleClickListener mOnDoubleClickListener;
     private GestureDetectorCompat mGestureDetector;
-
 
     public FloatingActionButton(Context context) {
         this(context, null);
@@ -266,6 +273,21 @@ public class FloatingActionButton extends ImageButton {
     }
 
 
+    public void setOnDoubleClickListener(OnDoubleClickListener l) {
+        if (!isClickable()) setClickable(true);
+        mOnDoubleClickListener = l;
+    }
+
+    protected boolean performDoubleClick() {
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+        if (mOnDoubleClickListener != null) {
+            playSoundEffect(SoundEffectConstants.CLICK);
+            mOnDoubleClickListener.onDoubleClick(this);
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (MotionEventCompat.getActionMasked(event)) {
@@ -284,7 +306,7 @@ public class FloatingActionButton extends ImageButton {
         @Override
         public boolean onDown(MotionEvent e) {
             Log.d("TAG", "onDown");
-            return true;
+            return isClickable();
         }
 
         @Override
@@ -307,7 +329,7 @@ public class FloatingActionButton extends ImageButton {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             Log.d("TAG", "onDoubleTap");
-            return true;
+            return isClickable() && performDoubleClick();
         }
 
     }
