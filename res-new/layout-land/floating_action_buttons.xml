@@ -21,7 +21,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <org.opensilk.music.widgets.FloatingActionButton
-        android:id="@+id/floating_action_button"
+        android:id="@id/floating_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabIcon="@drawable/ic_action_playback_play_white"
@@ -35,7 +35,7 @@
         android:layout_alignParentRight="true"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
-        android:id="@+id/floating_action_next"
+        android:id="@id/floating_action_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabIcon="@drawable/ic_action_playback_next_black"
@@ -47,7 +47,7 @@
         android:layout_alignParentBottom="true"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
-        android:id="@+id/floating_action_prev"
+        android:id="@id/floating_action_prev"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabIcon="@drawable/ic_action_playback_prev_black"
@@ -59,7 +59,7 @@
         android:layout_alignParentBottom="true"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
-        android:id="@+id/floating_action_shuffle"
+        android:id="@id/floating_action_shuffle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabIcon="@drawable/ic_action_playback_shuffle_black"
@@ -71,7 +71,7 @@
         android:layout_alignParentBottom="true"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
-        android:id="@+id/floating_action_repeat"
+        android:id="@id/floating_action_repeat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabIcon="@drawable/ic_action_playback_repeat_black"

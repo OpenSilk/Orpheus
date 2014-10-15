@@ -76,7 +76,7 @@ public class MainScreen implements Blueprint {
         @Inject
         protected Presenter(Parcer<Object> parcer) {
             super(parcer);
-            Timber.v("new God.Presenter()");
+            Timber.v("new MainScreen.Presenter()");
         }
 
         @Override

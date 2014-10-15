@@ -24,7 +24,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.opensilk.music.ui2.main.FloatingActionContainer
+    <org.opensilk.music.ui2.main.MainView
+        android:id="@+id/mainview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -38,65 +39,20 @@
                 android:layout_height="?actionBarSize"
                 android:background="?colorPrimary"/>
 
-            <org.opensilk.music.ui2.main.MainView
+            <FrameLayout
                 android:id="@+id/main"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"/>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="64dp">
-
-                <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
-                    android:id="@+id/now_playing_thumbnail"
-                    android:layout_height="match_parent"
-                    android:layout_width="wrap_content"/>
-
-                <ProgressBar
-                    android:id="@+id/now_playing_progress"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/now_playing_thumbnail"
-                    android:layout_toRightOf="@id/now_playing_thumbnail"
-                    android:layout_marginTop="-6dp"
-                    style="?android:progressBarStyleHorizontal"
-                    android:max="1000"/>
-
-                <TextView
-                    android:id="@+id/now_playing_track"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_toEndOf="@id/now_playing_thumbnail"
-                    android:layout_toRightOf="@id/now_playing_thumbnail"
-                    android:layout_below="@id/now_playing_progress"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    tools:text="Track Title"
-                    android:textAppearance="@style/TextAppearancePanelHeader.Title"
-                    style="@style/SingleLineTextView"/>
-
-                <TextView
-                    android:id="@+id/now_playing_artist"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:layout_toEndOf="@id/now_playing_thumbnail"
-                    android:layout_toRightOf="@id/now_playing_thumbnail"
-                    android:layout_below="@id/now_playing_track"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp"
-                    tools:text="Artist Name"
-                    android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
-                    style="@style/SingleLineTextView"/>
-
-            </RelativeLayout>
+            <include layout="@layout/footer"/>
 
         </LinearLayout>
 
+        <!--Fabs-->
         <include layout="@layout/floating_action_buttons"/>
 
-
-    </org.opensilk.music.ui2.main.FloatingActionContainer>
+    </org.opensilk.music.ui2.main.MainView>
 
     <!-- The drawer is given a fixed width in dp and extends the full height of
          the container. -->
