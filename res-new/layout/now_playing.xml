@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <org.opensilk.music.widgets.SquareFullScreenArtworkImageView
+        android:id="@+id/now_playing_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!-- Our scrubber height is 32dp making the seekbar view
+         32dp so as a hack to get the bar to sit on the edge
+         of the footer we set a negative bottom margin -->
+    <org.opensilk.music.ui3.theme.widget.CompatSeekBar
+        android:id="@+id/now_playing_seekprogress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/panel_footer"
+        android:layout_marginTop="-16dp"
+        android:gravity="center_vertical"
+        android:layout_below="@id/now_playing_image"
+        android:padding="0dp"
+        android:max="1000" />
+
+    <!-- current playtime -->
+    <TextView
+        android:id="@+id/now_playing_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/now_playing_seekprogress"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:gravity="start"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="24dp"
+        android:textAppearance="@style/TextAppearancePlayTime"
+        tools:text="0:00"/>
+
+    <!-- total playtime -->
+    <TextView
+        android:id="@+id/now_playing_total_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/now_playing_seekprogress"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="24dp"
+        android:textAppearance="@style/TextAppearancePlayTime"
+        tools:text="0:00"/>
+
+    <TextView
+        android:id="@+id/now_playing_track_title"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/now_playing_seekprogress"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="?android:textAppearanceLarge"
+        style="@style/SingleLineTextView"
+        tools:text="Track Title"/>
+
+    <TextView
+        android:id="@+id/now_playing_artist_name"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/now_playing_track_title"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="?android:textAppearanceMedium"
+        style="@style/SingleLineTextView"
+        tools:text="Artist Name"/>
+
+    <TextView
+        android:id="@+id/now_playing_album_name"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/now_playing_artist_name"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="?android:textAppearance"
+        style="@style/SingleLineTextView"
+        tools:text="Album Name"/>
+
+</RelativeLayout>

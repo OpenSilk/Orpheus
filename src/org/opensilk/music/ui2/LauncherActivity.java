@@ -149,7 +149,7 @@ public class LauncherActivity extends ActionBarActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mActivityScope.onSaveInstanceState(outState);
-        outState.putBoolean("panel_open", mSlidingPanel.isPanelExpanded());
+        if (mSlidingPanel != null) outState.putBoolean("panel_open", mSlidingPanel.isPanelExpanded());
 //        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
     }
 

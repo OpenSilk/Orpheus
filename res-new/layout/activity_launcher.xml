@@ -93,75 +93,8 @@
 
         </LinearLayout>
 
-        <org.opensilk.music.widgets.FloatingActionButton
-            android:id="@+id/floating_action_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabIcon="@drawable/ic_action_playback_play_white"
-            app:fabColorNormal="?colorPrimary"
-            app:fabColorPressed="?colorPrimary"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="24dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"/>
+        <include layout="@layout/floating_action_buttons"/>
 
-        <org.opensilk.music.widgets.FloatingActionButton
-            android:id="@+id/floating_action_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabIcon="@drawable/ic_action_playback_next_black"
-            app:fabColorNormal="@android:color/white"
-            app:fabColorPressed="@android:color/white"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_above="@id/floating_action_button"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:visibility="gone"/>
-
-        <org.opensilk.music.widgets.FloatingActionButton
-            android:id="@+id/floating_action_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabIcon="@drawable/ic_action_playback_prev_black"
-            app:fabColorNormal="@android:color/white"
-            app:fabColorPressed="@android:color/white"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_above="@id/floating_action_next"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:visibility="gone"/>
-
-        <org.opensilk.music.widgets.FloatingActionButton
-            android:id="@+id/floating_action_shuffle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabIcon="@drawable/ic_action_playback_shuffle_black"
-            app:fabColorNormal="@android:color/white"
-            app:fabColorPressed="@android:color/white"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_above="@id/floating_action_prev"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:visibility="gone"/>
-
-        <org.opensilk.music.widgets.FloatingActionButton
-            android:id="@+id/floating_action_repeat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabIcon="@drawable/ic_action_playback_repeat_black"
-            app:fabColorNormal="@android:color/white"
-            app:fabColorPressed="@android:color/white"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_above="@id/floating_action_shuffle"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:visibility="gone"/>
 
     </org.opensilk.music.ui2.main.FloatingActionContainer>
 
