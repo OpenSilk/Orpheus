@@ -121,6 +121,22 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
         screenConductor.showScreen(screen, direction);
     }
 
+    @Override
+    protected void onFabFling(Direction direction) {
+        switch (direction) {
+            case UP:
+                break;
+            case DOWN:
+                break;
+            case RIGHT:
+                presenter.closeQueue();
+                break;
+            case LEFT:
+                presenter.openQueue();
+                break;
+        }
+    }
+
     public Flow getFlow() {
         return presenter.getFlow();
     }

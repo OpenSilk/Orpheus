@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import com.andrew.apollo.R;
 
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/14/14.
@@ -72,6 +73,17 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
         }
     }
 
+    protected enum Direction {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT,
+    }
+
+    protected void onFabFling(Direction direction) {
+
+    }
+
     private class DragHelperCallback extends ViewDragHelper.Callback {
 
         int startPosTop;
@@ -108,12 +120,12 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            Log.d("TAG", String.format("onViewReleased(xvel=%f, yvel=%f", xvel, yvel));
+            Timber.d( "onViewReleased(xvel=%f, yvel=%f", xvel, yvel);
             int endPosTop = releasedChild.getTop();
             int entPosLeft = releasedChild.getLeft();
             int dTop = startPosTop - endPosTop;
             int dLeft = startPosLeft - entPosLeft;
-            Log.d("TAG", "Direction dTop="+dTop+" dLeft="+dLeft);
+            Timber.d( "Direction dTop=%d dLeft=%d", dTop, dLeft);
             String dir = "";
             if (Math.abs(dTop) > Math.abs(dLeft)) {
                 //VERTICAL
@@ -121,9 +133,11 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
                 if (dTop > 0) {
                     //UP
                     dir += " UP";
+                    onFabFling(Direction.UP);
                 } else {
                     //DOWN
                     dir += " DOWN";
+                    onFabFling(Direction.DOWN);
                 }
             } else {
                 //HORIZONTAL
@@ -131,12 +145,14 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
                 if (dLeft > 0) {
                     //LEFT
                     dir += " LEFT";
+                    onFabFling(Direction.LEFT);
                 } else {
                     //RIGHT
                     dir += " RIGHT";
+                    onFabFling(Direction.RIGHT);
                 }
             }
-            Log.d("TAG", "Overall Direction = " + dir);
+            Timber.d( "Overall Direction = %s", dir);
             dragHelper.settleCapturedViewAt(startPosLeft, startPosTop);
             invalidate();
         }

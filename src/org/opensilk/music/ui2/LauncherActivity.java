@@ -21,6 +21,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
@@ -50,12 +51,10 @@ public class LauncherActivity extends ActionBarActivity implements
         DrawerPresenter.View,
         SlidingUpPanelLayout.PanelSlideListener {
 
-    @Inject @Named("activity")
-    Bus mBus;
-    @Inject
-    DrawerPresenter mDrawerPresenter;
-    @Inject
-    PluginConnectionManager mPluginConnectionManager;
+    @Inject @Named("activity") Bus mBus;
+    @Inject ActionBarOwner mActionBarOwner;
+    @Inject DrawerPresenter mDrawerPresenter;
+    @Inject PluginConnectionManager mPluginConnectionManager;
 
     @InjectView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
@@ -124,12 +123,14 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onStart() {
+        Timber.v("onStart()");
         super.onStart();
         mPluginConnectionManager.onResume();
     }
 
     @Override
     protected void onStop() {
+        Timber.v("onStop()");
         super.onStop();
         mPluginConnectionManager.onPause();
     }
@@ -237,7 +238,7 @@ public class LauncherActivity extends ActionBarActivity implements
     private String getScopeName() {
         if (mScopeName == null) mScopeName = (String) getLastCustomNonConfigurationInstance();
         if (mScopeName == null) {
-            mScopeName = UUID.randomUUID().toString();
+            mScopeName = getClass().getName() + UUID.randomUUID().toString();
         }
         return mScopeName;
     }

@@ -20,6 +20,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.otto.Bus;
 
+import org.opensilk.music.AppModule;
+import org.opensilk.music.ui2.core.android.AndroidModule;
 import org.opensilk.music.util.GsonParcer;
 
 import javax.inject.Named;
@@ -34,6 +36,10 @@ import flow.Parcer;
  */
 @Module (
         injects = LauncherActivity.class,
+        includes = {
+                AndroidModule.class,
+        },
+        addsTo = AppModule.class,
         complete = false,
         library = true
 )

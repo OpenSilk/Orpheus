@@ -27,6 +27,7 @@ import org.opensilk.music.ui2.util.ViewStateSaver;
 import java.util.Arrays;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import flow.Layout;
 import mortar.Blueprint;
@@ -58,6 +59,7 @@ public class GalleryScreen implements Blueprint {
 
     }
 
+    @Singleton
     public static class Presenter extends ViewPresenter<GalleryView> {
 
         @Inject

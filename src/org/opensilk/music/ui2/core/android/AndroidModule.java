@@ -14,41 +14,19 @@
  * limitations under the License.
  */
 
-package org.opensilk.music;
-
-import android.content.Context;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import org.opensilk.music.ui2.ActivityModule;
-import org.opensilk.music.util.GsonParcer;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+package org.opensilk.music.ui2.core.android;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import flow.Parcer;
 
 /**
- * Created by drew on 6/16/14.
+ * Created by drew on 10/15/14.
  */
-@Module (
-        library = true,
-        addsTo = GlobalModule.class
+@Module(
+        library = true
 )
-public class AppModule {
-
-    private final MusicApp app;
-
-    public AppModule(MusicApp app) {
-        this.app = app;
-    }
-
-    @Provides @Singleton @ForApplication
-    public MusicApp provideApplication() {
-        return app;
-    }
-
+public class AndroidModule {
+    @Provides @Singleton ActionBarOwner provideActionBarOwner() { return new ActionBarOwner(); }
 }

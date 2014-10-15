@@ -16,7 +16,10 @@
 
 package org.opensilk.music.ui2.main;
 
+import android.os.Bundle;
+
 import org.opensilk.music.AppModule;
+import org.opensilk.music.ui2.ActivityModule;
 import org.opensilk.music.ui2.core.FlowOwner;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 
@@ -27,6 +30,7 @@ import dagger.Provides;
 import flow.Flow;
 import flow.Parcer;
 import mortar.Blueprint;
+import mortar.MortarScope;
 import timber.log.Timber;
 
 /**
@@ -43,12 +47,13 @@ public class MainScreen implements Blueprint {
     final String scopename;
 
     public MainScreen(String scopename) {
+        Timber.v("new MainScreen(%s)", scopename);
         this.scopename = scopename;
     }
 
     @Override
     public String getMortarScopeName() {
-        return getClass().getName() + scopename;
+        return scopename;
     }
 
     @Override
@@ -57,7 +62,7 @@ public class MainScreen implements Blueprint {
     }
 
     @dagger.Module(
-            addsTo = AppModule.class,
+            includes = ActivityModule.class,
             injects = MainView.class,
             library = true
     )
@@ -82,6 +87,41 @@ public class MainScreen implements Blueprint {
         @Override
         protected Blueprint getFirstScreen() {
             return new GalleryScreen();
+        }
+
+        @Override
+        protected void onEnterScope(MortarScope scope) {
+            Timber.v("onEnterScope(%s)", scope);
+            super.onEnterScope(scope);
+        }
+
+        @Override
+        protected void onExitScope() {
+            Timber.v("onExitScope()");
+            super.onExitScope();
+        }
+
+        @Override
+        public void onLoad(Bundle savedInstanceState) {
+            Timber.v("onLoad(%s)", savedInstanceState);
+            super.onLoad(savedInstanceState);
+        }
+
+        @Override
+        public void onSave(Bundle outState) {
+            Timber.v("onSave(%s)", outState);
+            super.onSave(outState);
+        }
+
+        void openQueue() {
+            Flow flow = getFlow();
+            if (flow.getBackstack().current().getScreen() instanceof QueueScreen) return;
+            flow.goTo(new QueueScreen());
+        }
+
+        void closeQueue() {
+            Flow flow = getFlow();
+            if (flow.getBackstack().current().getScreen() instanceof QueueScreen) flow.goBack();
         }
     }
 
