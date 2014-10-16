@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.ui3.theme.Themer;
 
 import javax.inject.Inject;
 
@@ -60,6 +61,7 @@ public class FooterView extends RelativeLayout {
         super.onFinishInflate();
         if (!isInEditMode()) {
             ButterKnife.inject(this);
+            Themer.themeProgressBar(progressBar);
             presenter.takeView(this);
         }
     }

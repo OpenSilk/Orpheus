@@ -136,7 +136,12 @@ public class MusicServiceConnection {
 
     Observable<IApolloService> getObservable() {
         ensureConnection();
-        return serviceToken.subject.asObservable();
+        // NOTE: onServiceConnected() is called from main thread
+        // hence the onNext() in the subject is called from main thread
+        // for this reason we 'observe' the onNextCall on an IO thread.
+        // so when the functions will receive the Func1.call() in the flatMap
+        // on the IO thread not the main thread.
+        return serviceToken.subject.asObservable().observeOn(Schedulers.io());
     }
 
     /*
@@ -184,45 +189,49 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
             public Observable<Long> call(IApolloService iApolloService) {
+                Timber.v("getDuration called on %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.duration());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
     public Observable<Long> getPosition() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
             public Observable<Long> call(IApolloService iApolloService) {
+                Timber.v("getPosition called on %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.position());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
     public Observable<Boolean> isPlaying() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
             @Override
             public Observable<Boolean> call(IApolloService iApolloService) {
+                Timber.v("isPlaying called on %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.isPlaying());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
     public Observable<Boolean> playOrPause() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
             @Override
             public Observable<Boolean> call(IApolloService iApolloService) {
+                Timber.v("playOrPause called on %s", Thread.currentThread().getName());
                 try {
                     if (iApolloService.isPlaying()) {
                         iApolloService.pause();
@@ -235,33 +244,35 @@ public class MusicServiceConnection {
                     return Observable.error(e);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
     public Observable<String> getArtistName() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<String>>() {
             @Override
             public Observable<String> call(IApolloService iApolloService) {
+                Timber.v("getArtistName called on %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.getArtistName());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
     public Observable<String> getTrackName() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<String>>() {
             @Override
             public Observable<String> call(IApolloService iApolloService) {
+                Timber.v("getTrackName called on %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.getTrackName());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
 }

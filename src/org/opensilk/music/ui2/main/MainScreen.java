@@ -34,6 +34,7 @@ import flow.Parcer;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.operators.OperatorViewClick;
 import timber.log.Timber;
@@ -129,7 +130,7 @@ public class MainScreen implements Blueprint {
             MainView v = getView();
             if (v == null) return;
             //TODO use broadcast receiver to update instead
-            musicService.isPlaying().subscribe(new Action1<Boolean>() {
+            musicService.isPlaying().observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Boolean>() {
                 @Override
                 public void call(Boolean aBoolean) {
                     setFabPlayIcon(aBoolean);
@@ -138,7 +139,7 @@ public class MainScreen implements Blueprint {
             v.fabPlay.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    musicService.playOrPause().subscribe(new Action1<Boolean>() {
+                    musicService.playOrPause().observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Boolean>() {
                         @Override
                         public void call(Boolean aBoolean) {
                             setFabPlayIcon(aBoolean);
@@ -166,7 +167,6 @@ public class MainScreen implements Blueprint {
             if (flow.getBackstack().current().getScreen() instanceof QueueScreen) flow.goBack();
         }
 
-        OperatorViewClick<FloatingActionButton> fabPlayOperator;
     }
 
 }
