@@ -52,6 +52,18 @@ public class Themer {
         return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
 
+    public static int getPlayIcon(Context context, boolean forcewhite) {
+        return forcewhite ? R.drawable.ic_action_playback_play_white :
+                (isLightTheme(context) ? R.drawable.ic_action_playback_play_black
+                        : R.drawable.ic_action_playback_play_white);
+    }
+
+    public static int getPauseIcon(Context context, boolean forcewhite) {
+        return forcewhite ? R.drawable.ic_action_playback_pause_white :
+                (isLightTheme(context) ? R.drawable.ic_action_playback_pause_black
+                        : R.drawable.ic_action_playback_pause_white);
+    }
+
     public static void themeSeekBar(SeekBar seekBar) {
         int color = getAccentColor(seekBar.getContext());
         seekBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
@@ -66,5 +78,17 @@ public class Themer {
     public static void themeProgressBar(ProgressBar progressBar) {
         int color = getAccentColor(progressBar.getContext());
         progressBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+    }
+
+    /**
+     * Whether or not theme is light
+     *
+     * from AOSP see @MediaRouterThemeHelper.java
+     * @param context
+     * @return
+     */
+    public static boolean isLightTheme(Context context) {
+        TypedValue value = new TypedValue();
+        return context.getTheme().resolveAttribute(R.attr.isLightTheme, value, true) && value.data != 0;
     }
 }

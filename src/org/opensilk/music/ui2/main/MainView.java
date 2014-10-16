@@ -142,12 +142,6 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
     }
 
     void setupActionButton() {
-        fabPlay.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
         fabPlay.setOnDoubleClickListener(new FloatingActionButton.OnDoubleClickListener() {
             @Override
             public void onDoubleClick(View view) {
@@ -162,7 +156,6 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
             }
         });
         fabPlay.bringToFront();
-
     }
 
     void setupFabAnimatiors() {

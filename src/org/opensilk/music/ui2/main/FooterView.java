@@ -26,14 +26,19 @@ import com.andrew.apollo.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import hugo.weaving.DebugLog;
+import mortar.Mortar;
 
 /**
  * Created by drew on 10/15/14.
  */
 public class FooterView extends RelativeLayout {
+
+    @Inject FooterScreen.Presenter presenter;
 
     @InjectView(R.id.footer_thumbnail)
     ArtworkImageView artworkThumbnail;
@@ -46,12 +51,17 @@ public class FooterView extends RelativeLayout {
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        if (!isInEditMode()) Mortar.inject(context, this);
     }
 
     @Override
+    @DebugLog
     protected void onFinishInflate() {
         super.onFinishInflate();
-        ButterKnife.inject(this);
+        if (!isInEditMode()) {
+            ButterKnife.inject(this);
+            presenter.takeView(this);
+        }
     }
 
     @Override
@@ -64,5 +74,8 @@ public class FooterView extends RelativeLayout {
     @DebugLog
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (!isInEditMode()) {
+            presenter.dropView(this);
+        }
     }
 }

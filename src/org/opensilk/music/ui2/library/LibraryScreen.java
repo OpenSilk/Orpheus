@@ -153,13 +153,7 @@ public class LibraryScreen implements Blueprint {
             // for each type of object, that filters for that type, then casts to
             // the appropriate type, and finally maps the type into a generic action0
             // that moves us into the next screen
-            Observable<? extends Action0> folder = og.filter(new Func1<Bundleable, Boolean>() {
-                @Override
-                public Boolean call(Bundleable bundleable) {
-//                    Timber.v("filter folder");
-                    return (bundleable instanceof Folder);
-                }
-            }).cast(Folder.class).map(new Func1<Folder, Action0>() {
+            Observable<? extends Action0> folder = og.ofType(Folder.class).cast(Folder.class).map(new Func1<Folder, Action0>() {
                 @Override
                 public Action0 call(final Folder folder) {
                     return new Action0() {
@@ -170,13 +164,7 @@ public class LibraryScreen implements Blueprint {
                     };
                 }
             });
-            Observable<? extends Action0> song = og.filter(new Func1<Bundleable, Boolean>() {
-                @Override
-                public Boolean call(Bundleable bundleable) {
-//                    Timber.v("filter song");
-                    return (bundleable instanceof Song);
-                }
-            }).cast(Song.class).map(new Func1<Song, Action0>() {
+            Observable<? extends Action0> song = og.ofType(Song.class).cast(Song.class).map(new Func1<Song, Action0>() {
                 @Override
                 public Action0 call(final Song song) {
                     return new Action0() {
@@ -187,13 +175,7 @@ public class LibraryScreen implements Blueprint {
                     };
                 }
             });
-            Observable<? extends Action0> artist = og.filter(new Func1<Bundleable, Boolean>() {
-                @Override
-                public Boolean call(Bundleable bundleable) {
-//                    Timber.v("filter artist");
-                    return (bundleable instanceof Artist);
-                }
-            }).cast(Artist.class).map(new Func1<Artist, Action0>() {
+            Observable<? extends Action0> artist = og.ofType(Artist.class).cast(Artist.class).map(new Func1<Artist, Action0>() {
                 @Override
                 public Action0 call(final Artist artist) {
                     return new Action0() {
@@ -204,13 +186,7 @@ public class LibraryScreen implements Blueprint {
                     };
                 }
             });
-            Observable<? extends Action0> album = og.filter(new Func1<Bundleable, Boolean>() {
-                @Override
-                public Boolean call(Bundleable bundleable) {
-//                    Timber.v("filter album");
-                    return (bundleable instanceof Album);
-                }
-            }).cast(Album.class).map(new Func1<Album, Action0>() {
+            Observable<? extends Action0> album = og.ofType(Album.class).cast(Album.class).map(new Func1<Album, Action0>() {
                 @Override
                 public Action0 call(final Album album) {
                     return new Action0() {

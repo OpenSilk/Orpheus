@@ -22,6 +22,7 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.AppModule;
 import org.opensilk.music.ui2.core.android.AndroidModule;
+import org.opensilk.music.ui2.core.lifecycle.LifecycleModule;
 import org.opensilk.music.util.GsonParcer;
 
 import javax.inject.Named;
@@ -30,6 +31,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import flow.Parcer;
+import rx.Observable;
 
 /**
  * Created by drew on 10/6/14.
@@ -38,6 +40,7 @@ import flow.Parcer;
         injects = LauncherActivity.class,
         includes = {
                 AndroidModule.class,
+                LifecycleModule.class,
         },
         addsTo = AppModule.class,
         complete = false,

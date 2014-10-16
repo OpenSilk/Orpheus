@@ -20,11 +20,15 @@ import android.os.Bundle;
 
 import com.andrew.apollo.R;
 
+import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeRegistrar;
+import org.opensilk.music.ui2.core.lifecycle.PausesAndResumes;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import flow.Layout;
 import mortar.Blueprint;
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 
 /**
@@ -51,17 +55,35 @@ public class QueueScreen implements Blueprint {
     }
 
     @Singleton
-    public static class Presenter extends ViewPresenter<QueueView> {
+    public static class Presenter extends ViewPresenter<QueueView> implements PausesAndResumes {
+
+        final PauseAndResumeRegistrar pauseAndResumeRegistrar;
 
         @Inject
-        public Presenter() {
+        public Presenter(PauseAndResumeRegistrar pauseAndResumeRegistrar) {
+            this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
+        }
 
+        @Override
+        protected void onEnterScope(MortarScope scope) {
+            super.onEnterScope(scope);
+            pauseAndResumeRegistrar.register(scope, this);
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             getView().setup();
+        }
+
+        @Override
+        public void onResume() {
+
+        }
+
+        @Override
+        public void onPause() {
+
         }
     }
 }

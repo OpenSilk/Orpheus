@@ -17,11 +17,13 @@
 package org.opensilk.music.ui2.main;
 
 import android.os.Bundle;
+import android.view.View;
 
-import org.opensilk.music.AppModule;
 import org.opensilk.music.ui2.ActivityModule;
 import org.opensilk.music.ui2.core.FlowOwner;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
+import org.opensilk.music.ui3.theme.Themer;
+import org.opensilk.music.widgets.FloatingActionButton;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,6 +33,9 @@ import flow.Flow;
 import flow.Parcer;
 import mortar.Blueprint;
 import mortar.MortarScope;
+import rx.Observable;
+import rx.functions.Action1;
+import rx.operators.OperatorViewClick;
 import timber.log.Timber;
 
 /**
@@ -63,7 +68,10 @@ public class MainScreen implements Blueprint {
 
     @dagger.Module(
             includes = ActivityModule.class,
-            injects = MainView.class,
+            injects = {
+                    MainView.class,
+                    FooterView.class,
+            },
             library = true
     )
     public static class Module {
@@ -78,10 +86,13 @@ public class MainScreen implements Blueprint {
     @Singleton
     public static class Presenter extends FlowOwner<Blueprint, MainView> {
 
+        final MusicServiceConnection musicService;
+
         @Inject
-        protected Presenter(Parcer<Object> parcer) {
+        protected Presenter(Parcer<Object> parcer, MusicServiceConnection musicService) {
             super(parcer);
             Timber.v("new MainScreen.Presenter()");
+            this.musicService = musicService;
         }
 
         @Override
@@ -105,12 +116,43 @@ public class MainScreen implements Blueprint {
         public void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
+            initFabButtons();
         }
 
         @Override
         public void onSave(Bundle outState) {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
+        }
+
+        void initFabButtons() {
+            MainView v = getView();
+            if (v == null) return;
+            //TODO use broadcast receiver to update instead
+            musicService.isPlaying().subscribe(new Action1<Boolean>() {
+                @Override
+                public void call(Boolean aBoolean) {
+                    setFabPlayIcon(aBoolean);
+                }
+            });
+            v.fabPlay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    musicService.playOrPause().subscribe(new Action1<Boolean>() {
+                        @Override
+                        public void call(Boolean aBoolean) {
+                            setFabPlayIcon(aBoolean);
+                        }
+                    });
+                }
+            });
+        }
+
+        void setFabPlayIcon(boolean playing) {
+            MainView v = getView();
+            if (v == null) return;
+            v.fabPlay.setIcon(playing ? Themer.getPauseIcon(v.getContext(), true)
+                    : Themer.getPlayIcon(v.getContext(), true));
         }
 
         void openQueue() {
@@ -123,6 +165,8 @@ public class MainScreen implements Blueprint {
             Flow flow = getFlow();
             if (flow.getBackstack().current().getScreen() instanceof QueueScreen) flow.goBack();
         }
+
+        OperatorViewClick<FloatingActionButton> fabPlayOperator;
     }
 
 }

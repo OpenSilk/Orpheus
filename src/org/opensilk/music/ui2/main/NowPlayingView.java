@@ -49,4 +49,5 @@ public class NowPlayingView extends RelativeLayout {
         super.onDetachedFromWindow();
         if (!isInEditMode()) presenter.dropView(this);
     }
+
 }

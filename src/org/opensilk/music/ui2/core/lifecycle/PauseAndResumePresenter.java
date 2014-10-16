@@ -7,6 +7,7 @@ import java.util.Set;
 import mortar.MortarScope;
 import mortar.Presenter;
 import mortar.Scoped;
+import timber.log.Timber;
 
 /**
  * Presenter to be registered by the {@link PauseAndResumeActivity}.
@@ -18,6 +19,7 @@ public class PauseAndResumePresenter extends Presenter<PauseAndResumeActivity>
     private final Set<Registration> registrations = new HashSet<>();
 
     PauseAndResumePresenter() {
+        Timber.v("new PauseAndResumePresenter()");
     }
 
     @Override protected MortarScope extractScope(PauseAndResumeActivity view) {
@@ -33,9 +35,9 @@ public class PauseAndResumePresenter extends Presenter<PauseAndResumeActivity>
         scope.register(registration);
 
         boolean added = registrations.add(registration);
-        if (added && isRunning()) {
-            listener.onResume();
-        }
+//        if (added && isRunning()) {
+//            listener.onResume();
+//        }
     }
 
     @Override public boolean isRunning() {

@@ -16,10 +16,19 @@
 
 package org.opensilk.music.ui2.main;
 
+import android.os.Bundle;
+
 import com.andrew.apollo.R;
+
+import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeRegistrar;
+import org.opensilk.music.ui2.core.lifecycle.PausesAndResumes;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import flow.Layout;
 import mortar.Blueprint;
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 
 /**
@@ -46,7 +55,35 @@ public class NowPlayingScreen implements Blueprint {
 
     }
 
-    public static class Presenter extends ViewPresenter<NowPlayingView> {
+    @Singleton
+    public static class Presenter extends ViewPresenter<NowPlayingView> implements PausesAndResumes {
 
+        final PauseAndResumeRegistrar pauseAndResumeRegistrar;
+
+        @Inject
+        public Presenter(PauseAndResumeRegistrar pauseAndResumeRegistrar) {
+            this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
+        }
+
+        @Override
+        protected void onEnterScope(MortarScope scope) {
+            super.onEnterScope(scope);
+            pauseAndResumeRegistrar.register(scope, this);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+        }
+
+        @Override
+        public void onResume() {
+
+        }
+
+        @Override
+        public void onPause() {
+
+        }
     }
 }

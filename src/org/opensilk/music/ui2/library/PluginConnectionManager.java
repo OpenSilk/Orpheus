@@ -63,10 +63,7 @@ public class PluginConnectionManager {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            if (connections.containsKey(name)) {
-                connections.remove(name);
-                subject.onError(new RemoteException());
-            }
+            onException(name);
         }
     }
 
@@ -76,7 +73,7 @@ public class PluginConnectionManager {
 
     @Inject
     public PluginConnectionManager(@ForApplication Context context) {
-        this.context = context;
+        this.context = new ContextWrapper(context);
     }
 
     public Observable<RemoteLibrary> bind(ComponentName componentName) {

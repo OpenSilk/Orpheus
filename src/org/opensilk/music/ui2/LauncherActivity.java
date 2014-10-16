@@ -22,12 +22,15 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeActivity;
+import org.opensilk.music.ui2.core.lifecycle.PauseAndResumePresenter;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerPresenter;
 import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.ui2.main.MainView;
+import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.music.ui2.main.NavScreen;
 
 import java.util.UUID;
@@ -48,12 +51,15 @@ import timber.log.Timber;
 
 
 public class LauncherActivity extends ActionBarActivity implements
+        PauseAndResumeActivity,
         DrawerPresenter.View,
         SlidingUpPanelLayout.PanelSlideListener {
 
     @Inject @Named("activity") Bus mBus;
+    @Inject PauseAndResumePresenter mPauseResumePresenter;
     @Inject ActionBarOwner mActionBarOwner;
     @Inject DrawerPresenter mDrawerPresenter;
+    @Inject MusicServiceConnection mMusicService;
     @Inject PluginConnectionManager mPluginConnectionManager;
 
     @InjectView(R.id.drawer_layout)
@@ -71,6 +77,7 @@ public class LauncherActivity extends ActionBarActivity implements
     ActionBarDrawerToggle mDrawerToggle;
     boolean mConfigurationChangeIncoming;
     String mScopeName;
+    boolean mIsResumed;
 
 
     @Override
@@ -84,6 +91,8 @@ public class LauncherActivity extends ActionBarActivity implements
         Mortar.inject(this, this);
 
         mBus.register(this);
+        mPauseResumePresenter.takeView(this);
+        mMusicService.bind();
 
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
@@ -108,12 +117,16 @@ public class LauncherActivity extends ActionBarActivity implements
         super.onDestroy();
 
         if (mBus != null) mBus.unregister(this);
+        if (mPauseResumePresenter != null) mPauseResumePresenter.dropView(this);
         if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
 
         if (!mConfigurationChangeIncoming) {
             Timber.d("Activity is finishing()");
+            // Release service connection
+            mMusicService.unbind();
             mPluginConnectionManager.onDestroy();
-            if (!mActivityScope.isDestroyed()) {
+            // Destroy our scope
+            if (mActivityScope != null && !mActivityScope.isDestroyed()) {
                 MortarScope parentScope = Mortar.getScope(getApplication());
                 parentScope.destroyChild(mActivityScope);
             }
@@ -137,13 +150,17 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onResume() {
+        Timber.v("onResume()");
         super.onResume();
-        maybeHideActionBar();
+        mIsResumed = true;
+        if (mPauseResumePresenter != null) mPauseResumePresenter.activityResumed();
     }
 
     @Override
     protected void onPause() {
+        Timber.v("onResume()");
         super.onPause();
+        if (mPauseResumePresenter != null) mPauseResumePresenter.activityPaused();
     }
 
     @Override
@@ -241,6 +258,11 @@ public class LauncherActivity extends ActionBarActivity implements
             mScopeName = getClass().getName() + UUID.randomUUID().toString();
         }
         return mScopeName;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return mIsResumed;
     }
 
     /*
