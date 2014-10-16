@@ -22,6 +22,8 @@ import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
 
+import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeRegistrar;
 import org.opensilk.music.ui2.core.lifecycle.PausesAndResumes;
 
@@ -58,15 +60,18 @@ public class FooterScreen {
 
         Subscription playStateSubscription;
         Subscription metaSubscription;
+        Subscription artworkSubscription;
         Subscription progressSubscription;
 
-        Observable<String[]> metaObservable;
         Observable<Boolean> playStateObservable;
+        Observable<String[]> metaObservable;
+        Observable<ArtInfo> artworkObservable;
         Observable<Long> currentPositionObservable;
         Observable<Long> progressObservable;
 
-        Observer<String[]> metaObserver;
         Observer<Boolean> playStateObserver;
+        Observer<String[]> metaObserver;
+        Observer<ArtInfo> artworkObserver;
         Observer<Long> progressObserver;
 
         @Inject
@@ -97,6 +102,7 @@ public class FooterScreen {
             setupObservers();
             subscribePlaystate();
             subscribeMeta();
+            subscribeArtwork();
             //playstate will kick off progress subscription
         }
 
@@ -113,6 +119,7 @@ public class FooterScreen {
             if (getView() == null) return;
             subscribePlaystate();
             subscribeMeta();
+            subscribeArtwork();
             //playstate will kick off progress subscription
         }
 
@@ -145,6 +152,12 @@ public class FooterScreen {
             FooterView v = getView();
             if (v == null) return;
             v.progressBar.setProgress(progress);
+        }
+
+        void updateArtwork(ArtInfo artInfo) {
+            FooterView v = getView();
+            if (v == null) return;
+            ArtworkManager.loadImage(artInfo, v.artworkThumbnail);
         }
 
         void setupObserables() {
@@ -181,7 +194,7 @@ public class FooterScreen {
                     })
                     // observe final result on main thread
                     .observeOn(AndroidSchedulers.mainThread());
-            metaObservable = intentObservable
+            Observable<Intent> metaChangedObservable = intentObservable
                     // filter only the META_CHANGED actions
                     .filter(new Func1<Intent, Boolean>() {
                         // will be called on computation
@@ -192,7 +205,8 @@ public class FooterScreen {
                         }
                     })
                     // buffer quick successive calls and only emit the most recent
-                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
+                    .debounce(20, TimeUnit.MILLISECONDS, scheduler);
+            metaObservable = metaChangedObservable
                     // flatmap the intent into a String[] containing the trackname and artistname
                     // XXX these are included in the intent as extras but could be out of date
                     .flatMap(new Func1<Intent, Observable<String[]>>() {
@@ -212,6 +226,14 @@ public class FooterScreen {
                         }
                     })
                     // we want the final value to come in on the main thread
+                    .observeOn(AndroidSchedulers.mainThread());
+            artworkObservable = metaChangedObservable
+                    .flatMap(new Func1<Intent, Observable<ArtInfo>>() {
+                        @Override
+                        public Observable<ArtInfo> call(Intent intent) {
+                            return musicService.getCurrentArtInfo();
+                        }
+                    })
                     .observeOn(AndroidSchedulers.mainThread());
             currentPositionObservable =
                     Observable.zip(musicService.getPosition(), musicService.getDuration(), new Func2<Long, Long, Long>() {
@@ -241,16 +263,6 @@ public class FooterScreen {
         }
 
         void setupObservers() {
-            metaObserver = Observers.create(new Action1<String[]>() {
-                @Override
-                public void call(String[] strings) {
-                    Timber.v("metaObserver(result) %s", Thread.currentThread().getName());
-                    if (strings.length == 2) {
-                        setTrackName(strings[0]);
-                        setArtistName(strings[1]);
-                    }
-                }
-            });
             playStateObserver = Observers.create(new Action1<Boolean>() {
                 @Override
                 public void call(Boolean playing) {
@@ -262,6 +274,22 @@ public class FooterScreen {
                         // update the current position
                         currentPositionObservable.observeOn(AndroidSchedulers.mainThread()).subscribe(progressObserver);
                     }
+                }
+            });
+            metaObserver = Observers.create(new Action1<String[]>() {
+                @Override
+                public void call(String[] strings) {
+                    Timber.v("metaObserver(result) %s", Thread.currentThread().getName());
+                    if (strings.length == 2) {
+                        setTrackName(strings[0]);
+                        setArtistName(strings[1]);
+                    }
+                }
+            });
+            artworkObserver = Observers.create(new Action1<ArtInfo>() {
+                @Override
+                public void call(ArtInfo artInfo) {
+                    updateArtwork(artInfo);
                 }
             });
             progressObserver = Observers.create(new Action1<Long>() {
@@ -277,14 +305,22 @@ public class FooterScreen {
             if (notSubscribed(progressSubscription)) playStateSubscription = playStateObservable.subscribe(playStateObserver);
         }
 
+        void subscribeMeta() {
+            if (notSubscribed(metaSubscription)) metaSubscription = metaObservable.subscribe(metaObserver);
+        }
+
+        void subscribeProgress() {
+            if (notSubscribed(progressSubscription)) progressSubscription = progressObservable.subscribe(progressObserver);
+        }
+
+        void subscribeArtwork() {
+            if (notSubscribed(artworkSubscription)) artworkSubscription = artworkObservable.subscribe(artworkObserver);
+        }
+
         void unsubscribePlaystate() {
             if (notSubscribed(playStateSubscription)) return;
             playStateSubscription.unsubscribe();
             playStateSubscription = null;
-        }
-
-        void subscribeMeta() {
-            if (notSubscribed(metaSubscription)) metaSubscription = metaObservable.subscribe(metaObserver);
         }
 
         void unsubscribeMeta() {
@@ -293,8 +329,10 @@ public class FooterScreen {
             metaSubscription = null;
         }
 
-        void subscribeProgress() {
-            if (notSubscribed(progressSubscription)) progressSubscription = progressObservable.subscribe(progressObserver);
+        void unsubscribeArtwork() {
+            if (notSubscribed(artworkSubscription)) return;
+            artworkSubscription.unsubscribe();
+            artworkSubscription = null;
         }
 
         void unsubscribeProgress() {
@@ -306,6 +344,7 @@ public class FooterScreen {
         void unsubscribeAll() {
             unsubscribePlaystate();
             unsubscribeMeta();
+            unsubscribeArtwork();
             unsubscribeProgress();
         }
 

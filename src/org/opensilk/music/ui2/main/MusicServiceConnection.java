@@ -29,6 +29,7 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.music.api.RemoteLibrary;
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.Collections;
@@ -181,7 +182,7 @@ public class MusicServiceConnection {
     int getMediaMountedCount();
     int getAudioSessionId();
     boolean isRemotePlayback();
-    ArtInfo getCurrentArtInfo();
+    //ArtInfo getCurrentArtInfo();
     boolean isFromSDCard();
      */
 
@@ -189,7 +190,7 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
             public Observable<Long> call(IApolloService iApolloService) {
-                Timber.v("getDuration called on %s", Thread.currentThread().getName());
+                Timber.v("getDuration %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.duration());
                 } catch (RemoteException e) {
@@ -203,7 +204,7 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
             public Observable<Long> call(IApolloService iApolloService) {
-                Timber.v("getPosition called on %s", Thread.currentThread().getName());
+                Timber.v("getPosition %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.position());
                 } catch (RemoteException e) {
@@ -217,7 +218,7 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
             @Override
             public Observable<Boolean> call(IApolloService iApolloService) {
-                Timber.v("isPlaying called on %s", Thread.currentThread().getName());
+                Timber.v("isPlaying %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.isPlaying());
                 } catch (RemoteException e) {
@@ -231,7 +232,7 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
             @Override
             public Observable<Boolean> call(IApolloService iApolloService) {
-                Timber.v("playOrPause called on %s", Thread.currentThread().getName());
+                Timber.v("playOrPause %s", Thread.currentThread().getName());
                 try {
                     if (iApolloService.isPlaying()) {
                         iApolloService.pause();
@@ -251,7 +252,7 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<String>>() {
             @Override
             public Observable<String> call(IApolloService iApolloService) {
-                Timber.v("getArtistName called on %s", Thread.currentThread().getName());
+                Timber.v("getArtistName %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.getArtistName());
                 } catch (RemoteException e) {
@@ -265,9 +266,23 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<String>>() {
             @Override
             public Observable<String> call(IApolloService iApolloService) {
-                Timber.v("getTrackName called on %s", Thread.currentThread().getName());
+                Timber.v("getTrackName %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.getTrackName());
+                } catch (RemoteException e) {
+                    return Observable.error(e);
+                }
+            }
+        });
+    }
+
+    public Observable<ArtInfo> getCurrentArtInfo() {
+        return getObservable().flatMap(new Func1<IApolloService, Observable<ArtInfo>>() {
+            @Override
+            public Observable<ArtInfo> call(IApolloService iApolloService) {
+                Timber.v("getCurrentArtInfo %s", Thread.currentThread().getName());
+                try {
+                    return Observable.just(iApolloService.getCurrentArtInfo());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }

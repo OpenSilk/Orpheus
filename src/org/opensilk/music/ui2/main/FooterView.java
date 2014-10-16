@@ -56,7 +56,6 @@ public class FooterView extends RelativeLayout {
     }
 
     @Override
-    @DebugLog
     protected void onFinishInflate() {
         super.onFinishInflate();
         if (!isInEditMode()) {
@@ -67,13 +66,11 @@ public class FooterView extends RelativeLayout {
     }
 
     @Override
-    @DebugLog
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
     }
 
     @Override
-    @DebugLog
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         if (!isInEditMode()) {
