@@ -38,13 +38,15 @@ import rx.Observable;
 import rx.Observer;
 import rx.Scheduler;
 import rx.Subscription;
+import rx.android.observables.AndroidObservable;
+import rx.android.operators.OperatorBroadcastRegister;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.observers.Observers;
-import rx.operators.OperatorBroadcastRegister;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
@@ -58,9 +60,7 @@ public class FooterScreen {
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
         final MusicServiceConnection musicService;
 
-        Subscription playStateSubscription;
-        Subscription metaSubscription;
-        Subscription artworkSubscription;
+        CompositeSubscription broadcastSubscriptions;
         Subscription progressSubscription;
 
         Observable<Boolean> playStateObservable;
@@ -91,7 +91,7 @@ public class FooterScreen {
         @Override
         protected void onExitScope() {
             super.onExitScope();
-            unsubscribeAll();
+            unsubscribeBroadcasts();
         }
 
         @Override
@@ -100,9 +100,7 @@ public class FooterScreen {
             super.onLoad(savedInstanceState);
             setupObserables();
             setupObservers();
-            subscribePlaystate();
-            subscribeMeta();
-            subscribeArtwork();
+            subscribeBroadcasts();
             //playstate will kick off progress subscription
         }
 
@@ -110,30 +108,27 @@ public class FooterScreen {
         protected void onSave(Bundle outState) {
             Timber.v("onSave()");
             super.onSave(outState);
-            if (getView() == null) return;
         }
 
         @Override
         public void onResume() {
             Timber.v("onResume()");
             if (getView() == null) return;
-            subscribePlaystate();
-            subscribeMeta();
-            subscribeArtwork();
+            subscribeBroadcasts();
             //playstate will kick off progress subscription
         }
 
         @Override
         public void onPause() {
             Timber.v("onPause");
-            unsubscribeAll();
+            unsubscribeBroadcasts();
         }
 
         @Override
         public void dropView(FooterView view) {
             Timber.v("dropView()");
             super.dropView(view);
-            unsubscribeAll();
+            unsubscribeBroadcasts();
         }
 
         void setTrackName(String s) {
@@ -164,12 +159,10 @@ public class FooterScreen {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
             intentFilter.addAction(MusicPlaybackService.META_CHANGED);
-            OperatorBroadcastRegister obr = new OperatorBroadcastRegister(getView().getContext(), intentFilter, null, null);
-            // we want to use the same thread for all operations
             Scheduler scheduler = Schedulers.computation();
             // obr will call onNext on the main thread so we observeOn computation
             // so our chained operators will be called on computation instead of main.
-            Observable<Intent> intentObservable = Observable.create(obr).observeOn(scheduler);
+            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(getView().getContext(), intentFilter).observeOn(scheduler);
             playStateObservable = intentObservable
                     // Filter for only PLAYSTATE_CHANGED actions
                     .filter(new Func1<Intent, Boolean>() {
@@ -239,7 +232,7 @@ public class FooterScreen {
                     Observable.zip(musicService.getPosition(), musicService.getDuration(), new Func2<Long, Long, Long>() {
                         @Override
                         public Long call(Long position, Long duration) {
-                            Timber.d("currentPositionObservable(zip) %s", Thread.currentThread().getName());
+//                            Timber.v("currentPositionObservable(zip) %s", Thread.currentThread().getName());
                             if (position > 0 && duration > 0) {
                                 return (1000 * position / duration);
                             } else {
@@ -249,12 +242,12 @@ public class FooterScreen {
                     });
             progressObservable =
                     // construct an Observable than repeats every .5s,
-                    Observable.interval(1000, TimeUnit.MILLISECONDS, Schedulers.computation())
+                    Observable.interval(1000, TimeUnit.MILLISECONDS, scheduler)
                     // we then fetch the progress as a percentage,
                     .flatMap(new Func1<Long, Observable<Long>>() {
                         @Override
                         public Observable<Long> call(Long aLong) {
-                            Timber.d("progressObservable(flatMap) %s", Thread.currentThread().getName());
+//                            Timber.v("progressObservable(flatMap) %s", Thread.currentThread().getName());
                             return currentPositionObservable;
                         }
                     })
@@ -295,57 +288,40 @@ public class FooterScreen {
             progressObserver = Observers.create(new Action1<Long>() {
                 @Override
                 public void call(Long progress) {
-                    Timber.d("progressObserver(result) %s", Thread.currentThread().getName());
+//                    Timber.d("progressObserver(result) %s", Thread.currentThread().getName());
                     setProgress(progress.intValue());
                 }
             });
         }
 
-        void subscribePlaystate() {
-            if (notSubscribed(progressSubscription)) playStateSubscription = playStateObservable.subscribe(playStateObserver);
+
+
+        void subscribeBroadcasts() {
+            if (notSubscribed(broadcastSubscriptions)) {
+                broadcastSubscriptions = new CompositeSubscription(
+                        playStateObservable.subscribe(playStateObserver),
+                        metaObservable.subscribe(metaObserver),
+                        artworkObservable.subscribe(artworkObserver)
+                );
+            }
         }
 
-        void subscribeMeta() {
-            if (notSubscribed(metaSubscription)) metaSubscription = metaObservable.subscribe(metaObserver);
+        void unsubscribeBroadcasts() {
+            if (notSubscribed(broadcastSubscriptions)) return;
+            broadcastSubscriptions.unsubscribe();
+            broadcastSubscriptions = null;
         }
 
         void subscribeProgress() {
-            if (notSubscribed(progressSubscription)) progressSubscription = progressObservable.subscribe(progressObserver);
-        }
-
-        void subscribeArtwork() {
-            if (notSubscribed(artworkSubscription)) artworkSubscription = artworkObservable.subscribe(artworkObserver);
-        }
-
-        void unsubscribePlaystate() {
-            if (notSubscribed(playStateSubscription)) return;
-            playStateSubscription.unsubscribe();
-            playStateSubscription = null;
-        }
-
-        void unsubscribeMeta() {
-            if (notSubscribed(metaSubscription)) return;
-            metaSubscription.unsubscribe();
-            metaSubscription = null;
-        }
-
-        void unsubscribeArtwork() {
-            if (notSubscribed(artworkSubscription)) return;
-            artworkSubscription.unsubscribe();
-            artworkSubscription = null;
+            if (notSubscribed(progressSubscription)) {
+                progressSubscription = progressObservable.subscribe(progressObserver);
+            }
         }
 
         void unsubscribeProgress() {
             if (notSubscribed(progressSubscription)) return;
             progressSubscription.unsubscribe();
             progressSubscription = null;
-        }
-
-        void unsubscribeAll() {
-            unsubscribePlaystate();
-            unsubscribeMeta();
-            unsubscribeArtwork();
-            unsubscribeProgress();
         }
 
         static boolean notSubscribed(Subscription subscription) {

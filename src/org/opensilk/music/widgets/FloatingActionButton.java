@@ -153,6 +153,13 @@ public class FloatingActionButton extends ImageButton {
         updateBackground();
     }
 
+    public void setIconAndColor(@DrawableRes int icon, int color, int colorPressed) {
+        mIcon = icon;
+        mColorNormal = color;
+        mColorPressed = colorPressed;
+        updateBackground();
+    }
+
     void updateBackground() {
         float circleLeft = mShadowRadius;
         float circleTop = mShadowRadius - mShadowOffset;
@@ -279,13 +286,14 @@ public class FloatingActionButton extends ImageButton {
     }
 
     protected boolean performDoubleClick() {
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
         if (mOnDoubleClickListener != null) {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
             playSoundEffect(SoundEffectConstants.CLICK);
             mOnDoubleClickListener.onDoubleClick(this);
             return true;
+        } else {
+            return performClick();
         }
-        return false;
     }
 
     @Override

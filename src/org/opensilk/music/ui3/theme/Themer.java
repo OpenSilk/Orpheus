@@ -16,7 +16,9 @@
 
 package org.opensilk.music.ui3.theme;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -28,6 +30,9 @@ import android.widget.SeekBar;
 import com.andrew.apollo.R;
 
 import org.opensilk.music.ui3.theme.widget.CompatSeekBar;
+
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/12/14.
@@ -52,6 +57,15 @@ public class Themer {
         return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
 
+    public static int[] getSecondaryFabColors(Context context) {
+        int colors[] = new int[2];
+        boolean islight = isLightTheme(context);
+        colors[0] = islight ? context.getResources().getColor(android.R.color.white)
+                : context.getResources().getColor(android.R.color.black);
+        colors[1] = colors[0]; //TODO
+        return colors;
+    }
+
     public static int getPlayIcon(Context context, boolean forcewhite) {
         return forcewhite ? R.drawable.ic_action_playback_play_white :
                 (isLightTheme(context) ? R.drawable.ic_action_playback_play_black
@@ -62,6 +76,16 @@ public class Themer {
         return forcewhite ? R.drawable.ic_action_playback_pause_white :
                 (isLightTheme(context) ? R.drawable.ic_action_playback_pause_black
                         : R.drawable.ic_action_playback_pause_white);
+    }
+
+    public static int getNextIcon(Context context) {
+        return isLightTheme(context) ? R.drawable.ic_action_playback_next_black
+                : R.drawable.ic_action_playback_next_white;
+    }
+
+    public static int getPrevIcon(Context context) {
+        return isLightTheme(context) ? R.drawable.ic_action_playback_prev_black
+                : R.drawable.ic_action_playback_prev_white;
     }
 
     public static void themeSeekBar(SeekBar seekBar) {
@@ -87,8 +111,10 @@ public class Themer {
      * @param context
      * @return
      */
+    @DebugLog
     public static boolean isLightTheme(Context context) {
         TypedValue value = new TypedValue();
         return context.getTheme().resolveAttribute(R.attr.isLightTheme, value, true) && value.data != 0;
     }
+
 }

@@ -36,6 +36,7 @@ import org.apache.http.util.VersionInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui2.core.CanShowScreen;
 import org.opensilk.music.ui2.core.ScreenConductor;
+import org.opensilk.music.ui3.theme.Themer;
 import org.opensilk.music.widgets.FloatingActionButton;
 import org.opensilk.music.widgets.FloatingActionButtonRelativeLayout;
 
@@ -68,9 +69,12 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
     FloatingActionButton fabRepeat;
 
     ScreenConductor<Blueprint> screenConductor;
+
     AnimatorSet expandFabs;
     AnimatorSet collapseFabs;
+
     boolean secondaryFabsShowing = true;
+    boolean firstLayout = true;
 
     public MainView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -97,7 +101,13 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        Timber.v("onLayout firstLayout="+firstLayout);
         super.onLayout(changed, l, t, r, b);
+        if (firstLayout) {
+            firstLayout = false;
+        } else {
+            return;
+        }
         // Now that everyone knows where they are supposed to be
         // move them into position for the expand animation
         fabNext.setY(fabPlay.getY());
@@ -142,6 +152,8 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
     }
 
     void setupActionButton() {
+        int playcolor = Themer.getAccentColor(getContext());
+        fabPlay.setIconAndColor(Themer.getPlayIcon(getContext(), true), playcolor, playcolor);
         fabPlay.setOnDoubleClickListener(new FloatingActionButton.OnDoubleClickListener() {
             @Override
             public void onDoubleClick(View view) {
@@ -156,6 +168,9 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
             }
         });
         fabPlay.bringToFront();
+        int color[] = Themer.getSecondaryFabColors(getContext());
+        fabNext.setIconAndColor(Themer.getNextIcon(getContext()), color[0], color[1]);
+        fabPrev.setIconAndColor(Themer.getPrevIcon(getContext()), color[0], color[1]);
     }
 
     void setupFabAnimatiors() {

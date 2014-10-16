@@ -42,9 +42,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import rx.Observable;
+import rx.android.operators.OperatorBroadcastRegister;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.operators.OperatorBroadcastRegister;
 import rx.schedulers.Schedulers;
 import rx.subjects.AsyncSubject;
 import rx.subjects.ReplaySubject;
@@ -151,8 +152,8 @@ public class MusicServiceConnection {
     void stop();
     void pause();
     void play();
-    void prev();
-    void next();
+    //void prev();
+    //void next();
     void enqueue(in long [] list, int action);
     void setQueuePosition(int index);
     void setShuffleMode(int shufflemode);
@@ -185,6 +186,25 @@ public class MusicServiceConnection {
     //ArtInfo getCurrentArtInfo();
     boolean isFromSDCard();
      */
+
+    public void prev() {
+        final Intent previous = new Intent(context, MusicPlaybackService.class);
+        previous.setAction(MusicPlaybackService.PREVIOUS_ACTION);
+        context.startService(previous);
+    }
+
+    public void next() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.next();
+                } catch (RemoteException e) {
+                    //TODO
+                }
+            }
+        });
+    }
 
     public Observable<Long> getDuration() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
