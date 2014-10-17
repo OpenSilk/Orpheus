@@ -111,7 +111,6 @@ public class Themer {
      * @param context
      * @return
      */
-    @DebugLog
     public static boolean isLightTheme(Context context) {
         TypedValue value = new TypedValue();
         return context.getTheme().resolveAttribute(R.attr.isLightTheme, value, true) && value.data != 0;
