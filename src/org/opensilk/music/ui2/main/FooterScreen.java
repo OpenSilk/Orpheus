@@ -241,8 +241,8 @@ public class FooterScreen {
                                 width = 320;
                             }
                             long nextrefreshtime = duration / width;
-                            if (nextrefreshtime < 20) {
-                                nextrefreshtime = 50;
+                            if (nextrefreshtime < 400) {
+                                nextrefreshtime = 400;
                             }
                             return new Long[] {progress, nextrefreshtime};
                         }

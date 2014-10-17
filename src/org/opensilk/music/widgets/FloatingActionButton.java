@@ -313,30 +313,25 @@ public class FloatingActionButton extends ImageButton {
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDown(MotionEvent e) {
-            Log.d("TAG", "onDown");
             return isClickable();
         }
 
         @Override
         public void onShowPress(MotionEvent e) {
-            Log.d("TAG", "onShowPress");
         }
 
         @Override
         public void onLongPress(MotionEvent e) {
-            Log.d("TAG", "onLongPress");
             performLongClick();
         }
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            Log.d("TAG", "onSingleTapConfirmed");
             return isClickable() && performClick();
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            Log.d("TAG", "onDoubleTap");
             return isClickable() && performDoubleClick();
         }
 

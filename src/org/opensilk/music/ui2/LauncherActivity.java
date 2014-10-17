@@ -158,7 +158,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onPause() {
-        Timber.v("onResume()");
+        Timber.v("onPause()");
         super.onPause();
         if (mPauseResumePresenter != null) mPauseResumePresenter.activityPaused();
     }
