@@ -151,6 +151,7 @@ public class FooterScreen {
         }
 
         void setupObserables() {
+            if (getView() == null) return;
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
             intentFilter.addAction(MusicPlaybackService.META_CHANGED);
