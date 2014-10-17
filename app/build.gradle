@@ -15,6 +15,7 @@
  */
 apply plugin: 'com.android.application'
 apply plugin: 'hugo'
+apply plugin: 'robolectric'
 
 // Versioning
 def versionMajor = 0
@@ -61,6 +62,11 @@ android {
             manifest.srcFile 'variants/release/AndroidManifest.xml'
             res.srcDirs = ['variants/release/res']
         }
+//        androidTest {
+//            manifest.srcFile 'variants/debug/AndroidManifest.xml'
+////            res.srcDirs = ['variants/debug/res']
+//            res.srcDir('variants/debug/res')
+//        }
     }
 
     signingConfigs {
@@ -110,6 +116,21 @@ configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
+robolectric {
+    include '**/*Test.class'
+}
+// hack for robolectric
+// https://github.com/JakeWharton/gradle-android-test-plugin/issues/54
+tasks.whenTaskAdded { task ->
+    if (task.name == 'testDebug') {
+        task.jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
+        // use afterTest to listen to the test execution results
+        afterTest { descriptor, result ->
+            println "Executing test for {$descriptor.name} with result: ${result.resultType}"
+        }
+    }
+}
+
 dependencies {
     compile 'com.android.support:support-v4:21.0.0'
     compile 'com.android.support:appcompat-v7:21.0.0'
@@ -150,5 +171,28 @@ dependencies {
     compile project(':api')
 
 //    compile fileTree(dir: '../libs', include: ['*.jar'])
+
+    androidTestCompile('junit:junit:4.11')
+    androidTestCompile('org.robolectric:robolectric:2.3') {
+        exclude module: 'classworlds'
+        exclude module: 'commons-logging'
+        exclude module: 'httpclient'
+        exclude module: 'maven-artifact'
+        exclude module: 'maven-artifact-manager'
+        exclude module: 'maven-error-diagnostics'
+        exclude module: 'maven-model'
+        exclude module: 'maven-project'
+        exclude module: 'maven-settings'
+        exclude module: 'plexus-container-default'
+        exclude module: 'plexus-interpolation'
+        exclude module: 'plexus-utils'
+        exclude module: 'wagon-file'
+        exclude module: 'wagon-http-lightweight'
+        exclude module: 'wagon-provider-api'
+    }
+    androidTestCompile('com.squareup:fest-android:1.0.0')
+//    androidTestCompile 'com.squareup.assertj:assertj-android:1.0.0@aar'
+//    androidTestCompile 'com.squareup.assertj:assertj-android-support-v4:1.0.0'
+//    androidTestCompile 'com.squareup.assertj:assertj-android-appcompat-v7:1.0.0'
 
 }
