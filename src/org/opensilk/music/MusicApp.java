@@ -143,7 +143,7 @@ public class MusicApp extends Application implements DaggerInjector {
         return super.getSystemService(name);
     }
 
-    protected void enableStrictMode() {
+    private void enableStrictMode() {
         if (DEBUG) {
             final StrictMode.ThreadPolicy.Builder threadPolicyBuilder
                     = new StrictMode.ThreadPolicy.Builder()
