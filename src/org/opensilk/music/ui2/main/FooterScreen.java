@@ -70,14 +70,13 @@ public class FooterScreen {
         Observable<Boolean> playStateObservable;
         Observable<String[]> metaObservable;
         Observable<ArtInfo> artworkObservable;
-        Observable<Long[]> currentPositionObservable;
+        Observable<Long> currentPositionObservable;
+        Observable<Long> progressObservable;
 
         Observer<Boolean> playStateObserver;
         Observer<String[]> metaObserver;
         Observer<ArtInfo> artworkObserver;
-        Observer<Long[]> progressObserver;
-
-        int progressWidth;
+        Observer<Long> progressObserver;
 
         @Inject
         public Presenter(PauseAndResumeRegistrar pauseAndResumeRegistrar,
@@ -107,7 +106,6 @@ public class FooterScreen {
             super.onLoad(savedInstanceState);
             setupObserables();
             setupObservers();
-            progressWidth = getView().progressBar.getWidth();
             //just for safety we should always receive a call to onResume()
             subscribeBroadcasts();
             //playstate will kick off progress subscription
@@ -171,7 +169,7 @@ public class FooterScreen {
                         }
                     })
                     // filter out repeats only taking most recent
-                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
+                    .debounce(20, TimeUnit.MILLISECONDS)
                     // flatMap the intent into a boolean by requesting the playstate
                     // XXX the intent contains the playstate as an extra but
                     //     it could be out of date
@@ -195,7 +193,7 @@ public class FooterScreen {
                         }
                     })
                     // buffer quick successive calls and only emit the most recent
-                    .debounce(20, TimeUnit.MILLISECONDS, scheduler);
+                    .debounce(20, TimeUnit.MILLISECONDS);
             metaObservable = metaChangedObservable
                     // flatmap the intent into a String[] containing the trackname and artistname
                     // XXX these are included in the intent as extras but could be out of date
@@ -226,27 +224,30 @@ public class FooterScreen {
                     })
                     .observeOn(AndroidSchedulers.mainThread());
             currentPositionObservable =
-                    Observable.zip(musicService.getPosition(), musicService.getDuration(), new Func2<Long, Long, Long[]>() {
+                    Observable.zip(musicService.getPosition(), musicService.getDuration(), new Func2<Long, Long, Long>() {
                         @Override
-                        public Long[] call(Long position, Long duration) {
+                        public Long call(Long position, Long duration) {
                             Timber.v("currentPositionObservable(%d, %d) %s", position, duration, Thread.currentThread().getName());
-                            long progress;
                             if (position > 0 && duration > 0) {
-                                progress = (1000 * position / duration);
+                                return (1000 * position / duration);
                             } else {
-                                progress = 1000;
+                                return (long) 1000;
                             }
-                            int width = progressWidth;
-                            if (width <= 0) {
-                                width = 320;
-                            }
-                            long nextrefreshtime = duration / width;
-                            if (nextrefreshtime < 400) {
-                                nextrefreshtime = 400;
-                            }
-                            return new Long[] {progress, nextrefreshtime};
                         }
                     }).observeOn(AndroidSchedulers.mainThread());
+            progressObservable =
+                    // construct an Observable than repeats every .5s,
+                    Observable.interval(500, TimeUnit.MILLISECONDS)
+                    // we then fetch the progress as a percentage,
+                    .flatMap(new Func1<Long, Observable<Long>>() {
+                        @Override
+                        public Observable<Long> call(Long aLong) {
+//                            Timber.v("progressObservable(flatMap) %s", Thread.currentThread().getName());
+                            return currentPositionObservable;
+                        }
+                    })
+                    // we want the final result on the ui thread
+                    .observeOn(AndroidSchedulers.mainThread());
         }
 
         void setupObservers() {
@@ -255,16 +256,12 @@ public class FooterScreen {
                 public void call(Boolean playing) {
                     Timber.v("playStateObserver(result) %s", Thread.currentThread().getName());
                     if (playing) {
-                        subscribeProgress(0);
+                        subscribeProgress();
                     } else {
                         unsubscribeProgress();
                         // update the current position
-                        currentPositionObservable.observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Long[]>() {
-                            @Override
-                            public void call(Long[] longs) {
-                                setProgress(longs[0].intValue());
-                            }
-                        });
+                        currentPositionObservable.observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(progressObserver);
                     }
                 }
             });
@@ -284,14 +281,11 @@ public class FooterScreen {
                     updateArtwork(artInfo);
                 }
             });
-            progressObserver = Observers.create(new Action1<Long[]>() {
+            progressObserver = Observers.create(new Action1<Long>() {
                 @Override
-                public void call(Long[] values) {
+                public void call(Long progress) {
 //                    Timber.d("progressObserver(result) %s", Thread.currentThread().getName());
-                    setProgress(values[0].intValue());
-                    // resubscribe the next duration
-                    unsubscribeProgress();
-                    subscribeProgress(values[1]);
+                    setProgress(progress.intValue());
                 }
             });
         }
@@ -313,11 +307,9 @@ public class FooterScreen {
             }
         }
 
-        void subscribeProgress(long delay) {
-            Timber.d("subscribeProgress delay=%d", delay);
+        void subscribeProgress() {
             if (notSubscribed(progressSubscription)) {
-                progressSubscription = currentPositionObservable.delay(delay,
-                        TimeUnit.MILLISECONDS).subscribe(progressObserver);
+                progressSubscription = progressObservable.subscribe(progressObserver);
             }
         }
 
