@@ -111,11 +111,10 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
         }
 
         @Override
-        @DebugLog
         public void onViewCaptured(View capturedChild, int activePointerId) {
             startPosTop = capturedChild.getTop();
             startPosLeft = capturedChild.getLeft();
-            Log.d("TAG", "startPos x=" + startPosTop + " y=" + startPosLeft);
+            Timber.d("onViewCaptured startPos x=%d, y=%d", startPosTop, startPosLeft);
         }
 
         @Override
@@ -173,7 +172,6 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
         }
 
         @Override
-        @DebugLog
         public boolean tryCaptureView(View child, int pointerId) {
             return child.getId() == R.id.floating_action_button;
         }

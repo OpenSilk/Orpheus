@@ -143,7 +143,7 @@ public class MusicServiceConnection {
         // for this reason we 'observe' the onNextCall on an IO thread.
         // so when the functions will receive the Func1.call() in the flatMap
         // on the IO thread not the main thread.
-        return serviceToken.subject.asObservable().observeOn(Schedulers.io());
+        return serviceToken.subject.asObservable().first().observeOn(Schedulers.io());
     }
 
     /*

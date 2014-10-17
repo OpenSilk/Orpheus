@@ -54,7 +54,11 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observers.Observers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
+
+import static org.opensilk.music.util.RxUtil.isSubscribed;
+import static org.opensilk.music.util.RxUtil.notSubscribed;
 
 /**
  * Created by drew on 10/5/14.
@@ -134,6 +138,8 @@ public class MainScreen implements Blueprint {
         public void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
+            setupObservables();
+            setupObservers();
             subscribeFabClicks();
             subscribeBroadcasts();
         }
@@ -270,21 +276,20 @@ public class MainScreen implements Blueprint {
             });
         }
 
-        Subscription playStateSubscription;
-        Subscription repeatModeSubscription;
-        Subscription shuffleModeSubscription;
+        CompositeSubscription broadcastSubscriptions;
 
         void subscribeBroadcasts() {
-            setupObservables();
-            setupObservers();
-            playStateSubscription = playStateObservable.subscribe(playStateObserver);
+            if (notSubscribed(broadcastSubscriptions)) {
+                broadcastSubscriptions = new CompositeSubscription(
+                        playStateObservable.subscribe(playStateObserver)
+                );
+            }
         }
 
         void unsubscribeBroadcasts() {
-            if (!notSubscribed(playStateSubscription)) {
-                playStateSubscription.unsubscribe();
-                playStateSubscription = null;
-            }
+            if (notSubscribed(broadcastSubscriptions)) return;
+            broadcastSubscriptions.unsubscribe();
+            broadcastSubscriptions = null;
         }
 
         static boolean notSubscribed(Subscription subscription) {
