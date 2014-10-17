@@ -17,8 +17,8 @@ allprojects {
 
 
 // Build config
-ext.compileSdkVersion = 20
-ext.buildToolsVersion  = "20"
+ext.compileSdkVersion = 21
+ext.buildToolsVersion  = "21"
 
 // defaultConfig
 ext.targetSdkVersion = 20

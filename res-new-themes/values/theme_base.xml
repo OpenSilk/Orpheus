@@ -112,7 +112,7 @@
     <!-- End common themes -->
 
     <!-- Use custom overflow icon -->
-    <style name="ActionButton.Overflow.CommonBase" parent="Widget.AppCompat.Base.ActionButton.Overflow">
+    <style name="ActionButton.Overflow.CommonBase" parent="Base.Widget.AppCompat.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_menu_moreoverflow_holo_dark</item>
     </style>
 
