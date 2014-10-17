@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import flow.Layout;
+import hugo.weaving.DebugLog;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -74,6 +75,7 @@ public class GalleryScreen implements Blueprint {
         }
 
         @Override
+        @DebugLog
         protected void onExitScope() {
             Timber.v("onExitScope()");
             super.onExitScope();
@@ -89,6 +91,7 @@ public class GalleryScreen implements Blueprint {
         }
 
         @Override
+        @DebugLog
         protected void onSave(Bundle outState) {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);

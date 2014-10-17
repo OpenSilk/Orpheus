@@ -45,6 +45,7 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import flow.Flow;
+import hugo.weaving.DebugLog;
 import mortar.Blueprint;
 import mortar.Mortar;
 import timber.log.Timber;
@@ -127,6 +128,7 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
     }
 
     @Override
+    @DebugLog
     public void showScreen(Blueprint screen, Flow.Direction direction) {
         screenConductor.showScreen(screen, direction);
     }

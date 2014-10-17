@@ -37,6 +37,7 @@ import javax.inject.Singleton;
 import dagger.Provides;
 import flow.Flow;
 import flow.Parcer;
+import hugo.weaving.DebugLog;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import rx.Observable;
@@ -164,12 +165,14 @@ public class MainScreen implements Blueprint {
                     : Themer.getPlayIcon(v.getContext(), true));
         }
 
+        @DebugLog
         void openQueue() {
             Flow flow = getFlow();
             if (flow.getBackstack().current().getScreen() instanceof QueueScreen) return;
             flow.goTo(new QueueScreen());
         }
 
+        @DebugLog
         void closeQueue() {
             Flow flow = getFlow();
             if (flow.getBackstack().current().getScreen() instanceof QueueScreen) flow.goBack();
