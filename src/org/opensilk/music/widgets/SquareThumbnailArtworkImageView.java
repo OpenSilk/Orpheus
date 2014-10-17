@@ -17,20 +17,7 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-
-import com.andrew.apollo.R;
-
-import org.opensilk.music.artwork.ArtworkImageView;
 
 /**
  * Created by drew on 7/7/14.

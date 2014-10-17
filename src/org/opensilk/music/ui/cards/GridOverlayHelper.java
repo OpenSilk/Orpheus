@@ -21,7 +21,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.view.View;
 
 import com.andrew.apollo.utils.ThemeHelper;
@@ -54,7 +53,7 @@ public class GridOverlayHelper implements Palette.PaletteAsyncListener {
 
     @Override
     public void onGenerated(Palette palette) {
-        PaletteItem item = PaletteUtil.getBackgroundItem(palette);
+        Palette.Swatch item = PaletteUtil.getBackgroundItem(palette);
         if (item != null) {
             final int backgroundColor = ThemeHelper.setColorAlpha(item.getRgb(), DESC_OVERLAY_ALPHA);
             if (backgroundColor != mDescOverlayDefaultColor) {

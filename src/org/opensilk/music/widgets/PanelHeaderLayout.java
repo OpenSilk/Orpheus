@@ -20,18 +20,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.os.Build;
-import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -40,7 +32,6 @@ import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import butterknife.ButterKnife;
-import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 3/16/14.

@@ -190,7 +190,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TAB_VIEW_TEXT_SIZE_SP);
         textView.setTypeface(Typeface.DEFAULT_BOLD);
         textView.setTextColor(mUnselectedTextColor);
-        textView.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.abc_action_bar_default_height));
+        textView.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.abc_action_bar_default_height_material));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // If we're running on Honeycomb or newer, then we can use the Theme's

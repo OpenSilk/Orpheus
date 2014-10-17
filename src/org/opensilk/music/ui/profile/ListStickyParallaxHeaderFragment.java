@@ -24,7 +24,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -125,7 +124,7 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
 
     @Override
     public void onGenerated(Palette palette) {
-        PaletteItem item = PaletteUtil.getBackgroundItem(palette);
+        Palette.Swatch item = PaletteUtil.getBackgroundItem(palette);
         if (item != null) {
             mPaletteColor = item.getRgb();
         }

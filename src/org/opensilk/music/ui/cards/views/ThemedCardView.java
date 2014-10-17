@@ -1,22 +1,13 @@
 package org.opensilk.music.ui.cards.views;
 
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 import android.util.AttributeSet;
-import android.view.View;
 
 import com.andrew.apollo.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
-import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui.cards.AbsBasicCard;
-import org.opensilk.music.util.PaletteUtil;
 
-import butterknife.ButterKnife;
 import it.gmariotti.cardslib.library.view.CardView;
 
 /**

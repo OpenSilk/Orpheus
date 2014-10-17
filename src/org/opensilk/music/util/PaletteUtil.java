@@ -17,19 +17,18 @@
 package org.opensilk.music.util;
 
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.PaletteItem;
 
 /**
  * Created by drew on 8/29/14.
  */
 public class PaletteUtil {
 
-    public static PaletteItem getBackgroundItem(Palette palette) {
-        PaletteItem item = null;
+    public static Palette.Swatch getBackgroundItem(Palette palette) {
+        Palette.Swatch item = null;
         if (palette != null) {
-            item = palette.getVibrantColor();
+            item = palette.getVibrantSwatch();
             if (item == null) {
-                item = palette.getMutedColor();
+                item = palette.getMutedSwatch();
             }
         }
         return item;
