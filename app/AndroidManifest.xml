@@ -224,7 +224,7 @@
         </receiver>
 
         <!-- Media button receiver -->
-        <receiver android:name=".MediaButtonIntentReceiver" >
+        <receiver android:name="com.andrew.apollo.MediaButtonIntentReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />
@@ -263,7 +263,7 @@
          </activity>
         <!-- Music service -->
         <service
-            android:name=".MusicPlaybackService"
+            android:name="com.andrew.apollo.MusicPlaybackService"
             android:process=":service"/>
         <!-- Cast Service -->
         <service android:name="org.opensilk.cast.SilkCastService"
