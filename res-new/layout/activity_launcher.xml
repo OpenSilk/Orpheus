@@ -24,35 +24,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.opensilk.music.ui2.main.MainView
-        android:id="@+id/mainview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
-                android:background="?colorPrimary"/>
-
-            <FrameLayout
-                android:id="@+id/main"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-            <include layout="@layout/footer"/>
-
-        </LinearLayout>
-
-        <!--Fabs-->
-        <include layout="@layout/floating_action_buttons"/>
-
-    </org.opensilk.music.ui2.main.MainView>
 
     <!-- The drawer is given a fixed width in dp and extends the full height of
          the container. -->

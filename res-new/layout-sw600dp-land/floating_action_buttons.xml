@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <org.opensilk.music.widgets.FloatingActionButton
+        android:id="@+id/floating_action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabIcon="@drawable/ic_action_playback_play_white"
+        app:fabColorNormal="?colorPrimary"
+        app:fabColorPressed="?colorPrimary"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="60dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"/>
+
+    <org.opensilk.music.widgets.FloatingActionButton
+        android:id="@+id/floating_action_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabIcon="@drawable/ic_action_playback_next_black"
+        app:fabColorNormal="@android:color/white"
+        app:fabColorPressed="@android:color/white"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_below="@id/floating_action_button"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"/>
+
+    <org.opensilk.music.widgets.FloatingActionButton
+        android:id="@+id/floating_action_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabIcon="@drawable/ic_action_playback_prev_black"
+        app:fabColorNormal="@android:color/white"
+        app:fabColorPressed="@android:color/white"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_below="@id/floating_action_next"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"/>
+
+    <org.opensilk.music.widgets.FloatingActionButton
+        android:id="@+id/floating_action_shuffle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabIcon="@drawable/ic_action_playback_shuffle_black"
+        app:fabColorNormal="@android:color/white"
+        app:fabColorPressed="@android:color/white"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_below="@id/floating_action_prev"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"/>
+
+    <org.opensilk.music.widgets.FloatingActionButton
+        android:id="@+id/floating_action_repeat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabIcon="@drawable/ic_action_playback_repeat_black"
+        app:fabColorNormal="@android:color/white"
+        app:fabColorPressed="@android:color/white"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_below="@id/floating_action_shuffle"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"/>
+
+
+</merge>
