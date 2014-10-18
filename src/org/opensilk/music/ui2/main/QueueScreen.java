@@ -18,10 +18,9 @@ package org.opensilk.music.ui2.main;
 
 import android.os.Bundle;
 
+import org.opensilk.common.mortar.PauseAndResumeRegistrar;
+import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.music.R;
-
-import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeRegistrar;
-import org.opensilk.music.ui2.core.lifecycle.PausesAndResumes;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

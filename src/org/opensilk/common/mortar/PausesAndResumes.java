@@ -1,5 +1,5 @@
 
-package org.opensilk.music.ui2.core.lifecycle;
+package org.opensilk.common.mortar;
 
 /**
  * <p>Implemented by objects that need to know when the {@link android.app.Activity} pauses

@@ -1,5 +1,5 @@
 
-package org.opensilk.music.ui2.core.lifecycle;
+package org.opensilk.common.mortar;
 
 import mortar.MortarScope;
 

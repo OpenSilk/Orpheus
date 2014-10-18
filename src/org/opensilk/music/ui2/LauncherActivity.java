@@ -7,12 +7,16 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.opensilk.common.mortar.PauseAndResumeActivity;
+import org.opensilk.common.mortar.PauseAndResumePresenter;
+import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
@@ -22,8 +26,6 @@ import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeActivity;
-import org.opensilk.music.ui2.core.lifecycle.PauseAndResumePresenter;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
@@ -32,6 +34,7 @@ import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.music.ui2.main.NavScreen;
+import org.opensilk.music.ui3.theme.Themer;
 
 import java.util.UUID;
 
@@ -52,8 +55,7 @@ import timber.log.Timber;
 
 public class LauncherActivity extends ActionBarActivity implements
         PauseAndResumeActivity,
-        DrawerPresenter.View,
-        SlidingUpPanelLayout.PanelSlideListener {
+        DrawerPresenter.View {
 
     @Inject @Named("activity") Bus mBus;
     @Inject PauseAndResumePresenter mPauseResumePresenter;
@@ -70,6 +72,8 @@ public class LauncherActivity extends ActionBarActivity implements
     MainView mMainView;
     @InjectView(R.id.sliding_layout) @Optional
     SlidingUpPanelLayout mSlidingPanel;
+    @InjectView(R.id.main_toolbar)
+    Toolbar mToolbar;
 
     MortarActivityScope mActivityScope;
 
@@ -82,7 +86,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(ThemeHelper.getInstance(this).getPanelTheme());
+        setTheme(ThemeHelper.getInstance(this).getTheme());
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());
@@ -96,14 +100,19 @@ public class LauncherActivity extends ActionBarActivity implements
 
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
+        initThemeables();
 
         mFlow = mMainView.getFlow();
         mDrawerPresenter.takeView(this);
+
+
+        setSupportActionBar(mToolbar);
 
         setupDrawer();
         setupNavigation();
 
         setupSlindingPanel();
+
     }
 
     @Override
@@ -255,7 +264,7 @@ public class LauncherActivity extends ActionBarActivity implements
     private String getScopeName() {
         if (mScopeName == null) mScopeName = (String) getLastCustomNonConfigurationInstance();
         if (mScopeName == null) {
-            mScopeName = getClass().getName() + UUID.randomUUID().toString();
+            mScopeName = ObjectUtils.<LauncherActivity>getClass(this).getName() + UUID.randomUUID().toString();
         }
         return mScopeName;
     }
@@ -349,7 +358,7 @@ public class LauncherActivity extends ActionBarActivity implements
      * implement SlidingUpPanelLayout.PanelSlideListener
      */
 
-    @Override
+//    @Override
     public void onPanelSlide(View panel, float slideOffset) {
         if (slideOffset > 0.84) {
             TypedValue out = new TypedValue();
@@ -368,24 +377,24 @@ public class LauncherActivity extends ActionBarActivity implements
         }
     }
 
-    @Override
+//    @Override
     public void onPanelExpanded(View panel) {
 //        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
         disableDrawer(false);
     }
 
-    @Override
+//    @Override
     public void onPanelCollapsed(View panel) {
 //        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
         enableDrawer();
     }
 
-    @Override
+//    @Override
     public void onPanelAnchored(View panel) {
         //not implemented
     }
 
-    @Override
+//    @Override
     public void onPanelHidden(View panel) {
 
     }
@@ -416,10 +425,14 @@ public class LauncherActivity extends ActionBarActivity implements
     }
 
     private void setupSlindingPanel() {
-        if (mSlidingPanel == null) return;
-        mSlidingPanel.setDragView(findViewById(R.id.panel_header));
-        mSlidingPanel.setPanelSlideListener(this);
-        mSlidingPanel.setEnableDragViewTouchEvents(true);
+//        if (mSlidingPanel == null) return;
+//        mSlidingPanel.setDragView(findViewById(R.id.panel_header));
+//        mSlidingPanel.setPanelSlideListener(this);
+//        mSlidingPanel.setEnableDragViewTouchEvents(true);
+    }
+
+    protected void initThemeables() {
+        Themer.themeToolbar(mToolbar);
     }
 
 }

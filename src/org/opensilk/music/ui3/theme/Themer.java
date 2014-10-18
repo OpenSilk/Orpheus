@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -86,6 +87,10 @@ public class Themer {
     public static int getPrevIcon(Context context) {
         return isLightTheme(context) ? R.drawable.ic_action_playback_prev_black
                 : R.drawable.ic_action_playback_prev_white;
+    }
+
+    public static void themeToolbar(Toolbar toolbar) {
+        toolbar.setBackgroundColor(getPrimaryColor(toolbar.getContext()));
     }
 
     public static void themeSeekBar(SeekBar seekBar) {

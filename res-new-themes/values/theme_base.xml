@@ -19,32 +19,15 @@
 
     <!--Common styles for light theme-->
 
-    <style name="Theme.LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- kitkat style selectables -->
-        <!--<item name="android:selectableItemBackground">@drawable/item_background_holo_light</item>-->
-        <!--<item name="popupMenuStyle">@style/Widget.AppCompat.Light.PopupMenu</item>-->
-        <item name="listPopupWindowStyle">@style/Widget.AppCompat.Light.ListPopupWindow</item>
-        <item name="dropDownListViewStyle">@style/Widget.AppCompat.Light.ListView.DropDown</item>
-        <!-- ActionBar overrides -->
-        <!--<item name="android:actionBarStyle">@style/ActionBar.Light</item>-->
-        <!--<item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>-->
-        <!--<item name="android:actionBarItemBackground">@drawable/item_background_holo_dark</item> &lt;!&ndash;dark on purpose&ndash;&gt;-->
-        <!--<item name="android:actionDropDownStyle">@style/DropDownNav.RepheusDark</item>-->
-        <!-- Disable shadow on action bar-->
-        <item name="android:windowContentOverlay">@null</item>
-        <!-- Light.DarkActionBar specific -->
-        <item name="actionBarWidgetTheme">@style/Theme.LightBase.Widget</item>
-        <item name="android:actionBarWidgetTheme">?actionBarWidgetTheme</item>
+    <style name="Theme.LightBase" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
     </style>
 
     <style name="Theme.Light" parent="Theme.LightBase">
-        <item name="colorPrimary">@android:color/white</item>
+
     </style>
 
     <style name="Theme.Light.Panel">
-        <!-- ActionBar overrides -->
-        <item name="android:actionBarStyle">@style/ActionBar.Light.Panel</item>
-        <item name="windowActionBarOverlay">true</item>
         <!-- Panel background -->
         <item name="nowPlayingBackground">@drawable/drop_shadow_light</item>
     </style>
@@ -54,41 +37,25 @@
     </style>
 
     <style name="Theme.Dialog.Light" parent="Theme.Dialog.LightBase">
-        <item name="colorPrimary">@android:color/white</item>
+
     </style>
 
     <style name="Theme.Dialog.Light.Panel">
-        <!-- ActionBar overrides -->
-        <item name="android:actionBarStyle">@style/ActionBar.Light.Panel</item>
-        <item name="windowActionBarOverlay">true</item>
         <!-- Panel background -->
         <item name="nowPlayingBackground">@drawable/drop_shadow_light</item>
     </style>
 
     <!--Common styles for dark theme-->
 
-    <style name="Theme.DarkBase" parent="Theme.AppCompat">
-        <!-- kitkat style selectables -->
-        <!--<item name="android:selectableItemBackground">@drawable/item_background_holo_dark</item>-->
-        <item name="android:popupMenuStyle">@style/PopupMenu.Dark</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Dark</item>
-        <!-- ActionBar overrides -->
-        <item name="android:actionBarStyle">@style/ActionBar.Dark</item>
-        <item name="android:actionOverflowButtonStyle">@style/ActionButton.Overflow.CommonBase</item>
-        <!--<item name="android:actionBarItemBackground">@drawable/item_background_holo_dark</item>-->
-        <!--<item name="android:actionDropDownStyle">@style/DropDownNav.RepheusDark</item>-->
-        <!-- Disable shadow on action bar-->
-        <item name="android:windowContentOverlay">@null</item>
+    <style name="Theme.DarkBase" parent="Theme.AppCompat.NoActionBar">
+
     </style>
 
     <style name="Theme.Dark" parent="Theme.DarkBase">
-        <item name="colorPrimary">@android:color/black</item>
+
     </style>
 
     <style name="Theme.Dark.Panel">
-        <!-- ActionBar overrides -->
-        <item name="android:actionBarStyle">@style/ActionBar.Dark.Panel</item>
-        <item name="windowActionBarOverlay">true</item>
         <!-- Panel background -->
         <item name="nowPlayingBackground">@drawable/drop_shadow_dark</item>
     </style>
@@ -98,87 +65,23 @@
     </style>
 
     <style name="Theme.Dialog.Dark" parent="Theme.Dialog.DarkBase">
-        <item name="colorPrimary">@android:color/black</item>
+
     </style>
 
     <style name="Theme.Dialog.Dark.Panel">
-        <!-- ActionBar overrides -->
-        <item name="android:actionBarStyle">@style/ActionBar.Dark.Panel</item>
-        <item name="windowActionBarOverlay">true</item>
         <!-- Panel background -->
         <item name="nowPlayingBackground">@drawable/drop_shadow_dark</item>
     </style>
 
     <!-- End common themes -->
 
-    <!-- Use custom overflow icon -->
-    <style name="ActionButton.Overflow.CommonBase" parent="Base.Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_menu_moreoverflow_holo_dark</item>
+    <!--Toolbar Styles -->
+    <style name="Toolbar.Dark" parent="Widget.AppCompat.Toolbar">
+        <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
-    <!-- action bar styles -->
-    <style name="ActionBar.Light" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">?colorPrimary</item>
-        <item name="android:backgroundStacked">?colorPrimary</item>
-        <item name="android:backgroundSplit">?colorPrimary</item>
-        <item name="android:icon">@drawable/blank</item>
-        <item name="icon">@drawable/blank</item>
-        <item name="android:title">@string/empty</item>
-        <item name="title">@string/empty</item>
-    </style>
-
-    <style name="ActionBar.Light.Panel">
-        <item name="android:background">@null</item>
-    </style>
-
-    <style name="ActionBar.Dark" parent="Widget.AppCompat.ActionBar.Solid">
-        <item name="android:background">?colorPrimary</item>
-        <item name="android:backgroundStacked">?colorPrimary</item>
-        <item name="android:backgroundSplit">?colorPrimary</item>
-        <item name="android:icon">@drawable/blank</item>
-        <item name="icon">@drawable/blank</item>
-        <item name="android:title">@null</item>
-        <item name="title">@null</item>
-    </style>
-
-    <style name="ActionBar.Dark.Panel">
-        <item name="android:background">@null</item>
-    </style>
-
-    <!-- PopupMenu styles -->
-    <style name="PopupMenu.Light" parent="Widget.AppCompat.Light.PopupMenu">
-        <!--<item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>-->
-    </style>
-
-    <style name="PopupMenu.Dark" parent="Widget.AppCompat.PopupMenu">
-
-    </style>
-
-    <!-- Dropdown list styles -->
-    <style name="DropDownListView.Light" parent="Widget.AppCompat.Light.ListView.DropDown">
-        <!--<item name="android:listSelector">@drawable/item_background_holo_light</item>-->
-    </style>
-
-    <style name="DropDownListView.Dark" parent="Widget.AppCompat.ListView.DropDown">
-        <!--<item name="android:listSelector">@drawable/item_background_holo_dark</item>-->
-    </style>
-
-    <!-- Drop down nav styles -->
-    <style name="DropDownNav.Light" parent="Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <!--<item name="android:background">@drawable/spinner_background_ab_blupheus</item>-->
-        <!--<item name="android:popupBackground">@drawable/menu_dropdown_panel_orpheus</item>-->
-        <!--<item name="android:dropDownSelector">@drawable/selectable_background_blupheus</item>-->
-    </style>
-
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.LightBase.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/Widget.AppCompat.Light.PopupMenu</item>
-        <item name="listPopupWindowStyle">@style/Widget.AppCompat.Light.ListPopupWindow</item>
-        <item name="dropDownListViewStyle">@style/Widget.AppCompat.Light.ListView.DropDown</item>
-        <!--<item name="android:popupMenuStyle">@style/PopupMenu.Light</item>-->
-        <!--<item name="android:dropDownListViewStyle">@style/DropDownListView.Light</item>-->
-        <!--<item name="android:textColor">@android:color/primary_text_light</item>-->
-        <!--<item name="android:listDivider">@drawable/list_divider_holo_light</item>-->
+    <style name="Toolbar.Dark.WhiteOverflow">
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
     </style>
 
 </resources>

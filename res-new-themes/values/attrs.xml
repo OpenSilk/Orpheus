@@ -19,4 +19,7 @@
     <declare-styleable name="ProfileTheme">
         <attr name="isDialog" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="ToolbarTheme">
+        <attr name="toolbarTheme" format="reference"/>
+    </declare-styleable>
 </resources>

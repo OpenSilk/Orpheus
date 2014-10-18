@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.core.lifecycle;
+package org.opensilk.common.mortar;
 
 import javax.inject.Singleton;
 
@@ -27,7 +27,7 @@ import dagger.Provides;
 @Module(
         library = true
 )
-public class LifecycleModule {
+public class PauseAndResumeModule {
     @Provides @Singleton PauseAndResumePresenter providePauseAndResumePresenter() { return new PauseAndResumePresenter(); }
     @Provides PauseAndResumeRegistrar providePauseAndResumeRegistar(PauseAndResumePresenter presenter) { return presenter; }
 }

@@ -16,7 +16,8 @@
 
 package org.opensilk.music.ui2.main;
 
-import org.opensilk.music.ui2.core.HasScope;
+
+import org.opensilk.common.mortar.HasScope;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

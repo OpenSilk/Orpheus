@@ -42,8 +42,8 @@ public class BaseSlidingDialogActivity extends BaseSlidingActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mActionBarHelper.enableHomeAsUp(R.drawable.blank,
-                mIsDialog ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);
+//        mActionBarHelper.enableHomeAsUp(R.drawable.blank,
+//                mIsDialog ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);
 
     }
 

@@ -24,10 +24,10 @@ import android.os.Bundle;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.common.mortar.PauseAndResumeRegistrar;
+import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeRegistrar;
-import org.opensilk.music.ui2.core.lifecycle.PausesAndResumes;
 
 import java.util.concurrent.TimeUnit;
 

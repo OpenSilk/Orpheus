@@ -1,7 +1,7 @@
 
-package org.opensilk.music.ui2.core.lifecycle;
+package org.opensilk.common.mortar;
 
-import org.opensilk.music.ui2.core.HasScope;
+import org.opensilk.common.mortar.HasScope;
 
 /**
  * Implemented by {@link android.app.Activity} instances whose pause / resume state

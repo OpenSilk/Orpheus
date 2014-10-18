@@ -61,7 +61,7 @@ public class FolderPickerActivity extends BaseDialogActivity implements Card.OnC
         setResult(RESULT_CANCELED, getIntent());
 
         // non traditional up nav, we just want to go back
-        mActionBarHelper.enableHomeAsUp(R.drawable.blank, R.drawable.ic_action_arrow_left_white);
+//        mActionBarHelper.enableHomeAsUp(R.drawable.blank, R.drawable.ic_action_arrow_left_white);
         final String action = getIntent().getStringExtra(EXTRA_DIR);
         mActionBarHelper.setTitle(makeTitle(action));
         mActionBarHelper.setSubTitle(makeSubtitle(action));

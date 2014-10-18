@@ -22,7 +22,7 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.AppModule;
 import org.opensilk.music.ui2.core.android.AndroidModule;
-import org.opensilk.music.ui2.core.lifecycle.LifecycleModule;
+import org.opensilk.common.mortar.PauseAndResumeModule;
 import org.opensilk.music.util.GsonParcer;
 
 import javax.inject.Named;
@@ -40,7 +40,7 @@ import rx.Observable;
         injects = LauncherActivity.class,
         includes = {
                 AndroidModule.class,
-                LifecycleModule.class,
+                PauseAndResumeModule.class,
         },
         addsTo = AppModule.class,
         complete = false,
