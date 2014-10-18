@@ -22,6 +22,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import org.opensilk.music.BuildConfig;
+
 import java.lang.ref.WeakReference;
 
 /**

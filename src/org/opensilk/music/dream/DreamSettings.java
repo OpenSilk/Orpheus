@@ -21,7 +21,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.view.MenuItem;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.util.ConfigHelper;

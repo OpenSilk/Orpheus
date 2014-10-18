@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.bus.EventBus;

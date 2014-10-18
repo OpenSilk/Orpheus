@@ -21,7 +21,7 @@ import android.os.Bundle;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Bus;
 

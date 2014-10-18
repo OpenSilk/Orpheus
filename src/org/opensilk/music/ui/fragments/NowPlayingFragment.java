@@ -37,7 +37,7 @@ import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalAlbum;

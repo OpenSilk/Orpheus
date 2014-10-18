@@ -34,7 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.triggertrap.seekarc.SeekArc;
 
 import org.opensilk.music.AppPreferences;

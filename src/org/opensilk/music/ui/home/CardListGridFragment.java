@@ -28,7 +28,7 @@ import android.widget.FrameLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import it.gmariotti.cardslib.library.view.CardListView;
 

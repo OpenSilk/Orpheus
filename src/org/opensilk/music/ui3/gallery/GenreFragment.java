@@ -21,7 +21,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.ui3.core.ListGridFragment;

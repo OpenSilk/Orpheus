@@ -23,7 +23,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;

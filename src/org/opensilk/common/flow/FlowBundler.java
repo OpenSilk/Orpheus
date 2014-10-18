@@ -41,17 +41,17 @@ public class FlowBundler {
         this.parcer = parcer;
     }
 
-    public AppFlow onCreate(Bundle savedInstanceState) {
-        checkArgument(flow == null, "Flow already created.");
-        Backstack backstack;
-        if (savedInstanceState != null && savedInstanceState.containsKey(FLOW_KEY)) {
-            backstack = Backstack.from(savedInstanceState.getParcelable(FLOW_KEY), parcer);
-        } else {
-            backstack = Backstack.fromUpChain(defaultScreen);
-        }
-        flow = new Flow(backstack, listener);
-        return new AppFlow(flow);
-    }
+//    public AppFlow onCreate(Bundle savedInstanceState) {
+//        checkArgument(flow == null, "Flow already created.");
+//        Backstack backstack;
+//        if (savedInstanceState != null && savedInstanceState.containsKey(FLOW_KEY)) {
+//            backstack = Backstack.from(savedInstanceState.getParcelable(FLOW_KEY), parcer);
+//        } else {
+//            backstack = Backstack.fromUpChain(defaultScreen);
+//        }
+//        flow = new Flow(backstack, listener);
+//        return new AppFlow(flow);
+//    }
 
     public void onSaveInstanceState(Bundle outState) {
         Backstack backstack = getBackstackToSave(flow.getBackstack());

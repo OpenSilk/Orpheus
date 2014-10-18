@@ -20,7 +20,7 @@ import android.content.Context;
 import android.view.View;
 import android.widget.PopupMenu;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import butterknife.OnClick;
 

@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.model.Playlist;
 import com.mobeta.android.dslv.DragSortListView;
 import com.squareup.otto.Bus;

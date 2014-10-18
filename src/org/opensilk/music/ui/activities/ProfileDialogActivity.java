@@ -21,7 +21,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 
 import com.andrew.apollo.Config;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.ArtistFragment;

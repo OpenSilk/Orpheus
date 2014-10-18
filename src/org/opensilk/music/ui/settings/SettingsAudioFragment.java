@@ -12,7 +12,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.text.TextUtils;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.google.android.gms.common.ConnectionResult;

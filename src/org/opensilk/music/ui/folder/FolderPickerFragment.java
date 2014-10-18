@@ -22,7 +22,7 @@ import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.view.View;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.filebrowser.FileBrowserArgs;
 import org.opensilk.filebrowser.FileItem;

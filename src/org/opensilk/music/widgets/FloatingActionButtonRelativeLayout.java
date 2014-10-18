@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import hugo.weaving.DebugLog;
 import timber.log.Timber;

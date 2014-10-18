@@ -32,7 +32,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 
 import org.opensilk.music.GraphHolder;
 import org.opensilk.music.util.PriorityAsyncTask;

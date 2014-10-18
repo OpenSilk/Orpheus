@@ -24,7 +24,7 @@ import android.view.ViewGroup;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;

@@ -30,7 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.filebrowser.FileItem;

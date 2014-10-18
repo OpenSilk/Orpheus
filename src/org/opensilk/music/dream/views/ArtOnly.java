@@ -20,7 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.widgets.FullScreenArtworkImageView;

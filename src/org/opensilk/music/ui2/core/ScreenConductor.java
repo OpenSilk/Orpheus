@@ -19,7 +19,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import flow.Flow;
 import flow.Layouts;

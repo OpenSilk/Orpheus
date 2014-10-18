@@ -19,7 +19,7 @@ package org.opensilk.music.dream;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 /**
  * Created by drew on 4/13/14.

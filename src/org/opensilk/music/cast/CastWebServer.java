@@ -24,8 +24,8 @@ import android.support.v4.util.LruCache;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.R;
+import org.opensilk.music.BuildConfig;
+import org.opensilk.music.R;
 import com.android.volley.toolbox.ByteArrayPool;
 import com.android.volley.toolbox.PoolingByteArrayOutputStream;
 

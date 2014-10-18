@@ -30,7 +30,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.apache.http.util.VersionInfo;
 import org.opensilk.music.artwork.ArtworkImageView;

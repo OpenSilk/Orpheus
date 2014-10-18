@@ -35,6 +35,7 @@ import org.opensilk.cast.manager.BaseCastManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.cast.CastUtils;
+import org.opensilk.music.R;
 
 import hugo.weaving.DebugLog;
 import timber.log.Timber;

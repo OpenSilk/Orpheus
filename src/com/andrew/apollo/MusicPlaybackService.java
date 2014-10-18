@@ -64,12 +64,14 @@ import org.opensilk.cast.helpers.CastServiceConnectionCallback;
 import org.opensilk.cast.helpers.LocalCastServiceManager;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.CastPreferences;
+import org.opensilk.music.BuildConfig;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.cast.CastWebServer;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.R;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;

@@ -29,7 +29,7 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.api.model.spi.Bundleable;
 

@@ -23,7 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Bus;

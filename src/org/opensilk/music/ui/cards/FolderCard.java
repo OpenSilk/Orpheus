@@ -23,7 +23,7 @@ import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.squareup.otto.Bus;
 
 import org.opensilk.filebrowser.FileItem;

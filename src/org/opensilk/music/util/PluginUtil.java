@@ -27,7 +27,7 @@ import android.preference.PreferenceManager;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.PluginInfo;

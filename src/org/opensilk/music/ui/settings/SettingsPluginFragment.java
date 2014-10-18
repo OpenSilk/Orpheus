@@ -23,7 +23,7 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.util.PluginUtil;

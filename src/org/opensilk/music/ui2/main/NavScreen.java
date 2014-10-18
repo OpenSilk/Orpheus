@@ -21,7 +21,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;

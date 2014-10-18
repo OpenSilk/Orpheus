@@ -21,7 +21,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;

@@ -20,7 +20,7 @@ import android.content.Context;
 import android.support.v7.app.MediaRouteChooserDialog;
 import android.support.v7.media.MediaRouter;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 /**

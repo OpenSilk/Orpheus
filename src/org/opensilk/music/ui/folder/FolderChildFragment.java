@@ -27,7 +27,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ListView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.filebrowser.FileBrowserArgs;
 import org.opensilk.filebrowser.FileItem;

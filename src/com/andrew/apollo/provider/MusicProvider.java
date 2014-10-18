@@ -32,8 +32,8 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.R;
+import org.opensilk.music.BuildConfig;
+import org.opensilk.music.R;
 
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.PriorityAsyncTask;

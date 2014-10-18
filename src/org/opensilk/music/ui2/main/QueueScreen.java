@@ -18,7 +18,7 @@ package org.opensilk.music.ui2.main;
 
 import android.os.Bundle;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.ui2.core.lifecycle.PauseAndResumeRegistrar;
 import org.opensilk.music.ui2.core.lifecycle.PausesAndResumes;

@@ -27,7 +27,7 @@ import android.util.TypedValue;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.ui3.theme.widget.CompatSeekBar;
 

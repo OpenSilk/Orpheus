@@ -19,7 +19,7 @@ package org.opensilk.music.widgets;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkType;

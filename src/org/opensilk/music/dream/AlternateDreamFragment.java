@@ -33,7 +33,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.service.dreams.DreamService;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import java.util.ArrayList;
 import java.util.List;

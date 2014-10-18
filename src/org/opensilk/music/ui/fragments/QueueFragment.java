@@ -32,7 +32,7 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.TranslateAnimation;
 
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.utils.ApolloUtils;

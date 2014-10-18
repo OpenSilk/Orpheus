@@ -26,6 +26,7 @@ import android.widget.RemoteViews;
 import com.andrew.apollo.utils.ApolloUtils;
 
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
+import org.opensilk.music.R;
 
 /**
  * Builds the notification for Apollo's service. Jelly Bean and higher uses the

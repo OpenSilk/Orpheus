@@ -20,7 +20,7 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.ui.modules.ActionBarController;

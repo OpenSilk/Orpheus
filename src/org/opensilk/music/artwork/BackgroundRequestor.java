@@ -19,7 +19,7 @@ package org.opensilk.music.artwork;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 import com.android.volley.Request;
 
 import org.opensilk.music.api.meta.ArtInfo;

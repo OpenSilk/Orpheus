@@ -39,7 +39,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.ui.home.adapter.SearchAdapter;
 import org.opensilk.music.ui.modules.DrawerHelper;

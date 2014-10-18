@@ -27,7 +27,7 @@ import android.view.View;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.etsy.android.grid.StaggeredGridView;
 
 import org.opensilk.music.AppPreferences;

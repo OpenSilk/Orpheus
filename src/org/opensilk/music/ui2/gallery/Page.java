@@ -17,7 +17,7 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import mortar.Blueprint;
 

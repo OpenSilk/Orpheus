@@ -18,7 +18,7 @@ package org.opensilk.music.ui2.folder;
 
 import android.os.Bundle;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.music.loader.AsyncLoader;

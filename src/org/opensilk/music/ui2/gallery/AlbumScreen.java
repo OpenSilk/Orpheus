@@ -21,7 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.loader.mediastore.AlbumsLoader;

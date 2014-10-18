@@ -50,7 +50,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageButton;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 /**
  *

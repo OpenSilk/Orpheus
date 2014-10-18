@@ -29,7 +29,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.etsy.android.grid.StaggeredGridView;
 
 import org.opensilk.music.api.model.Album;

@@ -22,7 +22,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.Lists;

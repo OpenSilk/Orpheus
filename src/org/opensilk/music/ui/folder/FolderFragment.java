@@ -24,7 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.ApolloUtils;

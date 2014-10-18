@@ -25,8 +25,8 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.R;
+import org.opensilk.music.BuildConfig;
+import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;

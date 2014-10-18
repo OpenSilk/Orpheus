@@ -19,7 +19,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.format.Capitalize;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.utils.MusicUtils;

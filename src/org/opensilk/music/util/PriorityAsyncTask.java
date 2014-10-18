@@ -19,7 +19,7 @@ package org.opensilk.music.util;
 import android.os.*;
 import android.os.Process;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;

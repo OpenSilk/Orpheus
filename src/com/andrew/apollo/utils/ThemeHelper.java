@@ -29,7 +29,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 /**
  * Created by drew on 2/25/14.

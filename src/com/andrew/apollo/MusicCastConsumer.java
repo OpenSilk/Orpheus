@@ -33,6 +33,7 @@ import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.cast.CastUtils;
+import org.opensilk.music.R;
 
 /**
  * Created by drew on 7/4/14.

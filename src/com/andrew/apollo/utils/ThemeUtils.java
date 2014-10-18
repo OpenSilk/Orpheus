@@ -30,8 +30,8 @@ import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.R;
+import org.opensilk.music.BuildConfig;
+import org.opensilk.music.R;
 
 /**
  * In order to implement the theme chooser for Apollo, this class returns a

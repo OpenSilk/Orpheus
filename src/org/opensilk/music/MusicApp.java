@@ -26,7 +26,7 @@ import android.os.StrictMode;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;

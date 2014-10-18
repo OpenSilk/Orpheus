@@ -27,7 +27,7 @@ import android.util.TypedValue;
 import android.view.View;
 
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 

@@ -28,7 +28,7 @@ import android.preference.PreferenceScreen;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.iab.IabHelper;
 import org.opensilk.music.iab.IabUtil;

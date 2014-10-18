@@ -19,7 +19,7 @@ package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.ui2.util.ViewStateSaver;

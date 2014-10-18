@@ -24,7 +24,7 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.LibraryInfo;
 import com.andrew.apollo.utils.ApolloUtils;

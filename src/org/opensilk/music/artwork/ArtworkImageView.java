@@ -26,7 +26,7 @@ import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 import com.android.volley.VolleyError;
 
 import org.opensilk.music.MusicApp;

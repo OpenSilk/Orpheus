@@ -18,7 +18,7 @@ package org.opensilk.music.artwork;
 
 import android.content.Context;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;

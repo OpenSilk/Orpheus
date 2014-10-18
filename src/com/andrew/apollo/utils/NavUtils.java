@@ -25,7 +25,7 @@ import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 
 import com.andrew.apollo.Config;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;

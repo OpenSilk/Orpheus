@@ -16,7 +16,7 @@
 
 package org.opensilk.music.ui.cards.event;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 /**
  * Created by drew on 7/16/14.

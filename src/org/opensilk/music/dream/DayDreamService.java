@@ -29,8 +29,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.R;
+import org.opensilk.music.BuildConfig;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.squareup.otto.Subscribe;
 

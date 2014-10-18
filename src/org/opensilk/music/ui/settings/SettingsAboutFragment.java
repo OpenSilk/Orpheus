@@ -3,8 +3,8 @@ package org.opensilk.music.ui.settings;
 import android.os.Bundle;
 import android.preference.Preference;
 
-import com.andrew.apollo.BuildConfig;
-import com.andrew.apollo.R;
+import org.opensilk.music.BuildConfig;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.ApolloUtils;
 
 /**

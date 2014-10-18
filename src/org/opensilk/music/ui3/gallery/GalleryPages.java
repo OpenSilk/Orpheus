@@ -18,7 +18,7 @@ package org.opensilk.music.ui3.gallery;
 
 import android.support.v4.app.Fragment;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 /**
  * Created by drew on 6/28/14.

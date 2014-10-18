@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 

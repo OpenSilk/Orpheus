@@ -3,7 +3,7 @@ package org.opensilk.music.ui.cards.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.ui.cards.AbsBasicCard;

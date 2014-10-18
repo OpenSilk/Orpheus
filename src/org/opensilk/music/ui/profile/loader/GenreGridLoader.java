@@ -19,7 +19,7 @@ package org.opensilk.music.ui.profile.loader;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;

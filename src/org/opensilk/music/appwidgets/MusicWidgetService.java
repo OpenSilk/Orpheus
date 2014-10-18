@@ -40,7 +40,7 @@ import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 

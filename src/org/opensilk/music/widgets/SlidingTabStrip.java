@@ -26,7 +26,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 class SlidingTabStrip extends LinearLayout {
 

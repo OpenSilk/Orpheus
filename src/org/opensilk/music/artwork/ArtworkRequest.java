@@ -24,7 +24,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;

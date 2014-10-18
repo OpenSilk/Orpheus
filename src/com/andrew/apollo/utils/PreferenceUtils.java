@@ -16,7 +16,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 /**
  * A collection of helpers designed to get and set various preferences across

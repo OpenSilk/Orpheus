@@ -18,7 +18,7 @@ package org.opensilk.music.ui2.library;
 
 import android.os.Bundle;
 
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.model.Album;

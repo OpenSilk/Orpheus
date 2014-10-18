@@ -40,7 +40,7 @@ import android.widget.Toast;
 
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.R;
+import org.opensilk.music.R;
 import org.opensilk.music.util.OrderPreservingCursor;
 
 import com.andrew.apollo.model.LocalAlbum;

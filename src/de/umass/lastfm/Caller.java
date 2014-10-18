@@ -29,7 +29,7 @@ package de.umass.lastfm;
 import android.content.Context;
 import android.util.Log;
 
-import com.andrew.apollo.BuildConfig;
+import org.opensilk.music.BuildConfig;
 import com.andrew.apollo.Config;
 
 import org.w3c.dom.Document;
