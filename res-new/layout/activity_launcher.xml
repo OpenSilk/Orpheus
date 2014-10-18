@@ -24,7 +24,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
+    <include layout="@layout/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <!-- The drawer is given a fixed width in dp and extends the full height of
          the container. -->
