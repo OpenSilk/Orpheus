@@ -18,7 +18,9 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
+import android.view.View;
 
+import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.music.R;
 
 import org.opensilk.music.ui2.main.MainScreen;
@@ -54,7 +56,9 @@ public class GalleryScreen implements Blueprint {
 
     @dagger.Module (
             addsTo = MainScreen.Module.class,
-            injects = GalleryView.class
+            injects = {
+                    GalleryView.class,
+            }
     )
     public static class Module {
 
@@ -63,9 +67,12 @@ public class GalleryScreen implements Blueprint {
     @Singleton
     public static class Presenter extends ViewPresenter<GalleryView> {
 
+        final ScreenScoper screenScoper;
+
         @Inject
-        public Presenter() {
-            Timber.v("new Presenter(Gallery)");
+        public Presenter(ScreenScoper screenScoper) {
+            Timber.v("new GalleryScreen.Presenter()");
+            this.screenScoper = screenScoper;
         }
 
         @Override
@@ -75,7 +82,6 @@ public class GalleryScreen implements Blueprint {
         }
 
         @Override
-        @DebugLog
         protected void onExitScope() {
             Timber.v("onExitScope()");
             super.onExitScope();
@@ -87,17 +93,16 @@ public class GalleryScreen implements Blueprint {
             super.onLoad(savedInstanceState);
 
             getView().setup(Arrays.asList(Page.values()), 4);
-            ViewStateSaver.restore(getView(), savedInstanceState, "pager");
+//            ViewStateSaver.restore(getView(), savedInstanceState, "pager");
         }
 
         @Override
-        @DebugLog
         protected void onSave(Bundle outState) {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
-            if (getView() != null) {
-                ViewStateSaver.save(getView(), outState, "pager");
-            }
+//            if (getView() != null) {
+//                ViewStateSaver.save(getView(), outState, "pager");
+//            }
         }
 
     }

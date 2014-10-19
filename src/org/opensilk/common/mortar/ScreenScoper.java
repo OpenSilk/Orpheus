@@ -41,7 +41,6 @@ public class ScreenScoper {
      */
     public MortarScope getScreenScope(Resources resources, MortarScope parentScope,
                                       final MortarScreen screen) {
-        Class<MortarScreen> clss = ObjectUtils.getClass(screen);
         ModuleFactory moduleFactory = getModuleFactory(screen);
         MortarScope childScope;
         if (moduleFactory != NO_FACTORY) {

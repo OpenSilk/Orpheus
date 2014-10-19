@@ -18,28 +18,34 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.SparseArray;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.MortarScreen;
+import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.widgets.SlidingTabLayout;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import flow.Layouts;
 import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarScope;
+import mortar.Presenter;
+import mortar.ViewPresenter;
 
 /**
  * Created by drew on 10/3/14.
@@ -74,54 +80,50 @@ public class GalleryView extends LinearLayout {
     }
 
     public void setup(List<Page> pages, int startPage) {
-        Adapter adapter = new Adapter(getContext(), pages);
+        Adapter adapter = new Adapter(pages);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(startPage);
         tabBar.setViewPager(viewPager);
     }
 
-    @Override
-    public void saveHierarchyState(SparseArray<Parcelable> container) {
-        super.saveHierarchyState(container);
-//        viewPager.saveHierarchyState(container);
-    }
-
-    @Override
-    public void restoreHierarchyState(SparseArray<Parcelable> container) {
-        super.restoreHierarchyState(container);
-//        viewPager.restoreHierarchyState(container);
-    }
-
-    public static class Adapter extends PagerAdapter {
-        private final Context context;
+    class Adapter extends PagerAdapter {
         private final List<Page> pages;
 
-        public Adapter(Context context, Page[] pages) {
-            this(context, Arrays.asList(pages));
+        public Adapter(Page[] pages) {
+            this(Arrays.asList(pages));
         }
 
-        public Adapter(Context context, List<Page> pages) {
-            this.context = context;
+        public Adapter(List<Page> pages) {
             this.pages = pages;
         }
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            Blueprint screen = initScreen(pages.get(position).clazz);
-            MortarScope myScope = Mortar.getScope(context);
-            MortarScope newChildScope = myScope.requireChild(screen);
-            Context childContext = newChildScope.createContext(context);
-            android.view.View newChild = Layouts.createView(childContext, screen);
+            Screen screen = pages.get(position).screen;
+            // Attach our child screen
+            MortarScope newChildScope = presenter.screenScoper.getScreenScope(getContext(), screen);
+            // create new scoped context (used to later obtain the child scope)
+            Context newChildContext = newChildScope.createContext(getContext());
+            // resolve the presenter for the child screen
+            ViewPresenter<RecyclerView> childPresenter = obtainPresenter(screen, newChildScope);
+            // inflate the recyclerview
+            RecyclerView newChild = inflate(newChildContext, R.layout.gallery_recyclerview, container, false);
+            // add the new view;
             container.addView(newChild);
+            // attach the view to the presenter
+            childPresenter.takeView(newChild);
             return newChild;
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            android.view.View oldChild = (android.view.View) object;
-            MortarScope myScope = Mortar.getScope(context);
+            RecyclerView oldChild = (RecyclerView) object;
+            MortarScope myScope = Mortar.getScope(getContext());
             MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
+            ViewPresenter<RecyclerView> oldChildPresenter = obtainPresenter(pages.get(position).screen, oldChildScope);
+            //TODO not sure the best order here
             myScope.destroyChild(oldChildScope);
+            oldChildPresenter.dropView(oldChild);
             container.removeView(oldChild);
         }
 
@@ -137,16 +139,25 @@ public class GalleryView extends LinearLayout {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return context.getString(pages.get(position).titleResource);
+            return getContext().getString(pages.get(position).titleResource).toUpperCase(Locale.getDefault());
         }
 
-        private static <T extends Blueprint> T initScreen(Class<T> clazz) throws IllegalArgumentException {
-            try {
-                return clazz.getConstructor().newInstance();
-            } catch (Exception e) {
-                throw new IllegalArgumentException(e.getCause());
-            }
+
+    }
+
+    static <T extends View> T inflate(Context context, int layout, ViewGroup parent, boolean attachToRoot) {
+        return (T) LayoutInflater.from(context).inflate(layout, parent, attachToRoot);
+    }
+
+    static ViewPresenter<RecyclerView> obtainPresenter(MortarScreen screen, MortarScope scope) {
+        Class<?> screenType = ObjectUtils.getClass(screen);
+        WithRecyclerViewPresenter withPresenter = screenType.getAnnotation(WithRecyclerViewPresenter.class);
+        if (withPresenter == null) {
+            throw new IllegalArgumentException("Screen not annotated with @WithPresenter");
         }
+        Class<?> presenterClass = withPresenter.value();
+        Object presenter = scope.getObjectGraph().get(presenterClass);
+        return (ViewPresenter<RecyclerView>) presenter;
     }
 
 }

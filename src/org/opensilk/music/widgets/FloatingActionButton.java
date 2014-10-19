@@ -17,6 +17,7 @@
 
 package org.opensilk.music.widgets;
 
+import android.animation.StateListAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;

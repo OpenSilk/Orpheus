@@ -115,8 +115,8 @@
     <style name="SingleLineTextView">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
-        <item name="android:layout_gravity">left|center_vertical</item>
-        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+        <item name="android:gravity">start|center_vertical</item>
     </style>
 
     <!-- PANEL -->

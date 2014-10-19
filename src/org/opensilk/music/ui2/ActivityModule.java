@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.otto.Bus;
 
+import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.music.AppModule;
 import org.opensilk.music.ui2.core.android.AndroidModule;
 import org.opensilk.common.mortar.PauseAndResumeModule;
@@ -51,6 +52,11 @@ public class ActivityModule {
     @Provides @Singleton @Named("activity")
     public Bus provideEventBus() {
         return new Bus("activity");
+    }
+
+    @Provides @Singleton
+    public ScreenScoper provideScreenScoper() {
+        return new ScreenScoper();
     }
 
     // Flow backstack

@@ -38,6 +38,6 @@ public class FlowModule {
         return new GsonBuilder().create();
     }
     @Provides @Singleton public Parcer<Object> provideParcer(Gson gson) {
-        return new org.opensilk.music.util.GsonParcer<Object>(gson);
+        return new GsonParcer<Object>(gson);
     }
 }

@@ -15,29 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui2.gallery;
+package org.opensilk.music.ui2.loader;
 
-import org.opensilk.common.flow.Screen;
-import org.opensilk.music.R;
+import android.content.Context;
+import android.database.Cursor;
 
-import mortar.Blueprint;
+import com.andrew.apollo.model.LocalAlbum;
+
+import org.opensilk.music.api.model.Album;
+import org.opensilk.music.util.Uris;
+import org.opensilk.silkdagger.qualifier.ForApplication;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
- * Created by drew on 10/3/14.
+ * Created by drew on 10/19/14.
  */
-public enum Page {
-//    PLAYLIST(AlbumScreen.class, R.string.page_playlists),
-    //    RECENT(R.string.page_recent),
-    ARTIST(new ArtistsScreen(), R.string.page_artists),
-    ALBUM(new AlbumsScreen(), R.string.page_albums);//,
-//    SONG(AlbumScreen.class, R.string.page_songs),
-//    GENRE(new ArtistsScreen(), R.string.page_genres);
+@Singleton
+public class AlbumsLoader extends MediaStoreLoader<LocalAlbum> {
 
-    public final Screen screen;
-    public final int titleResource;
+    @Inject
+    public AlbumsLoader(@ForApplication Context context) {
+        super(context);
+        setUri(Uris.EXTERNAL_MEDIASTORE_ALBUMS);
 
-    private Page(Screen screen, int titleResource) {
-        this.screen = screen;
-        this.titleResource = titleResource;
+    }
+
+    @Override
+    protected LocalAlbum makeFromCursor(Cursor c) {
+        return null;
     }
 }

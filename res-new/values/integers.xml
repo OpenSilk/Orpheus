@@ -20,4 +20,5 @@
     <integer name="grid_cols_horizontal">4</integer>
     <integer name="profile_grid_cols_vertical">2</integer>
     <integer name="profile_grid_cols_horizontal">4</integer>
+    <integer name="grid_columns">2</integer>
 </resources>
