@@ -61,22 +61,26 @@ public class GalleryView extends LinearLayout {
 
     public GalleryView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (isInEditMode()) return;
-        Mortar.inject(context, this);
+        if (!isInEditMode()) {
+            Mortar.inject(context, this);
+        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        if (isInEditMode()) return;
-        ButterKnife.inject(this);
-        presenter.takeView(this);
+        if (!isInEditMode()) {
+            ButterKnife.inject(this);
+            presenter.takeView(this);
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        presenter.dropView(this);
+        if (!isInEditMode()) {
+            presenter.dropView(this);
+        }
     }
 
     public void setup(List<Page> pages, int startPage) {

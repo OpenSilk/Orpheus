@@ -15,31 +15,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui2;
+package org.opensilk.music.ui2.gallery;
 
 import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opensilk.music.MortarTestActivity;
+import org.opensilk.music.R;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.util.ActivityController;
+
+import mortar.Mortar;
+import mortar.MortarScope;
 
 import static org.fest.assertions.api.ANDROID.assertThat;
 
 /**
- * Created by drew on 10/17/14.
+ * Created by drew on 10/19/14.
  */
 @Config(
         emulateSdk = 18,
         reportSdk = 18
 )
 @RunWith(RobolectricTestRunner.class)
-public class LauncherActivityTest {
+public class GalleryViewTest {
+
+    GalleryView galleryView;
+
+    @Before
+    public void setup() {
+        MortarTestActivity activity = Robolectric.buildActivity(MortarTestActivity.class).create().get();
+        MortarScope galleryScope = activity.mActivityScope.requireChild(new GalleryScreen());
+        Context galleryContext = galleryScope.createContext(activity);
+        galleryView = (GalleryView) LayoutInflater.from(galleryContext).inflate(R.layout.gallery_pager, null);
+    }
 
     @Test
-    public void thisTestAlwaysPasses() {
-        org.junit.Assert.assertTrue(true);
+    public void galleryViewWasInflated() {
+        assertThat(galleryView).isNotNull();
     }
 
 }
