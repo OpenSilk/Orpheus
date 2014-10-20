@@ -47,7 +47,6 @@ import rx.subscriptions.CompositeSubscription;
 public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.ViewHolder> {
 
     private LayoutInflater inflater;
-    private Drawable overflowDrawable;
     protected final List<T> items;
 
 
@@ -79,13 +78,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         if (inflater == null) {
             inflater = LayoutInflater.from(parent.getContext());
         }
-        if (overflowDrawable == null) {
-            // new in support-v7:21 but hidden
-            TintManager tm = new TintManager(parent.getContext());
-            overflowDrawable = tm.getDrawable(R.drawable.abc_ic_menu_moreoverflow_mtrl_alpha);
-        }
         View view = inflater.inflate(viewType, parent, false);
-        return new ViewHolder(view, overflowDrawable);
+        return new ViewHolder(view);
     }
 
     @Override
@@ -135,10 +129,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         CompositeSubscription subscriptions;
         int artNumber;
 
-        public ViewHolder(View itemView, Drawable overflowDrawable) {
+        public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
-            overflow.setImageDrawable(overflowDrawable);
             subscriptions = new CompositeSubscription();
         }
 

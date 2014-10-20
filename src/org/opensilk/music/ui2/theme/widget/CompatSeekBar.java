@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui3.theme.widget;
+package org.opensilk.music.ui2.theme.widget;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

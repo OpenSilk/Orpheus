@@ -19,15 +19,13 @@ package org.opensilk.music.ui2.main;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.view.View;
 
 import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.music.ui2.ActivityModule;
 import org.opensilk.music.ui2.core.FlowOwner;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
-import org.opensilk.music.ui3.theme.Themer;
-import org.opensilk.music.widgets.FloatingActionButton;
+import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -43,23 +41,17 @@ import mortar.MortarScope;
 import rx.Observable;
 import rx.Observer;
 import rx.Scheduler;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.AndroidObservable;
 import rx.android.observables.ViewObservable;
-import rx.android.operators.OperatorBroadcastRegister;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.android.subscriptions.AndroidSubscriptions;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.observers.Observers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
-
-import static org.opensilk.music.util.RxUtil.isSubscribed;
-import static org.opensilk.music.util.RxUtil.notSubscribed;
 
 /**
  * Created by drew on 10/5/14.

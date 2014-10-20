@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui3.theme;
+package org.opensilk.music.ui2.theme;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -30,15 +28,14 @@ import android.widget.SeekBar;
 
 import org.opensilk.music.R;
 
-import org.opensilk.music.ui3.theme.widget.CompatSeekBar;
-
-import hugo.weaving.DebugLog;
-import timber.log.Timber;
+import org.opensilk.music.ui2.theme.widget.CompatSeekBar;
 
 /**
  * Created by drew on 10/12/14.
  */
 public class Themer {
+
+    private static final TypedValue sTypedValue = new TypedValue();
 
     public static TypedValue resolveAttr(Context context, int attr) {
         TypedValue outValue = new TypedValue();
@@ -47,11 +44,11 @@ public class Themer {
     }
 
     public static int getPrimaryColor(Context context) {
-        return resolveAttr(context, R.attr.colorPrimary).data;
+        return getThemeAttrColor(context, R.attr.colorPrimary);
     }
 
     public static int getAccentColor(Context context) {
-        return resolveAttr(context, R.attr.colorAccent).data;
+        return getThemeAttrColor(context, R.attr.colorAccent);
     }
 
     public static int setColorAlpha(int color, int alpha) {
@@ -110,15 +107,29 @@ public class Themer {
     }
 
     /**
-     * Whether or not theme is light
-     *
-     * from AOSP see @MediaRouterThemeHelper.java
-     * @param context
-     * @return
+     * TintManager (support-v7:21)
+     */
+    public static int getThemeAttrColor(Context context, int attr) {
+        synchronized (sTypedValue) {
+            if (context.getTheme().resolveAttribute(attr, sTypedValue, true)) {
+                if (sTypedValue.type >= TypedValue.TYPE_FIRST_INT
+                        && sTypedValue.type <= TypedValue.TYPE_LAST_INT) {
+                    return sTypedValue.data;
+                } else if (sTypedValue.type == TypedValue.TYPE_STRING) {
+                    return context.getResources().getColor(sTypedValue.resourceId);
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * MediaRouterThemeHelper (support-v7)
      */
     public static boolean isLightTheme(Context context) {
-        TypedValue value = new TypedValue();
-        return context.getTheme().resolveAttribute(R.attr.isLightTheme, value, true) && value.data != 0;
+        synchronized (sTypedValue) {
+            return context.getTheme().resolveAttribute(R.attr.isLightTheme, sTypedValue, true) && sTypedValue.data != 0;
+        }
     }
 
 }

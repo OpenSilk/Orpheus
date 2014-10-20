@@ -25,13 +25,12 @@ import android.widget.TextView;
 import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.ui3.theme.Themer;
+import org.opensilk.music.ui2.theme.Themer;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import hugo.weaving.DebugLog;
 import mortar.Mortar;
 
 /**

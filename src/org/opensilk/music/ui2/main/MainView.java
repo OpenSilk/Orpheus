@@ -28,15 +28,12 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.Toast;
 
 import org.opensilk.music.R;
 
-import org.apache.http.util.VersionInfo;
-import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.ui2.core.CanShowScreen;
 import org.opensilk.music.ui2.core.ScreenConductor;
-import org.opensilk.music.ui3.theme.Themer;
+import org.opensilk.music.ui2.theme.Themer;
 import org.opensilk.music.widgets.FloatingActionButton;
 import org.opensilk.music.widgets.FloatingActionButtonRelativeLayout;
 

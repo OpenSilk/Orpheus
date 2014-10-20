@@ -34,7 +34,7 @@ import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.music.ui2.main.NavScreen;
-import org.opensilk.music.ui3.theme.Themer;
+import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.UUID;
 
