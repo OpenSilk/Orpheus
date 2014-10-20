@@ -54,8 +54,8 @@ public class SettingsMainFragment extends Fragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ActionBarActivity activity = (ActionBarActivity) getActivity();
-        activity.getSupportActionBar().setTitle(R.string.settings_title);
+//        ActionBarActivity activity = (ActionBarActivity) getActivity();
+//        activity.getSupportActionBar().setTitle(R.string.settings_title);
 
         final Intent intent = getActivity().getIntent();
         if (intent != null && intent.getAction() != null) {

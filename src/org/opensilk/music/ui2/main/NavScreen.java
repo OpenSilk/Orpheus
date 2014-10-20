@@ -19,18 +19,23 @@ package org.opensilk.music.ui2.main;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
+import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.loader.AsyncLoader;
 import org.opensilk.music.loader.PluginInfoLoader;
+import org.opensilk.music.ui.settings.SettingsActivity;
+import org.opensilk.music.ui2.event.StartActivityForResult;
 
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import flow.Flow;
@@ -69,12 +74,14 @@ public class NavScreen implements Blueprint {
     public static class Presenter extends ViewPresenter<NavView> implements AsyncLoader.Callback<PluginInfo> {
 
         final Flow flow;
+        final Bus bus;
         final DrawerPresenter drawerPresenter;
         final PluginInfoLoader loader;
 
         @Inject
-        public Presenter(Flow flow, DrawerPresenter drawerPresenter, PluginInfoLoader loader) {
+        public Presenter(Flow flow, @Named("activity") Bus bus, DrawerPresenter drawerPresenter, PluginInfoLoader loader) {
             this.flow = flow;
+            this.bus = bus;
             this.drawerPresenter = drawerPresenter;
             this.loader = loader;
         }
@@ -148,7 +155,7 @@ public class NavScreen implements Blueprint {
         }
 
         public void openSettings(Context context) {
-            NavUtils.openSettings((Activity)context);
+            bus.post(new StartActivityForResult(new Intent(context, SettingsActivity.class), StartActivityForResult.APP_REQUEST_SETTINGS));
         }
     }
 }

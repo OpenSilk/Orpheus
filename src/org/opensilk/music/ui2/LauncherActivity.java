@@ -1,5 +1,7 @@
 package org.opensilk.music.ui2;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -265,6 +267,25 @@ public class LauncherActivity extends ActionBarActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
+            case StartActivityForResult.APP_REQUEST_SETTINGS:
+                switch (resultCode) {
+                    case ActivityResult.RESULT_RESTART_APP:
+                        // Hack to force a refresh for our activity for eg theme change
+                        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        PendingIntent pi = PendingIntent.getActivity(this, 0,
+                                getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName()),
+                                PendingIntent.FLAG_CANCEL_CURRENT);
+                        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+700, pi);
+                        finish();
+                        break;
+                    case ActivityResult.RESULT_RESTART_FULL:
+                        //TODO
+//                        killServiceOnExit = true;
+                        onActivityResult(StartActivityForResult.APP_REQUEST_SETTINGS,
+                                ActivityResult.RESULT_RESTART_APP, data);
+                        break;
+                }
+                break;
             case StartActivityForResult.PLUGIN_REQUEST_LIBRARY:
             case StartActivityForResult.PLUGIN_REQUEST_SETTINGS:
                 mBus.post(new ActivityResult(data, requestCode, resultCode));

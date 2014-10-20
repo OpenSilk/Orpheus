@@ -24,6 +24,7 @@ import android.content.Intent;
 public class StartActivityForResult {
     public static final int PLUGIN_REQUEST_LIBRARY = 1001;
     public static final int PLUGIN_REQUEST_SETTINGS = 1002;
+    public static final int APP_REQUEST_SETTINGS = 1003;
 
     public final Intent intent;
     public final int reqCode;

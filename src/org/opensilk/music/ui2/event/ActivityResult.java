@@ -18,10 +18,15 @@ package org.opensilk.music.ui2.event;
 
 import android.content.Intent;
 
+import static android.app.Activity.RESULT_FIRST_USER;
+
 /**
  * Created by drew on 10/7/14.
  */
 public class ActivityResult {
+
+    public static final int RESULT_RESTART_APP = RESULT_FIRST_USER << 1;
+    public static final int RESULT_RESTART_FULL = RESULT_FIRST_USER << 2;
 
     public final Intent intent;
     public final int reqCode;
