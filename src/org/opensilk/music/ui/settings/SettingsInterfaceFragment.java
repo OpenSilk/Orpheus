@@ -51,16 +51,17 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference == mThemeList) {
-            String newTheme = (String) newValue;
-            String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName();
-            if (PreferenceUtils.getInstance(getActivity()).wantDarkTheme()) {
-                newTheme += "DARK"; //Chooser only has reg themes, so append dark
-            }
-            if (!newTheme.equalsIgnoreCase(currentTheme)) {
-                updateThemeIcon(newTheme);
-                applyTheme(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
-                doRestart();
-            }
+            new ThemePickerDialogFragment().show(getFragmentManager(), null);
+//            String newTheme = (String) newValue;
+//            String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName();
+//            if (PreferenceUtils.getInstance(getActivity()).wantDarkTheme()) {
+//                newTheme += "DARK"; //Chooser only has reg themes, so append dark
+//            }
+//            if (!newTheme.equalsIgnoreCase(currentTheme)) {
+//                updateThemeIcon(newTheme);
+//                applyTheme(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
+//                doRestart();
+//            }
             return false; // We set preference
         } else if (preference == mDarkTheme) {
             String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName().toUpperCase(Locale.US);

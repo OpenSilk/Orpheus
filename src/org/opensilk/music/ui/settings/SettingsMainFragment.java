@@ -130,8 +130,9 @@ public class SettingsMainFragment extends Fragment {
             boolean light = ThemeHelper.isLightTheme(mContext);
             if (v == null) {
                 v = mInflater.inflate(R.layout.settings_grid_item, parent, false);
-                v.setBackgroundResource(light ? R.drawable.drop_shadow_light :
-                        R.drawable.drop_shadow_dark);
+//                v.setBackgroundColor(light ?
+//                        mContext.getResources().getColor(android.R.color.white) :
+//                        mContext.getResources().getColor(android.R.color.black));
                 v.setTag(R.id.grid_item_icon, v.findViewById(R.id.grid_item_icon));
                 v.setTag(R.id.grid_item_text, v.findViewById(R.id.grid_item_text));
             }
