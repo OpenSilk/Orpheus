@@ -18,13 +18,10 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
-import android.view.View;
 
 import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.music.R;
-
 import org.opensilk.music.ui2.main.MainScreen;
-import org.opensilk.music.ui2.util.ViewStateSaver;
 
 import java.util.Arrays;
 
@@ -32,7 +29,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import flow.Layout;
-import hugo.weaving.DebugLog;
 import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;

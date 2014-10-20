@@ -27,6 +27,7 @@ import java.util.List;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Action2;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
@@ -34,7 +35,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/19/14.
  */
-public abstract class MediaStoreLoader<T> {
+public abstract class RxCursorLoader<T> {
 
     final Context context;
 
@@ -44,13 +45,13 @@ public abstract class MediaStoreLoader<T> {
     String[] selectionArgs;
     String sortOrder;
 
-    public MediaStoreLoader(Context context) {
+    public RxCursorLoader(Context context) {
         this.context = context;
     }
 
-    public MediaStoreLoader(Context context,
-                            Uri uri, String[] projection, String selection,
-                            String[] selectionArgs, String sortOrder) {
+    public RxCursorLoader(Context context,
+                          Uri uri, String[] projection, String selection,
+                          String[] selectionArgs, String sortOrder) {
         this.context = context;
         this.uri = uri;
         this.projection = projection;
@@ -66,32 +67,56 @@ public abstract class MediaStoreLoader<T> {
         subscriber.onError(t);
     }
 
-    public Observable<List<T>> getObservable() {
+    public Observable<List<T>> getListObservable() {
+        return createObservable()
+                // collects the objects into a list and publishes the complete list as
+                // a single onNext() call
+                .collect(new ArrayList<T>(), new Action2<List<T>, T>() {
+                    @Override
+                    public void call(List<T> list, T item) {
+        //                Timber.v("collect %s", Thread.currentThread().getName());
+                        list.add(item);
+                    }
+                })
+                // Im not really concered with errors right now
+                // just log it, and return an empty list
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.e(throwable, "RxCursorLoader(uri=%s :: projection=%s :: selection=%s " +
+                                "selectionArgs=%s :: sortOrder=%s", uri, projection, selection, selectionArgs, sortOrder);
+                    }
+                })
+                .onExceptionResumeNext(Observable.<List<T>>empty())
+                // want Query on an io thread
+                .subscribeOn(Schedulers.io())
+                // want the final List to be published on the main thread
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    protected Observable<T> createObservable() {
         return Observable.create(new Observable.OnSubscribe<T>() {
             // Querys the mediastore
             @Override
             public void call(Subscriber<? super T> subscriber) {
 //                Timber.v("OnSubscribe %s", Thread.currentThread().getName());
-                if (context == null) {
-                    emmitError(new NullPointerException("Context must not be null"), subscriber);
-                    return;
-                }
-                if (uri == null) {
-                    emmitError(new NullPointerException("Uri must not be null"), subscriber);
-                    return;
-                }
-                Cursor c = context.getContentResolver().query(
-                        uri,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        sortOrder
-                );
-                if (c == null) {
-                    emmitError(new NullPointerException("Unable to obtain cursor"), subscriber);
-                    return;
-                }
+                Cursor c = null;
                 try {
+                    if (context == null || uri == null) {
+                        emmitError(new NullPointerException("Context and Uri must not be null"), subscriber);
+                        return;
+                    }
+                    c = context.getContentResolver().query(
+                            uri,
+                            projection,
+                            selection,
+                            selectionArgs,
+                            sortOrder
+                    );
+                    if (c == null) {
+                        emmitError(new NullPointerException("Unable to obtain cursor"), subscriber);
+                        return;
+                    }
                     c.moveToFirst();
                     do {
                         T item = makeFromCursor(c);
@@ -109,20 +134,7 @@ public abstract class MediaStoreLoader<T> {
                     if (c != null) c.close();
                 }
             }
-        })
-        // collects the objects into a list and publishes the complete list as
-        // a single onNext() call
-        .collect(new ArrayList<T>(), new Action2<List<T>, T>() {
-            @Override
-            public void call(List<T> list, T item) {
-//                Timber.v("collect %s", Thread.currentThread().getName());
-                list.add(item);
-            }
-        })
-        // want Query on an io thread
-        .subscribeOn(Schedulers.io())
-        // want the final List to be published on the main thread
-        .observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
     public void setUri(Uri uri) {

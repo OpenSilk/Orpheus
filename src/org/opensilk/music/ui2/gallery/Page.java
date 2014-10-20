@@ -20,18 +20,16 @@ package org.opensilk.music.ui2.gallery;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.R;
 
-import mortar.Blueprint;
-
 /**
  * Created by drew on 10/3/14.
  */
 public enum Page {
-//    PLAYLIST(AlbumScreen.class, R.string.page_playlists),
+    PLAYLIST(new PlaylistsScreen(), R.string.page_playlists),
     //    RECENT(R.string.page_recent),
     ARTIST(new ArtistsScreen(), R.string.page_artists),
-    ALBUM(new AlbumsScreen(), R.string.page_albums);//,
-//    SONG(AlbumScreen.class, R.string.page_songs),
-//    GENRE(new ArtistsScreen(), R.string.page_genres);
+    ALBUM(new AlbumsScreen(), R.string.page_albums),
+    SONG(new SongsScreen(), R.string.page_songs),
+    GENRE(new GenresScreen(), R.string.page_genres);
 
     public final Screen screen;
     public final int titleResource;

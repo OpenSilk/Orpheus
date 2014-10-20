@@ -41,10 +41,8 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarScope;
-import mortar.Presenter;
 import mortar.ViewPresenter;
 
 /**

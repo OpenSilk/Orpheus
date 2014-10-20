@@ -30,7 +30,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.ui2.loader.MediaStoreLoader;
+import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
@@ -77,7 +77,7 @@ public class ArtistsScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad()");
             super.onLoad(savedInstanceState);
-            subscription = loader.getObservable().subscribe(new Action1<List<LocalArtist>>() {
+            subscription = loader.getListObservable().subscribe(new Action1<List<LocalArtist>>() {
                 @Override
                 public void call(List<LocalArtist> localArtists) {
                     setAdapter(new Adapter(localArtists));
@@ -98,7 +98,7 @@ public class ArtistsScreen extends Screen {
     }
 
     @Singleton
-    public static class Loader extends MediaStoreLoader<LocalArtist> {
+    public static class Loader extends RxCursorLoader<LocalArtist> {
 
         @Inject
         public Loader(@ForApplication Context context) {

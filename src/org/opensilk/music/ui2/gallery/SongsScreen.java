@@ -21,13 +21,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 
-import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.ui2.loader.DistinctAlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
@@ -45,13 +45,13 @@ import rx.functions.Action1;
 import timber.log.Timber;
 
 /**
- * Created by drew on 10/3/14.
+ * Created by drew on 10/19/14.
  */
-@WithModule(AlbumsScreen.Module.class)
-@WithRecyclerViewPresenter(AlbumsScreen.Presenter.class)
-public class AlbumsScreen extends Screen {
+@WithModule(SongsScreen.Module.class)
+@WithRecyclerViewPresenter(SongsScreen.Presenter.class)
+public class SongsScreen extends Screen {
 
-    @dagger.Module (
+    @dagger.Module(
             addsTo = GalleryScreen.Module.class,
             injects = Presenter.class
     )
@@ -62,7 +62,7 @@ public class AlbumsScreen extends Screen {
     @Singleton
     public static class Presenter extends BasePresenter {
 
-        final Loader loader;
+        Loader loader;
 
         @Inject
         public Presenter(AppPreferences preferences, Loader loader) {
@@ -72,12 +72,12 @@ public class AlbumsScreen extends Screen {
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
-            Timber.v("onLoad(%s)", savedInstanceState);
+            Timber.v("onLoad()");
             super.onLoad(savedInstanceState);
-            subscription = loader.getListObservable().subscribe(new Action1<List<LocalAlbum>>() {
+            subscription = loader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
                 @Override
-                public void call(List<LocalAlbum> localAlbums) {
-                    setAdapter(new Adapter(localAlbums));
+                public void call(List<LocalSong> localSongs) {
+                    setAdapter(new Adapter(localSongs));
                 }
             });
         }
@@ -91,42 +91,47 @@ public class AlbumsScreen extends Screen {
         protected boolean isStaggered() {
             return false;
         }
+
     }
 
     @Singleton
-    public static class Loader extends RxCursorLoader<LocalAlbum> {
+    public static class Loader extends RxCursorLoader<LocalSong> {
 
         @Inject
         public Loader(@ForApplication Context context) {
             super(context);
-            setUri(Uris.EXTERNAL_MEDIASTORE_ALBUMS);
-            setProjection(Projections.LOCAL_ALBUM);
-            setSelection(Selections.LOCAL_ALBUM);
-            setSelectionArgs(SelectionArgs.LOCAL_ALBUM);
-            // need set sortorder
+            setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);
+            setProjection(Projections.LOCAL_SONG);
+            setSelection(Selections.LOCAL_SONG);
+            setSelectionArgs(SelectionArgs.LOCAL_SONG);
+            //must set sort order
         }
 
         @Override
-        protected LocalAlbum makeFromCursor(Cursor c) {
-            return CursorHelpers.makeLocalAlbumFromCursor(c);
+        protected LocalSong makeFromCursor(Cursor c) {
+            return CursorHelpers.makeLocalSongFromCursor(null, c);
         }
-
     }
 
-    static class Adapter extends BaseAdapter<LocalAlbum> {
+    static class Adapter extends BaseAdapter<LocalSong> {
 
-        Adapter(List<LocalAlbum> items) {
+        Adapter(List<LocalSong> items) {
             super(items);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            LocalAlbum album = items.get(position);
-            holder.title.setText(album.name);
-            holder.subtitle.setText(album.artistName);
-            ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);
+        public void onBindViewHolder(final ViewHolder holder, int position) {
+            LocalSong song = items.get(position);
+            holder.title.setText(song.name);
+            holder.subtitle.setText(song.artistName);
+            // workaruond for mediastore to get the album artist
+            DistinctAlbumArtInfoLoader loader = new DistinctAlbumArtInfoLoader(holder.itemView.getContext(), new long[]{song.albumId});
+            holder.subscriptions.add(loader.getDistinctObservable().take(1).subscribe(new Action1<ArtInfo>() {
+                @Override
+                public void call(ArtInfo artInfo) {
+                    holder.loadArtwork(artInfo);
+                }
+            }));
         }
-
     }
-
 }

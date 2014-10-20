@@ -46,8 +46,13 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> {
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         RecyclerView v = getView();
-        v.setHasFixedSize(isStaggered());
+        v.setHasFixedSize(!isStaggered());
         v.setLayoutManager(getLayoutManager(v.getContext()));
+    }
+
+    @Override
+    protected void onSave(Bundle outState) {
+        super.onSave(outState);
     }
 
     @Override

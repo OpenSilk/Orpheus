@@ -24,6 +24,10 @@ import java.lang.annotation.Target;
 
 /**
  * Created by drew on 10/19/14.
+ *
+ * Little trick for the gallery pages so they can
+ * all use a generic RecyclerView and have the GalleryView
+ * handle notifying the presenters
  */
 @Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
 public @interface WithRecyclerViewPresenter {
