@@ -79,6 +79,11 @@ public class AlbumsScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
+        }
+
+        @Override
+        protected void reset() {
+            super.reset();
             reload();
         }
 
@@ -132,11 +137,11 @@ public class AlbumsScreen extends Screen {
                                 return true;
                             case R.id.menu_view_as_simple:
                                 preferences.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.SIMPLE);
-//                                    NavUtils.goHome(getActivity());
+                                reset();
                                 return true;
                             case R.id.menu_view_as_grid:
                                 preferences.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.GRID);
-//                                    NavUtils.goHome(getActivity());
+                                reset();
                                 return true;
                             default:
                                 return false;

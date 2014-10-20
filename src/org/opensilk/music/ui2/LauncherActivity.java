@@ -91,7 +91,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(ThemeHelper.getInstance(this).getTheme());
+        setTheme(R.style.Theme_Light);
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());
@@ -486,7 +486,7 @@ public class LauncherActivity extends ActionBarActivity implements
     }
 
     protected void initThemeables() {
-        Themer.themeToolbar(mToolbar);
+//        Themer.themeToolbar(mToolbar);
     }
 
 }

@@ -137,5 +137,15 @@ public class GenresScreen extends Screen {
             }
         }
 
+        @Override
+        protected boolean quadArtwork(int position) {
+            return getItem(position).mAlbumNumber >= 4;
+        }
+
+        @Override
+        protected boolean dualArtwork(int position) {
+            return getItem(position).mAlbumNumber >= 2;
+        }
+
     }
 }

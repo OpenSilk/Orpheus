@@ -16,21 +16,6 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
-        android:id="@+id/artwork_thumb"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Orpheus.Thumbnail"/>
-
-    <include layout="@layout/gallery_grid_item_description"
-        android:layout_width="match_parent"
-        android:layout_height="58dp"/>
-
-</LinearLayout>
+<resources>
+    <integer name="grid_columns">6</integer>
+</resources>

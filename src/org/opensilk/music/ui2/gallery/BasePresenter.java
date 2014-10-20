@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -48,9 +49,7 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        RecyclerView v = getView();
-        v.setHasFixedSize(!isStaggered());
-        v.setLayoutManager(getLayoutManager(v.getContext()));
+        reset();
     }
 
     @Override
@@ -64,6 +63,14 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
         if (subscription != null) subscription.unsubscribe();
     }
 
+    protected void reset() {
+        RecyclerView v = getView();
+        if (v == null) return;
+        v.setHasFixedSize(!isStaggered());
+        v.setLayoutManager(getLayoutManager(v.getContext()));
+        v.setAdapter(null);
+    }
+
     protected boolean isGrid() {
         return false;
     }
@@ -74,12 +81,17 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
 
     protected RecyclerView.LayoutManager getLayoutManager(Context context) {
         if (isStaggered()) {
-            return makeGridLayoutManager(context);
+            return makeStaggerdLayoutManager(context);
         } else if (isGrid()) {
             return makeGridLayoutManager(context);
         } else {
             return makeListLayoutManager(context);
         }
+    }
+
+    protected RecyclerView.LayoutManager makeStaggerdLayoutManager(Context context) {
+        int numCols = context.getResources().getInteger(R.integer.grid_columns);
+        return new StaggeredGridLayoutManager(numCols, StaggeredGridLayoutManager.VERTICAL);
     }
 
     protected RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
@@ -91,9 +103,11 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
         return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
     }
 
-    protected boolean setAdapter(RecyclerView.Adapter<?> adapter) {
+    protected boolean setAdapter(BaseAdapter<?> adapter) {
         RecyclerView v = getView();
         if (v == null) return false;
+        boolean isGrid = isGrid() || isStaggered();
+        adapter.setGridStyle(isGrid);
         v.setAdapter(adapter);
         return true;
     }

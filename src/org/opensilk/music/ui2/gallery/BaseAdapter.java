@@ -112,9 +112,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
             return R.layout.gallery_list_item_artwork;
         }
         if (quadArtwork(position)) {
-            return R.layout.gallery_grid_item_artwork;
+            return R.layout.gallery_grid_item_artwork4;
         } else if (dualArtwork(position)) {
-            return R.layout.gallery_grid_item_artwork;
+            return R.layout.gallery_grid_item_artwork2;
         } else {
             return R.layout.gallery_grid_item_artwork;
         }

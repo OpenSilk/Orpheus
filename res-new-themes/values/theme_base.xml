@@ -78,6 +78,7 @@
     <!--Toolbar Styles -->
     <style name="Toolbar.Dark" parent="Widget.AppCompat.Toolbar">
         <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="android:background">?colorPrimary</item>
     </style>
 
     <style name="Toolbar.Dark.WhiteOverflow">

@@ -23,14 +23,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
-        android:id="@+id/artwork_thumb"
+    <org.opensilk.music.widgets.HalfHeightFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Orpheus.Thumbnail"/>
+        android:layout_height="wrap_content">
+
+        <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
+            android:id="@+id/artwork_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top|left"
+            android:layout_marginRight="1dp"
+            style="@style/Orpheus.Thumbnail"/>
+
+        <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
+            android:id="@+id/artwork_thumb2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top|right"
+            android:layout_marginLeft="1dp"
+            style="@style/Orpheus.Thumbnail"/>
+
+    </org.opensilk.music.widgets.HalfHeightFrameLayout>
 
     <include layout="@layout/gallery_grid_item_description"
         android:layout_width="match_parent"
-        android:layout_height="58dp"/>
+        android:layout_height="58dp"
+        android:layout_below="@id/artwork_thumb"/>
 
 </LinearLayout>

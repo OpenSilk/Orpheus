@@ -81,6 +81,11 @@ public class ArtistsScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad()");
             super.onLoad(savedInstanceState);
+        }
+
+        @Override
+        protected void reset() {
+            super.reset();
             reload();
         }
 
@@ -131,11 +136,11 @@ public class ArtistsScreen extends Screen {
                                 return true;
                             case R.id.menu_view_as_simple:
                                 preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.SIMPLE);
-//                                NavUtils.goHome(getActivity());
+                                reset();
                                 return true;
                             case R.id.menu_view_as_grid:
                                 preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.GRID);
-//                                NavUtils.goHome(getActivity());
+                                reset();
                                 return true;
                             default:
                                 return false;
