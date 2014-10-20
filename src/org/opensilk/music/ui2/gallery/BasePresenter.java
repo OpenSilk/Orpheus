@@ -25,18 +25,21 @@ import android.support.v7.widget.RecyclerView;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
 import mortar.ViewPresenter;
 import rx.Subscription;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.
  */
-public abstract class BasePresenter extends ViewPresenter<RecyclerView> {
+public abstract class BasePresenter extends ViewPresenter<RecyclerView> implements HasOptionsMenu {
 
     protected final AppPreferences preferences;
 
     protected Subscription subscription;
+    protected ActionBarOwner.MenuConfig actionBarMenu;
 
     public BasePresenter(AppPreferences preferences) {
         this.preferences = preferences;
@@ -61,8 +64,13 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> {
         if (subscription != null) subscription.unsubscribe();
     }
 
-    protected abstract boolean isGrid();
-    protected abstract boolean isStaggered();
+    protected boolean isGrid() {
+        return false;
+    }
+
+    protected boolean isStaggered() {
+        return false;
+    }
 
     protected RecyclerView.LayoutManager getLayoutManager(Context context) {
         if (isStaggered()) {

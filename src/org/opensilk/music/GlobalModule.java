@@ -18,6 +18,9 @@ package org.opensilk.music;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.opensilk.music.artwork.ArtworkModule;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
@@ -34,9 +37,7 @@ import dagger.Provides;
         includes = {
                 ArtworkModule.class,
         },
-        injects = {
-                AppPreferences.class,
-        }
+        injects = AppPreferences.class
 )
 public class GlobalModule {
     private Context appContext;
@@ -54,7 +55,8 @@ public class GlobalModule {
     }
 
     @Provides @Singleton
-    public AppPreferences provideAppPreferences(@ForApplication Context context) {
-        return new AppPreferences(context);
+    public Gson provideGson() {
+        return new GsonBuilder().create();
     }
+
 }

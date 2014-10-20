@@ -62,11 +62,6 @@ public class ActivityModule {
     // Flow backstack
 
     @Provides @Singleton
-    public Gson provideGson() {
-        return new GsonBuilder().create();
-    }
-
-    @Provides @Singleton
     public Parcer<Object> provideParcer(Gson gson) {
         return new GsonParcer<Object>(gson);
     }

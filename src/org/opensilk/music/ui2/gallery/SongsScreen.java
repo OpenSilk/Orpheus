@@ -22,11 +22,14 @@ import android.database.Cursor;
 import android.os.Bundle;
 
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.DistinctAlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
@@ -42,6 +45,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import rx.functions.Action1;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 /**
@@ -68,12 +72,18 @@ public class SongsScreen extends Screen {
         public Presenter(AppPreferences preferences, Loader loader) {
             super(preferences);
             this.loader = loader;
+            this.loader.setSortOrder(preferences.getString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z));
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad()");
             super.onLoad(savedInstanceState);
+            reload();
+        }
+
+        void reload() {
+            if (subscription != null) subscription.unsubscribe();
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
                 @Override
                 public void call(List<LocalSong> localSongs) {
@@ -82,16 +92,53 @@ public class SongsScreen extends Screen {
             });
         }
 
-        @Override
-        protected boolean isGrid() {
-            return false;
+        void setNewSortOrder(String sortOrder) {
+            preferences.putString(AppPreferences.SONG_SORT_ORDER, sortOrder);
+            loader.setSortOrder(sortOrder);
+            reload();
         }
 
         @Override
-        protected boolean isStaggered() {
-            return false;
+        public ActionBarOwner.MenuConfig getMenuConfig() {
+            ensureMenu();
+            return actionBarMenu;
         }
 
+        void ensureMenu() {
+            if (actionBarMenu == null) {
+                Func1<Integer, Boolean> actionHandler = new Func1<Integer, Boolean>() {
+                    @Override
+                    public Boolean call(Integer integer) {
+                        switch (integer) {
+                            case R.id.menu_sort_by_az:
+                                setNewSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
+                                return true;
+                            case R.id.menu_sort_by_za:
+                                setNewSortOrder(SortOrder.SongSortOrder.SONG_Z_A);
+                                return true;
+                            case R.id.menu_sort_by_artist:
+                                setNewSortOrder(SortOrder.SongSortOrder.SONG_ARTIST);
+                                return true;
+                            case R.id.menu_sort_by_album:
+                                setNewSortOrder(SortOrder.SongSortOrder.SONG_ALBUM);
+                                return true;
+                            case R.id.menu_sort_by_year:
+                                setNewSortOrder(SortOrder.SongSortOrder.SONG_YEAR);
+                                return true;
+                            case R.id.menu_sort_by_duration:
+                                setNewSortOrder(SortOrder.SongSortOrder.SONG_DURATION);
+                                return true;
+                            case R.id.menu_sort_by_filename:
+                                setNewSortOrder(SortOrder.SongSortOrder.SONG_FILENAME);
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                };
+                actionBarMenu = new ActionBarOwner.MenuConfig(actionHandler, R.menu.song_sort_by);
+            }
+        }
     }
 
     @Singleton
@@ -121,7 +168,7 @@ public class SongsScreen extends Screen {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            LocalSong song = items.get(position);
+            LocalSong song = getItem(position);
             holder.title.setText(song.name);
             holder.subtitle.setText(song.artistName);
             // workaruond for mediastore to get the album artist

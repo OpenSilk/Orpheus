@@ -30,6 +30,7 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.DistinctAlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
@@ -80,14 +81,15 @@ public class PlaylistsScreen extends Screen {
         }
 
         @Override
-        protected boolean isGrid() {
-            return false;
-        }
-
-        @Override
         protected boolean isStaggered() {
             return true;
         }
+
+        @Override
+        public ActionBarOwner.MenuConfig getMenuConfig() {
+            return null;
+        }
+
     }
 
     @Singleton
@@ -114,7 +116,7 @@ public class PlaylistsScreen extends Screen {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            Playlist playlist = items.get(position);
+            Playlist playlist = getItem(position);
             holder.title.setText(playlist.mPlaylistName);
             holder.subtitle.setText(MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, playlist.mSongNumber));
             if (playlist.mAlbumNumber > 0) {

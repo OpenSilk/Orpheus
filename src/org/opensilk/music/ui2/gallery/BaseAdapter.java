@@ -49,13 +49,20 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     private LayoutInflater inflater;
     protected final List<T> items;
 
-
     public BaseAdapter() {
         this.items = new ArrayList<>();
     }
 
     public BaseAdapter(List<T> items) {
         this.items = items;
+    }
+
+    public List<T> getItems() {
+        return items;
+    }
+
+    public T getItem(int position) {
+        return items.get(position);
     }
 
     public void addAll(Collection<T> items) {
@@ -65,7 +72,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     public void add(T item) {
         items.add(item);
-        notifyDataSetChanged();
+        notifyItemInserted(items.size()-1);
     }
 
     public void clear() {

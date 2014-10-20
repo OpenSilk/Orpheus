@@ -30,6 +30,7 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.DistinctAlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
@@ -41,6 +42,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.
@@ -80,14 +82,15 @@ public class GenresScreen extends Screen {
         }
 
         @Override
-        protected boolean isGrid() {
-            return false;
-        }
-
-        @Override
         protected boolean isStaggered() {
             return true;
         }
+
+        @Override
+        public ActionBarOwner.MenuConfig getMenuConfig() {
+            return null;
+        }
+
     }
 
     @Singleton
@@ -114,7 +117,7 @@ public class GenresScreen extends Screen {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            Genre genre = items.get(position);
+            Genre genre = getItem(position);
             holder.title.setText(genre.mGenreName);
             Context context = holder.itemView.getContext();
             String l2 = MusicUtils.makeLabel(context, R.plurals.Nalbums, genre.mAlbumNumber)

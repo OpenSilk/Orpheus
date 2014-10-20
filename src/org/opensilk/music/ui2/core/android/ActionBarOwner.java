@@ -17,51 +17,54 @@ package org.opensilk.music.ui2.core.android;
 
 import android.content.Context;
 import android.os.Bundle;
+
+import org.opensilk.common.mortar.HasScope;
+
 import mortar.Mortar;
 import mortar.MortarScope;
 import mortar.Presenter;
 import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
 
 /** Allows shared configuration of the Android ActionBar. */
 public class ActionBarOwner extends Presenter<ActionBarOwner.View> {
-    public interface View {
+    public interface View extends HasScope {
         void setShowHomeEnabled(boolean enabled);
 
         void setUpButtonEnabled(boolean enabled);
 
-        void setTitle(CharSequence title);
+        void setTitle(int titleRes);
 
-        void setMenu(MenuAction action);
-
-        Context getMortarContext();
+        void setMenu(MenuConfig menuConfig);
     }
 
     public static class Config {
         public final boolean showHomeEnabled;
         public final boolean upButtonEnabled;
-        public final CharSequence title;
-        public final MenuAction action;
+        public final int titleRes;
+        public final MenuConfig menuConfig;
 
-        public Config(boolean showHomeEnabled, boolean upButtonEnabled, CharSequence title,
-                      MenuAction action) {
+        public Config(boolean showHomeEnabled, boolean upButtonEnabled,
+                      int titleRes, MenuConfig menuConfig) {
             this.showHomeEnabled = showHomeEnabled;
             this.upButtonEnabled = upButtonEnabled;
-            this.title = title;
-            this.action = action;
+            this.titleRes = titleRes;
+            this.menuConfig = menuConfig;
         }
 
-        public Config withAction(MenuAction action) {
-            return new Config(showHomeEnabled, upButtonEnabled, title, action);
+        public Config withActions(Func1<Integer, Boolean> actionHandler, int... menus) {
+            return new Config(showHomeEnabled, upButtonEnabled, titleRes, new MenuConfig(actionHandler, menus));
         }
     }
 
-    public static class MenuAction {
-        public final CharSequence title;
-        public final Action0 action;
+    public static class MenuConfig {
+        public final Func1<Integer, Boolean> actionHandler;
+        public final int[] menus;
 
-        public MenuAction(CharSequence title, Action0 action) {
-            this.title = title;
-            this.action = action;
+        public MenuConfig(Func1<Integer, Boolean> actionHandler, int... menus) {
+            this.actionHandler = actionHandler;
+            this.menus = menus;
         }
     }
 
@@ -84,7 +87,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.View> {
     }
 
     @Override protected MortarScope extractScope(View view) {
-        return Mortar.getScope(view.getMortarContext());
+        return view.getScope();
     }
 
     private void update() {
@@ -93,7 +96,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.View> {
 
         view.setShowHomeEnabled(config.showHomeEnabled);
         view.setUpButtonEnabled(config.upButtonEnabled);
-        view.setTitle(config.title);
-        view.setMenu(config.action);
+        view.setTitle(config.titleRes);
+        view.setMenu(config.menuConfig);
     }
 }

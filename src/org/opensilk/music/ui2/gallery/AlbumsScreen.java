@@ -22,12 +22,15 @@ import android.database.Cursor;
 import android.os.Bundle;
 
 import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
@@ -42,6 +45,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import rx.functions.Action1;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 /**
@@ -68,12 +72,18 @@ public class AlbumsScreen extends Screen {
         public Presenter(AppPreferences preferences, Loader loader) {
             super(preferences);
             this.loader = loader;
+            this.loader.setSortOrder(preferences.getString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z));
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
+            reload();
+        }
+
+        void reload() {
+            if (subscription != null) subscription.unsubscribe();
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalAlbum>>() {
                 @Override
                 public void call(List<LocalAlbum> localAlbums) {
@@ -82,14 +92,59 @@ public class AlbumsScreen extends Screen {
             });
         }
 
-        @Override
-        protected boolean isGrid() {
-            return false;
+        void setNewSortOrder(String sortOrder) {
+            preferences.putString(AppPreferences.ALBUM_SORT_ORDER, sortOrder);
+            loader.setSortOrder(sortOrder);
+            reload();
         }
 
         @Override
-        protected boolean isStaggered() {
-            return false;
+        protected boolean isGrid() {
+            return preferences.getString(AppPreferences.ALBUM_LAYOUT, AppPreferences.GRID).equals(AppPreferences.GRID);
+        }
+
+        @Override
+        public ActionBarOwner.MenuConfig getMenuConfig() {
+            ensureMenu();
+            return actionBarMenu;
+        }
+
+        void ensureMenu() {
+            if (actionBarMenu == null) {
+                Func1<Integer, Boolean> actionHandler = new Func1<Integer, Boolean>() {
+                    @Override
+                    public Boolean call(Integer integer) {
+                        switch (integer) {
+                            case R.id.menu_sort_by_az:
+                                setNewSortOrder(SortOrder.AlbumSortOrder.ALBUM_A_Z);
+                                return true;
+                            case R.id.menu_sort_by_za:
+                                setNewSortOrder(SortOrder.AlbumSortOrder.ALBUM_Z_A);
+                                return true;
+                            case R.id.menu_sort_by_artist:
+                                setNewSortOrder(SortOrder.AlbumSortOrder.ALBUM_ARTIST);
+                                return true;
+                            case R.id.menu_sort_by_year:
+                                setNewSortOrder(SortOrder.AlbumSortOrder.ALBUM_YEAR);
+                                return true;
+                            case R.id.menu_sort_by_number_of_songs:
+                                setNewSortOrder(SortOrder.AlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                                return true;
+                            case R.id.menu_view_as_simple:
+                                preferences.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.SIMPLE);
+//                                    NavUtils.goHome(getActivity());
+                                return true;
+                            case R.id.menu_view_as_grid:
+                                preferences.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.GRID);
+//                                    NavUtils.goHome(getActivity());
+                                return true;
+                            default:
+                                return false;
+                        }
+                    }
+                };
+                actionBarMenu = new ActionBarOwner.MenuConfig(actionHandler, R.menu.album_sort_by, R.menu.view_as);
+            }
         }
     }
 
@@ -121,7 +176,7 @@ public class AlbumsScreen extends Screen {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            LocalAlbum album = items.get(position);
+            LocalAlbum album = getItem(position);
             holder.title.setText(album.name);
             holder.subtitle.setText(album.artistName);
             ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);

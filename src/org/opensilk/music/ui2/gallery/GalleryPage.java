@@ -23,7 +23,7 @@ import org.opensilk.music.R;
 /**
  * Created by drew on 10/3/14.
  */
-public enum Page {
+public enum GalleryPage {
     PLAYLIST(new PlaylistsScreen(), R.string.page_playlists),
     //    RECENT(R.string.page_recent),
     ARTIST(new ArtistsScreen(), R.string.page_artists),
@@ -34,7 +34,7 @@ public enum Page {
     public final Screen screen;
     public final int titleResource;
 
-    private Page(Screen screen, int titleResource) {
+    private GalleryPage(Screen screen, int titleResource) {
         this.screen = screen;
         this.titleResource = titleResource;
     }

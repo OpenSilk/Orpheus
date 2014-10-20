@@ -81,27 +81,27 @@ public class GalleryView extends LinearLayout {
         }
     }
 
-    public void setup(List<Page> pages, int startPage) {
-        Adapter adapter = new Adapter(pages);
+    public void setup(List<GalleryPage> galleryPages, int startPage) {
+        Adapter adapter = new Adapter(galleryPages);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(startPage);
         tabBar.setViewPager(viewPager);
     }
 
     class Adapter extends PagerAdapter {
-        private final List<Page> pages;
+        private final List<GalleryPage> galleryPages;
 
-        public Adapter(Page[] pages) {
-            this(Arrays.asList(pages));
+        public Adapter(GalleryPage[] galleryPages) {
+            this(Arrays.asList(galleryPages));
         }
 
-        public Adapter(List<Page> pages) {
-            this.pages = pages;
+        public Adapter(List<GalleryPage> galleryPages) {
+            this.galleryPages = galleryPages;
         }
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            Screen screen = pages.get(position).screen;
+            Screen screen = galleryPages.get(position).screen;
             // Attach our child screen
             MortarScope newChildScope = presenter.screenScoper.getScreenScope(getContext(), screen);
             // create new scoped context (used to later obtain the child scope)
@@ -122,16 +122,31 @@ public class GalleryView extends LinearLayout {
             RecyclerView oldChild = (RecyclerView) object;
             MortarScope myScope = Mortar.getScope(getContext());
             MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
-            ViewPresenter<RecyclerView> oldChildPresenter = obtainPresenter(pages.get(position).screen, oldChildScope);
+            ViewPresenter<RecyclerView> oldChildPresenter = obtainPresenter(galleryPages.get(position).screen, oldChildScope);
             //TODO not sure the best order here
             myScope.destroyChild(oldChildScope);
             oldChildPresenter.dropView(oldChild);
             container.removeView(oldChild);
         }
 
+        Object mCurrentPrimaryItem;
+
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+            if (object != mCurrentPrimaryItem) {
+                RecyclerView currentChild = (RecyclerView) object;
+                MortarScope currentChildScope = Mortar.getScope(currentChild.getContext());
+                ViewPresenter<RecyclerView> childPresenter = obtainPresenter(galleryPages.get(position).screen, currentChildScope);
+                if (childPresenter instanceof HasOptionsMenu) {
+                    presenter.updateActionBarWithChildMenuConfig(((HasOptionsMenu) childPresenter).getMenuConfig());
+                }
+                mCurrentPrimaryItem = object;
+            }
+        }
+
         @Override
         public int getCount() {
-            return pages.size();
+            return galleryPages.size();
         }
 
         @Override
@@ -141,9 +156,8 @@ public class GalleryView extends LinearLayout {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return getContext().getString(pages.get(position).titleResource).toUpperCase(Locale.getDefault());
+            return getContext().getString(galleryPages.get(position).titleResource).toUpperCase(Locale.getDefault());
         }
-
 
     }
 
@@ -151,6 +165,7 @@ public class GalleryView extends LinearLayout {
         return (T) LayoutInflater.from(context).inflate(layout, parent, attachToRoot);
     }
 
+    //TODO cache these
     static ViewPresenter<RecyclerView> obtainPresenter(MortarScreen screen, MortarScope scope) {
         Class<?> screenType = ObjectUtils.getClass(screen);
         WithRecyclerViewPresenter withPresenter = screenType.getAnnotation(WithRecyclerViewPresenter.class);

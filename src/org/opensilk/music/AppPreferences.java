@@ -23,15 +23,22 @@ import android.util.JsonReader;
 import android.util.JsonWriter;
 
 import com.andrew.apollo.utils.Lists;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.cast.util.Utils;
 import org.opensilk.music.ui.home.MusicFragment;
+import org.opensilk.music.ui2.gallery.GalleryPage;
+import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -62,15 +69,13 @@ public class AppPreferences {
 
     private final Context appContext;
     private final SharedPreferences prefs;
+    private final Gson gson;
 
     @Inject
-    public AppPreferences(@ForApplication Context context) {
+    public AppPreferences(@ForApplication Context context, Gson gson) {
         appContext = context;
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
-    }
-
-    public static AppPreferences get(Context context) {
-        return new AppPreferences(context);
+        this.gson = gson;
     }
 
     public void putBoolean(String key, boolean value) {
@@ -109,6 +114,34 @@ public class AppPreferences {
         prefs.edit().remove(key).apply();
     }
 
+
+    public final String serializeGalleryPages(List<GalleryPage> pages) {
+        Type type = new TypeToken<List<GalleryPage>>() {}.getType();
+        return gson.toJson(pages, type);
+    }
+
+    public final List<GalleryPage> deserializeGalleryPages(String json) {
+        Type type = new TypeToken<List<GalleryPage>>() {}.getType();
+        return gson.fromJson(json, type);
+    }
+
+    public final void saveGalleryPages(List<GalleryPage> pages) {
+        try {
+            putString(HOME_PAGES, serializeGalleryPages(pages));
+        } catch (Exception e) {
+            remove(HOME_PAGES);
+        }
+    }
+
+    public final List<GalleryPage> getGalleryPages() {
+        String pgs = getString(HOME_PAGES, null);
+        if (pgs != null) {
+            try {
+                return deserializeGalleryPages(pgs);
+            } catch (Exception ignored) {}
+        }
+        return Arrays.asList(GalleryPage.values());
+    }
 
     /**
      * @return List of class names for home pager fragments

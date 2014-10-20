@@ -50,11 +50,13 @@ import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 import mortar.MortarScope;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 
 public class LauncherActivity extends ActionBarActivity implements
         PauseAndResumeActivity,
+        ActionBarOwner.View,
         DrawerPresenter.View {
 
     @Inject @Named("activity") Bus mBus;
@@ -78,6 +80,7 @@ public class LauncherActivity extends ActionBarActivity implements
     MortarActivityScope mActivityScope;
 
     Flow mFlow;
+    ActionBarOwner.MenuConfig mMenuConfig;
     ActionBarDrawerToggle mDrawerToggle;
     boolean mConfigurationChangeIncoming;
     String mScopeName;
@@ -103,8 +106,8 @@ public class LauncherActivity extends ActionBarActivity implements
         initThemeables();
 
         mFlow = mMainView.getFlow();
+        mActionBarOwner.takeView(this);
         mDrawerPresenter.takeView(this);
-
 
         setSupportActionBar(mToolbar);
 
@@ -127,6 +130,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
         if (mBus != null) mBus.unregister(this);
         if (mPauseResumePresenter != null) mPauseResumePresenter.dropView(this);
+        if (mActionBarOwner != null) mActionBarOwner.dropView(this);
         if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
 
         if (!mConfigurationChangeIncoming) {
@@ -205,6 +209,11 @@ public class LauncherActivity extends ActionBarActivity implements
             return false;
         } else {
 //            restoreActionBar();
+            if (mMenuConfig != null) {
+                for (int item : mMenuConfig.menus) {
+                    getMenuInflater().inflate(item, menu);
+                }
+            }
             getMenuInflater().inflate(R.menu.sleep_timer, menu);
             return super.onCreateOptionsMenu(menu);
         }
@@ -213,6 +222,10 @@ public class LauncherActivity extends ActionBarActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        if (mMenuConfig != null && mMenuConfig.actionHandler != null
+                && mMenuConfig.actionHandler.call(item.getItemId())) {
             return true;
         }
         switch (item.getItemId()) {
@@ -280,6 +293,26 @@ public class LauncherActivity extends ActionBarActivity implements
 
     public MortarScope getScope() {
         return mActivityScope;
+    }
+
+    /*
+     * ActionBarOwner.View
+     */
+
+    @Override
+    public void setShowHomeEnabled(boolean enabled) {
+
+    }
+
+    @Override
+    public void setUpButtonEnabled(boolean enabled) {
+
+    }
+
+    @Override
+    public void setMenu(ActionBarOwner.MenuConfig menuConfig) {
+        mMenuConfig = menuConfig;
+        supportInvalidateOptionsMenu();
     }
 
     /*
