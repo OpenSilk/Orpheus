@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -37,7 +38,7 @@ public class Album implements Bundleable {
     public final String date;
     public final Uri artworkUri;
 
-    public Album(String identity, String name, String artistName, int songCount, String date, Uri artworkUri) {
+    public Album(@NonNull String identity, @NonNull String name, String artistName, int songCount, String date, Uri artworkUri) {
         if (identity == null || name == null) {
             throw new NullPointerException("identity and name are required");
         }

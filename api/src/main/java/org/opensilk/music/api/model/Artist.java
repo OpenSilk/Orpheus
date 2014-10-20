@@ -20,6 +20,7 @@ package org.opensilk.music.api.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import org.opensilk.music.api.model.spi.Bundleable;
 
@@ -33,7 +34,7 @@ public class Artist implements Bundleable {
     public final int albumCount;
     public final int songCount;
 
-    public Artist(String identity, String name, int albumCount, int songCount) {
+    public Artist(@NonNull String identity, @NonNull String name, int albumCount, int songCount) {
         if (identity == null || name == null) {
             throw new NullPointerException("identity and name are required");
         }

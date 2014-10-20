@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -29,6 +30,8 @@ import org.opensilk.music.api.model.spi.Bundleable;
  * Created by drew on 6/10/14.
  */
 public class Song implements Bundleable {
+
+    public static final String DEFAULT_MIME_TYPE = "audio/*";
 
     public final String identity;
     public final String name;
@@ -41,8 +44,8 @@ public class Song implements Bundleable {
     public final Uri artworkUri;
     public final String mimeType;
 
-    public Song(String identity, String name, String albumName, String artistName,
-                String albumArtistName, String albumIdentity, int duration, Uri dataUri,
+    public Song(@NonNull String identity, @NonNull String name, String albumName, String artistName,
+                String albumArtistName, String albumIdentity, int duration, @NonNull Uri dataUri,
                 Uri artworkUri, String mimeType) {
         if (identity == null || name == null || dataUri == null) {
             throw new NullPointerException("identity, name, and dataUri are required");
@@ -56,7 +59,7 @@ public class Song implements Bundleable {
         this.duration = duration;
         this.dataUri = dataUri;
         this.artworkUri = artworkUri;
-        this.mimeType = mimeType != null ? mimeType : "audio/*";
+        this.mimeType = mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
     }
 
     @Override
@@ -158,7 +161,7 @@ public class Song implements Bundleable {
         private int duration;
         private Uri dataUri;
         private Uri artworkUri;
-        private String mimeType = "audio/*";
+        private String mimeType = DEFAULT_MIME_TYPE;
 
         public Builder setIdentity(String identity) {
             this.identity = identity;

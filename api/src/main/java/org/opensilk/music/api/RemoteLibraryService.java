@@ -23,6 +23,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.opensilk.music.api.callback.Result;
@@ -93,7 +95,8 @@ public abstract class RemoteLibraryService extends Service {
      *                         method of the previous query.
      * @param callback the {@link org.opensilk.music.api.callback.Result} callback to send back to Orpheus
      */
-    protected abstract void browseFolders(String libraryIdentity, String folderIdentity, int maxResults, Bundle paginationBundle, Result callback);
+    protected abstract void browseFolders(@NonNull String libraryIdentity, @Nullable String folderIdentity, int maxResults,
+                                          @Nullable Bundle paginationBundle, @NonNull Result callback);
 
     /**
      * Return a list of {@link org.opensilk.music.api.model.Song}s via the {@link org.opensilk.music.api.callback.Result} callback.
@@ -106,7 +109,8 @@ public abstract class RemoteLibraryService extends Service {
      * @param paginationBundle
      * @param callback
      */
-    protected abstract void listSongsInFolder(String libraryIdentity, String folderIdentity, int maxResults, Bundle paginationBundle, Result callback);
+    protected abstract void listSongsInFolder(@NonNull String libraryIdentity, @Nullable String folderIdentity,
+                                              int maxResults, @Nullable Bundle paginationBundle, @NonNull Result callback);
 
     /**
      * Return a list of {@link org.opensilk.music.api.model.spi.Bundleable} objects
@@ -114,12 +118,13 @@ public abstract class RemoteLibraryService extends Service {
      * @see #browseFolders(String, String, int, android.os.Bundle, org.opensilk.music.api.callback.Result) for params description
      *
      * @param libraryIdentity
-     * @param query the search query
+     * @param query the search query, raw user input from Search box
      * @param maxResults
      * @param paginationBundle
      * @param callback
      */
-    protected abstract void search(String libraryIdentity, String query, int maxResults, Bundle paginationBundle, Result callback);
+    protected abstract void search(@NonNull String libraryIdentity, @NonNull String query, int maxResults,
+                                   @Nullable Bundle paginationBundle, @NonNull Result callback);
 
     private RemoteLibrary.Stub mBinder;
     private Handler mHandler;

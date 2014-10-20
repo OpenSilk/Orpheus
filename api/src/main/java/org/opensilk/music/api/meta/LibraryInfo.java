@@ -20,6 +20,7 @@ package org.opensilk.music.api.meta;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 /**
  * Created by drew on 7/2/14.
@@ -34,6 +35,25 @@ public class LibraryInfo implements Parcelable {
         this.libraryId = libraryId;
         this.libraryComponent = libraryComponent;
         this.currentFolderId = currentFolderId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof LibraryInfo)) return false;
+        LibraryInfo that = (LibraryInfo) o;
+        if (!TextUtils.equals(currentFolderId, that.currentFolderId)) return false;
+        if (!libraryComponent.equals(that.libraryComponent)) return false;
+        if (!TextUtils.equals(libraryId, that.libraryId)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = libraryId != null ? libraryId.hashCode() : 0;
+        result = 31 * result + (libraryComponent != null ? libraryComponent.hashCode() : 0);
+        result = 31 * result + (currentFolderId != null ? currentFolderId.hashCode() : 0);
+        return result;
     }
 
     @Override

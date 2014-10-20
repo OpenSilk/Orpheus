@@ -20,6 +20,7 @@ package org.opensilk.music.api.model;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -35,7 +36,7 @@ public class Folder implements Bundleable {
     public final int childCount;
     public final String date;
 
-    public Folder(String identity, String name, String parentIdentity, int childCount, String date) {
+    public Folder(@NonNull String identity, @NonNull String name, String parentIdentity, int childCount, String date) {
         if (identity == null || name == null) {
             throw new NullPointerException("identity and name are required");
         }

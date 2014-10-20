@@ -17,6 +17,7 @@
 package org.opensilk.music.api;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import org.opensilk.music.api.model.spi.Bundleable;
 
@@ -90,15 +91,12 @@ public class OrpheusApi {
      *
      * @param b Bundle created with {@link org.opensilk.music.api.model.spi.Bundleable#toBundle()}
      * @return {@link org.opensilk.music.api.model.spi.Bundleable} or null if Bundle is malformed
+     * @throws java.lang.Exception
      */
-    public static Bundleable transformBundle(Bundle b) {
-        try {
-            Class cls = Class.forName(b.getString("clz"));
-            return transformBundle(cls, b);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
+    @NonNull
+    public static Bundleable transformBundle(Bundle b) throws Exception {
+        Class cls = Class.forName(b.getString("clz"));
+        return transformBundle(cls, b);
     }
 
     /**
@@ -108,15 +106,13 @@ public class OrpheusApi {
      * @param b Bundle created with {@link org.opensilk.music.api.model.spi.Bundleable#toBundle()}
      * @return {@link org.opensilk.music.api.model.spi.Bundleable} object or null if passed Bundle
      *          does not implement {@link org.opensilk.music.api.model.spi.Bundleable}
+     * @throws java.lang.Exception
      */
-    public static <T extends Bundleable> T transformBundle(Class<T> cls, Bundle b) {
-        try { // TODO better way?
-            Field f = cls.getDeclaredField("BUNDLE_CREATOR");
-            Bundleable.BundleCreator<T> creator = (Bundleable.BundleCreator<T>) f.get(null);
-            return creator.fromBundle(b);
-        } catch (NoSuchFieldException|IllegalAccessException|IllegalArgumentException e) {
-            e.printStackTrace();
-            return null;
-        }
+    @NonNull
+    public static <T extends Bundleable> T transformBundle(Class<T> cls, Bundle b) throws Exception {
+        // TODO better way?
+        Field f = cls.getDeclaredField("BUNDLE_CREATOR");
+        Bundleable.BundleCreator<T> creator = (Bundleable.BundleCreator<T>) f.get(null);
+        return creator.fromBundle(b);
     }
 }
