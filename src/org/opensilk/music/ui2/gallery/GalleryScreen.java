@@ -19,6 +19,8 @@ package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
 
+import com.andrew.apollo.utils.MusicUtils;
+
 import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -122,12 +124,12 @@ public class GalleryScreen implements Blueprint {
             if (menuConfig != null) {
                 delegateActionHandler.setDelegate(menuConfig.actionHandler);
                 menus = new int[menuConfig.menus.length+2];
-                menus[0] = R.menu.party_shuffle;
+                menus[0] = R.menu.shuffle;
                 menus[1] = R.menu.search;
                 System.arraycopy(menuConfig.menus, 0, menus, 2, menuConfig.menus.length);
             } else {
                 delegateActionHandler.setDelegate(null);
-                menus = new int[] { R.menu.party_shuffle, R.menu.search};
+                menus = new int[] { R.menu.shuffle, R.menu.search};
             }
             actionBarOwner.setConfig(new ActionBarOwner.Config(true, true, R.string.music,
                     new ActionBarOwner.MenuConfig(delegateActionHandler, menus)));
@@ -146,7 +148,9 @@ public class GalleryScreen implements Blueprint {
                 switch (integer) {
                     case R.id.menu_search:
                         return true;
-                    case R.id.menu_party_shuffle:
+                    case R.id.menu_shuffle:
+                        // Starts autoshuffle mode
+                        MusicUtils.startPartyShuffle();
                         return true;
                     default:
                         return delegate != null && delegate.call(integer);

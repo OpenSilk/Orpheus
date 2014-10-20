@@ -164,6 +164,7 @@ public class SongsScreen extends Screen {
 
         Adapter(List<LocalSong> items) {
             super(items);
+            setGridStyle(false);
         }
 
         @Override

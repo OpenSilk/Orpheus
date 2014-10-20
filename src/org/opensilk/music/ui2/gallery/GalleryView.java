@@ -84,12 +84,13 @@ public class GalleryView extends LinearLayout {
     public void setup(List<GalleryPage> galleryPages, int startPage) {
         Adapter adapter = new Adapter(galleryPages);
         viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(startPage);
         tabBar.setViewPager(viewPager);
+        viewPager.setCurrentItem(startPage);
     }
 
     class Adapter extends PagerAdapter {
         private final List<GalleryPage> galleryPages;
+        Object mCurrentPrimaryItem;
 
         public Adapter(GalleryPage[] galleryPages) {
             this(Arrays.asList(galleryPages));
@@ -128,8 +129,6 @@ public class GalleryView extends LinearLayout {
             oldChildPresenter.dropView(oldChild);
             container.removeView(oldChild);
         }
-
-        Object mCurrentPrimaryItem;
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {

@@ -48,6 +48,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     private LayoutInflater inflater;
     protected final List<T> items;
+    protected boolean mGridStyle = true;
 
     public BaseAdapter() {
         this.items = new ArrayList<>();
@@ -107,6 +108,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     @Override
     public int getItemViewType(int position) {
+        if (!mGridStyle) {
+            return R.layout.gallery_list_item_artwork;
+        }
         if (quadArtwork(position)) {
             return R.layout.gallery_grid_item_artwork;
         } else if (dualArtwork(position)) {
@@ -114,6 +118,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         } else {
             return R.layout.gallery_grid_item_artwork;
         }
+    }
+
+    public void setGridStyle(boolean gridStyle) {
+        mGridStyle = gridStyle;
     }
 
     protected boolean dualArtwork(int position) {

@@ -78,13 +78,17 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
         } else if (isGrid()) {
             return makeGridLayoutManager(context);
         } else {
-            return makeGridLayoutManager(context);
+            return makeListLayoutManager(context);
         }
     }
 
     protected RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
         int numCols = context.getResources().getInteger(R.integer.grid_columns);
-        return new GridLayoutManager(context, numCols, LinearLayoutManager.VERTICAL, false);
+        return new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
+    }
+
+    protected RecyclerView.LayoutManager makeListLayoutManager(Context context) {
+        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
     }
 
     protected boolean setAdapter(RecyclerView.Adapter<?> adapter) {
