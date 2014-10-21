@@ -118,7 +118,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<RecyclerView> imple
         if (v == null) return false;
         boolean isGrid = isGrid() || isStaggered();
         adapter.setGridStyle(isGrid);
-        v.setAdapter(adapter);
+        v.swapAdapter(adapter, false);
         return true;
     }
 

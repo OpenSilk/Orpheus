@@ -40,6 +40,7 @@ import butterknife.InjectView;
 import butterknife.Optional;
 import hugo.weaving.DebugLog;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/18/14.
@@ -171,12 +172,21 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
 //        @DebugLog
         public void reset() {
-            if (artwork != null) artwork.cancelRequest();
-            if (artwork2 != null) artwork2.cancelRequest();
-            if (artwork3 != null) artwork3.cancelRequest();
-            if (artwork4 != null) artwork4.cancelRequest();
-            subscriptions.unsubscribe();
-            subscriptions.clear();
+            Timber.v("Reset title=%s", title.getText());
+//            if (artwork != null) {
+//                artwork.reset();
+//            }
+//            if (artwork2 != null) {
+//                artwork2.reset();
+//            }
+//            if (artwork3 != null) {
+//                artwork3.reset();
+//            }
+//            if (artwork4 != null) {
+//                artwork4.reset();
+//            }
+//            subscriptions.unsubscribe();
+//            subscriptions.clear();
             artNumber=0;
         }
 

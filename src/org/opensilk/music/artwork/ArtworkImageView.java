@@ -26,9 +26,9 @@ import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
-import org.opensilk.music.BuildConfig;
 import com.android.volley.VolleyError;
 
+import org.opensilk.music.BuildConfig;
 import org.opensilk.music.MusicApp;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkLoader.ImageContainer;
@@ -182,7 +182,7 @@ public class ArtworkImageView extends ImageView {
         if (mImageContainer != null) {
             // If the view was bound to an image request, cancel it and clear
             // out the image from the view.
-            Timber.i("Canceling old Request");
+            Timber.i("Canceling old Request %s", mArtInfo);
             mImageContainer.cancelRequest();
             // clear out the image from the view.
             resetImage();

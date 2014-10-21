@@ -67,6 +67,8 @@ public class AppPreferences {
     public static final String SIMPLE = "simple";
     public static final String GRID = "grid";
 
+    public static final String IMAGE_DISK_CACHE_SIZE = "pref_cache_size";
+
     private final Context appContext;
     private final SharedPreferences prefs;
     private final Gson gson;

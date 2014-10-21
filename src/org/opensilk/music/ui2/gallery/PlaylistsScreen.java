@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Bundle;
 
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.provider.MusicProvider;
@@ -31,7 +30,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.DistinctAlbumArtInfoLoader;
+import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForApplication;
@@ -124,7 +123,7 @@ public class PlaylistsScreen extends Screen {
             holder.title.setText(playlist.mPlaylistName);
             holder.subtitle.setText(MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, playlist.mSongNumber));
             if (playlist.mAlbumNumber > 0) {
-                DistinctAlbumArtInfoLoader loader = new DistinctAlbumArtInfoLoader(holder.itemView.getContext(), playlist.mAlbumIds);
+                AlbumArtInfoLoader loader = new AlbumArtInfoLoader(holder.itemView.getContext(), playlist.mAlbumIds);
                 holder.subscriptions.add(loader.getDistinctObservable()
                         // only need at most 4
                         .take(4)

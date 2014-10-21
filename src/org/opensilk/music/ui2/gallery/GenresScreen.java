@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Bundle;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.provider.MusicProvider;
@@ -31,7 +30,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.DistinctAlbumArtInfoLoader;
+import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForApplication;
@@ -42,7 +41,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import rx.functions.Action1;
-import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.
@@ -128,7 +126,7 @@ public class GenresScreen extends Screen {
                     + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, genre.mSongNumber);
             holder.subtitle.setText(l2);
             if (genre.mAlbumNumber > 0) {
-                DistinctAlbumArtInfoLoader loader = new DistinctAlbumArtInfoLoader(context, genre.mAlbumIds);
+                AlbumArtInfoLoader loader = new AlbumArtInfoLoader(context, genre.mAlbumIds);
                 holder.subscriptions.add(loader.getDistinctObservable()
                         // only need at most 4
                         .take(4)

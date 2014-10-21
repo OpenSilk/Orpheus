@@ -16,8 +16,19 @@
 
 package org.opensilk.music.artwork;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
+
+import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
+import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
+import org.opensilk.music.artwork.cache.BitmapLruCache;
+import org.opensilk.music.artwork.cache.CacheUtil;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;
@@ -34,7 +45,8 @@ import dagger.Provides;
                 ArtworkProvider.class,
                 ArtworkBroadcastReceiver.class,
         },
-        complete = false
+        complete = false,
+        library = true
 )
 public class ArtworkModule {
 
@@ -48,4 +60,32 @@ public class ArtworkModule {
         return ArtworkManager.getInstance(context);
     }
 
+    @Provides @Singleton
+    public RequestQueue provideRequestQueue(@ForApplication Context context) {
+        RequestQueue q = Volley.newRequestQueue(context);
+        q.start();
+        return q;
+    }
+
+    @Provides @Singleton
+    public BitmapLruCache provideBitmapLruCache(@ForApplication Context context) {
+        return new BitmapLruCache(getL1CacheSize(context));
+    }
+
+    @Provides @Singleton
+    public BitmapDiskLruCache provideBitmapDiskLruCache(@ForApplication Context context, AppPreferences preferences) {
+        final int size = Integer.decode(preferences.getString(AppPreferences.IMAGE_DISK_CACHE_SIZE, "60")) * 1024 * 1024;
+        return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY),
+                size, Bitmap.CompressFormat.PNG, 100);
+    }
+
+    private static final float THUMB_MEM_CACHE_DIVIDER = 0.20f;
+    public static final String DISK_CACHE_DIRECTORY = "artworkcache";
+
+    private static int getL1CacheSize(Context context) {
+        final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        final int memClass = context.getResources().getBoolean(R.bool.config_largeHeap) ?
+                activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
+        return Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
+    }
 }

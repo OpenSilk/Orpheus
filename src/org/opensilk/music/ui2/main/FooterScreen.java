@@ -112,6 +112,11 @@ public class FooterScreen {
         }
 
         @Override
+        protected void onSave(Bundle outState) {
+            super.onSave(outState);
+        }
+
+        @Override
         public void onResume() {
             Timber.v("onResume()");
             if (getView() == null) return;
@@ -166,7 +171,7 @@ public class FooterScreen {
                         @Override
                         public Boolean call(Intent intent) {
                             Timber.v("playstateSubscripion filter called on %s", Thread.currentThread().getName());
-                            return intent.getAction() != null && intent.getAction().equals(MusicPlaybackService.PLAYSTATE_CHANGED);
+                            return MusicPlaybackService.PLAYSTATE_CHANGED.equals(intent.getAction());
                         }
                     })
                     // filter out repeats only taking most recent
@@ -190,7 +195,7 @@ public class FooterScreen {
                         @Override
                         public Boolean call(Intent intent) {
                             Timber.v("metaObservable(filter) %s", Thread.currentThread().getName());
-                            return intent.getAction() != null && intent.getAction().equals(MusicPlaybackService.META_CHANGED);
+                            return MusicPlaybackService.META_CHANGED.equals(intent.getAction());
                         }
                     })
                     // buffer quick successive calls and only emit the most recent

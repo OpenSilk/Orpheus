@@ -13,6 +13,7 @@ allprojects {
     repositories {
         maven { url "../../m2/repository" }
         mavenCentral()
+        jcenter()
     }
 }
 

@@ -30,6 +30,8 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.RxAlbumRequest;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
@@ -67,12 +69,15 @@ public class AlbumsScreen extends Screen {
     public static class Presenter extends BasePresenter<LocalAlbum> {
 
         final Loader loader;
+        final RxAlbumRequest requestManager;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader) {
+        public Presenter(AppPreferences preferences, Loader loader, RxAlbumRequest requestManager) {
             super(preferences);
+            Timber.v("new Albums.Presenter()");
             this.loader = loader;
             this.loader.setSortOrder(preferences.getString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z));
+            this.requestManager = requestManager;
         }
 
         @Override
@@ -87,7 +92,7 @@ public class AlbumsScreen extends Screen {
 
         @Override
         protected BaseAdapter<LocalAlbum> newAdapter(List<LocalAlbum> items) {
-            return new Adapter(items);
+            return new Adapter(items, requestManager);
         }
 
         @Override
@@ -152,6 +157,7 @@ public class AlbumsScreen extends Screen {
         @Inject
         public Loader(@ForApplication Context context) {
             super(context);
+            Timber.v("new Albums.Loader()");
             setUri(Uris.EXTERNAL_MEDIASTORE_ALBUMS);
             setProjection(Projections.LOCAL_ALBUM);
             setSelection(Selections.LOCAL_ALBUM);
@@ -167,9 +173,11 @@ public class AlbumsScreen extends Screen {
     }
 
     static class Adapter extends BaseAdapter<LocalAlbum> {
+        RxAlbumRequest requestManager;
 
-        Adapter(List<LocalAlbum> items) {
+        Adapter(List<LocalAlbum> items, RxAlbumRequest requestManager) {
             super(items);
+            this.requestManager = requestManager;
         }
 
         @Override
@@ -177,7 +185,11 @@ public class AlbumsScreen extends Screen {
             LocalAlbum album = getItem(position);
             holder.title.setText(album.name);
             holder.subtitle.setText(album.artistName);
-            ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);
+            RxAlbumRequest.Req req = requestManager.newRequest(holder.artwork,
+                    new ArtInfo(album.artistName, album.name, album.artworkUri),
+                    ArtworkType.THUMBNAIL);
+            req.tryForCache();
+//            ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);
         }
 
     }

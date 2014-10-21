@@ -71,6 +71,11 @@ public class ArtInfo implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return "ArtInfo{ artist="+artistName+" album="+albumName+" uri="+artworkUri+" }";
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

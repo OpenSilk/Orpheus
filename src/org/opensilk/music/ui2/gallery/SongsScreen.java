@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Bundle;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.utils.SortOrder;
@@ -30,7 +29,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.DistinctAlbumArtInfoLoader;
+import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
@@ -168,13 +167,15 @@ public class SongsScreen extends Screen {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             LocalSong song = getItem(position);
+            Timber.d("onBindViewHolder oldTitle=%s nowTitle=%s", holder.title.getText(), song.name);
             holder.title.setText(song.name);
             holder.subtitle.setText(song.artistName);
             // workaruond for mediastore to get the album artist
-            DistinctAlbumArtInfoLoader loader = new DistinctAlbumArtInfoLoader(holder.itemView.getContext(), new long[]{song.albumId});
+            AlbumArtInfoLoader loader = new AlbumArtInfoLoader(holder.itemView.getContext(), new long[]{song.albumId});
             holder.subscriptions.add(loader.getDistinctObservable().take(1).subscribe(new Action1<ArtInfo>() {
                 @Override
                 public void call(ArtInfo artInfo) {
+                    Timber.d("Loading artwork %s", artInfo);
                     holder.loadArtwork(artInfo);
                 }
             }));

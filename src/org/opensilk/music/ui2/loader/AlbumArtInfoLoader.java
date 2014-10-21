@@ -42,9 +42,9 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/19/14.
  */
-public class DistinctAlbumArtInfoLoader extends RxCursorLoader<ArtInfo> {
+public class AlbumArtInfoLoader extends RxCursorLoader<ArtInfo> {
 
-    public DistinctAlbumArtInfoLoader(Context context, long[] albumIds) {
+    public AlbumArtInfoLoader(Context context, long[] albumIds) {
         super(context);
         setUri(Uris.EXTERNAL_MEDIASTORE_ALBUMS);
         setProjection(Projections.LOCAL_ALBUM);
