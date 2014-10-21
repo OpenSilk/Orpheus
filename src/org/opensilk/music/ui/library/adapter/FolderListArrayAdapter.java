@@ -103,23 +103,27 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
     @Override
     protected Card makeCard(Bundle data) {
-        Bundleable b = OrpheusApi.transformBundle(data);
-        if (b instanceof Folder) {
-            FolderCard c = new FolderCard(getContext(), (Folder)b);
-            mInjector.inject(c);
-            return c;
-        } else if (b instanceof Song) {
-            SongCard c = new SongCard(getContext(), (Song)b);
-            mInjector.inject(c);
-            return c;
-        } else if (b instanceof Artist) {
-            ArtistCard c = new ArtistCard(getContext(), (Artist)b);
-            mInjector.inject(c);
-            return c;
-        } else if (b instanceof Album) {
-            AlbumCard c = new AlbumCard(getContext(), (Album)b);
-            mInjector.inject(c);
-            return c;
+        try {
+            Bundleable b = OrpheusApi.transformBundle(data);
+            if (b instanceof Folder) {
+                FolderCard c = new FolderCard(getContext(), (Folder)b);
+                mInjector.inject(c);
+                return c;
+            } else if (b instanceof Song) {
+                SongCard c = new SongCard(getContext(), (Song)b);
+                mInjector.inject(c);
+                return c;
+            } else if (b instanceof Artist) {
+                ArtistCard c = new ArtistCard(getContext(), (Artist)b);
+                mInjector.inject(c);
+                return c;
+            } else if (b instanceof Album) {
+                AlbumCard c = new AlbumCard(getContext(), (Album)b);
+                mInjector.inject(c);
+                return c;
+            }
+        } catch (Exception e) {
+            //fall
         }
         throw new IllegalArgumentException("Unknown resource class");
     }

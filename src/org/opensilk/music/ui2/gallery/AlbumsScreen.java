@@ -64,7 +64,7 @@ public class AlbumsScreen extends Screen {
     }
 
     @Singleton
-    public static class Presenter extends BasePresenter {
+    public static class Presenter extends BasePresenter<LocalAlbum> {
 
         final Loader loader;
 
@@ -76,31 +76,18 @@ public class AlbumsScreen extends Screen {
         }
 
         @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            Timber.v("onLoad(%s)", savedInstanceState);
-            super.onLoad(savedInstanceState);
-        }
-
-        @Override
-        protected void reset() {
-            super.reset();
-            reload();
-        }
-
-        void reload() {
-            if (subscription != null) subscription.unsubscribe();
+        protected void load() {
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalAlbum>>() {
                 @Override
                 public void call(List<LocalAlbum> localAlbums) {
-                    setAdapter(new Adapter(localAlbums));
+                    addItems(localAlbums);
                 }
             });
         }
 
-        void setNewSortOrder(String sortOrder) {
-            preferences.putString(AppPreferences.ALBUM_SORT_ORDER, sortOrder);
-            loader.setSortOrder(sortOrder);
-            reload();
+        @Override
+        protected BaseAdapter<LocalAlbum> newAdapter(List<LocalAlbum> items) {
+            return new Adapter(items);
         }
 
         @Override
@@ -112,6 +99,12 @@ public class AlbumsScreen extends Screen {
         public ActionBarOwner.MenuConfig getMenuConfig() {
             ensureMenu();
             return actionBarMenu;
+        }
+
+        void setNewSortOrder(String sortOrder) {
+            preferences.putString(AppPreferences.ALBUM_SORT_ORDER, sortOrder);
+            loader.setSortOrder(sortOrder);
+            reload();
         }
 
         void ensureMenu() {
@@ -137,11 +130,11 @@ public class AlbumsScreen extends Screen {
                                 return true;
                             case R.id.menu_view_as_simple:
                                 preferences.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.SIMPLE);
-                                reset();
+                                resetRecyclerView();
                                 return true;
                             case R.id.menu_view_as_grid:
                                 preferences.putString(AppPreferences.ALBUM_LAYOUT, AppPreferences.GRID);
-                                reset();
+                                resetRecyclerView();
                                 return true;
                             default:
                                 return false;

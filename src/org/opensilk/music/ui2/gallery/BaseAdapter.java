@@ -52,10 +52,12 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     public BaseAdapter() {
         this.items = new ArrayList<>();
+        setHasStableIds(true);
     }
 
     public BaseAdapter(List<T> items) {
         this.items = items;
+        setHasStableIds(true);
     }
 
     public List<T> getItems() {
@@ -103,7 +105,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     @Override
     public long getItemId(int position) {
-        return super.getItemId(position);
+        return getItem(position).hashCode();
     }
 
     @Override

@@ -81,8 +81,6 @@ public class MusicServiceConnection {
     // protected by synchronized methods
     private Token serviceToken;
 
-    private Observable<Intent> broadcastObservable;
-
     @Inject
     public MusicServiceConnection(@ForApplication Context context) {
         this.context = new ContextWrapper(context);
@@ -103,28 +101,10 @@ public class MusicServiceConnection {
         Timber.d("unbinding MusicService");
         context.unbindService(serviceToken);
         serviceToken = null;
-        if (broadcastObservable != null) broadcastObservable = null;
     }
 
     public synchronized boolean isBound() {
         return (serviceToken != null);
-    }
-
-    public synchronized Observable<Intent> getBroadcastObservable() {
-        if (broadcastObservable != null) return broadcastObservable;
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-        intentFilter.addAction(MusicPlaybackService.META_CHANGED);
-        intentFilter.addAction(MusicPlaybackService.REPEATMODE_CHANGED);
-        intentFilter.addAction(MusicPlaybackService.SHUFFLEMODE_CHANGED);
-        intentFilter.addAction(MusicPlaybackService.REFRESH);
-        intentFilter.addAction(MusicPlaybackService.QUEUE_CHANGED);
-        OperatorBroadcastRegister obr = new OperatorBroadcastRegister(context, intentFilter, null, null);
-        ReplaySubject<Intent> subject = ReplaySubject.createWithTime(2, TimeUnit.MINUTES, AndroidSchedulers.mainThread());
-        Observable<Intent> obs = Observable.create(obr);
-        obs.subscribe(subject);
-        broadcastObservable = subject.asObservable();
-        return broadcastObservable;
     }
 
     synchronized void ensureConnection() {

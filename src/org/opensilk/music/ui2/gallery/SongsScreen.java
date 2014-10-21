@@ -64,7 +64,7 @@ public class SongsScreen extends Screen {
     }
 
     @Singleton
-    public static class Presenter extends BasePresenter {
+    public static class Presenter extends BasePresenter<LocalSong> {
 
         Loader loader;
 
@@ -76,32 +76,30 @@ public class SongsScreen extends Screen {
         }
 
         @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            Timber.v("onLoad()");
-            super.onLoad(savedInstanceState);
-            reload();
-        }
-
-        void reload() {
-            if (subscription != null) subscription.unsubscribe();
+        protected void load() {
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
                 @Override
                 public void call(List<LocalSong> localSongs) {
-                    setAdapter(new Adapter(localSongs));
+                    addItems(localSongs);
                 }
             });
         }
 
-        void setNewSortOrder(String sortOrder) {
-            preferences.putString(AppPreferences.SONG_SORT_ORDER, sortOrder);
-            loader.setSortOrder(sortOrder);
-            reload();
+        @Override
+        protected BaseAdapter<LocalSong> newAdapter(List<LocalSong> items) {
+            return new Adapter(items);
         }
 
         @Override
         public ActionBarOwner.MenuConfig getMenuConfig() {
             ensureMenu();
             return actionBarMenu;
+        }
+
+        void setNewSortOrder(String sortOrder) {
+            preferences.putString(AppPreferences.SONG_SORT_ORDER, sortOrder);
+            loader.setSortOrder(sortOrder);
+            reload();
         }
 
         void ensureMenu() {

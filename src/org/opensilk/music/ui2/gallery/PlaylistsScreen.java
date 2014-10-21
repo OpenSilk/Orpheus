@@ -59,7 +59,7 @@ public class PlaylistsScreen extends Screen {
     }
 
     @Singleton
-    public static class Presenter extends BasePresenter {
+    public static class Presenter extends BasePresenter<Playlist> {
 
         final Loader loader;
 
@@ -70,12 +70,16 @@ public class PlaylistsScreen extends Screen {
         }
 
         @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-            loader.getListObservable().subscribe(new Action1<List<Playlist>>() {
+        protected BaseAdapter<Playlist> newAdapter(List<Playlist> items) {
+            return new Adapter(items);
+        }
+
+        @Override
+        protected void load() {
+            subscription = loader.getListObservable().subscribe(new Action1<List<Playlist>>() {
                 @Override
                 public void call(List<Playlist> playlists) {
-                    setAdapter(new Adapter(playlists));
+                    addItems(playlists);
                 }
             });
         }

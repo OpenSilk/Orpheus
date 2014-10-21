@@ -27,6 +27,9 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.util.ViewStateSaver;
+
+import java.util.List;
 
 import mortar.ViewPresenter;
 import rx.Subscription;
@@ -35,10 +38,11 @@ import rx.functions.Func1;
 /**
  * Created by drew on 10/19/14.
  */
-public abstract class BasePresenter extends ViewPresenter<RecyclerView> implements HasOptionsMenu {
+public abstract class BasePresenter<T> extends ViewPresenter<RecyclerView> implements HasOptionsMenu {
 
     protected final AppPreferences preferences;
 
+    protected List<T> items;
     protected Subscription subscription;
     protected ActionBarOwner.MenuConfig actionBarMenu;
 
@@ -49,12 +53,24 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        reset();
+        setupRecyclerView();
+        if (items != null && !items.isEmpty()) {
+            setAdapter(newAdapter(items));
+            if (savedInstanceState != null) {
+                ViewStateSaver.restore(getView(), savedInstanceState, "recyclerview");
+            }
+        } else if (subscription == null || subscription.isUnsubscribed()) {
+            load();
+        }
     }
 
     @Override
     protected void onSave(Bundle outState) {
         super.onSave(outState);
+        RecyclerView v = getView();
+        if (v != null) {
+            ViewStateSaver.save(v, outState, "recyclerview");
+        }
     }
 
     @Override
@@ -63,12 +79,63 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
         if (subscription != null) subscription.unsubscribe();
     }
 
-    protected void reset() {
+    // Init the recyclerview
+    protected void setupRecyclerView() {
         RecyclerView v = getView();
         if (v == null) return;
         v.setHasFixedSize(!isStaggered());
         v.setLayoutManager(getLayoutManager(v.getContext()));
-        v.setAdapter(null);
+    }
+
+    // reset the recyclerview for eg layoutmanager change
+    protected void resetRecyclerView() {
+        RecyclerView v = getView();
+        if (v == null) return;
+        v.getRecycledViewPool().clear();
+        setupRecyclerView();
+        if (items != null && !items.isEmpty()) {
+            setAdapter(newAdapter(items));
+        } else {
+            v.setAdapter(null);
+            reload();
+        }
+    }
+
+    // make a new adapter
+    protected abstract BaseAdapter<T> newAdapter(List<T> items);
+    // start the loader
+    protected abstract void load();
+
+    // cancels any ongoing load and starts a new one
+    protected void reload() {
+        if (subscription != null) subscription.unsubscribe();
+        load();
+    }
+
+    // sets the adapter for recycler view
+    protected boolean setAdapter(BaseAdapter<T> adapter) {
+        RecyclerView v = getView();
+        if (v == null) return false;
+        boolean isGrid = isGrid() || isStaggered();
+        adapter.setGridStyle(isGrid);
+        v.setAdapter(adapter);
+        return true;
+    }
+
+    // updates this.items incase we are inthe middel of config change
+    // and trys to set the adapter, if that fails it will be set
+    // on the next onLoad
+    protected void addItems(List<T> items) {
+        this.items = items;
+        setAdapter(newAdapter(items));
+    }
+
+    // adds a single item to the adapter
+    protected void addItem(T item) {
+        RecyclerView v = getView();
+        if (v == null) return;
+        BaseAdapter<T> adapter = (BaseAdapter<T>) v.getAdapter();
+        adapter.add(item);
     }
 
     protected boolean isGrid() {
@@ -103,12 +170,4 @@ public abstract class BasePresenter extends ViewPresenter<RecyclerView> implemen
         return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
     }
 
-    protected boolean setAdapter(BaseAdapter<?> adapter) {
-        RecyclerView v = getView();
-        if (v == null) return false;
-        boolean isGrid = isGrid() || isStaggered();
-        adapter.setGridStyle(isGrid);
-        v.setAdapter(adapter);
-        return true;
-    }
 }

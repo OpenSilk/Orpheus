@@ -103,7 +103,11 @@ public class LibraryLoader implements EndlessRemoteAsyncLoader<Bundleable>, Serv
                     pagination = paginationBundle;
                     final List<Bundleable> objs = new ArrayList<>(items.size());
                     for (Bundle b : items) {
-                        objs.add(OrpheusApi.transformBundle(b));
+                        try {
+                            objs.add(OrpheusApi.transformBundle(b));
+                        } catch (Exception e) {
+                            //ignore for now
+                        }
                     }
                     handler.post(new Runnable() {
                         @Override

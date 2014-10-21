@@ -184,9 +184,11 @@ public class LibraryLoader {
             } else {
                 ArrayList<Bundleable> bundleables = new ArrayList<>(items.size());
                 for (Bundle b : items) {
-                    Bundleable bdl = OrpheusApi.transformBundle(b);
-                    if (bdl == null)  continue;
-                    bundleables.add(bdl);
+                    try {
+                        bundleables.add(OrpheusApi.transformBundle(b));
+                    } catch (Exception e) {
+                        //ignore for now
+                    }
                 }
                 mResult = new Result(bundleables, paginationBundle);
             }

@@ -62,11 +62,10 @@ public abstract class RxCursorLoader<T> {
 
     protected abstract T makeFromCursor(Cursor c);
 
-    protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
-        if (subscriber.isUnsubscribed()) return;
-        subscriber.onError(t);
-    }
-
+    /**
+     * @return Observable that collects all items into a List and emits that
+     *         in a single onNext(List) call. subscribed on IO observes on main.
+     */
     public Observable<List<T>> getListObservable() {
         return createObservable()
                 // collects the objects into a list and publishes the complete list as
@@ -83,18 +82,36 @@ public abstract class RxCursorLoader<T> {
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.e(throwable, "RxCursorLoader(uri=%s :: projection=%s :: selection=%s " +
-                                "selectionArgs=%s :: sortOrder=%s", uri, projection, selection, selectionArgs, sortOrder);
+                        dump(throwable);
                     }
                 })
-                .onExceptionResumeNext(Observable.<List<T>>empty())
+                .onErrorResumeNext(Observable.<List<T>>empty())
                 // want Query on an io thread
                 .subscribeOn(Schedulers.io())
                 // want the final List to be published on the main thread
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    protected Observable<T> createObservable() {
+    /**
+     * @return Observable subscribed on IO and observes on main.
+     */
+    public Observable<T> getObservable() {
+        return createObservable()
+                .doOnError(new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        dump(throwable);
+                    }
+                })
+                .onErrorResumeNext(Observable.<T>empty())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * @return the raw producer, suitable for chaining.
+     */
+    public Observable<T> createObservable() {
         return Observable.create(new Observable.OnSubscribe<T>() {
             // Querys the mediastore
             @Override
@@ -117,14 +134,15 @@ public abstract class RxCursorLoader<T> {
                         emmitError(new NullPointerException("Unable to obtain cursor"), subscriber);
                         return;
                     }
-                    c.moveToFirst();
-                    do {
-                        T item = makeFromCursor(c);
-                        if (subscriber.isUnsubscribed()) {
-                            return;
-                        }
-                        subscriber.onNext(item);
-                    } while (c.moveToNext());
+                    if (c.moveToFirst()) {
+                        do {
+                            T item = makeFromCursor(c);
+                            if (subscriber.isUnsubscribed()) {
+                                return;
+                            }
+                            subscriber.onNext(item);
+                        } while (c.moveToNext());
+                    }
                     if (!subscriber.isUnsubscribed()) {
                         subscriber.onCompleted();
                     }
@@ -155,5 +173,15 @@ public abstract class RxCursorLoader<T> {
 
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
+        if (subscriber.isUnsubscribed()) return;
+        subscriber.onError(t);
+    }
+
+    protected void dump(Throwable throwable) {
+        Timber.e(throwable, "RxCursorLoader(uri=%s\nprojection=%s\nselection=%s\nselectionArgs=%s\nsortOrder=%s",
+                uri, projection, selection, selectionArgs, sortOrder);
     }
 }
