@@ -17,6 +17,10 @@
 
 package org.opensilk.music;
 
+import org.robolectric.Robolectric;
+
+import dagger.ObjectGraph;
+
 /**
  * Created by drew on 10/17/14.
  */
@@ -25,5 +29,19 @@ public class TestMusicApp extends MusicApp {
     @Override
     protected void enableStrictMode() {
         //Stub out
+    }
+
+    @Override
+    protected void setupDagger() {
+        // for tests we dont use the GraphHolder since i cannot think
+        // of anyway to override that, so we just make our own global module
+        // and ignore the graph holder global module
+        ObjectGraph og = ObjectGraph.create(new TestGlobalModule(getApplicationContext()));
+        mScopedGraphe = og.plus(new AppModule(this));
+    }
+
+    public static void injectTest(Object obj) {
+        TestMusicApp app = (TestMusicApp) Robolectric.application;
+        app.inject(obj);
     }
 }

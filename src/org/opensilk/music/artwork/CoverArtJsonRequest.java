@@ -33,7 +33,7 @@ import java.util.List;
  * Created by drew on 10/21/14.
  */
 class CoverArtJsonRequest extends JsonRequest<String> {
-    private static final String API_ROOT = "http://coverartarchive.org/release/";
+    static final String API_ROOT = "http://coverartarchive.org/release/";
 
     interface Listener extends Response.Listener<String>, Response.ErrorListener {
 

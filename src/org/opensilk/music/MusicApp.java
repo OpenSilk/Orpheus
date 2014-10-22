@@ -81,7 +81,7 @@ public class MusicApp extends Application implements DaggerInjector {
      */
     private GraphHolder mGraphHolder;
 
-    private ObjectGraph mScopedGraphe;
+    protected ObjectGraph mScopedGraphe;
 
     protected MortarScope mRootScope;
 
@@ -96,9 +96,8 @@ public class MusicApp extends Application implements DaggerInjector {
             BugSenseHandler.initAndStartSession(this, "7c67fe46");
         }
 
-        mGraphHolder = GraphHolder.get(this);
-        mScopedGraphe = mGraphHolder.getObjectGraph().plus(new AppModule(this));
-        mRootScope = Mortar.createRootScope(BuildConfig.DEBUG, mScopedGraphe);
+        setupDagger();
+        setupMortar();
 
         if (DEBUG) {
             // Plant the forest
@@ -123,6 +122,15 @@ public class MusicApp extends Application implements DaggerInjector {
          */
         // Enable strict mode logging
         enableStrictMode();
+    }
+
+    protected void setupDagger() {
+        mGraphHolder = GraphHolder.get(this);
+        mScopedGraphe = mGraphHolder.getObjectGraph().plus(new AppModule(this));
+    }
+
+    protected void setupMortar() {
+        mRootScope = Mortar.createRootScope(DEBUG, mScopedGraphe);
     }
 
     @Override
