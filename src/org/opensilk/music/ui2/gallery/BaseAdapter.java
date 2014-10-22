@@ -24,12 +24,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,17 +49,21 @@ import timber.log.Timber;
  */
 public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.ViewHolder> {
 
-    private LayoutInflater inflater;
     protected final List<T> items;
+    protected final ArtworkRequestManager artworkRequestor;
+
+    private LayoutInflater inflater;
     protected boolean mGridStyle = true;
 
-    public BaseAdapter() {
+    public BaseAdapter(ArtworkRequestManager artworkRequestor) {
         this.items = new ArrayList<>();
+        this.artworkRequestor = artworkRequestor;
         setHasStableIds(true);
     }
 
-    public BaseAdapter(List<T> items) {
+    public BaseAdapter(List<T> items, ArtworkRequestManager artworkRequestor) {
         this.items = items;
+        this.artworkRequestor = artworkRequestor;
         setHasStableIds(true);
     }
 
@@ -136,58 +142,34 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        @InjectView(R.id.artwork_thumb) ArtworkImageView artwork;
-        @InjectView(R.id.artwork_thumb2) @Optional ArtworkImageView artwork2;
-        @InjectView(R.id.artwork_thumb3) @Optional ArtworkImageView artwork3;
-        @InjectView(R.id.artwork_thumb4) @Optional ArtworkImageView artwork4;
+        @InjectView(R.id.artwork_thumb) ImageView artwork;
+        @InjectView(R.id.artwork_thumb2) @Optional ImageView artwork2;
+        @InjectView(R.id.artwork_thumb3) @Optional ImageView artwork3;
+        @InjectView(R.id.artwork_thumb4) @Optional ImageView artwork4;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_overflow) ImageButton overflow;
 
-        CompositeSubscription subscriptions;
-        int artNumber;
+        final CompositeSubscription subscriptions;
+        final int artNumber;
 
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
             subscriptions = new CompositeSubscription();
-        }
-
-        public void loadArtwork(ArtInfo artInfo) {
-            switch (++artNumber) {
-                case 1:
-                    if (artwork != null) ArtworkManager.loadImage(artInfo, artwork);
-                    break;
-                case 2:
-                    if (artwork2 != null) ArtworkManager.loadImage(artInfo, artwork2);
-                    break;
-                case 3:
-                    if (artwork3 != null) ArtworkManager.loadImage(artInfo, artwork3);
-                    break;
-                case 4:
-                    if (artwork4 != null) ArtworkManager.loadImage(artInfo, artwork4);
-                    break;
+            if (artwork4 != null) {
+                artNumber = 4;
+            } else if (artwork2 != null) {
+                artNumber = 2;
+            } else {
+                artNumber = 1;
             }
         }
 
-//        @DebugLog
         public void reset() {
             Timber.v("Reset title=%s", title.getText());
-//            if (artwork != null) {
-//                artwork.reset();
-//            }
-//            if (artwork2 != null) {
-//                artwork2.reset();
-//            }
-//            if (artwork3 != null) {
-//                artwork3.reset();
-//            }
-//            if (artwork4 != null) {
-//                artwork4.reset();
-//            }
-//            subscriptions.unsubscribe();
-//            subscriptions.clear();
-            artNumber=0;
+            subscriptions.unsubscribe();
+            subscriptions.clear();
         }
 
     }

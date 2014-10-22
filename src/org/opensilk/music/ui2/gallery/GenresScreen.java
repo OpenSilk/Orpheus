@@ -29,6 +29,8 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
@@ -63,14 +65,14 @@ public class GenresScreen extends Screen {
         final Loader loader;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader) {
-            super(preferences);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
+            super(preferences, artworkRequestor);
             this.loader = loader;
         }
 
         @Override
         protected BaseAdapter<Genre> newAdapter(List<Genre> items) {
-            return new Adapter(items);
+            return new Adapter(items, artworkRequestor);
         }
 
         @Override
@@ -113,8 +115,8 @@ public class GenresScreen extends Screen {
 
     static class Adapter extends BaseAdapter<Genre> {
 
-        Adapter(List<Genre> items) {
-            super(items);
+        Adapter(List<Genre> items, ArtworkRequestManager artworkRequestor) {
+            super(items, artworkRequestor);
         }
 
         @Override
@@ -125,28 +127,37 @@ public class GenresScreen extends Screen {
             String l2 = MusicUtils.makeLabel(context, R.plurals.Nalbums, genre.mAlbumNumber)
                     + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, genre.mSongNumber);
             holder.subtitle.setText(l2);
-            if (genre.mAlbumNumber > 0) {
-                AlbumArtInfoLoader loader = new AlbumArtInfoLoader(context, genre.mAlbumIds);
-                holder.subscriptions.add(loader.getDistinctObservable()
-                        // only need at most 4
-                        .take(4)
-                        .subscribe(new Action1<ArtInfo>() {
-                            @Override
-                            public void call(ArtInfo artInfo) {
-                                holder.loadArtwork(artInfo);
-                            }
-                        }));
+            switch (holder.artNumber) {
+                case 4:
+                    if (genre.mAlbumIds.length >= 4) {
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork4,
+                                genre.mAlbumIds[3], ArtworkType.THUMBNAIL));
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork3,
+                                genre.mAlbumIds[2], ArtworkType.THUMBNAIL));
+                    }
+                    //fall
+                case 2:
+                    if (genre.mAlbumIds.length >= 2) {
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork2,
+                                genre.mAlbumIds[1], ArtworkType.THUMBNAIL));
+                    }
+                    //fall
+                case 1:
+                    if (genre.mAlbumIds.length >= 1) {
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
+                                genre.mAlbumIds[0], ArtworkType.THUMBNAIL));
+                    }
             }
         }
 
         @Override
         protected boolean quadArtwork(int position) {
-            return getItem(position).mAlbumNumber >= 4;
+            return getItem(position).mAlbumIds.length >= 4;
         }
 
         @Override
         protected boolean dualArtwork(int position) {
-            return getItem(position).mAlbumNumber >= 2;
+            return getItem(position).mAlbumIds.length >= 2;
         }
 
     }

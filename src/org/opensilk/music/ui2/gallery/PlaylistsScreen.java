@@ -29,6 +29,8 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
@@ -63,14 +65,14 @@ public class PlaylistsScreen extends Screen {
         final Loader loader;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader) {
-            super(preferences);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
+            super(preferences, artworkRequestor);
             this.loader = loader;
         }
 
         @Override
         protected BaseAdapter<Playlist> newAdapter(List<Playlist> items) {
-            return new Adapter(items);
+            return new Adapter(items, artworkRequestor);
         }
 
         @Override
@@ -113,8 +115,8 @@ public class PlaylistsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<Playlist> {
 
-        Adapter(List<Playlist> items) {
-            super(items);
+        Adapter(List<Playlist> items, ArtworkRequestManager artworkRequestor) {
+            super(items, artworkRequestor);
         }
 
         @Override
@@ -122,28 +124,37 @@ public class PlaylistsScreen extends Screen {
             Playlist playlist = getItem(position);
             holder.title.setText(playlist.mPlaylistName);
             holder.subtitle.setText(MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, playlist.mSongNumber));
-            if (playlist.mAlbumNumber > 0) {
-                AlbumArtInfoLoader loader = new AlbumArtInfoLoader(holder.itemView.getContext(), playlist.mAlbumIds);
-                holder.subscriptions.add(loader.getDistinctObservable()
-                        // only need at most 4
-                        .take(4)
-                        .subscribe(new Action1<ArtInfo>() {
-                            @Override
-                            public void call(ArtInfo artInfo) {
-                                holder.loadArtwork(artInfo);
-                            }
-                        }));
+            switch (holder.artNumber) {
+                case 4:
+                    if (playlist.mAlbumIds.length >= 4) {
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork4,
+                                playlist.mAlbumIds[3], ArtworkType.THUMBNAIL));
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork3,
+                                playlist.mAlbumIds[2], ArtworkType.THUMBNAIL));
+                    }
+                    //fall
+                case 2:
+                    if (playlist.mAlbumIds.length >= 2) {
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork2,
+                                playlist.mAlbumIds[1], ArtworkType.THUMBNAIL));
+                    }
+                    //fall
+                case 1:
+                    if (playlist.mAlbumIds.length >= 1) {
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
+                                playlist.mAlbumIds[0], ArtworkType.THUMBNAIL));
+                    }
             }
         }
 
         @Override
         protected boolean quadArtwork(int position) {
-            return getItem(position).mAlbumNumber >= 4;
+            return getItem(position).mAlbumIds.length >= 4;
         }
 
         @Override
         protected boolean dualArtwork(int position) {
-            return getItem(position).mAlbumNumber >= 2;
+            return getItem(position).mAlbumIds.length >= 2;
         }
     }
 }

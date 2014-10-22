@@ -31,6 +31,8 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
@@ -70,8 +72,8 @@ public class ArtistsScreen extends Screen {
         Loader loader;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader) {
-            super(preferences);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
+            super(preferences, artworkRequestor);
             Timber.v("new ArtistsScreen.Presenter()");
             this.loader = loader;
             this.loader.setSortOrder(preferences.getString(AppPreferences.ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z));
@@ -89,7 +91,7 @@ public class ArtistsScreen extends Screen {
 
         @Override
         protected BaseAdapter<LocalArtist> newAdapter(List<LocalArtist> items) {
-            return new Adapter(items);
+            return new Adapter(items, artworkRequestor);
         }
 
         @Override
@@ -167,13 +169,14 @@ public class ArtistsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<LocalArtist> {
 
-        Adapter(List<LocalArtist> items) {
-            super(items);
+        Adapter(List<LocalArtist> items, ArtworkRequestManager artworkRequestor) {
+            super(items, artworkRequestor);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             LocalArtist artist = getItem(position);
+            ArtInfo artInfo = new ArtInfo(artist.name, null, null);
             holder.title.setText(artist.name);
             String subtitle = "";
             if (artist.albumCount > 0) {
@@ -183,7 +186,7 @@ public class ArtistsScreen extends Screen {
                 subtitle += MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
             }
             holder.subtitle.setText(subtitle);
-            ArtworkManager.loadImage(new ArtInfo(artist.name, null, null), holder.artwork);
+            holder.subscriptions.add(artworkRequestor.newArtistRequest(holder.artwork, artInfo, ArtworkType.THUMBNAIL));
         }
     }
 

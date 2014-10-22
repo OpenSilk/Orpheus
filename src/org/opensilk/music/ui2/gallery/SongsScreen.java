@@ -28,6 +28,8 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
@@ -68,8 +70,8 @@ public class SongsScreen extends Screen {
         Loader loader;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader) {
-            super(preferences);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
+            super(preferences, artworkRequestor);
             this.loader = loader;
             this.loader.setSortOrder(preferences.getString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z));
         }
@@ -86,7 +88,7 @@ public class SongsScreen extends Screen {
 
         @Override
         protected BaseAdapter<LocalSong> newAdapter(List<LocalSong> items) {
-            return new Adapter(items);
+            return new Adapter(items, artworkRequestor);
         }
 
         @Override
@@ -159,26 +161,18 @@ public class SongsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<LocalSong> {
 
-        Adapter(List<LocalSong> items) {
-            super(items);
+        Adapter(List<LocalSong> items, ArtworkRequestManager artworkRequestor) {
+            super(items, artworkRequestor);
             setGridStyle(false);
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             LocalSong song = getItem(position);
-            Timber.d("onBindViewHolder oldTitle=%s nowTitle=%s", holder.title.getText(), song.name);
             holder.title.setText(song.name);
             holder.subtitle.setText(song.artistName);
-            // workaruond for mediastore to get the album artist
-            AlbumArtInfoLoader loader = new AlbumArtInfoLoader(holder.itemView.getContext(), new long[]{song.albumId});
-            holder.subscriptions.add(loader.getDistinctObservable().take(1).subscribe(new Action1<ArtInfo>() {
-                @Override
-                public void call(ArtInfo artInfo) {
-                    Timber.d("Loading artwork %s", artInfo);
-                    holder.loadArtwork(artInfo);
-                }
-            }));
+            holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
+                    song.albumId, ArtworkType.THUMBNAIL));
         }
     }
 }

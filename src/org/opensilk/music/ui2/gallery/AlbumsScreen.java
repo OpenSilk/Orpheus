@@ -28,6 +28,7 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -67,15 +68,13 @@ public class AlbumsScreen extends Screen {
     public static class Presenter extends BasePresenter<LocalAlbum> {
 
         final Loader loader;
-        final ArtworkRequestManagerImpl requestManager;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader, ArtworkRequestManagerImpl requestManager) {
-            super(preferences);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
+            super(preferences, artworkRequestor);
             Timber.v("new Albums.Presenter()");
             this.loader = loader;
             this.loader.setSortOrder(preferences.getString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z));
-            this.requestManager = requestManager;
         }
 
         @Override
@@ -90,7 +89,7 @@ public class AlbumsScreen extends Screen {
 
         @Override
         protected BaseAdapter<LocalAlbum> newAdapter(List<LocalAlbum> items) {
-            return new Adapter(items, requestManager);
+            return new Adapter(items, artworkRequestor);
         }
 
         @Override
@@ -171,22 +170,18 @@ public class AlbumsScreen extends Screen {
     }
 
     static class Adapter extends BaseAdapter<LocalAlbum> {
-        ArtworkRequestManagerImpl requestManager;
 
-        Adapter(List<LocalAlbum> items, ArtworkRequestManagerImpl requestManager) {
-            super(items);
-            this.requestManager = requestManager;
+        Adapter(List<LocalAlbum> items, ArtworkRequestManager artworkRequestor) {
+            super(items, artworkRequestor);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             LocalAlbum album = getItem(position);
+            ArtInfo artInfo = new ArtInfo(album.artistName, album.name, album.artworkUri);
             holder.title.setText(album.name);
             holder.subtitle.setText(album.artistName);
-            holder.subscriptions.add(requestManager.newAlbumRequest(holder.artwork,
-                    new ArtInfo(album.artistName, album.name, album.artworkUri),
-                    ArtworkType.THUMBNAIL));
-//            ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);
+            holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork, artInfo, ArtworkType.THUMBNAIL));
         }
 
     }

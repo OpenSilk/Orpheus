@@ -26,6 +26,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 
@@ -41,13 +42,15 @@ import rx.functions.Func1;
 public abstract class BasePresenter<T> extends ViewPresenter<RecyclerView> implements HasOptionsMenu {
 
     protected final AppPreferences preferences;
+    protected final ArtworkRequestManager artworkRequestor;
 
     protected List<T> items;
     protected Subscription subscription;
     protected ActionBarOwner.MenuConfig actionBarMenu;
 
-    public BasePresenter(AppPreferences preferences) {
+    public BasePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor) {
         this.preferences = preferences;
+        this.artworkRequestor = artworkRequestor;
     }
 
     @Override

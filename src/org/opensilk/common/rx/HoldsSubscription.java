@@ -15,21 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
-
-import android.widget.ImageView;
-
-import org.opensilk.music.api.meta.ArtInfo;
+package org.opensilk.common.rx;
 
 import rx.Subscription;
 
 /**
  * Created by drew on 10/22/14.
  */
-public interface ArtworkRequestManager {
-
-    Subscription newAlbumRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType);
-    Subscription newAlbumRequest(ImageView imageView, long albumId, ArtworkType artworkType);
-    Subscription newArtistRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType);
-
+public interface HoldsSubscription {
+    void addSubscription(Subscription subscription);
+    void removeSubscription(Subscription subscription);
 }

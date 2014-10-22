@@ -29,6 +29,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
+import org.opensilk.common.rx.HoldsSubscription;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -97,6 +98,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         public Subscription start() {
+            registerWithImageView();
             tryForCache();
             return this;
         }
@@ -107,6 +109,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 subscription.unsubscribe();
                 subscription = null;
             }
+            unregisterWithImageView();
             imageViewWeakReference.clear();
             unsubscribed = true;
         }
@@ -114,6 +117,20 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         @Override
         public boolean isUnsubscribed() {
             return unsubscribed;
+        }
+
+        void registerWithImageView() {
+            ImageView imageView = imageViewWeakReference.get();
+            if (imageView != null && imageView instanceof HoldsSubscription) {
+                ((HoldsSubscription) imageView).addSubscription(this);
+            }
+        }
+
+        void unregisterWithImageView() {
+            ImageView imageView = imageViewWeakReference.get();
+            if (imageView != null && imageView instanceof HoldsSubscription) {
+                ((HoldsSubscription) imageView).removeSubscription(this);
+            }
         }
 
         void setDefaultImage() {
@@ -125,15 +142,18 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         void setImageBitmap(final Bitmap bitmap, boolean fromCache) {
+            final ImageView imageView = imageViewWeakReference.get();
+            if (imageView == null) return;
+            unregisterWithImageView();
             if (fromCache) {
-                imageViewWeakReference.get().setImageBitmap(bitmap);
+                imageView.setImageBitmap(bitmap);
             } else {
-                imageViewWeakReference.get().animate().alpha(0).setDuration(100)
+                imageView.animate().alpha(0).setDuration(100)
                         .withEndAction(new Runnable() {
                             @Override
                             public void run() {
-                                imageViewWeakReference.get().setImageBitmap(bitmap);
-                                imageViewWeakReference.get().animate().alpha(1).setDuration(100).start();
+                                imageView.setImageBitmap(bitmap);
+                                imageView.animate().alpha(1).setDuration(100).start();
                             }
                         }).start();
             }
@@ -202,11 +222,11 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             super(imageView, artInfo, artworkType);
         }
 
-        @Override
-        public Subscription start() {
-            tryForNetwork(false);
-            return this;
-        }
+//        @Override
+//        public Subscription start() {
+//            tryForNetwork(false);
+//            return this;
+//        }
 
         @Override
         void onCacheMiss() {
@@ -305,9 +325,75 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
     }
 
+    public class AlbumArtworkRequestWrapped extends BaseArtworkRequest {
+
+        final long id;
+        AlbumArtworkRequest wrappedRequest;
+
+        AlbumArtworkRequestWrapped(ImageView imageView, long id, ArtworkType artworkType) {
+            super(imageView, null, artworkType);
+            this.id =id;
+        }
+
+        @Override
+        public Subscription start() {
+            getArtInfo();
+            return this;
+        }
+
+        @Override
+        public void unsubscribe() {
+            if (wrappedRequest != null) {
+                wrappedRequest.unsubscribe();
+            } else {
+                super.unsubscribe();
+            }
+        }
+
+        @Override
+        public boolean isUnsubscribed() {
+            if (wrappedRequest != null) {
+                return wrappedRequest.isUnsubscribed();
+            } else {
+                return super.isUnsubscribed();
+            }
+        }
+
+        @Override
+        void onCacheMiss() {
+            if (unsubscribed) return;
+            setDefaultImage();
+        }
+
+        void getArtInfo() {
+            subscription = new AlbumArtInfoLoader(mContext, new long[]{id}).createObservable()
+                    .subscribe(new Action1<ArtInfo>() {
+                        @Override
+                        public void call(ArtInfo artInfo) {
+                            if (!unsubscribed && imageViewWeakReference.get() != null) {
+                                wrappedRequest = new AlbumArtworkRequest(imageViewWeakReference.get(), artInfo, artworkType);
+                                wrappedRequest.start();
+                            }
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Timber.e(throwable, "Unable to obtain artinfo from mediastore for id=%d", id);
+                            onCacheMiss();
+                        }
+                    });
+        }
+
+    }
+
     @Override
     public Subscription newAlbumRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
         return new AlbumArtworkRequest(imageView, artInfo, artworkType).start();
+    }
+
+    @Override
+    public Subscription newAlbumRequest(ImageView imageView, long albumId, ArtworkType artworkType) {
+        return new AlbumArtworkRequestWrapped(imageView, albumId, artworkType).start();
     }
 
     @Override
@@ -316,11 +402,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     public Observable<Bitmap> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
+        final String cacheKey = getCacheKey(artInfo, artworkType);
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
                 @Override
                 public void call(Subscriber<? super Bitmap> subscriber) {
                     Timber.v("Trying L1 for %s, from %s", artInfo.albumName, Thread.currentThread().getName());
-                    Bitmap bitmap = mL1Cache.getBitmap(getCacheKey(artInfo, artworkType));
+                    Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
                     if (!subscriber.isUnsubscribed()) {
                         if (bitmap != null) {
                             subscriber.onNext(bitmap);
@@ -340,9 +427,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                             @Override
                             public void call(Subscriber<? super Bitmap> subscriber) {
                                 Timber.v("Trying L2 for %s, from %s", artInfo.albumName, Thread.currentThread().getName());
-                                Bitmap bitmap = mL2Cache.getBitmap(getCacheKey(artInfo, artworkType));
+                                Bitmap bitmap = mL2Cache.getBitmap(cacheKey);
                                 if (!subscriber.isUnsubscribed()) {
                                     if (bitmap != null) {
+                                        mL1Cache.putBitmap(cacheKey, bitmap);
                                         subscriber.onNext(bitmap);
                                         subscriber.onCompleted();
                                     } else {
@@ -354,18 +442,6 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     } else {
                         return Observable.error(throwable);
                     }
-                }
-            });
-    }
-
-    public Observable<Bitmap> createCacheObservable(final long id, final ArtworkType artworkType) {
-        // first we have to get the artinfo for the album
-        return new AlbumArtInfoLoader(mContext, new long[]{id}).createObservable()
-                // then we can creat the cache observable with the artinfo
-            .flatMap(new Func1<ArtInfo, Observable<Bitmap>>() {
-                @Override
-                public Observable<Bitmap> call(final ArtInfo artInfo) {
-                    return createCacheObservable(artInfo, artworkType);
                 }
             });
     }
@@ -531,6 +607,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 mVolleyQueue.add(request);
             }
         });
+    }
+
+    public void addBitmapToCaches(String key, Bitmap bitmap) {
+
     }
 
     /**
