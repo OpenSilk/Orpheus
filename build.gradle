@@ -20,10 +20,10 @@ allprojects {
 
 // Build config
 ext.compileSdkVersion = 21
-ext.buildToolsVersion  = "21"
+ext.buildToolsVersion  = "21.0.2"
 
 // defaultConfig
-ext.targetSdkVersion = 20
+ext.targetSdkVersion = 21
 
 def gitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
