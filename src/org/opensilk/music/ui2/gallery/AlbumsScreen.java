@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Bundle;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.utils.SortOrder;
@@ -29,9 +28,8 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.AlbumArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.RxAlbumRequest;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
@@ -69,10 +67,10 @@ public class AlbumsScreen extends Screen {
     public static class Presenter extends BasePresenter<LocalAlbum> {
 
         final Loader loader;
-        final RxAlbumRequest requestManager;
+        final AlbumArtworkRequestManager requestManager;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader, RxAlbumRequest requestManager) {
+        public Presenter(AppPreferences preferences, Loader loader, AlbumArtworkRequestManager requestManager) {
             super(preferences);
             Timber.v("new Albums.Presenter()");
             this.loader = loader;
@@ -173,9 +171,9 @@ public class AlbumsScreen extends Screen {
     }
 
     static class Adapter extends BaseAdapter<LocalAlbum> {
-        RxAlbumRequest requestManager;
+        AlbumArtworkRequestManager requestManager;
 
-        Adapter(List<LocalAlbum> items, RxAlbumRequest requestManager) {
+        Adapter(List<LocalAlbum> items, AlbumArtworkRequestManager requestManager) {
             super(items);
             this.requestManager = requestManager;
         }
@@ -185,10 +183,10 @@ public class AlbumsScreen extends Screen {
             LocalAlbum album = getItem(position);
             holder.title.setText(album.name);
             holder.subtitle.setText(album.artistName);
-            RxAlbumRequest.Req req = requestManager.newRequest(holder.artwork,
+            AlbumArtworkRequestManager.AlbumArtworkRequest req = requestManager.newRequest(holder.artwork,
                     new ArtInfo(album.artistName, album.name, album.artworkUri),
                     ArtworkType.THUMBNAIL);
-            req.tryForCache();
+            req.tryForNetwork();
 //            ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);
         }
 

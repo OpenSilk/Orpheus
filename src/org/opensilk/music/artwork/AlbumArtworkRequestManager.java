@@ -23,12 +23,14 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
+import com.andrew.apollo.utils.ApolloUtils;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
@@ -124,9 +126,10 @@ public class AlbumArtworkRequestManager {
      */
 
     public class AlbumArtworkRequest implements Subscription {
-        WeakReference<ImageView> imageViewWeakReference;
-        ArtInfo artInfo;
-        ArtworkType artworkType;
+        final WeakReference<ImageView> imageViewWeakReference;
+        final ArtInfo artInfo;
+        final ArtworkType artworkType;
+
         Subscription subscription;
         boolean unsubscribed = false;
 
@@ -151,49 +154,139 @@ public class AlbumArtworkRequestManager {
             return unsubscribed;
         }
 
+        public Subscription start() {
+            tryForCache();
+            return this;
+        }
+
+        void setDefaultImage() {
+            imageViewWeakReference.get().setImageResource(R.drawable.default_artwork);
+        }
+
+        void setImageBitmap(Bitmap bitmap) {
+            setImageBitmap(bitmap, false);
+        }
+
+        void setImageBitmap(final Bitmap bitmap, boolean fromCache) {
+            if (fromCache) {
+                imageViewWeakReference.get().setImageBitmap(bitmap);
+            } else {
+                imageViewWeakReference.get().animate().alpha(0).setDuration(100)
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                imageViewWeakReference.get().setImageBitmap(bitmap);
+                                imageViewWeakReference.get().animate().alpha(1).setDuration(100).start();
+                            }
+                        }).start();
+            }
+        }
+
         public void tryForCache() {
             subscription = createCacheObservable(artInfo, artworkType)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
-                            imageViewWeakReference.get().setImageBitmap(bitmap);
+                            setImageBitmap(bitmap, true);
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
                             if (throwable instanceof CacheMissException) {
                                 onCacheMiss();
+                            } else {
+                                setDefaultImage();
                             }
                         }
                     });
         }
 
         void onCacheMiss() {
-            //TODO set default image
-            //TODO check mediastore
-            tryForNetwork();
+            if (unsubscribed) return;
+            setDefaultImage();
+            //check if we have everything we need to download artwork
+            boolean hasAlbumArtist = !TextUtils.isEmpty(artInfo.albumName) && !TextUtils.isEmpty(artInfo.artistName);
+            boolean hasUri = artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY);
+            boolean isOnline = ApolloUtils.isOnline(mContext);
+            boolean preferDownload = mPreferences.getBoolean(AppPreferences.PREFER_DOWNLOAD_ARTWORK, false);
+            boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
+            if (hasAlbumArtist && hasUri) {
+                // We have everything we may need
+                if (isOnline && preferDownload) {
+                    // trynetwork first, if localart try mediastore on failure
+                    tryForNetwork(isLocalArt);
+                } else if (isLocalArt) {
+                    // we dont prefer downloaded art, try mediastore
+                    // and check network on failure if we are online
+                    tryForMediaStore(isOnline);
+                } else if (isOnline) {
+                    // this is probably an external uri
+                    // see if we can fetch it directly
+                    tryForUrl();
+                }
+            } else if (hasAlbumArtist) {
+                if (isOnline) {
+                    // try for network, we dont have a uri so dont try the mediastore on failure
+                    tryForNetwork(false);
+                }
+            } else if (hasUri) {
+                if (isLocalArt) {
+                    //Wait what? how do we have album art without artist or album info?
+                    tryForMediaStore(isOnline);
+                } else if (isOnline) {
+                    //all we have is a url so go for it
+                    tryForUrl();
+                }
+            } //else just ignore the request
         }
 
-        public void tryForNetwork() {
+        public void tryForNetwork(final boolean tryMediaStoreOnFailure) {
             if (mPreferences.getBoolean(AppPreferences.DOWNLOAD_MISSING_ARTWORK, true)) {
                 subscription = createNetworkObservable(artInfo, artworkType)
                         .subscribe(new Action1<Bitmap>() {
                             @Override
                             public void call(Bitmap bitmap) {
-                                imageViewWeakReference.get().setImageBitmap(bitmap);
+                                setImageBitmap(bitmap);
                             }
                         }, new Action1<Throwable>() {
                             @Override
                             public void call(Throwable throwable) {
-                                onNetworkMiss();
+                                onNetworkMiss(tryMediaStoreOnFailure);
                             }
                         });
             }
+        }
+
+        void onNetworkMiss(final boolean tryMediaStore) {
+            Timber.v("onNetworkMiss %s, from %s", artInfo.albumName, Thread.currentThread().getName());
+            if (tryMediaStore && !unsubscribed) {
+                tryForMediaStore(false);
+            }
+        }
+
+        public void tryForMediaStore(boolean tryNetworkOnFailure) {
 
         }
 
-        void onNetworkMiss() {
-            Timber.v("onNetworkMiss %s, from %s", artInfo.albumName, Thread.currentThread().getName());
+        void onMediaStoreMiss(boolean tryNetwork) {
+            if (tryNetwork) {
+                tryForNetwork(false);
+            }
+        }
+
+        public void tryForUrl() {
+            subscription = createImageRequest(artInfo.artworkUri.toString(), artworkType)
+                    .subscribe(new Action1<Bitmap>() {
+                        @Override
+                        public void call(Bitmap bitmap) {
+                            setImageBitmap(bitmap);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Timber.e(throwable, "tryForUrl %s", artInfo);
+                        }
+                    });
         }
     }
 
@@ -290,7 +383,7 @@ public class AlbumArtworkRequestManager {
             @Override
             public void call(Subscriber<? super Album> subscriber) {
                 mVolleyQueue.add(Fetch.albumInfo(artInfo.artistName, artInfo.albumName,
-                        new AlbumResponseListener(subscriber), Request.Priority.NORMAL));
+                        new AlbumResponseListener(subscriber), Request.Priority.HIGH));
             }
         });
     }
@@ -300,17 +393,22 @@ public class AlbumArtworkRequestManager {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
                 CoverArtRequestListener listener = new CoverArtRequestListener(album, subscriber);
-                mVolleyQueue.add(new CoverArtArchiveRequest(album.getMbid(), listener, artworkType, listener));
+                mVolleyQueue.add(new CoverArtArchiveRequest(album.getMbid(), artworkType, listener));
             }
         });
     }
 
     public Observable<Bitmap> createLastFmImageRequestObservable(final Album album, final ArtworkType artworkType) {
+        Timber.v("creating LastFmImageRequest %s, from %s", album.getName(), Thread.currentThread().getName());
+        String url = getBestImage(album, !mPreferences.getBoolean(AppPreferences.WANT_LOW_RESOLUTION_ART, false));
+        return createImageRequest(url, artworkType);
+    }
+
+    public Observable<Bitmap> createImageRequest(final String url, final ArtworkType artworkType) {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
-                Timber.v("creating LastFmImageRequest %s, from %s", album.getName(), Thread.currentThread().getName());
-                String url = getBestImage(album, !mPreferences.getBoolean(AppPreferences.WANT_LOW_RESOLUTION_ART, false));
+                Timber.v("creating ImageRequest %s, from %s", url, Thread.currentThread().getName());
                 ImageResponseListener listener = new ImageResponseListener(subscriber);
                 ArtworkImageRequest request = new ArtworkImageRequest(url, listener, artworkType, listener);
                 mVolleyQueue.add(request);
@@ -376,11 +474,17 @@ public class AlbumArtworkRequestManager {
         return false;
     }
 
+    /**
+     *
+     */
     static class CacheMissException extends Exception {
         CacheMissException() {
         }
     }
 
+    /**
+     *
+     */
     static class CoverArtRequestException extends VolleyError {
         final Album album;
         CoverArtRequestException(Album album) {
@@ -407,6 +511,7 @@ public class AlbumArtworkRequestManager {
                     subscriber.onCompleted();
                 }
             } else {
+                Timber.e("Api response does not contain mbid for %s", response.getName());
                 onErrorResponse(new VolleyError("Unknown mbid"));
             }
         }
@@ -423,8 +528,7 @@ public class AlbumArtworkRequestManager {
     /**
      *
      */
-    static class CoverArtRequestListener implements Response.Listener<Bitmap>, Response.ErrorListener {
-
+    static class CoverArtRequestListener implements ArtworkImageRequest.Listener {
         final Album album;
         final Subscriber<? super Bitmap> subscriber;
 
@@ -452,8 +556,8 @@ public class AlbumArtworkRequestManager {
     /**
      *
      */
-    static class ImageResponseListener implements Response.Listener<Bitmap>, Response.ErrorListener {
-        Subscriber<? super Bitmap> subscriber;
+    static class ImageResponseListener implements ArtworkImageRequest.Listener {
+        final Subscriber<? super Bitmap> subscriber;
 
         ImageResponseListener(Subscriber<? super Bitmap> subscriber) {
             this.subscriber = subscriber;

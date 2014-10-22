@@ -25,7 +25,10 @@ import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.ImageRequest;
 
+import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
+
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Volley ImageRequest with support for variable priority
@@ -37,15 +40,26 @@ import hugo.weaving.DebugLog;
 public class ArtworkImageRequest extends ImageRequest {
     public static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.RGB_565;
 
+    public interface Listener extends Response.Listener<Bitmap>, ErrorListener {
+
+    }
+
     private final ArtworkType mImageType;
 
     // These are only set on main thread but read from main and executor threads
-    private volatile Priority mPriority = Priority.NORMAL;
+    private volatile Priority mPriority = Priority.LOW;
     private volatile boolean mInBackground = false;
 
-    public ArtworkImageRequest(String url, Listener<Bitmap> listener,
+    @Deprecated
+    public ArtworkImageRequest(String url, Response.Listener<Bitmap> listener,
                                 ArtworkType imageType, ErrorListener errorListener) {
         super(url, listener, ArtworkType.getWidth(imageType), 0, BITMAP_CONFIG, errorListener);
+        mImageType = imageType;
+        setRetryPolicy(new DefaultRetryPolicy(2500, 2, 1.6f));
+    }
+
+    public ArtworkImageRequest(String url, ArtworkType imageType, Listener listener) {
+        super(url, listener, ArtworkType.getWidth(imageType), 0, BITMAP_CONFIG, listener);
         mImageType = imageType;
         setRetryPolicy(new DefaultRetryPolicy(2500, 2, 1.6f));
     }
@@ -83,6 +97,7 @@ public class ArtworkImageRequest extends ImageRequest {
 
     @Override
     public Response<Bitmap> parseNetworkResponse(NetworkResponse response) {
+        Timber.i("processing Bitmap %s, from %s", getUrl(), Thread.currentThread().getName());
         return super.parseNetworkResponse(response);
     }
 
@@ -90,4 +105,5 @@ public class ArtworkImageRequest extends ImageRequest {
     public void deliverResponse(Bitmap response) {
         super.deliverResponse(response);
     }
+
 }

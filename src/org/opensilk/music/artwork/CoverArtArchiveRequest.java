@@ -29,9 +29,14 @@ public class CoverArtArchiveRequest extends ArtworkImageRequest {
     private static final String API_ROOT = "http://coverartarchive.org/release/";
     private static final String FRONT_COVER_URL = API_ROOT+"%s/front";
 
+    @Deprecated
     public CoverArtArchiveRequest(String mbid, Response.Listener<Bitmap> listener,
                                   ArtworkType imageType, Response.ErrorListener errorListener) {
         super(makeUrl(mbid), listener, imageType, errorListener);
+    }
+
+    public CoverArtArchiveRequest(String mbid, ArtworkType imageType, Listener listener) {
+        super(makeUrl(mbid), imageType, listener);
     }
 
     private static String makeUrl(String mbid) {

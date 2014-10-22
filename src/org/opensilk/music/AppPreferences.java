@@ -67,7 +67,18 @@ public class AppPreferences {
     public static final String SIMPLE = "simple";
     public static final String GRID = "grid";
 
+    // Key used to download images only on Wi-Fi
+    public static final String ONLY_ON_WIFI = "only_on_wifi";
+    // Key that gives permissions to download missing album covers
+    public static final String DOWNLOAD_MISSING_ARTWORK = "download_missing_artwork";
+    // Key to determine whether to try the network before local storage
+    public static final String PREFER_DOWNLOAD_ARTWORK = "prefer_download_artwork";
+    // Key that gives permissions to download missing artist images
+    public static final String DOWNLOAD_MISSING_ARTIST_IMAGES = "download_missing_artist_images";
+    // Key used to set image cache size
     public static final String IMAGE_DISK_CACHE_SIZE = "pref_cache_size";
+    // Key to decide whether we prefer high quality art
+    public static final String WANT_LOW_RESOLUTION_ART = "pref_low_resolution";
 
     private final Context appContext;
     private final SharedPreferences prefs;
