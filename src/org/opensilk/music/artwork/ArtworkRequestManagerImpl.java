@@ -61,7 +61,7 @@ import timber.log.Timber;
  * Created by drew on 10/21/14.
  */
 @Singleton
-public class AlbumArtworkRequestManager {
+public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     final Context mContext;
     final AppPreferences mPreferences;
@@ -71,9 +71,9 @@ public class AlbumArtworkRequestManager {
     final Gson mGson;
 
     @Inject
-    public AlbumArtworkRequestManager(@ForApplication Context mContext, AppPreferences mPreferences,
-                                      BitmapLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
-                                      RequestQueue mVolleyQueue, Gson mGson) {
+    public ArtworkRequestManagerImpl(@ForApplication Context mContext, AppPreferences mPreferences,
+                                     BitmapLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
+                                     RequestQueue mVolleyQueue, Gson mGson) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
         this.mL1Cache = mL1Cache;
@@ -305,8 +305,14 @@ public class AlbumArtworkRequestManager {
         }
     }
 
-    public AlbumArtworkRequest newAlbumRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
-        return new AlbumArtworkRequest(imageView, artInfo, artworkType);
+    @Override
+    public Subscription newAlbumRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        return new AlbumArtworkRequest(imageView, artInfo, artworkType).start();
+    }
+
+    @Override
+    public Subscription newArtistRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        return new ArtistArtworkRequest(imageView, artInfo, artworkType).start();
     }
 
     public Observable<Bitmap> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {

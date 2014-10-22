@@ -41,7 +41,6 @@ import dagger.Provides;
  */
 @Module (
         injects = {
-                ArtworkServiceImpl.class,
                 ArtworkProvider.class,
                 ArtworkBroadcastReceiver.class,
         },
@@ -58,6 +57,11 @@ public class ArtworkModule {
     @Provides @Singleton
     public ArtworkManager provideArtworkManager(@ForApplication Context context) {
         return ArtworkManager.getInstance(context);
+    }
+
+    @Provides @Singleton
+    public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl impl) {
+        return impl;
     }
 
     @Provides @Singleton

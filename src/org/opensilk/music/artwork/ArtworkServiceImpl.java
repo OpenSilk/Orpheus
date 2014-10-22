@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
@@ -39,12 +40,17 @@ import timber.log.Timber;
 /**
  * Created by drew on 6/21/14.
  */
+@Singleton
 public class ArtworkServiceImpl implements ArtworkService {
 
+    final Context mAppContext;
+    final ArtworkManager mManager;
+
     @Inject
-    ArtworkManager mManager;
-    @Inject @ForApplication
-    Context mAppContext;
+    public ArtworkServiceImpl(@ForApplication Context context, ArtworkManager manager) {
+        mAppContext = context;
+        mManager = manager;
+    }
 
     /**
      * @return ParcelFileDescriptor pipe to disk cache snapshot of image

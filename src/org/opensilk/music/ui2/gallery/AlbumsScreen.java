@@ -28,7 +28,7 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.AlbumArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
@@ -67,10 +67,10 @@ public class AlbumsScreen extends Screen {
     public static class Presenter extends BasePresenter<LocalAlbum> {
 
         final Loader loader;
-        final AlbumArtworkRequestManager requestManager;
+        final ArtworkRequestManagerImpl requestManager;
 
         @Inject
-        public Presenter(AppPreferences preferences, Loader loader, AlbumArtworkRequestManager requestManager) {
+        public Presenter(AppPreferences preferences, Loader loader, ArtworkRequestManagerImpl requestManager) {
             super(preferences);
             Timber.v("new Albums.Presenter()");
             this.loader = loader;
@@ -171,9 +171,9 @@ public class AlbumsScreen extends Screen {
     }
 
     static class Adapter extends BaseAdapter<LocalAlbum> {
-        AlbumArtworkRequestManager requestManager;
+        ArtworkRequestManagerImpl requestManager;
 
-        Adapter(List<LocalAlbum> items, AlbumArtworkRequestManager requestManager) {
+        Adapter(List<LocalAlbum> items, ArtworkRequestManagerImpl requestManager) {
             super(items);
             this.requestManager = requestManager;
         }
@@ -183,10 +183,9 @@ public class AlbumsScreen extends Screen {
             LocalAlbum album = getItem(position);
             holder.title.setText(album.name);
             holder.subtitle.setText(album.artistName);
-            AlbumArtworkRequestManager.AlbumArtworkRequest req = requestManager.newAlbumRequest(holder.artwork,
+            holder.subscriptions.add(requestManager.newAlbumRequest(holder.artwork,
                     new ArtInfo(album.artistName, album.name, album.artworkUri),
-                    ArtworkType.THUMBNAIL);
-            req.start();
+                    ArtworkType.THUMBNAIL));
 //            ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);
         }
 
