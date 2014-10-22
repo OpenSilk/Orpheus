@@ -183,10 +183,10 @@ public class AlbumsScreen extends Screen {
             LocalAlbum album = getItem(position);
             holder.title.setText(album.name);
             holder.subtitle.setText(album.artistName);
-            AlbumArtworkRequestManager.AlbumArtworkRequest req = requestManager.newRequest(holder.artwork,
+            AlbumArtworkRequestManager.AlbumArtworkRequest req = requestManager.newAlbumRequest(holder.artwork,
                     new ArtInfo(album.artistName, album.name, album.artworkUri),
                     ArtworkType.THUMBNAIL);
-            req.tryForNetwork();
+            req.start();
 //            ArtworkManager.loadImage(new ArtInfo(album.artistName, album.name, album.artworkUri), holder.artwork);
         }
 
