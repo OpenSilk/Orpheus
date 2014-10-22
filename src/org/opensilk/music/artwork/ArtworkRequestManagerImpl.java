@@ -88,6 +88,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         final ArtInfo artInfo;
         final ArtworkType artworkType;
 
+        final StringBuilder breadcrumbs;
+
         Subscription subscription;
         boolean unsubscribed = false;
 
@@ -95,16 +97,20 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             this.imageViewWeakReference = new WeakReference<>(imageView);
             this.artInfo = artInfo;
             this.artworkType = artworkType;
+            breadcrumbs = new StringBuilder(500);
+            if (this.artInfo != null) breadcrumbs.append(getCacheKey(artInfo, artworkType));
         }
 
         public Subscription start() {
             registerWithImageView();
+            addBreadcrumb("start");
             tryForCache();
             return this;
         }
 
         @Override
         public void unsubscribe() {
+            addBreadcrumb("unsubscribe");
             if (subscription != null) {
                 subscription.unsubscribe();
                 subscription = null;
@@ -134,7 +140,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         void setDefaultImage() {
-            imageViewWeakReference.get().setImageResource(R.drawable.default_artwork);
+            addBreadcrumb("setDefaultImage");
+            ImageView imageView = imageViewWeakReference.get();
+            if (imageView == null) return;
+            imageView.setImageResource(R.drawable.default_artwork);
         }
 
         void setImageBitmap(Bitmap bitmap) {
@@ -142,33 +151,30 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         void setImageBitmap(final Bitmap bitmap, boolean fromCache) {
+            addBreadcrumb("setImageBitmap("+fromCache+")");
             final ImageView imageView = imageViewWeakReference.get();
             if (imageView == null) return;
             unregisterWithImageView();
             if (fromCache) {
                 imageView.setImageBitmap(bitmap);
             } else {
-                imageView.animate().alpha(0).setDuration(100)
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                imageView.setImageBitmap(bitmap);
-                                imageView.animate().alpha(1).setDuration(100).start();
-                            }
-                        }).start();
+                imageView.setImageBitmap(bitmap);
             }
         }
 
         public void tryForCache() {
+            addBreadcrumb("tryForCache");
             subscription = createCacheObservable(artInfo, artworkType)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
+                            addBreadcrumb("tryForCache hit");
                             setImageBitmap(bitmap, true);
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
+                            addBreadcrumb("tryForCache miss");
                             if (throwable instanceof CacheMissException) {
                                 onCacheMiss();
                             } else {
@@ -179,6 +185,11 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         abstract void onCacheMiss();
+
+        void addBreadcrumb(String crumb) {
+            breadcrumbs.append(" -> ").append(crumb);
+            Timber.v(breadcrumbs.toString());
+        }
     }
 
     public class ArtistArtworkRequest extends BaseArtworkRequest {
@@ -190,12 +201,13 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         @Override
         void onCacheMiss() {
             if (unsubscribed) return;
-            Timber.i("onCacheMiss %s", artInfo);
+            addBreadcrumb("onCacheMiss");
             setDefaultImage();
             if (TextUtils.isEmpty(artInfo.artistName)) return;
             boolean isOnline = ApolloUtils.isOnline(mContext);
             boolean wantArtistImages = mPreferences.getBoolean(AppPreferences.DOWNLOAD_MISSING_ARTIST_IMAGES, true);
             if (isOnline && wantArtistImages) {
+                addBreadcrumb("goingForNetwork");
                 tryForNetwork();
             }
         }
@@ -205,12 +217,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
+                            addBreadcrumb("tryForNetwork hit");
                             setImageBitmap(bitmap);
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            Timber.e(throwable, "Unable to obtain image for %s", artInfo);
+                            addBreadcrumb("tryForNetwork miss");
+//                            Timber.e(throwable, "Unable to obtain image for %s", artInfo);
                         }
                     });
         }
@@ -231,7 +245,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         @Override
         void onCacheMiss() {
             if (unsubscribed) return;
-            Timber.v("onCacheMiss: %s", artInfo);
+            addBreadcrumb("onCacheMiss");
             setDefaultImage();
             //check if we have everything we need to download artwork
             boolean hasAlbumArtist = !TextUtils.isEmpty(artInfo.albumName) && !TextUtils.isEmpty(artInfo.artistName);
@@ -241,36 +255,47 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             boolean preferDownload = mPreferences.getBoolean(AppPreferences.PREFER_DOWNLOAD_ARTWORK, false);
             boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
             if (hasAlbumArtist && hasUri) {
+                addBreadcrumb("hasAlbumArtist && hasUri");
                 // We have everything we may need
                 if (isOnline && wantAlbumArt) {
+                    addBreadcrumb("isOnline && wantAlbumArt");
                     // were online and want artwork
                     if (isLocalArt && !preferDownload) {
+                        addBreadcrumb("goingForMediaStore(true)");
                         // try mediastore first if local and user prefers
                         tryForMediaStore(true);
                     } else {
+                        addBreadcrumb("goingForNetwork("+isLocalArt+")");
                         // go to network, falling back to mediastore if local
                         tryForNetwork(isLocalArt);
                     }
                 } else if (isOnline && !isLocalArt) {
+                    addBreadcrumb("goingForUrl");
                     // were online and have an external uri lets get it
                     // regardless of user preference
                     tryForUrl();
                 } else if (!isOnline && isLocalArt && !preferDownload) {
+                    addBreadcrumb("goingForMediaStore(false)");
                     // were offline, this is a local source
                     // and the user doesnt want to try network first
                     // go ahead and fetch the mediastore image
                     tryForMediaStore(false);
                 } // else were offline and cant get artwork or the user wants to defer
             } else if (hasAlbumArtist) {
+                addBreadcrumb("hasAlbumArtist");
                 if (isOnline) {
+                    addBreadcrumb("tryForNetwork(false)");
                     // try for network, we dont have a uri so dont try the mediastore on failure
                     tryForNetwork(false);
                 }
             } else if (hasUri) {
+                addBreadcrumb("hasUri");
                 if (isLocalArt) {
+                    addBreadcrumb("goingForMediaStore("+isOnline+")");
                     //Wait what? this should never happen
                     tryForMediaStore(isOnline);
                 } else if (isOnline) {
+                    addBreadcrumb("tryForUrl");
                     //all we have is a url so go for it
                     tryForUrl();
                 }
@@ -282,19 +307,22 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
+                            addBreadcrumb("tryForNetwork hit");
                             setImageBitmap(bitmap);
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
+                            addBreadcrumb("tryForNetwork miss");
                             onNetworkMiss(tryMediaStoreOnFailure);
                         }
                     });
         }
 
         void onNetworkMiss(final boolean tryMediaStore) {
-            Timber.v("onNetworkMiss %s", artInfo);
+            addBreadcrumb("onNetworkMiss");
             if (tryMediaStore && !unsubscribed) {
+                addBreadcrumb("goingForMediaStore(false)");
                 tryForMediaStore(false);
             }
         }
@@ -314,12 +342,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
+                            addBreadcrumb("tryForUrl hit");
                             setImageBitmap(bitmap);
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            Timber.e(throwable, "tryForUrl %s", artInfo);
+                            addBreadcrumb("tryForUrl miss");
+//                            Timber.e(throwable, "tryForUrl %s", artInfo);
                         }
                     });
         }
@@ -333,16 +363,19 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         AlbumArtworkRequestWrapped(ImageView imageView, long id, ArtworkType artworkType) {
             super(imageView, null, artworkType);
             this.id =id;
+            addBreadcrumb("albumId="+id);
         }
 
         @Override
         public Subscription start() {
+            addBreadcrumb("start");
             getArtInfo();
             return this;
         }
 
         @Override
         public void unsubscribe() {
+            addBreadcrumb("unsubscribe");
             if (wrappedRequest != null) {
                 wrappedRequest.unsubscribe();
             } else {
@@ -361,15 +394,18 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         @Override
         void onCacheMiss() {
+            addBreadcrumb("onCacheMiss");
             if (unsubscribed) return;
             setDefaultImage();
         }
 
         void getArtInfo() {
             subscription = new AlbumArtInfoLoader(mContext, new long[]{id}).createObservable()
+                    .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<ArtInfo>() {
                         @Override
                         public void call(ArtInfo artInfo) {
+                            addBreadcrumb("getArtInfo hit");
                             if (!unsubscribed && imageViewWeakReference.get() != null) {
                                 wrappedRequest = new AlbumArtworkRequest(imageViewWeakReference.get(), artInfo, artworkType);
                                 wrappedRequest.start();
@@ -378,7 +414,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            Timber.e(throwable, "Unable to obtain artinfo from mediastore for id=%d", id);
+                            addBreadcrumb("getArtInfo miss");
+//                            Timber.e(throwable, "Unable to obtain artinfo from mediastore for id=%d", id);
                             onCacheMiss();
                         }
                     });
@@ -406,7 +443,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
                 @Override
                 public void call(Subscriber<? super Bitmap> subscriber) {
-                    Timber.v("Trying L1 for %s, from %s", artInfo.albumName, Thread.currentThread().getName());
+                    Timber.v("Trying L1 for %s, from %s", cacheKey, Thread.currentThread().getName());
                     Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
                     if (!subscriber.isUnsubscribed()) {
                         if (bitmap != null) {
@@ -426,7 +463,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
                             @Override
                             public void call(Subscriber<? super Bitmap> subscriber) {
-                                Timber.v("Trying L2 for %s, from %s", artInfo.albumName, Thread.currentThread().getName());
+                                Timber.v("Trying L2 for %s, from %s", cacheKey, Thread.currentThread().getName());
                                 Bitmap bitmap = mL2Cache.getBitmap(cacheKey);
                                 if (!subscriber.isUnsubscribed()) {
                                     if (bitmap != null) {
@@ -499,7 +536,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         if (!TextUtils.isEmpty(url)) {
                             return Observable.just(url);
                         } else {
-                            Timber.i("ArtistApiRequest: No image urls for %s", artist.getName());
+                            Timber.v("ArtistApiRequest: No image urls for %s", artist.getName());
                             return Observable.error(new NullPointerException("No image urls for " + artist.getName()));
                         }
                     }
@@ -569,7 +606,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 CoverArtJsonRequest.Listener listener = new CoverArtJsonRequest.Listener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
-                        Timber.i("CoverArtRequest:onErrorResponse %s", volleyError);
+                        Timber.v("CoverArtRequest:onErrorResponse %s", volleyError);
                         if (subscriber.isUnsubscribed()) return;
                         subscriber.onError(volleyError);
                     }
@@ -655,7 +692,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             }
             String url = e.getImageURL(q);
             if (!TextUtils.isEmpty(url)) {
-                Timber.i("Found " + q.toString() + " url for " + e.getName());
+                Timber.v("Found " + q.toString() + " url for " + e.getName());
                 return url;
             }
         }

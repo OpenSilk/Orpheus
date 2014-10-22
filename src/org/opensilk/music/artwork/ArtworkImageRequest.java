@@ -97,7 +97,7 @@ public class ArtworkImageRequest extends ImageRequest {
 
     @Override
     public Response<Bitmap> parseNetworkResponse(NetworkResponse response) {
-        Timber.i("processing Bitmap %s, from %s", getUrl(), Thread.currentThread().getName());
+        Timber.v("processing Bitmap %s, from %s", getUrl(), Thread.currentThread().getName());
         return super.parseNetworkResponse(response);
     }
 

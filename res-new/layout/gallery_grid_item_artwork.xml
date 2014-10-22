@@ -23,7 +23,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <org.opensilk.music.widgets.SquareThumbnailArtworkImageView
+    <org.opensilk.music.widgets.SquareImageView
         android:id="@+id/artwork_thumb"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

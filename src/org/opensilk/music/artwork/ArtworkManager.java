@@ -107,13 +107,13 @@ public class ArtworkManager {
         mContext = context.getApplicationContext();
         mPreferences = PreferenceUtils.getInstance(context);
         // Fire off l2 init early
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
-                initDiskCache();
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
+//                initDiskCache();
+//            }
+//        }).start();
         // Init mem cache
         final int lruThumbCacheSize = getL1CacheSize(context);
         if (D) Log.d(TAG, "L1Cache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");

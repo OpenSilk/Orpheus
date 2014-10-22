@@ -168,7 +168,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
         public void reset() {
             Timber.v("Reset title=%s", title.getText());
-            subscriptions.unsubscribe();
+            if (artwork != null) artwork.setImageBitmap(null);
+            if (artwork2 != null) artwork2.setImageBitmap(null);
+            if (artwork3 != null) artwork3.setImageBitmap(null);
+            if (artwork4 != null) artwork4.setImageBitmap(null);
             subscriptions.clear();
         }
 

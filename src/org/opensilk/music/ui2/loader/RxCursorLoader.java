@@ -137,9 +137,9 @@ public abstract class RxCursorLoader<T> {
                     if (c.moveToFirst()) {
                         do {
                             T item = makeFromCursor(c);
-                            if (subscriber.isUnsubscribed()) {
-                                return;
-                            }
+                            //TODO throw this?
+                            if (item == null) continue;
+                            if (subscriber.isUnsubscribed()) return;
                             subscriber.onNext(item);
                         } while (c.moveToNext());
                     }
