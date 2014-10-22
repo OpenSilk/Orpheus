@@ -16,10 +16,13 @@
 
 package org.opensilk.music.ui2.util;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Created by drew on 10/9/14.
@@ -39,5 +42,13 @@ public class ViewStateSaver {
         if (bundle == null || view == null) return;
         SparseArray<Parcelable> state = bundle.getSparseParcelableArray(name);
         if (state != null) view.restoreHierarchyState(state);
+    }
+
+    public static <T extends View> T inflate(Context context, int layout, ViewGroup parent) {
+        return inflate(context, layout, parent, false);
+    }
+
+    public static <T extends View> T inflate(Context context, int layout, ViewGroup parent, boolean attachToRoot) {
+        return (T) LayoutInflater.from(context).inflate(layout, parent, attachToRoot);
     }
 }

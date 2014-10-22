@@ -24,11 +24,9 @@ import com.andrew.apollo.utils.MusicUtils;
 import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui.home.MusicFragment;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.main.MainScreen;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -44,7 +42,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/3/14.
  */
-@Layout(R.layout.gallery_pager)
+@Layout(R.layout.gallery)
 public class GalleryScreen implements Blueprint {
 
     @Override

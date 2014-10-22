@@ -22,8 +22,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -31,6 +29,8 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.MortarScreen;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.util.ViewStateSaver;
 import org.opensilk.music.widgets.SlidingTabLayout;
 
 import java.util.Arrays;
@@ -44,6 +44,7 @@ import butterknife.InjectView;
 import mortar.Mortar;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/3/14.
@@ -75,6 +76,7 @@ public class GalleryView extends LinearLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        Timber.i("onDetachedFromWindow()");
         super.onDetachedFromWindow();
         if (!isInEditMode()) {
             presenter.dropView(this);
@@ -105,40 +107,45 @@ public class GalleryView extends LinearLayout {
             Screen screen = galleryPages.get(position).screen;
             // Attach our child screen
             MortarScope newChildScope = presenter.screenScoper.getScreenScope(getContext(), screen);
+            Timber.i("instatiateItem %s", newChildScope.getName());
             // create new scoped context (used to later obtain the child scope)
             Context newChildContext = newChildScope.createContext(getContext());
             // resolve the presenter for the child screen
-            ViewPresenter<RecyclerView> childPresenter = obtainPresenter(screen, newChildScope);
+            final ViewPresenter<RecyclerView> childPresenter = obtainPresenter(screen, newChildScope);
             // inflate the recyclerview
-            RecyclerView newChild = inflate(newChildContext, R.layout.gallery_recyclerview, container, false);
+            final GalleryPageView newChild = ViewStateSaver.inflate(newChildContext, R.layout.gallery_page, container);
+            // set the presenter
+            newChild.setPresenter(childPresenter);
             // add the new view;
             container.addView(newChild);
-            // attach the view to the presenter
-            childPresenter.takeView(newChild);
             return newChild;
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            RecyclerView oldChild = (RecyclerView) object;
+            // cast
+            GalleryPageView oldChild = (GalleryPageView) object;
+            // retrieve our scope
             MortarScope myScope = Mortar.getScope(getContext());
+            // retrieve child scope
             MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
-            ViewPresenter<RecyclerView> oldChildPresenter = obtainPresenter(galleryPages.get(position).screen, oldChildScope);
+            Timber.i("destroyItem %s", oldChildScope.getName());
             //TODO not sure the best order here
+            // destroy the child
             myScope.destroyChild(oldChildScope);
-            oldChildPresenter.dropView(oldChild);
             container.removeView(oldChild);
         }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             if (object != mCurrentPrimaryItem) {
-                RecyclerView currentChild = (RecyclerView) object;
-                MortarScope currentChildScope = Mortar.getScope(currentChild.getContext());
-                ViewPresenter<RecyclerView> childPresenter = obtainPresenter(galleryPages.get(position).screen, currentChildScope);
-                if (childPresenter instanceof HasOptionsMenu) {
-                    presenter.updateActionBarWithChildMenuConfig(((HasOptionsMenu) childPresenter).getMenuConfig());
+                GalleryPageView currentChild = (GalleryPageView) object;
+                ViewPresenter<RecyclerView> childPresenter = currentChild.getPresenter();
+                ActionBarOwner.MenuConfig menuConfig = null;
+                if (childPresenter != null && childPresenter instanceof HasOptionsMenu) {
+                    menuConfig = ((HasOptionsMenu) childPresenter).getMenuConfig();
                 }
+                presenter.updateActionBarWithChildMenuConfig(menuConfig);
                 mCurrentPrimaryItem = object;
             }
         }
@@ -158,10 +165,6 @@ public class GalleryView extends LinearLayout {
             return getContext().getString(galleryPages.get(position).titleResource).toUpperCase(Locale.getDefault());
         }
 
-    }
-
-    static <T extends View> T inflate(Context context, int layout, ViewGroup parent, boolean attachToRoot) {
-        return (T) LayoutInflater.from(context).inflate(layout, parent, attachToRoot);
     }
 
     //TODO cache these

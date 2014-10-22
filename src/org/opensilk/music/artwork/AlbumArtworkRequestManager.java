@@ -21,28 +21,21 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.ImageView;
 
-import com.andrew.apollo.model.LocalAlbum;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.RequestFuture;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.lang.ref.WeakReference;
-import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,7 +43,6 @@ import javax.inject.Singleton;
 import de.umass.lastfm.Album;
 import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.MusicEntry;
-import de.umass.lastfm.opensilk.AlbumRequest;
 import de.umass.lastfm.opensilk.Fetch;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import rx.Observable;
@@ -66,7 +58,7 @@ import timber.log.Timber;
  * Created by drew on 10/21/14.
  */
 @Singleton
-public class RxAlbumRequest {
+public class AlbumArtworkRequestManager {
 
     final Context mContext;
     final AppPreferences mPreferences;
@@ -75,9 +67,9 @@ public class RxAlbumRequest {
     final RequestQueue mVolleyQueue;
 
     @Inject
-    public RxAlbumRequest(@ForApplication Context mContext, AppPreferences mPreferences,
-                          BitmapLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
-                          RequestQueue mVolleyQueue) {
+    public AlbumArtworkRequestManager(@ForApplication Context mContext, AppPreferences mPreferences,
+                                      BitmapLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
+                                      RequestQueue mVolleyQueue) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
         this.mL1Cache = mL1Cache;
@@ -85,16 +77,78 @@ public class RxAlbumRequest {
         this.mVolleyQueue = mVolleyQueue;
     }
 
-    public class Req {
+    /*
+    if (!TextUtils.isEmpty(mArtInfo.artistName)) {
+        if (!TextUtils.isEmpty(mArtInfo.albumName)) {
+            if (ApolloUtils.isOnline(mManager.mContext)) {
+                if (mManager.mPreferences.preferDownloadArtwork()) {
+                    queueAlbumRequest(true);
+                } else {
+                    if (isLocalArtwork()) {
+                        new MediaStoreTask(true).execute();
+                    } else {
+                        queueImageRequest(mArtInfo.artworkUri);
+                    }
+                }
+            //Not connected but want downloaded artwork, defer until later
+            } else if (mManager.mPreferences.preferDownloadArtwork()) {
+                notifyError(new VolleyError("No network connection"));
+            //Not connected and dont want downloaded art, just check mediastore
+            } else {
+                if (isLocalArtwork()) {
+                    new MediaStoreTask(false).execute();
+                } else {
+                    notifyError(new VolleyError("No network connection for remote Uri"));
+                }
+            }
+        } else { //Assume they meant to download artist images
+            if (ApolloUtils.isOnline(mManager.mContext)) {
+                queueArtistRequest();
+            } else {
+                notifyError(new VolleyError("No network connection"));
+            }
+        }
+        //no artist or album info just go strait for the artworUri
+    } else if (mArtInfo.artworkUri != null) {
+        if (isLocalArtwork()) {
+            // route local uris through the contentprovider
+            new MediaStoreTask(false).execute();
+        } else {
+            // assuming remote uris here
+            queueImageRequest(mArtInfo.artworkUri);
+        }
+    } else {
+        throw new RuntimeException("Hey dummy you made an ArtworkRequest will null info");
+//                        notifyError(new VolleyError("Incomplete ArtInfo"));
+    }
+     */
+
+    public class AlbumArtworkRequest implements Subscription {
         WeakReference<ImageView> imageViewWeakReference;
         ArtInfo artInfo;
         ArtworkType artworkType;
         Subscription subscription;
+        boolean unsubscribed = false;
 
-        public Req(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        public AlbumArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
             this.imageViewWeakReference = new WeakReference<>(imageView);
             this.artInfo = artInfo;
             this.artworkType = artworkType;
+        }
+
+        @Override
+        public void unsubscribe() {
+            if (subscription != null) {
+                subscription.unsubscribe();
+                subscription = null;
+            }
+            imageViewWeakReference.clear();
+            unsubscribed = true;
+        }
+
+        @Override
+        public boolean isUnsubscribed() {
+            return unsubscribed;
         }
 
         public void tryForCache() {
@@ -121,34 +175,37 @@ public class RxAlbumRequest {
         }
 
         public void tryForNetwork() {
-            subscription = createNetworkObservable(artInfo, artworkType)
-                    .subscribe(new Action1<Bitmap>() {
-                        @Override
-                        public void call(Bitmap bitmap) {
-                            imageViewWeakReference.get().setImageBitmap(bitmap);
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            onNetworkMiss();
-                        }
-                    });
+            if (mPreferences.getBoolean(AppPreferences.DOWNLOAD_MISSING_ARTWORK, true)) {
+                subscription = createNetworkObservable(artInfo, artworkType)
+                        .subscribe(new Action1<Bitmap>() {
+                            @Override
+                            public void call(Bitmap bitmap) {
+                                imageViewWeakReference.get().setImageBitmap(bitmap);
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                onNetworkMiss();
+                            }
+                        });
+            }
+
         }
 
         void onNetworkMiss() {
-
+            Timber.v("onNetworkMiss %s, from %s", artInfo.albumName, Thread.currentThread().getName());
         }
     }
 
-    public Req newRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
-        return new Req(imageView, artInfo, artworkType);
+    public AlbumArtworkRequest newRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        return new AlbumArtworkRequest(imageView, artInfo, artworkType);
     }
 
     public Observable<Bitmap> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
                 @Override
                 public void call(Subscriber<? super Bitmap> subscriber) {
-                    Timber.v("Trying L1 for %s, %s", artInfo.albumName, Thread.currentThread().getName());
+                    Timber.v("Trying L1 for %s, from %s", artInfo.albumName, Thread.currentThread().getName());
                     Bitmap bitmap = mL1Cache.getBitmap(getCacheKey(artInfo, artworkType));
                     if (!subscriber.isUnsubscribed()) {
                         if (bitmap != null) {
@@ -168,7 +225,7 @@ public class RxAlbumRequest {
                         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
                             @Override
                             public void call(Subscriber<? super Bitmap> subscriber) {
-                                Timber.v("Trying L2 for %s, %s", artInfo.albumName, Thread.currentThread().getName());
+                                Timber.v("Trying L2 for %s, from %s", artInfo.albumName, Thread.currentThread().getName());
                                 Bitmap bitmap = mL2Cache.getBitmap(getCacheKey(artInfo, artworkType));
                                 if (!subscriber.isUnsubscribed()) {
                                     if (bitmap != null) {
@@ -200,41 +257,35 @@ public class RxAlbumRequest {
     }
 
     public Observable<Bitmap> createNetworkObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return createApiRequestObservable(artInfo)
-                .flatMap(new Func1<Album, Observable<String>>() {
+        return createLastFmApiRequestObservable(artInfo)
+                .flatMap(new Func1<Album, Observable<Bitmap>>() {
                     @Override
-                    public Observable<String> call(Album album) {
-                        Timber.v("Creating CoverArtRequest %s", Thread.currentThread().getName());
-                        //TODO prefs highres
-                        return createCoverArtRequestObservable(album);
-                    }
-                })
-                .onErrorResumeNext(new Func1<Throwable, Observable<String>>() {
-                    @Override
-                    public Observable<String> call(Throwable throwable) {
-                        if (throwable instanceof CoverArtRequestException) {
-                            Timber.v("Handling CoverArtRequestException %s", Thread.currentThread().getName());
-                            Album album = ((CoverArtRequestException) throwable).album;
-                            String url = getBestImage(album, true);//TODO prefs
-                            if (!TextUtils.isEmpty(url)) {
-                                return Observable.just(url);
-                            } else {
-                                return Observable.error(new NullPointerException("Couldn't get LastFm artwork url"));
-                            }
-                        } else {
-                            return Observable.error(throwable);
+                    public Observable<Bitmap> call(Album album) {
+                        // try coverartarchive
+                        if (!mPreferences.getBoolean(AppPreferences.WANT_LOW_RESOLUTION_ART, false)) {
+                            Timber.v("Creating CoverArtRequest %s, from %s", album.getName(), Thread.currentThread().getName());
+                            return createCoverArtRequestObservable(album, artworkType)
+                                    // if coverartarchive fails fallback to lastfm
+                                    .onErrorResumeNext(new Func1<Throwable, Observable<Bitmap>>() {
+                                        @Override
+                                        public Observable<Bitmap> call(Throwable throwable) {
+                                            if (throwable instanceof CoverArtRequestException) {
+                                                Album album = ((CoverArtRequestException) throwable).album;
+                                                Timber.v("CoverArtRequest failed %s, from %s", album.getName(), Thread.currentThread().getName());
+                                                return createLastFmImageRequestObservable(album, artworkType);
+                                            } else {
+                                                return Observable.error(throwable);
+                                            }
+                                        }
+                                    });
+                        } else { // user wants low res go straight for lastfm
+                            return createLastFmImageRequestObservable(album, artworkType);
                         }
-                    }
-                })
-                .flatMap(new Func1<String, Observable<Bitmap>>() {
-                    @Override
-                    public Observable<Bitmap> call(String s) {
-                        return createImageRequestObservable(s, artworkType);
                     }
                 });
     }
 
-    public Observable<Album> createApiRequestObservable(final ArtInfo artInfo) {
+    public Observable<Album> createLastFmApiRequestObservable(final ArtInfo artInfo) {
         return Observable.create(new Observable.OnSubscribe<Album>() {
             @Override
             public void call(Subscriber<? super Album> subscriber) {
@@ -244,19 +295,22 @@ public class RxAlbumRequest {
         });
     }
 
-    public Observable<String> createCoverArtRequestObservable(final Album album) {
-        return Observable.create(new Observable.OnSubscribe<String>() {
+    public Observable<Bitmap> createCoverArtRequestObservable(final Album album, final ArtworkType artworkType) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
-            public void call(Subscriber<? super String> subscriber) {
-                mVolleyQueue.add(new CoverArtRequest(album, new CoverArtRequestListener(subscriber)));
+            public void call(Subscriber<? super Bitmap> subscriber) {
+                CoverArtRequestListener listener = new CoverArtRequestListener(album, subscriber);
+                mVolleyQueue.add(new CoverArtArchiveRequest(album.getMbid(), listener, artworkType, listener));
             }
         });
     }
 
-    public Observable<Bitmap> createImageRequestObservable(final String url, final ArtworkType artworkType) {
+    public Observable<Bitmap> createLastFmImageRequestObservable(final Album album, final ArtworkType artworkType) {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
+                Timber.v("creating LastFmImageRequest %s, from %s", album.getName(), Thread.currentThread().getName());
+                String url = getBestImage(album, !mPreferences.getBoolean(AppPreferences.WANT_LOW_RESOLUTION_ART, false));
                 ImageResponseListener listener = new ImageResponseListener(subscriber);
                 ArtworkImageRequest request = new ArtworkImageRequest(url, listener, artworkType, listener);
                 mVolleyQueue.add(request);
@@ -313,15 +367,23 @@ public class RxAlbumRequest {
         return null;
     }
 
+    public static boolean isLocalArtwork(Uri u) {
+        if (u != null) {
+            if ("content".equals(u.getScheme())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static class CacheMissException extends Exception {
-        public CacheMissException() {
+        CacheMissException() {
         }
     }
 
     static class CoverArtRequestException extends VolleyError {
         final Album album;
         CoverArtRequestException(Album album) {
-            super();
             this.album = album;
         }
     }
@@ -361,52 +423,18 @@ public class RxAlbumRequest {
     /**
      *
      */
-    static class CoverArtRequest extends Request<String> {
+    static class CoverArtRequestListener implements Response.Listener<Bitmap>, Response.ErrorListener {
+
         final Album album;
-        final CoverArtRequestListener listener;
+        final Subscriber<? super Bitmap> subscriber;
 
-        CoverArtRequest(Album album, CoverArtRequestListener listener) {
-            super(Method.HEAD, makeUrl(album.getMbid()), listener);
+        CoverArtRequestListener(Album album, Subscriber<? super Bitmap> subscriber) {
             this.album = album;
-            this.listener = listener;
-        }
-
-        @Override
-        protected Response<String> parseNetworkResponse(NetworkResponse response) {
-            Timber.v("CoverArtRequest header=%s", response.headers.toString());
-            String location = response.headers.get("Location");
-            Timber.v("CoverArtRequest Location=%s", location);
-            if (!TextUtils.isEmpty(location)) {
-                return Response.success(location, HttpHeaderParser.parseCacheHeaders(response));
-            } else {
-                return Response.error(new CoverArtRequestException(album));
-            }
-        }
-
-        @Override
-        protected void deliverResponse(String response) {
-            listener.onResponse(response);
-        }
-
-        private static final String API_ROOT = "http://coverartarchive.org/release/";
-        private static final String FRONT_COVER_URL = API_ROOT+"%s/front";
-        private static String makeUrl(String mbid) {
-            return String.format(Locale.US, FRONT_COVER_URL, mbid);
-        }
-    }
-
-    /**
-     *
-     */
-    static class CoverArtRequestListener implements Response.Listener<String>, Response.ErrorListener {
-        final Subscriber<? super String> subscriber;
-
-        CoverArtRequestListener(Subscriber<? super String> subscriber) {
             this.subscriber = subscriber;
         }
 
         @Override
-        public void onResponse(String response) {
+        public void onResponse(Bitmap response) {
             if (!subscriber.isUnsubscribed()) {
                 subscriber.onNext(response);
                 subscriber.onCompleted();
@@ -416,7 +444,7 @@ public class RxAlbumRequest {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
             if (!subscriber.isUnsubscribed()) {
-                subscriber.onError(volleyError);
+                subscriber.onError(new CoverArtRequestException(album));
             }
         }
     }

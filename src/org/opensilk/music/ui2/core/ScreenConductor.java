@@ -65,7 +65,9 @@ public class ScreenConductor<S extends Blueprint> implements CanShowScreen<S> {
                 return;
             }
 
-            myScope.destroyChild(oldChildScope);
+            if (direction != Flow.Direction.FORWARD) {
+                myScope.destroyChild(oldChildScope);
+            }
         }
 
         // Create the new child.
