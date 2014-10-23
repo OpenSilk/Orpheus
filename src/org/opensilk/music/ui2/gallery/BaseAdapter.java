@@ -17,8 +17,6 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.graphics.drawable.Drawable;
-import android.support.v7.internal.widget.TintManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,9 +26,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
-import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 
 import java.util.ArrayList;
@@ -40,7 +35,6 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import hugo.weaving.DebugLog;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 

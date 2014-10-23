@@ -27,11 +27,9 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
@@ -47,13 +45,12 @@ import javax.inject.Singleton;
 
 import rx.functions.Action1;
 import rx.functions.Func1;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/19/14.
  */
 @WithModule(SongsScreen.Module.class)
-@WithRecyclerViewPresenter(SongsScreen.Presenter.class)
+@WithGalleryPageViewPresenter(SongsScreen.Presenter.class)
 public class SongsScreen extends Screen {
 
     @dagger.Module(

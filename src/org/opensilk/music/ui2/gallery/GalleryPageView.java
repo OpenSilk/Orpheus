@@ -18,8 +18,9 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+
+import org.lucasr.twowayview.TwoWayView;
 
 import mortar.ViewPresenter;
 import timber.log.Timber;
@@ -27,9 +28,9 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/21/14.
  */
-public class GalleryPageView extends RecyclerView {
+public class GalleryPageView extends TwoWayView {
 
-    ViewPresenter<RecyclerView> presenter;
+    ViewPresenter<GalleryPageView> presenter;
 
     public GalleryPageView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -38,7 +39,7 @@ public class GalleryPageView extends RecyclerView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Timber.d("onAttachedToWindow");
+        Timber.v("onAttachedToWindow");
         if (presenter != null) {
             presenter.takeView(this);
         }
@@ -47,18 +48,18 @@ public class GalleryPageView extends RecyclerView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Timber.d("onDetachedFromWindow");
+        Timber.v("onDetachedFromWindow");
         if (presenter != null) {
             presenter.dropView(this);
         }
     }
 
     // Set this right after inflate, before adding to the container
-    public void setPresenter(ViewPresenter<RecyclerView> presenter) {
+    public void setPresenter(ViewPresenter<GalleryPageView> presenter) {
         this.presenter = presenter;
     }
 
-    public ViewPresenter<RecyclerView> getPresenter() {
+    public ViewPresenter<GalleryPageView> getPresenter() {
         return presenter;
     }
 }

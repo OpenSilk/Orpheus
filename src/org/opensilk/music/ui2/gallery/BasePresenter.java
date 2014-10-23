@@ -19,12 +19,14 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 
+import org.lucasr.twowayview.widget.GridLayoutManager;
+import org.lucasr.twowayview.widget.ListLayoutManager;
+import org.lucasr.twowayview.widget.SpacingItemDecoration;
+import org.lucasr.twowayview.widget.StaggeredGridLayoutManager;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.MusicApp;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -34,12 +36,11 @@ import java.util.List;
 
 import mortar.ViewPresenter;
 import rx.Subscription;
-import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.
  */
-public abstract class BasePresenter<T> extends ViewPresenter<RecyclerView> implements HasOptionsMenu {
+public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> implements HasOptionsMenu {
 
     protected final AppPreferences preferences;
     protected final ArtworkRequestManager artworkRequestor;
@@ -88,6 +89,10 @@ public abstract class BasePresenter<T> extends ViewPresenter<RecyclerView> imple
         if (v == null) return;
         v.setHasFixedSize(!isStaggered());
         v.setLayoutManager(getLayoutManager(v.getContext()));
+        if (isGrid() || isStaggered()) {
+            int spacing = MusicApp.convertDpToPx(v.getContext(), 4);
+            v.addItemDecoration(new SpacingItemDecoration(spacing, spacing));
+        }
     }
 
     // reset the recyclerview for eg layoutmanager change
@@ -161,16 +166,16 @@ public abstract class BasePresenter<T> extends ViewPresenter<RecyclerView> imple
 
     protected RecyclerView.LayoutManager makeStaggerdLayoutManager(Context context) {
         int numCols = context.getResources().getInteger(R.integer.grid_columns);
-        return new StaggeredGridLayoutManager(numCols, StaggeredGridLayoutManager.VERTICAL);
+        return new StaggeredGridLayoutManager(StaggeredGridLayoutManager.Orientation.VERTICAL, numCols, numCols);
     }
 
     protected RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
         int numCols = context.getResources().getInteger(R.integer.grid_columns);
-        return new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
+        return new GridLayoutManager(GridLayoutManager.Orientation.VERTICAL, numCols, numCols);
     }
 
     protected RecyclerView.LayoutManager makeListLayoutManager(Context context) {
-        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        return new ListLayoutManager(context, ListLayoutManager.Orientation.VERTICAL);
     }
 
 }

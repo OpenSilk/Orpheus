@@ -30,6 +30,6 @@ import java.lang.annotation.Target;
  * handle notifying the presenters
  */
 @Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface WithRecyclerViewPresenter {
+public @interface WithGalleryPageViewPresenter {
     Class<?> value();
 }

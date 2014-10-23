@@ -29,7 +29,6 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxCursorLoader;
@@ -53,7 +52,7 @@ import timber.log.Timber;
  * Created by drew on 10/3/14.
  */
 @WithModule(AlbumsScreen.Module.class)
-@WithRecyclerViewPresenter(AlbumsScreen.Presenter.class)
+@WithGalleryPageViewPresenter(AlbumsScreen.Presenter.class)
 public class AlbumsScreen extends Screen {
 
     @dagger.Module (

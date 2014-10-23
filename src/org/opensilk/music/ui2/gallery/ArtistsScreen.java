@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Bundle;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -30,7 +29,6 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -55,7 +53,7 @@ import timber.log.Timber;
  * Created by drew on 10/19/14.
  */
 @WithModule(ArtistsScreen.Module.class)
-@WithRecyclerViewPresenter(ArtistsScreen.Presenter.class)
+@WithGalleryPageViewPresenter(ArtistsScreen.Presenter.class)
 public class ArtistsScreen extends Screen {
 
     @dagger.Module(

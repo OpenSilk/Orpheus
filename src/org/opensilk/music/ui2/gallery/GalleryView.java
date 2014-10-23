@@ -20,7 +20,6 @@ package org.opensilk.music.ui2.gallery;
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -76,7 +75,7 @@ public class GalleryView extends LinearLayout {
 
     @Override
     protected void onDetachedFromWindow() {
-        Timber.i("onDetachedFromWindow()");
+        Timber.v("onDetachedFromWindow()");
         super.onDetachedFromWindow();
         if (!isInEditMode()) {
             presenter.dropView(this);
@@ -84,6 +83,7 @@ public class GalleryView extends LinearLayout {
     }
 
     public void setup(List<GalleryPage> galleryPages, int startPage) {
+        viewPager.setOffscreenPageLimit(galleryPages.size());
         Adapter adapter = new Adapter(galleryPages);
         viewPager.setAdapter(adapter);
         tabBar.setViewPager(viewPager);
@@ -111,7 +111,7 @@ public class GalleryView extends LinearLayout {
             // create new scoped context (used to later obtain the child scope)
             Context newChildContext = newChildScope.createContext(getContext());
             // resolve the presenter for the child screen
-            final ViewPresenter<RecyclerView> childPresenter = obtainPresenter(screen, newChildScope);
+            final ViewPresenter<GalleryPageView> childPresenter = obtainPresenter(screen, newChildScope);
             // inflate the recyclerview
             final GalleryPageView newChild = ViewStateSaver.inflate(newChildContext, R.layout.gallery_page, container);
             // set the presenter
@@ -140,7 +140,7 @@ public class GalleryView extends LinearLayout {
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             if (object != mCurrentPrimaryItem) {
                 GalleryPageView currentChild = (GalleryPageView) object;
-                ViewPresenter<RecyclerView> childPresenter = currentChild.getPresenter();
+                ViewPresenter<GalleryPageView> childPresenter = currentChild.getPresenter();
                 ActionBarOwner.MenuConfig menuConfig = null;
                 if (childPresenter != null && childPresenter instanceof HasOptionsMenu) {
                     menuConfig = ((HasOptionsMenu) childPresenter).getMenuConfig();
@@ -168,15 +168,15 @@ public class GalleryView extends LinearLayout {
     }
 
     //TODO cache these
-    static ViewPresenter<RecyclerView> obtainPresenter(MortarScreen screen, MortarScope scope) {
+    static ViewPresenter<GalleryPageView> obtainPresenter(MortarScreen screen, MortarScope scope) {
         Class<?> screenType = ObjectUtils.getClass(screen);
-        WithRecyclerViewPresenter withPresenter = screenType.getAnnotation(WithRecyclerViewPresenter.class);
+        WithGalleryPageViewPresenter withPresenter = screenType.getAnnotation(WithGalleryPageViewPresenter.class);
         if (withPresenter == null) {
             throw new IllegalArgumentException("Screen not annotated with @WithPresenter");
         }
         Class<?> presenterClass = withPresenter.value();
         Object presenter = scope.getObjectGraph().get(presenterClass);
-        return (ViewPresenter<RecyclerView>) presenter;
+        return (ViewPresenter<GalleryPageView>) presenter;
     }
 
 }

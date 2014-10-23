@@ -111,10 +111,10 @@ android {
 
 }
 
-configurations.all {
-    // check for updates every build
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
+//configurations.all {
+//    // check for updates every build
+//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}
 
 robolectric {
     include '**/*Test.class'
@@ -150,11 +150,13 @@ dependencies {
     compile 'com.jakewharton:butterknife:5.1.0'
     compile 'com.jakewharton.timber:timber:2.3.0'
     compile 'com.squareup.mortar:mortar:0.16'
-    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.google.code.gson:gson:2.3'
     compile 'com.squareup.flow:flow:0.8'
     provided 'com.squareup.dagger:dagger-compiler:1.2.1'
     compile 'com.squareup.dagger:dagger:1.2.1'
     compile 'io.reactivex:rxandroid:0.22.0'
+    compile 'org.lucasr.twowayview:core:1.0.0-SNAPSHOT@aar'
+    compile 'org.lucasr.twowayview:layouts:1.0.0-SNAPSHOT@aar'
 
     compile 'com.sothree.slidinguppanel:library:2.0-SNAPSHOT@aar'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
