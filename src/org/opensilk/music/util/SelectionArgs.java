@@ -43,6 +43,7 @@ public class SelectionArgs {
     public static final String[] LOCAL_ALBUM;
     public static final String[] LOCAL_ARTIST;
     public static final String[] PLAYLIST;
+    public static final String[] GENRE_SONGS;
 
     static {
         ONE_AND_EMPTY = new String[]{"1","''"};
@@ -57,5 +58,6 @@ public class SelectionArgs {
         LOCAL_ALBUM = EMPTY;
         LOCAL_ARTIST = EMPTY;
         PLAYLIST = EMPTY;
+        GENRE_SONGS = ONE_AND_EMPTY;
     }
 }

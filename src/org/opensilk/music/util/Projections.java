@@ -35,6 +35,7 @@ public class Projections {
     public static final String[] LOCAL_ALBUM;
     public static final String[] LOCAL_ARTIST;
     public static final String[] PLAYLIST_SONGS;
+    public static final String[] GENRE_SONGS;
     public static final String[] RECENT_SONGS;
     public static final String[] CACHED_GROUP;
     public static final String[] GENRE;
@@ -78,6 +79,15 @@ public class Projections {
                 MediaStore.Audio.Playlists.Members.ALBUM_ID,
                 MediaStore.Audio.Playlists.Members.DURATION,
                 MediaStore.Audio.Playlists.Members.MIME_TYPE,
+        };
+        GENRE_SONGS = new String[] {
+                MediaStore.Audio.Genres.Members.AUDIO_ID + " AS _id ",
+                MediaStore.Audio.Genres.Members.TITLE,
+                MediaStore.Audio.Genres.Members.ARTIST,
+                MediaStore.Audio.Genres.Members.ALBUM,
+                MediaStore.Audio.Genres.Members.ALBUM_ID,
+                MediaStore.Audio.Genres.Members.DURATION,
+                MediaStore.Audio.Genres.Members.MIME_TYPE,
         };
         RECENT_SONGS = new String[] {
                 MusicStore.Cols._ID,
