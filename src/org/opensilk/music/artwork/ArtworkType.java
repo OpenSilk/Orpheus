@@ -35,4 +35,8 @@ public enum ArtworkType {
                 return sDefaultThumbnailWidthPx;
         }
     }
+
+    static ArtworkType opposite(ArtworkType artworkType) {
+        return artworkType == THUMBNAIL ? LARGE : THUMBNAIL;
+    }
 }

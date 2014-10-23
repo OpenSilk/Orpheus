@@ -24,11 +24,14 @@ import android.text.TextUtils;
 import android.widget.ImageView;
 
 import com.andrew.apollo.utils.ApolloUtils;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
+import org.apache.commons.io.IOUtils;
 import org.opensilk.common.rx.HoldsSubscription;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -38,7 +41,13 @@ import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,9 +59,11 @@ import de.umass.lastfm.MusicEntry;
 import de.umass.lastfm.opensilk.Fetch;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -101,7 +112,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             if (this.artInfo != null) breadcrumbs.append(getCacheKey(artInfo, artworkType));
         }
 
-        public Subscription start() {
+        Subscription start() {
             registerWithImageView();
             addBreadcrumb("start");
             tryForCache();
@@ -162,7 +173,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             }
         }
 
-        public void tryForCache() {
+        void tryForCache() {
             addBreadcrumb("tryForCache");
             subscription = createCacheObservable(artInfo, artworkType)
                     .subscribe(new Action1<Bitmap>() {
@@ -192,15 +203,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
     }
 
-    public class ArtistArtworkRequest extends BaseArtworkRequest {
+    class ArtistArtworkRequest extends BaseArtworkRequest {
 
-        public ArtistArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        ArtistArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
             super(imageView, artInfo, artworkType);
         }
 
         @Override
         void onCacheMiss() {
-            if (unsubscribed) return;
             addBreadcrumb("onCacheMiss");
             setDefaultImage();
             if (TextUtils.isEmpty(artInfo.artistName)) return;
@@ -230,21 +240,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
     }
 
-    public class AlbumArtworkRequest extends BaseArtworkRequest {
+    class AlbumArtworkRequest extends BaseArtworkRequest {
 
-        public AlbumArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        AlbumArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
             super(imageView, artInfo, artworkType);
         }
 
-//        @Override
-//        public Subscription start() {
-//            tryForNetwork(false);
-//            return this;
-//        }
-
         @Override
         void onCacheMiss() {
-            if (unsubscribed) return;
             addBreadcrumb("onCacheMiss");
             setDefaultImage();
             //check if we have everything we need to download artwork
@@ -302,7 +305,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             } //else just ignore the request
         }
 
-        public void tryForNetwork(final boolean tryMediaStoreOnFailure) {
+        void tryForNetwork(final boolean tryMediaStoreOnFailure) {
             subscription = createAlbumNetworkObservable(artInfo, artworkType)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
@@ -327,18 +330,33 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             }
         }
 
-        public void tryForMediaStore(boolean tryNetworkOnFailure) {
-
+        void tryForMediaStore(final boolean tryNetworkOnFailure) {
+            subscription = createMediaStoreRequestObservable(artInfo, artworkType)
+                    .subscribe(new Action1<Bitmap>() {
+                        @Override
+                        public void call(Bitmap bitmap) {
+                            addBreadcrumb("tryForMediaStore hit");
+                            setImageBitmap(bitmap, false);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            addBreadcrumb("tryForMediaStore miss");
+                            onMediaStoreMiss(tryNetworkOnFailure);
+                        }
+                    });
         }
 
         void onMediaStoreMiss(boolean tryNetwork) {
+            addBreadcrumb("onMediaStoreMiss");
             if (tryNetwork) {
+                addBreadcrumb("goingForNetwork");
                 tryForNetwork(false);
             }
         }
 
-        public void tryForUrl() {
-            subscription = createImageRequestObservable(artInfo.artworkUri.toString(), artworkType)
+        void tryForUrl() {
+            subscription = createImageRequestObservable(artInfo.artworkUri.toString(), artInfo, artworkType)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
@@ -367,7 +385,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         @Override
-        public Subscription start() {
+        Subscription start() {
             addBreadcrumb("start");
             getArtInfo();
             return this;
@@ -522,7 +540,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 .flatMap(new Func1<String, Observable<Bitmap>>() {
                     @Override
                     public Observable<Bitmap> call(String s) {
-                        return createImageRequestObservable(s, artworkType);
+                        return createImageRequestObservable(s, artInfo, artworkType);
                     }
                 });
     }
@@ -544,7 +562,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 .flatMap(new Func1<String, Observable<Bitmap>>() {
                     @Override
                     public Observable<Bitmap> call(String s) {
-                        return createImageRequestObservable(s, artworkType);
+                        return createImageRequestObservable(s, artInfo, artworkType);
                     }
                 });
     }
@@ -622,7 +640,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         });
     }
 
-    public Observable<Bitmap> createImageRequestObservable(final String url, final ArtworkType artworkType) {
+    public Observable<Bitmap> createImageRequestObservable(final String url, final ArtInfo artInfo, final ArtworkType artworkType) {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
@@ -635,6 +653,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     }
                     @Override
                     public void onResponse(Bitmap bitmap) {
+                        // always add to cache
+                        addBitmapToCache(getCacheKey(artInfo, artworkType), bitmap);
                         if (subscriber.isUnsubscribed()) return;
                         subscriber.onNext(bitmap);
                         subscriber.onCompleted();
@@ -642,12 +662,91 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 };
                 ArtworkImageRequest request = new ArtworkImageRequest(url, artworkType, listener);
                 mVolleyQueue.add(request);
+                // Here we take advantage of volleys coolest feature,
+                // We have 2 types of images, a thumbnail and a larger image suitable for
+                // fullscreen use. these are almost never required at the same time so we create
+                // a second request. The cool part is volley wont actually download the image twice
+                // this second request is attached to the first and processed afterwards
+                // saving bandwidth and ensuring both kinds of images are available next time
+                // we need them.
+                final ArtworkType oppositeArtworkType = ArtworkType.opposite(artworkType);
+                ArtworkImageRequest.Listener oppositeListener = new ArtworkImageRequest.Listener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        //pass
+                    }
+                    @Override
+                    public void onResponse(Bitmap bitmap) {
+                        addBitmapToCache(getCacheKey(artInfo, oppositeArtworkType), bitmap);
+                    }
+                };
+                ArtworkImageRequest oppositeRequest = new ArtworkImageRequest(url, oppositeArtworkType, oppositeListener);
+                mVolleyQueue.add(oppositeRequest);
             }
         });
     }
 
-    public void addBitmapToCaches(String key, Bitmap bitmap) {
+    public Observable<Bitmap> createMediaStoreRequestObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
+        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+            @Override
+            public void call(final Subscriber<? super Bitmap> subscriber) {
+                Timber.v("creating MediaStoreRequest %s, from %s", artInfo, Thread.currentThread().getName());
+                InputStream in = null;
+                try {
+                    final Uri uri = artInfo.artworkUri;
+                    in = mContext.getContentResolver().openInputStream(uri);
+                    final NetworkResponse response = new NetworkResponse(IOUtils.toByteArray(in));
+                    if (subscriber.isUnsubscribed()) return;
+                    // We create a faux ImageRequest so we can cheat and use it
+                    // to processs the bitmap like a real network request
+                    // this is not only easier but safer since all bitmap processing is serial.
+                    ArtworkImageRequest request = new ArtworkImageRequest("fauxrequest", artworkType, null);
+                    Response<Bitmap> result = request.parseNetworkResponse(response);
+                    if (subscriber.isUnsubscribed()) return;
+                    if (result.isSuccess()) {
+                        subscriber.onNext(result.result);
+                        subscriber.onCompleted();
+                    } else {
+                        subscriber.onError(result.error);
+                    }
+                } catch (Exception e) { //too many to keep track of
+                    if (subscriber.isUnsubscribed()) return;
+                    subscriber.onError(e);
+                } finally {
+                    IOUtils.closeQuietly(in);
+                }
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+    }
 
+
+    final BlockingDeque<Map.Entry<String, Bitmap>> diskCacheQueue = new LinkedBlockingDeque<>();
+    Scheduler.Worker diskCacheWorker;
+
+    public void addBitmapToCache(final String key, final Bitmap bitmap) {
+        Timber.v("addBitmapToCache(%s)", key);
+        diskCacheQueue.addLast(new AbstractMap.SimpleEntry<>(key, bitmap));
+        if (diskCacheWorker == null || diskCacheWorker.isUnsubscribed()) {
+            diskCacheWorker = Schedulers.io().createWorker();
+            diskCacheWorker.schedule(new Action0() {
+                @Override
+                public void call() {
+                    while (true) {
+                        try {
+                            Map.Entry<String, Bitmap> entry = diskCacheQueue.pollFirst(60, TimeUnit.SECONDS);
+                            if (entry != null) {
+                                Timber.v("Adding %s to L2Cache", entry.getKey());
+                                mL2Cache.putBitmap(entry.getKey(), entry.getValue());
+                                continue;
+                            }
+                        } catch (InterruptedException ignored) {
+                        }
+                        diskCacheWorker.unsubscribe();
+                        break;
+                    }
+                }
+            });
+        }
     }
 
     /**
