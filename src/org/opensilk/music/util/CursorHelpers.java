@@ -93,6 +93,10 @@ public class CursorHelpers {
         return new LocalSong(id, songName, album, artist, /*albumArtist*/ null, albumId, seconds, dataUri, artworkUri, mimeType);
     }
 
+    public static LocalSong makeLocalSongFromCursor(final Cursor c) {
+        return makeLocalSongFromCursor(null, c);
+    }
+
     public static RecentSong makeRecentSongFromRecentCursor(final Cursor c) {
         final String identity = getStringOrEmpty(c, MusicStore.Cols.IDENTITY);
         final String name = getStringOrEmpty(c, MusicStore.Cols.NAME);

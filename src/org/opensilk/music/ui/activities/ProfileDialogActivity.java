@@ -44,8 +44,8 @@ public class ProfileDialogActivity extends BaseSlidingDialogActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mActionBarHelper.setBackground(null);
-        mActionBarHelper.setTitle(" ");
+//        mActionBarHelper.setBackground(null);
+//        mActionBarHelper.setTitle(" ");
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
         Fragment f = null;

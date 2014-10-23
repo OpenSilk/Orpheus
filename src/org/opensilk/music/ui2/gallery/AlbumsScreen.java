@@ -21,6 +21,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.common.flow.Screen;
@@ -84,6 +85,11 @@ public class AlbumsScreen extends Screen {
                     addItems(localAlbums);
                 }
             });
+        }
+
+        @Override
+        protected void handleItemClick(Context context, LocalAlbum item) {
+            NavUtils.openAlbumProfile(context, item);
         }
 
         @Override

@@ -32,9 +32,15 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.model.Playlist;
+import com.google.common.primitives.Longs;
+
 import org.opensilk.music.BuildConfig;
 import org.opensilk.music.R;
 
+import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.PriorityAsyncTask;
 import org.opensilk.music.util.Projections;
@@ -56,6 +62,12 @@ import java.util.concurrent.TimeUnit;
 
 import dagger.ObjectGraph;
 import hugo.weaving.DebugLog;
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Action2;
+import rx.functions.Func1;
+import rx.functions.Func2;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -285,8 +297,110 @@ public class MusicProvider extends ContentProvider {
     }
 
     @DebugLog
+    public Observable<Playlist> performSomeMagick(Observable<LocalSong> observable,
+                                          final long playlistId,
+                                          final String playlistName) {
+        //songs
+        Observable<List<Long>> songs = observable.subscribeOn(Schedulers.io()).map(new Func1<LocalSong, Long>() {
+            @Override
+            public Long call(LocalSong localSong) {
+                return localSong.songId;
+            }
+            // collect output into list
+        }).collect(new ArrayList<Long>(), new Action2<List<Long>, Long>() {
+            @Override
+            public void call(List<Long> longs, Long aLong) {
+                longs.add(aLong);
+            }
+        });
+        //albums
+        Observable<List<Long>> albums = observable.subscribeOn(Schedulers.io()).map(new Func1<LocalSong, Long>() {
+            @Override
+            public Long call(LocalSong localSong) {
+                return localSong.albumId;
+            }
+            //only want unique albums, //collect output into list
+        }).distinct().collect(new ArrayList<Long>(), new Action2<List<Long>, Long>() {
+            @Override
+            public void call(List<Long> longs, Long aLong) {
+                longs.add(aLong);
+            }
+        });
+        // zip the songs and albums into a playlist
+        return Observable.zip(songs, albums,
+                new Func2<List<Long>, List<Long>, Playlist>() {
+                    @Override
+                    public Playlist call(List<Long> songs, List<Long> albums) {
+                        Collections.sort(albums);
+                        return new Playlist(playlistId,
+                                playlistName,
+                                songs.size(),
+                                albums.size(),
+                                Longs.toArray(songs),
+                                Longs.toArray(albums));
+                    }
+                });
+    }
+
+    @DebugLog
     protected MatrixCursor makePlaylistMatrixCursor() {
         MatrixCursor c = new MatrixCursor(Projections.CACHED_GROUP);
+
+        RxCursorLoader<LocalSong> lastAddedLoader = new RxCursorLoader<LocalSong>(getContext(),
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                Projections.LOCAL_SONG,
+                Selections.LAST_ADDED,
+                SelectionArgs.LAST_ADDED(),
+                SortOrder.LAST_ADDED) {
+            @Override
+            protected LocalSong makeFromCursor(Cursor c) {
+                return CursorHelpers.makeLocalSongFromCursor(c);
+            }
+        };
+
+        RxCursorLoader<Playlist> playlistLoader = new RxCursorLoader<Playlist>(getContext(),
+                Uris.EXTERNAL_MEDIASTORE_PLAYLISTS,
+                Projections.PLAYLIST,
+                Selections.PLAYLIST,
+                SelectionArgs.PLAYLIST,
+                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER) {
+            @Override
+            protected Playlist makeFromCursor(Cursor c) {
+                long id = c.getInt(c.getColumnIndexOrThrow(BaseColumns._ID));
+                String name = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME));
+                RxCursorLoader<LocalSong> songsLoader = new RxCursorLoader<LocalSong>(getContext(),
+                        Uris.PLAYLIST(id),
+                        Projections.PLAYLIST_SONGS,
+                        Selections.PLAYLIST_SONGS,
+                        SelectionArgs.PLAYLIST_SONGS,
+                        SortOrder.PLAYLIST_SONGS) {
+                    @Override
+                    protected LocalSong makeFromCursor(Cursor c) {
+                        return CursorHelpers.makeLocalSongFromCursor(c);
+                    }
+                };
+                Observable<Playlist> playlist = performSomeMagick(
+                        songsLoader.createObservable(),
+                        id, name);
+                return playlist.toBlocking().first();
+            }
+        };
+
+        Observable<Playlist> lastAddedObservable = performSomeMagick(
+                // performSomeMagick subscribes us on io so we dont need to do that here
+                lastAddedLoader.createObservable(),
+                -1, getContext().getResources().getString(R.string.playlist_last_added));
+        //subscribing on io so we dont block whatever thread we are created on
+        Observable<Playlist> playlistObservable = playlistLoader.createObservable().subscribeOn(Schedulers.io());
+
+        /*
+        Uris.PLAYLIST(playlistid),
+                Projections.PLAYLIST_MEMBER,
+                Selections.PLAYLIST_MEMBER,
+                SelectionArgs.PLAYLIST_MEMBER,
+                SortOrder.PLAYLIST_SONGS
+         */
+
         //last added first
         // Get the song count
         final Cursor lastAdded = CursorHelpers.makeLastAddedCursor(getContext());

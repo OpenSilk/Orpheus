@@ -19,9 +19,11 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.text.TextUtils;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.common.flow.Screen;
@@ -85,6 +87,11 @@ public class ArtistsScreen extends Screen {
                     addItems(localArtists);
                 }
             });
+        }
+
+        @Override
+        protected void handleItemClick(Context context, LocalArtist item) {
+            NavUtils.openArtistProfile(context, item);
         }
 
         @Override
@@ -176,13 +183,8 @@ public class ArtistsScreen extends Screen {
             LocalArtist artist = getItem(position);
             ArtInfo artInfo = new ArtInfo(artist.name, null, null);
             holder.title.setText(artist.name);
-            String subtitle = "";
-            if (artist.albumCount > 0) {
-                subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount);
-            }
-            if (artist.songCount > 0) {
-                subtitle += MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
-            }
+            String subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount)
+                + ", " + MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
             holder.subtitle.setText(subtitle);
             holder.subscriptions.add(artworkRequestor.newArtistRequest(holder.artwork, artInfo, ArtworkType.THUMBNAIL));
         }

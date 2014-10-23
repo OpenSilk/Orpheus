@@ -23,6 +23,7 @@ import android.database.Cursor;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
@@ -69,11 +70,6 @@ public class GenresScreen extends Screen {
         }
 
         @Override
-        protected BaseAdapter<Genre> newAdapter(List<Genre> items) {
-            return new Adapter(items, artworkRequestor);
-        }
-
-        @Override
         protected void load() {
             subscription = loader.getListObservable().subscribe(new Action1<List<Genre>>() {
                 @Override
@@ -81,6 +77,16 @@ public class GenresScreen extends Screen {
                     addItems(genres);
                 }
             });
+        }
+
+        @Override
+        protected void handleItemClick(Context context, Genre item) {
+            NavUtils.openGenreProfile(context, item);
+        }
+
+        @Override
+        protected BaseAdapter<Genre> newAdapter(List<Genre> items) {
+            return new Adapter(items, artworkRequestor);
         }
 
         @Override
@@ -144,6 +150,8 @@ public class GenresScreen extends Screen {
                     if (genre.mAlbumIds.length >= 1) {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
                                 genre.mAlbumIds[0], ArtworkType.THUMBNAIL));
+                    } else {
+                        holder.artwork.setImageResource(R.drawable.default_artwork);
                     }
             }
         }

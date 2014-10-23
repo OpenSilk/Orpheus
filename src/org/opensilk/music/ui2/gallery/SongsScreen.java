@@ -21,6 +21,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.common.flow.Screen;
@@ -81,6 +82,11 @@ public class SongsScreen extends Screen {
                     addItems(localSongs);
                 }
             });
+        }
+
+        @Override
+        protected void handleItemClick(Context context, LocalSong item) {
+            //TODO
         }
 
         @Override

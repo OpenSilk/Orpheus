@@ -20,7 +20,9 @@ package org.opensilk.music.ui2.gallery;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
+import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.widget.GridLayoutManager;
 import org.lucasr.twowayview.widget.ListLayoutManager;
 import org.lucasr.twowayview.widget.SpacingItemDecoration;
@@ -32,6 +34,7 @@ import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import mortar.ViewPresenter;
@@ -66,6 +69,13 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         } else if (subscription == null || subscription.isUnsubscribed()) {
             load();
         }
+        ItemClickSupport itemClickSupport = ItemClickSupport.addTo(getView());
+        itemClickSupport.setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+            @Override
+            public void onItemClick(RecyclerView recyclerView, View view, int i, long l) {
+                handleItemClick(recyclerView.getContext(), items.get(i));
+            }
+        });
     }
 
     @Override
@@ -109,6 +119,8 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         }
     }
 
+    //handle item clicks
+    protected abstract void handleItemClick(Context context, T item);
     // make a new adapter
     protected abstract BaseAdapter<T> newAdapter(List<T> items);
     // start the loader
@@ -117,6 +129,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     // cancels any ongoing load and starts a new one
     protected void reload() {
         if (subscription != null) subscription.unsubscribe();
+        if (items != null) items.clear();
         load();
     }
 
@@ -140,6 +153,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
 
     // adds a single item to the adapter
     protected void addItem(T item) {
+        if (items == null) addItems(new ArrayList<T>());
         RecyclerView v = getView();
         if (v == null) return;
         BaseAdapter<T> adapter = (BaseAdapter<T>) v.getAdapter();
