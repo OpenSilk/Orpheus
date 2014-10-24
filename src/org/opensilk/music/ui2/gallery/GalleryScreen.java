@@ -104,12 +104,8 @@ public class GalleryScreen extends Screen {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             if (getView() != null) {
-                saveCurrenPage(getView().viewPager.getCurrentItem());
+                preferences.putInt(AppPreferences.START_PAGE, getView().viewPager.getCurrentItem());
             }
-        }
-
-        void saveCurrenPage(int page) {
-            preferences.putInt(AppPreferences.START_PAGE, page);
         }
 
         void updateActionBarWithChildMenuConfig(ActionBarOwner.MenuConfig menuConfig) {

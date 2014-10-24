@@ -108,7 +108,6 @@ public class GalleryView extends LinearLayout {
 
 
     public void setup(List<GalleryPage> galleryPages, int startPage) {
-        viewPager.setOffscreenPageLimit(galleryPages.size());
         Adapter adapter = new Adapter(galleryPages);
         viewPager.setAdapter(adapter);
         tabBar.setViewPager(viewPager);
@@ -119,14 +118,12 @@ public class GalleryView extends LinearLayout {
         private final MortarContextFactory contextFactory = new MortarContextFactory();
         private final List<GalleryPage> galleryPages;
         private final Set<Page> activePages;
-
         private Bundle savedState;
         private Object mCurrentPrimaryItem;
 
         private class Page {
             Screen screen;
             GalleryPageView view;
-
             private Page(Screen screen, GalleryPageView view) {
                 this.screen = screen;
                 this.view = view;
@@ -140,6 +137,7 @@ public class GalleryView extends LinearLayout {
         public Adapter(List<GalleryPage> galleryPages) {
             this.galleryPages = galleryPages;
             this.activePages = new LinkedHashSet<>(galleryPages.size());
+            this.savedState = new Bundle(galleryPages.size());
         }
 
         @Override
@@ -161,6 +159,7 @@ public class GalleryView extends LinearLayout {
             Page oldPage = (Page) object;
             Timber.v("destroyItem %s", oldPage.screen.getName());
             activePages.remove(oldPage);
+            ViewStateSaver.save(oldPage.view, savedState, oldPage.screen.getName());
             contextFactory.tearDownContext(oldPage.view.getContext());
             container.removeView(oldPage.view);
         }
@@ -196,16 +195,15 @@ public class GalleryView extends LinearLayout {
 
         @Override
         public Parcelable saveState() {
-            Bundle b = new Bundle(activePages.size());
             for (Page p : activePages) {
-                b.putSparseParcelableArray(p.screen.getName(), ViewStateSaver.save(p.view));
+                ViewStateSaver.save(p.view, savedState, p.screen.getName());
             }
-            return b;
+            return savedState;
         }
 
         @Override
         public void restoreState(Parcelable state, ClassLoader loader) {
-            super.restoreState(state, loader);
+            if (state == null || !(state instanceof Bundle)) return;
             Bundle b = (Bundle) state;
             b.setClassLoader(loader);
             savedState = b;
