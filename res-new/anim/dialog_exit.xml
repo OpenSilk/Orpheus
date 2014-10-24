@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/slide_in_right.xml
-**
+/*
 ** Copyright 2007, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
@@ -18,9 +17,14 @@
 */
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android">
-	<translate android:fromXDelta="50%p" android:toXDelta="0"
-            android:duration="@android:integer/config_mediumAnimTime"/>
-	<alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-            android:duration="@android:integer/config_mediumAnimTime" />
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+		android:shareInterpolator="false" >
+    <scale android:fromXScale="1.0" android:toXScale="0.9"
+           	android:fromYScale="1.0" android:toYScale="0.9"
+           	android:pivotX="50%" android:pivotY="50%"
+			android:interpolator="@android:interpolator/decelerate_quint"
+           	android:duration="220" />
+    <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
+			android:interpolator="@android:interpolator/decelerate_cubic"
+            android:duration="150"/>
 </set>

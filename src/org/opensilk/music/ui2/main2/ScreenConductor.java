@@ -29,12 +29,15 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.flow.ScreenContextFactory;
 import org.opensilk.common.flow.WithTransition;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.util.ObjectUtils;
+import org.opensilk.music.R;
 import org.opensilk.music.ui2.main2.ScreenSwitcher;
 import org.opensilk.common.flow.ScreenSwitcherView;
 import org.opensilk.music.ui2.util.ViewStateSaver;
@@ -85,79 +88,60 @@ public class ScreenConductor extends ScreenSwitcher {
         final View oldChild = getCurrentChild();
         View newChild = ViewStateSaver.inflate(contextFactory.setUpContext(to, container.getContext()), getLayout(to), container, false);
 
-        tag.setNextScreen(to);
         switch (direction) {
             case FORWARD:
-                if (tag.fromScreen != null && oldChild != null) {
+                if (from != null && oldChild != null) {
                     //save the oldchilds view state
                     SparseArray<Parcelable> state = new SparseArray<>();
                     oldChild.saveHierarchyState(state);
-                    tag.fromScreen.setViewState(state);
-                    container.addView(newChild);
-                    AnimatorSet set = animateSwitch(oldChild, getTransition(tag.fromScreen, WithTransition.OUT),
-                            newChild, getTransition(tag.toScreen, WithTransition.IN));
-                    set.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-                        }
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            container.removeView(oldChild);
-                            callback.onComplete();
-                        }
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
-                        }
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-                        }
-                    });
-                    set.start();
-                    return;
+                    from.setViewState(state);
+                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.shrink_fade_out));
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.slide_in_child_bottom));
                 } else {
-                    container.removeAllViews();
-                    container.addView(newChild);
-                    callback.onComplete();
-                    return;
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.grow_fade_in));
                 }
+                break;
             case BACKWARD:
-                if (oldChild != null) contextFactory.tearDownContext(oldChild.getContext());
-                container.addView(newChild);
                 if (from != null) {
                     from.restoreHierarchyState(newChild);
                 }
                 if (oldChild != null) {
-                    AnimatorSet set = animateSwitch(oldChild, getTransition(tag.fromScreen, WithTransition.OUT),
-                            newChild, getTransition(tag.toScreen, WithTransition.IN));
-                    set.addListener(new Animator.AnimatorListener() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-                        }
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            container.removeView(oldChild);
-                            callback.onComplete();
-                        }
-                        @Override
-                        public void onAnimationCancel(Animator animation) {
-                        }
-                        @Override
-                        public void onAnimationRepeat(Animator animation) {
-                        }
-                    });
-                    set.start();
-                } else {
-                    callback.onComplete();
+                    contextFactory.tearDownContext(oldChild.getContext());
+                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.slide_out_child_bottom));
                 }
+                newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.grow_fade_in));
+//                container.addView(newChild);
                 break;
             case REPLACE:
-                if (oldChild != null) contextFactory.tearDownContext(oldChild.getContext());
-                container.removeAllViews();
-                container.addView(newChild);
-                callback.onComplete();
+//                container.removeAllViews();
+//                container.addView(newChild);
+//                callback.onComplete();
+                if (oldChild != null) {
+                    contextFactory.tearDownContext(oldChild.getContext());
+                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.shrink_fade_out));
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.slide_in_left));
+                } else {
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.grow_fade_in));
+                }
                 break;
         }
+        tag.setNextScreen(to);
+        newChild.getAnimation().setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
 
+            }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                callback.onComplete();
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        if (oldChild != null) container.removeView(oldChild);
+        container.addView(newChild);
     }
 
     protected AnimatorSet animateSwitch(final View from, int fromTransition, View to, int toTransition) {
