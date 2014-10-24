@@ -21,18 +21,13 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import org.opensilk.filebrowser.FileItem;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
-import flow.Flow;
 import mortar.Mortar;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.

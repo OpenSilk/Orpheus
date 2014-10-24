@@ -22,26 +22,31 @@ import android.os.Bundle;
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
-import org.opensilk.music.R;
-
 import org.opensilk.filebrowser.FileItem;
-import org.opensilk.music.loader.AsyncLoader;
-import org.opensilk.music.loader.FileItemLoader;
+import org.opensilk.filebrowser.MediaProviderUtil;
+import org.opensilk.music.R;
 import org.opensilk.music.ui.folder.FolderPickerActivity;
 import org.opensilk.music.ui2.ActivityBlueprint;
-import org.opensilk.music.ui2.main.MainViewBlueprint;
+import org.opensilk.silkdagger.qualifier.ForApplication;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
-import flow.Flow;
 import flow.Layout;
-import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -77,7 +82,7 @@ public class FolderScreen extends Screen {
             this.screen = screen;
         }
 
-        @Provides
+        @Provides @Named("directory")
         public String provideDirectory() {
             return screen.directory;
         }
@@ -85,12 +90,13 @@ public class FolderScreen extends Screen {
     }
 
     @Singleton
-    public static class Presenter extends ViewPresenter<FolderView> implements AsyncLoader.Callback<FileItem> {
+    public static class Presenter extends ViewPresenter<FolderView> {
 
-        final FileItemLoader loader;
+        final Loader loader;
+        Subscription subscription;
 
         @Inject
-        public Presenter(FileItemLoader loader) {
+        public Presenter(Loader loader) {
             Timber.v("new Presenter(Folder)");
             this.loader = loader;
         }
@@ -105,6 +111,7 @@ public class FolderScreen extends Screen {
         protected void onExitScope() {
             Timber.v("onExitScope()");
             super.onExitScope();
+            if (subscription != null) subscription.unsubscribe();
         }
 
         @Override
@@ -112,7 +119,14 @@ public class FolderScreen extends Screen {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
             getView().setup();
-            loader.loadAsync(this);
+            subscription = loader.getObservable().subscribe(new Action1<List<FileItem>>() {
+                @Override
+                public void call(List<FileItem> fileItems) {
+                    FolderView v = getView();
+                    if (v == null) return;
+                    v.getAdapter().addAll(fileItems);
+                }
+            });
         }
 
         @Override
@@ -121,20 +135,47 @@ public class FolderScreen extends Screen {
             super.onSave(outState);
         }
 
-        @Override
-        public void onDataFetched(List<FileItem> items) {
-            FolderView v = getView();
-            if (v != null) {
-                v.getAdapter().clear();
-                v.getAdapter().addAll(items);
-            }
-        }
-
         public void go(Context context, FileItem item) {
             Timber.v("go(%s)", item);
             FolderView v = getView();
             if (v == null) return;
             AppFlow.get(context).goTo(new FolderScreen(item.getPath()));
+        }
+
+    }
+
+    @Singleton
+    static class Loader {
+        final Context context;
+        final String directory;
+
+        final static Set<Integer> MEDIA_TYPES = new HashSet<>();
+        static {
+            MEDIA_TYPES.add(FileItem.MediaType.AUDIO);
+            MEDIA_TYPES.add(FileItem.MediaType.DIRECTORY);
+        }
+
+        @Inject
+        public Loader(@ForApplication Context context, @Named("directory") String directory) {
+            this.context = context;
+            this.directory = directory.endsWith("/") ? directory.substring(0, directory.length()-1) : directory;
+        }
+
+        public Observable<List<FileItem>> getObservable() {
+            return Observable.create(new Observable.OnSubscribe<List<FileItem>>() {
+                @Override
+                public void call(Subscriber<? super List<FileItem>> subscriber) {
+                    try {
+                        List<FileItem> items = MediaProviderUtil.ls(context, directory, MEDIA_TYPES);
+                        if (subscriber.isUnsubscribed()) return;
+                        subscriber.onNext(items);
+                        subscriber.onCompleted();
+                    } catch (Exception e) {
+                        if (subscriber.isUnsubscribed()) return;
+                        subscriber.onError(e);
+                    }
+                }
+            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
         }
 
     }
