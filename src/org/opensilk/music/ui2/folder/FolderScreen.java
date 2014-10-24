@@ -16,8 +16,12 @@
 
 package org.opensilk.music.ui2.folder;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
 
 import org.opensilk.filebrowser.FileItem;
@@ -44,7 +48,8 @@ import timber.log.Timber;
  * Created by drew on 10/5/14.
  */
 @Layout(R.layout.folder_list)
-public class FolderScreen implements Blueprint {
+@WithModule(FolderScreen.Module.class)
+public class FolderScreen extends Screen {
 
     final String directory;
 
@@ -57,13 +62,8 @@ public class FolderScreen implements Blueprint {
     }
 
     @Override
-    public String getMortarScopeName() {
-        return getClass().getName() + directory;
-    }
-
-    @Override
-    public Object getDaggerModule() {
-        return new Module(this);
+    public String getName() {
+        return super.getName() + directory;
     }
 
     @dagger.Module(
@@ -71,7 +71,6 @@ public class FolderScreen implements Blueprint {
             injects = FolderView.class
     )
     public static class Module {
-
         final FolderScreen screen;
 
         public Module(FolderScreen screen) {
@@ -82,18 +81,17 @@ public class FolderScreen implements Blueprint {
         public String provideDirectory() {
             return screen.directory;
         }
+
     }
 
     @Singleton
     public static class Presenter extends ViewPresenter<FolderView> implements AsyncLoader.Callback<FileItem> {
 
-        final Flow flow;
         final FileItemLoader loader;
 
         @Inject
-        public Presenter(Flow flow, FileItemLoader loader) {
+        public Presenter(FileItemLoader loader) {
             Timber.v("new Presenter(Folder)");
-            this.flow = flow;
             this.loader = loader;
         }
 
@@ -132,9 +130,11 @@ public class FolderScreen implements Blueprint {
             }
         }
 
-        public void go(FileItem item) {
+        public void go(Context context, FileItem item) {
             Timber.v("go(%s)", item);
-            flow.goTo(new FolderScreen(item.getPath()));
+            FolderView v = getView();
+            if (v == null) return;
+            AppFlow.get(context).goTo(new FolderScreen(item.getPath()));
         }
 
     }

@@ -16,8 +16,12 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.LibraryInfo;
@@ -51,7 +55,8 @@ import timber.log.Timber;
  * Created by drew on 10/5/14.
  */
 @Layout(R.layout.library_list)
-public class LibraryScreen implements Blueprint {
+@WithModule(LibraryScreen.Module.class)
+public class LibraryScreen extends Screen {
 
     final LibraryInfo info;
 
@@ -60,13 +65,8 @@ public class LibraryScreen implements Blueprint {
     }
 
     @Override
-    public String getMortarScopeName() {
-        return getClass().getName() + info.toString();
-    }
-
-    @Override
-    public Object getDaggerModule() {
-        return new Module(this);
+    public String getName() {
+        return super.getName() + info.toString();
     }
 
     @dagger.Module(
@@ -92,15 +92,13 @@ public class LibraryScreen implements Blueprint {
     @Singleton
     public static class Presenter extends ViewPresenter<LibraryView> {
 
-        final Flow flow;
         final LibraryLoader loader;
         final LibraryInfo info;
 
         final ResultObserver observer;
 
         @Inject
-        public Presenter(Flow flow, LibraryLoader loader, LibraryInfo info) {
-            this.flow = flow;
+        public Presenter(LibraryLoader loader, LibraryInfo info) {
             this.loader = loader;
             this.info = info;
 
@@ -145,9 +143,8 @@ public class LibraryScreen implements Blueprint {
 
         // I know this seems ridiculous an if else block would be more sane
         // but im still trying to learn how FRP works and wanted to do this with it.
-        public void go(Bundleable item) {
+        public void go(final Context context, Bundleable item) {
             Timber.v("go(%s)", item);
-            //FRP thingy to avoid final
             Observable<Bundleable> og = Observable.just(item);
             // we need to convert the generic Bundleable into an action we can use
             // to proceed to the next screen, we first create separate observables
@@ -160,7 +157,7 @@ public class LibraryScreen implements Blueprint {
                     return new Action0() {
                         @Override
                         public void call() {
-                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, folder.identity)));
+                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, folder.identity)));
                         }
                     };
                 }
@@ -171,7 +168,7 @@ public class LibraryScreen implements Blueprint {
                     return new Action0() {
                         @Override
                         public void call() {
-                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, song.identity)));
+                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, song.identity)));
                         }
                     };
                 }
@@ -182,7 +179,7 @@ public class LibraryScreen implements Blueprint {
                     return new Action0() {
                         @Override
                         public void call() {
-                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, artist.identity)));
+                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, artist.identity)));
                         }
                     };
                 }
@@ -193,7 +190,7 @@ public class LibraryScreen implements Blueprint {
                     return new Action0() {
                         @Override
                         public void call() {
-                            flow.goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, album.identity)));
+                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, album.identity)));
                         }
                     };
                 }

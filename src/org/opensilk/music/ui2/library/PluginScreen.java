@@ -22,6 +22,9 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -53,7 +56,8 @@ import timber.log.Timber;
  * Created by drew on 10/6/14.
  */
 @Layout(R.layout.library)
-public class PluginScreen implements Blueprint {
+@WithModule(PluginScreen.Module.class)
+public class PluginScreen extends Screen {
 
     public final PluginInfo plugin;
 
@@ -62,13 +66,8 @@ public class PluginScreen implements Blueprint {
     }
 
     @Override
-    public String getMortarScopeName() {
-        return getClass().getName() + plugin.componentName;
-    }
-
-    @Override
-    public Object getDaggerModule() {
-        return new Module(this);
+    public String getName() {
+        return super.getName() + plugin.componentName;
     }
 
     @dagger.Module (
@@ -77,7 +76,6 @@ public class PluginScreen implements Blueprint {
             library = true
     )
     public static class Module {
-
         final PluginScreen screen;
 
         public Module(PluginScreen screen) {
@@ -98,19 +96,17 @@ public class PluginScreen implements Blueprint {
         final PluginSettings settings;
         final PluginConnectionManager connectionManager;
         final Bus bus;
-        final Flow flow;
 
         String libraryIdentity;
 
         @Inject
         public Presenter(PluginInfo plugin, PluginSettings settings,
                          PluginConnectionManager connectionManager,
-                         @Named("activity") Bus bus, Flow flow) {
+                         @Named("activity") Bus bus) {
             this.plugin = plugin;
             this.settings = settings;
             this.connectionManager = connectionManager;
             this.bus = bus;
-            this.flow = flow;
         }
 
         @Override
@@ -205,7 +201,9 @@ public class PluginScreen implements Blueprint {
             Timber.v("openLibrary()");
             LibraryInfo info = new LibraryInfo(libraryIdentity, plugin.componentName, null);
             LibraryScreen screen = new LibraryScreen(info);
-            flow.goTo(screen);
+            PluginView v = getView();
+            if (v == null) return;
+            AppFlow.get(v.getContext()).goTo(screen);
         }
 
     }

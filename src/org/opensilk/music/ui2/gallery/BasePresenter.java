@@ -63,9 +63,6 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         setupRecyclerView();
         if (items != null && !items.isEmpty()) {
             setAdapter(newAdapter(items));
-//            if (savedInstanceState != null) {
-//                ViewStateSaver.restore(getView(), savedInstanceState, "recyclerview");
-//            }
         } else if (subscription == null || subscription.isUnsubscribed()) {
             load();
         }
@@ -81,10 +78,6 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     @Override
     protected void onSave(Bundle outState) {
         super.onSave(outState);
-        RecyclerView v = getView();
-//        if (v != null) {
-//            ViewStateSaver.save(v, outState, "recyclerview");
-//        }
     }
 
     @Override

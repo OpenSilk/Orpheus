@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
 import org.opensilk.music.R;
 
 import com.squareup.otto.Bus;
@@ -48,14 +50,12 @@ public class NavViewBlueprint {
     @Singleton
     public static class Presenter extends ViewPresenter<NavView> implements AsyncLoader.Callback<PluginInfo> {
 
-        final Flow flow;
         final Bus bus;
         final DrawerPresenter drawerPresenter;
         final PluginInfoLoader loader;
 
         @Inject
-        public Presenter(Flow flow, @Named("activity") Bus bus, DrawerPresenter drawerPresenter, PluginInfoLoader loader) {
-            this.flow = flow;
+        public Presenter(@Named("activity") Bus bus, DrawerPresenter drawerPresenter, PluginInfoLoader loader) {
             this.bus = bus;
             this.drawerPresenter = drawerPresenter;
             this.loader = loader;
@@ -82,54 +82,14 @@ public class NavViewBlueprint {
             }
         }
 
-        public void go(Blueprint screen) {
+        public void go(Context context, Screen screen) {
             if (screen == null) return;
-//            Observable<Blueprint> oo = Observable.just(screen);
-//            Observable<Action0> galleryNfolders = oo.filter(new Func1<Blueprint, Boolean>() {
-//                @Override
-//                public Boolean call(Blueprint blueprint) {
-//                    return (blueprint instanceof FolderScreen) || (blueprint instanceof GalleryScreen);
-//                }
-//            }).map(new Func1<Blueprint, Action0>() {
-//                @Override
-//                public Action0 call(final Blueprint blueprint) {
-//                    return new Action0() {
-//                        @Override
-//                        public void call() {
-//                            flow.replaceTo(blueprint);
-//                        }
-//                    };
-//                }
-//            });
-//            Observable<Action0> plugins = oo.filter(new Func1<Blueprint, Boolean>() {
-//                @Override
-//                public Boolean call(Blueprint blueprint) {
-//                    return (blueprint instanceof LibraryScreen);
-//                }
-//            }).cast(LibraryScreen.class).map(new Func1<LibraryScreen, Action0>() {
-//                @Override
-//                public Action0 call(LibraryScreen libraryScreen) {
-//                    return new Action0() {
-//                        @Override
-//                        public void call() {
-//
-//                        }
-//                    };
-//                }
-//            });
-
-//            Observable.merge(galleryNfolders, plugins).subscribe(new Action1<Action0>() {
-//                @Override
-//                public void call(Action0 action0) {
-//                    drawerPresenter.closeDrawer();
-//                    action0.call();
-//                }
-//            });
             drawerPresenter.closeDrawer();
-            flow.replaceTo(screen);
+            AppFlow.get(context).replaceTo(screen);
         }
 
         public void openSettings(Context context) {
+            drawerPresenter.closeDrawer();
             bus.post(new StartActivityForResult(new Intent(context, SettingsActivity.class), StartActivityForResult.APP_REQUEST_SETTINGS));
         }
     }

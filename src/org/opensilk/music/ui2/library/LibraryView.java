@@ -78,7 +78,7 @@ public class LibraryView extends ListView {
         setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                presenter.go(getAdapter().getItem(position));
+                presenter.go(getContext(), getAdapter().getItem(position));
             }
         });
     }
