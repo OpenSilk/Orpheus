@@ -29,7 +29,6 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.main.MainViewBlueprint;
 
 import java.util.List;
 
@@ -37,7 +36,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import flow.Layout;
-import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.functions.Func1;
@@ -48,7 +46,7 @@ import timber.log.Timber;
  */
 @Layout(R.layout.gallery)
 @WithModule(GalleryScreen.Module.class)
-@WithTransition(in = R.animator.scale_fade_in, out = R.animator.scale_fade_out)
+@WithTransition(in = R.anim.grow_fade_in, out = R.anim.shrink_fade_out)
 public class GalleryScreen extends Screen {
 
     @dagger.Module (
@@ -66,7 +64,7 @@ public class GalleryScreen extends Screen {
         final AppPreferences preferences;
         final ActionBarOwner actionBarOwner;
 
-        DelagateActionHandler delegateActionHandler;
+        DelegateActionHandler delegateActionHandler;
 
         @Inject
         public Presenter(ScreenScoper screenScoper, AppPreferences preferences,
@@ -106,13 +104,17 @@ public class GalleryScreen extends Screen {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             if (getView() != null) {
-                preferences.putInt(AppPreferences.START_PAGE, getView().viewPager.getCurrentItem());
+                saveCurrenPage(getView().viewPager.getCurrentItem());
             }
+        }
+
+        void saveCurrenPage(int page) {
+            preferences.putInt(AppPreferences.START_PAGE, page);
         }
 
         void updateActionBarWithChildMenuConfig(ActionBarOwner.MenuConfig menuConfig) {
             if (delegateActionHandler == null) {
-                delegateActionHandler = new DelagateActionHandler();
+                delegateActionHandler = new DelegateActionHandler();
             }
             int[] menus;
             if (menuConfig != null) {
@@ -129,7 +131,7 @@ public class GalleryScreen extends Screen {
                     new ActionBarOwner.MenuConfig(delegateActionHandler, menus)));
         }
 
-        class DelagateActionHandler implements Func1<Integer, Boolean> {
+        class DelegateActionHandler implements Func1<Integer, Boolean> {
 
             Func1<Integer, Boolean> delegate;
 

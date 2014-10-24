@@ -47,6 +47,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Provides;
+import mortar.ViewPresenter;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;
@@ -55,14 +57,18 @@ import timber.log.Timber;
  * Created by drew on 10/19/14.
  */
 @WithModule(ArtistsScreen.Module.class)
-@WithGalleryPageViewPresenter(ArtistsScreen.Presenter.class)
 public class ArtistsScreen extends Screen {
 
     @dagger.Module(
             addsTo = GalleryScreen.Module.class,
-            injects = Presenter.class
+            injects = GalleryPageView.class
     )
     public static class Module {
+
+        @Provides @Singleton
+        public ViewPresenter<GalleryPageView> provideGalleryPagePresenter(Presenter presenter) {
+            return presenter;
+        }
 
     }
 

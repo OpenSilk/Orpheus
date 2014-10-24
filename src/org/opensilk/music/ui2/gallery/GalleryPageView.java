@@ -18,10 +18,14 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 
 import org.lucasr.twowayview.TwoWayView;
 
+import javax.inject.Inject;
+
+import mortar.Mortar;
 import mortar.ViewPresenter;
 import timber.log.Timber;
 
@@ -30,16 +34,18 @@ import timber.log.Timber;
  */
 public class GalleryPageView extends TwoWayView {
 
+    @Inject
     ViewPresenter<GalleryPageView> presenter;
 
     public GalleryPageView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        Mortar.inject(getContext(), this);
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Timber.v("onAttachedToWindow");
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        Timber.v("onFinishInflate()");
         if (presenter != null) {
             presenter.takeView(this);
         }
@@ -54,9 +60,16 @@ public class GalleryPageView extends TwoWayView {
         }
     }
 
-    // Set this right after inflate, before adding to the container
-    public void setPresenter(ViewPresenter<GalleryPageView> presenter) {
-        this.presenter = presenter;
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Timber.v("onSaveInstanceState");
+        return super.onSaveInstanceState();
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Timber.v("onRestoreInstanceState");
+        super.onRestoreInstanceState(state);
     }
 
     public ViewPresenter<GalleryPageView> getPresenter() {

@@ -33,9 +33,13 @@ public class ViewStateSaver {
 
     public static <T extends View> void save(T view, Bundle bundle, String name) {
         if (view == null) return;
+        bundle.putSparseParcelableArray(name, save(view));
+    }
+
+    public static <T extends View> SparseArray<Parcelable> save(T view) {
         SparseArray<Parcelable> state = new SparseArray<>();
         view.saveHierarchyState(state);
-        bundle.putSparseParcelableArray(name, state);
+        return state;
     }
 
     public static <T extends View> void restore(T view, Bundle bundle, String name) {

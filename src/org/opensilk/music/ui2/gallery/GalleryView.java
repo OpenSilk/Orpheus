@@ -18,22 +18,35 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.main.DrawerPresenter;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 import org.opensilk.music.widgets.SlidingTabLayout;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -81,6 +94,19 @@ public class GalleryView extends LinearLayout {
         }
     }
 
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Timber.v("onSaveInstanceState");
+        return super.onSaveInstanceState();
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Timber.v("onRestoreInstanceState");
+        super.onRestoreInstanceState(state);
+    }
+
+
     public void setup(List<GalleryPage> galleryPages, int startPage) {
         viewPager.setOffscreenPageLimit(galleryPages.size());
         Adapter adapter = new Adapter(galleryPages);
@@ -90,8 +116,22 @@ public class GalleryView extends LinearLayout {
     }
 
     class Adapter extends PagerAdapter {
+        private final MortarContextFactory contextFactory = new MortarContextFactory();
         private final List<GalleryPage> galleryPages;
-        Object mCurrentPrimaryItem;
+        private final Set<Page> activePages;
+
+        private Bundle savedState;
+        private Object mCurrentPrimaryItem;
+
+        private class Page {
+            Screen screen;
+            GalleryPageView view;
+
+            private Page(Screen screen, GalleryPageView view) {
+                this.screen = screen;
+                this.view = view;
+            }
+        }
 
         public Adapter(GalleryPage[] galleryPages) {
             this(Arrays.asList(galleryPages));
@@ -99,47 +139,37 @@ public class GalleryView extends LinearLayout {
 
         public Adapter(List<GalleryPage> galleryPages) {
             this.galleryPages = galleryPages;
+            this.activePages = new LinkedHashSet<>(galleryPages.size());
         }
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            Screen screen = galleryPages.get(position).screen;
-            // Attach our child screen
-            MortarScope newChildScope = presenter.screenScoper.getScreenScope(getContext(), screen.getName(), screen);
-            Timber.i("instatiateItem %s", newChildScope.getName());
-            // create new scoped context (used to later obtain the child scope)
-            Context newChildContext = newChildScope.createContext(getContext());
-            // resolve the presenter for the child screen
-            final ViewPresenter<GalleryPageView> childPresenter = obtainPresenter(screen, newChildScope);
-            // inflate the recyclerview
+            GalleryPage page = galleryPages.get(position);
+            Screen screen = page.screen;
+            Timber.v("instantiateItem %s", screen.getName());
+            Context newChildContext = contextFactory.setUpContext(screen, getContext());
             final GalleryPageView newChild = ViewStateSaver.inflate(newChildContext, R.layout.gallery_page, container);
-            // set the presenter
-            newChild.setPresenter(childPresenter);
-            // add the new view;
+            ViewStateSaver.restore(newChild, savedState, screen.getName());
             container.addView(newChild);
-            return newChild;
+            Page newPage = new Page(screen, newChild);
+            activePages.add(newPage);
+            return newPage;
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
-            // cast
-            GalleryPageView oldChild = (GalleryPageView) object;
-            // retrieve our scope
-            MortarScope myScope = Mortar.getScope(getContext());
-            // retrieve child scope
-            MortarScope oldChildScope = Mortar.getScope(oldChild.getContext());
-            Timber.i("destroyItem %s", oldChildScope.getName());
-            //TODO not sure the best order here
-            // destroy the child
-            myScope.destroyChild(oldChildScope);
-            container.removeView(oldChild);
+            Page oldPage = (Page) object;
+            Timber.v("destroyItem %s", oldPage.screen.getName());
+            activePages.remove(oldPage);
+            contextFactory.tearDownContext(oldPage.view.getContext());
+            container.removeView(oldPage.view);
         }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             if (object != mCurrentPrimaryItem) {
-                GalleryPageView currentChild = (GalleryPageView) object;
-                ViewPresenter<GalleryPageView> childPresenter = currentChild.getPresenter();
+                Page currentPage = (Page) object;
+                ViewPresenter<GalleryPageView> childPresenter = currentPage.view.getPresenter();
                 ActionBarOwner.MenuConfig menuConfig = null;
                 if (childPresenter != null && childPresenter instanceof HasOptionsMenu) {
                     menuConfig = ((HasOptionsMenu) childPresenter).getMenuConfig();
@@ -156,7 +186,7 @@ public class GalleryView extends LinearLayout {
 
         @Override
         public boolean isViewFromObject(android.view.View view, Object o) {
-            return view.equals(o);
+            return view.equals(((Page) o).view);
         }
 
         @Override
@@ -164,18 +194,22 @@ public class GalleryView extends LinearLayout {
             return getContext().getString(galleryPages.get(position).titleResource).toUpperCase(Locale.getDefault());
         }
 
-    }
-
-    //TODO cache these
-    static ViewPresenter<GalleryPageView> obtainPresenter(Screen screen, MortarScope scope) {
-        Class<?> screenType = ObjectUtils.getClass(screen);
-        WithGalleryPageViewPresenter withPresenter = screenType.getAnnotation(WithGalleryPageViewPresenter.class);
-        if (withPresenter == null) {
-            throw new IllegalArgumentException("Screen not annotated with @WithPresenter");
+        @Override
+        public Parcelable saveState() {
+            Bundle b = new Bundle(activePages.size());
+            for (Page p : activePages) {
+                b.putSparseParcelableArray(p.screen.getName(), ViewStateSaver.save(p.view));
+            }
+            return b;
         }
-        Class<?> presenterClass = withPresenter.value();
-        Object presenter = scope.getObjectGraph().get(presenterClass);
-        return (ViewPresenter<GalleryPageView>) presenter;
+
+        @Override
+        public void restoreState(Parcelable state, ClassLoader loader) {
+            super.restoreState(state, loader);
+            Bundle b = (Bundle) state;
+            b.setClassLoader(loader);
+            savedState = b;
+        }
     }
 
 }

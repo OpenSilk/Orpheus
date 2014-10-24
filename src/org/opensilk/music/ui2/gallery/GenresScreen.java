@@ -47,6 +47,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Provides;
+import mortar.ViewPresenter;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -56,14 +58,18 @@ import rx.functions.Func1;
  * Created by drew on 10/19/14.
  */
 @WithModule(GenresScreen.Module.class)
-@WithGalleryPageViewPresenter(GenresScreen.Presenter.class)
 public class GenresScreen extends Screen {
 
     @dagger.Module(
             addsTo = GalleryScreen.Module.class,
-            injects = Presenter.class
+            injects = GalleryPageView.class
     )
     public static class Module {
+
+        @Provides @Singleton
+        public ViewPresenter<GalleryPageView> provideGalleryPagePresenter(Presenter presenter) {
+            return presenter;
+        }
 
     }
 
