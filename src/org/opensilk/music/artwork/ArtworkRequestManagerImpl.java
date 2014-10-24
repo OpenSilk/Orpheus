@@ -463,7 +463,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
                 @Override
                 public void call(Subscriber<? super Bitmap> subscriber) {
-                    Timber.v("Trying L1 for %s, from %s", cacheKey, Thread.currentThread().getName());
+//                    Timber.v("Trying L1 for %s, from %s", cacheKey, Thread.currentThread().getName());
                     Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
                     if (!subscriber.isUnsubscribed()) {
                         if (bitmap != null) {
@@ -483,7 +483,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         return Observable.create(new Observable.OnSubscribe<Bitmap>() {
                             @Override
                             public void call(Subscriber<? super Bitmap> subscriber) {
-                                Timber.v("Trying L2 for %s, from %s", cacheKey, Thread.currentThread().getName());
+//                                Timber.v("Trying L2 for %s, from %s", cacheKey, Thread.currentThread().getName());
                                 Bitmap bitmap = mL2Cache.getBitmap(cacheKey);
                                 if (!subscriber.isUnsubscribed()) {
                                     if (bitmap != null) {
