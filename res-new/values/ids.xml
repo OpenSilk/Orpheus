@@ -17,5 +17,5 @@
   -->
 
 <resources>
-    <integer name="grid_columns">6</integer>
+    <item type="id" name="screen_switcher_tag"/>
 </resources>

@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2014 OpenSilk Productions LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.opensilk.music.ui2;
+
+
+import com.google.gson.Gson;
+import com.squareup.otto.Bus;
+
+import org.opensilk.common.flow.GsonParcer;
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.PauseAndResumeModule;
+import org.opensilk.common.mortar.ScreenScoper;
+import org.opensilk.music.AppModule;
+import org.opensilk.music.ui2.LauncherActivity;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.main.FooterView;
+import org.opensilk.music.ui2.main.FooterViewBlueprint;
+import org.opensilk.music.ui2.main.MainView;
+import org.opensilk.music.ui2.main.MainViewBlueprint;
+import org.opensilk.music.ui2.main.NavView;
+import org.opensilk.music.ui2.main.NavViewBlueprint;
+import org.opensilk.music.ui2.main2.AppFlowPresenter;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import dagger.Provides;
+import flow.Flow;
+import flow.Parcer;
+import mortar.Blueprint;
+
+/**
+ * Created by drew on 10/23/14.
+ */
+public class ActivityBlueprint implements Blueprint {
+
+    /**
+     * Required for a race condition cause by Android when a new scope is created
+     * before the old one is destroyed
+     * <p/>
+     * https://github.com/square/mortar/issues/87#issuecomment-43849264
+     */
+    private final String scopeName;
+
+    public ActivityBlueprint(String scopeName) {
+        this.scopeName = scopeName;
+    }
+
+    @Override public String getMortarScopeName() {
+        return scopeName;
+    }
+
+    @Override public Object getDaggerModule() {
+        return new Module();
+    }
+
+    @dagger.Module( //
+            addsTo = AppModule.class,
+            includes = {
+                    ActivityModule.class,
+            },
+            injects = {
+                    LauncherActivity.class,
+                    MainView.class,
+                    FooterView.class,
+                    NavView.class,
+            },
+            library = true //
+    )
+    public static class Module {
+        @Provides @Singleton
+        public AppFlowPresenter<LauncherActivity> providePresenter(Parcer<Object> floParcer) {
+            return new Presenter(floParcer);
+        }
+
+        @Provides
+        public Flow provideFlow(AppFlowPresenter<LauncherActivity> presenter) {
+            return presenter.getFlow();
+        }
+
+    }
+
+    static class Presenter extends AppFlowPresenter<LauncherActivity> {
+
+        Presenter(Parcer<Object> floParcer) {
+            super(floParcer);
+        }
+
+        @Override public void showScreen(Screen newScreen, Flow.Direction direction, Flow.Callback callback) {
+            super.showScreen(newScreen, direction, callback);
+        }
+    }
+}

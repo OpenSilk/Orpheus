@@ -148,7 +148,8 @@ public class ArtworkServiceImpl implements ArtworkService {
                 out.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Timber.e(""+e.getClass() + " " + e.getMessage());
+//            e.printStackTrace();
         }
         return null;
     }

@@ -29,5 +29,5 @@ import dagger.Provides;
 )
 public class PauseAndResumeModule {
     @Provides @Singleton PauseAndResumePresenter providePauseAndResumePresenter() { return new PauseAndResumePresenter(); }
-    @Provides PauseAndResumeRegistrar providePauseAndResumeRegistar(PauseAndResumePresenter presenter) { return presenter; }
+    @Provides @Singleton PauseAndResumeRegistrar providePauseAndResumeRegistar(PauseAndResumePresenter presenter) { return presenter; }
 }

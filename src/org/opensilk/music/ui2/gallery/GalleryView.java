@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.opensilk.common.flow.Screen;
-import org.opensilk.common.mortar.MortarScreen;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -106,7 +105,7 @@ public class GalleryView extends LinearLayout {
         public Object instantiateItem(ViewGroup container, int position) {
             Screen screen = galleryPages.get(position).screen;
             // Attach our child screen
-            MortarScope newChildScope = presenter.screenScoper.getScreenScope(getContext(), screen);
+            MortarScope newChildScope = presenter.screenScoper.getScreenScope(getContext(), screen.getName(), screen);
             Timber.i("instatiateItem %s", newChildScope.getName());
             // create new scoped context (used to later obtain the child scope)
             Context newChildContext = newChildScope.createContext(getContext());
@@ -168,7 +167,7 @@ public class GalleryView extends LinearLayout {
     }
 
     //TODO cache these
-    static ViewPresenter<GalleryPageView> obtainPresenter(MortarScreen screen, MortarScope scope) {
+    static ViewPresenter<GalleryPageView> obtainPresenter(Screen screen, MortarScope scope) {
         Class<?> screenType = ObjectUtils.getClass(screen);
         WithGalleryPageViewPresenter withPresenter = screenType.getAnnotation(WithGalleryPageViewPresenter.class);
         if (withPresenter == null) {

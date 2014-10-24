@@ -34,6 +34,11 @@ public class QueueView extends DragSortListView {
     @Inject
     QueueScreen.Presenter presenter;
 
+    int screenHeight;
+    int screenWidth;
+    float yFraction;
+    float xFraction;
+
     public QueueView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
@@ -61,6 +66,31 @@ public class QueueView extends DragSortListView {
             lst[ii] = "Song " + ii;
         }
         return lst;
+    }
+
+    @Override
+    public void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        screenHeight = h;
+        screenWidth = w;
+    }
+
+    public void setYFraction(float fraction) {
+        yFraction = fraction;
+        setY(screenHeight > 0 ? (yFraction * screenHeight) : 0);
+    }
+
+    public float getYFraction() {
+        return yFraction;
+    }
+
+    public void setXFraction(float fraction) {
+        xFraction = fraction;
+        setX(screenWidth > 0 ? (xFraction * screenWidth) : 0);
+    }
+
+    public float getXFraction() {
+        return xFraction;
     }
 
 }

@@ -38,7 +38,7 @@ import mortar.Mortar;
  */
 public class FooterView extends RelativeLayout {
 
-    @Inject FooterScreen.Presenter presenter;
+    @Inject FooterViewBlueprint.Presenter presenter;
 
     @InjectView(R.id.footer_thumbnail)
     ArtworkImageView artworkThumbnail;
@@ -51,7 +51,9 @@ public class FooterView extends RelativeLayout {
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (!isInEditMode()) Mortar.inject(context, this);
+        if (!isInEditMode()) {
+            Mortar.inject(context, this);
+        }
     }
 
     @Override
@@ -60,13 +62,15 @@ public class FooterView extends RelativeLayout {
         if (!isInEditMode()) {
             ButterKnife.inject(this);
             Themer.themeProgressBar(progressBar);
-            presenter.takeView(this);
         }
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (!isInEditMode()) {
+            presenter.takeView(this);
+        }
     }
 
     @Override

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2014 OpenSilk Productions LLC
+ * Copyright 2014 Square Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.core.android;
+package org.opensilk.common.flow;
 
-import javax.inject.Singleton;
+import android.content.Context;
+import android.view.ViewGroup;
 
-import dagger.Module;
-import dagger.Provides;
+public interface ScreenSwitcherView extends CanShowScreen {
+  ViewGroup getCurrentChild();
 
-/**
- * Created by drew on 10/15/14.
- */
-@Module(
-        library = true
-)
-public class AndroidModule {
-    @Provides @Singleton ActionBarOwner provideActionBarOwner() { return new ActionBarOwner(); }
+  ViewGroup getContainerView();
+
+  Context getContext();
 }

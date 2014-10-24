@@ -17,27 +17,18 @@
 
 package org.opensilk.common.flow;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
-import flow.Parcer;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Created by drew on 10/18/14.
+ * Created by drew on 10/23/14.
  */
-@Module(
-        library = true
-)
-public class FlowModule {
-    // Flow backstack
-    @Provides @Singleton public Gson provideGson() {
-        return new GsonBuilder().create();
-    }
-    @Provides @Singleton public Parcer<Object> provideParcer(Gson gson) {
-        return new GsonParcer<Object>(gson);
-    }
+@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+public @interface WithTransition {
+    int IN = 1;
+    int OUT = 2;
+    int in();
+    int out();
 }

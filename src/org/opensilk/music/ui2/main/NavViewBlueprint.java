@@ -17,19 +17,19 @@
 
 package org.opensilk.music.ui2.main;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.NavUtils;
+
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.loader.AsyncLoader;
 import org.opensilk.music.loader.PluginInfoLoader;
 import org.opensilk.music.ui.settings.SettingsActivity;
+import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 
 import java.util.List;
@@ -43,32 +43,7 @@ import flow.Layout;
 import mortar.Blueprint;
 import mortar.ViewPresenter;
 
-/**
- * Note to self: we arent embedding this listview in order to obtain the GodView's flow
- *      so we make sure to only add this screen after the GodView is inflated
- *
- * Created by drew on 10/4/14.
- */
-@Layout(R.layout.drawer_list)
-public class NavScreen implements Blueprint {
-
-    @Override
-    public String getMortarScopeName() {
-        return getClass().getName();
-    }
-
-    @Override
-    public Object getDaggerModule() {
-        return new Module();
-    }
-
-    @dagger.Module(
-            injects = NavView.class,
-            addsTo = MainScreen.Module.class
-    )
-    public static class Module {
-
-    }
+public class NavViewBlueprint {
 
     @Singleton
     public static class Presenter extends ViewPresenter<NavView> implements AsyncLoader.Callback<PluginInfo> {

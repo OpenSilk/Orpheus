@@ -22,9 +22,8 @@ import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
 
-import org.opensilk.music.ui2.ActivityModule;
-import org.opensilk.music.ui2.core.FlowOwner;
-import org.opensilk.music.ui2.gallery.GalleryScreen;
+import org.opensilk.common.flow.AppFlow;
+import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.concurrent.TimeUnit;
@@ -32,12 +31,11 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import dagger.Provides;
 import flow.Flow;
-import flow.Parcer;
 import hugo.weaving.DebugLog;
 import mortar.Blueprint;
 import mortar.MortarScope;
+import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Scheduler;
@@ -56,63 +54,17 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/5/14.
  */
-public class MainScreen implements Blueprint {
-
-    /**
-     * Required for a race condition cause by Android when a new scope is created
-     * before the old one is destroyed
-     * <p/>
-     * https://github.com/square/mortar/issues/87#issuecomment-43849264
-     */
-    final String scopename;
-
-    public MainScreen(String scopename) {
-        Timber.v("new MainScreen(%s)", scopename);
-        this.scopename = scopename;
-    }
-
-    @Override
-    public String getMortarScopeName() {
-        return scopename;
-    }
-
-    @Override
-    public Object getDaggerModule() {
-        return new Module();
-    }
-
-    @dagger.Module(
-            includes = ActivityModule.class,
-            injects = {
-                    MainView.class,
-                    FooterView.class,
-            },
-            library = true
-    )
-    public static class Module {
-
-        @Provides @Singleton
-        public Flow provideFlow(Presenter presenter) {
-            return presenter.getFlow();
-        }
-
-    }
+public class MainViewBlueprint {
 
     @Singleton
-    public static class Presenter extends FlowOwner<Blueprint, MainView> {
+    public static class Presenter extends ViewPresenter<MainView> {
 
         final MusicServiceConnection musicService;
 
         @Inject
-        protected Presenter(Parcer<Object> parcer, MusicServiceConnection musicService) {
-            super(parcer);
-            Timber.v("new MainScreen.Presenter()");
+        protected Presenter(MusicServiceConnection musicService) {
+            Timber.v("new MainViewBlueprint.Presenter()");
             this.musicService = musicService;
-        }
-
-        @Override
-        protected Blueprint getFirstScreen() {
-            return new GalleryScreen();
         }
 
         @Override
@@ -159,14 +111,18 @@ public class MainScreen implements Blueprint {
 
         @DebugLog
         void openQueue() {
-            Flow flow = getFlow();
+            MainView  v = getView();
+            if (v == null) return;
+            Flow flow = AppFlow.get(v.getContext());
             if (flow.getBackstack().current().getScreen() instanceof QueueScreen) return;
             flow.goTo(new QueueScreen());
         }
 
         @DebugLog
         void closeQueue() {
-            Flow flow = getFlow();
+            MainView  v = getView();
+            if (v == null) return;
+            Flow flow = AppFlow.get(v.getContext());
             if (flow.getBackstack().current().getScreen() instanceof QueueScreen) flow.goBack();
         }
 

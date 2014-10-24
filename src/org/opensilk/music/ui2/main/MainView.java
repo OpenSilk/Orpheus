@@ -24,15 +24,12 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
 import org.opensilk.music.R;
 
-import org.opensilk.music.ui2.core.CanShowScreen;
-import org.opensilk.music.ui2.core.ScreenConductor;
 import org.opensilk.music.ui2.theme.Themer;
 import org.opensilk.music.widgets.FloatingActionButton;
 import org.opensilk.music.widgets.FloatingActionButtonRelativeLayout;
@@ -41,19 +38,16 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import flow.Flow;
-import hugo.weaving.DebugLog;
-import mortar.Blueprint;
 import mortar.Mortar;
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/14/14.
  */
-public class MainView extends FloatingActionButtonRelativeLayout implements CanShowScreen<Blueprint> {
+public class MainView extends FloatingActionButtonRelativeLayout {
 
     @Inject
-    MainScreen.Presenter presenter;
+    MainViewBlueprint.Presenter presenter;
 
     @InjectView(R.id.floating_action_button)
     FloatingActionButton fabPlay;
@@ -65,8 +59,6 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
     FloatingActionButton fabShuffle;
     @InjectView(R.id.floating_action_repeat)
     FloatingActionButton fabRepeat;
-
-    ScreenConductor<Blueprint> screenConductor;
 
     AnimatorSet expandFabs;
     AnimatorSet collapseFabs;
@@ -85,8 +77,6 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        screenConductor = new ScreenConductor<>(getContext(), ButterKnife.<ViewGroup>findById(this, R.id.main));
-//        setupLayoutTransitions();
         setupActionButton();
         if (!isInEditMode()) presenter.takeView(this);
     }
@@ -99,7 +89,7 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Timber.v("onLayout firstLayout="+firstLayout);
+        Timber.v("onLayout firstLayout=%s", firstLayout);
         super.onLayout(changed, l, t, r, b);
         if (firstLayout) {
             firstLayout = false;
@@ -125,29 +115,19 @@ public class MainView extends FloatingActionButtonRelativeLayout implements CanS
     }
 
     @Override
-    @DebugLog
-    public void showScreen(Blueprint screen, Flow.Direction direction) {
-        screenConductor.showScreen(screen, direction);
-    }
-
-    @Override
     protected void onFabFling(Direction direction) {
         switch (direction) {
             case UP:
-                break;
-            case DOWN:
-                break;
-            case RIGHT:
-                presenter.closeQueue();
-                break;
-            case LEFT:
                 presenter.openQueue();
                 break;
+            case DOWN:
+                presenter.closeQueue();
+                break;
+            case RIGHT:
+                break;
+            case LEFT:
+                break;
         }
-    }
-
-    public Flow getFlow() {
-        return presenter.getFlow();
     }
 
     void setupActionButton() {

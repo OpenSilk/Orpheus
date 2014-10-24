@@ -30,9 +30,10 @@ import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
-import org.opensilk.music.ui2.main.MainScreen;
+import org.opensilk.music.ui2.main.MainViewBlueprint;
 import org.opensilk.music.util.PluginSettings;
 
 import javax.inject.Inject;
@@ -71,7 +72,7 @@ public class PluginScreen implements Blueprint {
     }
 
     @dagger.Module (
-            addsTo = MainScreen.Module.class,
+            addsTo = ActivityBlueprint.Module.class,
             injects = PluginView.class,
             library = true
     )

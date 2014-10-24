@@ -18,45 +18,45 @@
 
 <org.opensilk.music.ui2.main.MainView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/main_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentTop="true"
+        style="?toolbarTheme"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_below="@id/main_toolbar"
         android:background="?colorPrimary"/>
 
-
-    <!--<android.support.v7.widget.CardView-->
-        <!--android:id="@+id/cardview"-->
-        <!--android:layout_width="600dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!-->-->
-        <!---->
-    <!--</android.support.v7.widget.CardView>-->
-
-    <LinearLayout
-        android:layout_below="@id/toolbar"
-        android:orientation="vertical"
+    <android.support.v7.widget.CardView
         android:layout_width="600dp"
         android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize"
         android:layout_centerHorizontal="true">
 
-
-
-        <FrameLayout
-            android:id="@+id/main"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_height="match_parent">
 
-        <include layout="@layout/footer"/>
+            <org.opensilk.music.ui2.main2.FrameScreenSwitcherView
+                android:id="@+id/main"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
-    </LinearLayout>
+            <include layout="@layout/footer"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
 
     <!--Fabs-->
     <include layout="@layout/floating_action_buttons"/>

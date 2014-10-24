@@ -19,9 +19,9 @@ package org.opensilk.music;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 
-import org.opensilk.music.ui2.main.MainScreen;
+import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.music.ui2.main.MainViewBlueprint;
 
 import mortar.Blueprint;
 import mortar.Mortar;
@@ -68,7 +68,7 @@ public class MortarTestActivity extends Activity {
     }
 
     protected Blueprint getStartingScope() {
-        return new MainScreen(getScopeName());
+        return new ActivityBlueprint(getScopeName());
     }
 
 }

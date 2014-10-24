@@ -83,6 +83,7 @@ public class MusicServiceConnection {
 
     @Inject
     public MusicServiceConnection(@ForApplication Context context) {
+        Timber.v("new MusicServiceConnection");
         this.context = new ContextWrapper(context);
     }
 

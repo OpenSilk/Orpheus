@@ -18,9 +18,13 @@ package org.opensilk.music.ui2.main;
 
 import android.os.Bundle;
 
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.flow.WithTransition;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
+import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.ActivityBlueprint;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,20 +38,13 @@ import mortar.ViewPresenter;
  * Created by drew on 10/15/14.
  */
 @Layout(R.layout.queue)
-public class QueueScreen implements Blueprint {
-    @Override
-    public String getMortarScopeName() {
-        return getClass().getName();
-    }
-
-    @Override
-    public Object getDaggerModule() {
-        return new Module();
-    }
+@WithModule(QueueScreen.Module.class)
+@WithTransition(in = R.animator.slide_in_bottom, out = R.animator.slide_out_bottom)
+public class QueueScreen extends Screen {
 
     @dagger.Module(
-            injects = QueueView.class,
-            addsTo = MainScreen.Module.class
+            addsTo = ActivityBlueprint.Module.class,
+            injects = QueueView.class
     )
     public static class Module {
 

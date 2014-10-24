@@ -26,7 +26,8 @@ import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
-import org.opensilk.music.ui2.main.MainScreen;
+import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.music.ui2.main.MainViewBlueprint;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -69,8 +70,8 @@ public class LibraryScreen implements Blueprint {
     }
 
     @dagger.Module(
+            addsTo = ActivityBlueprint.Module.class,
             injects = LibraryView.class,
-            addsTo = MainScreen.Module.class,
             library = true
     )
     public static class Module {

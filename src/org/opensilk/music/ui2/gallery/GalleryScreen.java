@@ -21,11 +21,15 @@ import android.os.Bundle;
 
 import com.andrew.apollo.utils.MusicUtils;
 
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.flow.WithTransition;
 import org.opensilk.common.mortar.ScreenScoper;
+import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.main.MainScreen;
+import org.opensilk.music.ui2.main.MainViewBlueprint;
 
 import java.util.List;
 
@@ -43,20 +47,12 @@ import timber.log.Timber;
  * Created by drew on 10/3/14.
  */
 @Layout(R.layout.gallery)
-public class GalleryScreen implements Blueprint {
-
-    @Override
-    public String getMortarScopeName() {
-        return getClass().getName();
-    }
-
-    @Override
-    public Object getDaggerModule() {
-        return new Module();
-    }
+@WithModule(GalleryScreen.Module.class)
+@WithTransition(in = R.animator.scale_fade_in, out = R.animator.scale_fade_out)
+public class GalleryScreen extends Screen {
 
     @dagger.Module (
-            addsTo = MainScreen.Module.class,
+            addsTo = ActivityBlueprint.Module.class,
             injects = GalleryView.class
     )
     public static class Module {

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2014 OpenSilk Productions LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.opensilk.music.ui2;
 
 import android.app.AlarmManager;
@@ -16,8 +33,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeActivity;
 import org.opensilk.common.mortar.PauseAndResumePresenter;
+import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
@@ -32,11 +52,13 @@ import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerPresenter;
-import org.opensilk.music.ui2.main.MainScreen;
+import org.opensilk.music.ui2.main.FooterViewBlueprint;
+import org.opensilk.music.ui2.main.MainViewBlueprint;
 import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.music.ui2.main.NavScreen;
-import org.opensilk.music.ui2.theme.Themer;
+import org.opensilk.music.ui2.main.NavViewBlueprint;
+import org.opensilk.music.ui2.main2.AppFlowPresenter;
+import org.opensilk.music.ui2.main2.FrameScreenSwitcherView;
 
 import java.util.UUID;
 
@@ -52,13 +74,13 @@ import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 import mortar.MortarScope;
-import rx.functions.Func1;
 import timber.log.Timber;
 
 
 public class LauncherActivity extends ActionBarActivity implements
         PauseAndResumeActivity,
-        ActionBarOwner.View,
+        AppFlowPresenter.Activity,
+        ActionBarOwner.Activity,
         DrawerPresenter.View {
 
     @Inject @Named("activity") Bus mBus;
@@ -67,27 +89,24 @@ public class LauncherActivity extends ActionBarActivity implements
     @Inject DrawerPresenter mDrawerPresenter;
     @Inject MusicServiceConnection mMusicService;
     @Inject PluginConnectionManager mPluginConnectionManager;
+    @Inject AppFlowPresenter<LauncherActivity> mAppFlowPresenter;
 
+    @InjectView(R.id.main)
+    FrameScreenSwitcherView mContainer;
     @InjectView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container)
     ViewGroup mNavContainer;
-    @InjectView(R.id.mainview)
-    MainView mMainView;
-    @InjectView(R.id.sliding_layout) @Optional
-    SlidingUpPanelLayout mSlidingPanel;
     @InjectView(R.id.main_toolbar)
     Toolbar mToolbar;
 
     MortarActivityScope mActivityScope;
 
-    Flow mFlow;
     ActionBarOwner.MenuConfig mMenuConfig;
     ActionBarDrawerToggle mDrawerToggle;
     boolean mConfigurationChangeIncoming;
     String mScopeName;
     boolean mIsResumed;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,29 +114,27 @@ public class LauncherActivity extends ActionBarActivity implements
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());
-        mActivityScope = Mortar.requireActivityScope(parentScope, new MainScreen(getScopeName()));
-        mActivityScope.onCreate(savedInstanceState);
+        mActivityScope = Mortar.requireActivityScope(parentScope, new ActivityBlueprint(getScopeName()));
         Mortar.inject(this, this);
 
+        mActivityScope.onCreate(savedInstanceState);
+
         mBus.register(this);
-        mPauseResumePresenter.takeView(this);
         mMusicService.bind();
+
+        mAppFlowPresenter.takeView(this);
+        mPauseResumePresenter.takeView(this);
+        mActionBarOwner.takeView(this);
+        mDrawerPresenter.takeView(this);
 
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
         initThemeables();
 
-        mFlow = mMainView.getFlow();
-        mActionBarOwner.takeView(this);
-        mDrawerPresenter.takeView(this);
-
         setSupportActionBar(mToolbar);
-
         setupDrawer();
-        setupNavigation();
 
-        setupSlindingPanel();
-
+        AppFlow.loadInitialScreen(this);
     }
 
     @Override
@@ -131,6 +148,7 @@ public class LauncherActivity extends ActionBarActivity implements
         super.onDestroy();
 
         if (mBus != null) mBus.unregister(this);
+        if (mAppFlowPresenter != null) mAppFlowPresenter.dropView(this);
         if (mPauseResumePresenter != null) mPauseResumePresenter.dropView(this);
         if (mActionBarOwner != null) mActionBarOwner.dropView(this);
         if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
@@ -182,19 +200,6 @@ public class LauncherActivity extends ActionBarActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mActivityScope.onSaveInstanceState(outState);
-        if (mSlidingPanel != null) outState.putBoolean("panel_open", mSlidingPanel.isPanelExpanded());
-//        outState.putBoolean("queue_showing", mNowPlayingFragment.isQueueShowing());
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.getBoolean("panel_open", false)) {
-//            mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
-//            if (savedInstanceState.getBoolean("queue_showing", false)) {
-//                mNowPlayingFragment.onQueueVisibilityChanged(true);
-//            }
-        }
     }
 
     @Override
@@ -207,10 +212,8 @@ public class LauncherActivity extends ActionBarActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (isDrawerOpen()) {
-//            showGlobalContextActionBar();
             return false;
         } else {
-//            restoreActionBar();
             if (mMenuConfig != null) {
                 for (int item : mMenuConfig.menus) {
                     getMenuInflater().inflate(item, menu);
@@ -243,18 +246,15 @@ public class LauncherActivity extends ActionBarActivity implements
     public void onBackPressed() {
         if (isDrawerOpen()) {
             closeDrawer();
-        } else if (isPanelOpen()) {
-            maybeClosePanel();
-        } else if (!mFlow.goBack()) {
+        } else if (!mContainer.onBackPressed()) {
             super.onBackPressed();
         }
     }
 
     @Override
     public Object getSystemService(String name) {
-        if (Mortar.isScopeSystemService(name)) {
-            return mActivityScope;
-        }
+        if (Mortar.isScopeSystemService(name)) return mActivityScope;
+        if (AppFlow.isAppFlowSystemService(name)) return mAppFlowPresenter.getAppFlow();
         return super.getSystemService(name);
     }
 
@@ -303,6 +303,10 @@ public class LauncherActivity extends ActionBarActivity implements
         return mScopeName;
     }
 
+    /*
+     * PausesAndResumes
+     */
+
     @Override
     public boolean isRunning() {
         return mIsResumed;
@@ -314,6 +318,15 @@ public class LauncherActivity extends ActionBarActivity implements
 
     public MortarScope getScope() {
         return mActivityScope;
+    }
+
+    /*
+     * AppFlowPresenter
+     */
+
+    @Override
+    public void showScreen(Screen screen, Flow.Direction direction, Flow.Callback callback) {
+        mContainer.showScreen(screen, direction, callback);
     }
 
     /*
@@ -399,90 +412,6 @@ public class LauncherActivity extends ActionBarActivity implements
                 mDrawerToggle.syncState();
             }
         });
-    }
-
-    private void setupNavigation() {
-        Blueprint navScreen = new NavScreen();
-        MortarScope newChildScope = mActivityScope.requireChild(navScreen);
-        View newChild = Layouts.createView(newChildScope.createContext(this), navScreen);
-        mNavContainer.addView(newChild);
-    }
-
-        /*
-     * implement SlidingUpPanelLayout.PanelSlideListener
-     */
-
-//    @Override
-    public void onPanelSlide(View panel, float slideOffset) {
-        if (slideOffset > 0.84) {
-            TypedValue out = new TypedValue();
-            getTheme().resolveAttribute(R.attr.actionBarSize, out, true);
-            final int actionBarSize = TypedValue.complexToDimensionPixelSize(out.data, getResources().getDisplayMetrics());
-            Timber.d("actionBarSize=" + actionBarSize + " panelTop=" + panel.getTop());
-            if (panel.getTop() < actionBarSize) {
-                if (getSupportActionBar().isShowing()) {
-                    getSupportActionBar().hide();
-                }
-            }
-        } else {
-            if (!getSupportActionBar().isShowing()) {
-                getSupportActionBar().show();
-            }
-        }
-    }
-
-//    @Override
-    public void onPanelExpanded(View panel) {
-//        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
-        disableDrawer(false);
-    }
-
-//    @Override
-    public void onPanelCollapsed(View panel) {
-//        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
-        enableDrawer();
-    }
-
-//    @Override
-    public void onPanelAnchored(View panel) {
-        //not implemented
-    }
-
-//    @Override
-    public void onPanelHidden(View panel) {
-
-    }
-
-    // panel helpers
-
-    public boolean isPanelOpen() {
-        return mSlidingPanel != null && mSlidingPanel.isPanelExpanded();
-    }
-
-    public void maybeClosePanel() {
-        if (mSlidingPanel != null && mSlidingPanel.isPanelExpanded()) {
-            mSlidingPanel.collapsePanel();
-        }
-    }
-
-    public void maybeOpenPanel() {
-        if (mSlidingPanel != null && !mSlidingPanel.isPanelExpanded()) {
-            mSlidingPanel.expandPanel();
-        }
-    }
-
-    protected void maybeHideActionBar() {
-        if (mSlidingPanel != null && mSlidingPanel.isPanelExpanded()
-                && getSupportActionBar().isShowing()) {
-            getSupportActionBar().hide();
-        }
-    }
-
-    private void setupSlindingPanel() {
-//        if (mSlidingPanel == null) return;
-//        mSlidingPanel.setDragView(findViewById(R.id.panel_header));
-//        mSlidingPanel.setPanelSlideListener(this);
-//        mSlidingPanel.setEnableDragViewTouchEvents(true);
     }
 
     protected void initThemeables() {

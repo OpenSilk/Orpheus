@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 Square Inc.
+ * Copyright (C) 2014 OpenSilk Productions LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.opensilk.music.ui2.core.android;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.common.mortar.HasScope;
 
-import mortar.Mortar;
+import javax.inject.Singleton;
+
+import dagger.Provides;
 import mortar.MortarScope;
 import mortar.Presenter;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 
 /** Allows shared configuration of the Android ActionBar. */
-public class ActionBarOwner extends Presenter<ActionBarOwner.View> {
-    public interface View extends HasScope {
+public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
+
+    @dagger.Module(
+        library = true
+    )
+    public static class Module {
+        @Provides @Singleton ActionBarOwner provideActionBarOwner() { return new ActionBarOwner(); }
+    }
+
+    public interface Activity extends HasScope {
         void setShowHomeEnabled(boolean enabled);
 
         void setUpButtonEnabled(boolean enabled);
@@ -86,12 +95,12 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.View> {
         return config;
     }
 
-    @Override protected MortarScope extractScope(View view) {
+    @Override protected MortarScope extractScope(Activity view) {
         return view.getScope();
     }
 
     private void update() {
-        View view = getView();
+        Activity view = getView();
         if (view == null) return;
 
         view.setShowHomeEnabled(config.showHomeEnabled);

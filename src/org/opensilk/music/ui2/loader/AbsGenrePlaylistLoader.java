@@ -65,7 +65,7 @@ public abstract class AbsGenrePlaylistLoader<T> {
     protected abstract Uri getUriForId(long id);
     protected abstract T createItem(long id, String name, int songCount, int albumCount, long[] songIds, long[] albumIds);
 
-    @DebugLog
+    //@DebugLog
     public Observable<T> getCollection() {
         RxCursorLoader<T> collectionLoader = new RxCursorLoader<T>(context,
                 uri,
@@ -95,7 +95,7 @@ public abstract class AbsGenrePlaylistLoader<T> {
         return collectionLoader.createObservable().subscribeOn(Schedulers.io());
     }
 
-    @DebugLog
+    //@DebugLog
     public Observable<T> performSomeMagick(Observable<LocalSong> observable,
                                            final long itemId,
                                            final String itemName) {

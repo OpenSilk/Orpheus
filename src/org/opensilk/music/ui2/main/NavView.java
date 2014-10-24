@@ -18,7 +18,6 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
-import android.support.v4.app.FragmentActivity;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,17 +28,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.folder.FolderScreen;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
-import org.opensilk.music.ui2.library.LibraryScreen;
 import org.opensilk.music.ui2.library.PluginScreen;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -52,7 +47,7 @@ import mortar.Mortar;
 public class NavView extends ListView {
 
     @Inject
-    NavScreen.Presenter presenter;
+    NavViewBlueprint.Presenter presenter;
 
     public NavView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -139,16 +134,16 @@ public class NavView extends ListView {
         }
 
         public void loadPlugins(Collection<PluginInfo> infos) {
-            add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_device), null));
-            add(new Item(Item.Type.ITEM, getContext().getString(R.string.music), new GalleryScreen()));
-            add(new Item(Item.Type.ITEM, getContext().getString(R.string.folders), new FolderScreen()));
-            if (infos != null) {
-                add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_library), null));
-                for (final PluginInfo info : infos) {
-                    add(new Item(Item.Type.ITEM, info.title, new PluginScreen(info)));
-                }
-            }
-            add(new Item(Item.Type.HEADER, getContext().getString(R.string.menu_settings), null));
+//            add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_device), null));
+//            add(new Item(Item.Type.ITEM, getContext().getString(R.string.music), new GalleryScreen()));
+//            add(new Item(Item.Type.ITEM, getContext().getString(R.string.folders), new FolderScreen()));
+//            if (infos != null) {
+//                add(new Item(Item.Type.HEADER, getContext().getString(R.string.drawer_library), null));
+//                for (final PluginInfo info : infos) {
+//                    add(new Item(Item.Type.ITEM, info.title, new PluginScreen(info)));
+//                }
+//            }
+//            add(new Item(Item.Type.HEADER, getContext().getString(R.string.menu_settings), null));
         }
 
     }

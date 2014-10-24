@@ -74,6 +74,7 @@ import timber.log.Timber;
  */
 @Singleton
 public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
+    final static boolean DEBUG = false;
 
     final Context mContext;
     final AppPreferences mPreferences;
@@ -198,6 +199,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         abstract void onCacheMiss();
 
         void addBreadcrumb(String crumb) {
+            if (!DEBUG) return;
             breadcrumbs.append(" -> ").append(crumb);
             Timber.v(breadcrumbs.toString());
         }

@@ -1,4 +1,3 @@
-
 package org.opensilk.common.mortar;
 
 import java.lang.annotation.ElementType;
@@ -16,5 +15,5 @@ import mortar.MortarScope;
  */
 @Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
 public @interface WithModuleFactory {
-    Class<? extends ModuleFactory> value();
+  Class<? extends ModuleFactory> value();
 }

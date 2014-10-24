@@ -16,24 +16,24 @@
 
 package org.opensilk.music.ui2.main;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
-import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.ui2.ActivityBlueprint;
 
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -56,7 +56,7 @@ import static org.opensilk.music.util.RxUtil.notSubscribed;
 /**
  * Created by drew on 10/15/14.
  */
-public class FooterScreen {
+public class FooterViewBlueprint {
 
     @Singleton
     public static class Presenter extends ViewPresenter<FooterView> implements PausesAndResumes {
@@ -81,6 +81,7 @@ public class FooterScreen {
         @Inject
         public Presenter(PauseAndResumeRegistrar pauseAndResumeRegistrar,
                          MusicServiceConnection musicService) {
+            Timber.v("new FooterViewBlueprint.Presenter");
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
             this.musicService = musicService;
         }

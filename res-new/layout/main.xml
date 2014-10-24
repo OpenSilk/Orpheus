@@ -33,7 +33,7 @@
             android:layout_height="?actionBarSize"
             style="?toolbarTheme"/>
 
-        <FrameLayout
+        <org.opensilk.music.ui2.main2.FrameScreenSwitcherView
             android:id="@+id/main"
             android:layout_width="match_parent"
             android:layout_height="0dp"
