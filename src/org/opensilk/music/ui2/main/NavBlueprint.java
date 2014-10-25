@@ -18,24 +18,17 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-
-import org.opensilk.common.flow.AppFlow;
-import org.opensilk.common.flow.Screen;
 
 import com.squareup.otto.Bus;
 
+import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.loader.AsyncLoader;
-import org.opensilk.music.loader.LoaderTask;
-import org.opensilk.music.loader.PluginInfoLoader;
-import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.util.PluginUtil;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,7 +42,7 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
 
-public class NavViewBlueprint {
+public class NavBlueprint {
 
     @Singleton
     public static class Presenter extends ViewPresenter<NavView> {

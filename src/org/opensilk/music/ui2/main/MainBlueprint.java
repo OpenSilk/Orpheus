@@ -54,7 +54,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/5/14.
  */
-public class MainViewBlueprint {
+public class MainBlueprint {
 
     @Singleton
     public static class Presenter extends ViewPresenter<MainView> {

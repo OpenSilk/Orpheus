@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import org.opensilk.music.ui2.ActivityBlueprint;
-import org.opensilk.music.ui2.main.MainViewBlueprint;
 
 import mortar.Blueprint;
 import mortar.Mortar;

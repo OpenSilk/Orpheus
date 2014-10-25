@@ -31,16 +31,13 @@ import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui2.ActivityBlueprint;
-import org.opensilk.music.ui2.main.MainViewBlueprint;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Provides;
-import flow.Flow;
 import flow.Layout;
 import hugo.weaving.DebugLog;
-import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;

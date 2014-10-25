@@ -38,7 +38,7 @@ import mortar.Mortar;
  */
 public class FooterView extends RelativeLayout {
 
-    @Inject FooterViewBlueprint.Presenter presenter;
+    @Inject FooterBlueprint.Presenter presenter;
 
     @InjectView(R.id.footer_thumbnail)
     ArtworkImageView artworkThumbnail;

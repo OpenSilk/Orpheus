@@ -47,7 +47,7 @@ import timber.log.Timber;
 public class MainView extends FloatingActionButtonRelativeLayout {
 
     @Inject
-    MainViewBlueprint.Presenter presenter;
+    MainBlueprint.Presenter presenter;
 
     @InjectView(R.id.floating_action_button)
     FloatingActionButton fabPlay;

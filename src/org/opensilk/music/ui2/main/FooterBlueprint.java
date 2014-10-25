@@ -56,7 +56,7 @@ import static org.opensilk.music.util.RxUtil.notSubscribed;
 /**
  * Created by drew on 10/15/14.
  */
-public class FooterViewBlueprint {
+public class FooterBlueprint {
 
     @Singleton
     public static class Presenter extends ViewPresenter<FooterView> implements PausesAndResumes {

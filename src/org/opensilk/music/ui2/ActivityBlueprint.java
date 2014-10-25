@@ -18,25 +18,13 @@
 package org.opensilk.music.ui2;
 
 
-import com.google.gson.Gson;
-import com.squareup.otto.Bus;
-
-import org.opensilk.common.flow.GsonParcer;
 import org.opensilk.common.flow.Screen;
-import org.opensilk.common.mortar.PauseAndResumeModule;
-import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.music.AppModule;
-import org.opensilk.music.ui2.LauncherActivity;
-import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.main.FooterView;
-import org.opensilk.music.ui2.main.FooterViewBlueprint;
 import org.opensilk.music.ui2.main.MainView;
-import org.opensilk.music.ui2.main.MainViewBlueprint;
 import org.opensilk.music.ui2.main.NavView;
-import org.opensilk.music.ui2.main.NavViewBlueprint;
 import org.opensilk.music.ui2.main2.AppFlowPresenter;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;

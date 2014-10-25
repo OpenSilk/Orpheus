@@ -39,7 +39,6 @@ import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.library.PluginScreen;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -51,7 +50,7 @@ import mortar.Mortar;
 public class NavView extends ListView {
 
     @Inject
-    NavViewBlueprint.Presenter presenter;
+    NavBlueprint.Presenter presenter;
 
     public NavView(Context context, AttributeSet attrs) {
         super(context, attrs);

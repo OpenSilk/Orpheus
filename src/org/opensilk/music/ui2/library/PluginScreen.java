@@ -36,7 +36,6 @@ import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
-import org.opensilk.music.ui2.main.MainViewBlueprint;
 import org.opensilk.music.util.PluginSettings;
 
 import javax.inject.Inject;
@@ -44,9 +43,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
-import flow.Flow;
 import flow.Layout;
-import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.functions.Action1;
