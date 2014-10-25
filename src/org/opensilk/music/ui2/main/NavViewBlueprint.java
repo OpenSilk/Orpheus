@@ -23,74 +23,111 @@ import android.os.Bundle;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
-import org.opensilk.music.R;
 
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.loader.AsyncLoader;
+import org.opensilk.music.loader.LoaderTask;
 import org.opensilk.music.loader.PluginInfoLoader;
 import org.opensilk.music.ui.settings.SettingsActivity;
-import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.util.PluginUtil;
+import org.opensilk.silkdagger.qualifier.ForApplication;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import flow.Flow;
-import flow.Layout;
-import mortar.Blueprint;
 import mortar.ViewPresenter;
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.functions.Action1;
 
 public class NavViewBlueprint {
 
     @Singleton
-    public static class Presenter extends ViewPresenter<NavView> implements AsyncLoader.Callback<PluginInfo> {
+    public static class Presenter extends ViewPresenter<NavView> {
 
         final Bus bus;
-        final DrawerPresenter drawerPresenter;
-        final PluginInfoLoader loader;
+        final DrawerOwner drawerOwner;
+        final Loader loader;
+
+        Subscription subscription;
 
         @Inject
-        public Presenter(@Named("activity") Bus bus, DrawerPresenter drawerPresenter, PluginInfoLoader loader) {
+        public Presenter(@Named("activity") Bus bus, DrawerOwner drawerOwner, Loader loader) {
             this.bus = bus;
-            this.drawerPresenter = drawerPresenter;
+            this.drawerOwner = drawerOwner;
             this.loader = loader;
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            getView().setup();
-            loader.loadAsync(this);
+            subscription = loader.getObservable().subscribe(new Action1<List<PluginInfo>>() {
+                @Override
+                public void call(List<PluginInfo> pluginInfos) {
+                    NavView v = getView();
+                    if (v == null) return;
+                    v.onLoad(pluginInfos);
+                }
+            });
         }
 
         @Override
-        protected void onSave(Bundle outState) {
-            super.onSave(outState);
-        }
-
-        @Override
-        public void onDataFetched(List<PluginInfo> items) {
-            NavView v = getView();
-            if (v != null) {
-                v.getAdapter().clear();
-                v.getAdapter().loadPlugins(items);
-            }
+        protected void onExitScope() {
+            super.onExitScope();
+            if (subscription != null ) subscription.unsubscribe();
         }
 
         public void go(Context context, Screen screen) {
             if (screen == null) return;
-            drawerPresenter.closeDrawer();
+            drawerOwner.closeDrawer();
             AppFlow.get(context).replaceTo(screen);
         }
 
-        public void openSettings(Context context) {
-            drawerPresenter.closeDrawer();
-            bus.post(new StartActivityForResult(new Intent(context, SettingsActivity.class), StartActivityForResult.APP_REQUEST_SETTINGS));
+        public void open(StartActivityForResult event) {
+            drawerOwner.closeDrawer();
+            bus.post(event);
         }
+    }
+
+    @Singleton
+    public static class Loader {
+        final Context context;
+
+        @Inject
+        public Loader(@ForApplication Context context) {
+            this.context = context;
+        }
+
+        public Observable<List<PluginInfo>> getObservable() {
+            return Observable.create(new Observable.OnSubscribe<List<PluginInfo>>() {
+                @Override
+                public void call(Subscriber<? super List<PluginInfo>> subscriber) {
+                    try {
+                        List<PluginInfo> list = PluginUtil.getActivePlugins(context);
+                        if (list == null) {
+                            list = Collections.emptyList();
+                        } else {
+                            Collections.sort(list);
+                        }
+                        if (subscriber.isUnsubscribed()) return;
+                        subscriber.onNext(list);
+                        subscriber.onCompleted();
+                    } catch (Exception e) {
+                        if (subscriber.isUnsubscribed()) return;
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        }
+
     }
 }

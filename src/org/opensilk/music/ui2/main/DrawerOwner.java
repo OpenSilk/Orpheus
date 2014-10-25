@@ -29,9 +29,9 @@ import mortar.Presenter;
  * Created by drew on 10/5/14.
  */
 @Singleton
-public class DrawerPresenter extends Presenter<DrawerPresenter.View> {
+public class DrawerOwner extends Presenter<DrawerOwner.Activity> {
 
-    public interface View extends HasScope {
+    public interface Activity extends HasScope {
         void openDrawer();
         void closeDrawer();
         void disableDrawer(boolean hideIndicator);
@@ -39,35 +39,35 @@ public class DrawerPresenter extends Presenter<DrawerPresenter.View> {
     }
 
     @Inject
-    public DrawerPresenter() {
+    public DrawerOwner() {
         super();
     }
 
     @Override
-    protected MortarScope extractScope(View view) {
+    protected MortarScope extractScope(Activity view) {
         return view.getScope();
     }
 
     public void openDrawer() {
-        View v = getView();
+        Activity v = getView();
         if (v == null) return;
         v.openDrawer();
     }
 
     public void closeDrawer() {
-        View v = getView();
+        Activity v = getView();
         if (v == null) return;
         v.closeDrawer();
     }
 
     public void disableDrawer(boolean hideIndicator) {
-        View v = getView();
+        Activity v = getView();
         if (v == null) return;
         v.disableDrawer(hideIndicator);
     }
 
     public void enableDrawer() {
-        View v = getView();
+        Activity v = getView();
         if (v == null) return;
         v.enableDrawer();
     }

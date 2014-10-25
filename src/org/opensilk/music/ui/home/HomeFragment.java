@@ -54,7 +54,6 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import timber.log.Timber;
 
 /**
  * This class is used to hold the {@link ViewPager} used for swiping between the
@@ -133,7 +132,7 @@ public class HomeFragment extends ScopedDaggerFragment {
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //Set title
-        mActionBarHelper.setTitle(getString(R.string.music));
+        mActionBarHelper.setTitle(getString(R.string.my_library));
         // Enable the options menu
         setHasOptionsMenu(true);
     }
@@ -162,7 +161,7 @@ public class HomeFragment extends ScopedDaggerFragment {
         super.onCreateOptionsMenu(menu, inflater);
         if (!mDrawerHelper.isDrawerOpen()) {
             //Set title (hacks)
-            mActionBarHelper.setTitle(getString(R.string.music));
+            mActionBarHelper.setTitle(getString(R.string.my_library));
             // search
             inflater.inflate(R.menu.search, menu);
             // Party shuffle

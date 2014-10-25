@@ -20,32 +20,23 @@ package org.opensilk.music.ui2.gallery;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.MortarContextFactory;
-import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.main.DrawerPresenter;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 import org.opensilk.music.widgets.SlidingTabLayout;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -53,7 +44,6 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.Mortar;
-import mortar.MortarScope;
 import mortar.ViewPresenter;
 import timber.log.Timber;
 

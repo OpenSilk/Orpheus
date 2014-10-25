@@ -18,7 +18,6 @@ package org.opensilk.music.ui.nav.adapter;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +28,6 @@ import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.nav.NavItem;
 import org.opensilk.music.ui.nav.NavItem.Type;
 import org.opensilk.music.util.MarkedForRemoval;
@@ -86,7 +84,7 @@ public class NavAdapter extends ArrayAdapter<NavItem> {
     public static List<NavItem> makeDefaultNavList(final Context context) {
         List<NavItem> navItems = new ArrayList<>();
         navItems.add(new NavItem(Type.HEADER, context.getString(R.string.drawer_device), null));
-        navItems.add(new NavItem(Type.ITEM, context.getString(R.string.music), new Runnable() {
+        navItems.add(new NavItem(Type.ITEM, context.getString(R.string.my_library), new Runnable() {
             @Override
             public void run() {
                 NavUtils.goHome((FragmentActivity) context);

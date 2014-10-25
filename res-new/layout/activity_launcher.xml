@@ -33,16 +33,21 @@
     <LinearLayout
         android:id="@+id/drawer_container"
         android:orientation="vertical"
-        android:layout_width="240dp"
+        android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
         android:background="?android:colorBackground"
         android:layout_gravity="start"
-        android:paddingTop="?actionBarSize">
+        android:showDividers="middle"
+        android:divider="?android:dividerHorizontal">
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:scaleType="fitCenter"
+            android:paddingStart="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingEnd="16dp"
+            android:scaleType="fitStart"
             android:src="@drawable/orpheus_logo_record"/>
 
         <org.opensilk.music.ui2.main.NavView
@@ -51,9 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:choiceMode="singleChoice"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp" />
+            android:choiceMode="singleChoice"/>
 
     </LinearLayout>
 

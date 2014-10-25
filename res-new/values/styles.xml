@@ -202,29 +202,6 @@
         <item name="android:shadowRadius">3.8</item>
     </style>
 
-
-    <!--DRAWER-->
-    <style name="DrawerHeader">
-        <item name="android:textAppearance">?android:textAppearanceSmall</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:paddingRight">16dp</item>
-        <item name="android:paddingLeft">16dp</item>
-        <item name="android:minHeight">?android:listPreferredItemHeightSmall</item>
-        <item name="android:textColor">?android:textColorSecondary</item>
-        <item name="android:gravity">left|center_vertical</item>
-    </style>
-
-    <style name="DrawerItem">
-        <item name="android:textAppearance">?android:textAppearanceSmall</item>
-        <item name="android:textColor">?android:textColorPrimary</item>
-        <item name="android:paddingLeft">16dp</item>
-        <item name="android:paddingRight">16dp</item>
-        <item name="android:gravity">left|center_vertical</item>
-        <item name="android:minHeight">?android:listPreferredItemHeightSmall</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">end</item>
-    </style>
-
     <!--SETTINGS-->
     <style name="SettingsGridBase">
         <item name="android:numColumns">2</item>

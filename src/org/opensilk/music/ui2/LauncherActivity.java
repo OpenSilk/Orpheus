@@ -27,7 +27,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,12 +36,10 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeActivity;
 import org.opensilk.common.mortar.PauseAndResumePresenter;
-import org.opensilk.common.mortar.ScreenScoper;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -51,12 +48,8 @@ import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
-import org.opensilk.music.ui2.main.DrawerPresenter;
-import org.opensilk.music.ui2.main.FooterViewBlueprint;
-import org.opensilk.music.ui2.main.MainViewBlueprint;
-import org.opensilk.music.ui2.main.MainView;
+import org.opensilk.music.ui2.main.DrawerOwner;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.music.ui2.main.NavViewBlueprint;
 import org.opensilk.music.ui2.main2.AppFlowPresenter;
 import org.opensilk.music.ui2.main2.FrameScreenSwitcherView;
 
@@ -67,10 +60,7 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
 import flow.Flow;
-import flow.Layouts;
-import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 import mortar.MortarScope;
@@ -81,12 +71,13 @@ public class LauncherActivity extends ActionBarActivity implements
         PauseAndResumeActivity,
         AppFlowPresenter.Activity,
         ActionBarOwner.Activity,
-        DrawerPresenter.View {
+        DrawerOwner.Activity {
 
     @Inject @Named("activity") Bus mBus;
     @Inject PauseAndResumePresenter mPauseResumePresenter;
     @Inject ActionBarOwner mActionBarOwner;
-    @Inject DrawerPresenter mDrawerPresenter;
+    @Inject
+    DrawerOwner mDrawerOwner;
     @Inject MusicServiceConnection mMusicService;
     @Inject PluginConnectionManager mPluginConnectionManager;
     @Inject AppFlowPresenter<LauncherActivity> mAppFlowPresenter;
@@ -125,7 +116,7 @@ public class LauncherActivity extends ActionBarActivity implements
         mAppFlowPresenter.takeView(this);
         mPauseResumePresenter.takeView(this);
         mActionBarOwner.takeView(this);
-        mDrawerPresenter.takeView(this);
+        mDrawerOwner.takeView(this);
 
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
@@ -151,7 +142,7 @@ public class LauncherActivity extends ActionBarActivity implements
         if (mAppFlowPresenter != null) mAppFlowPresenter.dropView(this);
         if (mPauseResumePresenter != null) mPauseResumePresenter.dropView(this);
         if (mActionBarOwner != null) mActionBarOwner.dropView(this);
-        if (mDrawerPresenter != null) mDrawerPresenter.dropView(this);
+        if (mDrawerOwner != null) mDrawerOwner.dropView(this);
 
         if (!mConfigurationChangeIncoming) {
             Timber.d("Activity is finishing()");
@@ -384,6 +375,7 @@ public class LauncherActivity extends ActionBarActivity implements
     private void setupDrawer() {
         if (mDrawerLayout == null) return;
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+//        mDrawerLayout.setScrimColor(getResources().getColor(android.R.color.transparent));
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -395,13 +387,13 @@ public class LauncherActivity extends ActionBarActivity implements
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+//                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+//                supportInvalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);

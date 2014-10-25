@@ -123,7 +123,7 @@ public class GalleryScreen extends Screen {
                 delegateActionHandler.setDelegate(null);
                 menus = new int[] { R.menu.shuffle, R.menu.search};
             }
-            actionBarOwner.setConfig(new ActionBarOwner.Config(true, true, R.string.music,
+            actionBarOwner.setConfig(new ActionBarOwner.Config(true, true, R.string.my_library,
                     new ActionBarOwner.MenuConfig(delegateActionHandler, menus)));
         }
 
