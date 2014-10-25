@@ -32,13 +32,14 @@ import org.opensilk.music.MusicApp;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.util.ViewStateSaver;
+import org.opensilk.music.ui2.loader.RxLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import mortar.ViewPresenter;
 import rx.Subscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/19/14.
@@ -47,22 +48,24 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
 
     protected final AppPreferences preferences;
     protected final ArtworkRequestManager artworkRequestor;
+    protected final RxLoader<T> loader;
 
-    protected List<T> items;
     protected Subscription subscription;
     protected ActionBarOwner.MenuConfig actionBarMenu;
 
-    public BasePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor) {
+    public BasePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<T> loader) {
         this.preferences = preferences;
         this.artworkRequestor = artworkRequestor;
+        this.loader = loader;
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         setupRecyclerView();
-        if (items != null && !items.isEmpty()) {
-            setAdapter(newAdapter(items));
+        if (loader.hasCache()) {
+            Timber.d("Cache hit %s", getClass());
+            setAdapter(newAdapter(loader.getCache()));
         } else if (subscription == null || subscription.isUnsubscribed()) {
             load();
         }
@@ -70,7 +73,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         itemClickSupport.setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView recyclerView, View view, int i, long l) {
-                handleItemClick(recyclerView.getContext(), items.get(i));
+                handleItemClick(recyclerView.getContext(), getItem(i));
             }
         });
     }
@@ -104,8 +107,8 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         if (v == null) return;
         v.getRecycledViewPool().clear();
         setupRecyclerView();
-        if (items != null && !items.isEmpty()) {
-            setAdapter(newAdapter(items));
+        if (loader.hasCache()) {
+            setAdapter(newAdapter(loader.getCache()));
         } else {
             v.setAdapter(null);
             reload();
@@ -122,7 +125,6 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     // cancels any ongoing load and starts a new one
     protected void reload() {
         if (subscription != null) subscription.unsubscribe();
-        if (items != null) items.clear();
         load();
     }
 
@@ -140,17 +142,24 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     // and trys to set the adapter, if that fails it will be set
     // on the next onLoad
     protected void addItems(List<T> items) {
-        this.items = items;
         setAdapter(newAdapter(items));
     }
 
     // adds a single item to the adapter
     protected void addItem(T item) {
-        if (items == null) addItems(new ArrayList<T>());
         RecyclerView v = getView();
         if (v == null) return;
         BaseAdapter<T> adapter = (BaseAdapter<T>) v.getAdapter();
+        if (adapter == null) {
+            addItems(new ArrayList<T>());
+            adapter = (BaseAdapter<T>) v.getAdapter();
+        }
         adapter.add(item);
+    }
+
+    protected T getItem(int position) {
+        BaseAdapter<T> adapter = (BaseAdapter<T>) getView().getAdapter();
+        return adapter.getItem(position);
     }
 
     protected boolean isGrid() {

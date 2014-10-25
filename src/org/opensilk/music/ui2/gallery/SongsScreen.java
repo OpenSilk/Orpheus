@@ -18,10 +18,8 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.database.Cursor;
 
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.common.flow.Screen;
@@ -31,13 +29,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
-import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.RxLoader;
 
 import java.util.List;
 
@@ -71,17 +63,14 @@ public class SongsScreen extends Screen {
     @Singleton
     public static class Presenter extends BasePresenter<LocalSong> {
 
-        Loader loader;
-
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
-            super(preferences, artworkRequestor);
-            this.loader = loader;
-            this.loader.setSortOrder(preferences.getString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z));
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<LocalSong> loader) {
+            super(preferences, artworkRequestor, loader);
         }
 
         @Override
         protected void load() {
+            loader.setSortOrder(preferences.getString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z));
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
                 @Override
                 public void call(List<LocalSong> localSongs) {
@@ -108,7 +97,6 @@ public class SongsScreen extends Screen {
 
         void setNewSortOrder(String sortOrder) {
             preferences.putString(AppPreferences.SONG_SORT_ORDER, sortOrder);
-            loader.setSortOrder(sortOrder);
             reload();
         }
 
@@ -146,25 +134,6 @@ public class SongsScreen extends Screen {
                 };
                 actionBarMenu = new ActionBarOwner.MenuConfig(actionHandler, R.menu.song_sort_by);
             }
-        }
-    }
-
-    @Singleton
-    public static class Loader extends RxCursorLoader<LocalSong> {
-
-        @Inject
-        public Loader(@ForApplication Context context) {
-            super(context);
-            setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);
-            setProjection(Projections.LOCAL_SONG);
-            setSelection(Selections.LOCAL_SONG);
-            setSelectionArgs(SelectionArgs.LOCAL_SONG);
-            //must set sort order
-        }
-
-        @Override
-        protected LocalSong makeFromCursor(Cursor c) {
-            return CursorHelpers.makeLocalSongFromCursor(null, c);
         }
     }
 

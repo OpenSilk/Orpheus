@@ -18,10 +18,6 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
@@ -34,13 +30,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.AbsGenrePlaylistLoader;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.SortOrder;
-import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.RxLoader;
 
 import java.util.List;
 
@@ -49,10 +39,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import mortar.ViewPresenter;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.
@@ -76,25 +63,17 @@ public class GenresScreen extends Screen {
     @Singleton
     public static class Presenter extends BasePresenter<Genre> {
 
-        final Loader loader;
-
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
-            super(preferences, artworkRequestor);
-            this.loader = loader;
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<Genre> loader) {
+            super(preferences, artworkRequestor, loader);
         }
 
         @Override
         protected void load() {
-            subscription = loader.getCollection().subscribe(new Action1<Genre>() {
+            subscription = loader.getObservable().subscribe(new Action1<Genre>() {
                 @Override
                 public void call(Genre genre) {
                     addItem(genre);
-                }
-            }, new Action1<Throwable>() {
-                @Override
-                public void call(Throwable throwable) {
-                    //TODO
                 }
             });
         }
@@ -117,58 +96,6 @@ public class GenresScreen extends Screen {
         @Override
         public ActionBarOwner.MenuConfig getMenuConfig() {
             return null;
-        }
-
-    }
-
-    @Singleton
-    public static class Loader extends AbsGenrePlaylistLoader<Genre> {
-
-        @Inject
-        public Loader(@ForApplication Context context) {
-            super(context);
-            setUri(Uris.EXTERNAL_MEDIASTORE_GENRES);
-            setProjection(Projections.GENRE);
-            setSelection(Selections.GENRE);
-            setSelectionArgs(SelectionArgs.GENRE);
-            setSortOrder(MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
-
-            setProjection2(Projections.GENRE_SONGS);
-            setSelection2(Selections.GENRE_SONGS);
-            setSelectionArgs2(SelectionArgs.GENRE_SONGS);
-            setSortOrder2(SortOrder.GENRE_SONGS);
-        }
-
-        @Override
-        protected int getIdColumnIdx(Cursor c) {
-            return c.getColumnIndexOrThrow(BaseColumns._ID);
-        }
-
-        @Override
-        protected int getNameColumnIdx(Cursor c) {
-            return c.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME);
-        }
-
-        @Override
-        protected Uri getUriForId(long id) {
-            return Uris.GENRE(id);
-        }
-
-        @Override
-        protected Genre createItem(long id, String name, int songCount, int albumCount, long[] songIds, long[] albumIds) {
-            return new Genre(id, name, songCount, albumCount, songIds, albumIds);
-        }
-
-        @Override
-        public Observable<Genre> getCollection() {
-            return super.getCollection().filter(new Func1<Genre, Boolean>() {
-                @Override
-                public Boolean call(Genre genre) {
-                    // mediastore doesnt cleanup old genres so
-                    // we have to make sure not to add any that are empty
-                    return genre.mSongNumber > 0;
-                }
-            }).observeOn(AndroidSchedulers.mainThread());
         }
 
     }

@@ -18,20 +18,21 @@
 package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Handler;
 
 import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.functions.Action2;
 import rx.functions.Func1;
@@ -41,8 +42,23 @@ import rx.schedulers.Schedulers;
 /**
  * Created by drew on 10/23/14.
  */
-public abstract class AbsGenrePlaylistLoader<T> {
+public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
 
+    private class UriObserver extends ContentObserver {
+        private UriObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            for (ContentChangedListener l : contentChangedListeners) {
+                l.reload();
+            }
+        }
+    }
+
+    protected final List<ContentChangedListener> contentChangedListeners;
+    protected final List<T> cache;
     protected final Context context;
 
     Uri uri;
@@ -56,7 +72,11 @@ public abstract class AbsGenrePlaylistLoader<T> {
     String[] selectionArgs2;
     String sortOrder2;
 
-    public AbsGenrePlaylistLoader(@ForApplication Context context) {
+    private UriObserver uriObserver;
+
+    public AbsGenrePlaylistLoader(Context context) {
+        contentChangedListeners = new ArrayList<>();
+        cache = new CopyOnWriteArrayList<>();
         this.context = context;
     }
 
@@ -66,7 +86,7 @@ public abstract class AbsGenrePlaylistLoader<T> {
     protected abstract T createItem(long id, String name, int songCount, int albumCount, long[] songIds, long[] albumIds);
 
     //@DebugLog
-    public Observable<T> getCollection() {
+    public Observable<T> getObservable() {
         RxCursorLoader<T> collectionLoader = new RxCursorLoader<T>(context,
                 uri,
                 projection,
@@ -134,6 +154,30 @@ public abstract class AbsGenrePlaylistLoader<T> {
                         return createItem(itemId, itemName, songs.size(), albums.size(), toArray(songs), toArray(albums));
                     }
                 });
+    }
+
+    public boolean hasCache() {
+        return !cache.isEmpty();
+    }
+
+    public List<T> getCache() {
+        return cache;
+    }
+
+    public void addContentChangedListener(ContentChangedListener l) {
+        contentChangedListeners.add(l);
+        if (uriObserver == null) {
+            uriObserver = new UriObserver(new Handler());
+            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
+        }
+    }
+
+    public void removeContentChangedListener(ContentChangedListener l) {
+        contentChangedListeners.remove(l);
+        if (contentChangedListeners.isEmpty()) {
+            context.getContentResolver().unregisterContentObserver(uriObserver);
+            uriObserver = null;
+        }
     }
 
     public void setUri(Uri uri) {

@@ -20,6 +20,7 @@ package org.opensilk.music.ui2;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.AppModule;
+import org.opensilk.music.ui2.loader.LoaderModule;
 import org.opensilk.music.ui2.main.FooterView;
 import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.NavView;
@@ -61,6 +62,7 @@ public class ActivityBlueprint implements Blueprint {
             addsTo = AppModule.class,
             includes = {
                     ActivityModule.class,
+                    LoaderModule.class,
             },
             injects = {
                     LauncherActivity.class,

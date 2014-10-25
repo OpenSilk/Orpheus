@@ -27,11 +27,6 @@ import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForApplication;
-
-import java.util.List;
-
-import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;

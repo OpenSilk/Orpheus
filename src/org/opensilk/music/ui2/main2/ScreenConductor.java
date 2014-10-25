@@ -93,6 +93,7 @@ public class ScreenConductor extends ScreenSwitcher {
         switch (direction) {
             case FORWARD:
                 if (from != null && oldChild != null) {
+                    contextFactory.tearDownContext(oldChild.getContext());
                     from.setViewState(ViewStateSaver.save(oldChild));
                     oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.shrink_fade_out));
                     newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.slide_in_child_bottom));

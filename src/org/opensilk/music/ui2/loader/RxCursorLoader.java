@@ -18,40 +18,65 @@
 package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Handler;
+
+import org.apache.commons.io.IOUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Action2;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/19/14.
  */
-public abstract class RxCursorLoader<T> {
+public abstract class RxCursorLoader<T> implements RxLoader<T> {
 
-    final Context context;
+    private class UriObserver extends ContentObserver {
+        private UriObserver(Handler handler) {
+            super(handler);
+        }
 
-    Uri uri;
-    String[] projection;
-    String selection;
-    String[] selectionArgs;
-    String sortOrder;
+        @Override
+        public void onChange(boolean selfChange) {
+            for (ContentChangedListener l : contentChangedListeners) {
+                l.reload();
+            }
+        }
+    }
+
+    protected final List<ContentChangedListener> contentChangedListeners;
+    protected final List<T> cache;
+    protected final Context context;
+
+    protected Uri uri;
+    protected String[] projection;
+    protected String selection;
+    protected String[] selectionArgs;
+    protected String sortOrder;
+
+    private UriObserver uriObserver;
 
     public RxCursorLoader(Context context) {
+        contentChangedListeners = new ArrayList<>();
+        cache = new CopyOnWriteArrayList<>();
         this.context = context;
     }
 
     public RxCursorLoader(Context context,
                           Uri uri, String[] projection, String selection,
                           String[] selectionArgs, String sortOrder) {
+        contentChangedListeners = new ArrayList<>();
+        cache = new CopyOnWriteArrayList<>();
         this.context = context;
         this.uri = uri;
         this.projection = projection;
@@ -67,21 +92,21 @@ public abstract class RxCursorLoader<T> {
      *         in a single onNext(List) call. subscribed on IO observes on main.
      */
     public Observable<List<T>> getListObservable() {
+        cache.clear();
         return createObservable()
-                // collects the objects into a list and publishes the complete list as
-                // a single onNext() call
-                .collect(new ArrayList<T>(), new Action2<List<T>, T>() {
+                .doOnNext(new Action1<T>() {
                     @Override
-                    public void call(List<T> list, T item) {
-        //                Timber.v("collect %s", Thread.currentThread().getName());
-                        list.add(item);
+                    public void call(T t) {
+                        cache.add(t);
                     }
                 })
+                .toList()
                 // Im not really concered with errors right now
                 // just log it, and return an empty list
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        cache.clear();
                         dump(throwable);
                     }
                 })
@@ -96,10 +121,18 @@ public abstract class RxCursorLoader<T> {
      * @return Observable subscribed on IO and observes on main.
      */
     public Observable<T> getObservable() {
+        cache.clear();
         return createObservable()
+                .doOnNext(new Action1<T>() {
+                    @Override
+                    public void call(T t) {
+                        cache.add(t);
+                    }
+                })
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        cache.clear();
                         dump(throwable);
                     }
                 })
@@ -149,10 +182,39 @@ public abstract class RxCursorLoader<T> {
                 } catch (Exception e) {
                     emmitError(e, subscriber);
                 } finally {
-                    if (c != null) c.close();
+                    IOUtils.closeQuietly(c);
                 }
             }
         });
+    }
+
+    public boolean hasCache() {
+        return !cache.isEmpty();
+    }
+
+    public List<T> getCache() {
+        return cache;
+    }
+
+    public void addContentChangedListener(ContentChangedListener l) {
+        contentChangedListeners.add(l);
+        if (uriObserver == null) {
+            uriObserver = new UriObserver(new Handler());
+            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
+        }
+    }
+
+    public void removeContentChangedListener(ContentChangedListener l) {
+        contentChangedListeners.remove(l);
+        if (contentChangedListeners.isEmpty()) {
+            context.getContentResolver().unregisterContentObserver(uriObserver);
+            uriObserver = null;
+        }
+    }
+
+    protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
+        if (subscriber.isUnsubscribed()) return;
+        subscriber.onError(t);
     }
 
     public void setUri(Uri uri) {
@@ -173,11 +235,6 @@ public abstract class RxCursorLoader<T> {
 
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
-    }
-
-    protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
-        if (subscriber.isUnsubscribed()) return;
-        subscriber.onError(t);
     }
 
     protected void dump(Throwable throwable) {

@@ -18,8 +18,6 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.text.TextUtils;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -34,13 +32,7 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
-import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.RxLoader;
 
 import java.util.List;
 
@@ -75,18 +67,15 @@ public class ArtistsScreen extends Screen {
     @Singleton
     public static class Presenter extends BasePresenter<LocalArtist> {
 
-        Loader loader;
-
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
-            super(preferences, artworkRequestor);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<LocalArtist> loader) {
+            super(preferences, artworkRequestor, loader);
             Timber.v("new ArtistsScreen.Presenter()");
-            this.loader = loader;
-            this.loader.setSortOrder(preferences.getString(AppPreferences.ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z));
         }
 
         @Override
         protected void load() {
+            loader.setSortOrder(preferences.getString(AppPreferences.ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z));
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalArtist>>() {
                 @Override
                 public void call(List<LocalArtist> localArtists) {
@@ -118,7 +107,6 @@ public class ArtistsScreen extends Screen {
 
         void setNewSortOrder(String sortOrder) {
             preferences.putString(AppPreferences.ARTIST_SORT_ORDER, sortOrder);
-            loader.setSortOrder(sortOrder);
             reload();
         }
 
@@ -156,26 +144,6 @@ public class ArtistsScreen extends Screen {
                 actionBarMenu = new ActionBarOwner.MenuConfig(actionHandler, R.menu.artist_sort_by, R.menu.view_as);
             }
         }
-    }
-
-    @Singleton
-    public static class Loader extends RxCursorLoader<LocalArtist> {
-
-        @Inject
-        public Loader(@ForApplication Context context) {
-            super(context);
-            setUri(Uris.EXTERNAL_MEDIASTORE_ARTISTS);
-            setProjection(Projections.LOCAL_ARTIST);
-            setSelection(Selections.LOCAL_ARTIST);
-            setSelectionArgs(SelectionArgs.LOCAL_ARTIST);
-            //must set sort order
-        }
-
-        @Override
-        protected LocalArtist makeFromCursor(Cursor c) {
-            return CursorHelpers.makeLocalArtistFromCursor(c);
-        }
-
     }
 
     static class Adapter extends BaseAdapter<LocalArtist> {

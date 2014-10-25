@@ -36,7 +36,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
 import rx.subscriptions.CompositeSubscription;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/18/14.
@@ -161,7 +160,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         }
 
         public void reset() {
-            Timber.v("Reset title=%s", title.getText());
+//            Timber.v("Reset title=%s", title.getText());
             if (artwork != null) artwork.setImageBitmap(null);
             if (artwork2 != null) artwork2.setImageBitmap(null);
             if (artwork3 != null) artwork3.setImageBitmap(null);

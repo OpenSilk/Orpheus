@@ -18,7 +18,6 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.database.Cursor;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.utils.NavUtils;
@@ -32,13 +31,7 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
-import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.RxLoader;
 
 import java.util.List;
 
@@ -73,18 +66,15 @@ public class AlbumsScreen extends Screen {
     @Singleton
     public static class Presenter extends BasePresenter<LocalAlbum> {
 
-        final Loader loader;
-
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
-            super(preferences, artworkRequestor);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<LocalAlbum> loader) {
+            super(preferences, artworkRequestor, loader);
             Timber.v("new Albums.Presenter()");
-            this.loader = loader;
-            this.loader.setSortOrder(preferences.getString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z));
         }
 
         @Override
         protected void load() {
+            loader.setSortOrder(preferences.getString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z));
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalAlbum>>() {
                 @Override
                 public void call(List<LocalAlbum> localAlbums) {
@@ -116,7 +106,6 @@ public class AlbumsScreen extends Screen {
 
         void setNewSortOrder(String sortOrder) {
             preferences.putString(AppPreferences.ALBUM_SORT_ORDER, sortOrder);
-            loader.setSortOrder(sortOrder);
             reload();
         }
 
@@ -157,27 +146,6 @@ public class AlbumsScreen extends Screen {
                 actionBarMenu = new ActionBarOwner.MenuConfig(actionHandler, R.menu.album_sort_by, R.menu.view_as);
             }
         }
-    }
-
-    @Singleton
-    public static class Loader extends RxCursorLoader<LocalAlbum> {
-
-        @Inject
-        public Loader(@ForApplication Context context) {
-            super(context);
-            Timber.v("new Albums.Loader()");
-            setUri(Uris.EXTERNAL_MEDIASTORE_ALBUMS);
-            setProjection(Projections.LOCAL_ALBUM);
-            setSelection(Selections.LOCAL_ALBUM);
-            setSelectionArgs(SelectionArgs.LOCAL_ALBUM);
-            // need set sortorder
-        }
-
-        @Override
-        protected LocalAlbum makeFromCursor(Cursor c) {
-            return CursorHelpers.makeLocalAlbumFromCursor(c);
-        }
-
     }
 
     static class Adapter extends BaseAdapter<LocalAlbum> {

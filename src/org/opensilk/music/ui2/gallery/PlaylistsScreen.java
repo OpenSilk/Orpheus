@@ -18,12 +18,7 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
 
-import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
@@ -35,15 +30,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.AbsGenrePlaylistLoader;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
-import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.SortOrder;
-import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.RxLoader;
 
 import java.util.List;
 
@@ -52,8 +39,6 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import mortar.ViewPresenter;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
 /**
@@ -78,25 +63,17 @@ public class PlaylistsScreen extends Screen {
     @Singleton
     public static class Presenter extends BasePresenter<Playlist> {
 
-        final Loader loader;
-
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, Loader loader) {
-            super(preferences, artworkRequestor);
-            this.loader = loader;
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<Playlist> loader) {
+            super(preferences, artworkRequestor, loader);
         }
 
         @Override
         protected void load() {
-            subscription = loader.getCollection().subscribe(new Action1<Playlist>() {
+            subscription = loader.getObservable().subscribe(new Action1<Playlist>() {
                 @Override
                 public void call(Playlist playlist) {
                     addItem(playlist);
-                }
-            }, new Action1<Throwable>() {
-                @Override
-                public void call(Throwable throwable) {
-                    //TODO
                 }
             });
         }
@@ -119,69 +96,6 @@ public class PlaylistsScreen extends Screen {
         @Override
         public ActionBarOwner.MenuConfig getMenuConfig() {
             return null;
-        }
-
-    }
-
-    @Singleton
-    public static class Loader extends AbsGenrePlaylistLoader<Playlist> {
-
-        @Inject
-        public Loader(@ForApplication Context context) {
-            super(context);
-            setUri(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS);
-            setProjection(Projections.PLAYLIST);
-            setSelection(Selections.PLAYLIST);
-            setSelectionArgs(SelectionArgs.PLAYLIST);
-            setSortOrder(MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
-
-            setProjection2(Projections.PLAYLIST_SONGS);
-            setSelection2(Selections.PLAYLIST_SONGS);
-            setSelectionArgs2(SelectionArgs.PLAYLIST_SONGS);
-            setSortOrder2(SortOrder.PLAYLIST_SONGS);
-        }
-
-        @Override
-        protected int getIdColumnIdx(Cursor c) {
-            return c.getColumnIndexOrThrow(BaseColumns._ID);
-        }
-
-        @Override
-        protected int getNameColumnIdx(Cursor c) {
-            return c.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME);
-        }
-
-        @Override
-        protected Uri getUriForId(long id) {
-            return Uris.PLAYLIST(id);
-        }
-
-        @Override
-        protected Playlist createItem(long id, String name, int songCount, int albumCount, long[] songIds, long[] albumIds) {
-            return new Playlist(id, name, songCount, albumCount, songIds, albumIds);
-        }
-
-        @Override
-        public Observable<Playlist> getCollection() {
-
-            RxCursorLoader<LocalSong> lastAddedLoader = new RxCursorLoader<LocalSong>(context,
-                    Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                    Projections.LOCAL_SONG,
-                    Selections.LAST_ADDED,
-                    SelectionArgs.LAST_ADDED(),
-                    SortOrder.LAST_ADDED) {
-                @Override
-                protected LocalSong makeFromCursor(Cursor c) {
-                    return CursorHelpers.makeLocalSongFromCursor(c);
-                }
-            };
-
-            Observable<Playlist> lastAddedObservable = performSomeMagick(
-                    // performSomeMagick subscribes us on io so we dont need to do that here
-                    lastAddedLoader.createObservable(),
-                    -1, context.getResources().getString(R.string.playlist_last_added));
-                //TODO instead of merge is there some kind of onComplete do, so that lastadded is always first
-            return Observable.mergeDelayError(lastAddedObservable, super.getCollection()).observeOn(AndroidSchedulers.mainThread());
         }
 
     }
