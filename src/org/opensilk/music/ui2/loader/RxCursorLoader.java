@@ -45,12 +45,16 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
         private UriObserver(Handler handler) {
             super(handler);
         }
-
         @Override
         public void onChange(boolean selfChange) {
+            cache.clear();
             for (ContentChangedListener l : contentChangedListeners) {
                 l.reload();
             }
+        }
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange);
         }
     }
 

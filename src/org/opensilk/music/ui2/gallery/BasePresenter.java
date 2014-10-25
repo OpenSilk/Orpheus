@@ -37,6 +37,7 @@ import org.opensilk.music.ui2.loader.RxLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Subscription;
 import timber.log.Timber;
@@ -44,7 +45,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/19/14.
  */
-public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> implements HasOptionsMenu {
+public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> implements HasOptionsMenu, RxLoader.ContentChangedListener {
 
     protected final AppPreferences preferences;
     protected final ArtworkRequestManager artworkRequestor;
@@ -57,6 +58,12 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         this.preferences = preferences;
         this.artworkRequestor = artworkRequestor;
         this.loader = loader;
+    }
+
+    @Override
+    protected void onEnterScope(MortarScope scope) {
+        super.onEnterScope(scope);
+        loader.addContentChangedListener(this);
     }
 
     @Override
@@ -87,6 +94,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected void onExitScope() {
         super.onExitScope();
         if (subscription != null) subscription.unsubscribe();
+        loader.removeContentChangedListener(this);
     }
 
     // Init the recyclerview
@@ -123,7 +131,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected abstract void load();
 
     // cancels any ongoing load and starts a new one
-    protected void reload() {
+    public void reload() {
         if (subscription != null) subscription.unsubscribe();
         load();
     }

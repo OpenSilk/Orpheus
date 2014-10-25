@@ -32,6 +32,7 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -76,6 +77,12 @@ public class PlaylistsScreen extends Screen {
                     addItem(playlist);
                 }
             });
+        }
+
+        @Override
+        public void reload() {
+            addItems(new ArrayList<Playlist>());
+            super.reload();
         }
 
         @Override
