@@ -27,6 +27,7 @@ import android.preference.PreferenceManager;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
+import org.apache.commons.io.IOUtils;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.OrpheusApi;
@@ -147,9 +148,7 @@ public class PluginUtil {
                 sp.edit().remove(PREF_DISABLED_PLUGINS).apply();
                 list.clear();
             } finally {
-                try {
-                    jr.close();
-                } catch (IOException ignored) {}
+                IOUtils.closeQuietly(jr);
             }
         }
         return list;
