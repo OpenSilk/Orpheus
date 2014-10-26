@@ -21,6 +21,14 @@
 
     <style name="Theme.LightBase" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
+        <item name="fabPlayStyle">@style/fabLight.Play</item>
+        <item name="fabNextStyle">@style/fabLight.Next</item>
+        <item name="fabPrevStyle">@style/fabLight.Prev</item>
+        <item name="fabShuffleStyle">@style/fabLight.Shuffle</item>
+        <item name="fabRepeatStyle">@style/fabLight.Repeat</item>
+        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
+        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
+        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
     </style>
 
     <style name="Theme.Light" parent="Theme.LightBase">
@@ -49,6 +57,14 @@
 
     <style name="Theme.DarkBase" parent="Theme.AppCompat.NoActionBar">
         <item name="toolbarTheme">@style/Toolbar.Dark</item>
+        <item name="fabPlayStyle">@style/fabDark.Play</item>
+        <item name="fabNextStyle">@style/fabDark.Next</item>
+        <item name="fabPrevStyle">@style/fabDark.Prev</item>
+        <item name="fabShuffleStyle">@style/fabDark.Shuffle</item>
+        <item name="fabRepeatStyle">@style/fabDark.Repeat</item>
+        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
+        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
+        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Dark</item>
     </style>
 
     <style name="Theme.Dark" parent="Theme.DarkBase">
@@ -83,6 +99,89 @@
 
     <style name="Toolbar.Dark.WhiteOverflow">
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <!--grid tile-->
+    <style name="GridTileDescriptionLight">
+        <item name="android:background">@color/primary_dark_material_light</item>
+    </style>
+
+    <style name="GridTileDescriptionDark">
+        <item name="android:background">@color/primary_dark_material_dark</item>
+    </style>
+
+    <style name="GridTileDescriptionTitle" parent="SingleLineTextView">
+        <item name="android:textAppearance">?android:textAppearance</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="GridTileDescriptionTitle.Light">
+        <item name="android:textAppearance">?android:textAppearanceInverse</item>
+    </style>
+
+    <style name="GridTileDescriptionTitle.Dark">
+    </style>
+
+    <style name="GridTileDescriptionSubTitle" parent="SingleLineTextView">
+        <item name="android:textAppearance">?android:textAppearanceSmall</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="GridTileDescriptionSubTitle.Light">
+        <item name="android:textAppearance">?android:textAppearanceSmallInverse</item>
+    </style>
+
+    <style name="GridTileDescriptionSubTitle.Dark">
+    </style>
+
+
+    <!-- fabs -->
+    <style name="fabDark">
+        <item name="fabColor">accent</item>
+    </style>
+
+    <style name="fabLight">
+        <item name="fabColor">accent</item>
+    </style>
+
+    <style name="fabLight.Play">
+        <item name="fabIcon">@drawable/ic_action_playback_play_white</item>
+    </style>
+
+    <style name="fabDark.Play">
+        <item name="fabIcon">@drawable/ic_action_playback_play_black</item>
+    </style>
+
+    <style name="fabLight.Next">
+        <item name="fabIcon">@drawable/ic_action_playback_next_white</item>
+    </style>
+
+    <style name="fabDark.Next">
+        <item name="fabIcon">@drawable/ic_action_playback_next_black</item>
+    </style>
+
+    <style name="fabLight.Prev">
+        <item name="fabIcon">@drawable/ic_action_playback_prev_white</item>
+    </style>
+
+    <style name="fabDark.Prev">
+        <item name="fabIcon">@drawable/ic_action_playback_prev_black</item>
+    </style>
+
+    <style name="fabLight.Shuffle">
+        <item name="fabIcon">@drawable/ic_action_playback_shuffle_white</item>
+    </style>
+
+    <style name="fabDark.Shuffle">
+        <item name="fabIcon">@drawable/ic_action_playback_shuffle_black</item>
+    </style>
+
+    <style name="fabLight.Repeat">
+        <item name="fabIcon">@drawable/ic_action_playback_repeat_white</item>
+    </style>
+
+    <style name="fabDark.Repeat">
+        <item name="fabIcon">@drawable/ic_action_playback_repeat_black</item>
     </style>
 
 </resources>

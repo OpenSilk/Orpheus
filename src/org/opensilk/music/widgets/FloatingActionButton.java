@@ -17,15 +17,18 @@
 
 package org.opensilk.music.widgets;
 
+import android.animation.AnimatorInflater;
 import android.animation.StateListAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
@@ -34,7 +37,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.support.annotation.ColorRes;
@@ -52,6 +58,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageButton;
 
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.theme.Themer;
 
 /**
  *
@@ -64,14 +71,17 @@ public class FloatingActionButton extends ImageButton {
 
     public static final int SIZE_NORMAL = 0;
     public static final int SIZE_MINI = 1;
+    public static final int COLOR_ACCENT = 0;
+    public static final int COLOR_WHITE =1;
+    public static final int COLOR_BLACK = 2;
 
     private static final int HALF_TRANSPARENT_WHITE = Color.argb(128, 255, 255, 255);
     private static final int HALF_TRANSPARENT_BLACK = Color.argb(128, 0, 0, 0);
 
+    int mColor;
     int mColorNormal;
     int mColorPressed;
-    @DrawableRes
-    private int mIcon;
+    @DrawableRes private int mIcon;
     private int mSize;
 
     private float mCircleSize;
@@ -97,8 +107,6 @@ public class FloatingActionButton extends ImageButton {
     }
 
     void init(Context context, AttributeSet attributeSet) {
-        mColorNormal = getColor(android.R.color.holo_blue_dark);
-        mColorPressed = getColor(android.R.color.holo_blue_light);
         mIcon = 0;
         mSize = SIZE_NORMAL;
         if (attributeSet != null) {
@@ -127,10 +135,21 @@ public class FloatingActionButton extends ImageButton {
         TypedArray attr = context.obtainStyledAttributes(attributeSet, R.styleable.FloatingActionButton, 0, 0);
         if (attr != null) {
             try {
-                mColorNormal = attr.getColor(R.styleable.FloatingActionButton_fabColorNormal, getColor(android.R.color.holo_blue_dark));
-                mColorPressed = attr.getColor(R.styleable.FloatingActionButton_fabColorPressed, getColor(android.R.color.holo_blue_light));
+                mColor = attr.getInt(R.styleable.FloatingActionButton_fabColor, COLOR_ACCENT);
+                switch (mColor) {
+                    case COLOR_BLACK:
+                        mColorNormal = Color.BLACK;
+                        break;
+                    case COLOR_WHITE:
+                        mColorNormal = Color.WHITE;
+                        break;
+                    case COLOR_ACCENT:
+                    default:
+                        mColorNormal = Themer.getAccentColor(getContext());
+                }
+                mColorPressed = Themer.getThemeAttrColor(getContext(), R.attr.colorControlHighlight);
                 mSize = attr.getInt(R.styleable.FloatingActionButton_fabSize, SIZE_NORMAL);
-                mIcon = attr.getResourceId(R.styleable.FloatingActionButton_fabIcon, 0);
+                mIcon = attr.getResourceId(R.styleable.FloatingActionButton_fabIcon, -1);
             } finally {
                 attr.recycle();
             }
@@ -140,28 +159,33 @@ public class FloatingActionButton extends ImageButton {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(mDrawableSize, mDrawableSize);
-    }
-
-    public void setColor(@ColorRes int color, @ColorRes int colorPressed) {
-        mColorNormal = color;
-        mColorPressed = colorPressed;
-        updateBackground();
+//        setMeasuredDimension(mDrawableSize, mDrawableSize);
     }
 
     public void setIcon(@DrawableRes int icon) {
         mIcon = icon;
-        updateBackground();
-    }
-
-    public void setIconAndColor(@DrawableRes int icon, int color, int colorPressed) {
-        mIcon = icon;
-        mColorNormal = color;
-        mColorPressed = colorPressed;
-        updateBackground();
+//        updateBackground();
     }
 
     void updateBackground() {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+            if (mColor == COLOR_ACCENT) {
+                setBackgroundResource(R.drawable.fab_ripple_accent);
+            } else {
+                setBackgroundResource(R.drawable.fab_ripple_white);
+            }
+//            setStateListAnimator(
+//                    AnimatorInflater.loadStateListAnimator(getContext(), R.animator.fab_elevation)
+//            );
+            setElevation(getResources().getDimension(R.dimen.fab_elevation));
+            setImageResource(mIcon);
+            return;
+        } else {
+            setBackgroundCompat(createDrawable());
+            setImageResource(mIcon);
+            if (true) return;
+        }
+
         float circleLeft = mShadowRadius;
         float circleTop = mShadowRadius - mShadowOffset;
 
@@ -184,6 +208,24 @@ public class FloatingActionButton extends ImageButton {
         layerDrawable.setLayerInset(3, iconInsetHorizontal, iconInsetTop, iconInsetHorizontal, iconInsetBottom);
 
         setBackgroundCompat(layerDrawable);
+    }
+
+    Drawable createDrawable() {
+
+        ShapeDrawable drawableNormal = new ShapeDrawable(new OvalShape());
+        drawableNormal.getPaint().setColor(mColorNormal);
+
+        StateListDrawable stateDrawable = new StateListDrawable();
+
+        ShapeDrawable drawableHighlight = new ShapeDrawable(new OvalShape());
+        drawableHighlight.getPaint().setColor(mColorPressed);
+
+        stateDrawable.addState(new int[]{android.R.attr.state_pressed}, drawableHighlight);
+        stateDrawable.addState(new int[0], null);
+
+        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[] {drawableNormal, stateDrawable});
+
+        return layerDrawable;
     }
 
     Drawable getIconDrawable() {

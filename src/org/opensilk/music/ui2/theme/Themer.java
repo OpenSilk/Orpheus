@@ -17,6 +17,7 @@
 package org.opensilk.music.ui2.theme;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -107,8 +108,18 @@ public class Themer {
     }
 
     /**
+     * MediaRouterThemeHelper (support-v7)
+     */
+    public static boolean isLightTheme(Context context) {
+        synchronized (sTypedValue) {
+            return context.getTheme().resolveAttribute(R.attr.isLightTheme, sTypedValue, true) && sTypedValue.data != 0;
+        }
+    }
+
+    /*
      * TintManager (support-v7:21)
      */
+
     public static int getThemeAttrColor(Context context, int attr) {
         synchronized (sTypedValue) {
             if (context.getTheme().resolveAttribute(attr, sTypedValue, true)) {
@@ -123,13 +134,67 @@ public class Themer {
         return 0;
     }
 
-    /**
-     * MediaRouterThemeHelper (support-v7)
-     */
-    public static boolean isLightTheme(Context context) {
+    public static int getThemeAttrColor(Context context, int attr, float alpha) {
+        final int color = getThemeAttrColor(context, attr);
+        final int originalAlpha = Color.alpha(color);
+
+        // Return the color, multiplying the original alpha by the disabled value
+        return (color & 0x00ffffff) | (Math.round(originalAlpha * alpha) << 24);
+    }
+
+    public static int getDisabledThemeAttrColor(Context context, int attr) {
+        // Now retrieve the disabledAlpha value from the theme
+        final float disabledAlpha;
         synchronized (sTypedValue) {
-            return context.getTheme().resolveAttribute(R.attr.isLightTheme, sTypedValue, true) && sTypedValue.data != 0;
+            context.getTheme().resolveAttribute(android.R.attr.disabledAlpha, sTypedValue, true);
+            disabledAlpha = sTypedValue.getFloat();
         }
+        return getThemeAttrColor(context, attr, disabledAlpha);
+    }
+
+    public static ColorStateList getDefaultColorStateList(Context context) {
+            /**
+             * Generate the default color state list which uses the colorControl attributes.
+             * Order is important here. The default enabled state needs to go at the bottom.
+             */
+
+            final int colorControlNormal = getThemeAttrColor(context, R.attr.colorControlNormal);
+            final int colorControlActivated = getThemeAttrColor(context, R.attr.colorControlActivated);
+
+            final int[][] states = new int[7][];
+            final int[] colors = new int[7];
+            int i = 0;
+
+            // Disabled state
+            states[i] = new int[] { -android.R.attr.state_enabled };
+            colors[i] = getDisabledThemeAttrColor(context, R.attr.colorControlNormal);
+            i++;
+
+            states[i] = new int[] { android.R.attr.state_focused };
+            colors[i] = colorControlActivated;
+            i++;
+
+            states[i] = new int[] { android.R.attr.state_activated };
+            colors[i] = colorControlActivated;
+            i++;
+
+            states[i] = new int[] { android.R.attr.state_pressed };
+            colors[i] = colorControlActivated;
+            i++;
+
+            states[i] = new int[] { android.R.attr.state_checked };
+            colors[i] = colorControlActivated;
+            i++;
+
+            states[i] = new int[] { android.R.attr.state_selected };
+            colors[i] = colorControlActivated;
+            i++;
+
+            // Default enabled state
+            states[i] = new int[0];
+            colors[i] = colorControlNormal;
+            i++;
+        return new ColorStateList(states, colors);
     }
 
 }

@@ -17,6 +17,8 @@
 
 package org.opensilk.music.ui2.gallery;
 
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,8 +28,10 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import org.opensilk.common.theme.TintDrawableWrapper;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +40,6 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import rx.android.events.OnItemClickEvent;
 import rx.subscriptions.CompositeSubscription;
 
 /**
@@ -47,7 +50,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     protected final List<T> items;
     protected final ArtworkRequestManager artworkRequestor;
 
-    private LayoutInflater inflater;
+//    private LayoutInflater inflater;
     protected boolean mGridStyle = true;
 
     public interface ItemClickListener<T> {
@@ -108,9 +111,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (inflater == null) {
-            inflater = LayoutInflater.from(parent.getContext());
-        }
+        //Not caching this right now so i dont hold any context stuff
+        //in the presenters
+//        if (inflater == null) {
+          LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+//        }
         View view = inflater.inflate(viewType, parent, false);
         return new ViewHolder(view);
     }
@@ -180,6 +185,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
             } else {
                 artNumber = 1;
             }
+//            Drawable d = ContextCompat.getDrawable(itemView.getContext(), R.drawable.ic_menu_moreoverflow_mtrl_alpha);
+//            overflow.setImageDrawable(new TintDrawableWrapper(d, Themer.getDefaultColorStateList(itemView.getContext())));
         }
 
         public void reset() {

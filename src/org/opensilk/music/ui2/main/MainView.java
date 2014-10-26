@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.ImageButton;
 
 import org.opensilk.music.R;
 
@@ -132,7 +133,6 @@ public class MainView extends FloatingActionButtonRelativeLayout {
 
     void setupActionButton() {
         int playcolor = Themer.getAccentColor(getContext());
-        fabPlay.setIconAndColor(Themer.getPlayIcon(getContext(), true), playcolor, playcolor);
         fabPlay.setOnDoubleClickListener(new FloatingActionButton.OnDoubleClickListener() {
             @Override
             public void onDoubleClick(View view) {
@@ -147,9 +147,6 @@ public class MainView extends FloatingActionButtonRelativeLayout {
             }
         });
         fabPlay.bringToFront();
-        int color[] = Themer.getSecondaryFabColors(getContext());
-        fabNext.setIconAndColor(Themer.getNextIcon(getContext()), color[0], color[1]);
-        fabPrev.setIconAndColor(Themer.getPrevIcon(getContext()), color[0], color[1]);
     }
 
     void setupFabAnimatiors() {

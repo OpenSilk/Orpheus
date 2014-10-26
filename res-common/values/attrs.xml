@@ -25,4 +25,19 @@
     <declare-styleable name="SlidingTabLayout">
         <attr name="invertedTabBar" format="boolean"/>
     </declare-styleable>
+    <declare-styleable name="TintImageButton">
+        <attr name="tintSrc" format="reference"/>
+    </declare-styleable>
+    <declare-styleable name="FloatingActionButton">
+        <attr name="fabColor" format="enum">
+            <enum name="accent" value="0"/>
+            <enum name="white" value="1"/>
+            <enum name="black" value="2"/>
+        </attr>
+        <attr name="fabIcon" format="reference"/>
+        <attr name="fabSize" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="mini" value="1"/>
+        </attr>
+    </declare-styleable>
 </resources>

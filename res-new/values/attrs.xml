@@ -10,14 +10,4 @@
     <declare-styleable name="NowPlaying">
         <attr name="nowPlayingBackground" format="reference"/>
     </declare-styleable>
-    <!--FloatingACtionButton-->
-    <declare-styleable name="FloatingActionButton">
-        <attr name="fabColorPressed" format="color"/>
-        <attr name="fabColorNormal" format="color"/>
-        <attr name="fabIcon" format="reference"/>
-        <attr name="fabSize" format="enum">
-            <enum name="normal" value="0"/>
-            <enum name="mini" value="1"/>
-        </attr>
-    </declare-styleable>
 </resources>

@@ -24,7 +24,7 @@
     android:gravity="center_vertical"
     android:layout_width="match_parent"
     android:layout_height="58dp"
-    android:background="?colorPrimaryDark">
+    style="?gridTileDescriptionStyle">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -38,10 +38,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
-            android:textAppearance="?android:attr/textAppearance"
-            android:textSize="16sp"
             tools:text="Artist"
-            style="@style/SingleLineTextView"/>
+            style="?gridTileDescriptionTitleStyle"/>
 
         <TextView
             android:id="@+id/tile_subtitle"
@@ -49,10 +47,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
-            android:textAppearance="?android:textAppearanceSmall"
-            android:textSize="12sp"
             tools:text="Num Albums"
-            style="@style/SingleLineTextView"/>
+            style="?gridTileDescriptionSubTitleStyle"/>
 
     </LinearLayout>
 

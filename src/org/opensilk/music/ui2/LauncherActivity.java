@@ -21,6 +21,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -36,6 +37,8 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeActivity;
 import org.opensilk.common.mortar.PauseAndResumePresenter;
+import org.opensilk.common.theme.TintManager;
+import org.opensilk.common.theme.TintResources;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
@@ -94,6 +97,8 @@ public class LauncherActivity extends ActionBarActivity implements
     boolean mConfigurationChangeIncoming;
     String mScopeName;
     boolean mIsResumed;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -406,4 +411,17 @@ public class LauncherActivity extends ActionBarActivity implements
 //        Themer.themeToolbar(mToolbar);
     }
 
+    TintManager mTintManager;
+
+    @Override
+    public Resources getResources() {
+        ensureTintManager();
+        return mTintManager.getResources();
+    }
+
+    void ensureTintManager() {
+        if (mTintManager == null) {
+            mTintManager = new TintManager(this, super.getResources());
+        }
+    }
 }

@@ -19,7 +19,15 @@
     <declare-styleable name="ProfileTheme">
         <attr name="isDialog" format="boolean" />
     </declare-styleable>
-    <declare-styleable name="ToolbarTheme">
+    <declare-styleable name="ThemeStyleables">
         <attr name="toolbarTheme" format="reference"/>
+        <attr name="fabPlayStyle" format="reference"/>
+        <attr name="fabNextStyle" format="reference"/>
+        <attr name="fabPrevStyle" format="reference"/>
+        <attr name="fabShuffleStyle" format="reference"/>
+        <attr name="fabRepeatStyle" format="reference"/>
+        <attr name="gridTileDescriptionStyle" format="reference"/>
+        <attr name="gridTileDescriptionTitleStyle" format="reference"/>
+        <attr name="gridTileDescriptionSubTitleStyle" format="reference"/>
     </declare-styleable>
 </resources>

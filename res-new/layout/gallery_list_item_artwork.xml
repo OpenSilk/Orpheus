@@ -62,11 +62,14 @@
 
     </LinearLayout>
 
-    <ImageButton
+    <!--had to copy the drawable for this
+        tint manager caches it and the grids
+        were being tinted-->
+    <org.opensilk.common.widget.TintImageButton
         android:id="@+id/tile_overflow"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:src="@drawable/abc_ic_menu_moreoverflow_mtrl_alpha"
+        app:tintSrc="@drawable/ic_menu_moreoverflow_mtrl_alpha"
         android:contentDescription="@string/abc_action_menu_overflow_description"
         style="@style/Widget.AppCompat.ActionButton.Overflow"/>
 
