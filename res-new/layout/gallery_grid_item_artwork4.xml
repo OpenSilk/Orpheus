@@ -16,13 +16,14 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout
+<org.opensilk.common.widget.ForegroundLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:foreground="?selectableItemBackground"
+    android:layout_margin="2dp">
 
     <org.opensilk.music.widgets.SquareFrameLayout
         android:layout_width="match_parent"
@@ -66,4 +67,4 @@
         android:layout_width="match_parent"
         android:layout_height="58dp"/>
 
-</LinearLayout>
+</org.opensilk.common.widget.ForegroundLinearLayout>

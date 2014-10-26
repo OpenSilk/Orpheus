@@ -19,14 +19,11 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 
-import org.lucasr.twowayview.ItemClickSupport;
-import org.lucasr.twowayview.widget.GridLayoutManager;
-import org.lucasr.twowayview.widget.ListLayoutManager;
-import org.lucasr.twowayview.widget.SpacingItemDecoration;
-import org.lucasr.twowayview.widget.StaggeredGridLayoutManager;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicApp;
 import org.opensilk.music.R;
@@ -51,6 +48,8 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected final ArtworkRequestManager artworkRequestor;
     protected final RxLoader<T> loader;
 
+    protected final BaseAdapter<T> adapter;
+
     protected Subscription subscription;
     protected ActionBarOwner.MenuConfig actionBarMenu;
 
@@ -58,6 +57,8 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         this.preferences = preferences;
         this.artworkRequestor = artworkRequestor;
         this.loader = loader;
+
+        adapter = newAdapter();
     }
 
     @Override
@@ -69,25 +70,15 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        setupRecyclerView();
+        setupRecyclerView(false);
         if (loader.hasCache()) {
             Timber.d("Cache hit %s", getClass());
-            setAdapter(newAdapter(loader.getCache()));
+            adapter.addAll(loader.getCache());
+            getView().setListShown(true, false);
         } else if (subscription == null || subscription.isUnsubscribed()) {
+            getView().setLoading(true);
             load();
         }
-        ItemClickSupport itemClickSupport = ItemClickSupport.addTo(getView());
-        itemClickSupport.setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-            @Override
-            public void onItemClick(RecyclerView recyclerView, View view, int i, long l) {
-                handleItemClick(recyclerView.getContext(), getItem(i));
-            }
-        });
-    }
-
-    @Override
-    protected void onSave(Bundle outState) {
-        super.onSave(outState);
     }
 
     @Override
@@ -98,76 +89,46 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     }
 
     // Init the recyclerview
-    protected void setupRecyclerView() {
-        RecyclerView v = getView();
+    protected void setupRecyclerView(boolean clear) {
+        GalleryPageView v = getView();
         if (v == null) return;
-        v.setHasFixedSize(!isStaggered());
-        v.setLayoutManager(getLayoutManager(v.getContext()));
-        if (isGrid() || isStaggered()) {
-            int spacing = MusicApp.convertDpToPx(v.getContext(), 4);
-            v.addItemDecoration(new SpacingItemDecoration(spacing, spacing));
-        }
+        v.getListView().setHasFixedSize(!isStaggered());
+        v.getListView().setLayoutManager(getLayoutManager(v.getContext()));
+        adapter.setGridStyle(isGrid() || isStaggered());
+        v.getListView().swapAdapter(adapter, clear);
     }
 
     // reset the recyclerview for eg layoutmanager change
     protected void resetRecyclerView() {
-        RecyclerView v = getView();
+        GalleryPageView v = getView();
         if (v == null) return;
-        v.getRecycledViewPool().clear();
-        setupRecyclerView();
-        if (loader.hasCache()) {
-            setAdapter(newAdapter(loader.getCache()));
-        } else {
-            v.setAdapter(null);
-            reload();
-        }
+        setupRecyclerView(true);
+    }
+
+    protected void showRecyclerView() {
+        GalleryPageView v = getView();
+        if (v == null) return;
+        v.setListShown(true, true);
+    }
+
+    protected void showEmptyView() {
+        GalleryPageView v = getView();
+        if (v == null) return;
+        v.setListEmpty(true, true);
     }
 
     //handle item clicks
     protected abstract void handleItemClick(Context context, T item);
     // make a new adapter
-    protected abstract BaseAdapter<T> newAdapter(List<T> items);
+    protected abstract BaseAdapter<T> newAdapter();
     // start the loader
     protected abstract void load();
 
     // cancels any ongoing load and starts a new one
     public void reload() {
         if (subscription != null) subscription.unsubscribe();
+        adapter.clear();
         load();
-    }
-
-    // sets the adapter for recycler view
-    protected boolean setAdapter(BaseAdapter<T> adapter) {
-        RecyclerView v = getView();
-        if (v == null) return false;
-        boolean isGrid = isGrid() || isStaggered();
-        adapter.setGridStyle(isGrid);
-        v.swapAdapter(adapter, false);
-        return true;
-    }
-
-    // updates this.items incase we are inthe middel of config change
-    // and trys to set the adapter, if that fails it will be set
-    // on the next onLoad
-    protected void addItems(List<T> items) {
-        setAdapter(newAdapter(items));
-    }
-
-    // adds a single item to the adapter
-    protected void addItem(T item) {
-        RecyclerView v = getView();
-        if (v == null) return;
-        BaseAdapter<T> adapter = (BaseAdapter<T>) v.getAdapter();
-        if (adapter == null) {
-            addItems(new ArrayList<T>());
-            adapter = (BaseAdapter<T>) v.getAdapter();
-        }
-        adapter.add(item);
-    }
-
-    protected T getItem(int position) {
-        BaseAdapter<T> adapter = (BaseAdapter<T>) getView().getAdapter();
-        return adapter.getItem(position);
     }
 
     protected boolean isGrid() {
@@ -190,16 +151,16 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
 
     protected RecyclerView.LayoutManager makeStaggerdLayoutManager(Context context) {
         int numCols = context.getResources().getInteger(R.integer.grid_columns);
-        return new StaggeredGridLayoutManager(StaggeredGridLayoutManager.Orientation.VERTICAL, numCols, numCols);
+        return new StaggeredGridLayoutManager(numCols, StaggeredGridLayoutManager.VERTICAL);
     }
 
     protected RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
         int numCols = context.getResources().getInteger(R.integer.grid_columns);
-        return new GridLayoutManager(GridLayoutManager.Orientation.VERTICAL, numCols, numCols);
+        return new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
     }
 
     protected RecyclerView.LayoutManager makeListLayoutManager(Context context) {
-        return new ListLayoutManager(context, ListLayoutManager.Orientation.VERTICAL);
+        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
     }
 
 }

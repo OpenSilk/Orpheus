@@ -14,7 +14,6 @@ allprojects {
         maven { url "../../m2/repository" }
         mavenCentral()
         jcenter()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 }
 

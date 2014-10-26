@@ -39,6 +39,7 @@ import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;
@@ -86,6 +87,7 @@ public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
     @Override
     public Observable<Genre> getObservable() {
         cache.clear();
+        cachePopulated = false;
         return super.getObservable().filter(new Func1<Genre, Boolean>() {
             @Override
             public Boolean call(Genre genre) {
@@ -98,10 +100,16 @@ public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
             public void call(Genre genre) {
                 cache.add(genre);
             }
+        }).doOnCompleted(new Action0() {
+            @Override
+            public void call() {
+                cachePopulated = true;
+            }
         }).doOnError(new Action1<Throwable>() {
             @Override
             public void call(Throwable throwable) {
                 cache.clear();
+                cachePopulated = false;
                 Timber.e(throwable, "Couldn't get geners");
             }
         }).onErrorResumeNext(Observable.<Genre>empty()).observeOn(AndroidSchedulers.mainThread());

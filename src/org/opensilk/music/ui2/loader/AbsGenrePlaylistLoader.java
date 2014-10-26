@@ -62,6 +62,11 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
     }
 
     protected final List<ContentChangedListener> contentChangedListeners;
+    // NOTE not using Observable.cache because i want to be able
+    // to pull the cache synchronously so we can immediatly populate
+    // the adapter and restore the viewstate, I might revisit this later.
+    // ie to use api21 persistent bundle to always restore viewstate
+    // even when doing a fresh load.
     protected final List<T> cache;
     protected final Context context;
 
@@ -77,6 +82,7 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
     String sortOrder2;
 
     private UriObserver uriObserver;
+    protected volatile boolean cachePopulated = false;
 
     public AbsGenrePlaylistLoader(Context context) {
         contentChangedListeners = new ArrayList<>();
@@ -161,7 +167,7 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
     }
 
     public boolean hasCache() {
-        return !cache.isEmpty();
+        return !cache.isEmpty() && cachePopulated;
     }
 
     public List<T> getCache() {

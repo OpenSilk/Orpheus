@@ -16,12 +16,14 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.opensilk.common.widget.ForegroundLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:gravity="center_vertical"
     android:layout_width="match_parent"
-    android:layout_height="72dp">
+    android:layout_height="72dp"
+    android:foreground="?selectableItemBackground">
 
     <org.opensilk.music.widgets.SquareImageView
         android:id="@+id/artwork_thumb"
@@ -68,4 +70,4 @@
         android:contentDescription="@string/abc_action_menu_overflow_description"
         style="@style/Widget.AppCompat.ActionButton.Overflow"/>
 
-</LinearLayout>
+</org.opensilk.common.widget.ForegroundLinearLayout>

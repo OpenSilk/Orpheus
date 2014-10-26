@@ -69,12 +69,12 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
 
     @Override
     public int getItemCount() {
-        return 0;
+        return items.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return super.getItemViewType(position);
+        return android.R.layout.simple_list_item_2;
     }
 
     public Bundleable getItem(int position) {

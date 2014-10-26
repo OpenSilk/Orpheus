@@ -18,6 +18,8 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -31,6 +33,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.ui2.common.PopupMenuHandler;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
@@ -41,6 +44,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import mortar.ViewPresenter;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;
@@ -79,7 +83,18 @@ public class ArtistsScreen extends Screen {
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalArtist>>() {
                 @Override
                 public void call(List<LocalArtist> localArtists) {
-                    addItems(localArtists);
+                    adapter.addAll(localArtists);
+                    showRecyclerView();
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+
+                }
+            }, new Action0() {
+                @Override
+                public void call() {
+                    if (adapter.isEmpty()) showEmptyView();
                 }
             });
         }
@@ -90,8 +105,8 @@ public class ArtistsScreen extends Screen {
         }
 
         @Override
-        protected BaseAdapter<LocalArtist> newAdapter(List<LocalArtist> items) {
-            return new Adapter(items, artworkRequestor);
+        protected BaseAdapter<LocalArtist> newAdapter() {
+            return new Adapter(artworkRequestor);
         }
 
         @Override
@@ -148,18 +163,26 @@ public class ArtistsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<LocalArtist> {
 
-        Adapter(List<LocalArtist> items, ArtworkRequestManager artworkRequestor) {
-            super(items, artworkRequestor);
+        Adapter(ArtworkRequestManager artworkRequestor) {
+            super(artworkRequestor);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            LocalArtist artist = getItem(position);
+            final LocalArtist artist = getItem(position);
             ArtInfo artInfo = new ArtInfo(artist.name, null, null);
             holder.title.setText(artist.name);
             String subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount)
                 + ", " + MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
             holder.subtitle.setText(subtitle);
+            holder.overflow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PopupMenu m = new PopupMenu(v.getContext(), v);
+                    PopupMenuHandler.populateMenu(m, artist);
+                    m.show();
+                }
+            });
             holder.subscriptions.add(artworkRequestor.newArtistRequest(holder.artwork, artInfo, ArtworkType.THUMBNAIL));
         }
     }

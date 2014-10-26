@@ -32,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
@@ -69,6 +70,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
     protected String sortOrder;
 
     private UriObserver uriObserver;
+    protected volatile boolean cachePopulated = false;
 
     public RxCursorLoader(Context context) {
         contentChangedListeners = new ArrayList<>();
@@ -96,29 +98,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
      *         in a single onNext(List) call. subscribed on IO observes on main.
      */
     public Observable<List<T>> getListObservable() {
-        cache.clear();
-        return createObservable()
-                .doOnNext(new Action1<T>() {
-                    @Override
-                    public void call(T t) {
-                        cache.add(t);
-                    }
-                })
-                .toList()
-                // Im not really concered with errors right now
-                // just log it, and return an empty list
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        cache.clear();
-                        dump(throwable);
-                    }
-                })
-                .onErrorResumeNext(Observable.<List<T>>empty())
-                // want Query on an io thread
-                .subscribeOn(Schedulers.io())
-                // want the final List to be published on the main thread
-                .observeOn(AndroidSchedulers.mainThread());
+        return getObservable().toList();
     }
 
     /**
@@ -126,6 +106,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
      */
     public Observable<T> getObservable() {
         cache.clear();
+        cachePopulated = false;
         return createObservable()
                 .doOnNext(new Action1<T>() {
                     @Override
@@ -133,10 +114,17 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                         cache.add(t);
                     }
                 })
+                .doOnCompleted(new Action0() {
+                    @Override
+                    public void call() {
+                        cachePopulated = true;
+                    }
+                })
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         cache.clear();
+                        cachePopulated = false;
                         dump(throwable);
                     }
                 })
@@ -193,7 +181,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
     }
 
     public boolean hasCache() {
-        return !cache.isEmpty();
+        return !cache.isEmpty() && cachePopulated;
     }
 
     public List<T> getCache() {

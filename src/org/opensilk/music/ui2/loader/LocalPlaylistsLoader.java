@@ -42,6 +42,7 @@ import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import timber.log.Timber;
 
@@ -88,7 +89,8 @@ public class LocalPlaylistsLoader extends AbsGenrePlaylistLoader<Playlist> {
 
     @Override
     public Observable<Playlist> getObservable() {
-
+        cache.clear();
+        cachePopulated = false;
         RxCursorLoader<LocalSong> lastAddedLoader = new RxCursorLoader<LocalSong>(context,
                 Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
@@ -106,17 +108,25 @@ public class LocalPlaylistsLoader extends AbsGenrePlaylistLoader<Playlist> {
                 lastAddedLoader.createObservable(),
                 -1, context.getResources().getString(R.string.playlist_last_added));
 
-        //TODO instead of merge is there some kind of onComplete do, so that lastadded is always first
-        return Observable.mergeDelayError(lastAddedObservable, super.getObservable())
+        // we want last added first so concat them together
+        return Observable.concat(lastAddedObservable, super.getObservable())
                 .doOnNext(new Action1<Playlist>() {
                     @Override
                     public void call(Playlist playlist) {
                         cache.add(playlist);
                     }
                 })
+                .doOnCompleted(new Action0() {
+                    @Override
+                    public void call() {
+                        cachePopulated = true;
+                    }
+                })
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        cache.clear();
+                        cachePopulated = false;
                         Timber.e(throwable, "Unable to obtain playlists");
                     }
                 })

@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
@@ -35,6 +36,7 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
+import rx.android.events.OnItemClickEvent;
 import rx.subscriptions.CompositeSubscription;
 
 /**
@@ -47,6 +49,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     private LayoutInflater inflater;
     protected boolean mGridStyle = true;
+
+    public interface ItemClickListener<T> {
+        void OnItemClick(View view, T item);
+    }
+
+    protected ItemClickListener<T> itemClickListener;
+    protected PopupMenu.OnMenuItemClickListener overflowClickListener;
 
     public BaseAdapter(ArtworkRequestManager artworkRequestor) {
         this.items = new ArrayList<>();
@@ -69,18 +78,32 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     }
 
     public void addAll(Collection<T> items) {
-        items.addAll(items);
+        this.items.addAll(items);
         notifyDataSetChanged();
     }
 
     public void add(T item) {
         items.add(item);
-        notifyItemInserted(items.size()-1);
+//        notifyItemInserted(items.indexOf(item));
+        // bug in StaggeredGrid tries to arrayCopy items.size() + 1 and barfs
+        notifyItemRangeInserted(items.indexOf(item), 0);
     }
 
     public void clear() {
-        items.clear();
+        this.items.clear();
         notifyDataSetChanged();
+    }
+
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
+    public void setItemClickListener(ItemClickListener<T> l) {
+        this.itemClickListener = l;
+    }
+
+    public void setOverflowClickListener(PopupMenu.OnMenuItemClickListener l) {
+        this.overflowClickListener = l;
     }
 
     @Override

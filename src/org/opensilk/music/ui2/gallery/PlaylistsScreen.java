@@ -18,6 +18,8 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -29,6 +31,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.ui2.common.PopupMenuHandler;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
@@ -40,6 +43,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import mortar.ViewPresenter;
+import rx.functions.Action0;
 import rx.functions.Action1;
 
 /**
@@ -74,15 +78,20 @@ public class PlaylistsScreen extends Screen {
             subscription = loader.getObservable().subscribe(new Action1<Playlist>() {
                 @Override
                 public void call(Playlist playlist) {
-                    addItem(playlist);
+                    adapter.add(playlist);
+                    showRecyclerView();
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+
+                }
+            }, new Action0() {
+                @Override
+                public void call() {
+                    if (adapter.isEmpty()) showEmptyView();
                 }
             });
-        }
-
-        @Override
-        public void reload() {
-            addItems(new ArrayList<Playlist>());
-            super.reload();
         }
 
         @Override
@@ -91,8 +100,8 @@ public class PlaylistsScreen extends Screen {
         }
 
         @Override
-        protected BaseAdapter<Playlist> newAdapter(List<Playlist> items) {
-            return new Adapter(items, artworkRequestor);
+        protected BaseAdapter<Playlist> newAdapter() {
+            return new Adapter(artworkRequestor);
         }
 
         @Override
@@ -109,15 +118,23 @@ public class PlaylistsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<Playlist> {
 
-        Adapter(List<Playlist> items, ArtworkRequestManager artworkRequestor) {
-            super(items, artworkRequestor);
+        Adapter(ArtworkRequestManager artworkRequestor) {
+            super(artworkRequestor);
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            Playlist playlist = getItem(position);
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            final Playlist playlist = getItem(position);
             holder.title.setText(playlist.mPlaylistName);
             holder.subtitle.setText(MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, playlist.mSongNumber));
+            holder.overflow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PopupMenu m = new PopupMenu(v.getContext(), v);
+                    PopupMenuHandler.populateMenu(m, playlist);
+                    m.show();
+                }
+            });
             switch (holder.artNumber) {
                 case 4:
                     if (playlist.mAlbumIds.length >= 4) {

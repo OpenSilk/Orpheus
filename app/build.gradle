@@ -51,7 +51,7 @@ android {
             resources.srcDirs = ['../src']
             aidl.srcDirs = ['../src']
             renderscript.srcDirs = ['../src']
-            res.srcDirs = ['../res','../res-new-themes','../res-new']
+            res.srcDirs = ['../res','../res-new-themes','../res-new','../res-common']
             assets.srcDirs = ['../assets']
         }
         debug {
@@ -155,8 +155,6 @@ dependencies {
     provided 'com.squareup.dagger:dagger-compiler:1.2.1'
     compile 'com.squareup.dagger:dagger:1.2.1'
     compile 'io.reactivex:rxandroid:0.22.0'
-    compile 'org.lucasr.twowayview:core:1.0.0-SNAPSHOT@aar'
-    compile 'org.lucasr.twowayview:layouts:1.0.0-SNAPSHOT@aar'
 
     compile 'com.sothree.slidinguppanel:library:2.0-SNAPSHOT@aar'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'

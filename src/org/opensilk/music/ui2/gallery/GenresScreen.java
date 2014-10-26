@@ -18,6 +18,8 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
@@ -29,6 +31,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.ui2.common.PopupMenuHandler;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
@@ -40,6 +43,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import mortar.ViewPresenter;
+import rx.functions.Action0;
 import rx.functions.Action1;
 
 /**
@@ -74,16 +78,20 @@ public class GenresScreen extends Screen {
             subscription = loader.getObservable().subscribe(new Action1<Genre>() {
                 @Override
                 public void call(Genre genre) {
-                    addItem(genre);
+                    adapter.add(genre);
+                    showRecyclerView();
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+
+                }
+            }, new Action0() {
+                @Override
+                public void call() {
+                    if (adapter.isEmpty()) showEmptyView();
                 }
             });
-        }
-
-        @Override
-        public void reload() {
-            // reset the adapter
-            addItems(new ArrayList<Genre>());
-            super.reload();
         }
 
         @Override
@@ -92,8 +100,8 @@ public class GenresScreen extends Screen {
         }
 
         @Override
-        protected BaseAdapter<Genre> newAdapter(List<Genre> items) {
-            return new Adapter(items, artworkRequestor);
+        protected BaseAdapter<Genre> newAdapter() {
+            return new Adapter(artworkRequestor);
         }
 
         @Override
@@ -110,18 +118,26 @@ public class GenresScreen extends Screen {
 
     static class Adapter extends BaseAdapter<Genre> {
 
-        Adapter(List<Genre> items, ArtworkRequestManager artworkRequestor) {
-            super(items, artworkRequestor);
+        Adapter(ArtworkRequestManager artworkRequestor) {
+            super(artworkRequestor);
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            Genre genre = getItem(position);
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            final Genre genre = getItem(position);
             holder.title.setText(genre.mGenreName);
             Context context = holder.itemView.getContext();
             String l2 = MusicUtils.makeLabel(context, R.plurals.Nalbums, genre.mAlbumNumber)
                     + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, genre.mSongNumber);
             holder.subtitle.setText(l2);
+            holder.overflow.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PopupMenu m = new PopupMenu(v.getContext(), v);
+                    PopupMenuHandler.populateMenu(m, genre);
+                    m.show();
+                }
+            });
             switch (holder.artNumber) {
                 case 4:
                     if (genre.mAlbumIds.length >= 4) {
