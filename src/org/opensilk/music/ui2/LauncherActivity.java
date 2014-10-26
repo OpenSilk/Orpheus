@@ -60,6 +60,7 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.Optional;
 import flow.Flow;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
@@ -76,20 +77,15 @@ public class LauncherActivity extends ActionBarActivity implements
     @Inject @Named("activity") Bus mBus;
     @Inject PauseAndResumePresenter mPauseResumePresenter;
     @Inject ActionBarOwner mActionBarOwner;
-    @Inject
-    DrawerOwner mDrawerOwner;
+    @Inject DrawerOwner mDrawerOwner;
     @Inject MusicServiceConnection mMusicService;
     @Inject PluginConnectionManager mPluginConnectionManager;
     @Inject AppFlowPresenter<LauncherActivity> mAppFlowPresenter;
 
-    @InjectView(R.id.main)
-    FrameScreenSwitcherView mContainer;
-    @InjectView(R.id.drawer_layout)
-    DrawerLayout mDrawerLayout;
-    @InjectView(R.id.drawer_container)
-    ViewGroup mNavContainer;
-    @InjectView(R.id.main_toolbar)
-    Toolbar mToolbar;
+    @InjectView(R.id.main) FrameScreenSwitcherView mContainer;
+    @InjectView(R.id.drawer_layout) @Optional DrawerLayout mDrawerLayout;
+    @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
+    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
 
     MortarActivityScope mActivityScope;
 
@@ -101,7 +97,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_Light);
+        setTheme(R.style.Theme_Dark);
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());

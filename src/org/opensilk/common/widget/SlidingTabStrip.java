@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.widgets;
+package org.opensilk.common.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -26,6 +26,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import org.opensilk.common.widget.SlidingTabLayout;
 import org.opensilk.music.R;
 
 class SlidingTabStrip extends LinearLayout {

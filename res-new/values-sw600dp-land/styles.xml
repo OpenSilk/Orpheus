@@ -17,12 +17,7 @@
   -->
 
 <resources>
-    <declare-styleable name="ForegroundLinearLayout">
-        <attr name="android:foreground" />
-        <attr name="android:foregroundInsidePadding" />
-        <attr name="android:foregroundGravity" />
-    </declare-styleable>
-    <declare-styleable name="SlidingTabLayout">
-        <attr name="invertedTabBar" format="boolean"/>
-    </declare-styleable>
+    <style name="GalleryTabs">
+        <item name="invertedTabBar">true</item>
+    </style>
 </resources>

@@ -19,4 +19,6 @@
 <resources>
     <!-- Daydream -->
     <dimen name="dream_art_size">400dp</dimen>
+
+    <dimen name="action_bar_double_height">128dp</dimen>
 </resources>

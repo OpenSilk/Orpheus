@@ -27,6 +27,9 @@ import android.widget.LinearLayout;
 
 import org.opensilk.music.R;
 
+/**
+ * https://gist.github.com/chrisbanes/9091754
+ */
 public class ForegroundLinearLayout extends LinearLayout {
 
     private Drawable mForeground;

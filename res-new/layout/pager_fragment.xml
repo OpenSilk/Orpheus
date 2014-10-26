@@ -24,7 +24,7 @@
         android:layout_height="?actionBarSize"
         android:background="?colorPrimary"/>
 
-    <org.opensilk.music.widgets.SlidingTabLayout
+    <org.opensilk.common.widget.SlidingTabLayout
         android:id="@+id/tab_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

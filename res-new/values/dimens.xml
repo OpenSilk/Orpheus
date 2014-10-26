@@ -65,4 +65,6 @@
     <dimen name="fab_shadow_radius">8dp</dimen>
     <dimen name="fab_stroke_width">0.5dp</dimen>
     <dimen name="fab_actions_spacing">16dp</dimen>
+
+    <dimen name="action_bar_double_height">112dp</dimen>
 </resources>

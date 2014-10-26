@@ -18,4 +18,6 @@
 <resources>
     <dimen name="listview_marginRight">64dp</dimen>
     <dimen name="listview_marginLeft">64dp</dimen>
+
+    <dimen name="main_content_width">700dp</dimen>
 </resources>

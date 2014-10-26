@@ -26,11 +26,11 @@
 
     <!--<include layout="@layout/actionbar_background"/>-->
 
-    <org.opensilk.music.widgets.SlidingTabLayout
+    <org.opensilk.common.widget.SlidingTabLayout
         android:id="@+id/tab_bar"
-        app:lightStyle="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        style="@style/GalleryTabs"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"

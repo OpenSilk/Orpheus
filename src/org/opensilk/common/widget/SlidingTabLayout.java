@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.widgets;
+package org.opensilk.common.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -32,6 +32,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.theme.Themer;
 
 /**
  * To be used with ViewPager to provide a tab indicator component which give constant feedback as to
@@ -101,20 +102,18 @@ public class SlidingTabLayout extends HorizontalScrollView {
         boolean lightStyle = false;
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SlidingTabLayout, defStyle, 0);
         if (a != null) {
-            lightStyle = a.getBoolean(R.styleable.SlidingTabLayout_lightStyle, false);
+            lightStyle = a.getBoolean(R.styleable.SlidingTabLayout_invertedTabBar, false);
             a.recycle();
         }
 
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.colorPrimary, outValue, true);
-        final int themePrimaryColor =  outValue.data;
-
-        if (lightStyle) {
+        final int themePrimaryColor =  Themer.getPrimaryColor(getContext());
+        boolean lightTheme = Themer.isLightTheme(getContext());
+        if (lightStyle && lightTheme) {
             mSelectedTextColor = themePrimaryColor;
             mUnselectedTextColor = SlidingTabStrip.setColorAlpha(
                     context.getResources().getColor(android.R.color.black), UNSELECTED_TEXT_COLOR_ALPHA_LIGHT);
         } else {
-            setBackgroundColor(themePrimaryColor);
+            if (!lightStyle) setBackgroundColor(themePrimaryColor);
             mSelectedTextColor = context.getResources().getColor(android.R.color.white);
             mUnselectedTextColor = SlidingTabStrip.setColorAlpha(mSelectedTextColor, UNSELECTED_TEXT_COLOR_ALPHA);
         }

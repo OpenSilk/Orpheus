@@ -18,6 +18,8 @@
 
 <org.opensilk.music.ui2.main.MainView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -36,10 +38,11 @@
         android:background="?colorPrimary"/>
 
     <android.support.v7.widget.CardView
-        android:layout_width="600dp"
+        android:layout_width="@dimen/main_content_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="?actionBarSize"
-        android:layout_centerHorizontal="true">
+        android:layout_below="@id/main_toolbar"
+        android:layout_centerHorizontal="true"
+        app:cardBackgroundColor="?android:colorBackground">
 
         <LinearLayout
             android:orientation="vertical"

@@ -214,4 +214,8 @@
         <item name="android:scrollbars">none</item>
     </style>
 
+    <style name="GalleryTabs">
+        <item name="invertedTabBar">false</item>
+    </style>
+
 </resources>

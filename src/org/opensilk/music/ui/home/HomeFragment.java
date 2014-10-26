@@ -42,7 +42,7 @@ import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.home.adapter.HomePagerAdapter;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
-import org.opensilk.music.widgets.SlidingTabLayout;
+import org.opensilk.common.widget.SlidingTabLayout;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;

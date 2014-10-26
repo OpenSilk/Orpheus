@@ -31,7 +31,7 @@ import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.util.ViewStateSaver;
-import org.opensilk.music.widgets.SlidingTabLayout;
+import org.opensilk.common.widget.SlidingTabLayout;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
