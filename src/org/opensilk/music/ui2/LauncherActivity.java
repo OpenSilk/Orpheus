@@ -90,7 +90,7 @@ public class LauncherActivity extends ActionBarActivity implements
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
     @InjectView(R.id.main_toolbar) Toolbar mToolbar;
-    @InjectView(R.id.sliding_panel) SlidingUpPanelLayout mSlidingPanelContainer;
+    @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanelContainer;
 
     MortarActivityScope mActivityScope;
 
