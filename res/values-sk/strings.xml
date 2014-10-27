@@ -25,8 +25,8 @@
   <string name="page_genres">Žánre</string>
   <string name="menu_settings">Nastavenia</string>
   <string name="menu_search">Hľadať</string>
-  <string name="menu_shuffle">Náhodne prehrať všetko</string>
-  <string name="menu_play_all">Prehrať všetko</string>
+  <string name="menu_shuffle">Prehrať všetky náhodne</string>
+  <string name="menu_play_all">Prehrať všetky</string>
   <string name="menu_sort_by">Zoradiť podľa</string>
   <string name="menu_shop">Obchod s témami</string>
   <string name="menu_clear_queue">Vyčistiť poradie</string>
@@ -53,7 +53,7 @@
   <string name="sort_order_entry_track_list">Zoznam stôp</string>
   <string name="sort_order_entry_number_of_songs">Počet skladieb</string>
   <string name="sort_order_entry_number_of_albums">Počet albumov</string>
-  <string name="sort_order_entry_filename">Názov súboru</string>
+  <string name="sort_order_entry_filename">Názvu súboru</string>
   <string name="playlist_favorite">Obľúbené</string>
   <string name="playlist_favorites">Obľúbené</string>
   <string name="playlist_last_added">Naposledy pridané</string>
@@ -86,13 +86,13 @@
   <string name="accessibility_next">Ďalšie</string>
   <string name="accessibility_prev">Naspäť</string>
   <string name="accessibility_shuffle">Náhodne prehrať</string>
-  <string name="accessibility_shuffle_all">Náhodne prehrať všetko</string>
+  <string name="accessibility_shuffle_all">Prehrať všetky náhodne</string>
   <string name="accessibility_repeat">Opakovať</string>
   <string name="accessibility_repeat_all">Opakovať všetko</string>
   <string name="accessibility_repeat_one">Opakovať raz</string>
   <string name="pinned_to_home_screen">Skladba <xliff:g id="name">%s</xliff:g> bola pripnutá na domovskú obrazovku</string>
   <string name="could_not_be_pinned_to_home_screen">Skladba <xliff:g id="name">%s</xliff:g> nemohla byť pripnutá na domovskú obrazovku</string>
-  <string name="set_as_ringtone">Skladba \'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' bola nastavená ako zvonenie</string>
+  <string name="set_as_ringtone">Skladba \'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' bola nastavená ako vyzváňanie</string>
   <string name="theme_set">Téma <xliff:g id="name">%s</xliff:g> bola nastavená ako téma aplikácie</string>
   <string name="settings_ui_category">Rozhranie</string>
   <string name="settings_storage_category">Ukladací priestor</string>

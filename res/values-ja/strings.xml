@@ -62,10 +62,10 @@
   <string name="cancel">キャンセル</string>
   <string name="overwrite">上書き</string>
   <string name="new_playlist_name_template">プレイリスト<xliff:g id="number">%d</xliff:g></string>
-  <string name="create_playlist_prompt">プレイリストの名前</string>
+  <string name="create_playlist_prompt">プレイリスト名</string>
   <string name="delete_dialog_title"><xliff:g id="item" example="album">%s</xliff:g>を削除しますか？</string>
   <string name="cannot_be_undone">この操作は元に戻せません</string>
-  <string name="delete_warning">キャッシュされたイメージエントリを恒久的に削除します</string>
+  <string name="delete_warning">キャッシュされた画像エントリーを恒久的に削除します</string>
   <string name="new_photo">ギャラリーから写真を選択</string>
   <string name="google_search">Google検索</string>
   <string name="use_default">デフォルトの写真を使用</string>
@@ -76,7 +76,7 @@
   <string name="context_menu_rename_playlist">名前の変更</string>
   <string name="context_menu_delete">削除</string>
   <string name="context_menu_fetch_album_art">アルバムアートを取得</string>
-  <string name="context_menu_fetch_artist_image">アーティストの画像を取得</string>
+  <string name="context_menu_fetch_artist_image">アーティスト画像を取得</string>
   <string name="context_menu_open_in_play_store">Playストアで開く</string>
   <string name="context_menu_remove_from_recent">履歴から削除</string>
   <string name="context_menu_use_as_ringtone">着信音として使用</string>
@@ -89,7 +89,7 @@
   <string name="accessibility_shuffle_all">すべてシャッフル</string>
   <string name="accessibility_repeat">リピート</string>
   <string name="accessibility_repeat_all">すべてリピート</string>
-  <string name="accessibility_repeat_one">一曲リピート</string>
+  <string name="accessibility_repeat_one">1曲リピート</string>
   <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>をホーム画面に追加しました</string>
   <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>をホーム画面に追加できませんでした</string>
   <string name="set_as_ringtone">｢<xliff:g id="name" example="Alarm Bell">%s</xliff:g>｣を着信音として設定しました</string>
