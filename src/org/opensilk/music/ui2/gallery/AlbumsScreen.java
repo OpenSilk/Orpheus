@@ -17,9 +17,7 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.content.Context;
 import android.view.View;
-import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.utils.NavUtils;
@@ -33,7 +31,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui2.common.PopupMenuHandler;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
@@ -72,8 +70,9 @@ public class AlbumsScreen extends Screen {
     public static class Presenter extends BasePresenter<LocalAlbum> {
 
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<LocalAlbum> loader) {
-            super(preferences, artworkRequestor, loader);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
+                         RxLoader<LocalAlbum> loader, OverflowHandlers.LocalAlbums popupHandler) {
+            super(preferences, artworkRequestor, loader, popupHandler);
             Timber.v("new Albums.Presenter()");
         }
 
@@ -83,8 +82,10 @@ public class AlbumsScreen extends Screen {
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalAlbum>>() {
                 @Override
                 public void call(List<LocalAlbum> localAlbums) {
-                    adapter.addAll(localAlbums);
-                    showRecyclerView();
+                    if (viewNotNull()) {
+                        getAdapter().addAll(localAlbums);
+                        showRecyclerView();
+                    }
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -94,19 +95,19 @@ public class AlbumsScreen extends Screen {
             }, new Action0() {
                 @Override
                 public void call() {
-                    if (adapter.isEmpty()) showEmptyView();
+                    if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });
         }
 
         @Override
-        protected void handleItemClick(Context context, LocalAlbum item) {
-            NavUtils.openAlbumProfile(context, item);
+        protected void onItemClicked(View view, LocalAlbum item) {
+            NavUtils.openAlbumProfile(view.getContext(), item);
         }
 
         @Override
         protected BaseAdapter<LocalAlbum> newAdapter() {
-            return new Adapter(artworkRequestor);
+            return new Adapter(this, artworkRequestor);
         }
 
         @Override
@@ -166,33 +167,20 @@ public class AlbumsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<LocalAlbum> {
 
-        Adapter(ArtworkRequestManager artworkRequestor) {
-            super(artworkRequestor);
+        Adapter(BasePresenter<LocalAlbum> presenter, ArtworkRequestManager artworkRequestor) {
+            super(presenter, artworkRequestor);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            final LocalAlbum album = getItem(position);
+        public void onBindViewHolder(ViewHolder holder, LocalAlbum album) {
             ArtInfo artInfo = new ArtInfo(album.artistName, album.name, album.artworkUri);
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
             holder.title.setText(album.name);
             holder.subtitle.setText(album.artistName);
-            holder.overflow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    PopupMenu m = new PopupMenu(v.getContext(), v);
-                    PopupMenuHandler.populateMenu(m, album);
-                    m.show();
-                }
-            });
             holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork, artInfo, ArtworkType.THUMBNAIL));
         }
 
     }
+
+
 
 }

@@ -20,35 +20,38 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
+import com.andrew.apollo.provider.MusicProviderUtil;
+import com.andrew.apollo.utils.MusicUtils;
+import com.squareup.otto.Bus;
 
-import org.opensilk.music.api.RemoteLibrary;
+import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.common.util.ObjectUtils;
+import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui2.event.MakeToast;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import rx.Observable;
-import rx.android.operators.OperatorBroadcastRegister;
-import rx.android.schedulers.AndroidSchedulers;
+import rx.Scheduler;
+import rx.Subscriber;
+import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subjects.AsyncSubject;
-import rx.subjects.ReplaySubject;
 import timber.log.Timber;
 
 /**
@@ -78,13 +81,15 @@ public class MusicServiceConnection {
     }
 
     private final Context context;
+    private final Bus eventBus;
     // protected by synchronized methods
     private Token serviceToken;
 
     @Inject
-    public MusicServiceConnection(@ForApplication Context context) {
+    public MusicServiceConnection(@ForApplication Context context, @Named("activity") Bus eventBus) {
         Timber.v("new MusicServiceConnection");
         this.context = new ContextWrapper(context);
+        this.eventBus = eventBus;
     }
 
     public synchronized void bind() {
@@ -182,6 +187,30 @@ public class MusicServiceConnection {
                     iApolloService.next();
                 } catch (RemoteException e) {
                     //TODO
+                }
+            }
+        });
+    }
+
+    public void enqueueNext(final Func0<Song[]> func) {
+        enqueueSongs(func, MusicPlaybackService.NEXT);
+    }
+
+    public void enqueueEnd(final Func0<Song[]> func) {
+        enqueueSongs(func, MusicPlaybackService.LAST);
+    }
+
+    public void enqueueSongs(final Func0<Song[]> func, final int where) {
+        getObservable().subscribe(new SimpleObserver<IApolloService>() {
+            @Override
+            public void onNext(IApolloService iApolloService) {
+                try {
+                    Song[] songs = func.call();
+                    long[] providerIds = addSongsToMusicProvider(songs);
+                    iApolloService.enqueue(providerIds, where);
+                    eventBus.post(new MakeToast(R.plurals.NNNtrackstoqueue, providerIds.length));
+                } catch (RemoteException e) {
+                    eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
         });
@@ -286,6 +315,33 @@ public class MusicServiceConnection {
                     return Observable.just(iApolloService.getCurrentArtInfo());
                 } catch (RemoteException e) {
                     return Observable.error(e);
+                }
+            }
+        });
+    }
+
+    /*
+     * Helpers
+     */
+
+    public long[] addSongsToMusicProvider(Song[] songs) {
+        long[] providerids = new long[songs.length];
+        for (int ii=0; ii<songs.length; ii++) {
+            providerids[ii] = MusicProviderUtil.insertSong(context, songs[ii]);
+        }
+        return providerids;
+    }
+
+    public void playAllSongs(final Func0<Song[]> func, final int startPos, final boolean shuffle) {
+        getObservable().subscribe(new SimpleObserver<IApolloService>() {
+            @Override
+            public void onNext(IApolloService iApolloService) {
+                try {
+                    Song[] songs = func.call();
+                    long[] providerids = addSongsToMusicProvider(songs);
+                    MusicUtils.playAll(iApolloService, providerids, startPos, shuffle);
+                } catch (Exception e) {
+                    eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
         });

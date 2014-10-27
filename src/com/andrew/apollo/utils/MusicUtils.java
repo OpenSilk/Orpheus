@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import org.opensilk.music.R;
+import org.opensilk.music.util.MarkedForRemoval;
 import org.opensilk.music.util.OrderPreservingCursor;
 
 import com.andrew.apollo.model.LocalAlbum;
@@ -48,7 +49,6 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicProviderUtil;
-import com.andrew.apollo.provider.MusicStore;
 import com.andrew.apollo.provider.RecentStore;
 
 import org.opensilk.music.api.model.Song;
@@ -62,8 +62,6 @@ import org.opensilk.music.util.Selections;
 import java.io.File;
 import java.util.Arrays;
 import java.util.WeakHashMap;
-
-import static com.andrew.apollo.provider.MusicProvider.RECENTS_URI;
 
 /**
  * A collection of helpers directly related to music or Apollo's service.
@@ -549,7 +547,7 @@ public final class MusicUtils {
      * @param id The ID of the track to remove.
      * @return removes track from a playlist or the queue.
      */
-    @Deprecated
+    @MarkedForRemoval
     public static final int removeTrackOLD(final long id) {
         try {
             if (sService != null) {
@@ -648,6 +646,7 @@ public final class MusicUtils {
      * @param id The ID of the artist.
      * @return The song list for an artist.
      */
+    @MarkedForRemoval
     public static LocalSong[] getLocalSongListForArtist(final Context context, final long id) {
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -693,6 +692,7 @@ public final class MusicUtils {
         return sEmptyList;
     }
 
+    @MarkedForRemoval
     public static LocalSong[] getLocalSongListForGenre(final Context context, final long id) {
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Genres.Members.getContentUri("external", id),
@@ -765,41 +765,46 @@ public final class MusicUtils {
         }
     }
 
+
+    @Deprecated
+    public static void playAll(final Context context, final long[] list, int position,
+            final boolean forceShuffle) {
+        try {
+            playAll(sService, list, position, forceShuffle);
+        } catch (Exception ignored) { }
+    }
+
     /**
-     * @param context The {@link Context} to use.
      * @param list The list of songs to play. (ids must be from musicprovider (recent id)
      * @param position Specify where to start.
      * @param forceShuffle True to force a shuffle, false otherwise.
      */
-    public static void playAll(final Context context, final long[] list, int position,
-            final boolean forceShuffle) {
-        if (list.length == 0 || sService == null) {
+    public static void playAll(IApolloService service, long[] list, int position, boolean forceShuffle) throws RemoteException {
+        if (list.length == 0 || service == null) {
             return;
         }
-        try {
-            if (forceShuffle) {
-                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-            } else {
-                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
-            }
-            final long currentId = sService.getAudioId();
-            final int currentQueuePosition = getQueuePosition();
-            if (position != -1 && currentQueuePosition == position && currentId == list[position]) {
-                final long[] playlist = getQueue();
-                if (Arrays.equals(list, playlist)) {
-                    sService.play();
-                    return;
-                }
-            }
-            if (position < 0) {
-                position = 0;
-            }
-            sService.open(list, forceShuffle ? -1 : position);
-            sService.play();
-        } catch (final RemoteException ignored) {
+        if (forceShuffle) {
+            service.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+        } else {
+            service.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
         }
+        final long currentId = service.getAudioId();
+        final int currentQueuePosition = getQueuePosition();
+        if (position != -1 && currentQueuePosition == position && currentId == list[position]) {
+            final long[] playlist = getQueue();
+            if (Arrays.equals(list, playlist)) {
+                service.play();
+                return;
+            }
+        }
+        if (position < 0) {
+            position = 0;
+        }
+        service.open(list, forceShuffle ? -1 : position);
+        service.play();
     }
 
+    @Deprecated
     public static void playAllSongs(Context context, Song[] list, int position, boolean forceShuffle) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             throw new RuntimeException("Stop calling from main thread");
@@ -839,6 +844,7 @@ public final class MusicUtils {
     /**
      * @param list The list to enqueue.
      */
+    @MarkedForRemoval
     public static void playNext(long[] recentslist) {
         if (sService == null) {
             return;
@@ -849,6 +855,7 @@ public final class MusicUtils {
         }
     }
 
+    @MarkedForRemoval
     public static void playNext(Context context, Song[] list) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             throw new RuntimeException("Stop calling from main thread");
@@ -1321,8 +1328,9 @@ public final class MusicUtils {
      * @param context The {@link Context} to use.
      * @param playlistId The playlist Id.
      */
+    @MarkedForRemoval
     public static void playPlaylist(final Context context, final long playlistId, final boolean forceShuffle) {
-        playAllSongs(context, CursorHelpers.getLocalSongListForPlaylist(context, playlistId), 0, forceShuffle);
+        playAllSongs(context, CursorHelpers.getSongsForPlaylist(context, playlistId), 0, forceShuffle);
     }
 
     /**
@@ -1330,8 +1338,9 @@ public final class MusicUtils {
      *
      * @param context The {@link Context} to use
      */
+    @MarkedForRemoval
     public static void playLastAdded(final Context context, final boolean forceShuffle) {
-        playAllSongs(context, CursorHelpers.getLocalSongListForLastAdded(context), 0, forceShuffle);
+        playAllSongs(context, CursorHelpers.getSongsForLastAdded(context), 0, forceShuffle);
     }
 
     /**

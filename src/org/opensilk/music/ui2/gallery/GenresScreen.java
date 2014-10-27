@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
@@ -32,12 +31,9 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui2.common.PopupMenuHandler;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -70,8 +66,9 @@ public class GenresScreen extends Screen {
     public static class Presenter extends BasePresenter<Genre> {
 
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<Genre> loader) {
-            super(preferences, artworkRequestor, loader);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
+                         RxLoader<Genre> loader, OverflowHandlers.Genres popupHandler) {
+            super(preferences, artworkRequestor, loader, popupHandler);
         }
 
         @Override
@@ -79,8 +76,10 @@ public class GenresScreen extends Screen {
             subscription = loader.getObservable().subscribe(new Action1<Genre>() {
                 @Override
                 public void call(Genre genre) {
-                    adapter.add(genre);
-                    showRecyclerView();
+                    if (viewNotNull()) {
+                        getAdapter().add(genre);
+                        showRecyclerView();
+                    }
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -90,19 +89,19 @@ public class GenresScreen extends Screen {
             }, new Action0() {
                 @Override
                 public void call() {
-                    if (adapter.isEmpty()) showEmptyView();
+                    if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });
         }
 
         @Override
-        protected void handleItemClick(Context context, Genre item) {
-            NavUtils.openGenreProfile(context, item);
+        protected void onItemClicked(View view, Genre item) {
+            NavUtils.openGenreProfile(view.getContext(), item);
         }
 
         @Override
         protected BaseAdapter<Genre> newAdapter() {
-            return new Adapter(artworkRequestor);
+            return new Adapter(this, artworkRequestor);
         }
 
         @Override
@@ -119,26 +118,17 @@ public class GenresScreen extends Screen {
 
     static class Adapter extends BaseAdapter<Genre> {
 
-        Adapter(ArtworkRequestManager artworkRequestor) {
-            super(artworkRequestor);
+        Adapter(BasePresenter<Genre> presenter, ArtworkRequestManager artworkRequestor) {
+            super(presenter, artworkRequestor);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            final Genre genre = getItem(position);
+        public void onBindViewHolder(ViewHolder holder, Genre genre) {
             holder.title.setText(genre.mGenreName);
             Context context = holder.itemView.getContext();
             String l2 = MusicUtils.makeLabel(context, R.plurals.Nalbums, genre.mAlbumNumber)
                     + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, genre.mSongNumber);
             holder.subtitle.setText(l2);
-            holder.overflow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    PopupMenu m = new PopupMenu(v.getContext(), v);
-                    PopupMenuHandler.populateMenu(m, genre);
-                    m.show();
-                }
-            });
             switch (holder.artNumber) {
                 case 4:
                     if (genre.mAlbumIds.length >= 4) {

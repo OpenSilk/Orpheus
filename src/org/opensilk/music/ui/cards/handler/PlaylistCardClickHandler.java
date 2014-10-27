@@ -28,7 +28,6 @@ import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.provider.MusicProvider;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Subscribe;
@@ -96,9 +95,9 @@ public class PlaylistCardClickHandler {
                     public CharSequence execute() {
                         LocalSong[] list;
                         if (playlist.mPlaylistId == -2) {
-                            list = CursorHelpers.getLocalSongListForLastAdded(getActivity());
+                            list = CursorHelpers.getSongsForLastAdded(getActivity());
                         } else {
-                            list = CursorHelpers.getLocalSongListForPlaylist(getActivity(), playlist.mPlaylistId);
+                            list = CursorHelpers.getSongsForPlaylist(getActivity(), playlist.mPlaylistId);
                         }
                         return MusicUtils.addSongsToQueueSilent(getActivity(), list);
                     }

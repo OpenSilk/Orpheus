@@ -49,7 +49,7 @@ public class ArtistGridLoader extends WrappedAsyncTaskLoader<List<Object>> {
     public List<Object> loadInBackground() {
         List<Object> objs = new ArrayList<>();
         // get all songs;
-        Cursor c = CursorHelpers.makeArtistSongsCursor(getContext(), artist.artistId);
+        Cursor c = CursorHelpers.makeLocalArtistSongsCursor(getContext(), artist.artistId);
         final List<Long> songIds = new ArrayList<>(c.getCount());
         final Set<Long> albumIdsSet = new HashSet<>(c.getCount());
         if (c != null) {

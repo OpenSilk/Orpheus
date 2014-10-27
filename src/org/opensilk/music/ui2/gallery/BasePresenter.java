@@ -23,16 +23,16 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.View;
+import android.widget.PopupMenu;
 
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.MusicApp;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.ui2.common.OverflowAction;
+import org.opensilk.music.ui2.common.OverflowHandler;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -47,18 +47,17 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected final AppPreferences preferences;
     protected final ArtworkRequestManager artworkRequestor;
     protected final RxLoader<T> loader;
-
-    protected final BaseAdapter<T> adapter;
+    protected final OverflowHandler<T> popupHandler;
 
     protected Subscription subscription;
     protected ActionBarOwner.MenuConfig actionBarMenu;
 
-    public BasePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<T> loader) {
+    public BasePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
+                         RxLoader<T> loader, OverflowHandler<T> popupHandler) {
         this.preferences = preferences;
         this.artworkRequestor = artworkRequestor;
         this.loader = loader;
-
-        adapter = newAdapter();
+        this.popupHandler = popupHandler;
     }
 
     @Override
@@ -73,7 +72,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         setupRecyclerView(false);
         if (loader.hasCache()) {
             Timber.d("Cache hit %s", getClass());
-            adapter.addAll(loader.getCache());
+            getAdapter().addAll(loader.getCache());
             getView().setListShown(true, false);
         } else if (subscription == null || subscription.isUnsubscribed()) {
             getView().setLoading(true);
@@ -90,35 +89,47 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
 
     // Init the recyclerview
     protected void setupRecyclerView(boolean clear) {
-        GalleryPageView v = getView();
-        if (v == null) return;
-        v.getListView().setHasFixedSize(!isStaggered());
-        v.getListView().setLayoutManager(getLayoutManager(v.getContext()));
+        if (!viewNotNull()) return;
+        BaseAdapter<T> adapter = newAdapter();
         adapter.setGridStyle(isGrid() || isStaggered());
-        v.getListView().swapAdapter(adapter, clear);
+        if (loader.hasCache()) adapter.getItems().addAll(loader.getCache());
+        RecyclerView v = getView().getListView();
+        v.setHasFixedSize(!isStaggered());
+        v.setLayoutManager(getLayoutManager(v.getContext()));
+        v.swapAdapter(adapter, clear);
     }
 
     // reset the recyclerview for eg layoutmanager change
     protected void resetRecyclerView() {
-        GalleryPageView v = getView();
-        if (v == null) return;
         setupRecyclerView(true);
     }
 
     protected void showRecyclerView() {
-        GalleryPageView v = getView();
-        if (v == null) return;
-        v.setListShown(true, true);
+        if (viewNotNull()) getView().setListShown(true, true);
     }
 
     protected void showEmptyView() {
-        GalleryPageView v = getView();
-        if (v == null) return;
-        v.setListEmpty(true, true);
+        if (viewNotNull()) {
+            setEmptyText();
+            getView().setListEmpty(true, true);
+        }
+    }
+
+    protected void setEmptyText() {
+        if (viewNotNull()) getView().setEmptyText(R.string.empty_music);
+    }
+
+    protected BaseAdapter<T> getAdapter() {
+        if (!viewNotNull()) throw new NullPointerException("You didn't check if list was null");
+        return (BaseAdapter<T>) getView().getListView().getAdapter();
+    }
+
+    protected boolean viewNotNull() {
+        return getView() != null;
     }
 
     //handle item clicks
-    protected abstract void handleItemClick(Context context, T item);
+    protected abstract void onItemClicked(View view, T item);
     // make a new adapter
     protected abstract BaseAdapter<T> newAdapter();
     // start the loader
@@ -127,8 +138,16 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     // cancels any ongoing load and starts a new one
     public void reload() {
         if (subscription != null) subscription.unsubscribe();
-        adapter.clear();
+        if (viewNotNull()) getAdapter().clear();
         load();
+    }
+
+    protected void onCreateOverflowMenu(PopupMenu m, T item) {
+        popupHandler.populateMenu(m, item);
+    }
+
+    protected boolean onOverflowItemClicked(OverflowAction action, T item) {
+        return popupHandler.handleClick(action, item);
     }
 
     protected boolean isGrid() {

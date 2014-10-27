@@ -17,9 +17,7 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.content.Context;
 import android.view.View;
-import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -32,12 +30,9 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui2.common.PopupMenuHandler;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -70,8 +65,9 @@ public class PlaylistsScreen extends Screen {
     public static class Presenter extends BasePresenter<Playlist> {
 
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<Playlist> loader) {
-            super(preferences, artworkRequestor, loader);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
+                         RxLoader<Playlist> loader, OverflowHandlers.Playlists popupHandler) {
+            super(preferences, artworkRequestor, loader, popupHandler);
         }
 
         @Override
@@ -79,8 +75,10 @@ public class PlaylistsScreen extends Screen {
             subscription = loader.getObservable().subscribe(new Action1<Playlist>() {
                 @Override
                 public void call(Playlist playlist) {
-                    adapter.add(playlist);
-                    showRecyclerView();
+                    if (viewNotNull()) {
+                        getAdapter().add(playlist);
+                        showRecyclerView();
+                    }
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -90,19 +88,19 @@ public class PlaylistsScreen extends Screen {
             }, new Action0() {
                 @Override
                 public void call() {
-                    if (adapter.isEmpty()) showEmptyView();
+                    if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });
         }
 
         @Override
-        protected void handleItemClick(Context context, Playlist item) {
-            NavUtils.openPlaylistProfile(context, item);
+        protected void onItemClicked(View view, Playlist item) {
+            NavUtils.openPlaylistProfile(view.getContext(), item);
         }
 
         @Override
         protected BaseAdapter<Playlist> newAdapter() {
-            return new Adapter(artworkRequestor);
+            return new Adapter(this, artworkRequestor);
         }
 
         @Override
@@ -119,23 +117,14 @@ public class PlaylistsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<Playlist> {
 
-        Adapter(ArtworkRequestManager artworkRequestor) {
-            super(artworkRequestor);
+        Adapter(BasePresenter<Playlist> presenter, ArtworkRequestManager artworkRequestor) {
+            super(presenter, artworkRequestor);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            final Playlist playlist = getItem(position);
+        public void onBindViewHolder(ViewHolder holder, Playlist playlist) {
             holder.title.setText(playlist.mPlaylistName);
             holder.subtitle.setText(MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, playlist.mSongNumber));
-            holder.overflow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    PopupMenu m = new PopupMenu(v.getContext(), v);
-                    PopupMenuHandler.populateMenu(m, playlist);
-                    m.show();
-                }
-            });
             switch (holder.artNumber) {
                 case 4:
                     if (playlist.mAlbumIds.length >= 4) {

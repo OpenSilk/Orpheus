@@ -30,22 +30,13 @@ import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.RecentSong;
-import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicStore;
-import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.GraphHolder;
-import org.opensilk.music.MusicApp;
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.api.model.Album;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.silkdagger.DaggerInjector;
 
-import java.util.Arrays;
 import java.util.Collection;
-
-import hugo.weaving.DebugLog;
-import timber.log.Timber;
 
 /**
  * Created by drew on 2/22/14.
@@ -66,6 +57,7 @@ public class CursorHelpers {
         // static
     }
 
+    @MarkedForRemoval
     public static LocalSong makeLocalSongFromCursor(Context context, final Cursor c) {
         // Copy the song Id
         final long id = getLongOrZero(c, BaseColumns._ID);
@@ -160,6 +152,7 @@ public class CursorHelpers {
         return new LocalArtist(id, artistName, albumCount, songCount);
     }
 
+    @MarkedForRemoval
     public static Genre makeGenreFromCursor(final Cursor c) {
         final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
         final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
@@ -170,6 +163,7 @@ public class CursorHelpers {
         return new Genre(id, name, songNumber, albumNumber, songs, albums);
     }
 
+    @MarkedForRemoval
     public static Playlist makePlaylistFromCursor(final Cursor c) {
         final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
         final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
@@ -224,6 +218,34 @@ public class CursorHelpers {
                 MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
     }
 
+    public static LocalSong[] getSongsForGenre(Context context, long id) {
+        Cursor cursor = context.getContentResolver().query(
+                Uris.GENRE(id),
+                Projections.GENRE_SONGS,
+                Selections.GENRE_SONGS,
+                SelectionArgs.GENRE_SONGS,
+//                MediaStore.Audio.AudioColumns.ALBUM_KEY + ", "
+//                    + MediaStore.Audio.AudioColumns.TRACK + ", "
+//                    + MediaStore.Audio.Media.DEFAULT_SORT_ORDER
+                SortOrder.GENRE_SONGS);
+        if (cursor != null) {
+            try {
+                LocalSong[] songs = new LocalSong[cursor.getCount()];
+                if (cursor.moveToFirst()) {
+                    int ii=0;
+                    do {
+                        songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                    } while (cursor.moveToNext());
+                }
+                return songs;
+            } finally {
+                cursor.close();
+            }
+        }
+        return sEmptySongList;
+    }
+
+    @MarkedForRemoval
     public static Cursor makeSongCursor(final Context context) {
         AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
         final String sortOrder = settings.getString(AppPreferences.SONG_SORT_ORDER,
@@ -244,7 +266,8 @@ public class CursorHelpers {
     }
 
     public static String getAlbumArtist(Context context, long albumId) {
-        Cursor c = context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_ALBUMS,
+        Cursor c = context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_ALBUMS,
                 new String[]{ MediaStore.Audio.AlbumColumns.ARTIST },
                 BaseColumns._ID + "=?",
                 new String[]{ String.valueOf(albumId) },
@@ -276,13 +299,32 @@ public class CursorHelpers {
                 BaseColumns._ID);
     }
 
-    public static Cursor makeArtistSongsCursor(Context context, long artistId) {
+    public static Cursor makeLocalArtistSongsCursor(Context context, long artistId) {
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG + " AND " + MediaStore.Audio.AudioColumns.ARTIST_ID + "=" + String.valueOf(artistId),
-                SelectionArgs.LOCAL_SONG,
+                Selections.LOCAL_ARTIST_SONGS,
+                SelectionArgs.LOCAL_ARTIST_SONGS(artistId),
                 SortOrder.LOCAL_ARTIST_SONGS);
+    }
+
+    public static LocalSong[] getSongsForLocalArtist(Context context, long artistId) {
+        Cursor c = makeLocalArtistSongsCursor(context, artistId);
+        if (c != null) {
+            try {
+                LocalSong[] songs = new LocalSong[c.getCount()];
+                if (c.moveToFirst()) {
+                    int ii= 0;
+                    do {
+                        songs[ii++] = CursorHelpers.makeLocalSongFromCursor(c);
+                    } while (c.moveToNext());
+                }
+                return songs;
+            } finally {
+                c.close();
+            }
+        }
+        return sEmptySongList;
     }
 
     public static Cursor makeLocalAlbumsCursor(Context context, long[] albumIds) {
@@ -401,7 +443,7 @@ public class CursorHelpers {
         return sEmptySongList;
     }
 
-    public static LocalSong[] getLocalSongListForPlaylist(Context context, long playlistId) {
+    public static LocalSong[] getSongsForPlaylist(Context context, long playlistId) {
         Cursor cursor = context.getContentResolver().query(
                 Uris.PLAYLIST(playlistId),
                 Projections.PLAYLIST_SONGS,
@@ -425,7 +467,7 @@ public class CursorHelpers {
         return sEmptySongList;
     }
 
-    public static LocalSong[] getLocalSongListForLastAdded(Context context) {
+    public static LocalSong[] getSongsForLastAdded(Context context) {
         final Cursor cursor = makeLastAddedCursor(context);
         if (cursor != null) {
             try {

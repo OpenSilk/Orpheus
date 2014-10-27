@@ -114,8 +114,8 @@ public class GalleryPageView extends FrameLayout {
         return mList;
     }
 
-    public void setEmptyText(CharSequence text) {
-        mEmptyText.setText(text);
+    public void setEmptyText(int stringRes) {
+        mEmptyText.setText(getContext().getString(stringRes));
     }
 
     public void setLoading(boolean shown) {

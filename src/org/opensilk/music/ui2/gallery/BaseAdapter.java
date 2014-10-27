@@ -17,10 +17,9 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -28,10 +27,9 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import org.opensilk.common.theme.TintDrawableWrapper;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.ui2.theme.Themer;
+import org.opensilk.music.ui2.common.OverflowAction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,28 +46,82 @@ import rx.subscriptions.CompositeSubscription;
 public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.ViewHolder> {
 
     protected final List<T> items;
+    protected final BasePresenter<T> presenter;
     protected final ArtworkRequestManager artworkRequestor;
 
-//    private LayoutInflater inflater;
+    private LayoutInflater inflater;
     protected boolean mGridStyle = true;
 
-    public interface ItemClickListener<T> {
-        void OnItemClick(View view, T item);
-    }
-
-    protected ItemClickListener<T> itemClickListener;
-    protected PopupMenu.OnMenuItemClickListener overflowClickListener;
-
-    public BaseAdapter(ArtworkRequestManager artworkRequestor) {
+    public BaseAdapter(BasePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
         this.items = new ArrayList<>();
+        this.presenter = presenter;
         this.artworkRequestor = artworkRequestor;
         setHasStableIds(true);
     }
 
-    public BaseAdapter(List<T> items, ArtworkRequestManager artworkRequestor) {
-        this.items = items;
+    public BaseAdapter(List<T> items, BasePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
+        this.items = new ArrayList<>(items); //copy probably not needed
+        this.presenter = presenter;
         this.artworkRequestor = artworkRequestor;
         setHasStableIds(true);
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (inflater == null) {
+            inflater = LayoutInflater.from(parent.getContext());
+        }
+        View view = inflater.inflate(viewType, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int i) {
+        final T item = getItem(i);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.onItemClicked(v, item);
+            }
+        });
+        holder.overflow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu m = new PopupMenu(v.getContext(), v);
+                presenter.onCreateOverflowMenu(m, item);
+                m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem i) {
+                        try {
+                            OverflowAction a = OverflowAction.valueOf(i.getItemId());
+                            return presenter.onOverflowItemClicked(a, item);
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
+                    }
+                });
+                m.show();
+            }
+        });
+        onBindViewHolder(holder, item);
+    }
+
+    protected abstract void onBindViewHolder(ViewHolder holder, T item);
+
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.reset();
+    }
+
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return getItem(position).hashCode();
     }
 
     public List<T> getItems() {
@@ -99,41 +151,6 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
 
     public boolean isEmpty() {
         return items.isEmpty();
-    }
-
-    public void setItemClickListener(ItemClickListener<T> l) {
-        this.itemClickListener = l;
-    }
-
-    public void setOverflowClickListener(PopupMenu.OnMenuItemClickListener l) {
-        this.overflowClickListener = l;
-    }
-
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //Not caching this right now so i dont hold any context stuff
-        //in the presenters
-//        if (inflater == null) {
-          LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-//        }
-        View view = inflater.inflate(viewType, parent, false);
-        return new ViewHolder(view);
-    }
-
-    @Override
-    public void onViewRecycled(ViewHolder holder) {
-        super.onViewRecycled(holder);
-        holder.reset();
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return getItem(position).hashCode();
     }
 
     @Override

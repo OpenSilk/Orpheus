@@ -17,9 +17,7 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.content.Context;
 import android.view.View;
-import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -34,7 +32,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui2.common.PopupMenuHandler;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
@@ -73,8 +71,9 @@ public class ArtistsScreen extends Screen {
     public static class Presenter extends BasePresenter<LocalArtist> {
 
         @Inject
-        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor, RxLoader<LocalArtist> loader) {
-            super(preferences, artworkRequestor, loader);
+        public Presenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
+                         RxLoader<LocalArtist> loader, OverflowHandlers.LocalArtists popupHandler) {
+            super(preferences, artworkRequestor, loader, popupHandler);
             Timber.v("new ArtistsScreen.Presenter()");
         }
 
@@ -84,8 +83,10 @@ public class ArtistsScreen extends Screen {
             subscription = loader.getListObservable().subscribe(new Action1<List<LocalArtist>>() {
                 @Override
                 public void call(List<LocalArtist> localArtists) {
-                    adapter.addAll(localArtists);
-                    showRecyclerView();
+                    if (viewNotNull()) {
+                        getAdapter().addAll(localArtists);
+                        showRecyclerView();
+                    }
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -95,19 +96,19 @@ public class ArtistsScreen extends Screen {
             }, new Action0() {
                 @Override
                 public void call() {
-                    if (adapter.isEmpty()) showEmptyView();
+                    if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });
         }
 
         @Override
-        protected void handleItemClick(Context context, LocalArtist item) {
-            NavUtils.openArtistProfile(context, item);
+        protected void onItemClicked(View view, LocalArtist item) {
+            NavUtils.openArtistProfile(view.getContext(), item);
         }
 
         @Override
         protected BaseAdapter<LocalArtist> newAdapter() {
-            return new Adapter(artworkRequestor);
+            return new Adapter(this, artworkRequestor);
         }
 
         @Override
@@ -164,26 +165,17 @@ public class ArtistsScreen extends Screen {
 
     static class Adapter extends BaseAdapter<LocalArtist> {
 
-        Adapter(ArtworkRequestManager artworkRequestor) {
-            super(artworkRequestor);
+        Adapter(BasePresenter<LocalArtist> presenter, ArtworkRequestManager artworkRequestor) {
+            super(presenter, artworkRequestor);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            final LocalArtist artist = getItem(position);
+        public void onBindViewHolder(ViewHolder holder, LocalArtist artist) {
             ArtInfo artInfo = new ArtInfo(artist.name, null, null);
             holder.title.setText(artist.name);
             String subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount)
                 + ", " + MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
             holder.subtitle.setText(subtitle);
-            holder.overflow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    PopupMenu m = new PopupMenu(v.getContext(), v);
-                    PopupMenuHandler.populateMenu(m, artist);
-                    m.show();
-                }
-            });
             holder.subscriptions.add(artworkRequestor.newArtistRequest((AnimatedImageView)holder.artwork, artInfo, ArtworkType.THUMBNAIL));
         }
     }
