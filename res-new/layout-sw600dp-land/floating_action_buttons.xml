@@ -23,64 +23,63 @@
 
     <org.opensilk.music.widgets.FloatingActionButton
         android:id="@+id/floating_action_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:fabIcon="@drawable/ic_action_playback_play_white"
-        app:fabColor="accent"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="96dp"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="100dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        style="?fabPlayStyle"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
         android:id="@+id/floating_action_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:fabIcon="@drawable/ic_action_playback_next_black"
-        app:fabColor="white"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="8dp"
         android:layout_below="@id/floating_action_button"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        style="?fabNextStyle"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
         android:id="@+id/floating_action_prev"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:fabIcon="@drawable/ic_action_playback_prev_black"
-        app:fabColor="white"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="8dp"
         android:layout_below="@id/floating_action_next"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        style="?fabPrevStyle"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
         android:id="@+id/floating_action_shuffle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:fabIcon="@drawable/ic_action_playback_shuffle_black"
-        app:fabColor="white"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="8dp"
         android:layout_below="@id/floating_action_prev"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        style="?fabShuffleStyle"/>
 
     <org.opensilk.music.widgets.FloatingActionButton
         android:id="@+id/floating_action_repeat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:fabIcon="@drawable/ic_action_playback_repeat_black"
-        app:fabColor="white"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="8dp"
         android:layout_below="@id/floating_action_shuffle"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        style="?fabRepeatStyle"/>
 
 
 </merge>

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.widgets;
+package org.opensilk.common.widget;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
@@ -34,7 +35,14 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/14/14.
  */
-public class FloatingActionButtonRelativeLayout extends RelativeLayout {
+public abstract class FlingyFabLayout extends RelativeLayout {
+
+    protected enum Direction {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT,
+    }
 
     final ViewDragHelper dragHelper;
 
@@ -42,7 +50,7 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
     int horizontalRange;
     int draggingState;
 
-    public FloatingActionButtonRelativeLayout(Context context, AttributeSet attrs) {
+    public FlingyFabLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         dragHelper = ViewDragHelper.create(this, new DragHelperCallback());
     }
@@ -53,7 +61,7 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         dragHelper.processTouchEvent(event);
         return true;
     }
@@ -73,16 +81,14 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
         }
     }
 
-    protected enum Direction {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-    }
-
-    protected void onFabFling(Direction direction) {
+    /**
+     * Called when child is release, override to perform actions
+     */
+    protected void onFabFling(View child, Direction direction) {
 
     }
+
+    public abstract boolean canCaptureView(View child, int pointerId);
 
     private class DragHelperCallback extends ViewDragHelper.Callback {
 
@@ -93,38 +99,24 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
         public void onViewDragStateChanged(int state) {
             super.onViewDragStateChanged(state);
             if (state == draggingState) return;
-            if ((draggingState == ViewDragHelper.STATE_DRAGGING || draggingState == ViewDragHelper.STATE_SETTLING)
-                    && state == ViewDragHelper.STATE_IDLE) {
-                // the view stopped from moving.
-
-                //TODO return to start
-            }
-            if (state == ViewDragHelper.STATE_DRAGGING) {
-//                onStartDragging();
-            }
             draggingState = state;
-        }
-
-        @Override
-        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            super.onViewPositionChanged(changedView, left, top, dx, dy);
         }
 
         @Override
         public void onViewCaptured(View capturedChild, int activePointerId) {
             startPosTop = capturedChild.getTop();
             startPosLeft = capturedChild.getLeft();
-            Timber.d("onViewCaptured startPos x=%d, y=%d", startPosTop, startPosLeft);
+//            Timber.d("onViewCaptured startPos x=%d, y=%d", startPosTop, startPosLeft);
         }
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            Timber.d( "onViewReleased(xvel=%f, yvel=%f", xvel, yvel);
+//            Timber.d( "onViewReleased(xvel=%f, yvel=%f", xvel, yvel);
             int endPosTop = releasedChild.getTop();
             int entPosLeft = releasedChild.getLeft();
             int dTop = startPosTop - endPosTop;
             int dLeft = startPosLeft - entPosLeft;
-            Timber.d( "Direction dTop=%d dLeft=%d", dTop, dLeft);
+//            Timber.d( "Direction dTop=%d dLeft=%d", dTop, dLeft);
             String dir = "";
             if (Math.abs(dTop) > Math.abs(dLeft)) {
                 //VERTICAL
@@ -132,11 +124,11 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
                 if (dTop > 0) {
                     //UP
                     dir += " UP";
-                    onFabFling(Direction.UP);
+                    onFabFling(releasedChild, Direction.UP);
                 } else {
                     //DOWN
                     dir += " DOWN";
-                    onFabFling(Direction.DOWN);
+                    onFabFling(releasedChild, Direction.DOWN);
                 }
             } else {
                 //HORIZONTAL
@@ -144,21 +136,16 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
                 if (dLeft > 0) {
                     //LEFT
                     dir += " LEFT";
-                    onFabFling(Direction.LEFT);
+                    onFabFling(releasedChild, Direction.LEFT);
                 } else {
                     //RIGHT
                     dir += " RIGHT";
-                    onFabFling(Direction.RIGHT);
+                    onFabFling(releasedChild, Direction.RIGHT);
                 }
             }
-            Timber.d( "Overall Direction = %s", dir);
+//            Timber.d( "Overall Direction = %s", dir);
             dragHelper.settleCapturedViewAt(startPosLeft, startPosTop);
             invalidate();
-        }
-
-        @Override
-        public int getOrderedChildIndex(int index) {
-            return super.getOrderedChildIndex(index);
         }
 
         @Override
@@ -173,7 +160,7 @@ public class FloatingActionButtonRelativeLayout extends RelativeLayout {
 
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            return child.getId() == R.id.floating_action_button;
+            return canCaptureView(child, pointerId);
         }
 
         @Override

@@ -27,13 +27,12 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.ImageButton;
 
 import org.opensilk.music.R;
 
 import org.opensilk.music.ui2.theme.Themer;
 import org.opensilk.music.widgets.FloatingActionButton;
-import org.opensilk.music.widgets.FloatingActionButtonRelativeLayout;
+import org.opensilk.common.widget.FlingyFabLayout;
 
 import javax.inject.Inject;
 
@@ -45,7 +44,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/14/14.
  */
-public class MainView extends FloatingActionButtonRelativeLayout {
+public class MainView extends FlingyFabLayout {
 
     @Inject
     MainBlueprint.Presenter presenter;
@@ -116,19 +115,19 @@ public class MainView extends FloatingActionButtonRelativeLayout {
     }
 
     @Override
-    protected void onFabFling(Direction direction) {
-        switch (direction) {
-            case UP:
-                presenter.openQueue();
-                break;
-            case DOWN:
-                presenter.closeQueue();
-                break;
-            case RIGHT:
-                break;
-            case LEFT:
-                break;
+    public boolean canCaptureView(View child, int pointerId) {
+        if (child.getId() == fabPlay.getId()) {
+            return true;
+        } else if (fabNext.getVisibility() == VISIBLE && child.getId() == fabNext.getId()) {
+            return true;
+        } else if (fabPrev.getVisibility() == VISIBLE && child.getId() == fabPrev.getId()) {
+            return true;
+        } else if (fabRepeat.getVisibility() == VISIBLE && child.getId() == fabRepeat.getId()) {
+            return true;
+        } else if (fabShuffle.getVisibility() == VISIBLE && child.getId() == fabShuffle.getId()) {
+            return true;
         }
+        return false;
     }
 
     void setupActionButton() {
