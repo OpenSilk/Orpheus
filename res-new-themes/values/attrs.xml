@@ -29,5 +29,6 @@
         <attr name="gridTileDescriptionStyle" format="reference"/>
         <attr name="gridTileDescriptionTitleStyle" format="reference"/>
         <attr name="gridTileDescriptionSubTitleStyle" format="reference"/>
+        <attr name="settingsCardBackgroundColor" format="color"/>
     </declare-styleable>
 </resources>

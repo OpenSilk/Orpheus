@@ -5,23 +5,30 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui.activities.ActivityModule;
+import org.opensilk.music.ui.activities.BaseActivity;
 import org.opensilk.music.ui.activities.BaseDialogActivity;
+
+import butterknife.ButterKnife;
 
 /**
  * Created by andrew on 2/28/14.
  */
-public class SettingsActivity extends BaseDialogActivity {
+public class SettingsActivity extends BaseActivity {
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (savedInstanceState == null) {
             //Load the main fragment
@@ -50,6 +57,17 @@ public class SettingsActivity extends BaseDialogActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    @Override
+    protected int getThemeId() {
+        boolean light = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
+        return light ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark;
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.blank_framelayout;
     }
 
     @Override

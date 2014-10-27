@@ -6,7 +6,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="160dp"
     android:layout_width="match_parent"
-    app:cardPreventCornerOverlap="true">
+    app:cardPreventCornerOverlap="true"
+    app:cardBackgroundColor="?settingsCardBackgroundColor">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -32,8 +32,8 @@ public abstract class SettingsFragment extends PreferenceFragment {
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (mTitle != null) {
-//            ActionBarActivity activity = (ActionBarActivity) getActivity();
-//            activity.getSupportActionBar().setTitle(mTitle);
+            ActionBarActivity activity = (ActionBarActivity) getActivity();
+            activity.setTitle(mTitle);
         }
     }
 

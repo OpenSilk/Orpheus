@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -54,8 +55,8 @@ public class SettingsMainFragment extends Fragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        ActionBarActivity activity = (ActionBarActivity) getActivity();
-//        activity.getSupportActionBar().setTitle(R.string.settings_title);
+        ActionBarActivity activity = (ActionBarActivity) getActivity();
+        activity.setTitle(R.string.settings_title);
 
         final Intent intent = getActivity().getIntent();
         if (intent != null && intent.getAction() != null) {
@@ -130,9 +131,7 @@ public class SettingsMainFragment extends Fragment {
             boolean light = ThemeHelper.isLightTheme(mContext);
             if (v == null) {
                 v = mInflater.inflate(R.layout.settings_grid_item, parent, false);
-//                v.setBackgroundColor(light ?
-//                        mContext.getResources().getColor(android.R.color.white) :
-//                        mContext.getResources().getColor(android.R.color.black));
+//                v.setBackgroundColor(light ? Color.WHITE : Color.BLACK);
                 v.setTag(R.id.grid_item_icon, v.findViewById(R.id.grid_item_icon));
                 v.setTag(R.id.grid_item_text, v.findViewById(R.id.grid_item_text));
             }

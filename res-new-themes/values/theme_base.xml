@@ -94,6 +94,18 @@
 
     <!-- End common themes -->
 
+    <!-- Settings themes -->
+
+    <style name="Theme.Settings.Light" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <item name="settingsCardBackgroundColor">@android:color/white</item>
+    </style>
+
+    <style name="Theme.Settings.Dark" parent="Theme.AppCompat.DialogWhenLarge">
+        <item name="settingsCardBackgroundColor">@android:color/black</item>
+    </style>
+
+    <!-- end settings themes -->
+
     <!--Toolbar Styles -->
     <style name="Toolbar.Dark" parent="Widget.AppCompat.Toolbar">
         <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
