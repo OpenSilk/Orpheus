@@ -19,6 +19,8 @@ package org.opensilk.music.ui2.main;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +39,7 @@ import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.folder.FolderScreen;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.library.PluginScreen;
+import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.Collection;
 
@@ -96,23 +99,51 @@ public class NavView extends ListView {
             ITEM,
         }
         public final Type type;
+        public final int titleRes;
         public final CharSequence title;
+        public final int iconRes;
+        public final Drawable icon;
         public final Screen screen;
         public final StartActivityForResult intent;
 
-        public Item(Type type, CharSequence title, Screen screen, StartActivityForResult intent) {
+        public Item(Type type, CharSequence title, Drawable icon, Screen screen) {
             this.type = type;
+            this.titleRes = -1;
             this.title = title;
+            this.icon = icon;
+            this.iconRes = -1;
             this.screen = screen;
+            this.intent = null;
+        }
+
+        public Item(Type type, int titleRes, int iconRes, Screen screen) {
+            this.type = type;
+            this.titleRes = titleRes;
+            this.title = null;
+            this.iconRes = iconRes;
+            this.icon = null;
+            this.screen = screen;
+            this.intent = null;
+        }
+
+        public Item(Type type, int titleRes, int iconRes, StartActivityForResult intent) {
+            this.type = type;
+            this.titleRes = titleRes;
+            this.title = null;
+            this.iconRes = iconRes;
+            this.icon = null;
+            this.screen = null;
             this.intent = intent;
         }
 
     }
 
     public static class Adapter extends ArrayAdapter<Item> {
+        final boolean lightTheme;
 
         public Adapter(Context context, Collection<PluginInfo> plugins) {
             super(context, -1);
+            lightTheme = Themer.isLightTheme(context);
             loadPlugins(plugins);
         }
 
@@ -125,7 +156,16 @@ public class NavView extends ListView {
                         item.type == Item.Type.HEADER ? R.layout.drawer_list_header : R.layout.drawer_list_item,
                         parent, false);
             }
-            v.setText(item.title);
+            if (!TextUtils.isEmpty(item.title)) {
+                v.setText(item.title);
+            } else {
+                v.setText(item.titleRes);
+            }
+            if (item.icon != null) {
+                v.setCompoundDrawables(item.icon, null, null, null);
+            } else if (item.iconRes >= 0) {
+                v.setCompoundDrawablesWithIntrinsicBounds(item.iconRes, 0, 0, 0);
+            }
             return v;
         }
 
@@ -140,12 +180,19 @@ public class NavView extends ListView {
         }
 
         public void loadPlugins(Collection<PluginInfo> infos) {
-            add(new Item(Item.Type.ITEM, getContext().getString(R.string.my_library), new GalleryScreen(), null));
-            add(new Item(Item.Type.ITEM, getContext().getString(R.string.folders), new FolderScreen(), null));
+            add(new Item(Item.Type.ITEM, R.string.my_library, R.drawable.ic_my_library_music_grey600_24dp, new GalleryScreen()));
+            add(new Item(Item.Type.ITEM, R.string.folders, R.drawable.ic_folder_grey600_24dp, new FolderScreen()));
             for (final PluginInfo info : infos) {
-                add(new Item(Item.Type.ITEM, info.title, new PluginScreen(info), null));
+                Drawable d = info.icon;
+                info.icon = null;
+                if (d == null) {
+                    d = getContext().getResources().getDrawable(R.drawable.ic_extension_grey600_24dp);
+                }
+                int bounds = (int) (24 * getContext().getResources().getDisplayMetrics().density);
+                d.setBounds(0,0, bounds, bounds);
+                add(new Item(Item.Type.ITEM, info.title, d, new PluginScreen(info)));
             }
-            add(new Item(Item.Type.HEADER, getContext().getString(R.string.menu_settings), null,
+            add(new Item(Item.Type.HEADER, R.string.menu_settings, R.drawable.ic_settings_grey600_24dp,
                     new StartActivityForResult(new Intent(getContext(), SettingsActivity.class),
                             StartActivityForResult.APP_REQUEST_SETTINGS)));
         }

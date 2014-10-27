@@ -23,6 +23,7 @@
         android:id="@+id/menu_sleep_timer"
         android:title="@string/sleep_timer"
         android:orderInCategory="90"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_av_timer_white_24dp"
+        app:showAsAction="ifRoom" />
 
 </menu>

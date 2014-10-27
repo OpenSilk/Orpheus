@@ -105,7 +105,7 @@ public class NavBlueprint {
                 @Override
                 public void call(Subscriber<? super List<PluginInfo>> subscriber) {
                     try {
-                        List<PluginInfo> list = PluginUtil.getActivePlugins(context);
+                        List<PluginInfo> list = PluginUtil.getActivePlugins(context, true);
                         if (list == null) {
                             list = Collections.emptyList();
                         } else {

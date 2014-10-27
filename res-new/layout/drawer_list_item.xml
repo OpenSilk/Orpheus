@@ -28,6 +28,7 @@
     android:paddingLeft="16dp"
     android:paddingEnd="16dp"
     android:paddingRight="16dp"
+    android:drawablePadding="16dp"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:ellipsize="end"
     android:singleLine="true"/>

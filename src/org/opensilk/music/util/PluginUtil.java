@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.util.JsonReader;
 import android.util.JsonWriter;
@@ -52,6 +53,10 @@ public class PluginUtil {
     public static final String API_PLUGIN_SERVICE = OrpheusApi.ACTION_LIBRARY_SERVICE;
 
     public static List<PluginInfo> getPluginInfos(Context context) {
+        return getPluginInfos(context, false);
+    }
+
+    public static List<PluginInfo> getPluginInfos(Context context, boolean wantIcon) {
         List<ComponentName> disabledPlugins = PluginUtil.readDisabledPlugins(context);
         PackageManager pm = context.getPackageManager();
         Intent dreamIntent = new Intent(API_PLUGIN_SERVICE);
@@ -62,7 +67,7 @@ public class PluginUtil {
                 continue;
             CharSequence title = resolveInfo.loadLabel(pm);
             ComponentName cn = getComponentName(resolveInfo);
-//            pluginInfo.icon = resolveInfo.loadIcon(pm);
+            Drawable icon = resolveInfo.loadIcon(pm);
             CharSequence description;
             try {
                 Context packageContext = context.createPackageContext(cn.getPackageName(), 0);
@@ -72,6 +77,7 @@ public class PluginUtil {
                 description = null;
             }
             PluginInfo pluginInfo = new PluginInfo(title, description, cn);
+            if (wantIcon) pluginInfo.icon = icon;
             for (ComponentName c : disabledPlugins) {
                 if (c.equals(pluginInfo.componentName)) {
                     pluginInfo.isActive = false;
@@ -84,7 +90,11 @@ public class PluginUtil {
     }
 
     public static List<PluginInfo> getActivePlugins(Context context) {
-        List<PluginInfo> plugins = getPluginInfos(context);
+        return getActivePlugins(context, false);
+    }
+
+    public static List<PluginInfo> getActivePlugins(Context context, boolean wantIcon) {
+        List<PluginInfo> plugins = getPluginInfos(context, wantIcon);
         List<ComponentName> disabledComponets = readDisabledPlugins(context);
         if (plugins != null && !plugins.isEmpty()) {
             if (disabledComponets != null && !disabledComponets.isEmpty()) {

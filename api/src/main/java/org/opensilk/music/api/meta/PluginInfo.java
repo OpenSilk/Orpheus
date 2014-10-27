@@ -17,6 +17,7 @@
 package org.opensilk.music.api.meta;
 
 import android.content.ComponentName;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -30,6 +31,7 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
     public final CharSequence description;
     public final ComponentName componentName;
     public boolean isActive = true;
+    public Drawable icon;
 
     public PluginInfo(CharSequence title, CharSequence description, ComponentName componentName) {
         this.title = title;
