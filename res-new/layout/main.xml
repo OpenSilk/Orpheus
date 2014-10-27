@@ -18,30 +18,45 @@
 
 <org.opensilk.music.ui2.main.MainView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mainview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="?actionBarSize"
+        style="?toolbarTheme"/>
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/main_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            style="?toolbarTheme"/>
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        android:id="@+id/sliding_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/main_toolbar"
+        android:gravity="bottom"
+        app:panelHeight="64dp">
 
         <org.opensilk.music.ui2.main2.FrameScreenSwitcherView
             android:id="@+id/main"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_height="match_parent"/>
 
-        <include layout="@layout/footer"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    </LinearLayout>
+            <include layout="@layout/footer"
+                android:id="@+id/footer_view"/>
+
+            <include layout="@layout/queue"
+                android:layout_below="@id/footer_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </RelativeLayout>
+
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
     <!--Fabs-->
     <include layout="@layout/floating_action_buttons"/>

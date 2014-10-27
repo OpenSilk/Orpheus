@@ -24,6 +24,7 @@ import org.opensilk.music.ui2.loader.LoaderModule;
 import org.opensilk.music.ui2.main.FooterView;
 import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.NavView;
+import org.opensilk.music.ui2.main.QueueView;
 import org.opensilk.music.ui2.main2.AppFlowPresenter;
 
 import javax.inject.Singleton;
@@ -69,6 +70,7 @@ public class ActivityBlueprint implements Blueprint {
                     MainView.class,
                     FooterView.class,
                     NavView.class,
+                    QueueView.class,
             },
             library = true //
     )

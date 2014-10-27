@@ -37,18 +37,7 @@ import mortar.ViewPresenter;
 /**
  * Created by drew on 10/15/14.
  */
-@Layout(R.layout.queue)
-@WithModule(QueueScreen.Module.class)
-@WithTransition(in = R.animator.slide_in_bottom, out = R.animator.slide_out_bottom)
-public class QueueScreen extends Screen {
-
-    @dagger.Module(
-            addsTo = ActivityBlueprint.Module.class,
-            injects = QueueView.class
-    )
-    public static class Module {
-
-    }
+public class QueueScreen {
 
     @Singleton
     public static class Presenter extends ViewPresenter<QueueView> implements PausesAndResumes {

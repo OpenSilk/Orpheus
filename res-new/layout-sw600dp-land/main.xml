@@ -44,20 +44,28 @@
         android:layout_centerHorizontal="true"
         app:cardBackgroundColor="?android:colorBackground">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <com.sothree.slidinguppanel.SlidingUpPanelLayout
+            android:id="@+id/sliding_panel"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            app:panelHeight="68dp">
 
             <org.opensilk.music.ui2.main2.FrameScreenSwitcherView
                 android:id="@+id/main"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
+                android:layout_height="match_parent"/>
 
-            <include layout="@layout/footer"/>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-        </LinearLayout>
+                <include layout="@layout/footer"/>
+
+            </LinearLayout>
+
+        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
     </android.support.v7.widget.CardView>
 

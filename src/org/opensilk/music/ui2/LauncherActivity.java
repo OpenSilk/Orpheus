@@ -38,11 +38,11 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeActivity;
 import org.opensilk.common.mortar.PauseAndResumePresenter;
 import org.opensilk.common.theme.TintManager;
-import org.opensilk.common.theme.TintResources;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -72,6 +72,7 @@ import timber.log.Timber;
 
 
 public class LauncherActivity extends ActionBarActivity implements
+        SlidingUpPanelLayout.PanelSlideListener,
         PauseAndResumeActivity,
         AppFlowPresenter.Activity,
         ActionBarOwner.Activity,
@@ -86,9 +87,10 @@ public class LauncherActivity extends ActionBarActivity implements
     @Inject AppFlowPresenter<LauncherActivity> mAppFlowPresenter;
 
     @InjectView(R.id.main) FrameScreenSwitcherView mContainer;
-    @InjectView(R.id.drawer_layout) @Optional DrawerLayout mDrawerLayout;
+    @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
     @InjectView(R.id.main_toolbar) Toolbar mToolbar;
+    @InjectView(R.id.sliding_panel) SlidingUpPanelLayout mSlidingPanelContainer;
 
     MortarActivityScope mActivityScope;
 
@@ -125,6 +127,8 @@ public class LauncherActivity extends ActionBarActivity implements
 
         setSupportActionBar(mToolbar);
         setupDrawer();
+
+        setupSlidingPanel();
 
         AppFlow.loadInitialScreen(this);
     }
@@ -226,6 +230,8 @@ public class LauncherActivity extends ActionBarActivity implements
             return true;
         }
         switch (item.getItemId()) {
+            case android.R.id.home:
+                return closePanel() || mContainer.onUpPressed();
             case R.id.menu_sleep_timer:
                 NavUtils.openSleepTimerDialog(this);
                 return true;
@@ -238,6 +244,8 @@ public class LauncherActivity extends ActionBarActivity implements
     public void onBackPressed() {
         if (isDrawerOpen()) {
             closeDrawer();
+        } else if (closePanel()) {
+            return;
         } else if (!mContainer.onBackPressed()) {
             super.onBackPressed();
         }
@@ -406,6 +414,57 @@ public class LauncherActivity extends ActionBarActivity implements
             }
         });
     }
+
+    /*
+     * Sliding panel
+     */
+
+    @Override
+    public void onPanelSlide(View view, float v) {
+
+    }
+
+    @Override
+    public void onPanelCollapsed(View view) {
+        enableDrawer();
+    }
+
+    @Override
+    public void onPanelExpanded(View view) {
+        disableDrawer(true);
+    }
+
+    @Override
+    public void onPanelAnchored(View view) {
+
+    }
+
+    @Override
+    public void onPanelHidden(View view) {
+
+    }
+
+    //Panel helpers
+
+    void setupSlidingPanel() {
+        if (mSlidingPanelContainer == null) return;
+        mSlidingPanelContainer.setDragView(findViewById(R.id.footer_view));
+        mSlidingPanelContainer.setPanelSlideListener(this);
+        mSlidingPanelContainer.setEnableDragViewTouchEvents(true);
+    }
+
+    boolean closePanel() {
+        if (mSlidingPanelContainer != null
+                && mSlidingPanelContainer.isPanelExpanded()) {
+            mSlidingPanelContainer.collapsePanel();
+            return true;
+        }
+        return false;
+    }
+
+    /*
+     * Theme stuff
+     */
 
     protected void initThemeables() {
 //        Themer.themeToolbar(mToolbar);

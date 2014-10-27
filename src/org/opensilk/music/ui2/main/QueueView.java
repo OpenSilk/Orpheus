@@ -18,9 +18,12 @@ package org.opensilk.music.ui2.main;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.widget.ArrayAdapter;
 
 import com.mobeta.android.dslv.DragSortListView;
+
+import org.opensilk.music.R;
 
 import javax.inject.Inject;
 
@@ -42,6 +45,7 @@ public class QueueView extends DragSortListView {
     public QueueView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
+
     }
 
     @Override
@@ -57,7 +61,8 @@ public class QueueView extends DragSortListView {
     }
 
     public void setup() {
-        setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, generateList()));
+        addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.list_footer, this, false));
+        setAdapter(new ArrayAdapter<String>(getContext(), R.layout.queue_list_item, R.id.tile_title, generateList()));
     }
 
     String[] generateList() {
