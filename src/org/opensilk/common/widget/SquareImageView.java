@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (c) 2014 OpenSilk Productions LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +15,29 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.widgets;
+package org.opensilk.common.widget;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
 import org.opensilk.common.rx.HoldsSubscription;
+import org.opensilk.music.R;
 
 import rx.Subscription;
 
 /**
  * Created by drew on 10/22/14.
  */
-public class SquareImageView extends ImageView implements HoldsSubscription {
+public class SquareImageView extends ImageView implements HoldsSubscription, AnimatedImageView {
 
-    private Subscription subscription;
+    public static final int TRANSITION_DURATION = 300;
+    protected Subscription subscription;
+    protected boolean defaultImageSet;
 
     public SquareImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -75,6 +83,10 @@ public class SquareImageView extends ImageView implements HoldsSubscription {
         forceLayout();
     }
 
+    /*
+     * Holds subscription
+     */
+
     @Override
     public void addSubscription(Subscription subscription) {
         this.subscription = subscription;
@@ -93,4 +105,35 @@ public class SquareImageView extends ImageView implements HoldsSubscription {
             subscription = null;
         }
     }
+
+    /*
+     * AnimatedImageView
+     */
+
+    @Override
+    public void setDefaultImage() {
+        setImageResource(R.drawable.default_artwork);
+        defaultImageSet = true;
+    }
+
+    @Override
+    public void setImageBitmap(Bitmap bm, boolean shouldAnimate) {
+        if (shouldAnimate) {
+            if (defaultImageSet) {
+                Drawable layer1 = getDrawable();
+                Drawable layer2 = new BitmapDrawable(getResources(), bm);
+                TransitionDrawable td = new TransitionDrawable(new Drawable[]{ layer1, layer2 });
+                td.setCrossFadeEnabled(true);
+                setImageDrawable(td);
+                td.startTransition(TRANSITION_DURATION);
+            } else {
+                setAlpha(0.0f);
+                setImageBitmap(bm);
+                animate().alpha(1.0f).setDuration(TRANSITION_DURATION).start();
+            }
+        } else {
+            setImageBitmap(bm);
+        }
+    }
+
 }

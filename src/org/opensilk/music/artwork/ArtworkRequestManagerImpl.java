@@ -20,6 +20,7 @@ package org.opensilk.music.artwork;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.text.TextUtils;
 import android.widget.ImageView;
 
@@ -33,6 +34,7 @@ import com.google.gson.Gson;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.common.rx.HoldsSubscription;
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -96,7 +98,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     abstract class BaseArtworkRequest implements Subscription {
-        final WeakReference<ImageView> imageViewWeakReference;
+        final WeakReference<AnimatedImageView> imageViewWeakReference;
         final ArtInfo artInfo;
         final ArtworkType artworkType;
 
@@ -105,7 +107,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         Subscription subscription;
         boolean unsubscribed = false;
 
-        BaseArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        BaseArtworkRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
             this.imageViewWeakReference = new WeakReference<>(imageView);
             this.artInfo = artInfo;
             this.artworkType = artworkType;
@@ -138,14 +140,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         void registerWithImageView() {
-            ImageView imageView = imageViewWeakReference.get();
+            AnimatedImageView imageView = imageViewWeakReference.get();
             if (imageView != null && imageView instanceof HoldsSubscription) {
                 ((HoldsSubscription) imageView).addSubscription(this);
             }
         }
 
         void unregisterWithImageView() {
-            ImageView imageView = imageViewWeakReference.get();
+            AnimatedImageView imageView = imageViewWeakReference.get();
             if (imageView != null && imageView instanceof HoldsSubscription) {
                 ((HoldsSubscription) imageView).removeSubscription(this);
             }
@@ -153,35 +155,35 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void setDefaultImage() {
             addBreadcrumb("setDefaultImage");
-            ImageView imageView = imageViewWeakReference.get();
+            AnimatedImageView imageView = imageViewWeakReference.get();
             if (imageView == null) return;
-            imageView.setImageResource(R.drawable.default_artwork);
+            imageView.setDefaultImage();
         }
 
         void setImageBitmap(Bitmap bitmap) {
-            setImageBitmap(bitmap, false);
+            setImageBitmap(bitmap, false, true);
         }
 
-        void setImageBitmap(final Bitmap bitmap, boolean fromCache) {
+        void setImageBitmap(final Bitmap bitmap, boolean fromCache, boolean shouldAnimate) {
             addBreadcrumb("setImageBitmap("+fromCache+")");
-            final ImageView imageView = imageViewWeakReference.get();
+            final AnimatedImageView imageView = imageViewWeakReference.get();
             if (imageView == null) return;
             unregisterWithImageView();
             if (fromCache) {
-                imageView.setImageBitmap(bitmap);
+                imageView.setImageBitmap(bitmap, shouldAnimate);
             } else {
-                imageView.setImageBitmap(bitmap);
+                imageView.setImageBitmap(bitmap, shouldAnimate);
             }
         }
 
         void tryForCache() {
             addBreadcrumb("tryForCache");
             subscription = createCacheObservable(artInfo, artworkType)
-                    .subscribe(new Action1<Bitmap>() {
+                    .subscribe(new Action1<CacheResponse>() {
                         @Override
-                        public void call(Bitmap bitmap) {
+                        public void call(CacheResponse cr) {
                             addBreadcrumb("tryForCache hit");
-                            setImageBitmap(bitmap, true);
+                            setImageBitmap(cr.bitmap, true, !cr.fromL1);
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -207,7 +209,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     class ArtistArtworkRequest extends BaseArtworkRequest {
 
-        ArtistArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        ArtistArtworkRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
             super(imageView, artInfo, artworkType);
         }
 
@@ -244,7 +246,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     class AlbumArtworkRequest extends BaseArtworkRequest {
 
-        AlbumArtworkRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        AlbumArtworkRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
             super(imageView, artInfo, artworkType);
         }
 
@@ -338,7 +340,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Bitmap bitmap) {
                             addBreadcrumb("tryForMediaStore hit");
-                            setImageBitmap(bitmap, false);
+                            setImageBitmap(bitmap);
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -380,7 +382,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         final long id;
         AlbumArtworkRequest wrappedRequest;
 
-        AlbumArtworkRequestWrapped(ImageView imageView, long id, ArtworkType artworkType) {
+        AlbumArtworkRequestWrapped(AnimatedImageView imageView, long id, ArtworkType artworkType) {
             super(imageView, null, artworkType);
             this.id =id;
             addBreadcrumb("albumId="+id);
@@ -444,30 +446,30 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     @Override
-    public Subscription newAlbumRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+    public Subscription newAlbumRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
         return new AlbumArtworkRequest(imageView, artInfo, artworkType).start();
     }
 
     @Override
-    public Subscription newAlbumRequest(ImageView imageView, long albumId, ArtworkType artworkType) {
+    public Subscription newAlbumRequest(AnimatedImageView imageView, long albumId, ArtworkType artworkType) {
         return new AlbumArtworkRequestWrapped(imageView, albumId, artworkType).start();
     }
 
     @Override
-    public Subscription newArtistRequest(ImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+    public Subscription newArtistRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
         return new ArtistArtworkRequest(imageView, artInfo, artworkType).start();
     }
 
-    public Observable<Bitmap> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
+    public Observable<CacheResponse> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
         final String cacheKey = getCacheKey(artInfo, artworkType);
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+        return Observable.create(new Observable.OnSubscribe<CacheResponse>() {
                 @Override
-                public void call(Subscriber<? super Bitmap> subscriber) {
+                public void call(Subscriber<? super CacheResponse> subscriber) {
 //                    Timber.v("Trying L1 for %s, from %s", cacheKey, Thread.currentThread().getName());
                     Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
                     if (!subscriber.isUnsubscribed()) {
                         if (bitmap != null) {
-                            subscriber.onNext(bitmap);
+                            subscriber.onNext(new CacheResponse(bitmap, true));
                             subscriber.onCompleted();
                         } else {
                             subscriber.onError(new CacheMissException());
@@ -476,19 +478,19 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 }
             })
             // We missed the l1cache try l2
-            .onErrorResumeNext(new Func1<Throwable, Observable<? extends Bitmap>>() {
+            .onErrorResumeNext(new Func1<Throwable, Observable<? extends CacheResponse>>() {
                 @Override
-                public Observable<? extends Bitmap> call(Throwable throwable) {
+                public Observable<? extends CacheResponse> call(Throwable throwable) {
                     if (throwable instanceof CacheMissException) {
-                        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+                        return Observable.create(new Observable.OnSubscribe<CacheResponse>() {
                             @Override
-                            public void call(Subscriber<? super Bitmap> subscriber) {
+                            public void call(Subscriber<? super CacheResponse> subscriber) {
 //                                Timber.v("Trying L2 for %s, from %s", cacheKey, Thread.currentThread().getName());
                                 Bitmap bitmap = mL2Cache.getBitmap(cacheKey);
                                 if (!subscriber.isUnsubscribed()) {
                                     if (bitmap != null) {
                                         mL1Cache.putBitmap(cacheKey, bitmap);
-                                        subscriber.onNext(bitmap);
+                                        subscriber.onNext(new CacheResponse(bitmap, false));
                                         subscriber.onCompleted();
                                     } else {
                                         subscriber.onError(new CacheMissException());

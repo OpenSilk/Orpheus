@@ -27,6 +27,7 @@ import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -138,21 +139,21 @@ public class PlaylistsScreen extends Screen {
             switch (holder.artNumber) {
                 case 4:
                     if (playlist.mAlbumIds.length >= 4) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork4,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork4,
                                 playlist.mAlbumIds[3], ArtworkType.THUMBNAIL));
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork3,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork3,
                                 playlist.mAlbumIds[2], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 2:
                     if (playlist.mAlbumIds.length >= 2) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork2,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork2,
                                 playlist.mAlbumIds[1], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 1:
                     if (playlist.mAlbumIds.length >= 1) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
                                 playlist.mAlbumIds[0], ArtworkType.THUMBNAIL));
                     } else {
                         holder.artwork.setImageResource(R.drawable.default_artwork);

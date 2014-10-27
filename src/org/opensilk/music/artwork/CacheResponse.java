@@ -17,18 +17,17 @@
 
 package org.opensilk.music.artwork;
 
-import org.opensilk.common.widget.AnimatedImageView;
-import org.opensilk.music.api.meta.ArtInfo;
-
-import rx.Subscription;
+import android.graphics.Bitmap;
 
 /**
- * Created by drew on 10/22/14.
+ * Created by drew on 10/26/14.
  */
-public interface ArtworkRequestManager {
 
-    Subscription newAlbumRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType);
-    Subscription newAlbumRequest(AnimatedImageView imageView, long albumId, ArtworkType artworkType);
-    Subscription newArtistRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType);
-
+public class CacheResponse {
+    public final Bitmap bitmap;
+    public final boolean fromL1;
+    public CacheResponse(Bitmap bitmap, boolean fromL1) {
+        this.bitmap = bitmap;
+        this.fromL1 = fromL1;
+    }
 }

@@ -29,7 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <org.opensilk.music.widgets.SquareImageView
+        <org.opensilk.common.widget.SquareImageView
             android:id="@+id/artwork_thumb"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -37,7 +37,7 @@
             android:layout_marginBottom="1dp"
             android:layout_marginRight="1dp"/>
 
-        <org.opensilk.music.widgets.SquareImageView
+        <org.opensilk.common.widget.SquareImageView
             android:id="@+id/artwork_thumb2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -45,7 +45,7 @@
             android:layout_marginBottom="1dp"
             android:layout_marginLeft="1dp"/>
 
-        <org.opensilk.music.widgets.SquareImageView
+        <org.opensilk.common.widget.SquareImageView
             android:id="@+id/artwork_thumb3"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -53,7 +53,7 @@
             android:layout_marginTop="1dp"
             android:layout_marginRight="1dp"/>
 
-        <org.opensilk.music.widgets.SquareImageView
+        <org.opensilk.common.widget.SquareImageView
             android:id="@+id/artwork_thumb4"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

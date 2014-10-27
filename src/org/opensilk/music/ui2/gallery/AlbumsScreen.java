@@ -27,6 +27,7 @@ import com.andrew.apollo.utils.SortOrder;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -189,7 +190,7 @@ public class AlbumsScreen extends Screen {
                     m.show();
                 }
             });
-            holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork, artInfo, ArtworkType.THUMBNAIL));
+            holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork, artInfo, ArtworkType.THUMBNAIL));
         }
 
     }

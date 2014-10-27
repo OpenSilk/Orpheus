@@ -15,20 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.common.widget;
 
-import org.opensilk.common.widget.AnimatedImageView;
-import org.opensilk.music.api.meta.ArtInfo;
-
-import rx.Subscription;
+import android.graphics.Bitmap;
 
 /**
- * Created by drew on 10/22/14.
+ * Created by drew on 10/26/14.
  */
-public interface ArtworkRequestManager {
-
-    Subscription newAlbumRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType);
-    Subscription newAlbumRequest(AnimatedImageView imageView, long albumId, ArtworkType artworkType);
-    Subscription newArtistRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType);
-
+public interface AnimatedImageView {
+    void setDefaultImage();
+    void setImageBitmap(Bitmap bm, boolean shouldAnimate);
 }
