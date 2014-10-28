@@ -43,6 +43,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import de.greenrobot.event.EventBus;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
@@ -81,12 +82,12 @@ public class MusicServiceConnection {
     }
 
     private final Context context;
-    private final Bus eventBus;
+    private final EventBus eventBus;
     // protected by synchronized methods
     private Token serviceToken;
 
     @Inject
-    public MusicServiceConnection(@ForApplication Context context, @Named("activity") Bus eventBus) {
+    public MusicServiceConnection(@ForApplication Context context, @Named("activity") EventBus eventBus) {
         Timber.v("new MusicServiceConnection");
         this.context = new ContextWrapper(context);
         this.eventBus = eventBus;
@@ -208,9 +209,9 @@ public class MusicServiceConnection {
                     Song[] songs = func.call();
                     long[] providerIds = addSongsToMusicProvider(songs);
                     iApolloService.enqueue(providerIds, where);
-                    eventBus.post(new MakeToast(R.plurals.NNNtrackstoqueue, providerIds.length));
+                    eventBus.post(new MakeToast(MakeToast.Type.PLURALS, R.plurals.NNNtrackstoqueue, providerIds.length));
                 } catch (RemoteException e) {
-                    eventBus.post(new MakeToast(R.string.err_addtoqueue));
+                    eventBus.post(new MakeToast(MakeToast.Type.NORMAL, R.string.err_addtoqueue));
                 }
             }
         });
@@ -341,7 +342,7 @@ public class MusicServiceConnection {
                     long[] providerids = addSongsToMusicProvider(songs);
                     MusicUtils.playAll(iApolloService, providerids, startPos, shuffle);
                 } catch (Exception e) {
-                    eventBus.post(new MakeToast(R.string.err_addtoqueue));
+                    eventBus.post(new MakeToast(MakeToast.Type.NORMAL, R.string.err_addtoqueue));
                 }
             }
         });

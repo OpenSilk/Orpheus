@@ -21,11 +21,24 @@ package org.opensilk.music.ui2.event;
  * Created by drew on 10/27/14.
  */
 public class MakeToast {
-    public final int resId;
-    public final Object[] args;
+    public enum Type {
+        NORMAL,
+        PLURALS
+    }
 
-    public MakeToast(int resId, Object... args) {
+    public final Type type;
+    public final int resId;
+    public final int arg;
+
+    public MakeToast(Type type, int resId) {
+        this.type = type;
         this.resId = resId;
-        this.args = args;
+        this.arg = -1;
+    }
+
+    public MakeToast(Type type, int resId, int arg) {
+        this.type = type;
+        this.resId = resId;
+        this.arg = arg;
     }
 }

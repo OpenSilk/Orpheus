@@ -30,6 +30,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import de.greenrobot.event.EventBus;
 import flow.Parcer;
 
 /**
@@ -45,8 +46,8 @@ import flow.Parcer;
 )
 public class ActivityModule {
     @Provides @Singleton @Named("activity")
-    public Bus provideEventBus() {
-        return new Bus("activity");
+    public EventBus provideEventBus() {
+        return new EventBus();
     }
 
     @Provides @Singleton

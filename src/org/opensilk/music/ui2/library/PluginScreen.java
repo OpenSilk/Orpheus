@@ -43,6 +43,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import de.greenrobot.event.EventBus;
 import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -92,14 +93,14 @@ public class PluginScreen extends Screen {
         final PluginInfo plugin;
         final PluginSettings settings;
         final PluginConnectionManager connectionManager;
-        final Bus bus;
+        final EventBus bus;
 
         String libraryIdentity;
 
         @Inject
         public Presenter(PluginInfo plugin, PluginSettings settings,
                          PluginConnectionManager connectionManager,
-                         @Named("activity") Bus bus) {
+                         @Named("activity") EventBus bus) {
             this.plugin = plugin;
             this.settings = settings;
             this.connectionManager = connectionManager;

@@ -155,6 +155,7 @@ dependencies {
     provided 'com.squareup.dagger:dagger-compiler:1.2.1'
     compile 'com.squareup.dagger:dagger:1.2.1'
     compile 'io.reactivex:rxandroid:0.22.0'
+    compile 'de.greenrobot:eventbus:2.2.1'
 
     compile 'com.sothree.slidinguppanel:library:2.0-SNAPSHOT@aar'
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'

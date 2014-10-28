@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import de.greenrobot.event.EventBus;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Subscriber;
@@ -47,14 +48,14 @@ public class NavBlueprint {
     @Singleton
     public static class Presenter extends ViewPresenter<NavView> {
 
-        final Bus bus;
+        final EventBus bus;
         final DrawerOwner drawerOwner;
         final Loader loader;
 
         Subscription subscription;
 
         @Inject
-        public Presenter(@Named("activity") Bus bus, DrawerOwner drawerOwner, Loader loader) {
+        public Presenter(@Named("activity") EventBus bus, DrawerOwner drawerOwner, Loader loader) {
             this.bus = bus;
             this.drawerOwner = drawerOwner;
             this.loader = loader;

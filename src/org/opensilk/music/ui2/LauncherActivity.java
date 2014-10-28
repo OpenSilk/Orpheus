@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -40,6 +41,8 @@ import org.opensilk.common.mortar.PauseAndResumePresenter;
 import org.opensilk.common.theme.TintManager;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
+
+import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -49,12 +52,14 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
+import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerOwner;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.music.ui2.main2.AppFlowPresenter;
 import org.opensilk.music.ui2.main2.FrameScreenSwitcherView;
+import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.UUID;
 
@@ -64,6 +69,7 @@ import javax.inject.Named;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
+import de.greenrobot.event.EventBus;
 import flow.Flow;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
@@ -78,7 +84,7 @@ public class LauncherActivity extends ActionBarActivity implements
         ActionBarOwner.Activity,
         DrawerOwner.Activity {
 
-    @Inject @Named("activity") Bus mBus;
+    @Inject @Named("activity") EventBus mBus;
     @Inject PauseAndResumePresenter mPauseResumePresenter;
     @Inject ActionBarOwner mActionBarOwner;
     @Inject DrawerOwner mDrawerOwner;
@@ -258,12 +264,6 @@ public class LauncherActivity extends ActionBarActivity implements
         return super.getSystemService(name);
     }
 
-    @Subscribe
-    public void onStartActivityForResultEvent(StartActivityForResult req) {
-        req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(this));
-        startActivityForResult(req.intent, req.reqCode);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
@@ -301,6 +301,23 @@ public class LauncherActivity extends ActionBarActivity implements
             mScopeName = ObjectUtils.<LauncherActivity>getClass(this).getName() + UUID.randomUUID().toString();
         }
         return mScopeName;
+    }
+
+    /*
+     * Events
+     */
+
+    public void onEventMainThread(StartActivityForResult req) {
+        req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, Themer.isLightTheme(this));
+        startActivityForResult(req.intent, req.reqCode);
+    }
+
+    public void onEventMainThread(MakeToast e) {
+        if (e.type == MakeToast.Type.PLURALS) {
+            Toast.makeText(this, MusicUtils.makeLabel(this, e.resId, e.arg), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, e.resId, Toast.LENGTH_SHORT).show();
+        }
     }
 
     /*
