@@ -19,6 +19,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -85,32 +87,51 @@ public class NotificationHelper {
             final String trackName, final Bitmap albumArt,
             final boolean isPlaying) {
 
-        // Default notfication layout
-        mNotificationTemplate = new RemoteViews(mService.getPackageName(),
-                R.layout.notification_template_base);
+        if (ApolloUtils.hasLollipop()) {
+            Notification.Builder builder = new Notification.Builder(mService)
+                    .setSmallIcon(R.drawable.stat_notify_music)
+                    .setLargeIcon(albumArt)
+                    .setContentTitle(trackName)
+                    .setContentText(artistName + " - " + albumName)
+                    .setContentIntent(getPendingIntent())
+                    .addAction(getPrevAction())
+                    .addAction(getPlayPauseAction(isPlaying))
+                    .addAction(getNextAction())
+                    .setPriority(Notification.PRIORITY_DEFAULT)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setShowWhen(false);
+            mNotification = new Notification.MediaStyle(builder)
+                    .setShowActionsInCompactView(1,2)
+                    .build();
+        } else {
+            // Default notfication layout
+            mNotificationTemplate = new RemoteViews(mService.getPackageName(),
+                    R.layout.notification_template_base);
 
-        // Set up the content view
-        initCollapsedLayout(trackName, artistName, albumArt);
+            // Set up the content view
+            initCollapsedLayout(trackName, artistName, albumArt);
 
-        // Notification Builder
-        mNotification = new NotificationCompat.Builder(mService)
-                .setSmallIcon(R.drawable.stat_notify_music)
-                .setContentIntent(getPendingIntent())
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContent(mNotificationTemplate)
-                .build();
-        // Control playback from the notification
-        initPlaybackActions(isPlaying);
-        if (ApolloUtils.hasJellyBean()) {
-            // Expanded notifiction style
-            mExpandedView = new RemoteViews(mService.getPackageName(),
-                    R.layout.notification_template_expanded_base);
-            mNotification.bigContentView = mExpandedView;
+            // Notification Builder
+            mNotification = new NotificationCompat.Builder(mService)
+                    .setSmallIcon(R.drawable.stat_notify_music)
+                    .setContentIntent(getPendingIntent())
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContent(mNotificationTemplate)
+                    .build();
             // Control playback from the notification
-            initExpandedPlaybackActions(isPlaying);
-            // Set up the expanded content view
-            initExpandedLayout(trackName, albumName, artistName, albumArt);
+            initPlaybackActions(isPlaying);
+            if (ApolloUtils.hasJellyBean()) {
+                // Expanded notifiction style
+                mExpandedView = new RemoteViews(mService.getPackageName(),
+                        R.layout.notification_template_expanded_base);
+                mNotification.bigContentView = mExpandedView;
+                // Control playback from the notification
+                initExpandedPlaybackActions(isPlaying);
+                // Set up the expanded content view
+                initExpandedLayout(trackName, albumName, artistName, albumArt);
+            }
         }
+
         mService.startForeground(APOLLO_MUSIC_SERVICE, mNotification);
     }
 
@@ -131,15 +152,21 @@ public class NotificationHelper {
         if (mNotification == null || mNotificationManager == null) {
             return;
         }
-        if (mNotificationTemplate != null) {
-            mNotificationTemplate.setImageViewResource(R.id.notification_base_play,
-                    isPlaying ? R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
+
+        if (ApolloUtils.hasLollipop()) {
+            mNotification.actions[1] = getPlayPauseAction(isPlaying);
+        } else {
+            if (mNotificationTemplate != null) {
+                mNotificationTemplate.setImageViewResource(R.id.notification_base_play,
+                        isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
+            }
+
+            if (ApolloUtils.hasJellyBean() && mExpandedView != null) {
+                mExpandedView.setImageViewResource(R.id.notification_expanded_base_play,
+                        isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
+            }
         }
 
-        if (ApolloUtils.hasJellyBean() && mExpandedView != null) {
-            mExpandedView.setImageViewResource(R.id.notification_expanded_base_play,
-                    isPlaying ? R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
-        }
         mNotificationManager.notify(APOLLO_MUSIC_SERVICE, mNotification);
     }
 
@@ -179,7 +206,7 @@ public class NotificationHelper {
 
         // Update the play button image
         mExpandedView.setImageViewResource(R.id.notification_expanded_base_play,
-                isPlaying ? R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
+                isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
     }
 
     /**
@@ -204,7 +231,7 @@ public class NotificationHelper {
 
         // Update the play button image
         mNotificationTemplate.setImageViewResource(R.id.notification_base_play,
-                isPlaying ? R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
+                isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
     }
 
     /**
@@ -273,6 +300,27 @@ public class NotificationHelper {
         mExpandedView.setTextViewText(R.id.notification_expanded_base_line_three, artistName);
         // Album art
         mExpandedView.setImageViewBitmap(R.id.notification_expanded_base_image, albumArt);
+    }
+
+    private Notification.Action getPlayPauseAction(boolean isPlaying) {
+        return new Notification.Action(
+                isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp,
+                null,
+                retreivePlaybackActions(1));
+    }
+
+    private Notification.Action getNextAction() {
+        return new Notification.Action(
+                R.drawable.ic_skip_next_white_36dp,
+                null,
+                retreivePlaybackActions(2));
+    }
+
+    private Notification.Action getPrevAction() {
+        return new Notification.Action(
+                R.drawable.ic_skip_previous_white_36dp,
+                null,
+                retreivePlaybackActions(3));
     }
 
 }
