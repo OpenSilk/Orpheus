@@ -14,6 +14,7 @@
      limitations under the License.
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">Apollo</string>
     <string name="page_recent">Récents</string>
     <string name="page_artists">Artistes</string>
     <string name="page_albums">Albums</string>
@@ -52,7 +53,6 @@
     <string name="sort_order_entry_track_list">Suivre la liste</string>
     <string name="sort_order_entry_number_of_songs">Nombre de titres</string>
     <string name="sort_order_entry_number_of_albums">Nombre d\'albums</string>
-    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">Favoris</string>
     <string name="playlist_favorites">Favoris</string>
     <string name="playlist_last_added">Derniers ajouts</string>
@@ -99,11 +99,11 @@
     <string name="settings_data_category">Données</string>
     <string name="settings_about_category">À propos</string>
     <string name="settings_author_title">Auteur</string>
-    <string name="settings_about">À propos d\'Orpheus</string>
+    <string name="settings_about_apollo">À propos d\'Apollo</string>
     <string name="settings_special_thanks">Remerciements</string>
     <string name="settings_lopez_summary">Design de l\'icône et de la bannière du Play Store</string>
     <string name="settings_color_scheme_title">Charte de couleur</string>
-    <string name="settings_color_scheme_summary">Choisir la couleur dominante par défaut d\'Orpheus</string>
+    <string name="settings_color_scheme_summary">Choisir la couleur dominante par défaut d\'Apollo</string>
     <string name="settings_theme_chooser_title">Sélecteur de thèmes</string>
     <string name="settings_delete_cache_title">Supprimer le cache</string>
     <string name="settings_delete_cache_summary">Supprimer les images du cache</string>
@@ -113,16 +113,16 @@
     <string name="settings_download_artist_images_title">Télécharger les photos d\'artistes manquantes</string>
     <string name="settings_open_source_licenses">Licenses open source</string>
     <string name="settings_version_title">Numéro de version</string>
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> par <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> par <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
     <string name="share_track_using">Partager le titre via\u00A0:</string>
     <string name="color_picker_title">Charte de couleur</string>
     <string name="hex">#</string>
     <string name="current_color">Courante</string>
     <string name="new_color">Nouvelle</string>
-    <string name="app_widget_small">Orpheus: 4x1</string>
-    <string name="app_widget_large">Orpheus: 4x2</string>
-    <string name="app_widget_large_alt">Orpheus: 4x2 (Alternatif)</string>
-    <string name="app_widget_recent">Orpheus: Écoutés récemment</string>
+    <string name="app_widget_small">Apollo: 4x1</string>
+    <string name="app_widget_large">Apollo: 4x2</string>
+    <string name="app_widget_large_alt">Apollo: 4x2 (Alternatif)</string>
+    <string name="app_widget_recent">Apollo: Écoutés récemment</string>
     <string name="app_widget_text_separator">-</string>
     <string name="no_effects_for_you">L\'égaliseur ne peut pas être ouvert.</string>
     <string name="empty_music">Utilisez un câble USB pour copier de la musique depuis votre ordinateur vers votre appareil.</string>

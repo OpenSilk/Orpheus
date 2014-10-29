@@ -14,6 +14,7 @@
      limitations under the License.
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">Apollo</string>
     <string name="page_recent">最近播放</string>
     <string name="page_artists">演出者</string>
     <string name="page_albums">專輯</string>
@@ -52,7 +53,6 @@
     <string name="sort_order_entry_track_list">曲目列表</string>
     <string name="sort_order_entry_number_of_songs">樂曲數量</string>
     <string name="sort_order_entry_number_of_albums">專輯數量</string>
-    <string name="sort_order_entry_filename">Filename</string>
     <string name="playlist_favorite">我的最愛</string>
     <string name="playlist_favorites">我的最愛</string>
     <string name="playlist_last_added">最後加入</string>
@@ -99,11 +99,11 @@
     <string name="settings_data_category">行動數據</string>
     <string name="settings_about_category">關於</string>
     <string name="settings_author_title">作者</string>
-    <string name="settings_about">關於 Orpheus</string>
+    <string name="settings_about_apollo">關於 Apollo</string>
     <string name="settings_special_thanks">特別感謝</string>
     <string name="settings_lopez_summary">圖示與 Play 商店的橫額設計</string>
-    <string name="settings_color_scheme_title">選擇 Orpheus 預設配色方案</string>
-    <string name="settings_color_scheme_summary">改變 Orpheus 中的強調色</string>
+    <string name="settings_color_scheme_title">選擇 Apollo 預設配色方案</string>
+    <string name="settings_color_scheme_summary">改變 Apollo 中的強調色</string>
     <string name="settings_theme_chooser_title">主題選擇器</string>
     <string name="settings_delete_cache_title">清除快取</string>
     <string name="settings_delete_cache_summary">移除所有已快取的影像</string>
@@ -113,16 +113,16 @@
     <string name="settings_download_artist_images_title">下載缺失的演出者影像</string>
     <string name="settings_open_source_licenses">開放原始碼授權</string>
     <string name="settings_version_title">版本號碼</string>
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
     <string name="share_track_using">分享曲目使用：</string>
     <string name="color_picker_title">配色方案</string>
     <string name="hex">#</string>
     <string name="current_color">目前：</string>
     <string name="new_color">新的：</string>
-    <string name="app_widget_small">Orpheus: 4x1</string>
-    <string name="app_widget_large">Orpheus: 4x2</string>
-    <string name="app_widget_large_alt">Orpheus: 4x2 (替代)</string>
-    <string name="app_widget_recent">Orpheus: 最近播放</string>
+    <string name="app_widget_small">Apollo: 4x1</string>
+    <string name="app_widget_large">Apollo: 4x2</string>
+    <string name="app_widget_large_alt">Apollo: 4x2 (替代)</string>
+    <string name="app_widget_recent">Apollo: 最近播放</string>
     <string name="app_widget_text_separator">-</string>
     <string name="no_effects_for_you">無法開啟等化器。</string>
     <string name="empty_music">請使用 USB 連接線將音樂從您的電腦複製到您的裝置。</string>

@@ -15,6 +15,7 @@
  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <string name="app_name">Apollo</string>
 
     <!-- Page titles -->
     <string name="page_recent">Ostatnio słuchane</string>
@@ -61,7 +62,6 @@
     <string name="sort_order_entry_track_list">Lista utworów</string>
     <string name="sort_order_entry_number_of_songs">Liczba utworów</string>
     <string name="sort_order_entry_number_of_albums">Liczba albumów</string>
-    <string name="sort_order_entry_filename">Filename</string>
 
     <!-- Default playlist names -->
     <string name="playlist_favorite">Ulubiona</string>
@@ -120,11 +120,11 @@
     <string name="settings_data_category">Dane</string>
     <string name="settings_about_category">O aplikacji</string>
     <string name="settings_author_title">Autor</string>
-    <string name="settings_about">O Orpheus</string>
+    <string name="settings_about_apollo">O Apollo</string>
     <string name="settings_special_thanks">Specjalne podziękowania</string>
     <string name="settings_lopez_summary">Projekt ikony i bannerów w sklepie Play</string>
-    <string name="settings_color_scheme_title">Wybierz domyślny schemat kolorów Orpheus</string>
-    <string name="settings_color_scheme_summary">Zmienia akcentowany kolor w interfejsie Orpheus</string>
+    <string name="settings_color_scheme_title">Wybierz domyślny schemat kolorów Apollo</string>
+    <string name="settings_color_scheme_summary">Zmienia akcentowany kolor w interfejsie Apollo</string>
     <string name="settings_theme_chooser_title">Menedżer motywów</string>
     <string name="settings_delete_cache_title">Wyczyść pamięć podręczną</string>
     <string name="settings_delete_cache_summary">Usuń wszystkie zapisane grafiki</string>
@@ -136,7 +136,7 @@
     <string name="settings_version_title">Numer wersji</string>
 
     <!-- Share Intent -->
-    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> wykonawcy <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> wykonawcy <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
     <string name="share_track_using">Udostępnij utwór za pomocą:</string>
 
     <!-- ColorPicker -->
@@ -146,10 +146,10 @@
     <string name="new_color">Nowy</string>
 
     <!-- App widget -->
-    <string name="app_widget_small">Orpheus: 4x1</string>
-    <string name="app_widget_large">Orpheus: 4x2</string>
-    <string name="app_widget_large_alt">Orpheus: 4x2 (alternatywny)</string>
-    <string name="app_widget_recent">Orpheus: Ostatnio słuchane</string>
+    <string name="app_widget_small">Apollo: 4x1</string>
+    <string name="app_widget_large">Apollo: 4x2</string>
+    <string name="app_widget_large_alt">Apollo: 4x2 (alternatywny)</string>
+    <string name="app_widget_recent">Apollo: Ostatnio słuchane</string>
     <string name="app_widget_text_separator">-</string>
 
     <!-- Empty list / error messages -->
