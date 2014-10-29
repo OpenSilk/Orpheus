@@ -99,11 +99,11 @@
   <string name="settings_data_category">數據</string>
   <string name="settings_about_category">關於</string>
   <string name="settings_author_title">作者</string>
-  <string name="settings_about_apollo">關於 Apollo</string>
+  <string name="settings_about_apollo">關於 Orpheus</string>
   <string name="settings_special_thanks">特別鳴謝</string>
   <string name="settings_lopez_summary">圖示與 Play Store 的橫額設計</string>
-  <string name="settings_color_scheme_title">選擇 Apollo 的預設配色方案</string>
-  <string name="settings_color_scheme_summary">變更 Apollo 中的強調色</string>
+  <string name="settings_color_scheme_title">選擇 Orpheus 的預設配色方案</string>
+  <string name="settings_color_scheme_summary">變更 Orpheus 中的強調色</string>
   <string name="settings_theme_chooser_title">主題選擇器</string>
   <string name="settings_delete_cache_title">刪除緩存</string>
   <string name="settings_delete_cache_summary">移除所有緩存圖像</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">下載缺少的演出者影像</string>
   <string name="settings_open_source_licenses">開放原始碼授權</string>
   <string name="settings_version_title">版本號碼</string>
-  <string name="now_listening_to">#正在播放 <xliff:g id="artist">%2$s</xliff:g> - <xliff:g id="title">%1$s</xliff:g> #Apollo</string>
+  <string name="now_listening_to">#正在播放 <xliff:g id="artist">%2$s</xliff:g> - <xliff:g id="title">%1$s</xliff:g> #Orpheus</string>
   <string name="share_track_using">曲目分享方式:</string>
   <string name="color_picker_title">配色方案</string>
   <string name="current_color">目前</string>
   <string name="new_color">新的</string>
-  <string name="app_widget_large_alt">Apollo: 4×2 (替代)</string>
-  <string name="app_widget_recent">Apollo: 最近播放</string>
+  <string name="app_widget_large_alt">Orpheus: 4×2 (替代)</string>
+  <string name="app_widget_recent">Orpheus: 最近播放</string>
   <string name="no_effects_for_you">無法打開等化器。</string>
   <string name="empty_music">使用 USB 連接線將音樂從您的電腦複製到您的裝置中。</string>
   <string name="empty_last_added">你最近一個月新增的歌曲將會在這裏顯示。</string>

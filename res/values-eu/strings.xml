@@ -99,11 +99,11 @@
   <string name="settings_data_category">Datuak</string>
   <string name="settings_about_category">Honi buruz</string>
   <string name="settings_author_title">Autorea</string>
-  <string name="settings_about_apollo">Apollo-ri buruz</string>
+  <string name="settings_about_apollo">Orpheus-ri buruz</string>
   <string name="settings_special_thanks">Eskerrak</string>
   <string name="settings_lopez_summary">Ikonoak eta diseinuak Play Store-n</string>
   <string name="settings_color_scheme_title">Kolore eskema</string>
-  <string name="settings_color_scheme_summary">Kolore bat aukeratu Apolloren diseinurako</string>
+  <string name="settings_color_scheme_summary">Kolore bat aukeratu Orpheusren diseinurako</string>
   <string name="settings_theme_chooser_title">Gaiak</string>
   <string name="settings_delete_cache_title">Katxea ezabatu</string>
   <string name="settings_delete_cache_summary">Katxean gordetako irudiak ezabatu</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">Falta diren artisten argazkiak lortu</string>
   <string name="settings_open_source_licenses">Software askearen lizentziak</string>
   <string name="settings_version_title">Bertsioa</string>
-  <string name="now_listening_to"><xliff:g id="title">%1$s</xliff:g> de <xliff:g id="artist">%2$s</xliff:g> #Entzuten #Apollo</string>
+  <string name="now_listening_to"><xliff:g id="title">%1$s</xliff:g> de <xliff:g id="artist">%2$s</xliff:g> #Entzuten #Orpheus</string>
   <string name="share_track_using">Abestia honela elkarbanatu:</string>
   <string name="color_picker_title">Kolore eskema</string>
   <string name="current_color">Oraingoa</string>
   <string name="new_color">Berria</string>
-  <string name="app_widget_large_alt">Apollo: 4×2 (alt.)</string>
-  <string name="app_widget_recent">Apollo: Berrikiak</string>
+  <string name="app_widget_large_alt">Orpheus: 4×2 (alt.)</string>
+  <string name="app_widget_recent">Orpheus: Berrikiak</string>
   <string name="no_effects_for_you">Ezin izan da ekualizadorea ireki.</string>
   <string name="empty_music">Musika ordenagailutik galiura kopiatzeko USB kablea erabili.</string>
   <string name="empty_last_added">Azken hilabetean gehituriko abestiak hemen agertuko dira.</string>

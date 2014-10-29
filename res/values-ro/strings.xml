@@ -99,11 +99,11 @@
   <string name="settings_data_category">Date</string>
   <string name="settings_about_category">Despre</string>
   <string name="settings_author_title">Autor</string>
-  <string name="settings_about_apollo">Despre Apollo</string>
+  <string name="settings_about_apollo">Despre Orpheus</string>
   <string name="settings_special_thanks">Mulțumiri speciale</string>
   <string name="settings_lopez_summary">Design Icon și banner Magazin Play</string>
-  <string name="settings_color_scheme_title">Alege schema de culori implicită pentru Apollo</string>
-  <string name="settings_color_scheme_summary">Schimbă culoarea de accentuare în Apollo</string>
+  <string name="settings_color_scheme_title">Alege schema de culori implicită pentru Orpheus</string>
+  <string name="settings_color_scheme_summary">Schimbă culoarea de accentuare în Orpheus</string>
   <string name="settings_theme_chooser_title">Selector de temă</string>
   <string name="settings_delete_cache_title">Șterge cache-ul</string>
   <string name="settings_delete_cache_summary">Elimină toate imaginile din cache</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">Imaginea artistului lipsește din descărcare</string>
   <string name="settings_open_source_licenses">Licențe Open source</string>
   <string name="settings_version_title">Număr versiune</string>
-  <string name="now_listening_to">#AcumAsculți <xliff:g id="title">%1$s</xliff:g> de <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+  <string name="now_listening_to">#AcumAsculți <xliff:g id="title">%1$s</xliff:g> de <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
   <string name="share_track_using">Distribuie melodia folosind:</string>
   <string name="color_picker_title">Schema de culori</string>
   <string name="current_color">Curent</string>
   <string name="new_color">Nou</string>
-  <string name="app_widget_large_alt">Apollo: 4×2 (alternativ)</string>
-  <string name="app_widget_recent">Apollo: ascultate recent</string>
+  <string name="app_widget_large_alt">Orpheus: 4×2 (alternativ)</string>
+  <string name="app_widget_recent">Orpheus: ascultate recent</string>
   <string name="no_effects_for_you">Egalizatorul nu a putut fi deschis.</string>
   <string name="empty_music">Pentru a copia muzică de pe computer în dispozitivul dvs, folosiți un cablu USB.</string>
   <string name="empty_last_added">Melodiile adăugare de dvs în ultima lună vor fi afișate aici.</string>

@@ -3,7 +3,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/settings_about">
+        android:title="@string/settings_about_apollo">
 
         <Preference
             android:key="pref_author"

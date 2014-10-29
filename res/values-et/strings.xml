@@ -99,11 +99,11 @@
   <string name="settings_data_category">Andmed</string>
   <string name="settings_about_category">Üldist</string>
   <string name="settings_author_title">Autor</string>
-  <string name="settings_about_apollo">Teave Apollost</string>
+  <string name="settings_about_apollo">Teave Orpheusst</string>
   <string name="settings_special_thanks">Erilised tänud</string>
   <string name="settings_lopez_summary">Ikooni ja Play poe bänneri disain</string>
-  <string name="settings_color_scheme_title">Vali Apollo vaikimisi värviskeem</string>
-  <string name="settings_color_scheme_summary">Muudab Apollo põhivärvi</string>
+  <string name="settings_color_scheme_title">Vali Orpheus vaikimisi värviskeem</string>
+  <string name="settings_color_scheme_summary">Muudab Orpheus põhivärvi</string>
   <string name="settings_theme_chooser_title">Teema valik</string>
   <string name="settings_delete_cache_title">Kustuta vahemälu</string>
   <string name="settings_delete_cache_summary">Eemalda kõik puhverdatud pildid</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">Lae puuduvad esitaja pildid</string>
   <string name="settings_open_source_licenses">Avatud lähtekoodiga litsentsid</string>
   <string name="settings_version_title">Versiooni number</string>
-  <string name="now_listening_to">#PraeguEsitusel <xliff:g id="artist">%2$s</xliff:g> - <xliff:g id="title">%1$s</xliff:g> #Apollo</string>
+  <string name="now_listening_to">#PraeguEsitusel <xliff:g id="artist">%2$s</xliff:g> - <xliff:g id="title">%1$s</xliff:g> #Orpheus</string>
   <string name="share_track_using">Jaga lugu, kasutades:</string>
   <string name="color_picker_title">Värvilahendus</string>
   <string name="current_color">Praegune</string>
   <string name="new_color">Uus</string>
-  <string name="app_widget_large_alt">Apollo: 4 × 2 (alternatiivne)</string>
-  <string name="app_widget_recent">Apollo: viimati kuulatud</string>
+  <string name="app_widget_large_alt">Orpheus: 4 × 2 (alternatiivne)</string>
+  <string name="app_widget_recent">Orpheus: viimati kuulatud</string>
   <string name="no_effects_for_you">Ekvalaiserit ei saanud avada.</string>
   <string name="empty_music">Et kopeerida muusikat arvutist seadmesse, kasuta USB-kaablit.</string>
   <string name="empty_last_added">Viimase kuu jooksul lisatud laulud kuvatakse siin.</string>

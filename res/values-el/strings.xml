@@ -99,11 +99,11 @@
   <string name="settings_data_category">Δεδομένα</string>
   <string name="settings_about_category">Σχετικά</string>
   <string name="settings_author_title">Δημιουργός</string>
-  <string name="settings_about_apollo">Περί Apollo</string>
+  <string name="settings_about_apollo">Περί Orpheus</string>
   <string name="settings_special_thanks">Θερμές ευχαριστίες</string>
   <string name="settings_lopez_summary">Εικονίδια και σχεδιασμός Play Store banner</string>
   <string name="settings_color_scheme_title">Επιλογή προεπιλεγμένου συνδυασμού χρωμάτων</string>
-  <string name="settings_color_scheme_summary">Αλλαγή τόνου χρώματος του Apollo</string>
+  <string name="settings_color_scheme_summary">Αλλαγή τόνου χρώματος του Orpheus</string>
   <string name="settings_theme_chooser_title">Θέματα</string>
   <string name="settings_delete_cache_title">Διαγράφη προσωρινής μνήμης</string>
   <string name="settings_delete_cache_summary">Κατάργηση όλων των προσωρινά αποθηκευμένων εικόνων</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">Λήψη εικόνων καλλιτέχνη που λείπουν</string>
   <string name="settings_open_source_licenses">Άδειες χρήσης ανοιχτού κώδικα</string>
   <string name="settings_version_title">Αρıθμός έκδοσης</string>
-  <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+  <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
   <string name="share_track_using">Κοινή χρήση κομματιού με τη χρήση:</string>
   <string name="color_picker_title">Τόνος χρώματος</string>
   <string name="current_color">Τρέχον</string>
   <string name="new_color">Νέο</string>
-  <string name="app_widget_large_alt">Apollo: 4×2 (εναλλακτικό)</string>
-  <string name="app_widget_recent">Apollo: ακούστηκαν πρόσφατα</string>
+  <string name="app_widget_large_alt">Orpheus: 4×2 (εναλλακτικό)</string>
+  <string name="app_widget_recent">Orpheus: ακούστηκαν πρόσφατα</string>
   <string name="no_effects_for_you">Δεν ήταν δυνατό το άνοιγμα του ισοσταθμιστή.</string>
   <string name="empty_music">Για να αντιγράψετε μουσική από τον υπολογιστή στη συσκευή σας, χρησιμοποιήστε ένα καλώδιο USB.</string>
   <string name="empty_last_added">Τραγούδια που έχετε προσθέσει τον τελευταίο μήνα θα εμφανιστούν εδώ.</string>

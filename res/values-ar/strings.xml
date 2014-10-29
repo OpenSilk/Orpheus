@@ -99,11 +99,11 @@
   <string name="settings_data_category">البيانات</string>
   <string name="settings_about_category">حول</string>
   <string name="settings_author_title">الناشر</string>
-  <string name="settings_about_apollo">حول Apollo</string>
+  <string name="settings_about_apollo">حول Orpheus</string>
   <string name="settings_special_thanks">شكر خاص</string>
   <string name="settings_lopez_summary">تصميم شعار الرمز و تصميم Play Store</string>
-  <string name="settings_color_scheme_title">اختر نظام الألوان الإفتىاضي Apollo</string>
-  <string name="settings_color_scheme_summary">يتغير لون علامة في Apollo</string>
+  <string name="settings_color_scheme_title">اختر نظام الألوان الإفتىاضي Orpheus</string>
+  <string name="settings_color_scheme_summary">يتغير لون علامة في Orpheus</string>
   <string name="settings_theme_chooser_title">اختيار الموضوع</string>
   <string name="settings_delete_cache_title">حذف ذاكرة التخزين المؤقت</string>
   <string name="settings_delete_cache_summary">إزالة كافة الصور المخزنة مؤقتاً</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">تحميل صور الفنان مفقود</string>
   <string name="settings_open_source_licenses">تراخيص مفتوحة المصدر</string>
   <string name="settings_version_title">رقم الإصدار</string>
-  <string name="now_listening_to">#تشغيل جديد <xliff:g id="title">%1$s</xliff:g> بي <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+  <string name="now_listening_to">#تشغيل جديد <xliff:g id="title">%1$s</xliff:g> بي <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
   <string name="share_track_using">مشاركة المسار ااستخدام:</string>
   <string name="color_picker_title">نظام الألوان</string>
   <string name="current_color">الحالي</string>
   <string name="new_color">جديد</string>
-  <string name="app_widget_large_alt">Apollo: 4×2 (مناوب)</string>
-  <string name="app_widget_recent">Apollo: استمع مؤخرا</string>
+  <string name="app_widget_large_alt">Orpheus: 4×2 (مناوب)</string>
+  <string name="app_widget_recent">Orpheus: استمع مؤخرا</string>
   <string name="no_effects_for_you">المساوي لم يستطع الفتح.</string>
   <string name="empty_music">لنسخ ملفات الموسيقى من الكمبيوتر إلى الجهاز الخاص بك، استخدم كبل USB.</string>
   <string name="empty_last_added">هنا ستظهر الأغاني التي قمت بإضافتها خلال الشهر الماضي.</string>

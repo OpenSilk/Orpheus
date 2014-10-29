@@ -99,11 +99,11 @@
   <string name="settings_data_category">Duomenys</string>
   <string name="settings_about_category">Apie</string>
   <string name="settings_author_title">Autorius</string>
-  <string name="settings_about_apollo">Apie „Apollo“</string>
+  <string name="settings_about_apollo">Apie „Orpheus“</string>
   <string name="settings_special_thanks">Ypatingas ačiū</string>
   <string name="settings_lopez_summary">Piktogramos ir „Play“ parduotuvės reklamos dizainas</string>
-  <string name="settings_color_scheme_title">Pasirinkti „Apollo“ numatytąją spalvų schemą</string>
-  <string name="settings_color_scheme_summary">Keičia „Apollo“ spalvų akcentą</string>
+  <string name="settings_color_scheme_title">Pasirinkti „Orpheus“ numatytąją spalvų schemą</string>
+  <string name="settings_color_scheme_summary">Keičia „Orpheus“ spalvų akcentą</string>
   <string name="settings_theme_chooser_title">Pasirinkti temą</string>
   <string name="settings_delete_cache_title">Ištrinti talpyklą</string>
   <string name="settings_delete_cache_summary">Pašalinti visus talpykloje esančius vaizdus</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">Parsisiųsti trūkstamus artistų vaizdus</string>
   <string name="settings_open_source_licenses">Atviro kodo licencijos</string>
   <string name="settings_version_title">Versijos numeris</string>
-  <string name="now_listening_to">#Dabar grojama <xliff:g id="title">%1$s</xliff:g> pagal <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+  <string name="now_listening_to">#Dabar grojama <xliff:g id="title">%1$s</xliff:g> pagal <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
   <string name="share_track_using">Bendrinti dainą naudojant:</string>
   <string name="color_picker_title">Spalvų schema</string>
   <string name="current_color">Dabartinė</string>
   <string name="new_color">Nauja</string>
-  <string name="app_widget_large_alt">Apollo: 4×2 (alternatyva)</string>
-  <string name="app_widget_recent">Apollo: Neseniai klausyta</string>
+  <string name="app_widget_large_alt">Orpheus: 4×2 (alternatyva)</string>
+  <string name="app_widget_recent">Orpheus: Neseniai klausyta</string>
   <string name="no_effects_for_you">Nepavyko atidaryti ekvalaizerio.</string>
   <string name="empty_music">Norėdami kopijuoti muziką iš kompiuterio į savo prietaisą, naudokite USB kabelį.</string>
   <string name="empty_last_added">Dainas, kurias pridėjote per pastarąjį mėnesį bus rodomos čia.</string>

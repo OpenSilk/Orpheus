@@ -99,11 +99,11 @@
   <string name="settings_data_category">Dane</string>
   <string name="settings_about_category">O aplikacji</string>
   <string name="settings_author_title">Autor</string>
-  <string name="settings_about_apollo">O Apollo</string>
+  <string name="settings_about_apollo">O Orpheus</string>
   <string name="settings_special_thanks">Specjalne podziękowania</string>
   <string name="settings_lopez_summary">Projekt ikony i bannerów w sklepie Play</string>
-  <string name="settings_color_scheme_title">Wybierz domyślny schemat kolorów Apollo</string>
-  <string name="settings_color_scheme_summary">Zmienia akcentowany kolor w interfejsie Apollo</string>
+  <string name="settings_color_scheme_title">Wybierz domyślny schemat kolorów Orpheus</string>
+  <string name="settings_color_scheme_summary">Zmienia akcentowany kolor w interfejsie Orpheus</string>
   <string name="settings_theme_chooser_title">Menedżer motywów</string>
   <string name="settings_delete_cache_title">Wyczyść pamięć podręczną</string>
   <string name="settings_delete_cache_summary">Usuń wszystkie zapisane grafiki</string>
@@ -113,13 +113,13 @@
   <string name="settings_download_artist_images_title">Pobierz brakujące zdjęcia wykonawców</string>
   <string name="settings_open_source_licenses">Licencje open source</string>
   <string name="settings_version_title">Numer wersji</string>
-  <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> wykonawcy <xliff:g id="artist">%2$s</xliff:g> #Apollo</string>
+  <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> wykonawcy <xliff:g id="artist">%2$s</xliff:g> #Orpheus</string>
   <string name="share_track_using">Udostępnij utwór za pomocą:</string>
   <string name="color_picker_title">Schemat kolorów</string>
   <string name="current_color">Bieżący</string>
   <string name="new_color">Nowy</string>
-  <string name="app_widget_large_alt">Apollo: 4×2 (alternatywny)</string>
-  <string name="app_widget_recent">Apollo: Ostatnio słuchane</string>
+  <string name="app_widget_large_alt">Orpheus: 4×2 (alternatywny)</string>
+  <string name="app_widget_recent">Orpheus: Ostatnio słuchane</string>
   <string name="no_effects_for_you">Equalizer nie może zostać uruchomiony.</string>
   <string name="empty_music">Aby skopiować muzykę z komputera do urządzenia, użyj kabla USB.</string>
   <string name="empty_last_added">Tutaj pojawią się utwory dodane w przeciągu ostatniego miesiąca.</string>
