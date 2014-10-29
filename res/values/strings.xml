@@ -17,7 +17,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="app_name">Apollo</string>
+    <string name="app_name" translatable="false">Apollo</string>
 
     <!-- Page titles -->
     <string name="page_recent">Recent</string>
@@ -34,7 +34,6 @@
     <string name="menu_play_all">Play all</string>
     <string name="menu_sort_by">Sort by</string>
     <string name="menu_shop">Shop for themes</string>
-    <string name="menu_clear_recents">Clear recent</string>
     <string name="menu_clear_queue">Clear queue</string>
     <string name="menu_save_queue">Save queue</string>
     <string name="menu_share">Share</string>
@@ -50,7 +49,6 @@
     <string name="add_to_favorites">Add to favorites</string>
     <string name="add_to_queue">Add to queue</string>
     <string name="remove_from_favorites">Remove from favorites</string>
-    <string name="remove_from_recent">Remove from recent</string>
     <string name="remove_from_queue">Remove from queue</string>
 
     <!-- Sort orders -->
@@ -67,7 +65,8 @@
     <string name="sort_order_entry_filename">Filename</string>
 
     <!-- Default playlist names -->
-    <string name="playlist_favorite">Favorite</string> <!-- used in voice search processing only -->
+    <!-- playlist_favorite used in voice search processing only -->
+    <string name="playlist_favorite">Favorite</string>
     <string name="playlist_favorites">Favorites</string>
     <string name="playlist_last_added">Last added</string>
 
@@ -114,7 +113,6 @@
     <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> pinned to your home screen</string>
     <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> could not be pinned to your home screen</string>
     <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' set as ringtone</string>
-    <string name="playlist_renamed">Playlist renamed</string>
     <string name="theme_set"><xliff:g id="name">%s</xliff:g> set as the theme</string>
 
     <!-- Settings -->
@@ -147,16 +145,16 @@
 
     <!-- ColorPicker -->
     <string name="color_picker_title">Color scheme</string>
-    <string name="hex">#</string>
+    <string name="hex" translatable="false">#</string>
     <string name="current_color">Current</string>
     <string name="new_color">New</string>
 
     <!-- App widget -->
-    <string name="app_widget_small">Apollo: 4x1</string>
-    <string name="app_widget_large">Apollo: 4x2</string>
-    <string name="app_widget_large_alt">Apollo: 4x2 (alternate)</string>
+    <string name="app_widget_small" translatable="false">Apollo: 4×1</string>
+    <string name="app_widget_large" translatable="false">Apollo: 4×2</string>
+    <string name="app_widget_large_alt">Apollo: 4×2 (alternate)</string>
     <string name="app_widget_recent">Apollo: recently listened</string>
-    <string name="app_widget_text_separator">-</string>
+    <string name="app_widget_text_separator" translatable="false">-</string>
 
     <!-- What keywords to use when shopping for Apollo themes -->
     <string name="apollo_themes_shop_key" translatable="false">Apollo Themes</string>
