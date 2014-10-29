@@ -150,6 +150,9 @@
     <string name="sleep_timer_set">Sleep timer set for %d minutes</string>
     <string name="cancel_current_timer">Cancel current timer</string>
 
+    <string name="send_feedback">Send feedback</string>
+    <string name="feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
+    <string name="feedback_subject">Feedback for Orpheus Music Player</string>
 
     <string name="err_addtoqueue">Unable to enqueue songs</string>
 </resources>

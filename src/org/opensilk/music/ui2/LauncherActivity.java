@@ -44,10 +44,7 @@ import org.opensilk.music.R;
 
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;

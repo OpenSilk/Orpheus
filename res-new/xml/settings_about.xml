@@ -14,6 +14,17 @@
             </Preference>
 
         <Preference
+            android:key="send_feedback"
+            android:title="@string/send_feedback">
+            <intent android:action="android.intent.action.SENDTO"
+                android:data="@string/feedback_url">
+                <extra
+                    android:name="android.intent.extra.SUBJECT"
+                    android:value="@string/feedback_subject"/>
+            </intent>
+        </Preference>
+
+        <Preference
             android:key="pref_version"
             android:title="@string/settings_version_title" />
 

@@ -81,8 +81,8 @@ public class NavView extends ListView {
                 if (item.screen != null) {
                     setItemChecked(position, true);
                     presenter.go(getContext(), item.screen);
-                } else if (item.intent != null) {
-                    presenter.open(item.intent);
+                } else if (item.event != null) {
+                    presenter.open(item.event);
                 }
             }
         });
@@ -104,7 +104,7 @@ public class NavView extends ListView {
         public final int iconRes;
         public final Drawable icon;
         public final Screen screen;
-        public final StartActivityForResult intent;
+        public final Object event;
 
         public Item(Type type, CharSequence title, Drawable icon, Screen screen) {
             this.type = type;
@@ -113,7 +113,7 @@ public class NavView extends ListView {
             this.icon = icon;
             this.iconRes = -1;
             this.screen = screen;
-            this.intent = null;
+            this.event = null;
         }
 
         public Item(Type type, int titleRes, int iconRes, Screen screen) {
@@ -123,17 +123,17 @@ public class NavView extends ListView {
             this.iconRes = iconRes;
             this.icon = null;
             this.screen = screen;
-            this.intent = null;
+            this.event = null;
         }
 
-        public Item(Type type, int titleRes, int iconRes, StartActivityForResult intent) {
+        public Item(Type type, int titleRes, int iconRes, Object event) {
             this.type = type;
             this.titleRes = titleRes;
             this.title = null;
             this.iconRes = iconRes;
             this.icon = null;
             this.screen = null;
-            this.intent = intent;
+            this.event = event;
         }
 
     }

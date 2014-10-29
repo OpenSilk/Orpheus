@@ -86,7 +86,7 @@ public class NavBlueprint {
             AppFlow.get(context).replaceTo(screen);
         }
 
-        public void open(StartActivityForResult event) {
+        public void open(Object event) {
             drawerOwner.closeDrawer();
             bus.post(event);
         }
