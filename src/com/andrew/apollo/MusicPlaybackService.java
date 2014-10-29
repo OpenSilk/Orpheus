@@ -379,13 +379,6 @@ public class MusicPlaybackService extends Service {
      */
     private boolean mAnyActivityInForeground = false;
 
-    /**
-     * Lock screen controls
-     */
-    private RemoteControlClient mRemoteControlClient;
-
-    private ComponentName mMediaButtonReceiverComponent;
-
     // We use this to distinguish between different cards when saving/restoring
     // playlists
     private int mCardId;
@@ -418,6 +411,11 @@ public class MusicPlaybackService extends Service {
      * Used to build the notification
      */
     private NotificationHelper mNotificationHelper;
+
+    /**
+     * handles mediasession on L and Remotecontrolclient on older apis
+     */
+    private MediaSessionHelper mMediaSessionHelper;
 
     /**
      * Favorites database
@@ -555,12 +553,9 @@ public class MusicPlaybackService extends Service {
         // Initialize the audio manager and register any headset controls for
         // playback
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        mMediaButtonReceiverComponent = new ComponentName(getPackageName(),
-                MediaButtonIntentReceiver.class.getName());
-        mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
 
-        // Use the remote control APIs to set the playback state
-        setUpRemoteControlClient();
+        mMediaSessionHelper = new MediaSessionHelper(this);
+        mMediaSessionHelper.setup();
 
         // Initialize the preferences
         mPreferences = getSharedPreferences("Service", 0);
@@ -615,48 +610,7 @@ public class MusicPlaybackService extends Service {
         notifyChange(META_CHANGED);
     }
 
-    /**
-     * Initializes the remote control client
-     */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    private void setUpRemoteControlClient() {
-        final Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-        mediaButtonIntent.setComponent(mMediaButtonReceiverComponent);
-        mRemoteControlClient = new RemoteControlClient(
-                PendingIntent.getBroadcast(getApplicationContext(), 0, mediaButtonIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT));
-        mAudioManager.registerRemoteControlClient(mRemoteControlClient);
 
-        // Flags for the media transport control that this client supports.
-        int flags = RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
-                | RemoteControlClient.FLAG_KEY_MEDIA_NEXT
-                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY
-                | RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
-                | RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE
-                | RemoteControlClient.FLAG_KEY_MEDIA_STOP;
-
-        if (ApolloUtils.hasJellyBeanMR2()) {
-            flags |= RemoteControlClient.FLAG_KEY_MEDIA_POSITION_UPDATE;
-
-            mRemoteControlClient.setOnGetPlaybackPositionListener(
-                    new RemoteControlClient.OnGetPlaybackPositionListener() {
-                @Override
-                public long onGetPlaybackPosition() {
-                    return position();
-                }
-            });
-            mRemoteControlClient.setPlaybackPositionUpdateListener(
-                    new RemoteControlClient.OnPlaybackPositionUpdateListener() {
-                @Override
-                public void onPlaybackPositionUpdate(long newPositionMs) {
-                    seek(newPositionMs);
-                }
-            });
-        }
-
-        mRemoteControlClient.setTransportControlFlags(flags);
-
-    }
 
     /**
      * {@inheritDoc}
@@ -684,8 +638,7 @@ public class MusicPlaybackService extends Service {
 
         // Remove the audio focus listener and lock screen controls
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
-        mAudioManager.unregisterRemoteControlClient(mRemoteControlClient);
-        mAudioManager.unregisterMediaButtonEventReceiver(mMediaButtonReceiverComponent);
+        mMediaSessionHelper.teardown();
 
         // Remove any callbacks from the handler
         mPlayerHandler.removeCallbacksAndMessages(null);
@@ -1192,6 +1145,18 @@ public class MusicPlaybackService extends Service {
         }
     }
 
+    private boolean ensureCursor() {
+        if (mCursor == null || mCursor.isClosed()) {
+            if (getAudioId() >= 0) {
+                updateCursor(getAudioId());
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * @param trackId The track ID
      */
@@ -1208,9 +1173,13 @@ public class MusicPlaybackService extends Service {
         } else {
             Cursor c = openCursorAndGoToFirst(uri, Projections.LOCAL_SONG, selection, selectionArgs);
             if (c != null) {
-                long id = MusicProviderUtil.insertSong(this, CursorHelpers.makeLocalSongFromCursor(this, c));
-                c.close();
-                updateCursor(id);
+                try {
+                    long id = MusicProviderUtil.insertSong(this, CursorHelpers.makeLocalSongFromCursor(this, c));
+                    updateCursor(id);
+                } finally {
+                     c.close();
+                }
+
             }
         }
     }
@@ -1523,7 +1492,7 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "notifyChange: what = " + what);
 
         // Update the lockscreen controls
-        updateRemoteControlClient(what);
+        mMediaSessionHelper.updateMeta(what);
 
         if (what.equals(POSITION_CHANGED)) {
             return;
@@ -1563,57 +1532,6 @@ public class MusicPlaybackService extends Service {
 
         if (what.equals(PLAYSTATE_CHANGED)) {
             mNotificationHelper.updatePlayState(isPlaying());
-        }
-    }
-
-    /**
-     * Updates the lockscreen controls.
-     *
-     * @param what The broadcast
-     */
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    private void updateRemoteControlClient(final String what) {
-        int playState = mIsSupposedToBePlaying
-                ? RemoteControlClient.PLAYSTATE_PLAYING
-                : RemoteControlClient.PLAYSTATE_PAUSED;
-
-        if (ApolloUtils.hasJellyBeanMR2()
-                && (what.equals(PLAYSTATE_CHANGED) || what.equals(POSITION_CHANGED))) {
-            mRemoteControlClient.setPlaybackState(playState, position(), 1.0f);
-        } else if (what.equals(PLAYSTATE_CHANGED)) {
-            mRemoteControlClient.setPlaybackState(playState);
-        } else if (what.equals(META_CHANGED) || what.equals(QUEUE_CHANGED)) {
-            Bitmap albumArt;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                //Kitkat has fullscreen artwork
-                albumArt = getAlbumArt();
-            } else {
-                albumArt = getAlbumArtThumbnail();
-            }
-            if (albumArt != null) {
-                // RemoteControlClient wants to recycle the bitmaps thrown at it, so we need
-                // to make sure not to hand out our cache copy
-                Bitmap.Config config = albumArt.getConfig();
-                if (config == null) {
-                    config = Bitmap.Config.RGB_565;
-                }
-                albumArt = albumArt.copy(config, false);
-            }
-
-            mRemoteControlClient
-                    .editMetadata(true)
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, getArtistName())
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
-                            !TextUtils.isEmpty(getAlbumArtistName()) ? getAlbumArtistName() : getArtistName())
-                    .putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, getAlbumName())
-                    .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, getTrackName())
-                    .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, duration())
-                    .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, albumArt)
-                    .apply();
-
-            if (ApolloUtils.hasJellyBeanMR2()) {
-                mRemoteControlClient.setPlaybackState(playState, position(), 1.0f);
-            }
         }
     }
 
@@ -2012,9 +1930,7 @@ public class MusicPlaybackService extends Service {
      */
     public Uri getDataUri() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return null;
-            }
+            if (!ensureCursor()) return null;
             final String uri = CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.DATA_URI);
             if (TextUtils.isEmpty(uri)) {
                 return null;
@@ -2031,9 +1947,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getAlbumName() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return null;
-            }
+            if (!ensureCursor()) return null;
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ALBUM_NAME);
         }
     }
@@ -2045,9 +1959,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getTrackName() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return null;
-            }
+            if (!ensureCursor()) return null;
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.NAME);
         }
     }
@@ -2059,9 +1971,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getArtistName() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return null;
-            }
+            if (!ensureCursor()) return null;
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ARTIST_NAME);
         }
     }
@@ -2073,9 +1983,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getAlbumArtistName() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return null;
-            }
+            if (!ensureCursor()) return null;
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ALBUM_ARTIST_NAME);
         }
     }
@@ -2087,9 +1995,7 @@ public class MusicPlaybackService extends Service {
      */
     public long getAlbumId() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return -1;
-            }
+            if (!ensureCursor()) return -1;
             return CursorHelpers.getLongOrZero(mCursor, MusicStore.Cols.ALBUM_IDENTITY);
         }
     }
@@ -2101,8 +2007,7 @@ public class MusicPlaybackService extends Service {
      */
     public long getAudioId() {
         synchronized (this) {
-            IMusicPlayer player = getPlayer();
-            if (mPlayPos >= 0 && player != null && player.isInitialized()) {
+            if (mPlayPos >= 0 && mPlayList.length > mPlayPos) {
                 return mPlayList[mPlayPos];
             }
         }
@@ -2116,9 +2021,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getMimeType() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return null;
-            }
+            if (!ensureCursor()) return null;
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.MIME_TYPE);
         }
     }
@@ -2129,9 +2032,7 @@ public class MusicPlaybackService extends Service {
      */
     public Uri getArtworkUri() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return null;
-            }
+            if (!ensureCursor()) return null;
             final String uri = CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ARTWORK_URI);
             if (TextUtils.isEmpty(uri)) {
                 return null;
@@ -2158,9 +2059,7 @@ public class MusicPlaybackService extends Service {
      */
     public boolean isFromSDCard() {
         synchronized (this) {
-            if (mCursor == null || mCursor.isClosed()) {
-                return false;
-            }
+            if (!ensureCursor()) return false;
             return CursorHelpers.getIntOrZero(mCursor, MusicStore.Cols.ISLOCAL) == 1;
         }
     }
@@ -2332,7 +2231,7 @@ public class MusicPlaybackService extends Service {
             return;
         }
 
-        mAudioManager.registerMediaButtonEventReceiver(mMediaButtonReceiverComponent);
+        mMediaSessionHelper.ping();
 
         synchronized (this) {
             IMusicPlayer player = getPlayer();
@@ -2791,9 +2690,9 @@ public class MusicPlaybackService extends Service {
                             service.mLastKnowPosition = player.position();
                         }
                     } catch (TransientNetworkDisconnectionException|NoConnectionException ignored) { }
-                    service.mRemoteProgressHandler.sendEmptyMessageDelayed(0, 3000); //Might increase this
+                    RemoteProgressHandler.this.sendEmptyMessageDelayed(0, 3000); //Might increase this
                 } else {
-                    service.mRemoteProgressHandler.removeMessages(0);
+                    RemoteProgressHandler.this.removeMessages(0);
                 }
             }
         }

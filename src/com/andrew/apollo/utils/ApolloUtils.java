@@ -83,6 +83,14 @@ public final class ApolloUtils {
     }
 
     /**
+     * Api 19 or higher
+     * @return
+     */
+    public static boolean hasKitkat() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    }
+
+    /**
      * Api 21 or higher
      * @return
      */
