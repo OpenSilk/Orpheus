@@ -101,8 +101,6 @@ public class ThemeUtils {
      * @param context The {@link Context} to use.
      */
     public ThemeUtils(final Context context) {
-        // Get the search query
-        sApolloSearch = context.getString(R.string.apollo_themes_shop_key);
         // Get the preferences
         mPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         // Get the theme package name
@@ -118,12 +116,12 @@ public class ThemeUtils {
             setThemePackageName(APOLLO_PACKAGE);
         }
         // Get the current theme color
-        mCurrentThemeColor = PreferenceUtils.getInstance(context).getDefaultThemeColor(context);
+        mCurrentThemeColor = android.R.color.holo_blue_dark;
     }
 
     /**
      * Set the new theme package name.
-     * 
+     *
      * @param packageName The package name of the theme to be set.
      */
     public void setThemePackageName(final String packageName) {
@@ -132,7 +130,7 @@ public class ThemeUtils {
 
     /**
      * Return the current theme package name.
-     * 
+     *
      * @return The default theme package name.
      */
     public final String getThemePackageName() {
@@ -183,20 +181,6 @@ public class ThemeUtils {
      */
     public boolean isActionBarDark() {
         return ApolloUtils.isColorDark(getColor("action_bar"));
-    }
-
-    /**
-     * Sets the corret overflow icon in the action bar depending on whether or
-     * not the current action bar color is dark or light.
-     * 
-     * @param app The {@link Activity} used to set the theme.
-     */
-    public void setOverflowStyle(final Activity app) {
-        if (isActionBarDark()) {
-            app.setTheme(R.style.Apollo_Theme_Dark);
-        } else {
-            app.setTheme(R.style.Apollo_Theme_Light);
-        }
     }
 
     /**

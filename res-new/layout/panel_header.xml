@@ -56,14 +56,14 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:textAppearance="@style/TextAppearancePanelHeader.Title"
-                android:background="@color/transparent"
+                android:background="@android:color/transparent"
                 style="@style/SingleLineTextView"/>
 
             <TextView
                 android:id="@+id/header_artist_info"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:background="@color/transparent"
+                android:background="@android:color/transparent"
                 android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
                 style="@style/SingleLineTextView"/>
 

@@ -150,18 +150,6 @@ public final class PreferenceUtils {
     }
 
     /**
-     * Returns the current theme color.
-     * 
-     * @param context The {@link Context} to use.
-     * @return The default theme color.
-     */
-    @Deprecated
-    public final int getDefaultThemeColor(final Context context) {
-        return mPreferences.getInt(DEFAULT_THEME_COLOR,
-                context.getResources().getColor(R.color.holo_blue_light));
-    }
-
-    /**
      * @return True if the user has checked to only download images on Wi-Fi,
      *         false otherwise
      */

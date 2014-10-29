@@ -15,16 +15,6 @@
  -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Main Holo -->
-    <style name="Apollo.Theme.Dark" parent="@android:style/Theme.Holo">
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-    <!-- Main Holo light -->
-    <style name="Apollo.Theme.Light" parent="@android:style/Theme.Holo.Light">
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
     <!-- Notification bar event text -->
     <style name="NotificationText">
         <item name="android:layout_width">match_parent</item>
@@ -45,18 +35,18 @@
     </style>
 
     <style name="NotificationAction.Previous" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/ic_action_playback_prev_white</item>
+        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
         <item name="android:visibility">gone</item>
         <item name="android:contentDescription">@string/accessibility_prev</item>
     </style>
 
     <style name="NotificationAction.Play" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/ic_action_playback_play_white</item>
+        <item name="android:src">@drawable/ic_play_arrow_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_play</item>
     </style>
 
     <style name="NotificationAction.Next" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/ic_action_playback_next_white</item>
+        <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
         <item name="android:contentDescription">@string/accessibility_next</item>
     </style>
 

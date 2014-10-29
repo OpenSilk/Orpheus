@@ -12,6 +12,7 @@
 package com.andrew.apollo.format;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -33,7 +34,7 @@ public class PrefixHighlighter {
      * @param prefixHighlightColor The color used to highlight the prefixes.
      */
     public PrefixHighlighter(final Context context) {
-        mPrefixHighlightColor = PreferenceUtils.getInstance(context).getDefaultThemeColor(context);
+        mPrefixHighlightColor = Color.BLUE;
     }
 
     /**

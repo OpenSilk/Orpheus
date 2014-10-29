@@ -53,7 +53,7 @@
     <!-- header shadow -->
     <org.opensilk.music.widgets.ShadowView
         android:layout_width="match_parent"
-        android:layout_height="@dimen/shadow_height"
+        android:layout_height="5dp"
         android:layout_below="@id/panel_header"
         app:shadowPosition="below"
         android:contentDescription="@null"/>
@@ -61,7 +61,7 @@
     <!-- footer shadow -->
     <org.opensilk.music.widgets.ShadowView
         android:layout_width="match_parent"
-        android:layout_height="@dimen/shadow_height"
+        android:layout_height="5dp"
         android:layout_above="@id/panel_footer"
         app:shadowPosition="above"
         android:contentDescription="@null"/>
