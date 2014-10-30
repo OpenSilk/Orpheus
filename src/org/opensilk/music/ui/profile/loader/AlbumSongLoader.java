@@ -35,7 +35,7 @@ public class AlbumSongLoader extends CursorLoader {
         setProjection(Projections.LOCAL_SONG);
         setSelection(Selections.LOCAL_ALBUM_SONGS);
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(albumId));
-        setSortOrder(MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+        setSortOrder(Selections.LOCAL_ALBUM_SONGS);
     }
 
 }

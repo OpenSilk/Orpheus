@@ -716,6 +716,8 @@ public final class MusicUtils {
         return sEmptyLocalSongList;
     }
 
+    @MarkedForRemoval
+    @Deprecated
     public static LocalSong[] getLocalSongList(Context context, long[] ids) {
         if (ids == null || ids.length == 0) {
             return sEmptyLocalSongList;

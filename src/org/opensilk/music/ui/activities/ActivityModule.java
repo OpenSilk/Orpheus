@@ -30,10 +30,12 @@ import org.opensilk.music.ui.modules.ActionBarControllerImpl;
 import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by drew on 6/20/14.
@@ -81,6 +83,11 @@ public class ActivityModule {
     @Provides @Singleton @ForActivity
     public Bus provideActivityBus() {
         return new Bus("activity");
+    }
+
+    @Provides @Singleton @Named("activity")
+    public EventBus provideActivityEventbus() {
+        return new EventBus();
     }
 
 }

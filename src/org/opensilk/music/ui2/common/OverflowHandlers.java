@@ -21,12 +21,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.widget.PopupMenu;
 
+import com.andrew.apollo.menu.AddToPlaylistDialog;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.R;
 import org.opensilk.music.api.model.Album;
@@ -36,6 +39,7 @@ import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
+import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
@@ -427,6 +431,62 @@ public class OverflowHandlers {
                     return true;
                 case DELETE:
                     bus.post(new ConfirmDelete(new long[]{song.songId}, song.name));
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
+
+    public static class LocalSongGroups implements OverflowHandler<LocalSongGroup> {
+        final MusicServiceConnection connection;
+        final Context context;
+        final EventBus bus;
+
+        @Inject
+        public LocalSongGroups(MusicServiceConnection connection,
+                          @ForApplication Context context,
+                          @Named("activity") EventBus bus) {
+            this.connection = connection;
+            this.context = context;
+            this.bus = bus;
+        }
+
+        public void populateMenu(PopupMenu m, LocalSongGroup group) {
+            m.inflate(R.menu.popup_play_all);
+            m.inflate(R.menu.popup_shuffle_all);
+            m.inflate(R.menu.popup_add_to_queue);
+            m.inflate(R.menu.popup_add_to_playlist);
+        }
+
+        public boolean handleClick(OverflowAction action, final LocalSongGroup group) {
+            switch (action) {
+                case PLAY_ALL:
+                    connection.playAllSongs(new Func0<Song[]>() {
+                        @Override
+                        public Song[] call() {
+                            return CursorHelpers.getSongsFromId(context, group.songIds);
+                        }
+                    }, 0, false);
+                    return true;
+                case SHUFFLE_ALL:
+                    connection.playAllSongs(new Func0<Song[]>() {
+                        @Override
+                        public Song[] call() {
+                            return CursorHelpers.getSongsFromId(context, group.songIds);
+                        }
+                    }, 0, true);
+                    return true;
+                case ADD_TO_QUEUE:
+                    connection.enqueueEnd(new Func0<Song[]>() {
+                        @Override
+                        public Song[] call() {
+                            return CursorHelpers.getSongsFromId(context, group.songIds);
+                        }
+                    });
+                    return true;
+                case ADD_TO_PLAYLIST:
+                    bus.post(new OpenAddToPlaylist(group.songIds));
                     return true;
                 default:
                     return false;

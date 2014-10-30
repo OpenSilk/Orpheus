@@ -58,9 +58,8 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
 
     private Genre mGenre;
 
-    protected GridAdapter mAdapter;
-    @Inject @ForFragment
-    protected Bus mBus;
+    @Inject
+    GridAdapter mAdapter;
 
     public static GenreFragment newInstance(Bundle args) {
         GenreFragment f = new GenreFragment();
@@ -72,10 +71,8 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mGenre = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new GridAdapter(getActivity(), this);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
-        registerHandlers();
     }
 
     @Override
@@ -115,21 +112,10 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unregisterHandlers();
-    }
-
-    @Override
     protected Object[] getModules() {
         return new Object[] {
                 new ProfileModule(),
         };
-    }
-
-    @Override
-    protected int getListLayout() {
-        return R.layout.profile_staggeredgrid_frame;
     }
 
     @Override
@@ -150,8 +136,7 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
 
     @Override
     public void onLoadFinished(Loader<List<Object>> loader, List<Object> data) {
-        mAdapter.clear();
-        mAdapter.populate(data);
+        mAdapter.addAll(data);
     }
 
     @Override
@@ -159,22 +144,4 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
         mAdapter.clear();
     }
 
-    private GenreCardClickHandler mGenreHandler;
-    private AlbumCardClickHandler mAlbumHandler;
-    private SongGroupCardClickHandler mSongGroupHandler;
-
-    private void registerHandlers() {
-        mGenreHandler = getObjectGraph().get(GenreCardClickHandler.class);
-        mAlbumHandler = getObjectGraph().get(AlbumCardClickHandler.class);
-        mSongGroupHandler = getObjectGraph().get(SongGroupCardClickHandler.class);
-        mBus.register(mGenreHandler);
-        mBus.register(mAlbumHandler);
-        mBus.register(mSongGroupHandler);
-    }
-
-    private void unregisterHandlers() {
-        mBus.unregister(mGenreHandler);
-        mBus.unregister(mAlbumHandler);
-        mBus.unregister(mSongGroupHandler);
-    }
 }

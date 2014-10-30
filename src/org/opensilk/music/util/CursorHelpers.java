@@ -403,7 +403,28 @@ public class CursorHelpers {
         return sEmptySongList;
     }
 
+    public static LocalSong[] getSongsFromId(Context context, long[] ids) {
+        if (ids == null || ids.length == 0) {
+            return sEmptySongList;
+        }
+        Cursor c = new OrderPreservingCursor(context, ids);
+        LocalSong[] songs = new LocalSong[c.getCount()];
+        if (c.getCount() > 0 && c.moveToFirst()) {
+            int ii=0;
+            do {
+                final LocalSong s = CursorHelpers.makeLocalSongFromCursor(context, c);
+                songs[ii++] = s;
+            } while (c.moveToNext());
+        }
+        c.close();
 
+//        int ii;
+//        for (ii=0;ii<ids.length;ii++) {
+//            Timber.d(ids[ii] + " :: "+ songs[ii].songId);
+//        }
+
+        return songs;
+    }
 
     public static Cursor makeLocalAlbumsCursor(Context context, long[] albumIds) {
         return context.getContentResolver().query(

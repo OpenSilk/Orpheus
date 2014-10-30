@@ -35,6 +35,7 @@ import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui.profile.loader.ArtistGridLoader;
+import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.qualifier.ForFragment;
 
 import java.util.List;
@@ -55,9 +56,8 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
 
     private LocalArtist mArtist;
 
-    protected GridAdapter mAdapter;
-    @Inject @ForFragment
-    protected Bus mBus;
+    @Inject
+    GridAdapter mAdapter;
 
     public static ArtistFragment newInstance(Bundle args) {
         ArtistFragment f = new ArtistFragment();
@@ -69,10 +69,8 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mArtist = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new GridAdapter(getActivity(), this);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
-        registerHandlers();
     }
 
     @Override
@@ -103,12 +101,6 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unregisterHandlers();
-    }
-
-    @Override
     protected Object[] getModules() {
         return new Object[] {
                 new ProfileModule(),
@@ -122,32 +114,12 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
 
     @Override
     public void onLoadFinished(Loader<List<Object>> loader, List<Object> data) {
-        mAdapter.clear();
-        mAdapter.populate(data);
+        mAdapter.addAll(data);
     }
 
     @Override
     public void onLoaderReset(Loader<List<Object>> loader) {
         mAdapter.clear();
-    }
-
-    private ArtistCardClickHandler mArtistHandler;
-    private SongGroupCardClickHandler mSongGroupHandler;
-    private AlbumCardClickHandler mAlbumHandler;
-
-    private void registerHandlers() {
-        mArtistHandler = getObjectGraph().get(ArtistCardClickHandler.class);
-        mSongGroupHandler = getObjectGraph().get(SongGroupCardClickHandler.class);
-        mAlbumHandler = getObjectGraph().get(AlbumCardClickHandler.class);
-        mBus.register(mArtistHandler);
-        mBus.register(mSongGroupHandler);
-        mBus.register(mAlbumHandler);
-    }
-
-    private void unregisterHandlers() {
-        mBus.unregister(mArtistHandler);
-        mBus.unregister(mSongGroupHandler);
-        mBus.register(mAlbumHandler);
     }
 
 }
