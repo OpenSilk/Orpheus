@@ -153,6 +153,7 @@ public class CursorHelpers {
     }
 
     @MarkedForRemoval
+    @Deprecated
     public static Genre makeGenreFromCursor(final Cursor c) {
         final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
         final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
@@ -164,6 +165,7 @@ public class CursorHelpers {
     }
 
     @MarkedForRemoval
+    @Deprecated
     public static Playlist makePlaylistFromCursor(final Cursor c) {
         final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
         final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
@@ -216,6 +218,23 @@ public class CursorHelpers {
                 Selections.GENRE_MEMBER,
                 SelectionArgs.GENRE_MEMBER,
                 MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER);
+    }
+
+    public static long[] getSongIdsForGenre(Context context, long genreId) {
+        Cursor cursor = context.getContentResolver().query(
+                Uris.GENRE(genreId),
+                Projections.ID_ONLY,
+                Selections.GENRE_SONGS,
+                SelectionArgs.GENRE_SONGS,
+                SortOrder.GENRE_SONGS);
+        if (cursor != null) {
+            try {
+                return getSongIdsForCursor(cursor);
+            } finally {
+                cursor.close();
+            }
+        }
+        return sEmptyList;
     }
 
     public static LocalSong[] getSongsForGenre(Context context, long id) {
@@ -308,6 +327,23 @@ public class CursorHelpers {
                 SortOrder.LOCAL_ARTIST_SONGS);
     }
 
+    public static long[] getSongIdsForArtist(Context context, long artistId) {
+        Cursor cursor = context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                Projections.ID_ONLY,
+                Selections.LOCAL_ARTIST_SONGS,
+                SelectionArgs.LOCAL_ARTIST_SONGS(artistId),
+                SortOrder.LOCAL_ARTIST_SONGS);
+        if (cursor != null) {
+            try {
+                return getSongIdsForCursor(cursor);
+            } finally {
+                cursor.close();
+            }
+        }
+        return sEmptyList;
+    }
+
     public static LocalSong[] getSongsForLocalArtist(Context context, long artistId) {
         Cursor c = makeLocalArtistSongsCursor(context, artistId);
         if (c != null) {
@@ -327,14 +363,6 @@ public class CursorHelpers {
         return sEmptySongList;
     }
 
-    public static Cursor makeLocalAlbumsCursor(Context context, long[] albumIds) {
-        return context.getContentResolver().query(
-                Uris.EXTERNAL_MEDIASTORE_ALBUMS,
-                Projections.LOCAL_ALBUM,
-                Selections.LOCAL_ALBUM + " AND " + Selections.LOCAL_ALBUMS(albumIds),
-                SelectionArgs.LOCAL_ALBUM,
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-    }
 
     public static ArtInfo makeArtInfoFromLocalAlbumCursor(final Cursor c) {
         return new ArtInfo(getStringOrNull(c, MediaStore.Audio.AlbumColumns.ARTIST),
@@ -375,32 +403,15 @@ public class CursorHelpers {
         return sEmptySongList;
     }
 
-    public static long[] getSongIdsForCursor(final Cursor c) {
-        if (c != null) {
-            try {
-                if (c.moveToFirst()) {
-                    int colidx = -1;
-                    try {
-                        colidx = c.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-                    } catch (IllegalArgumentException e) {
-                        try {
-                            colidx = c.getColumnIndexOrThrow(BaseColumns._ID);
-                        } catch (IllegalArgumentException e1) {
-                            return sEmptyList;
-                        }
-                    }
-                    long[] list = new long[c.getCount()];
-                    int ii = 0;
-                    do {
-                       list[ii++] = c.getLong(colidx);
-                    } while (c.moveToNext());
-                    return list;
-                }
-            } finally {
-                c.close();
-            }
-        }
-        return sEmptyList;
+
+
+    public static Cursor makeLocalAlbumsCursor(Context context, long[] albumIds) {
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_ALBUMS,
+                Projections.LOCAL_ALBUM,
+                Selections.LOCAL_ALBUM + " AND " + Selections.LOCAL_ALBUMS(albumIds),
+                SelectionArgs.LOCAL_ALBUM,
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
     }
 
     public static long[] getSongIdsForAlbum(Context context, long albumid) {
@@ -411,10 +422,11 @@ public class CursorHelpers {
                 SelectionArgs.LOCAL_ALBUM_SONGS(albumid),
                 SortOrder.LOCAL_ALBUM_SONGS);
         if (cursor != null) {
-            final long[] mList = getSongIdsForCursor(cursor);
-            cursor.close();
-            cursor = null;
-            return mList;
+            try {
+                return getSongIdsForCursor(cursor);
+            } finally {
+                cursor.close();
+            }
         }
         return sEmptyList;
     }
@@ -484,6 +496,34 @@ public class CursorHelpers {
             }
         }
         return sEmptySongList;
+    }
+
+    public static long[] getSongIdsForCursor(final Cursor c) {
+        if (c != null) {
+            try {
+                if (c.moveToFirst()) {
+                    int colidx = -1;
+                    try {
+                        colidx = c.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+                    } catch (IllegalArgumentException e) {
+                        try {
+                            colidx = c.getColumnIndexOrThrow(BaseColumns._ID);
+                        } catch (IllegalArgumentException e1) {
+                            return sEmptyList;
+                        }
+                    }
+                    long[] list = new long[c.getCount()];
+                    int ii = 0;
+                    do {
+                        list[ii++] = c.getLong(colidx);
+                    } while (c.moveToNext());
+                    return list;
+                }
+            } finally {
+                c.close();
+            }
+        }
+        return sEmptyList;
     }
 
     public static Uri generateDataUri(long songId) {

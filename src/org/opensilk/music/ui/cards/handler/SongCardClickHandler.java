@@ -20,13 +20,12 @@ import android.support.v4.app.FragmentActivity;
 
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.dialogs.AddToPlaylistDialog;
+import com.andrew.apollo.menu.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.SongCardClick;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;

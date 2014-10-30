@@ -34,7 +34,7 @@ public class SortOrder {
         SONG_GROUP = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
         LAST_ADDED = MediaStore.Audio.Media.DATE_ADDED + " DESC";
         PLAYLIST_SONGS = MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER;
-        LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.ALBUM + ", " + LOCAL_ALBUM_SONGS;
+        LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.ALBUM_KEY + ", " + LOCAL_ALBUM_SONGS;
         GENRE_SONGS = MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER;
     }
 }

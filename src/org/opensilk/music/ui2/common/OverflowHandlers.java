@@ -25,18 +25,22 @@ import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.R;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+import de.greenrobot.event.EventBus;
 import rx.functions.Func0;
 
 /**
@@ -65,11 +69,15 @@ public class OverflowHandlers {
     public static class LocalAlbums implements OverflowHandler<LocalAlbum> {
         final MusicServiceConnection connection;
         final Context context;
+        final EventBus bus;
 
         @Inject
-        public LocalAlbums(MusicServiceConnection connection, @ForApplication Context context) {
+        public LocalAlbums(MusicServiceConnection connection,
+                            @ForApplication Context context,
+                            @Named("activity") EventBus bus) {
             this.connection = connection;
             this.context = context;
+            this.bus = bus;
         }
 
         public void populateMenu(PopupMenu m, LocalAlbum album) {
@@ -109,9 +117,9 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_PLAYLIST:
-//                    long[] plist = CursorHelpers.getSongIdsForAlbum(context, album.albumId);
-//                    AddToPlaylistDialog.newInstance(plist)
-//                            .show(context.getSupportFragmentManager(), "AddToPlaylistDialog");
+
+                    long[] plist = CursorHelpers.getSongIdsForAlbum(context, album.albumId);
+                    bus.post(new OpenAddToPlaylist(plist));
                     return true;
                 case MORE_BY_ARTIST:
 //                    NavUtils.openArtistProfile(context, MusicUtils.makeArtist(context, album.artistName));
@@ -131,11 +139,15 @@ public class OverflowHandlers {
     public static class LocalArtists implements OverflowHandler<LocalArtist> {
         final MusicServiceConnection connection;
         final Context context;
+        final EventBus bus;
 
         @Inject
-        public LocalArtists(MusicServiceConnection connection, @ForApplication Context context) {
+        public LocalArtists(MusicServiceConnection connection,
+                            @ForApplication Context context,
+                            @Named("activity") EventBus bus) {
             this.connection = connection;
             this.context = context;
+            this.bus = bus;
         }
 
         public void populateMenu(PopupMenu m, LocalArtist artist) {
@@ -174,9 +186,8 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_PLAYLIST:
-//                    long[] plist = MusicUtils.getSongListForArtist(getActivity(), artist.artistId);
-//                    AddToPlaylistDialog.newInstance(plist)
-//                            .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
+                    long[] plist = CursorHelpers.getSongIdsForArtist(context, artistId);
+                    bus.post(new OpenAddToPlaylist(plist));
                     return true;
                 case DELETE:
 //                    long[] dlist = MusicUtils.getSongListForArtist(getActivity(), artist.artistId);
@@ -193,11 +204,15 @@ public class OverflowHandlers {
     public static class Genres implements OverflowHandler<Genre> {
         final MusicServiceConnection connection;
         final Context context;
+        final EventBus bus;
 
         @Inject
-        public Genres(MusicServiceConnection connection, @ForApplication Context context) {
+        public Genres(MusicServiceConnection connection,
+                            @ForApplication Context context,
+                            @Named("activity") EventBus bus) {
             this.connection = connection;
             this.context = context;
+            this.bus = bus;
         }
 
         public void populateMenu(PopupMenu m, Genre genre) {
@@ -235,9 +250,8 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_PLAYLIST:
-//                    long[] plist = MusicUtils.getSongListForGenre(getActivity(), genre.mGenreId);
-//                    AddToPlaylistDialog.newInstance(plist)
-//                            .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
+                    long[] plist = CursorHelpers.getSongIdsForGenre(context, genreId);
+                    bus.post(new OpenAddToPlaylist(plist));
                     return true;
                 default:
                     return false;
@@ -249,11 +263,15 @@ public class OverflowHandlers {
     public static class Playlists implements OverflowHandler<Playlist> {
         final MusicServiceConnection connection;
         final Context context;
+        final EventBus bus;
 
         @Inject
-        public Playlists(MusicServiceConnection connection, @ForApplication Context context) {
+        public Playlists(MusicServiceConnection connection,
+                            @ForApplication Context context,
+                            @Named("activity") EventBus bus) {
             this.connection = connection;
             this.context = context;
+            this.bus = bus;
         }
 
         public void populateMenu(PopupMenu m, Playlist playlist) {
@@ -344,11 +362,15 @@ public class OverflowHandlers {
     public static class LocalSongs implements OverflowHandler<LocalSong> {
         final MusicServiceConnection connection;
         final Context context;
+        final EventBus bus;
 
         @Inject
-        public LocalSongs(MusicServiceConnection connection, @ForApplication Context context) {
+        public LocalSongs(MusicServiceConnection connection,
+                            @ForApplication Context context,
+                            @Named("activity") EventBus bus) {
             this.connection = connection;
             this.context = context;
+            this.bus = bus;
         }
 
         public void populateMenu(PopupMenu m, LocalSong song) {
@@ -388,11 +410,7 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_PLAYLIST:
-//                    if (song instanceof LocalSong) {
-//                        LocalSong localsong = (LocalSong) song;
-//                        AddToPlaylistDialog.newInstance(new long[]{localsong.songId})
-//                                .show(getActivity().getSupportFragmentManager(), "AddToPlaylistDialog");
-//                    }
+                    bus.post(new OpenAddToPlaylist(new long[]{song.songId}));
                     return true;
                 case MORE_BY_ARTIST:
 //                    if (song instanceof LocalSong) {

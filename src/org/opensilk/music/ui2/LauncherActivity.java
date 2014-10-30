@@ -47,9 +47,11 @@ import com.andrew.apollo.utils.NavUtils;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.api.OrpheusApi;
+import com.andrew.apollo.menu.AddToPlaylistDialog;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.MakeToast;
+import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerOwner;
@@ -315,6 +317,12 @@ public class LauncherActivity extends ActionBarActivity implements
         } else {
             Toast.makeText(this, e.resId, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    //TODO stop using fragments
+    public void onEventMainThread(OpenAddToPlaylist e) {
+        AddToPlaylistDialog.newInstance(e.songsToAdd)
+            .show(getSupportFragmentManager(), "AddToPlaylistDialog");
     }
 
     /*

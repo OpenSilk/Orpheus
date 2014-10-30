@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.dialogs;
+package com.andrew.apollo.menu;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -23,10 +23,9 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.menu.CreateNewPlaylist;
+
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.Lists;
-import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.ui.home.loader.PlaylistLoader;
 
@@ -86,7 +85,7 @@ public class AddToPlaylistDialog extends DialogFragment implements DialogInterfa
                 CreateNewPlaylist.getInstance(mSongIds).show(getFragmentManager(), "CreatePlaylist");
                 break;
             default:
-                MusicUtils.addToPlaylist(getActivity(), mSongIds, mUserPlaylists.get(which-1).mPlaylistId);
+
         }
         dialog.dismiss();
     }
