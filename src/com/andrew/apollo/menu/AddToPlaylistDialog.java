@@ -19,6 +19,7 @@ package com.andrew.apollo.menu;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
@@ -28,6 +29,7 @@ import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.Lists;
 
 import org.opensilk.music.ui.home.loader.PlaylistLoader;
+import org.opensilk.music.util.CursorHelpers;
 
 import java.util.List;
 
@@ -50,7 +52,7 @@ public class AddToPlaylistDialog extends DialogFragment implements DialogInterfa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUserPlaylists = PlaylistLoader.getUserPlaylists(getActivity());
+        mUserPlaylists = getUserPlaylists();
         if (getArguments() != null) {
             mSongIds = getArguments().getLongArray("playlist_list");
         }
@@ -88,5 +90,32 @@ public class AddToPlaylistDialog extends DialogFragment implements DialogInterfa
 
         }
         dialog.dismiss();
+    }
+
+    public List<Playlist> getUserPlaylists() {
+        List<Playlist> usrPlaylists = Lists.newArrayList();
+        // Create the Cursor
+        Cursor c = CursorHelpers.makePlaylistCursor(getActivity());
+        // Gather the data
+        if (c != null && c.moveToFirst()) {
+            do {
+                // Copy the playlist id
+                final long id = c.getLong(0);
+
+                // Copy the playlist name
+                final String name = c.getString(1);
+
+                // Create a new playlist
+                final Playlist playlist = new Playlist(id, name, 0, 0, null, null);
+
+                // Add everything up
+                usrPlaylists.add(playlist);
+            } while (c.moveToNext());
+        }
+        // Close the cursor
+        if (c != null) {
+            c.close();
+        }
+        return usrPlaylists;
     }
 }
