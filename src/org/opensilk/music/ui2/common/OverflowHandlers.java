@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.common;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.model.Genre;
@@ -31,7 +32,9 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
+import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForApplication;
@@ -118,16 +121,15 @@ public class OverflowHandlers {
                     return true;
                 case ADD_TO_PLAYLIST:
 
-                    long[] plist = CursorHelpers.getSongIdsForAlbum(context, album.albumId);
+                    long[] plist = CursorHelpers.getSongIdsForAlbum(context, albumId);
                     bus.post(new OpenAddToPlaylist(plist));
                     return true;
                 case MORE_BY_ARTIST:
 //                    NavUtils.openArtistProfile(context, MusicUtils.makeArtist(context, album.artistName));
                     return true;
                 case DELETE:
-//                    long[] dlist = CursorHelpers.getSongIdsForAlbum(getActivity(), album.albumId);
-//                    DeleteDialog.newInstance(album.name, dlist, null) //TODO
-//                            .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
+                    long[] dlist = CursorHelpers.getSongIdsForAlbum(context, albumId);
+                    bus.post(new ConfirmDelete(dlist, album.name));
                     return true;
                 default:
                     return false;
@@ -190,9 +192,8 @@ public class OverflowHandlers {
                     bus.post(new OpenAddToPlaylist(plist));
                     return true;
                 case DELETE:
-//                    long[] dlist = MusicUtils.getSongListForArtist(getActivity(), artist.artistId);
-//                    DeleteDialog.newInstance(artist.name, dlist, null) //TODO
-//                            .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
+                    long[] dlist = CursorHelpers.getSongIdsForArtist(context, artistId);
+                    bus.post(new ConfirmDelete(dlist, artist.name));
                     return true;
                 default:
                     return false;
@@ -425,11 +426,7 @@ public class OverflowHandlers {
 //                    }
                     return true;
                 case DELETE:
-//                    if (song instanceof LocalSong) {
-//                        LocalSong localsong = (LocalSong) song;
-//                        DeleteDialog.newInstance(localsong.name, new long[]{localsong.songId}, null)
-//                                .show(getActivity().getSupportFragmentManager(), "DeleteDialog");
-//                    }
+                    bus.post(new ConfirmDelete(new long[]{song.songId}, song.name));
                     return true;
                 default:
                     return false;

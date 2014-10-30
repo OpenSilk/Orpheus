@@ -623,6 +623,8 @@ public final class MusicUtils {
      * @param id The ID of the artist.
      * @return The song list for an artist.
      */
+    @Deprecated
+    @MarkedForRemoval
     public static final long[] getSongListForArtist(final Context context, final long id) {
         final String[] projection = new String[] {
             BaseColumns._ID

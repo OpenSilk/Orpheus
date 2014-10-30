@@ -42,6 +42,7 @@ import org.opensilk.common.theme.TintManager;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
 
+import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -50,6 +51,7 @@ import org.opensilk.music.api.OrpheusApi;
 import com.andrew.apollo.menu.AddToPlaylistDialog;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
+import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.ui2.event.StartActivityForResult;
@@ -323,6 +325,11 @@ public class LauncherActivity extends ActionBarActivity implements
     public void onEventMainThread(OpenAddToPlaylist e) {
         AddToPlaylistDialog.newInstance(e.songsToAdd)
             .show(getSupportFragmentManager(), "AddToPlaylistDialog");
+    }
+
+    public void onEventMainThread(ConfirmDelete e) {
+        DeleteDialog.newInstance((String)e.title, e.songids, null) //TODO
+                .show(getSupportFragmentManager(), "DeleteDialog");
     }
 
     /*
