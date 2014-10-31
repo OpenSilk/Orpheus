@@ -21,7 +21,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <org.opensilk.music.widgets.FloatingActionButton
+    <org.opensilk.common.widget.FloatingActionButtonCheckable
         android:id="@+id/floating_action_button"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
@@ -33,7 +33,7 @@
         android:layout_alignParentRight="true"
         style="?fabPlayStyle"/>
 
-    <org.opensilk.music.widgets.FloatingActionButton
+    <org.opensilk.common.widget.FloatingActionButton
         android:id="@+id/floating_action_next"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
@@ -45,7 +45,7 @@
         android:layout_alignParentRight="true"
         style="?fabNextStyle"/>
 
-    <org.opensilk.music.widgets.FloatingActionButton
+    <org.opensilk.common.widget.FloatingActionButton
         android:id="@+id/floating_action_prev"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
@@ -57,7 +57,7 @@
         android:layout_alignParentRight="true"
         style="?fabPrevStyle"/>
 
-    <org.opensilk.music.widgets.FloatingActionButton
+    <org.opensilk.common.widget.FloatingActionButton
         android:id="@+id/floating_action_shuffle"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
@@ -69,7 +69,7 @@
         android:layout_alignParentRight="true"
         style="?fabShuffleStyle"/>
 
-    <org.opensilk.music.widgets.FloatingActionButton
+    <org.opensilk.common.widget.FloatingActionButton
         android:id="@+id/floating_action_repeat"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"

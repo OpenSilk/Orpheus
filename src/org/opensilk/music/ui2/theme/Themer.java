@@ -44,25 +44,40 @@ public class Themer {
         return outValue;
     }
 
-    public static int getPrimaryColor(Context context) {
+    public static int getColorPrimary(Context context) {
         return getThemeAttrColor(context, R.attr.colorPrimary);
     }
 
-    public static int getAccentColor(Context context) {
+    public static int getColorAccent(Context context) {
         return getThemeAttrColor(context, R.attr.colorAccent);
+    }
+
+    public static int getColorPrimaryDark(Context context) {
+        return getThemeAttrColor(context, R.attr.colorPrimaryDark);
+    }
+
+    public static int getColorControlNormal(Context context) {
+        return getThemeAttrColor(context, R.attr.colorControlNormal);
+    }
+
+    public static int getColorControlActivited(Context context) {
+        return getThemeAttrColor(context, R.attr.colorControlActivated);
+    }
+
+    public static int getColorControlHighlight(Context context) {
+        return getThemeAttrColor(context, R.attr.colorControlHighlight);
+    }
+
+    public static int getColorButtonNormal(Context context) {
+        return getThemeAttrColor(context, R.attr.colorButtonNormal);
+    }
+
+    public static int getColorSwitchThumbNormal(Context context) {
+        return getThemeAttrColor(context, R.attr.colorSwitchThumbNormal);
     }
 
     public static int setColorAlpha(int color, int alpha) {
         return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
-    }
-
-    public static int[] getSecondaryFabColors(Context context) {
-        int colors[] = new int[2];
-        boolean islight = isLightTheme(context);
-        colors[0] = islight ? context.getResources().getColor(android.R.color.white)
-                : context.getResources().getColor(android.R.color.black);
-        colors[1] = colors[0]; //TODO
-        return colors;
     }
 
     public static int getPlayIcon(Context context, boolean forcewhite) {
@@ -88,11 +103,11 @@ public class Themer {
     }
 
     public static void themeToolbar(Toolbar toolbar) {
-        toolbar.setBackgroundColor(getPrimaryColor(toolbar.getContext()));
+        toolbar.setBackgroundColor(getColorPrimary(toolbar.getContext()));
     }
 
     public static void themeSeekBar(SeekBar seekBar) {
-        int color = getAccentColor(seekBar.getContext());
+        int color = getColorAccent(seekBar.getContext());
         seekBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             seekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
@@ -103,7 +118,7 @@ public class Themer {
     }
 
     public static void themeProgressBar(ProgressBar progressBar) {
-        int color = getAccentColor(progressBar.getContext());
+        int color = getColorAccent(progressBar.getContext());
         progressBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 

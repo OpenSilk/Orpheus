@@ -93,20 +93,38 @@ public class MainBlueprint {
         public void onSave(Bundle outState) {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
-        }
-
-        @Override
-        public void dropView(MainView view) {
-            super.dropView(view);
-            unsubscribeFabClicks();
-            unsubscribeBroadcasts();
+            if (getView() == null) {
+                unsubscribeFabClicks();
+                unsubscribeBroadcasts();
+            }
         }
 
         void updateFabPlay(boolean playing) {
             MainView v = getView();
             if (v == null) return;
-            v.fabPlay.setIcon(playing ? Themer.getPauseIcon(v.getContext(), true)
-                    : Themer.getPlayIcon(v.getContext(), true));
+            v.fabPlay.setChecked(playing);
+        }
+
+        void updateFabShuffle(int shufflemode) {
+            MainView v = getView();
+            if (v == null) return;
+            v.fabShuffle.setImageLevel(shufflemode);
+        }
+
+        void updateFabRepeat(int repeatmode) {
+            MainView v = getView();
+            if (v == null) return;
+            switch (repeatmode) {
+                case MusicPlaybackService.REPEAT_NONE:
+                    v.fabRepeat.setImageLevel(0);
+                    break;
+                case MusicPlaybackService.REPEAT_CURRENT:
+                    v.fabRepeat.setImageLevel(1);
+                    break;
+                case MusicPlaybackService.REPEAT_ALL:
+                    v.fabRepeat.setImageLevel(2);
+                    break;
+            }
         }
 
         @DebugLog
@@ -126,58 +144,54 @@ public class MainBlueprint {
             if (flow.getBackstack().current().getScreen() instanceof QueueScreen) flow.goBack();
         }
 
-        Subscription fabPlaySubscription;
-        Subscription fabNextSubscription;
-        Subscription fabPrevSubscription;
+        CompositeSubscription fabClicksSubscription;
 
         void subscribeFabClicks() {
             MainView v = getView();
             if (v == null) return;
-            fabPlaySubscription = ViewObservable.clicks(v.fabPlay).subscribe(new Action1<OnClickEvent>() {
-                @Override
-                public void call(OnClickEvent onClickEvent) {
-                    musicService.playOrPause()
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<Boolean>() {
-                                @Override
-                                public void call(Boolean playing) {
-                                    updateFabPlay(playing);
-                                }
-                            });
-                }
-            });
-            fabNextSubscription = ViewObservable.clicks(v.fabNext).subscribe(new Action1<OnClickEvent>() {
-                @Override
-                public void call(OnClickEvent onClickEvent) {
-                    musicService.next();
-                }
-            });
-            fabPrevSubscription = ViewObservable.clicks(v.fabPrev).subscribe(new Action1<OnClickEvent>() {
-                @Override
-                public void call(OnClickEvent onClickEvent) {
-                    musicService.prev();
-                }
-            });
+            fabClicksSubscription = new CompositeSubscription(
+                    ViewObservable.clicks(v.fabPlay).subscribe(new Action1<OnClickEvent>() {
+                        @Override
+                        public void call(OnClickEvent onClickEvent) {
+                            musicService.playOrPause();
+                        }
+                    }),
+                    ViewObservable.clicks(v.fabNext).subscribe(new Action1<OnClickEvent>() {
+                        @Override
+                        public void call(OnClickEvent onClickEvent) {
+                            musicService.next();
+                        }
+                    }),
+                    ViewObservable.clicks(v.fabPrev).subscribe(new Action1<OnClickEvent>() {
+                        @Override
+                        public void call(OnClickEvent onClickEvent) {
+                            musicService.prev();
+                        }
+                    }),
+                    ViewObservable.clicks(v.fabShuffle).subscribe(new Action1<OnClickEvent>() {
+                        @Override
+                        public void call(OnClickEvent onClickEvent) {
+                            musicService.cycleShuffleMode();
+                        }
+                    }),
+                    ViewObservable.clicks(v.fabRepeat).subscribe(new Action1<OnClickEvent>() {
+                        @Override
+                        public void call(OnClickEvent onClickEvent) {
+                            musicService.cycleRepeatMode();
+                        }
+                    })
+            );
         }
 
         void unsubscribeFabClicks() {
-            if (!notSubscribed(fabPlaySubscription)) {
-                fabPlaySubscription.unsubscribe();
-                fabPlaySubscription = null;
-            }
-            if (!notSubscribed(fabNextSubscription)) {
-                fabNextSubscription.unsubscribe();
-                fabNextSubscription = null;
-            }
-            if (!notSubscribed(fabPrevSubscription)) {
-                fabPrevSubscription.unsubscribe();
-                fabPrevSubscription = null;
-            }
+            if (notSubscribed(fabClicksSubscription)) return;
+            fabClicksSubscription.unsubscribe();
+            fabClicksSubscription = null;
         }
 
         Observable<Boolean> playStateObservable;
+        Observable<Integer> shuffleModeObservable;
         Observable<Integer> repeatModeObservable;
-        Observable<Intent> shuffleModeObservable;
 
         void setupObservables() {
             IntentFilter intentFilter = new IntentFilter();
@@ -195,11 +209,11 @@ public class MainBlueprint {
                         @Override
                         public Boolean call(Intent intent) {
                             Timber.v("playstateSubscripion filter called on %s", Thread.currentThread().getName());
-                            return intent.getAction() != null && intent.getAction().equals(MusicPlaybackService.PLAYSTATE_CHANGED);
+                            return MusicPlaybackService.PLAYSTATE_CHANGED.equals(intent.getAction());
                         }
                     })
                             // filter out repeats only taking most recent
-                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
+//                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
                             // flatMap the intent into a boolean by requesting the playstate
                             // XXX the intent contains the playstate as an extra but
                             //     it could be out of date
@@ -212,17 +226,59 @@ public class MainBlueprint {
                     })
                             // observe final result on main thread
                     .observeOn(AndroidSchedulers.mainThread());
+            shuffleModeObservable = intentObservable
+                    .filter(new Func1<Intent, Boolean>() {
+                        @Override
+                        public Boolean call(Intent intent) {
+                            return MusicPlaybackService.SHUFFLEMODE_CHANGED.equals(intent.getAction());
+                        }
+                    })
+//                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
+                    .flatMap(new Func1<Intent, Observable<Integer>>() {
+                        @Override
+                        public Observable<Integer> call(Intent intent) {
+                            return musicService.getShuffleMode();
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread());
+            repeatModeObservable = intentObservable
+                    .filter(new Func1<Intent, Boolean>() {
+                        @Override
+                        public Boolean call(Intent intent) {
+                            return MusicPlaybackService.REPEATMODE_CHANGED.equals(intent.getAction());
+                        }
+                    })
+//                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
+                    .flatMap(new Func1<Intent, Observable<Integer>>() {
+                        @Override
+                        public Observable<Integer> call(Intent intent) {
+                            return musicService.getRepeatMode();
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread());
         }
 
         Observer<Boolean> playStateObserver;
-        Observer<Integer> repeatModeObserver;
         Observer<Integer> shuffleModeObserver;
+        Observer<Integer> repeatModeObserver;
 
         void setupObservers() {
             playStateObserver = Observers.create(new Action1<Boolean>() {
                 @Override
                 public void call(Boolean playing) {
                     updateFabPlay(playing);
+                }
+            });
+            shuffleModeObserver = Observers.create(new Action1<Integer>() {
+                @Override
+                public void call(Integer integer) {
+                    updateFabShuffle(integer);
+                }
+            });
+            repeatModeObserver = Observers.create(new Action1<Integer>() {
+                @Override
+                public void call(Integer integer) {
+                    updateFabRepeat(integer);
                 }
             });
         }
@@ -232,7 +288,9 @@ public class MainBlueprint {
         void subscribeBroadcasts() {
             if (notSubscribed(broadcastSubscriptions)) {
                 broadcastSubscriptions = new CompositeSubscription(
-                        playStateObservable.subscribe(playStateObserver)
+                        playStateObservable.subscribe(playStateObserver),
+                        shuffleModeObservable.subscribe(shuffleModeObserver),
+                        repeatModeObservable.subscribe(repeatModeObserver)
                 );
             }
         }

@@ -22,16 +22,22 @@ import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
+import com.andrew.apollo.utils.ThemeHelper;
+
+import org.opensilk.common.util.VersionUtils;
+import org.opensilk.common.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 
 import org.opensilk.music.ui2.theme.Themer;
-import org.opensilk.music.widgets.FloatingActionButton;
+import org.opensilk.common.widget.FloatingActionButton;
 import org.opensilk.common.widget.FlingyFabLayout;
 
 import javax.inject.Inject;
@@ -50,7 +56,7 @@ public class MainView extends FlingyFabLayout {
     MainBlueprint.Presenter presenter;
 
     @InjectView(R.id.floating_action_button)
-    FloatingActionButton fabPlay;
+    FloatingActionButtonCheckable fabPlay;
     @InjectView(R.id.floating_action_next)
     FloatingActionButton fabNext;
     @InjectView(R.id.floating_action_prev)
@@ -131,7 +137,6 @@ public class MainView extends FlingyFabLayout {
     }
 
     void setupActionButton() {
-        int playcolor = Themer.getAccentColor(getContext());
         fabPlay.setOnDoubleClickListener(new FloatingActionButton.OnDoubleClickListener() {
             @Override
             public void onDoubleClick(View view) {
@@ -146,6 +151,9 @@ public class MainView extends FlingyFabLayout {
             }
         });
         fabPlay.bringToFront();
+
+        setupShuffleDrawable();
+        setupRepeatDrawable();
     }
 
     void setupFabAnimatiors() {
@@ -249,6 +257,27 @@ public class MainView extends FlingyFabLayout {
             collapseFabs.cancel();
             expandFabs.start();
         }
+    }
+
+    void setupShuffleDrawable() {
+        if (VersionUtils.hasLollipop()) return;
+        LevelListDrawable d = (LevelListDrawable) fabShuffle.getDrawable();
+//        Drawable d1 = getResources().getDrawable(R.drawable.ic_shuffle_black_36dp);
+//        d1.setColorFilter(Themer.getColorAccent(getContext()), PorterDuff.Mode.MULTIPLY);
+        Drawable d1 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_shuffle_white_24dp,
+                Themer.getColorAccent(getContext()));
+        d.addLevel(1, 2, d1);
+    }
+
+    void setupRepeatDrawable() {
+        if (VersionUtils.hasLollipop()) return;
+        LevelListDrawable d = (LevelListDrawable) fabRepeat.getDrawable();
+        Drawable d1 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_repeat_one_white_24dp,
+                Themer.getColorAccent(getContext()));
+        d.addLevel(1, 1, d1);
+        Drawable d2 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_repeat_white_24dp,
+                Themer.getColorAccent(getContext()));
+        d.addLevel(2, 2, d2);
     }
 
     void setupLayoutTransitions() {

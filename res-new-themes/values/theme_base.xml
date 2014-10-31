@@ -29,9 +29,12 @@
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
-        <item name="colorPrimary">@color/deep_orange_500</item>
-        <item name="colorPrimaryDark">@color/deep_orange_700</item>
-        <item name="colorAccent">@color/teal_500</item>
+        <!--Dark Actionbar -->
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <item name="colorPrimary">@color/primary_material_dark</item>
+        <!--<item name="colorPrimary">@color/deep_orange_500</item>-->
+        <!--<item name="colorPrimaryDark">@color/deep_orange_700</item>-->
+        <!--<item name="colorAccent">@color/teal_500</item>-->
     </style>
 
     <style name="Theme.Light" parent="Theme.LightBase">
@@ -152,51 +155,55 @@
 
     <!-- fabs -->
     <style name="fabDark">
-        <item name="fabColor">accent</item>
+        <item name="fabColor">black</item>
+        <item name="android:scaleType">centerInside</item>
     </style>
 
     <style name="fabLight">
-        <item name="fabColor">accent</item>
+        <item name="fabColor">white</item>
+        <item name="android:scaleType">centerInside</item>
     </style>
 
     <style name="fabLight.Play">
-        <item name="fabIcon">@drawable/ic_play_arrow_white_24dp</item>
+        <item name="fabColor">accent</item>
+        <item name="android:src">@drawable/fab_playpause_black</item>
     </style>
 
     <style name="fabDark.Play">
-        <item name="fabIcon">@drawable/ic_play_arrow_black_24dp</item>
+        <item name="fabColor">accent</item>
+        <item name="android:src">@drawable/fab_playpause_white</item>
     </style>
 
     <style name="fabLight.Next">
-        <item name="fabIcon">@drawable/ic_skip_next_white_24dp</item>
+        <item name="android:src">@drawable/ic_skip_next_black_24dp</item>
     </style>
 
     <style name="fabDark.Next">
-        <item name="fabIcon">@drawable/ic_skip_next_black_24dp</item>
+        <item name="android:src">@drawable/ic_skip_next_white_24dp</item>
     </style>
 
     <style name="fabLight.Prev">
-        <item name="fabIcon">@drawable/ic_skip_previous_white_24dp</item>
+        <item name="android:src">@drawable/ic_skip_previous_black_24dp</item>
     </style>
 
     <style name="fabDark.Prev">
-        <item name="fabIcon">@drawable/ic_skip_previous_black_24dp</item>
+        <item name="android:src">@drawable/ic_skip_previous_white_24dp</item>
     </style>
 
     <style name="fabLight.Shuffle">
-        <item name="fabIcon">@drawable/ic_shuffle_white_24dp</item>
+        <item name="android:src">@drawable/fab_shuffle_black</item>
     </style>
 
     <style name="fabDark.Shuffle">
-        <item name="fabIcon">@drawable/ic_shuffle_black_24dp</item>
+        <item name="android:src">@drawable/fab_shuffle_white</item>
     </style>
 
     <style name="fabLight.Repeat">
-        <item name="fabIcon">@drawable/ic_repeat_white_24dp</item>
+        <item name="android:src">@drawable/fab_repeat_black</item>
     </style>
 
     <style name="fabDark.Repeat">
-        <item name="fabIcon">@drawable/ic_repeat_black_24dp</item>
+        <item name="android:src">@drawable/fab_repeat_white</item>
     </style>
 
 </resources>

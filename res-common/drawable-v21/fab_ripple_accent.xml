@@ -3,8 +3,17 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="?android:colorControlHighlight">
     <item>
-        <shape android:shape="oval">
-            <solid android:color="?android:colorAccent"/>
-        </shape>
+        <selector>
+            <item android:state_enabled="true" android:state_pressed="true">
+                <shape android:shape="oval">
+                    <solid android:color="?colorAccent"/>
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="?colorAccent"/>
+                </shape>
+            </item>
+        </selector>
     </item>
 </ripple>

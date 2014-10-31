@@ -16,7 +16,14 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<resources>
-    <dimen name="fab_elevation">4dp</dimen>
-    <dimen name="fab_pressed_elevation">8dp</dimen>
-</resources>
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:minLevel="0" android:maxLevel="0" android:drawable="@drawable/ic_repeat_white_24dp"/>
+    <item android:minLevel="1" android:maxLevel="1">
+        <bitmap android:src="@drawable/ic_repeat_one_white_24dp"
+            android:tint="?attr/colorAccent"/>
+    </item>
+    <item android:minLevel="2" android:maxLevel="2">
+        <bitmap android:src="@drawable/ic_repeat_white_24dp"
+            android:tint="?attr/colorAccent"/>
+    </item>
+</level-list>

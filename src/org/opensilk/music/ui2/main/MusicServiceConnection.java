@@ -141,9 +141,9 @@ public class MusicServiceConnection {
     void play();
     //void prev();
     //void next();
-    void enqueue(in long [] list, int action);
+    //void enqueue(in long [] list, int action);
     void setQueuePosition(int index);
-    void setShuffleMode(int shufflemode);
+    //void setShuffleMode(int shufflemode);
     void setRepeatMode(int repeatmode);
     void moveQueueItem(int from, int to);
     void toggleFavorite();
@@ -163,10 +163,10 @@ public class MusicServiceConnection {
     Uri getDataUri();
     Uri getArtworkUri();
     int getQueuePosition();
-    int getShuffleMode();
+    //int getShuffleMode();
     int removeTracks(int first, int last);
     int removeTrack(long id);
-    int getRepeatMode();
+    //int getRepeatMode();
     int getMediaMountedCount();
     int getAudioSessionId();
     boolean isRemotePlayback();
@@ -217,6 +217,75 @@ public class MusicServiceConnection {
         });
     }
 
+    public void playOrPause() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                Timber.v("playOrPause %s", Thread.currentThread().getName());
+                try {
+                    if (iApolloService.isPlaying()) {
+                        iApolloService.pause();
+                    } else {
+                        iApolloService.play();
+                    }
+                } catch (RemoteException e) {
+                    //TODO
+                }
+            }
+        });
+    }
+
+    public void cycleShuffleMode() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    int shufflemode = iApolloService.getShuffleMode();
+                    switch (shufflemode) {
+                        case MusicPlaybackService.SHUFFLE_NONE:
+                            iApolloService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+                            if (iApolloService.getRepeatMode() == MusicPlaybackService.REPEAT_CURRENT) {
+                                iApolloService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
+                            }
+                            break;
+                        case MusicPlaybackService.SHUFFLE_NORMAL:
+                        case MusicPlaybackService.SHUFFLE_AUTO:
+                            iApolloService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+                            break;
+                    }
+                } catch (RemoteException e) {
+                    //TODO
+                }
+            }
+        });
+    }
+
+    public void cycleRepeatMode() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    int repeatmode = iApolloService.getRepeatMode();
+                    switch (repeatmode) {
+                        case MusicPlaybackService.REPEAT_NONE:
+                            iApolloService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
+                            break;
+                        case MusicPlaybackService.REPEAT_ALL:
+                            iApolloService.setRepeatMode(MusicPlaybackService.REPEAT_CURRENT);
+                            if (iApolloService.getShuffleMode() != MusicPlaybackService.SHUFFLE_NONE) {
+                                iApolloService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+                            }
+                            break;
+                        default:
+                            iApolloService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
+                    }
+                } catch (RemoteException e) {
+                    //TODO
+                }
+            }
+        });
+    }
+
     public Observable<Long> getDuration() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
@@ -259,26 +328,6 @@ public class MusicServiceConnection {
         });
     }
 
-    public Observable<Boolean> playOrPause() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
-            @Override
-            public Observable<Boolean> call(IApolloService iApolloService) {
-                Timber.v("playOrPause %s", Thread.currentThread().getName());
-                try {
-                    if (iApolloService.isPlaying()) {
-                        iApolloService.pause();
-                        return Observable.just(false);
-                    } else {
-                        iApolloService.play();
-                        return Observable.just(true);
-                    }
-                } catch (RemoteException e) {
-                    return Observable.error(e);
-                }
-            }
-        });
-    }
-
     public Observable<String> getArtistName() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<String>>() {
             @Override
@@ -300,6 +349,34 @@ public class MusicServiceConnection {
                 Timber.v("getTrackName %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.getTrackName());
+                } catch (RemoteException e) {
+                    return Observable.error(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Integer> getShuffleMode() {
+        return getObservable().flatMap(new Func1<IApolloService, Observable<Integer>>() {
+            @Override
+            public Observable<Integer> call(IApolloService iApolloService) {
+                Timber.v("getShuffleMode %s", Thread.currentThread().getName());
+                try {
+                    return Observable.just(iApolloService.getShuffleMode());
+                } catch (RemoteException e) {
+                    return Observable.error(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Integer> getRepeatMode() {
+        return getObservable().flatMap(new Func1<IApolloService, Observable<Integer>>() {
+            @Override
+            public Observable<Integer> call(IApolloService iApolloService) {
+                Timber.v("getRepeatMode %s", Thread.currentThread().getName());
+                try {
+                    return Observable.just(iApolloService.getRepeatMode());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }

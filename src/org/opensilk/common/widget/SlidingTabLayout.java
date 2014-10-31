@@ -106,7 +106,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
             a.recycle();
         }
 
-        final int themePrimaryColor =  Themer.getPrimaryColor(getContext());
+        final int themePrimaryColor =  Themer.getColorPrimary(getContext());
         boolean lightTheme = Themer.isLightTheme(getContext());
         if (lightStyle && lightTheme) {
             mSelectedTextColor = themePrimaryColor;
