@@ -16,6 +16,7 @@
 
 package org.opensilk.music.ui2.main;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +63,7 @@ public class FooterBlueprint {
     @Singleton
     public static class Presenter extends ViewPresenter<FooterView> implements PausesAndResumes {
 
+        final Context appContext;
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
         final MusicServiceConnection musicService;
 
@@ -79,9 +82,11 @@ public class FooterBlueprint {
         Observer<Long> progressObserver;
 
         @Inject
-        public Presenter(PauseAndResumeRegistrar pauseAndResumeRegistrar,
+        public Presenter(@ForApplication Context context,
+                         PauseAndResumeRegistrar pauseAndResumeRegistrar,
                          MusicServiceConnection musicService) {
             Timber.v("new FooterViewBlueprint.Presenter");
+            this.appContext = context;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
             this.musicService = musicService;
         }
@@ -91,22 +96,19 @@ public class FooterBlueprint {
             Timber.v("onEnterScope()");
             super.onEnterScope(scope);
             pauseAndResumeRegistrar.register(scope, this);
+            setupObserables();
+            setupObservers();
         }
 
         @Override
         protected void onExitScope() {
             super.onExitScope();
-            //just for safety we should always receive a call to onPause()
-            unsubscribeBroadcasts();
-            unsubscribeProgress();
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad()");
             super.onLoad(savedInstanceState);
-            setupObserables();
-            setupObservers();
             //just for safety we should always receive a call to onResume()
             subscribeBroadcasts();
             //playstate will kick off progress subscription
@@ -115,6 +117,11 @@ public class FooterBlueprint {
         @Override
         protected void onSave(Bundle outState) {
             super.onSave(outState);
+            if (getView() == null) {
+                //just for safety we should always receive a call to onPause()
+                unsubscribeBroadcasts();
+                unsubscribeProgress();
+            }
         }
 
         @Override
@@ -157,14 +164,13 @@ public class FooterBlueprint {
         }
 
         void setupObserables() {
-            if (getView() == null) return;
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
             intentFilter.addAction(MusicPlaybackService.META_CHANGED);
             Scheduler scheduler = Schedulers.computation();
             // obr will call onNext on the main thread so we observeOn computation
             // so our chained operators will be called on computation instead of main.
-            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(getView().getContext(), intentFilter).observeOn(scheduler);
+            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(appContext, intentFilter).observeOn(scheduler);
             playStateObservable = intentObservable
                     // Filter for only PLAYSTATE_CHANGED actions
                     .filter(new Func1<Intent, Boolean>() {

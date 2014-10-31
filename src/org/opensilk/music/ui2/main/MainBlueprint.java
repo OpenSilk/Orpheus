@@ -16,6 +16,7 @@
 
 package org.opensilk.music.ui2.main;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -23,8 +24,11 @@ import android.os.Bundle;
 import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.mortar.PauseAndResumeRegistrar;
+import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.theme.Themer;
+import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.concurrent.TimeUnit;
 
@@ -51,26 +55,38 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
+import static org.opensilk.music.util.RxUtil.isSubscribed;
+import static org.opensilk.music.util.RxUtil.notSubscribed;
+
 /**
  * Created by drew on 10/5/14.
  */
 public class MainBlueprint {
 
     @Singleton
-    public static class Presenter extends ViewPresenter<MainView> {
+    public static class Presenter extends ViewPresenter<MainView> implements PausesAndResumes {
 
+        final Context appContext;
         final MusicServiceConnection musicService;
+        final PauseAndResumeRegistrar pauseAndResumeRegistrar;
 
         @Inject
-        protected Presenter(MusicServiceConnection musicService) {
+        protected Presenter(@ForApplication Context context,
+                            MusicServiceConnection musicService,
+                            PauseAndResumeRegistrar pauseAndResumeRegistrar) {
             Timber.v("new MainViewBlueprint.Presenter()");
+            this.appContext = context;
             this.musicService = musicService;
+            this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
         }
 
         @Override
         protected void onEnterScope(MortarScope scope) {
             Timber.v("onEnterScope(%s)", scope);
             super.onEnterScope(scope);
+            pauseAndResumeRegistrar.register(scope, this);
+            setupObservables();
+            setupObservers();
         }
 
         @Override
@@ -83,8 +99,6 @@ public class MainBlueprint {
         public void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
-            setupObservables();
-            setupObservers();
             subscribeFabClicks();
             subscribeBroadcasts();
         }
@@ -97,6 +111,18 @@ public class MainBlueprint {
                 unsubscribeFabClicks();
                 unsubscribeBroadcasts();
             }
+        }
+
+        @Override
+        public void onResume() {
+            subscribeFabClicks();
+            subscribeBroadcasts();
+        }
+
+        @Override
+        public void onPause() {
+            unsubscribeFabClicks();
+            unsubscribeBroadcasts();
         }
 
         void updateFabPlay(boolean playing) {
@@ -147,6 +173,7 @@ public class MainBlueprint {
         CompositeSubscription fabClicksSubscription;
 
         void subscribeFabClicks() {
+            if (isSubscribed(fabClicksSubscription)) return;
             MainView v = getView();
             if (v == null) return;
             fabClicksSubscription = new CompositeSubscription(
@@ -201,7 +228,7 @@ public class MainBlueprint {
             Scheduler scheduler = Schedulers.computation();
             // obr will call onNext on the main thread so we observeOn computation
             // so our chained operators will be called on computation instead of main.
-            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(getView().getContext(), intentFilter).observeOn(scheduler);
+            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(appContext, intentFilter).observeOn(scheduler);
             playStateObservable = intentObservable
                     // Filter for only PLAYSTATE_CHANGED actions
                     .filter(new Func1<Intent, Boolean>() {
@@ -286,23 +313,18 @@ public class MainBlueprint {
         CompositeSubscription broadcastSubscriptions;
 
         void subscribeBroadcasts() {
-            if (notSubscribed(broadcastSubscriptions)) {
-                broadcastSubscriptions = new CompositeSubscription(
-                        playStateObservable.subscribe(playStateObserver),
-                        shuffleModeObservable.subscribe(shuffleModeObserver),
-                        repeatModeObservable.subscribe(repeatModeObserver)
-                );
-            }
+            if (isSubscribed(broadcastSubscriptions)) return;
+            broadcastSubscriptions = new CompositeSubscription(
+                    playStateObservable.subscribe(playStateObserver),
+                    shuffleModeObservable.subscribe(shuffleModeObserver),
+                    repeatModeObservable.subscribe(repeatModeObserver)
+            );
         }
 
         void unsubscribeBroadcasts() {
             if (notSubscribed(broadcastSubscriptions)) return;
             broadcastSubscriptions.unsubscribe();
             broadcastSubscriptions = null;
-        }
-
-        static boolean notSubscribed(Subscription subscription) {
-            return subscription == null || subscription.isUnsubscribed();
         }
 
     }
