@@ -116,25 +116,17 @@ public class ThemeHelper {
         //Set theme
         switch (mActiveTheme) {
             case ORPHEUS:
-                return R.style.Theme_Orpheus;
             case BLUPHEUS:
-                return R.style.Theme_Blupheus;
             case REPHEUS:
-                return R.style.Theme_Repheus;
             case GREPHEUS:
-                return R.style.Theme_Grepheus;
             case PURPHEUS:
-                return R.style.Theme_Purpheus;
+                return R.style.Theme_Light;
             case ORPHEUSDARK:
-                return R.style.Theme_OrpheusDark;
             case BLUPHEUSDARK:
-                return R.style.Theme_BlupheusDark;
             case REPHEUSDARK:
-                return R.style.Theme_RepheusDark;
             case GREPHEUSDARK:
-                return R.style.Theme_GrepheusDark;
             case PURPHEUSDARK:
-                return R.style.Theme_PurpheusDark;
+                return R.style.Theme_Dark;
         }
         return -1;
     }

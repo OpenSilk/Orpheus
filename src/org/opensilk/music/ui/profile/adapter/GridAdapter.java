@@ -37,6 +37,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.ui.cards.AlbumCard;
 import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui2.common.OverflowAction;
@@ -105,8 +106,10 @@ public class GridAdapter extends ArrayAdapter<Object> {
             final LocalAlbum la = (LocalAlbum)obj;
             vh.title.setText(la.name);
             vh.subtitle.setText(la.artistName);
+            PaletteObserver paletteObserver = null;// vh.descriptionContainer != null
+//                    ? vh.descriptionContainer.getPaletteObserver() : null;
             vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork,
-                    new ArtInfo(la.artistName, la.name, la.artworkUri), ArtworkType.THUMBNAIL));
+                    paletteObserver, new ArtInfo(la.artistName, la.name, la.artworkUri), ArtworkType.THUMBNAIL));
             vh.overflow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -135,21 +138,21 @@ public class GridAdapter extends ArrayAdapter<Object> {
                 case 4:
                     if (lsg.albumIds.length >= 4) {
                         vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork4,
-                                lsg.albumIds[3], ArtworkType.THUMBNAIL));
+                                null, lsg.albumIds[3], ArtworkType.THUMBNAIL));
                         vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork3,
-                                lsg.albumIds[2], ArtworkType.THUMBNAIL));
+                                null, lsg.albumIds[2], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 2:
                     if (lsg.albumIds.length >= 2) {
                         vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork2,
-                                lsg.albumIds[1], ArtworkType.THUMBNAIL));
+                                null, lsg.albumIds[1], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 1:
                     if (lsg.albumIds.length >= 1) {
                         vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork,
-                                lsg.albumIds[0], ArtworkType.THUMBNAIL));
+                                null, lsg.albumIds[0], ArtworkType.THUMBNAIL));
                     } else {
                         vh.artwork.setImageResource(R.drawable.default_artwork);
                     }

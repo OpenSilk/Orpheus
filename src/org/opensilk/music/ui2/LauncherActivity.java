@@ -46,6 +46,7 @@ import org.opensilk.music.R;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.api.OrpheusApi;
@@ -112,7 +113,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_Dark);
+        setTheme(ThemeHelper.getInstance(this).getTheme());
         super.onCreate(savedInstanceState);
 
         MortarScope parentScope = Mortar.getScope(getApplication());

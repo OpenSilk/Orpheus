@@ -133,21 +133,21 @@ public class GenresScreen extends Screen {
                 case 4:
                     if (genre.mAlbumIds.length >= 4) {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork4,
-                                genre.mAlbumIds[3], ArtworkType.THUMBNAIL));
+                                null, genre.mAlbumIds[3], ArtworkType.THUMBNAIL));
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork3,
-                                genre.mAlbumIds[2], ArtworkType.THUMBNAIL));
+                                null, genre.mAlbumIds[2], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 2:
                     if (genre.mAlbumIds.length >= 2) {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork2,
-                                genre.mAlbumIds[1], ArtworkType.THUMBNAIL));
+                                null, genre.mAlbumIds[1], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 1:
                     if (genre.mAlbumIds.length >= 1) {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
-                                genre.mAlbumIds[0], ArtworkType.THUMBNAIL));
+                                null, genre.mAlbumIds[0], ArtworkType.THUMBNAIL));
                     } else {
                         holder.artwork.setImageResource(R.drawable.default_artwork);
                     }

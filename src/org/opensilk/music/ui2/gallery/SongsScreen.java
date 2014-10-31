@@ -166,7 +166,7 @@ public class SongsScreen extends Screen {
             holder.title.setText(song.name);
             holder.subtitle.setText(song.artistName);
             holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
-                    song.albumId, ArtworkType.THUMBNAIL));
+                    null, song.albumId, ArtworkType.THUMBNAIL));
         }
     }
 }

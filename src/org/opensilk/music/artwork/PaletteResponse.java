@@ -17,18 +17,17 @@
 
 package org.opensilk.music.artwork;
 
-import org.opensilk.common.widget.AnimatedImageView;
-import org.opensilk.music.api.meta.ArtInfo;
-
-import rx.Subscription;
+import android.support.v7.graphics.Palette;
 
 /**
- * Created by drew on 10/22/14.
+ * Created by drew on 10/31/14.
  */
-public interface ArtworkRequestManager {
+public class PaletteResponse {
+    public final Palette palette;
+    public final boolean shouldAnimate;
 
-    Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
-    Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, long albumId, ArtworkType artworkType);
-    Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
-
+    public PaletteResponse(Palette palette, boolean shouldAnimate) {
+        this.palette = palette;
+        this.shouldAnimate = shouldAnimate;
+    }
 }

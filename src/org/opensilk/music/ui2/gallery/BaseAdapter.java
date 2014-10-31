@@ -29,7 +29,9 @@ import android.widget.TextView;
 
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.ui2.common.OverflowAction;
+import org.opensilk.music.widgets.GridTileDescription;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -184,6 +186,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         @InjectView(R.id.artwork_thumb2) @Optional ImageView artwork2;
         @InjectView(R.id.artwork_thumb3) @Optional ImageView artwork3;
         @InjectView(R.id.artwork_thumb4) @Optional ImageView artwork4;
+        @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_overflow) ImageButton overflow;
@@ -212,6 +215,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
             if (artwork2 != null) artwork2.setImageBitmap(null);
             if (artwork3 != null) artwork3.setImageBitmap(null);
             if (artwork4 != null) artwork4.setImageBitmap(null);
+            if (descriptionContainer != null) descriptionContainer.resetBackground();
             subscriptions.clear();
         }
 

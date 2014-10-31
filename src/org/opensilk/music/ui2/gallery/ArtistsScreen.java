@@ -32,6 +32,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
@@ -176,7 +177,10 @@ public class ArtistsScreen extends Screen {
             String subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount)
                 + ", " + MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
             holder.subtitle.setText(subtitle);
-            holder.subscriptions.add(artworkRequestor.newArtistRequest((AnimatedImageView)holder.artwork, artInfo, ArtworkType.THUMBNAIL));
+            PaletteObserver paletteObserver = holder.descriptionContainer != null
+                    ? holder.descriptionContainer.getPaletteObserver() : null;
+            holder.subscriptions.add(artworkRequestor.newArtistRequest((AnimatedImageView)holder.artwork,
+                    paletteObserver, artInfo, ArtworkType.THUMBNAIL));
         }
     }
 

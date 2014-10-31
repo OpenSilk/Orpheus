@@ -17,17 +17,14 @@
 
 package org.opensilk.music.artwork;
 
-import android.graphics.Bitmap;
-
 /**
  * Created by drew on 10/26/14.
  */
-
 public class CacheResponse {
-    public final Bitmap bitmap;
+    public final Artwork artwork;
     public final boolean fromL1;
-    public CacheResponse(Bitmap bitmap, boolean fromL1) {
-        this.bitmap = bitmap;
+    public CacheResponse(Artwork artwork, boolean fromL1) {
+        this.artwork = artwork;
         this.fromL1 = fromL1;
     }
 }

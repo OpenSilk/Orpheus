@@ -26,6 +26,7 @@ import com.android.volley.toolbox.Volley;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
@@ -74,6 +75,11 @@ public class ArtworkModule {
     @Provides @Singleton
     public BitmapLruCache provideBitmapLruCache(@ForApplication Context context) {
         return new BitmapLruCache(getL1CacheSize(context));
+    }
+
+    @Provides @Singleton
+    public ArtworkLruCache provideArtworkLruCache(@ForApplication Context context) {
+        return new ArtworkLruCache(getL1CacheSize(context));
     }
 
     @Provides @Singleton

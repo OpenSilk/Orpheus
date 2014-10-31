@@ -164,14 +164,14 @@ public class FloatingActionButton extends ImageButton {
 
     @Override
     public void setImageLevel(int level) {
-        if (getDrawable() != null && getDrawable().getLevel() == level) return;
+//        if (getDrawable() != null && getDrawable().getLevel() == level) return;
         maybeDoCircularReveal();
         super.setImageLevel(level);
     }
 
     @Override
     public void setImageState(int[] state, boolean merge) {
-        if (getDrawable() != null && getDrawable().getState() == state) return;
+//        if (getDrawable() != null && getDrawable().getState() == state) return;
         maybeDoCircularReveal();
         super.setImageState(state, merge);
     }

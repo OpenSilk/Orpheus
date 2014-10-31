@@ -19,7 +19,7 @@
 
     <item
         android:id="@+id/menu_shuffle"
-        android:icon="@drawable/ic_shuffle_white_24dp"
+        android:icon="@drawable/ic_menu_shuffle_white_24dp"
         app:showAsAction="ifRoom"
         android:title="@string/menu_shuffle"/>
 

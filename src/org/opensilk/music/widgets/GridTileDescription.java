@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2014 OpenSilk Productions LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package org.opensilk.music.widgets;
+
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.support.v7.graphics.Palette;
+import android.util.AttributeSet;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import org.opensilk.common.widget.SquareImageView;
+import org.opensilk.music.R;
+import org.opensilk.music.artwork.PaletteObserver;
+import org.opensilk.music.artwork.PaletteResponse;
+import org.opensilk.music.ui2.theme.Themer;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
+/**
+ * Created by drew on 10/31/14.
+ */
+public class GridTileDescription extends LinearLayout {
+
+    @InjectView(R.id.tile_title)
+    TextView mTitle;
+    @InjectView(R.id.tile_subtitle)
+    TextView mSubTitle;
+
+    final PaletteObserver paletteObserver;
+    final boolean lightTheme;
+    Drawable originalBackground;
+
+    public GridTileDescription(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        lightTheme = Themer.isLightTheme(getContext());
+        paletteObserver = new PaletteObserver() {
+            @Override
+            public void onNext(PaletteResponse paletteResponse) {
+                Palette palette = paletteResponse.palette;
+                Palette.Swatch swatch = lightTheme ? palette.getLightMutedSwatch() : palette.getDarkMutedSwatch();
+                if (swatch == null) swatch = palette.getMutedSwatch();
+                if (swatch != null) {
+                    if (paletteResponse.shouldAnimate) {
+                        originalBackground = getBackground();
+                        Drawable d = getBackground();
+                        Drawable d2 = new ColorDrawable(swatch.getRgb());
+                        TransitionDrawable td = new TransitionDrawable(new Drawable[]{d,d2});
+                        td.setCrossFadeEnabled(true);
+                        setBackgroundDrawable(td);
+                        td.startTransition(SquareImageView.TRANSITION_DURATION);
+                    } else {
+                        originalBackground = getBackground();
+                        setBackgroundColor(swatch.getRgb());
+//                        mTitle.setTextColor(swatch.getTitleTextColor());
+//                        mSubTitle.setTextColor(swatch.getBodyTextColor());
+                    }
+                }
+            }
+        };
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        ButterKnife.inject(this);
+    }
+
+    public PaletteObserver getPaletteObserver() {
+        return paletteObserver;
+    }
+
+    public void resetBackground() {
+        if (originalBackground != null) {
+            setBackgroundDrawable(originalBackground);
+        }
+    }
+
+}

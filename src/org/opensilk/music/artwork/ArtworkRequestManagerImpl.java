@@ -20,9 +20,8 @@ package org.opensilk.music.artwork;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
-import android.widget.ImageView;
 
 import com.andrew.apollo.utils.ApolloUtils;
 import com.android.volley.NetworkResponse;
@@ -36,10 +35,9 @@ import org.apache.commons.io.IOUtils;
 import org.opensilk.common.rx.HoldsSubscription;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
-import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
@@ -80,14 +78,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     final Context mContext;
     final AppPreferences mPreferences;
-    final BitmapLruCache mL1Cache;
+    final ArtworkLruCache mL1Cache;
     final BitmapDiskLruCache mL2Cache;
     final RequestQueue mVolleyQueue;
     final Gson mGson;
 
     @Inject
     public ArtworkRequestManagerImpl(@ForApplication Context mContext, AppPreferences mPreferences,
-                                     BitmapLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
+                                     ArtworkLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
                                      RequestQueue mVolleyQueue, Gson mGson) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
@@ -99,6 +97,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     abstract class BaseArtworkRequest implements Subscription {
         final WeakReference<AnimatedImageView> imageViewWeakReference;
+        final WeakReference<PaletteObserver> palleteObserverWeakReference;
         final ArtInfo artInfo;
         final ArtworkType artworkType;
 
@@ -107,8 +106,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         Subscription subscription;
         boolean unsubscribed = false;
 
-        BaseArtworkRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
+        BaseArtworkRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                           ArtInfo artInfo, ArtworkType artworkType) {
             this.imageViewWeakReference = new WeakReference<>(imageView);
+            this.palleteObserverWeakReference = new WeakReference<>(paletteObserver);
             this.artInfo = artInfo;
             this.artworkType = artworkType;
             breadcrumbs = new StringBuilder(500);
@@ -131,6 +132,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             }
             unregisterWithImageView();
             imageViewWeakReference.clear();
+            palleteObserverWeakReference.clear();
             unsubscribed = true;
         }
 
@@ -176,6 +178,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             }
         }
 
+        void notifyPaletteObserver(Palette palette, boolean shouldAnimate) {
+            PaletteObserver po = palleteObserverWeakReference.get();
+            if (po != null) {
+                po.onNext(new PaletteResponse(palette, shouldAnimate));
+                po.onCompleted();
+            }
+        }
+
         void tryForCache() {
             addBreadcrumb("tryForCache");
             subscription = createCacheObservable(artInfo, artworkType)
@@ -183,7 +193,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(CacheResponse cr) {
                             addBreadcrumb("tryForCache hit");
-                            setImageBitmap(cr.bitmap, true, !cr.fromL1);
+                            setImageBitmap(cr.artwork.bitmap, true, !cr.fromL1);
+                            notifyPaletteObserver(cr.artwork.palette, !cr.fromL1);
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -209,8 +220,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     class ArtistArtworkRequest extends BaseArtworkRequest {
 
-        ArtistArtworkRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
-            super(imageView, artInfo, artworkType);
+        ArtistArtworkRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                             ArtInfo artInfo, ArtworkType artworkType) {
+            super(imageView, paletteObserver, artInfo, artworkType);
         }
 
         @Override
@@ -228,11 +240,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void tryForNetwork() {
             subscription = createArtistNetworkRequest(artInfo, artworkType)
-                    .subscribe(new Action1<Bitmap>() {
+                    .subscribe(new Action1<Artwork>() {
                         @Override
-                        public void call(Bitmap bitmap) {
+                        public void call(Artwork artwork) {
                             addBreadcrumb("tryForNetwork hit");
-                            setImageBitmap(bitmap);
+                            setImageBitmap(artwork.bitmap);
+                            notifyPaletteObserver(artwork.palette, true);
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -246,8 +259,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     class AlbumArtworkRequest extends BaseArtworkRequest {
 
-        AlbumArtworkRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
-            super(imageView, artInfo, artworkType);
+        AlbumArtworkRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                            ArtInfo artInfo, ArtworkType artworkType) {
+            super(imageView, paletteObserver, artInfo, artworkType);
         }
 
         @Override
@@ -311,11 +325,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void tryForNetwork(final boolean tryMediaStoreOnFailure) {
             subscription = createAlbumNetworkObservable(artInfo, artworkType)
-                    .subscribe(new Action1<Bitmap>() {
+                    .subscribe(new Action1<Artwork>() {
                         @Override
-                        public void call(Bitmap bitmap) {
+                        public void call(Artwork artwork) {
                             addBreadcrumb("tryForNetwork hit");
-                            setImageBitmap(bitmap);
+                            setImageBitmap(artwork.bitmap);
+                            notifyPaletteObserver(artwork.palette, true);
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -336,11 +351,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void tryForMediaStore(final boolean tryNetworkOnFailure) {
             subscription = createMediaStoreRequestObservable(artInfo, artworkType)
-                    .subscribe(new Action1<Bitmap>() {
+                    .subscribe(new Action1<Artwork>() {
                         @Override
-                        public void call(Bitmap bitmap) {
+                        public void call(Artwork artwork) {
                             addBreadcrumb("tryForMediaStore hit");
-                            setImageBitmap(bitmap);
+                            setImageBitmap(artwork.bitmap);
+                            notifyPaletteObserver(artwork.palette, true);
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -361,11 +377,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void tryForUrl() {
             subscription = createImageRequestObservable(artInfo.artworkUri.toString(), artInfo, artworkType)
-                    .subscribe(new Action1<Bitmap>() {
+                    .subscribe(new Action1<Artwork>() {
                         @Override
-                        public void call(Bitmap bitmap) {
+                        public void call(Artwork artwork) {
                             addBreadcrumb("tryForUrl hit");
-                            setImageBitmap(bitmap);
+                            setImageBitmap(artwork.bitmap);
+                            notifyPaletteObserver(artwork.palette, true);
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -382,8 +399,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         final long id;
         AlbumArtworkRequest wrappedRequest;
 
-        AlbumArtworkRequestWrapped(AnimatedImageView imageView, long id, ArtworkType artworkType) {
-            super(imageView, null, artworkType);
+        AlbumArtworkRequestWrapped(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                                   long id, ArtworkType artworkType) {
+            super(imageView, paletteObserver, null, artworkType);
             this.id =id;
             addBreadcrumb("albumId="+id);
         }
@@ -429,7 +447,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         public void call(ArtInfo artInfo) {
                             addBreadcrumb("getArtInfo hit");
                             if (!unsubscribed && imageViewWeakReference.get() != null) {
-                                wrappedRequest = new AlbumArtworkRequest(imageViewWeakReference.get(), artInfo, artworkType);
+                                wrappedRequest = new AlbumArtworkRequest(imageViewWeakReference.get(),
+                                        palleteObserverWeakReference.get(), artInfo, artworkType);
                                 wrappedRequest.start();
                             }
                         }
@@ -446,18 +465,18 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     @Override
-    public Subscription newAlbumRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
-        return new AlbumArtworkRequest(imageView, artInfo, artworkType).start();
+    public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType) {
+        return new AlbumArtworkRequest(imageView, paletteObserver, artInfo, artworkType).start();
     }
 
     @Override
-    public Subscription newAlbumRequest(AnimatedImageView imageView, long albumId, ArtworkType artworkType) {
-        return new AlbumArtworkRequestWrapped(imageView, albumId, artworkType).start();
+    public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, long albumId, ArtworkType artworkType) {
+        return new AlbumArtworkRequestWrapped(imageView, paletteObserver, albumId, artworkType).start();
     }
 
     @Override
-    public Subscription newArtistRequest(AnimatedImageView imageView, ArtInfo artInfo, ArtworkType artworkType) {
-        return new ArtistArtworkRequest(imageView, artInfo, artworkType).start();
+    public Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType) {
+        return new ArtistArtworkRequest(imageView, paletteObserver, artInfo, artworkType).start();
     }
 
     public Observable<CacheResponse> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
@@ -466,10 +485,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 @Override
                 public void call(Subscriber<? super CacheResponse> subscriber) {
 //                    Timber.v("Trying L1 for %s, from %s", cacheKey, Thread.currentThread().getName());
-                    Bitmap bitmap = mL1Cache.getBitmap(cacheKey);
+                    Artwork artwork = mL1Cache.getArtwork(cacheKey);
                     if (!subscriber.isUnsubscribed()) {
-                        if (bitmap != null) {
-                            subscriber.onNext(new CacheResponse(bitmap, true));
+                        if (artwork != null) {
+                            subscriber.onNext(new CacheResponse(artwork, true));
                             subscriber.onCompleted();
                         } else {
                             subscriber.onError(new CacheMissException());
@@ -487,14 +506,17 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                             public void call(Subscriber<? super CacheResponse> subscriber) {
 //                                Timber.v("Trying L2 for %s, from %s", cacheKey, Thread.currentThread().getName());
                                 Bitmap bitmap = mL2Cache.getBitmap(cacheKey);
-                                if (!subscriber.isUnsubscribed()) {
-                                    if (bitmap != null) {
-                                        mL1Cache.putBitmap(cacheKey, bitmap);
-                                        subscriber.onNext(new CacheResponse(bitmap, false));
-                                        subscriber.onCompleted();
-                                    } else {
-                                        subscriber.onError(new CacheMissException());
-                                    }
+                                if (bitmap != null) {
+                                    //Always add to cache
+                                    Palette palette = Palette.generate(bitmap);
+                                    Artwork artwork = new Artwork(bitmap, palette);
+                                    mL1Cache.putArtwork(cacheKey, artwork);
+                                    if (subscriber.isUnsubscribed()) return;
+                                    subscriber.onNext(new CacheResponse(artwork, false));
+                                    subscriber.onCompleted();
+                                } else {
+                                    if (subscriber.isUnsubscribed()) return;
+                                    subscriber.onError(new CacheMissException());
                                 }
                             }
                         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
@@ -505,7 +527,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             });
     }
 
-    public Observable<Bitmap> createAlbumNetworkObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
+    public Observable<Artwork> createAlbumNetworkObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
         return createAlbumLastFmApiRequestObservable(artInfo)
                 // remap the album info returned by last fm into a url where we can find an image
                 .flatMap(new Func1<Album, Observable<String>>() {
@@ -541,15 +563,15 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     }
                 })
                 // remap the url we found into a bitmap
-                .flatMap(new Func1<String, Observable<Bitmap>>() {
+                .flatMap(new Func1<String, Observable<Artwork>>() {
                     @Override
-                    public Observable<Bitmap> call(String s) {
+                    public Observable<Artwork> call(String s) {
                         return createImageRequestObservable(s, artInfo, artworkType);
                     }
                 });
     }
 
-    public Observable<Bitmap> createArtistNetworkRequest(final ArtInfo artInfo, final ArtworkType artworkType) {
+    public Observable<Artwork> createArtistNetworkRequest(final ArtInfo artInfo, final ArtworkType artworkType) {
         return createArtistLastFmApiRequestObservable(artInfo)
                 .flatMap(new Func1<Artist, Observable<String>>() {
                     @Override
@@ -563,9 +585,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         }
                     }
                 })
-                .flatMap(new Func1<String, Observable<Bitmap>>() {
+                .flatMap(new Func1<String, Observable<Artwork>>() {
                     @Override
-                    public Observable<Bitmap> call(String s) {
+                    public Observable<Artwork> call(String s) {
                         return createImageRequestObservable(s, artInfo, artworkType);
                     }
                 });
@@ -644,27 +666,29 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         });
     }
 
-    public Observable<Bitmap> createImageRequestObservable(final String url, final ArtInfo artInfo, final ArtworkType artworkType) {
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+    public Observable<Artwork> createImageRequestObservable(final String url, final ArtInfo artInfo, final ArtworkType artworkType) {
+        return Observable.create(new Observable.OnSubscribe<Artwork>() {
             @Override
-            public void call(final Subscriber<? super Bitmap> subscriber) {
+            public void call(final Subscriber<? super Artwork> subscriber) {
                 Timber.v("creating ImageRequest %s, from %s", url, Thread.currentThread().getName());
-                ArtworkImageRequest.Listener listener = new ArtworkImageRequest.Listener() {
+                ArtworkRequest2.Listener listener = new ArtworkRequest2.Listener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
                         if (subscriber.isUnsubscribed()) return;
                         subscriber.onError(volleyError);
                     }
                     @Override
-                    public void onResponse(Bitmap bitmap) {
+                    public void onResponse(Artwork artwork) {
                         // always add to cache
-                        addBitmapToCache(getCacheKey(artInfo, artworkType), bitmap);
+                        String cacheKey = getCacheKey(artInfo, artworkType);
+                        mL1Cache.putArtwork(cacheKey, artwork);
+                        putInDiskCache(cacheKey, artwork.bitmap);
                         if (subscriber.isUnsubscribed()) return;
-                        subscriber.onNext(bitmap);
+                        subscriber.onNext(artwork);
                         subscriber.onCompleted();
                     }
                 };
-                ArtworkImageRequest request = new ArtworkImageRequest(url, artworkType, listener);
+                ArtworkRequest2 request = new ArtworkRequest2(url, artworkType, listener);
                 mVolleyQueue.add(request);
                 // Here we take advantage of volleys coolest feature,
                 // We have 2 types of images, a thumbnail and a larger image suitable for
@@ -674,26 +698,26 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 // saving bandwidth and ensuring both kinds of images are available next time
                 // we need them.
                 final ArtworkType oppositeArtworkType = ArtworkType.opposite(artworkType);
-                ArtworkImageRequest.Listener oppositeListener = new ArtworkImageRequest.Listener() {
+                ArtworkRequest2.Listener oppositeListener = new ArtworkRequest2.Listener() {
                     @Override
                     public void onErrorResponse(VolleyError volleyError) {
                         //pass
                     }
                     @Override
-                    public void onResponse(Bitmap bitmap) {
-                        addBitmapToCache(getCacheKey(artInfo, oppositeArtworkType), bitmap);
+                    public void onResponse(Artwork artwork) {
+                        putInDiskCache(getCacheKey(artInfo, oppositeArtworkType), artwork.bitmap);
                     }
                 };
-                ArtworkImageRequest oppositeRequest = new ArtworkImageRequest(url, oppositeArtworkType, oppositeListener);
+                ArtworkRequest2 oppositeRequest = new ArtworkRequest2(url, oppositeArtworkType, oppositeListener);
                 mVolleyQueue.add(oppositeRequest);
             }
         });
     }
 
-    public Observable<Bitmap> createMediaStoreRequestObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return Observable.create(new Observable.OnSubscribe<Bitmap>() {
+    public Observable<Artwork> createMediaStoreRequestObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
+        return Observable.create(new Observable.OnSubscribe<Artwork>() {
             @Override
-            public void call(final Subscriber<? super Bitmap> subscriber) {
+            public void call(final Subscriber<? super Artwork> subscriber) {
                 Timber.v("creating MediaStoreRequest %s, from %s", artInfo, Thread.currentThread().getName());
                 InputStream in = null;
                 try {
@@ -704,13 +728,18 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     // We create a faux ImageRequest so we can cheat and use it
                     // to processs the bitmap like a real network request
                     // this is not only easier but safer since all bitmap processing is serial.
-                    ArtworkImageRequest request = new ArtworkImageRequest("fauxrequest", artworkType, null);
-                    Response<Bitmap> result = request.parseNetworkResponse(response);
-                    if (subscriber.isUnsubscribed()) return;
+                    ArtworkRequest2 request = new ArtworkRequest2("fauxrequest", artworkType, null);
+                    Response<Artwork> result = request.parseNetworkResponse(response);
                     if (result.isSuccess()) {
+                        //always add to cache
+                        String cacheKey = getCacheKey(artInfo, artworkType);
+                        mL1Cache.putArtwork(cacheKey, result.result);
+                        putInDiskCache(cacheKey, result.result.bitmap);
+                        if (subscriber.isUnsubscribed()) return;
                         subscriber.onNext(result.result);
                         subscriber.onCompleted();
                     } else {
+                        if (subscriber.isUnsubscribed()) return;
                         subscriber.onError(result.error);
                     }
                 } catch (Exception e) { //too many to keep track of
@@ -727,8 +756,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     final BlockingDeque<Map.Entry<String, Bitmap>> diskCacheQueue = new LinkedBlockingDeque<>();
     Scheduler.Worker diskCacheWorker;
 
-    public void addBitmapToCache(final String key, final Bitmap bitmap) {
-        Timber.v("addBitmapToCache(%s)", key);
+    public void putInDiskCache(final String key, final Bitmap bitmap) {
+        Timber.v("putInDiskCache(%s)", key);
         diskCacheQueue.addLast(new AbstractMap.SimpleEntry<>(key, bitmap));
         if (diskCacheWorker == null || diskCacheWorker.isUnsubscribed()) {
             diskCacheWorker = Schedulers.io().createWorker();

@@ -129,21 +129,21 @@ public class PlaylistsScreen extends Screen {
                 case 4:
                     if (playlist.mAlbumIds.length >= 4) {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork4,
-                                playlist.mAlbumIds[3], ArtworkType.THUMBNAIL));
+                                null, playlist.mAlbumIds[3], ArtworkType.THUMBNAIL));
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork3,
-                                playlist.mAlbumIds[2], ArtworkType.THUMBNAIL));
+                                null, playlist.mAlbumIds[2], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 2:
                     if (playlist.mAlbumIds.length >= 2) {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork2,
-                                playlist.mAlbumIds[1], ArtworkType.THUMBNAIL));
+                                null, playlist.mAlbumIds[1], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 1:
                     if (playlist.mAlbumIds.length >= 1) {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
-                                playlist.mAlbumIds[0], ArtworkType.THUMBNAIL));
+                                null, playlist.mAlbumIds[0], ArtworkType.THUMBNAIL));
                     } else {
                         holder.artwork.setImageResource(R.drawable.default_artwork);
                     }
