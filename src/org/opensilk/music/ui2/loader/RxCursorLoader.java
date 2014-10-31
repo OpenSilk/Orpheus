@@ -174,7 +174,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                 } catch (Exception e) {
                     emmitError(e, subscriber);
                 } finally {
-                    IOUtils.closeQuietly(c);
+                    if (c != null) c.close();
                 }
             }
         });
