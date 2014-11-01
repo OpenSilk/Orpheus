@@ -58,8 +58,8 @@ public class TintManager {
 //            R.drawable.abc_ic_menu_selectall_mtrl_alpha,
 //            R.drawable.abc_ic_menu_paste_mtrl_am_alpha,
             R.drawable.ic_menu_moreoverflow_mtrl_alpha,
-            R.drawable.ic_menu_shuffle_white_24dp,
-            R.drawable.ic_av_timer_white_24dp
+//            R.drawable.ic_menu_shuffle_white_24dp,
+//            R.drawable.ic_av_timer_white_24dp
 //            R.drawable.abc_ic_voice_search_api_mtrl_alpha,
 //            R.drawable.abc_textfield_search_default_mtrl_alpha,
 //            R.drawable.abc_textfield_default_mtrl_alpha
