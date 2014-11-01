@@ -17,16 +17,6 @@
 
 package org.opensilk.music.ui2.main2;
 
-import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.os.Parcelable;
-import android.transition.Transition;
-import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -35,24 +25,14 @@ import android.view.animation.AnimationUtils;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.flow.ScreenContextFactory;
 import org.opensilk.common.flow.WithTransition;
-import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.main.QueueScreen;
-import org.opensilk.music.ui2.main2.ScreenSwitcher;
 import org.opensilk.common.flow.ScreenSwitcherView;
 import org.opensilk.music.ui2.util.ViewStateSaver;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import flow.Flow;
-import flow.Layout;
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
-import static flow.Flow.Direction.FORWARD;
-import static flow.Flow.Direction.REPLACE;
 import static org.opensilk.common.util.Preconditions.checkNotNull;
 
 /**

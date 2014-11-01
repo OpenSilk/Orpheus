@@ -26,24 +26,18 @@ import com.andrew.apollo.MusicPlaybackService;
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
-import org.opensilk.music.ui2.ActivityBlueprint;
-import org.opensilk.music.ui2.theme.Themer;
 import org.opensilk.silkdagger.qualifier.ForApplication;
-
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import flow.Flow;
 import hugo.weaving.DebugLog;
-import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Scheduler;
-import rx.Subscription;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.AndroidObservable;
 import rx.android.observables.ViewObservable;
@@ -158,8 +152,8 @@ public class MainBlueprint {
             MainView  v = getView();
             if (v == null) return;
             Flow flow = AppFlow.get(v.getContext());
-            if (flow.getBackstack().current().getScreen() instanceof QueueScreen) return;
-            flow.goTo(new QueueScreen());
+            if (flow.getBackstack().current().getScreen() instanceof QueueBlueprint) return;
+            flow.goTo(new QueueBlueprint());
         }
 
         @DebugLog
@@ -167,7 +161,7 @@ public class MainBlueprint {
             MainView  v = getView();
             if (v == null) return;
             Flow flow = AppFlow.get(v.getContext());
-            if (flow.getBackstack().current().getScreen() instanceof QueueScreen) flow.goBack();
+            if (flow.getBackstack().current().getScreen() instanceof QueueBlueprint) flow.goBack();
         }
 
         CompositeSubscription fabClicksSubscription;
@@ -241,9 +235,14 @@ public class MainBlueprint {
                     })
                             // filter out repeats only taking most recent
 //                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
-                            // flatMap the intent into a boolean by requesting the playstate
-                            // XXX the intent contains the playstate as an extra but
-                            //     it could be out of date
+                    // XXX the intent contains the playstate as an extra but it could be out of date
+//                    .map(new Func1<Intent, Boolean>() {
+//                        @Override
+//                        public Boolean call(Intent intent) {
+//                            return intent.getBooleanExtra("playing", false);
+//                        }
+//                    })
+                    // flatMap the intent into a boolean by requesting the playstate
                     .flatMap(new Func1<Intent, Observable<Boolean>>() {
                         @Override
                         public Observable<Boolean> call(Intent intent) {

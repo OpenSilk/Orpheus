@@ -150,11 +150,11 @@ public class MusicServiceConnection {
     void refresh();
     boolean isFavorite();
     boolean isPlaying();
-    long [] getQueue();
+    //long [] getQueue();
     //long duration();
     //long position();
     long seek(long pos);
-    long getAudioId();
+    //long getAudioId();
     long getAlbumId();
     //String getArtistName();
     //String getTrackName();
@@ -286,6 +286,33 @@ public class MusicServiceConnection {
         });
     }
 
+    public Observable<Boolean> isPlaying() {
+        return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
+            @Override
+            public Observable<Boolean> call(IApolloService iApolloService) {
+                Timber.v("isPlaying %s", Thread.currentThread().getName());
+                try {
+                    return Observable.just(iApolloService.isPlaying());
+                } catch (RemoteException e) {
+                    return Observable.error(e);
+                }
+            }
+        });
+    }
+
+    public Observable<long[]> getQueue() {
+        return getObservable().flatMap(new Func1<IApolloService, Observable<long[]>>() {
+            @Override
+            public Observable<long[]> call(IApolloService iApolloService) {
+                try {
+                    return Observable.just(iApolloService.getQueue());
+                } catch (Exception e) {
+                    return Observable.error(e);
+                }
+            }
+        });
+    }
+
     public Observable<Long> getDuration() {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
@@ -314,13 +341,13 @@ public class MusicServiceConnection {
         });
     }
 
-    public Observable<Boolean> isPlaying() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
+    public Observable<Long> getAudioId() {
+        return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
-            public Observable<Boolean> call(IApolloService iApolloService) {
-                Timber.v("isPlaying %s", Thread.currentThread().getName());
+            public Observable<Long> call(IApolloService iApolloService) {
+                Timber.v("getAudioId %s", Thread.currentThread().getName());
                 try {
-                    return Observable.just(iApolloService.isPlaying());
+                    return Observable.just(iApolloService.getAudioId());
                 } catch (RemoteException e) {
                     return Observable.error(e);
                 }

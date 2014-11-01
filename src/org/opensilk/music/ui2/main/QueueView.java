@@ -17,35 +17,67 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
 
+import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.utils.MusicUtils;
 import com.mobeta.android.dslv.DragSortListView;
 
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
+import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.ui.cards.SongQueueCard;
+import org.opensilk.music.ui2.common.OverflowAction;
+import org.opensilk.music.util.Command;
+import org.opensilk.music.util.CommandRunner;
+import org.opensilk.music.widgets.GridTileDescription;
+import org.opensilk.music.widgets.PlayingIndicator;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.Optional;
+import it.gmariotti.cardslib.library.internal.Card;
 import mortar.Mortar;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by drew on 10/15/14.
  */
-public class QueueView extends DragSortListView {
+public class QueueView extends DragSortListView implements
+        DragSortListView.DropListener,
+        DragSortListView.RemoveListener,
+        AdapterView.OnItemClickListener {
 
     @Inject
-    QueueScreen.Presenter presenter;
+    QueueBlueprint.Presenter presenter;
+    @Inject
+    ArtworkRequestManager requestor;
 
-    int screenHeight;
-    int screenWidth;
-    float yFraction;
-    float xFraction;
+    Adapter adapter;
 
     public QueueView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
-
+        adapter = new Adapter(getContext(), requestor, presenter);
+        setDropListener(this);
+        setRemoveListener(this);
+        setOnItemClickListener(this);
     }
 
     @Override
@@ -60,42 +92,168 @@ public class QueueView extends DragSortListView {
         presenter.dropView(this);
     }
 
-    public void setup() {
-        addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.list_footer, this, false));
-        setAdapter(new ArrayAdapter<String>(getContext(), R.layout.queue_list_item, R.id.tile_title, generateList()));
-    }
-
-    String[] generateList() {
-        String[] lst = new String[50];
-        for (int ii=0; ii<50; ii++) {
-            lst[ii] = "Song " + ii;
-        }
-        return lst;
-    }
+       /*
+     * RemoveListener
+     */
 
     @Override
-    public void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        screenHeight = h;
-        screenWidth = w;
+    public void remove(final int which) {
+        RecentSong s = adapter.getItem(which);
+        adapter.remove(s);
+        presenter.removeQueueItem(s.recentId);
     }
 
-    public void setYFraction(float fraction) {
-        yFraction = fraction;
-        setY(screenHeight > 0 ? (yFraction * screenHeight) : 0);
+    /*
+     * Droplistener
+     */
+
+    @Override
+    public void drop(final int from, final int to) {
+        RecentSong s = adapter.getItem(from);
+//        adapter.setNotifyOnChange(false);
+        adapter.remove(s);
+        adapter.insert(s, to);
+//        adapter.setNotifyOnChange(true);
+//        adapter.notifyDataSetChanged();
+        presenter.moveQueueItem(from,to);
     }
 
-    public float getYFraction() {
-        return yFraction;
+    /*
+     * ItemClickListener
+     */
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // When selecting a track from the queue, just jump there instead of
+        // reloading the queue. This is both faster, and prevents accidentally
+        // dropping out of party shuffle.
+        presenter.setQueuePosition(position);
     }
 
-    public void setXFraction(float fraction) {
-        xFraction = fraction;
-        setX(screenWidth > 0 ? (xFraction * screenWidth) : 0);
+    public void setup() {
+        addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.list_footer, this, false));
+        setAdapter(adapter);
     }
 
-    public float getXFraction() {
-        return xFraction;
+    public void onCurrentSongChanged(long recentId) {
+        adapter.currentSong = recentId;
+        adapter.notifyDataSetChanged();
+    }
+
+    public void onPlaystateChanged(boolean isPlaying) {
+        adapter.isPlaying = isPlaying;
+        adapter.notifyDataSetChanged();
+    }
+
+    static class Adapter extends ArrayAdapter<RecentSong> {
+
+        final ArtworkRequestManager requestor;
+        final QueueBlueprint.Presenter presenter;
+
+        long currentSong;
+        boolean isPlaying;
+
+        Adapter(Context context, ArtworkRequestManager requestor, QueueBlueprint.Presenter presenter) {
+            super(context, -1);
+            this.requestor = requestor;
+            this.presenter = presenter;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            ViewHolder holder;
+            if (v == null) {
+                v = LayoutInflater.from(getContext()).inflate(R.layout.queue_list_item, parent, false);
+                holder = new ViewHolder(v);
+                v.setTag(holder);
+            } else {
+                holder = (ViewHolder) v.getTag();
+                holder.reset();
+            }
+            final RecentSong item = getItem(position);
+            holder.title.setText(item.name);
+            holder.subtitle.setText(item.artistName);
+
+            String artist = item.albumArtistName;
+            if (TextUtils.isEmpty(artist)) artist = item.artistName;
+            holder.subscriptions.add(requestor.newAlbumRequest((AnimatedImageView)holder.artwork,
+                    null, new ArtInfo(artist, item.albumName, item.artworkUri), ArtworkType.THUMBNAIL));
+
+            holder.overflow.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PopupMenu m = new PopupMenu(getContext(), v);
+                    m.inflate(R.menu.popup_play_next);
+                    if (item.isLocal) {
+                        m.inflate(R.menu.popup_add_to_playlist);
+                        m.inflate(R.menu.popup_more_by_artist);
+                        m.inflate(R.menu.popup_set_ringtone);
+                        m.inflate(R.menu.popup_delete);
+                    }
+                    m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem i) {
+                            try {
+                                return presenter.handleItemOverflowClick(OverflowAction.valueOf(i.getItemId()), item);
+                            } catch (IllegalArgumentException e) {
+                                return false;
+                            }
+                        }
+                    });
+                    m.show();
+                }
+            });
+
+            if (currentSong == item.recentId) {
+                if (isPlaying) {
+                    holder.playingIndicator.startAnimating();
+                } else {
+                    holder.playingIndicator.setVisibility(View.VISIBLE);
+                }
+            }
+
+            return v;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return getItem(position).identity.hashCode();
+        }
+    }
+
+    static class ViewHolder {
+        final View itemView;
+        @InjectView(R.id.artwork_thumb) ImageView artwork;
+        @InjectView(R.id.tile_title) TextView title;
+        @InjectView(R.id.tile_subtitle) TextView subtitle;
+        @InjectView(R.id.playing_indicator) PlayingIndicator playingIndicator;
+        @InjectView(R.id.tile_overflow) ImageButton overflow;
+
+        final CompositeSubscription subscriptions;
+
+        public ViewHolder(View itemView) {
+            this.itemView = itemView;
+            ButterKnife.inject(this, itemView);
+            subscriptions = new CompositeSubscription();
+        }
+
+        public void reset() {
+//            Timber.v("Reset title=%s", title.getText());
+            if (artwork != null) artwork.setImageBitmap(null);
+            subscriptions.clear();
+            if (playingIndicator.isAnimating()) {
+                playingIndicator.stopAnimating(); //stopAnimating sets GONE
+            } else {
+                playingIndicator.setVisibility(View.GONE);
+            }
+        }
+
     }
 
 }

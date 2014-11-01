@@ -29,7 +29,9 @@
     <ImageView
         android:id="@+id/drag_handle"
         android:layout_gravity="center_vertical"
+        android:paddingStart="16dp"
         android:paddingLeft="16dp"
+        android:paddingEnd="16dp"
         android:paddingRight="16dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -40,8 +42,6 @@
         android:id="@+id/artwork_thumb"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
@@ -72,6 +72,12 @@
             style="@style/SingleLineTextView"/>
 
     </LinearLayout>
+
+    <org.opensilk.music.widgets.PlayingIndicator
+        android:id="@+id/playing_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <!--had to copy the drawable for this
         tint manager caches it and the grids

@@ -183,9 +183,14 @@ public class FooterBlueprint {
                     })
                     // filter out repeats only taking most recent
                     .debounce(20, TimeUnit.MILLISECONDS)
+                    // XXX the intent contains the playstate as an extra but it could be out of date
+//                    .map(new Func1<Intent, Boolean>() {
+//                        @Override
+//                        public Boolean call(Intent intent) {
+//                            return intent.getBooleanExtra("playing", false);
+//                        }
+//                    })
                     // flatMap the intent into a boolean by requesting the playstate
-                    // XXX the intent contains the playstate as an extra but
-                    //     it could be out of date
                     .flatMap(new Func1<Intent, Observable<Boolean>>() {
                         @Override
                         public Observable<Boolean> call(Intent intent) {
@@ -208,8 +213,14 @@ public class FooterBlueprint {
                     // buffer quick successive calls and only emit the most recent
                     .debounce(20, TimeUnit.MILLISECONDS);
             metaObservable = metaChangedObservable
-                    // flatmap the intent into a String[] containing the trackname and artistname
                     // XXX these are included in the intent as extras but could be out of date
+//                    .map(new Func1<Intent, String[]>() {
+//                        @Override
+//                        public String[] call(Intent intent) {
+//                            return new String[] {intent.getStringExtra("track"), intent.getStringExtra("artist")});
+//                        }
+//                    })
+                    // flatmap the intent into a String[] containing the trackname and artistname
                     .flatMap(new Func1<Intent, Observable<String[]>>() {
                         // called on computation
                         @Override

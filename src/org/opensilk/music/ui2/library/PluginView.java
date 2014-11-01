@@ -22,8 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import org.opensilk.music.ui2.core.CanShowScreen;
-
 import javax.inject.Inject;
 
 import flow.Flow;
