@@ -18,8 +18,13 @@
 package org.opensilk.music.ui2.core.android;
 
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import org.opensilk.common.mortar.HasScope;
+
+import java.util.HashMap;
 
 import javax.inject.Singleton;
 
@@ -44,6 +49,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         void setUpButtonEnabled(boolean enabled);
 
         void setTitle(int titleRes);
+        void setTitle(CharSequence title);
 
         void setMenu(MenuConfig menuConfig);
     }
@@ -52,6 +58,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         public final boolean showHomeEnabled;
         public final boolean upButtonEnabled;
         public final int titleRes;
+        public final CharSequence title;
         public final MenuConfig menuConfig;
 
         public Config(boolean showHomeEnabled, boolean upButtonEnabled,
@@ -60,6 +67,16 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
             this.upButtonEnabled = upButtonEnabled;
             this.titleRes = titleRes;
             this.menuConfig = menuConfig;
+            this.title = null;
+        }
+
+        public Config(boolean showHomeEnabled, boolean upButtonEnabled,
+                      CharSequence title, MenuConfig menuConfig) {
+            this.showHomeEnabled = showHomeEnabled;
+            this.upButtonEnabled = upButtonEnabled;
+            this.title = title;
+            this.menuConfig = menuConfig;
+            this.titleRes = -1;
         }
 
         public Config withActions(Func1<Integer, Boolean> actionHandler, int... menus) {
@@ -70,10 +87,48 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
     public static class MenuConfig {
         public final Func1<Integer, Boolean> actionHandler;
         public final int[] menus;
+        public final CustomMenuItem[] customMenus;
 
         public MenuConfig(Func1<Integer, Boolean> actionHandler, int... menus) {
             this.actionHandler = actionHandler;
             this.menus = menus;
+            customMenus = new CustomMenuItem[0];
+        }
+
+        public MenuConfig(Func1<Integer, Boolean> actionHandler, CustomMenuItem... customMenus) {
+            this.actionHandler = actionHandler;
+            this.menus = new int[0];
+            this.customMenus = customMenus;
+        }
+
+        public MenuConfig(Func1<Integer, Boolean> actionHandler, int[] menus, CustomMenuItem[] customMenus) {
+            this.actionHandler = actionHandler;
+            this.menus = menus;
+            this.customMenus = customMenus;
+        }
+    }
+
+    public static class CustomMenuItem {
+        public final int groupId;
+        public final int itemId;
+        public final int order;
+        public final CharSequence title;
+        public final int iconRes;
+
+        public CustomMenuItem(int itemId, CharSequence title) {
+            this.groupId = Menu.NONE;
+            this.itemId = itemId;
+            this.order = Menu.NONE;
+            this.title = title;
+            this.iconRes = -1;
+        }
+
+        public CustomMenuItem(int groupId, int itemId, int order, CharSequence title, int iconRes) {
+            this.groupId = groupId;
+            this.itemId = itemId;
+            this.order = order;
+            this.title = title;
+            this.iconRes = iconRes;
         }
     }
 
@@ -105,7 +160,11 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
 
         view.setShowHomeEnabled(config.showHomeEnabled);
         view.setUpButtonEnabled(config.upButtonEnabled);
-        view.setTitle(config.titleRes);
+        if (!TextUtils.isEmpty(config.title)) {
+            view.setTitle(config.title);
+        } else if (config.titleRes >= 0) {
+            view.setTitle(config.titleRes);
+        }
         view.setMenu(config.menuConfig);
     }
 }

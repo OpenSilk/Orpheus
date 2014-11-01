@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -41,7 +42,10 @@ import rx.schedulers.Schedulers;
 /**
  * Created by drew on 10/20/14.
  */
+@Singleton
 public class LibraryConnection {
+
+    public static final int STEP = 30;
 
     final PluginConnectionManager connectionManager;
     final LibraryInfo libraryInfo;
@@ -75,10 +79,15 @@ public class LibraryConnection {
         }
     }
 
+    Observable<RemoteLibrary> getObservable() {
+        return connectionManager
+                .bind(libraryInfo.libraryComponent)
+                // subject emmits on io so push it onto a background thread
+                .observeOn(Schedulers.io());
+    }
+
     public Observable<Result> browse(final Bundle previousBundle) {
-        return connectionManager.bind(libraryInfo.libraryComponent)
-                // push the flatMap onto a background thread
-                .observeOn(Schedulers.io())
+        return getObservable()
                 .flatMap(new Func1<RemoteLibrary, Observable<Result>>() {
                     @Override
                     public Observable<Result> call(final RemoteLibrary remoteLibrary) {
@@ -87,7 +96,7 @@ public class LibraryConnection {
                             public void call(final Subscriber<? super Result> subscriber) {
                                 try {
                                     remoteLibrary.browseFolders(libraryInfo.libraryId,
-                                            libraryInfo.currentFolderId, 30, previousBundle,
+                                            libraryInfo.currentFolderId, STEP, previousBundle,
                                             new org.opensilk.music.api.callback.Result.Stub() {
                                                 @Override
                                                 public void success(List<Bundle> items, Bundle paginationBundle) throws RemoteException {
@@ -95,25 +104,24 @@ public class LibraryConnection {
                                                     for (Bundle b : items) {
                                                         try {
                                                             list.add(OrpheusApi.transformBundle(b));
+                                                            if (subscriber.isUnsubscribed()) return;
+                                                            subscriber.onNext(new Result(list, paginationBundle));
+                                                            subscriber.onCompleted();
                                                         } catch (Exception e) {
-                                                            if (!subscriber.isUnsubscribed())
-                                                                subscriber.onError(e);
-                                                            return;
+                                                            if (subscriber.isUnsubscribed()) return;
+                                                            subscriber.onError(e);
                                                         }
                                                     }
-                                                    if (!subscriber.isUnsubscribed())
-                                                        subscriber.onNext(new Result(list, paginationBundle));
-                                                    if (!subscriber.isUnsubscribed())
-                                                        subscriber.onCompleted();
                                                 }
 
                                                 @Override
                                                 public void failure(int code, String reason) throws RemoteException {
-                                                    if (!subscriber.isUnsubscribed())
-                                                        subscriber.onError(new ResultException(reason, code));
+                                                    if (subscriber.isUnsubscribed()) return;
+                                                    subscriber.onError(new ResultException(reason, code));
                                                 }
                                             });
                                 } catch (RemoteException e) {
+                                    connectionManager.onException(libraryInfo.libraryComponent);
                                     if (!subscriber.isUnsubscribed()) subscriber.onError(e);
                                 }
                             }
@@ -122,6 +130,6 @@ public class LibraryConnection {
                 })
                 // the Result callback will produce on a binder thread
                 // push the results back to main.
-                .subscribeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread());
     }
 }

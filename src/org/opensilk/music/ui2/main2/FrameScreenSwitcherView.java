@@ -26,7 +26,6 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.HandlesBack;
 import org.opensilk.common.flow.HandlesUp;
 import org.opensilk.common.flow.Screen;
-import org.opensilk.music.ui2.main2.ScreenSwitcher;
 import org.opensilk.common.flow.ScreenSwitcherView;
 import org.opensilk.common.flow.UpAndBackHandler;
 import org.opensilk.common.mortarflow.MortarContextFactory;

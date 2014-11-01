@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -216,17 +217,22 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (isDrawerOpen()) {
-            return false;
-        } else {
-            if (mMenuConfig != null) {
-                for (int item : mMenuConfig.menus) {
-                    getMenuInflater().inflate(item, menu);
+        if (mMenuConfig != null) {
+            for (int item : mMenuConfig.menus) {
+                getMenuInflater().inflate(item, menu);
+            }
+            for (ActionBarOwner.CustomMenuItem item : mMenuConfig.customMenus) {
+                menu.add(item.groupId, item.itemId, item.order, item.title)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                if (item.iconRes >= 0) {
+                    menu.findItem(item.itemId)
+                            .setIcon(item.iconRes)
+                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
                 }
             }
-            getMenuInflater().inflate(R.menu.sleep_timer, menu);
-            return super.onCreateOptionsMenu(menu);
         }
+        getMenuInflater().inflate(R.menu.sleep_timer, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -269,6 +275,7 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Timber.v("onActivityResult");
         switch (requestCode) {
             case StartActivityForResult.APP_REQUEST_SETTINGS:
                 switch (resultCode) {

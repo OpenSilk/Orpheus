@@ -18,12 +18,14 @@ package org.opensilk.music.ui2.library;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.RemoteException;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
 
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
@@ -31,6 +33,8 @@ import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui2.ActivityBlueprint;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,16 +46,20 @@ import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.subjects.Subject;
 import timber.log.Timber;
+
+import static org.opensilk.music.util.RxUtil.isSubscribed;
 
 /**
  * Created by drew on 10/5/14.
  */
-@Layout(R.layout.library_list)
+@Layout(R.layout.library)
 @WithModule(LibraryScreen.Module.class)
 public class LibraryScreen extends Screen {
 
@@ -89,17 +97,20 @@ public class LibraryScreen extends Screen {
     @Singleton
     public static class Presenter extends ViewPresenter<LibraryView> {
 
-        final LibraryLoader loader;
+        final LibraryConnection loader;
         final LibraryInfo info;
 
-        final ResultObserver observer;
+        final ResultObserver resultObserver;
+        Subscription resultSubscription;
+        boolean isloading;
 
         @Inject
-        public Presenter(LibraryLoader loader, LibraryInfo info) {
+        public Presenter(LibraryConnection loader,
+                         LibraryInfo info) {
             this.loader = loader;
             this.info = info;
 
-            observer = new ResultObserver();
+            resultObserver = new ResultObserver();
         }
 
         @Override
@@ -108,12 +119,10 @@ public class LibraryScreen extends Screen {
             super.onEnterScope(scope);
         }
 
-
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            getView().setup();
-            subscribe(null);
+            loadMore(null);
         }
 
         @Override
@@ -124,24 +133,44 @@ public class LibraryScreen extends Screen {
         @Override
         protected void onExitScope() {
             super.onExitScope();
+            if (isSubscribed(resultSubscription)) {
+                resultSubscription.unsubscribe();
+                resultSubscription = null;
+            }
         }
 
-        @DebugLog
-        public boolean fetchMore(Bundle token) {
-            if (!observer.complete) return false;
-            subscribe(token);
-            return true;
+        public void loadMore(Bundle token) {
+            if (isloading) return;
+            loadMore(token, 0);
         }
 
-        private void subscribe(Bundle token) {
-            observer.complete = false;
-            loader.getObservable(token).subscribe(observer);
+        public void loadMore(final Bundle token, long delayMilli) {
+            Timber.v("loadMore()");
+            LibraryView v = getView();
+            if (v != null) v.loadingProgress.show();
+            resultSubscription = Observable.timer(delayMilli, TimeUnit.MILLISECONDS)
+                    .flatMap(new Func1<Long, Observable<LibraryConnection.Result>>() {
+                        @Override
+                        public Observable<LibraryConnection.Result> call(Long aLong) {
+                            return loader.browse(token);
+                        }
+                    })
+                    .subscribe(resultObserver);
+        }
+
+        public void onNewResult(LibraryConnection.Result result) {
+            isloading = false;
+            LibraryView v = getView();
+            if (v == null) return;
+            v.loadingProgress.hide();
+            v.adapter.onNewResult(result);
         }
 
         // I know this seems ridiculous an if else block would be more sane
         // but im still trying to learn how FRP works and wanted to do this with it.
         public void go(final Context context, Bundleable item) {
             Timber.v("go(%s)", item);
+
             Observable<Bundleable> og = Observable.just(item);
             // we need to convert the generic Bundleable into an action we can use
             // to proceed to the next screen, we first create separate observables
@@ -211,29 +240,57 @@ public class LibraryScreen extends Screen {
         }
 
         // we re use this so we cant use a subscriber
-        // not that it matters since you cant cancel an Observable created from
-        // a future (noted for future reference (damn puns))
-        private class ResultObserver implements Observer<LibraryLoader.Result> {
+        class ResultObserver implements Observer<LibraryConnection.Result> {
+            final int RETRY_LIMIT = 5;
 
-            boolean complete;
+            LibraryConnection.Result lastResult;
+            int retryCount = 0;
 
             @Override
             public void onCompleted() {
-                complete = true;
+                retryCount = 0;
             }
 
             @Override
             public void onError(Throwable e) {
-                Timber.e(e, "LibraryLoader.Result Observer");
-                //TODO
+                Timber.e(e, "ResultObserver.OnError()");
+                if (++retryCount > RETRY_LIMIT) {
+                    //TODO show toast
+                    return;
+                }
+                Bundle token = lastResult != null ? lastResult.token : null;
+                int backoff = retryCount * 1000;
+                if (e instanceof RemoteException) {
+                    loadMore(token, backoff);
+                } else if (e instanceof LibraryConnection.ResultException) {
+                    int code = ((LibraryConnection.ResultException) e).getCode();
+                    switch (code) {
+                        case OrpheusApi.Error.NETWORK:
+                            //TODO
+                            break;
+                        case OrpheusApi.Error.AUTH_FAILURE:
+                            //TODO
+                            break;
+                        case OrpheusApi.Error.RETRY:
+                            loadMore(token, backoff);
+                            break;
+                        case OrpheusApi.Error.UNKNOWN:
+                            loader.connectionManager.onException(loader.libraryInfo.libraryComponent);
+                            loadMore(token, backoff);
+                        default:
+                            break;
+                    }
+                    return;
+                }
+                Timber.e(e, "ResultObserver: Unhandled exception");
             }
 
             @Override
-            public void onNext(LibraryLoader.Result result) {
-                Timber.v("onNext called from:" + Thread.currentThread().getName());
-                LibraryView v = getView();
-                if (v == null) return;
-                v.getAdapter().onNewResult(result);
+            public void onNext(LibraryConnection.Result result) {
+                Timber.v("ResultObserver.onNext() called from:" + Thread.currentThread().getName());
+                Timber.v("ResultObserver %s, %s", result.items, result.token);
+                lastResult = result;
+                onNewResult(result);
             }
         }
 

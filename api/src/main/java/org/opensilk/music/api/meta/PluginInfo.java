@@ -31,7 +31,7 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
     public final CharSequence description;
     public final ComponentName componentName;
     public boolean isActive = true;
-    public Drawable icon;
+    //public Drawable icon;
 
     public PluginInfo(CharSequence title, CharSequence description, ComponentName componentName) {
         this.title = title;

@@ -20,6 +20,7 @@ package org.opensilk.music.ui2;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.AppModule;
+import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.loader.LoaderModule;
 import org.opensilk.music.ui2.main.FooterView;
 import org.opensilk.music.ui2.main.MainView;
@@ -91,6 +92,11 @@ public class ActivityBlueprint implements Blueprint {
 
         Presenter(Parcer<Object> floParcer) {
             super(floParcer);
+        }
+
+        @Override
+        public Screen getDefaultScreen() {
+            return new GalleryScreen();
         }
 
         @Override public void showScreen(Screen newScreen, Flow.Direction direction, Flow.Callback callback) {

@@ -18,8 +18,10 @@
 package org.opensilk.music.ui2.library;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Album;
@@ -27,9 +29,12 @@ import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import rx.Observable;
 import timber.log.Timber;
 
@@ -38,21 +43,32 @@ import timber.log.Timber;
  */
 public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHolder> {
 
-    final LibraryConnection connection;
+    final LibraryScreen.Presenter presenter;
     final ArrayList<Bundleable> items;
 
-    public LibraryAdapter2(LibraryConnection connection) {
-        this.connection = connection;
+    LayoutInflater inflater;
+
+    public LibraryAdapter2(LibraryScreen.Presenter presenter) {
+        this.presenter = presenter;
         this.items = new ArrayList<>();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int position) {
-        return null;
+        if (inflater == null) {
+            inflater = LayoutInflater.from(viewGroup.getContext());
+        }
+        View v = inflater.inflate(getItemViewType(position), viewGroup, false);
+        return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
+        if (!endofResults && position == getItemCount()-1) {
+            if (lastResult != null && lastResult.token != null) {
+                presenter.loadMore(lastResult.token);
+            }
+        }
         Bundleable b = getItem(position);
         if (b instanceof Album) {
             bindAlbum(viewHolder, (Album)b);
@@ -82,30 +98,49 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
-
+        holder.title.setText(album.name);
     }
 
     void bindArtist(ViewHolder holder, Artist artist) {
-
+        holder.title.setText(artist.name);
     }
 
     void bindFolder(ViewHolder holder, Folder folder) {
-
+        holder.title.setText(folder.name);
     }
 
     void bindSong(ViewHolder holder, Song song) {
-
+        holder.title.setText(song.name);
     }
 
     LibraryConnection.Result lastResult;
+    boolean endofResults;
 
     public void onNewResult(LibraryConnection.Result result) {
+        if (result.token == null) {
+            endofResults = true;
+        }
+        if (result.items.isEmpty()) {
+            endofResults = true;
+            return;
+        }
         lastResult = result;
+        if (getItemCount() == 0) {
+            items.addAll(result.items);
+            notifyDataSetChanged();
+        } else {
+            int oldpos = getItemCount()-1;
+            items.addAll(result.items);
+            notifyItemRangeInserted(oldpos, getItemCount());
+        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        @InjectView(android.R.id.text1) TextView title;
+        @InjectView(android.R.id.text2) TextView subTitle;
         public ViewHolder(View itemView) {
             super(itemView);
+            ButterKnife.inject(this, itemView);
         }
     }
 }

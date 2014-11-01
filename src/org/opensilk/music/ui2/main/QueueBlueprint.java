@@ -255,7 +255,8 @@ public class QueueBlueprint {
                         public Observable<Long> call(Intent intent) {
                             return musicService.getAudioId();
                         }
-                    });
+                    })
+                    .observeOn(AndroidSchedulers.mainThread());
             queueChangedObservable = intentObservable.observeOn(Schedulers.io())
                     .filter(new Func1<Intent, Boolean>() {
                         @Override
@@ -268,7 +269,8 @@ public class QueueBlueprint {
                         public List<RecentSong> call(Intent intent) {
                             return getQueue();
                         }
-                    });
+                    })
+                    .observeOn(AndroidSchedulers.mainThread());
         }
 
         Observer<Boolean> playStateObserver;

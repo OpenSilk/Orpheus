@@ -77,7 +77,7 @@ public class PluginUtil {
                 description = null;
             }
             PluginInfo pluginInfo = new PluginInfo(title, description, cn);
-            if (wantIcon) pluginInfo.icon = icon;
+            //if (wantIcon) pluginInfo.icon = icon;
             for (ComponentName c : disabledPlugins) {
                 if (c.equals(pluginInfo.componentName)) {
                     pluginInfo.isActive = false;

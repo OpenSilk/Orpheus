@@ -20,10 +20,18 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+
+import org.opensilk.common.flow.Screen;
+import org.opensilk.music.R;
+import org.opensilk.music.ui2.main2.AppFlowPresenter;
+import org.opensilk.music.ui2.main2.FrameScreenSwitcherView;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import flow.Flow;
 import flow.Layouts;
 import mortar.Blueprint;
@@ -41,6 +49,11 @@ public class PluginView extends LinearLayout {
     @Inject
     PluginScreen.Presenter presenter;
 
+//    @InjectView(R.id.library_breadcrumbs)
+//    HorizontalScrollView mBreadcrumbs;
+//    @InjectView(R.id.library_container)
+//    FrameScreenSwitcherView mContainer;
+
     public PluginView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
@@ -49,6 +62,7 @@ public class PluginView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        ButterKnife.inject(this);
         presenter.takeView(this);
     }
 
@@ -60,6 +74,7 @@ public class PluginView extends LinearLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        Timber.v("onDetachedFromWindow");
         super.onDetachedFromWindow();
         presenter.dropView(this);
     }

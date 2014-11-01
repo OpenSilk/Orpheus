@@ -35,7 +35,7 @@ import mortar.Presenter;
 /**
  * Created by drew on 10/23/14.
  */
-public class AppFlowPresenter<A extends AppFlowPresenter.Activity> extends Presenter<A> implements Flow.Listener {
+public abstract class AppFlowPresenter<A extends AppFlowPresenter.Activity> extends Presenter<A> implements Flow.Listener {
 
     public interface Activity extends CanShowScreen, HasScope {
 
@@ -49,8 +49,10 @@ public class AppFlowPresenter<A extends AppFlowPresenter.Activity> extends Prese
     private AppFlow appFlow;
 
     public AppFlowPresenter(Parcer<Object> flowParcer) {
-        flowBundler = new FlowBundler(new GalleryScreen(), this, flowParcer);
+        flowBundler = new FlowBundler(getDefaultScreen(), this, flowParcer);
     }
+
+    public abstract Screen getDefaultScreen();
 
     @Override protected MortarScope extractScope(A activity) {
         return activity.getScope();
@@ -85,7 +87,7 @@ public class AppFlowPresenter<A extends AppFlowPresenter.Activity> extends Prese
 
     /**
      * Gives access to the {@link AppFlow}, to allow it to be provided as a system service as
-     * required by {@link AppFlow#get} and {@link AppFlow#getScreen}.
+     * required by {@link AppFlow#get}.
      */
     public AppFlow getAppFlow() {
         return appFlow;

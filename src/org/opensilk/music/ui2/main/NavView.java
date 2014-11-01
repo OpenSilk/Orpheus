@@ -183,8 +183,8 @@ public class NavView extends ListView {
             add(new Item(Item.Type.ITEM, R.string.my_library, R.drawable.ic_my_library_music_grey600_24dp, new GalleryScreen()));
             add(new Item(Item.Type.ITEM, R.string.folders, R.drawable.ic_folder_grey600_24dp, new FolderScreen()));
             for (final PluginInfo info : infos) {
-                Drawable d = info.icon;
-                info.icon = null;
+                Drawable d = null;// info.icon;
+                //info.icon = null;
                 if (d == null) {
                     d = getContext().getResources().getDrawable(R.drawable.ic_extension_grey600_24dp);
                 }
