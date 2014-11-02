@@ -277,7 +277,7 @@
     <!-- Our scrubber height is 32dp making the seekbar view
          32dp so as a hack to get the bar to sit on the edge
          of the footer we set a negative bottom margin -->
-    <org.opensilk.music.ui2.theme.widget.CompatSeekBar
+    <org.opensilk.common.widget.CompatSeekBar
         android:id="@+id/footer_progress_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

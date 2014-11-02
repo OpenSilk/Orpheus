@@ -29,7 +29,7 @@ import android.widget.SeekBar;
 
 import org.opensilk.music.R;
 
-import org.opensilk.music.ui2.theme.widget.CompatSeekBar;
+import org.opensilk.common.widget.CompatSeekBar;
 
 /**
  * Created by drew on 10/12/14.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.theme.widget;
+package org.opensilk.common.widget;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -23,11 +23,15 @@ import android.util.AttributeSet;
 import android.widget.AbsSeekBar;
 import android.widget.SeekBar;
 
+import org.opensilk.common.util.VersionUtils;
+
 import java.lang.reflect.Field;
 
 import timber.log.Timber;
 
 /**
+ * Provides public access to thumb drawable to allow tinting for API < 16
+ *
  * Created by drew on 10/12/14.
  */
 public class CompatSeekBar extends SeekBar {
@@ -44,9 +48,9 @@ public class CompatSeekBar extends SeekBar {
         super(context, attrs, defStyle);
     }
 
-    @Override
+    @Override @SuppressWarnings("NewApi")
     public Drawable getThumb() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (VersionUtils.hasApi16()) {
             return super.getThumb();
         } else {
             try {
