@@ -74,7 +74,7 @@ import timber.log.Timber;
  */
 @Singleton
 public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
-    final static boolean DEBUG = false;
+    final static boolean DEBUG = true;
 
     final Context mContext;
     final AppPreferences mPreferences;
@@ -285,10 +285,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         addBreadcrumb("goingForMediaStore(true)");
                         // try mediastore first if local and user prefers
                         tryForMediaStore(true);
+                    } else if (!isLocalArt && !preferDownload) {
+                        // remote art and dont want to try for lfm
+                        addBreadcrumb("goingForUrl");
+                        tryForUrl();
                     } else {
-                        addBreadcrumb("goingForNetwork("+isLocalArt+")");
-                        // go to network, falling back to mediastore if local
-                        tryForNetwork(isLocalArt);
+                        addBreadcrumb("goingForNetwork(true)");
+                        // go to network, falling back on fail
+                        tryForNetwork(true);
                     }
                 } else if (isOnline && !isLocalArt) {
                     addBreadcrumb("goingForUrl");
@@ -301,12 +305,15 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     // and the user doesnt want to try network first
                     // go ahead and fetch the mediastore image
                     tryForMediaStore(false);
-                } // else were offline and cant get artwork or the user wants to defer
+                } else {
+                    //  were offline and cant get artwork or the user wants to defer
+                    addBreadcrumb("defer fetching art");
+                }
             } else if (hasAlbumArtist) {
                 addBreadcrumb("hasAlbumArtist");
                 if (isOnline) {
                     addBreadcrumb("tryForNetwork(false)");
-                    // try for network, we dont have a uri so dont try the mediastore on failure
+                    // try for network, we dont have a uri so dont fallback on failure
                     tryForNetwork(false);
                 }
             } else if (hasUri) {
@@ -316,14 +323,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     //Wait what? this should never happen
                     tryForMediaStore(isOnline);
                 } else if (isOnline) {
-                    addBreadcrumb("tryForUrl");
+                    addBreadcrumb("goingForUrl");
                     //all we have is a url so go for it
                     tryForUrl();
                 }
             } //else just ignore the request
         }
 
-        void tryForNetwork(final boolean tryMediaStoreOnFailure) {
+        void tryForNetwork(final boolean tryFallbackOnFail) {
             subscription = createAlbumNetworkObservable(artInfo, artworkType)
                     .subscribe(new Action1<Artwork>() {
                         @Override
@@ -336,16 +343,22 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Throwable throwable) {
                             addBreadcrumb("tryForNetwork miss");
-                            onNetworkMiss(tryMediaStoreOnFailure);
+                            onNetworkMiss(tryFallbackOnFail);
                         }
                     });
         }
 
-        void onNetworkMiss(final boolean tryMediaStore) {
+        void onNetworkMiss(final boolean tryFallback) {
             addBreadcrumb("onNetworkMiss");
-            if (tryMediaStore && !unsubscribed) {
-                addBreadcrumb("goingForMediaStore(false)");
-                tryForMediaStore(false);
+            boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
+            if (tryFallback && !unsubscribed) {
+                if (isLocalArt) {
+                    addBreadcrumb("goingForMediaStore(false)");
+                    tryForMediaStore(false);
+                } else {
+                    addBreadcrumb("goingForUrl");
+                    tryForUrl();
+                }
             }
         }
 

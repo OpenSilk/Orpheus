@@ -19,6 +19,7 @@ package org.opensilk.common.widget;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -59,6 +60,11 @@ public class CircleImageView extends SquareImageView {
     @Override
     public void setImageBitmap(Bitmap bm) {
         setImageDrawable(createRoundDrawable(bm));
+    }
+
+    @Override
+    public void setImageResource(int resId) {
+        setImageDrawable(createRoundDrawable(((BitmapDrawable) getResources().getDrawable(resId)).getBitmap()));
     }
 
     /*

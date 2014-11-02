@@ -17,6 +17,9 @@
 package org.opensilk.music.widgets;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -94,7 +97,9 @@ public class ColorCodedThumbnail extends TextView {
         if (color == null) {
             color = R.color.gray;
         }
-        setBackgroundColor(getResources().getColor(color));
+        ShapeDrawable bg = new ShapeDrawable(new OvalShape());
+        bg.getPaint().setColor(getResources().getColor(color));
+        setBackgroundDrawable(bg);
     }
 
     // http://www.christianfaur.com/conceptual/colorAlphabet/image3.html

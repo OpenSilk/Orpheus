@@ -38,6 +38,7 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/20/14.
@@ -104,16 +105,15 @@ public class LibraryConnection {
                                                     for (Bundle b : items) {
                                                         try {
                                                             list.add(OrpheusApi.transformBundle(b));
-                                                            if (subscriber.isUnsubscribed()) return;
-                                                            subscriber.onNext(new Result(list, paginationBundle));
-                                                            subscriber.onCompleted();
                                                         } catch (Exception e) {
-                                                            if (subscriber.isUnsubscribed()) return;
-                                                            subscriber.onError(e);
+                                                            if (!subscriber.isUnsubscribed()) subscriber.onError(e);
+                                                            return;
                                                         }
                                                     }
+                                                    if (subscriber.isUnsubscribed()) return;
+                                                    subscriber.onNext(new Result(list, paginationBundle));
+                                                    subscriber.onCompleted();
                                                 }
-
                                                 @Override
                                                 public void failure(int code, String reason) throws RemoteException {
                                                     if (subscriber.isUnsubscribed()) return;

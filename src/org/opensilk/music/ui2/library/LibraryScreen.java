@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.library;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.text.TextUtils;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -32,6 +33,7 @@ import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.ActivityBlueprint;
 
 import java.util.concurrent.TimeUnit;
@@ -99,16 +101,20 @@ public class LibraryScreen extends Screen {
 
         final LibraryConnection loader;
         final LibraryInfo info;
+        final ArtworkRequestManager requestor;
 
         final ResultObserver resultObserver;
         Subscription resultSubscription;
         boolean isloading;
+        boolean initialLoad = true;
 
         @Inject
         public Presenter(LibraryConnection loader,
-                         LibraryInfo info) {
+                         LibraryInfo info,
+                         ArtworkRequestManager requestor) {
             this.loader = loader;
             this.info = info;
+            this.requestor = requestor;
 
             resultObserver = new ResultObserver();
         }
@@ -147,7 +153,14 @@ public class LibraryScreen extends Screen {
         public void loadMore(final Bundle token, long delayMilli) {
             Timber.v("loadMore()");
             LibraryView v = getView();
-            if (v != null) v.loadingProgress.show();
+            if (v != null) {
+                if (initialLoad) {
+                    v.setLoading(true);
+                } else {
+                    v.setMoreLoading(true);
+                }
+            }
+            if (isSubscribed(resultSubscription)) resultSubscription.unsubscribe();
             resultSubscription = Observable.timer(delayMilli, TimeUnit.MILLISECONDS)
                     .flatMap(new Func1<Long, Observable<LibraryConnection.Result>>() {
                         @Override
@@ -162,81 +175,33 @@ public class LibraryScreen extends Screen {
             isloading = false;
             LibraryView v = getView();
             if (v == null) return;
-            v.loadingProgress.hide();
+            if (initialLoad) {
+                initialLoad = false;
+                if (result.items.isEmpty()) {
+                    v.setListEmpty(true, true);
+                } else {
+                    v.setListShown(true, true);
+                }
+            } else {
+                v.setMoreLoading(false);
+            }
             v.adapter.onNewResult(result);
         }
 
-        // I know this seems ridiculous an if else block would be more sane
-        // but im still trying to learn how FRP works and wanted to do this with it.
-        public void go(final Context context, Bundleable item) {
-            Timber.v("go(%s)", item);
-
-            Observable<Bundleable> og = Observable.just(item);
-            // we need to convert the generic Bundleable into an action we can use
-            // to proceed to the next screen, we first create separate observables
-            // for each type of object, that filters for that type, then casts to
-            // the appropriate type, and finally maps the type into a generic action0
-            // that moves us into the next screen
-            Observable<? extends Action0> folder = og.ofType(Folder.class).cast(Folder.class).map(new Func1<Folder, Action0>() {
-                @Override
-                public Action0 call(final Folder folder) {
-                    return new Action0() {
-                        @Override
-                        public void call() {
-                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, folder.identity)));
-                        }
-                    };
-                }
-            });
-            Observable<? extends Action0> song = og.ofType(Song.class).cast(Song.class).map(new Func1<Song, Action0>() {
-                @Override
-                public Action0 call(final Song song) {
-                    return new Action0() {
-                        @Override
-                        public void call() {
-                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, song.identity)));
-                        }
-                    };
-                }
-            });
-            Observable<? extends Action0> artist = og.ofType(Artist.class).cast(Artist.class).map(new Func1<Artist, Action0>() {
-                @Override
-                public Action0 call(final Artist artist) {
-                    return new Action0() {
-                        @Override
-                        public void call() {
-                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, artist.identity)));
-                        }
-                    };
-                }
-            });
-            Observable<? extends Action0> album = og.ofType(Album.class).cast(Album.class).map(new Func1<Album, Action0>() {
-                @Override
-                public Action0 call(final Album album) {
-                    return new Action0() {
-                        @Override
-                        public void call() {
-                            AppFlow.get(context).goTo(new LibraryScreen(new LibraryInfo(info.libraryId, info.libraryComponent, album.identity)));
-                        }
-                    };
-                }
-            });
-            // finally merge the previous Observables into a single operation
-            Observable.merge(folder, song, artist, album)
-                    // since we only started with one item we can safely just grab
-                    // the first Action0 that is emmited
-                    .first()
-                    // I think it will already be observed on main
-                    // In fact the whole thing /should/ be synchronous
-                    // but just in case
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Action0>() {
-                        @Override
-                        public void call(Action0 action0) {
-//                            Timber.v("call action0");
-                            action0.call();
-                        }
-                    });
+        public void onItemClicked(Context context, Bundleable item) {
+            String identity = null;
+            if (item instanceof Folder) {
+                identity = ((Folder) item).identity;
+            } else if (item instanceof Album) {
+                identity = ((Album) item).identity;
+            } else if (item instanceof Artist) {
+                 identity = ((Artist) item).identity;
+            } else if (item instanceof Song) {
+                return;
+            }
+            if (TextUtils.isEmpty(identity)) return;
+            LibraryInfo newInfo = new LibraryInfo(info.libraryId, info.libraryComponent, identity);
+            AppFlow.get(context).goTo(new LibraryScreen(newInfo));
         }
 
         // we re use this so we cant use a subscriber

@@ -42,22 +42,15 @@ import timber.log.Timber;
  */
 public class GalleryPageView extends FrameLayout {
 
-    @InjectView(R.id.list_container)
-    View mListContainer;
-    @InjectView(R.id.recyclerview)
-    RecyclerView mList;
-    @InjectView(R.id.empty_view)
-    View mEmptyView;
-    @InjectView(R.id.empty_text)
-    TextView mEmptyText;
-    @InjectView(R.id.loading_progress)
-    ContentLoadingProgressBar mProgressContainer;
+    @InjectView(R.id.list_container) View mListContainer;
+    @InjectView(R.id.recyclerview) RecyclerView mList;
+    @InjectView(R.id.empty_view) View mEmptyView;
+    @InjectView(R.id.empty_text) TextView mEmptyText;
+    @InjectView(R.id.loading_progress) ContentLoadingProgressBar mProgressContainer;
 
     boolean mLoadingShown;
     boolean mListShown;
     boolean mEmptyShown;
-
-    boolean attached;
 
     @Inject
     ViewPresenter<GalleryPageView> presenter;
@@ -72,26 +65,20 @@ public class GalleryPageView extends FrameLayout {
         super.onFinishInflate();
         Timber.v("onFinishInflate()");
         ButterKnife.inject(this);
-        if (presenter != null) {
-            presenter.takeView(this);
-        }
+        presenter.takeView(this);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Timber.v("onAttachedToWindow()");
-        attached = true;
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Timber.v("onDetachedFromWindow");
-        attached = false;
-        if (presenter != null) {
-            presenter.dropView(this);
-        }
+        presenter.dropView(this);
     }
 
     @Override

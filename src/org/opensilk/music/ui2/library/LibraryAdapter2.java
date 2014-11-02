@@ -18,24 +18,36 @@
 package org.opensilk.music.ui2.library;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.PaletteObserver;
+import org.opensilk.music.widgets.ColorCodedThumbnail;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.Optional;
 import rx.Observable;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
@@ -54,11 +66,11 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int position) {
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         if (inflater == null) {
             inflater = LayoutInflater.from(viewGroup.getContext());
         }
-        View v = inflater.inflate(getItemViewType(position), viewGroup, false);
+        View v = inflater.inflate(viewType, viewGroup, false);
         return new ViewHolder(v);
     }
 
@@ -69,7 +81,7 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
                 presenter.loadMore(lastResult.token);
             }
         }
-        Bundleable b = getItem(position);
+        final Bundleable b = getItem(position);
         if (b instanceof Album) {
             bindAlbum(viewHolder, (Album)b);
         } else if (b instanceof Artist) {
@@ -81,6 +93,23 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
         } else {
             Timber.e("Some how an invalid Bundleable slipped through.");
         }
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.onItemClicked(v.getContext(), b);
+            }
+        });
+        viewHolder.overflow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        holder.reset();
     }
 
     @Override
@@ -90,7 +119,13 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
 
     @Override
     public int getItemViewType(int position) {
-        return android.R.layout.simple_list_item_2;
+        super.getItemViewType(position);
+        Bundleable item = getItem(position);
+        if ((item instanceof Album) || (item instanceof Artist) || (item instanceof Song)) {
+            return R.layout.gallery_list_item_artwork;
+        } else {
+            return R.layout.gallery_list_item_folder;
+        }
     }
 
     public Bundleable getItem(int position) {
@@ -98,19 +133,45 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
+        ArtInfo artInfo = new ArtInfo(album.artistName, album.name, album.artworkUri);
         holder.title.setText(album.name);
+        holder.subtitle.setText(album.artistName);
+        holder.subscriptions.add(presenter.requestor.newAlbumRequest((AnimatedImageView) holder.artwork,
+                null, artInfo, ArtworkType.THUMBNAIL));
     }
 
     void bindArtist(ViewHolder holder, Artist artist) {
+        ArtInfo artInfo = new ArtInfo(artist.name, null, null);
         holder.title.setText(artist.name);
+        String subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount)
+                + ", " + MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
+        holder.subtitle.setText(subtitle);
+        holder.subscriptions.add(presenter.requestor.newArtistRequest((AnimatedImageView) holder.artwork,
+                null, artInfo, ArtworkType.THUMBNAIL));
     }
 
     void bindFolder(ViewHolder holder, Folder folder) {
         holder.title.setText(folder.name);
+        if (folder.childCount > 0) {
+            holder.subtitle.setText(MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nitems, folder.childCount));
+        } else {
+            holder.subtitle.setText(" ");
+        }
+        holder.extraInfo.setText(folder.date);
+        holder.extraInfo.setVisibility(View.VISIBLE);
+        holder.folderthumb.init(folder.name);
     }
 
     void bindSong(ViewHolder holder, Song song) {
+        ArtInfo artInfo = new ArtInfo(song.artistName, song.albumArtistName, song.artworkUri);
         holder.title.setText(song.name);
+        holder.subtitle.setText(song.artistName);
+        if (song.duration > 0) {
+            holder.extraInfo.setText(MusicUtils.makeTimeString(holder.itemView.getContext(), song.duration));
+            holder.extraInfo.setVisibility(View.VISIBLE);
+        }
+        holder.subscriptions.add(presenter.requestor.newAlbumRequest((AnimatedImageView) holder.artwork,
+                null, artInfo, ArtworkType.THUMBNAIL));
     }
 
     LibraryConnection.Result lastResult;
@@ -129,18 +190,32 @@ public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHo
             items.addAll(result.items);
             notifyDataSetChanged();
         } else {
-            int oldpos = getItemCount()-1;
+            int oldpos = getItemCount();
             items.addAll(result.items);
-            notifyItemRangeInserted(oldpos, getItemCount());
+            notifyItemRangeInserted(oldpos, result.items.size());
         }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        @InjectView(android.R.id.text1) TextView title;
-        @InjectView(android.R.id.text2) TextView subTitle;
+        @InjectView(R.id.artwork_thumb) @Optional ImageView artwork;
+        @InjectView(R.id.folder_thumb) @Optional ColorCodedThumbnail folderthumb;
+        @InjectView(R.id.tile_title) TextView title;
+        @InjectView(R.id.tile_subtitle) TextView subtitle;
+        @InjectView(R.id.tile_info) TextView extraInfo;
+        @InjectView(R.id.tile_overflow) ImageButton overflow;
+
+        final CompositeSubscription subscriptions;
+
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
+            subscriptions = new CompositeSubscription();
+        }
+
+        public void reset() {
+            if (artwork != null) artwork.setImageBitmap(null);
+            if (extraInfo.getVisibility() == View.GONE) extraInfo.setVisibility(View.GONE);
+            subscriptions.clear();
         }
     }
 }
