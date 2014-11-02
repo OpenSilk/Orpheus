@@ -50,7 +50,7 @@ import rx.Subscription;
 import rx.functions.Func1;
 import timber.log.Timber;
 
-import static org.opensilk.music.util.RxUtil.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 10/5/14.

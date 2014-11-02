@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.util;
+package org.opensilk.common.rx;
 
 import rx.Subscription;
 
 /**
  * Created by drew on 10/16/14.
  */
-public class RxUtil {
+public class RxUtils {
 
     public static boolean notSubscribed(Subscription subscription) {
         return subscription == null || subscription.isUnsubscribed();

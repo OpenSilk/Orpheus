@@ -49,8 +49,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
-import static org.opensilk.music.util.RxUtil.isSubscribed;
-import static org.opensilk.music.util.RxUtil.notSubscribed;
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.notSubscribed;
 
 /**
  * Created by drew on 10/5/14.

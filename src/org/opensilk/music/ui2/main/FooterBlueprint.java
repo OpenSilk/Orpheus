@@ -27,7 +27,6 @@ import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import mortar.Blueprint;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -52,8 +50,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
-import static org.opensilk.music.util.RxUtil.isSubscribed;
-import static org.opensilk.music.util.RxUtil.notSubscribed;
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.notSubscribed;
 
 /**
  * Created by drew on 10/15/14.
