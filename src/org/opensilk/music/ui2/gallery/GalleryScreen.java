@@ -35,6 +35,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Provides;
 import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -60,17 +61,15 @@ public class GalleryScreen extends Screen {
     @Singleton
     public static class Presenter extends ViewPresenter<GalleryView> {
 
-        final ScreenScoper screenScoper;
         final AppPreferences preferences;
         final ActionBarOwner actionBarOwner;
 
         DelegateActionHandler delegateActionHandler;
 
         @Inject
-        public Presenter(ScreenScoper screenScoper, AppPreferences preferences,
+        public Presenter(AppPreferences preferences,
                          ActionBarOwner actionBarOwner) {
             Timber.v("new GalleryScreen.Presenter()");
-            this.screenScoper = screenScoper;
             this.preferences = preferences;
             this.actionBarOwner = actionBarOwner;
         }

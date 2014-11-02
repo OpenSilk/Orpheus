@@ -43,17 +43,6 @@ import rx.schedulers.Schedulers;
 @Singleton
 public class LibraryConnection {
 
-    public static final int STEP = 30;
-
-    final PluginConnectionManager connectionManager;
-    final LibraryInfo libraryInfo;
-
-    @Inject
-    public LibraryConnection(PluginConnectionManager connectionManager, LibraryInfo libraryInfo) {
-        this.connectionManager = connectionManager;
-        this.libraryInfo = libraryInfo;
-    }
-
     public static class Result {
         final List<Bundleable> items;
         final Bundle token;
@@ -75,6 +64,17 @@ public class LibraryConnection {
         public int getCode() {
             return code;
         }
+    }
+
+    public static final int STEP = 30;
+
+    final PluginConnectionManager connectionManager;
+    final LibraryInfo libraryInfo;
+
+    @Inject
+    public LibraryConnection(PluginConnectionManager connectionManager, LibraryInfo libraryInfo) {
+        this.connectionManager = connectionManager;
+        this.libraryInfo = libraryInfo;
     }
 
     Observable<RemoteLibrary> getObservable() {

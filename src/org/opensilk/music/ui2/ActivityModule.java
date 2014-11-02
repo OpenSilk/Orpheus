@@ -51,11 +51,6 @@ public class ActivityModule {
     }
 
     @Provides @Singleton
-    public ScreenScoper provideScreenScoper() {
-        return new ScreenScoper();
-    }
-
-    @Provides @Singleton
     public Parcer<Object> provideParcer(Gson gson) {
         return new GsonParcer<>(gson);
     }

@@ -76,14 +76,10 @@ public class ActivityBlueprint implements Blueprint {
             library = true //
     )
     public static class Module {
+
         @Provides @Singleton
         public AppFlowPresenter<LauncherActivity> providePresenter(Parcer<Object> floParcer) {
             return new Presenter(floParcer);
-        }
-
-        @Provides
-        public Flow provideFlow(AppFlowPresenter<LauncherActivity> presenter) {
-            return presenter.getFlow();
         }
 
     }
