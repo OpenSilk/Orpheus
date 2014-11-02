@@ -218,4 +218,9 @@
         <item name="invertedTabBar">false</item>
     </style>
 
+    <!--Tiles-->
+    <style name="TileOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="tibTint">?attr/colorControlNormal</item>
+    </style>
+
 </resources>
