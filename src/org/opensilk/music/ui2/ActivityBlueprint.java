@@ -26,7 +26,7 @@ import org.opensilk.music.ui2.main.FooterView;
 import org.opensilk.music.ui2.main.MainView;
 import org.opensilk.music.ui2.main.NavView;
 import org.opensilk.music.ui2.main.QueueView;
-import org.opensilk.music.ui2.main2.AppFlowPresenter;
+import org.opensilk.common.mortarflow.AppFlowPresenter;
 
 import javax.inject.Singleton;
 

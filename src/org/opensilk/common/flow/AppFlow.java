@@ -36,7 +36,7 @@ public final class AppFlow {
 
   private final Flow flow;
 
-  protected AppFlow(Flow flow) {
+  public AppFlow(Flow flow) {
     this.flow = flow;
   }
 

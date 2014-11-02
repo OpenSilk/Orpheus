@@ -22,9 +22,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -61,7 +59,7 @@ import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerOwner;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.music.ui2.main2.AppFlowPresenter;
+import org.opensilk.common.mortarflow.AppFlowPresenter;
 import org.opensilk.music.ui2.main2.FrameScreenSwitcherView;
 import org.opensilk.music.ui2.theme.Themer;
 

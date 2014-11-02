@@ -41,7 +41,7 @@ public class FlowBundler {
     this.parcer = parcer;
   }
 
-  public AppFlow onCreate(Bundle savedInstanceState) {
+  public FlowBundler onCreate(Bundle savedInstanceState) {
     checkArgument(flow == null, "Flow already created.");
     Backstack backstack;
     if (savedInstanceState != null && savedInstanceState.containsKey(FLOW_KEY)) {
@@ -50,7 +50,7 @@ public class FlowBundler {
       backstack = Backstack.fromUpChain(defaultScreen);
     }
     flow = new Flow(backstack, listener);
-    return new AppFlow(flow);
+    return this;
   }
 
   public void onSaveInstanceState(Bundle outState) {
