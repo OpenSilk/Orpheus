@@ -18,28 +18,13 @@ package org.opensilk.music.ui2.library;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-
-import org.opensilk.common.flow.Screen;
-import org.opensilk.music.R;
-import org.opensilk.music.ui2.main2.AppFlowPresenter;
-import org.opensilk.music.ui2.main2.FrameScreenSwitcherView;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import flow.Flow;
-import flow.Layouts;
-import mortar.Blueprint;
 import mortar.Mortar;
-import mortar.MortarScope;
 import timber.log.Timber;
-
-import static android.view.animation.AnimationUtils.loadAnimation;
 
 /**
  * Created by drew on 10/6/14.

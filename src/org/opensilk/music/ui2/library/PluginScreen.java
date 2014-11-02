@@ -25,13 +25,10 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import com.andrew.apollo.utils.ThemeHelper;
-
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
-
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
@@ -56,7 +53,6 @@ import de.greenrobot.event.EventBus;
 import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
-import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;

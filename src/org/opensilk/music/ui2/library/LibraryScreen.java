@@ -25,7 +25,6 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
-
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.model.Album;
@@ -43,17 +42,12 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Layout;
-import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.subjects.Subject;
 import timber.log.Timber;
 
 import static org.opensilk.music.util.RxUtil.isSubscribed;

@@ -18,7 +18,6 @@
 package org.opensilk.music.ui2.library;
 
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,30 +36,27 @@ import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.widgets.ColorCodedThumbnail;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import rx.Observable;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/20/14.
  */
-public class LibraryAdapter2 extends RecyclerView.Adapter<LibraryAdapter2.ViewHolder> {
+public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHolder> {
 
     final LibraryScreen.Presenter presenter;
     final ArrayList<Bundleable> items;
 
     LayoutInflater inflater;
 
-    public LibraryAdapter2(LibraryScreen.Presenter presenter) {
+    public LibraryAdapter(LibraryScreen.Presenter presenter) {
         this.presenter = presenter;
         this.items = new ArrayList<>();
     }

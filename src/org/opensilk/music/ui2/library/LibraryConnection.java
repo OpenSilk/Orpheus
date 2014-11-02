@@ -17,13 +17,11 @@
 
 package org.opensilk.music.ui2.library;
 
-import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
-import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.model.spi.Bundleable;
 
@@ -38,7 +36,6 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/20/14.
@@ -106,7 +103,8 @@ public class LibraryConnection {
                                                         try {
                                                             list.add(OrpheusApi.transformBundle(b));
                                                         } catch (Exception e) {
-                                                            if (!subscriber.isUnsubscribed()) subscriber.onError(e);
+                                                            if (!subscriber.isUnsubscribed())
+                                                                subscriber.onError(e);
                                                             return;
                                                         }
                                                     }
@@ -114,6 +112,7 @@ public class LibraryConnection {
                                                     subscriber.onNext(new Result(list, paginationBundle));
                                                     subscriber.onCompleted();
                                                 }
+
                                                 @Override
                                                 public void failure(int code, String reason) throws RemoteException {
                                                     if (subscriber.isUnsubscribed()) return;

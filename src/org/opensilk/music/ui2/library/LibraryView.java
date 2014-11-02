@@ -17,37 +17,21 @@
 package org.opensilk.music.ui2.library;
 
 import android.content.Context;
-import android.os.Bundle;
-
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.HeaderViewListAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
-
-import org.opensilk.music.api.model.spi.Bundleable;
-
-import java.util.Collection;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import hugo.weaving.DebugLog;
 import mortar.Mortar;
 
 /**
@@ -64,7 +48,7 @@ public class LibraryView extends FrameLayout {
     @InjectView(R.id.loading_progress) ContentLoadingProgressBar mLoadingProgress;
     @InjectView(R.id.more_loading_progress) ContentLoadingProgressBar mMoreLoadingProgress;
 
-    final LibraryAdapter2 adapter;
+    final LibraryAdapter adapter;
 
     boolean mLoadingShown;
     boolean mListShown;
@@ -73,7 +57,7 @@ public class LibraryView extends FrameLayout {
     public LibraryView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
-        adapter = new LibraryAdapter2(presenter);
+        adapter = new LibraryAdapter(presenter);
     }
 
     @Override

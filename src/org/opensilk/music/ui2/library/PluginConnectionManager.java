@@ -25,7 +25,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.RemoteLibrary;
-import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.Collections;
