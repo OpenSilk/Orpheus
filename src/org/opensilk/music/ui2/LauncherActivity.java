@@ -60,7 +60,7 @@ import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerOwner;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.common.mortarflow.AppFlowPresenter;
-import org.opensilk.music.ui2.main2.FrameScreenSwitcherView;
+import org.opensilk.common.mortarflow.FrameScreenSwitcherView;
 import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.UUID;

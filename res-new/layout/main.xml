@@ -37,7 +37,7 @@
         android:gravity="bottom"
         app:panelHeight="64dp">
 
-        <org.opensilk.music.ui2.main2.FrameScreenSwitcherView
+        <org.opensilk.common.mortarflow.FrameScreenSwitcherView
             android:id="@+id/main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

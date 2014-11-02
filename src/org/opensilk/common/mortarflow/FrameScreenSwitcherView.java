@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.main2;
+package org.opensilk.common.mortarflow;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -28,7 +28,6 @@ import org.opensilk.common.flow.HandlesUp;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.flow.ScreenSwitcherView;
 import org.opensilk.common.flow.UpAndBackHandler;
-import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.music.R;
 
 import flow.Flow;
@@ -43,7 +42,8 @@ public class FrameScreenSwitcherView extends FrameLayout
 
     @SuppressWarnings("UnusedDeclaration") // Used by layout inflation, of course!
     public FrameScreenSwitcherView(Context context, AttributeSet attrs) {
-        this(context, attrs, new ScreenConductor.Factory(R.id.screen_switcher_tag, new MortarContextFactory()));
+        this(context, attrs, new TransitionScreenSwitcher.Factory(R.id.screen_switcher_tag,
+                new MortarContextFactory()));
     }
 
     /**

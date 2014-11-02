@@ -28,10 +28,10 @@ import android.widget.LinearLayout;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.MortarContextFactory;
+import org.opensilk.common.util.ViewUtils;
 import org.opensilk.common.widget.SlidingTabLayout;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.util.ViewStateSaver;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -136,8 +136,8 @@ public class GalleryView extends LinearLayout {
             Screen screen = page.screen;
             Timber.v("instantiateItem %s", screen.getName());
             Context newChildContext = contextFactory.setUpContext(screen, getContext());
-            final GalleryPageView newChild = ViewStateSaver.inflate(newChildContext, R.layout.gallery_page, container);
-            ViewStateSaver.restore(newChild, savedState, screen.getName());
+            final GalleryPageView newChild = ViewUtils.inflate(newChildContext, R.layout.gallery_page, container);
+            ViewUtils.restoreState(newChild, savedState, screen.getName());
             container.addView(newChild);
             Page newPage = new Page(screen, newChild);
             activePages.add(newPage);
@@ -149,7 +149,7 @@ public class GalleryView extends LinearLayout {
             Page oldPage = (Page) object;
             Timber.v("destroyItem %s", oldPage.screen.getName());
             activePages.remove(oldPage);
-            ViewStateSaver.save(oldPage.view, savedState, oldPage.screen.getName());
+            ViewUtils.saveState(oldPage.view, savedState, oldPage.screen.getName());
             contextFactory.tearDownContext(oldPage.view.getContext());
             container.removeView(oldPage.view);
         }
@@ -186,7 +186,7 @@ public class GalleryView extends LinearLayout {
         @Override
         public Parcelable saveState() {
             for (Page p : activePages) {
-                ViewStateSaver.save(p.view, savedState, p.screen.getName());
+                ViewUtils.saveState(p.view, savedState, p.screen.getName());
             }
             return savedState;
         }

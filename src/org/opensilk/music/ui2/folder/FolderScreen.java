@@ -21,6 +21,7 @@ import android.os.Bundle;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.MediaProviderUtil;
@@ -54,6 +55,12 @@ import timber.log.Timber;
  */
 @Layout(R.layout.folder_list)
 @WithModule(FolderScreen.Module.class)
+@WithTransitions(
+        single = R.anim.grow_fade_in,
+        forward = { R.anim.slide_out_left, R.anim.slide_in_right },
+        backward = { R.anim.slide_out_right, R.anim.slide_in_left },
+        replace = { R.anim.shrink_fade_out, R.anim.slide_in_left }
+)
 public class FolderScreen extends Screen {
 
     final String directory;

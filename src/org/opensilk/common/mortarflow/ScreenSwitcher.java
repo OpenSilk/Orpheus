@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.main2;
+package org.opensilk.common.mortarflow;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +23,11 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.flow.ScreenSwitcherView;
 import org.opensilk.common.util.ObjectUtils;
 
-import flow.Flow;
-import flow.Layout;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import flow.Flow;
+import flow.Layout;
 
 import static org.opensilk.common.util.Preconditions.checkNotNull;
 

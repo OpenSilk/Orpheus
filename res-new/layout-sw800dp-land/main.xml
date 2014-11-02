@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <org.opensilk.music.ui2.main2.FrameScreenSwitcherView
+            <org.opensilk.common.mortarflow.FrameScreenSwitcherView
                 android:id="@+id/main"
                 android:layout_width="@dimen/main_content_width"
                 android:layout_height="match_parent"

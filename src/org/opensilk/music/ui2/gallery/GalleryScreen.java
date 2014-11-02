@@ -22,8 +22,7 @@ import android.os.Bundle;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.flow.Screen;
-import org.opensilk.common.flow.WithTransition;
-import org.opensilk.common.mortar.ScreenScoper;
+import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -35,7 +34,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import dagger.Provides;
 import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -47,7 +45,12 @@ import timber.log.Timber;
  */
 @Layout(R.layout.gallery)
 @WithModule(GalleryScreen.Module.class)
-@WithTransition(in = R.anim.grow_fade_in, out = R.anim.shrink_fade_out)
+@WithTransitions(
+        single = R.anim.grow_fade_in,
+        forward = { R.anim.slide_out_left, R.anim.slide_in_right },
+        backward = { R.anim.slide_out_right, R.anim.slide_in_left },
+        replace = { R.anim.shrink_fade_out, R.anim.slide_in_left }
+)
 public class GalleryScreen extends Screen {
 
     @dagger.Module (

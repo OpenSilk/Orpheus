@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.util;
+package org.opensilk.common.util;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -27,22 +27,22 @@ import android.view.ViewGroup;
 /**
  * Created by drew on 10/9/14.
  */
-public class ViewStateSaver {
+public class ViewUtils {
 
-    private ViewStateSaver() {}
+    private ViewUtils() {}
 
-    public static <T extends View> void save(T view, Bundle bundle, String name) {
+    public static <T extends View> void saveState(T view, Bundle bundle, String name) {
         if (view == null) return;
-        bundle.putSparseParcelableArray(name, save(view));
+        bundle.putSparseParcelableArray(name, saveState(view));
     }
 
-    public static <T extends View> SparseArray<Parcelable> save(T view) {
+    public static <T extends View> SparseArray<Parcelable> saveState(T view) {
         SparseArray<Parcelable> state = new SparseArray<>();
         view.saveHierarchyState(state);
         return state;
     }
 
-    public static <T extends View> void restore(T view, Bundle bundle, String name) {
+    public static <T extends View> void restoreState(T view, Bundle bundle, String name) {
         if (bundle == null || view == null) return;
         SparseArray<Parcelable> state = bundle.getSparseParcelableArray(name);
         if (state != null) view.restoreHierarchyState(state);
@@ -55,4 +55,6 @@ public class ViewStateSaver {
     public static <T extends View> T inflate(Context context, int layout, ViewGroup parent, boolean attachToRoot) {
         return (T) LayoutInflater.from(context).inflate(layout, parent, attachToRoot);
     }
+
+
 }

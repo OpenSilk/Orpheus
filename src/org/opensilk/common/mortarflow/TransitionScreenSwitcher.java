@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui2.main2;
+package org.opensilk.common.mortarflow;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +24,12 @@ import android.view.animation.AnimationUtils;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.flow.ScreenContextFactory;
-import org.opensilk.common.flow.WithTransition;
-import org.opensilk.common.util.ObjectUtils;
-import org.opensilk.music.R;
 import org.opensilk.common.flow.ScreenSwitcherView;
-import org.opensilk.music.ui2.util.ViewStateSaver;
+import org.opensilk.common.impl.SimpleAnimationListener;
+import org.opensilk.common.util.ObjectUtils;
+import org.opensilk.common.util.ViewUtils;
+
+import java.util.HashMap;
 
 import flow.Flow;
 import timber.log.Timber;
@@ -38,7 +39,7 @@ import static org.opensilk.common.util.Preconditions.checkNotNull;
 /**
  * Created by drew on 10/23/14.
  */
-public class ScreenConductor extends ScreenSwitcher {
+public class TransitionScreenSwitcher extends ScreenSwitcher {
 
     public static class Factory extends ScreenSwitcher.Factory {
         final ScreenContextFactory contextFactory;
@@ -50,13 +51,22 @@ public class ScreenConductor extends ScreenSwitcher {
 
         @Override
         public ScreenSwitcher createScreenSwitcher(ScreenSwitcherView view) {
-            return new ScreenConductor(view, tagKey, contextFactory);
+            return new TransitionScreenSwitcher(view, tagKey, contextFactory);
         }
     }
 
-    final ScreenContextFactory contextFactory;
+    private static class TransitionHolder {
+        private final int[][] transitions;
+        private TransitionHolder(int[][] transitions) {
+            this.transitions = transitions;
+        }
+    }
 
-    public ScreenConductor(ScreenSwitcherView view, int tagKey, ScreenContextFactory contextFactory) {
+    private static final HashMap<String, TransitionHolder> TRANSITIONS_CACHE = new HashMap<>();
+
+    protected final ScreenContextFactory contextFactory;
+
+    public TransitionScreenSwitcher(ScreenSwitcherView view, int tagKey, ScreenContextFactory contextFactory) {
         super(view, tagKey);
         this.contextFactory = contextFactory;
     }
@@ -68,15 +78,16 @@ public class ScreenConductor extends ScreenSwitcher {
         tag.setNextScreen(to);
 
         final View oldChild = getCurrentChild();
-        final View newChild = ViewStateSaver.inflate(contextFactory.setUpContext(to, container.getContext()), getLayout(to), container, false);
+        final View newChild = ViewUtils.inflate(contextFactory.setUpContext(to, container.getContext()), getLayout(to), container, false);
 
         switch (direction) {
             case FORWARD:
                 if (from != null && oldChild != null) {
                     contextFactory.tearDownContext(oldChild.getContext());
-                    from.setViewState(ViewStateSaver.save(oldChild));
-                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.shrink_fade_out));
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.slide_in_child_bottom));
+                    from.setViewState(ViewUtils.saveState(oldChild));
+                    int[] transitions = getTransitions(to, WithTransitions.FORWARD);
+                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
                     newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
                         @Override
                         public void onAnimationEnd(Animation animation) {
@@ -86,7 +97,8 @@ public class ScreenConductor extends ScreenSwitcher {
                     container.removeView(oldChild);
                     container.addView(newChild);
                 } else {
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.grow_fade_in));
+                    int[] transitions = getTransitions(to, WithTransitions.SINGLE);
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
                     newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
                         @Override
                         public void onAnimationEnd(Animation animation) {
@@ -101,8 +113,9 @@ public class ScreenConductor extends ScreenSwitcher {
                 to.restoreHierarchyState(newChild);
                 if (oldChild != null) {
                     contextFactory.tearDownContext(oldChild.getContext());
-                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.slide_out_child_bottom));
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.grow_fade_in));
+                    int[] transitions = getTransitions(to, WithTransitions.BACKWARD);
+                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
                     newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
                         @Override
                         public void onAnimationEnd(Animation animation) {
@@ -112,7 +125,8 @@ public class ScreenConductor extends ScreenSwitcher {
                     container.removeView(oldChild);
                     container.addView(newChild);
                 } else {
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.grow_fade_in));
+                    int[] transitions = getTransitions(to, WithTransitions.SINGLE);
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
                     newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
                         @Override
                         public void onAnimationEnd(Animation animation) {
@@ -127,8 +141,9 @@ public class ScreenConductor extends ScreenSwitcher {
                 to.restoreHierarchyState(newChild);
                 if (oldChild != null) {
                     contextFactory.tearDownContext(oldChild.getContext());
-                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.shrink_fade_out));
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.slide_in_left));
+                    int[] transitions = getTransitions(to, WithTransitions.REPLACE);
+                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
                     newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
                         @Override
                         public void onAnimationEnd(Animation animation) {
@@ -138,7 +153,8 @@ public class ScreenConductor extends ScreenSwitcher {
                     container.removeAllViews();
                     container.addView(newChild);
                 } else {
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), R.anim.grow_fade_in));
+                    int[] transitions = getTransitions(to, WithTransitions.SINGLE);
+                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
                     newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
                         @Override
                         public void onAnimationEnd(Animation animation) {
@@ -152,29 +168,41 @@ public class ScreenConductor extends ScreenSwitcher {
         }
     }
 
-    protected static int getTransition(Object screen, int direction) {
+    protected static int[] getTransitions(Object screen, int direction) {
         Class<Object> screenType = ObjectUtils.getClass(screen);
-        WithTransition transitions = screenType.getAnnotation(WithTransition.class);
-        checkNotNull(transitions, "@%s annotation not found on class %s",
-                WithTransition.class.getSimpleName(), screenType.getName());
-        return direction == WithTransition.IN ? transitions.in() : transitions.out();
-    }
-
-    protected static class SimpleAnimationListener implements Animation.AnimationListener {
-        @Override
-        public void onAnimationStart(Animation animation) {
-
+        TransitionHolder holder = TRANSITIONS_CACHE.get(screenType.getName());
+        int[][] transitions;
+        if (holder != null) {
+            transitions = holder.transitions;
+        } else {
+            WithTransitions withTransitions = screenType.getAnnotation(WithTransitions.class);
+            checkNotNull(withTransitions, "@%s annotation not found on class %s",
+                    WithTransitions.class.getSimpleName(), screenType.getName());
+            transitions = new int[4][];
+            transitions[0] = withTransitions.single();
+            transitions[1] = withTransitions.forward();
+            transitions[2] = withTransitions.backward();
+            transitions[3] = withTransitions.replace();
+            TRANSITIONS_CACHE.put(screenType.getName(), new TransitionHolder(transitions));
         }
-
-        @Override
-        public void onAnimationEnd(Animation animation) {
-
+        int[] transition;
+        switch (direction) {
+            case WithTransitions.SINGLE:
+                transition = transitions[0];
+                if (transition.length == 1) return transition; break;
+            case WithTransitions.FORWARD:
+                transition = transitions[1];
+                if (transition.length == 2) return transition; break;
+            case WithTransitions.BACKWARD:
+                transition = transitions[2];
+                if (transition.length == 2) return transition; break;
+            case WithTransitions.REPLACE:
+                transition = transitions[3];
+                if (transition.length == 2) return transition; break;
+            default:
+                throw new IllegalArgumentException("Unknown transition direction: " + direction);
         }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {
-
-        }
+        throw new IllegalArgumentException("Illegal array size for transition direction: " + direction);
     }
 
 }
