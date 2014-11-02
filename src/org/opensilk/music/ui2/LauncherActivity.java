@@ -38,6 +38,7 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeActivity;
 import org.opensilk.common.mortar.PauseAndResumePresenter;
 import org.opensilk.common.util.ObjectUtils;
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 
 import com.andrew.apollo.menu.DeleteDialog;
@@ -59,7 +60,6 @@ import org.opensilk.music.ui2.main.DrawerOwner;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.common.mortarflow.AppFlowPresenter;
 import org.opensilk.common.mortarflow.FrameScreenSwitcherView;
-import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.UUID;
 
@@ -314,7 +314,7 @@ public class LauncherActivity extends ActionBarActivity implements
      */
 
     public void onEventMainThread(StartActivityForResult req) {
-        req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, Themer.isLightTheme(this));
+        req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeUtils.isLightTheme(this));
         startActivityForResult(req.intent, req.reqCode);
     }
 

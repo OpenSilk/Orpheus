@@ -31,6 +31,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.opensilk.common.flow.Screen;
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.PluginInfo;
@@ -39,7 +40,6 @@ import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.folder.FolderScreen;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.library.PluginScreen;
-import org.opensilk.music.ui2.theme.Themer;
 
 import java.util.Collection;
 
@@ -143,7 +143,7 @@ public class NavView extends ListView {
 
         public Adapter(Context context, Collection<PluginInfo> plugins) {
             super(context, -1);
-            lightTheme = Themer.isLightTheme(context);
+            lightTheme = ThemeUtils.isLightTheme(context);
             loadPlugins(plugins);
         }
 

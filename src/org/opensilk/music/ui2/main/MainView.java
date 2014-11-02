@@ -32,11 +32,11 @@ import android.view.animation.OvershootInterpolator;
 
 import com.andrew.apollo.utils.ThemeHelper;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.util.VersionUtils;
 import org.opensilk.common.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 
-import org.opensilk.music.ui2.theme.Themer;
 import org.opensilk.common.widget.FloatingActionButton;
 import org.opensilk.common.widget.FlingyFabLayout;
 
@@ -265,7 +265,7 @@ public class MainView extends FlingyFabLayout {
 //        Drawable d1 = getResources().getDrawable(R.drawable.ic_shuffle_black_36dp);
 //        d1.setColorFilter(Themer.getColorAccent(getContext()), PorterDuff.Mode.MULTIPLY);
         Drawable d1 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_shuffle_white_24dp,
-                Themer.getColorAccent(getContext()));
+                ThemeUtils.getColorAccent(getContext()));
         d.addLevel(1, 2, d1);
     }
 
@@ -273,10 +273,10 @@ public class MainView extends FlingyFabLayout {
         if (VersionUtils.hasLollipop()) return;
         LevelListDrawable d = (LevelListDrawable) fabRepeat.getDrawable();
         Drawable d1 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_repeat_one_white_24dp,
-                Themer.getColorAccent(getContext()));
+                ThemeUtils.getColorAccent(getContext()));
         d.addLevel(1, 1, d1);
         Drawable d2 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_repeat_white_24dp,
-                Themer.getColorAccent(getContext()));
+                ThemeUtils.getColorAccent(getContext()));
         d.addLevel(2, 2, d2);
     }
 

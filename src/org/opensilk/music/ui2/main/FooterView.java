@@ -22,10 +22,10 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.ui2.theme.Themer;
 
 import javax.inject.Inject;
 
@@ -61,7 +61,7 @@ public class FooterView extends RelativeLayout {
         super.onFinishInflate();
         if (!isInEditMode()) {
             ButterKnife.inject(this);
-            Themer.themeProgressBar(progressBar);
+            ThemeUtils.themeProgressBar(progressBar, R.attr.colorAccent);
         }
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.theme;
+package org.opensilk.common.util;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -34,7 +34,7 @@ import org.opensilk.common.widget.CompatSeekBar;
 /**
  * Created by drew on 10/12/14.
  */
-public class Themer {
+public class ThemeUtils {
 
     private static final TypedValue sTypedValue = new TypedValue();
 
@@ -78,48 +78,6 @@ public class Themer {
 
     public static int setColorAlpha(int color, int alpha) {
         return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
-    }
-
-    public static int getPlayIcon(Context context, boolean forcewhite) {
-        return forcewhite ? R.drawable.ic_action_playback_play_white :
-                (isLightTheme(context) ? R.drawable.ic_action_playback_play_black
-                        : R.drawable.ic_action_playback_play_white);
-    }
-
-    public static int getPauseIcon(Context context, boolean forcewhite) {
-        return forcewhite ? R.drawable.ic_action_playback_pause_white :
-                (isLightTheme(context) ? R.drawable.ic_action_playback_pause_black
-                        : R.drawable.ic_action_playback_pause_white);
-    }
-
-    public static int getNextIcon(Context context) {
-        return isLightTheme(context) ? R.drawable.ic_action_playback_next_black
-                : R.drawable.ic_action_playback_next_white;
-    }
-
-    public static int getPrevIcon(Context context) {
-        return isLightTheme(context) ? R.drawable.ic_action_playback_prev_black
-                : R.drawable.ic_action_playback_prev_white;
-    }
-
-    public static void themeToolbar(Toolbar toolbar) {
-        toolbar.setBackgroundColor(getColorPrimary(toolbar.getContext()));
-    }
-
-    public static void themeSeekBar(SeekBar seekBar) {
-        int color = getColorAccent(seekBar.getContext());
-        seekBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            seekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        } else if (seekBar instanceof CompatSeekBar) {
-            Drawable thumb = ((CompatSeekBar) seekBar).getThumb();
-            if (thumb != null) thumb.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        }
-    }
-
-    public static void themeProgressBar(ProgressBar progressBar) {
-        int color = getColorAccent(progressBar.getContext());
-        progressBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
     /**
@@ -210,6 +168,27 @@ public class Themer {
             colors[i] = colorControlNormal;
             i++;
         return new ColorStateList(states, colors);
+    }
+
+
+    public static void themeToolbar(Toolbar toolbar) {
+        toolbar.setBackgroundColor(getColorPrimary(toolbar.getContext()));
+    }
+
+    public static void themeSeekBar(SeekBar seekBar, int colorAttr) {
+        int color = getThemeAttrColor(seekBar.getContext(), colorAttr);
+        seekBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            seekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        } else if (seekBar instanceof CompatSeekBar) {
+            Drawable thumb = ((CompatSeekBar) seekBar).getThumb();
+            if (thumb != null) thumb.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        }
+    }
+
+    public static void themeProgressBar(ProgressBar progressBar, int colorAttr) {
+        int color = getThemeAttrColor(progressBar.getContext(), colorAttr);
+        progressBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
 }

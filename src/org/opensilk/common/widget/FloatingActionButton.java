@@ -18,7 +18,6 @@
 package org.opensilk.common.widget;
 
 import android.animation.AnimatorInflater;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -41,9 +40,9 @@ import android.view.ViewAnimationUtils;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageButton;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.theme.Themer;
 
 /**
  * Created by drew on 10/30/14.
@@ -87,9 +86,9 @@ public class FloatingActionButton extends ImageButton {
                         break;
                     case COLOR_ACCENT:
                     default:
-                        mColorNormal = Themer.getColorAccent(getContext());
+                        mColorNormal = ThemeUtils.getColorAccent(getContext());
                 }
-                mColorPressed = Themer.getColorControlNormal(getContext());
+                mColorPressed = ThemeUtils.getColorControlNormal(getContext());
             } finally {
                 attr.recycle();
             }

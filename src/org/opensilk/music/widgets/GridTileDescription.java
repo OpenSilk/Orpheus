@@ -26,11 +26,11 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
-import org.opensilk.music.ui2.theme.Themer;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -51,7 +51,7 @@ public class GridTileDescription extends LinearLayout {
 
     public GridTileDescription(Context context, AttributeSet attrs) {
         super(context, attrs);
-        lightTheme = Themer.isLightTheme(getContext());
+        lightTheme = ThemeUtils.isLightTheme(getContext());
         paletteObserver = new PaletteObserver() {
             @Override
             public void onNext(PaletteResponse paletteResponse) {
