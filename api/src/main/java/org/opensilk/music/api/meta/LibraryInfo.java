@@ -28,13 +28,28 @@ import android.text.TextUtils;
 public class LibraryInfo implements Parcelable {
 
     public final String libraryId;
+    public final String libraryName;
     public final ComponentName libraryComponent;
-    public final String currentFolderId;
+    public final String folderId;
+    public final String folderName;
 
-    public LibraryInfo(String libraryId, ComponentName libraryComponent, String currentFolderId) {
+    @Deprecated
+    public LibraryInfo(String libraryId, ComponentName libraryComponent, String folderId) {
+        this(libraryId, "", libraryComponent, folderId, "");
+    }
+
+    public LibraryInfo(String libraryId, String libraryName,
+                       ComponentName libraryComponent,
+                       String folderId, String folderName) {
         this.libraryId = libraryId;
+        this.libraryName = libraryName;
         this.libraryComponent = libraryComponent;
-        this.currentFolderId = currentFolderId;
+        this.folderId = folderId;
+        this.folderName = folderName;
+    }
+
+    public LibraryInfo buildUpon(String newFolderId, String newFolderName) {
+        return new LibraryInfo(this.libraryId, this.libraryName, this.libraryComponent, newFolderId, newFolderName);
     }
 
     @Override
@@ -42,37 +57,46 @@ public class LibraryInfo implements Parcelable {
         if (this == o) return true;
         if (o == null || !(o instanceof LibraryInfo)) return false;
         LibraryInfo that = (LibraryInfo) o;
-        if (!TextUtils.equals(currentFolderId, that.currentFolderId)) return false;
-        if (!libraryComponent.equals(that.libraryComponent)) return false;
         if (!TextUtils.equals(libraryId, that.libraryId)) return false;
+        if (!TextUtils.equals(libraryName, that.libraryName)) return false;
+        if (!libraryComponent.equals(that.libraryComponent)) return false;
+        if (!TextUtils.equals(folderId, that.folderId)) return false;
+        if (!TextUtils.equals(folderName, that.folderName)) return false;
         return true;
     }
 
     @Override
     public int hashCode() {
         int result = libraryId != null ? libraryId.hashCode() : 0;
+        result = 31 * result + (libraryName != null ? libraryName.hashCode() : 0);
         result = 31 * result + (libraryComponent != null ? libraryComponent.hashCode() : 0);
-        result = 31 * result + (currentFolderId != null ? currentFolderId.hashCode() : 0);
+        result = 31 * result + (folderId != null ? folderId.hashCode() : 0);
+        result = 31 * result + (folderName != null ? folderName.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "["+libraryId+","+libraryComponent.flattenToString()+","+currentFolderId+"]";
+        return "[library="+libraryName+", folder="+folderName+"]";
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(libraryId);
+        dest.writeString(libraryName);
         dest.writeString(libraryComponent.flattenToString());
-        dest.writeString(currentFolderId);
+        dest.writeString(folderId);
+        dest.writeString(folderName);
     }
 
     private static LibraryInfo fromParcel(Parcel source) {
-        final String id = source.readString();
-        final ComponentName cmpnt = ComponentName.unflattenFromString(source.readString());
-        final String fid = source.readString();
-        return new LibraryInfo(id, cmpnt, fid);
+        return new LibraryInfo(
+                source.readString(),
+                source.readString(),
+                ComponentName.unflattenFromString(source.readString()),
+                source.readString(),
+                source.readString()
+        );
     }
 
     @Override

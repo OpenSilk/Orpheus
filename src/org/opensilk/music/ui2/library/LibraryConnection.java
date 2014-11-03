@@ -94,7 +94,7 @@ public class LibraryConnection {
                             public void call(final Subscriber<? super Result> subscriber) {
                                 try {
                                     remoteLibrary.browseFolders(libraryInfo.libraryId,
-                                            libraryInfo.currentFolderId, STEP, previousBundle,
+                                            libraryInfo.folderId, STEP, previousBundle,
                                             new org.opensilk.music.api.callback.Result.Stub() {
                                                 @Override
                                                 public void success(List<Bundle> items, Bundle paginationBundle) throws RemoteException {

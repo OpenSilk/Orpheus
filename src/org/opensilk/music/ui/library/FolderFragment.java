@@ -99,7 +99,7 @@ public class FolderFragment extends CardListGridFragment implements LibraryAdapt
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (!mDrawerHelper.isDrawerOpen()) {
-            if (mLibraryInfo.currentFolderId != null) {
+            if (mLibraryInfo.folderId != null) {
                 inflater.inflate(R.menu.popup_play_all, menu);
                 inflater.inflate(R.menu.popup_shuffle_all, menu);
                 inflater.inflate(R.menu.popup_add_to_queue, menu);

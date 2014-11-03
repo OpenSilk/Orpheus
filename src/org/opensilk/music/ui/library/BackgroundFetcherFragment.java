@@ -17,7 +17,6 @@
 package org.opensilk.music.ui.library;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -27,7 +26,7 @@ import android.support.v4.app.FragmentActivity;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.LibraryInfo;
-import com.andrew.apollo.utils.ApolloUtils;
+
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.api.RemoteLibrary;
@@ -209,7 +208,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
                     int apiVersion = l.getApiVersion();
                     //TODO version check
                     {
-                        l.listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId, STEP, bundle, result);
+                        l.listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.folderId, STEP, bundle, result);
                         result.waitForComplete();
                     }
                 } //else what todo?

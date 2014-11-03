@@ -20,8 +20,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.meta.LibraryInfo;
@@ -77,7 +75,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                 final int apiVersion = l.getApiVersion();
                 //TODO api check
                 {
-                    l.browseFolders(mLibraryInfo.libraryId, mLibraryInfo.currentFolderId,
+                    l.browseFolders(mLibraryInfo.libraryId, mLibraryInfo.folderId,
                             STEP, mPaginationBundle, new ResultCallback(this));
                 }
             } else {
