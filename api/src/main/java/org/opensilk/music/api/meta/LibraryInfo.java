@@ -29,27 +29,19 @@ public class LibraryInfo implements Parcelable {
 
     public final String libraryId;
     public final String libraryName;
-    public final ComponentName libraryComponent;
     public final String folderId;
     public final String folderName;
 
-    @Deprecated
-    public LibraryInfo(String libraryId, ComponentName libraryComponent, String folderId) {
-        this(libraryId, "", libraryComponent, folderId, "");
-    }
-
     public LibraryInfo(String libraryId, String libraryName,
-                       ComponentName libraryComponent,
                        String folderId, String folderName) {
         this.libraryId = libraryId;
         this.libraryName = libraryName;
-        this.libraryComponent = libraryComponent;
         this.folderId = folderId;
         this.folderName = folderName;
     }
 
     public LibraryInfo buildUpon(String newFolderId, String newFolderName) {
-        return new LibraryInfo(this.libraryId, this.libraryName, this.libraryComponent, newFolderId, newFolderName);
+        return new LibraryInfo(this.libraryId, this.libraryName, newFolderId, newFolderName);
     }
 
     @Override
@@ -59,7 +51,6 @@ public class LibraryInfo implements Parcelable {
         LibraryInfo that = (LibraryInfo) o;
         if (!TextUtils.equals(libraryId, that.libraryId)) return false;
         if (!TextUtils.equals(libraryName, that.libraryName)) return false;
-        if (!libraryComponent.equals(that.libraryComponent)) return false;
         if (!TextUtils.equals(folderId, that.folderId)) return false;
         if (!TextUtils.equals(folderName, that.folderName)) return false;
         return true;
@@ -69,7 +60,6 @@ public class LibraryInfo implements Parcelable {
     public int hashCode() {
         int result = libraryId != null ? libraryId.hashCode() : 0;
         result = 31 * result + (libraryName != null ? libraryName.hashCode() : 0);
-        result = 31 * result + (libraryComponent != null ? libraryComponent.hashCode() : 0);
         result = 31 * result + (folderId != null ? folderId.hashCode() : 0);
         result = 31 * result + (folderName != null ? folderName.hashCode() : 0);
         return result;
@@ -84,7 +74,6 @@ public class LibraryInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(libraryId);
         dest.writeString(libraryName);
-        dest.writeString(libraryComponent.flattenToString());
         dest.writeString(folderId);
         dest.writeString(folderName);
     }
@@ -93,7 +82,6 @@ public class LibraryInfo implements Parcelable {
         return new LibraryInfo(
                 source.readString(),
                 source.readString(),
-                ComponentName.unflattenFromString(source.readString()),
                 source.readString(),
                 source.readString()
         );

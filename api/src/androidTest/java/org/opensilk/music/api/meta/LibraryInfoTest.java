@@ -41,9 +41,9 @@ public class LibraryInfoTest {
 
     @Before
     public void setUp() {
-        libraryInfo1 = new LibraryInfo("1", "Lib1", new ComponentName("org.opensilk.test", "TestClass"), "1", "Folder1");
-        libraryInfo1_copy = new LibraryInfo("1", "Lib1", new ComponentName("org.opensilk.test", "TestClass"), "1", "Folder1");
-        libraryInfo2 = new LibraryInfo("11", "Lib11", new ComponentName("org.opensilk.test1", "TestClass"), "11", "Folder1");
+        libraryInfo1 = new LibraryInfo("1", "Lib1", "1", "Folder1");
+        libraryInfo1_copy = new LibraryInfo("1", "Lib1", "1", "Folder1");
+        libraryInfo2 = new LibraryInfo("11", "Lib11", "11", "Folder1");
     }
 
     @Test

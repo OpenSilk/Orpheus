@@ -34,8 +34,14 @@ public class OrpheusApi {
     public static final String ACTION_LIBRARY_SERVICE = "org.opensilk.music.plugin.LIBRARY_SERVICE";
     /**
      * Intent extra containing library identity, used in multiple places
+     * @deprecated since {@link #API_020} use {@link #EXTRA_LIBRARY_INFO}
      */
+    @Deprecated
     public static final String EXTRA_LIBRARY_ID = "org.opensilk.music.api.LIBRARY_ID";
+    /**
+     * Intent extra containing the {@link org.opensilk.music.api.meta.LibraryInfo}
+     */
+    public static final String EXTRA_LIBRARY_INFO = "org.opensilk.music.api.LIBRARY_INFO";
     /**
      * Intent extra passed by Orpheus to plugin activities to help them determine whether to use light or dark themes
      */
@@ -49,6 +55,10 @@ public class OrpheusApi {
      * Api version 0.1.0, used internally
      */
     public static final int API_010 = 10000;
+    /**
+     * Api version 0.2.0, used internally
+     */
+    public static final int API_020 = 20000;
 
     /**
      * Bits used in {@link RemoteLibraryService#getCapabilities()}

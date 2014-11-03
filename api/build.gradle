@@ -19,7 +19,7 @@ apply plugin: 'robolectric'
 
 // Versioning
 def versionMajor = 0
-def versionMinor = 1 // make sure to update OrpheusApi
+def versionMinor = 2 // make sure to update OrpheusApi
 def versionPatch = 0
 def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
