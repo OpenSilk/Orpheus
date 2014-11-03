@@ -114,7 +114,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
 
         // need instance with appcontext, so we gotta get a new one.
         mLibrary = new RemoteLibraryHelperImpl(getActivity().getApplicationContext());
-        mLibrary.acquireService(mLibraryInfo.libraryComponent, this);
+        //mLibrary.acquireService(mLibraryInfo.libraryComponent, this);
 
         mMessage = getString(R.string.fetching_song_list);
     }

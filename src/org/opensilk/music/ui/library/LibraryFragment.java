@@ -317,7 +317,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     private void initFolderFragment() {
         resolveCapabilities();
         if (isResumed()) {
-            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null);
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, null, null, null);
             Fragment f = FolderFragment.newInstance(li);
             FragmentManager fm = getChildFragmentManager();
             if (fm.getBackStackEntryCount() > 0) {
@@ -335,7 +335,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
     private void pushFolderFragment(String folderId) {
         if (isResumed()) {
-            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, folderId);
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, null, folderId, null);
             Fragment f = FolderFragment.newInstance(li);
             getChildFragmentManager().beginTransaction()
                     .replace(R.id.container, f)
@@ -347,7 +347,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public void openSearchFragment() {
         getChildFragmentManager().beginTransaction()
                 .replace(R.id.container,SearchFragment.newInstance(
-                        new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, null)))
+                        new LibraryInfo(mLibraryIdentity, null, null, null)))
                 .addToBackStack("search")
                 .commit();
     }
@@ -383,7 +383,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     class FragmentBusMonitor {
         @Subscribe
         public void onFolderClicked(FolderCardClick e) {
-            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, e.folder.identity);
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, null, e.folder.identity, null);
             switch (e.event) {
                 case OPEN:
                     pushFolderFragment(e.folder.identity);
@@ -402,7 +402,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
         @Subscribe
         public void onArtistCardClicked(ArtistCardClick e) {
-            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, e.artist.identity);
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, null, e.artist.identity, null);
             switch (e.event) {
                 case OPEN:
                     pushFolderFragment(e.artist.identity);
@@ -421,7 +421,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
         @Subscribe
         public void onAlbumCardClicked(AlbumCardClick e) {
-            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, mPluginInfo.componentName, e.album.identity);
+            final LibraryInfo li = new LibraryInfo(mLibraryIdentity, null, e.album.identity, null);
             switch (e.event) {
                 case OPEN:
                     pushFolderFragment(e.album.identity);
