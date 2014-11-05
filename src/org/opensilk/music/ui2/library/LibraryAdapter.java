@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.widget.LetterTileDrawable;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Album;
@@ -115,13 +116,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-        super.getItemViewType(position);
-        Bundleable item = getItem(position);
-        if ((item instanceof Album) || (item instanceof Artist) || (item instanceof Song)) {
-            return R.layout.gallery_list_item_artwork;
-        } else {
-            return R.layout.gallery_list_item_folder;
-        }
+        return R.layout.gallery_list_item_artwork;
     }
 
     public Bundleable getItem(int position) {
@@ -155,7 +150,9 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         }
         holder.extraInfo.setText(folder.date);
         holder.extraInfo.setVisibility(View.VISIBLE);
-        holder.folderthumb.init(folder.name);
+        LetterTileDrawable drawable = new LetterTileDrawable(holder.itemView.getResources());
+        drawable.setText(folder.name);
+        holder.artwork.setImageDrawable(drawable);
     }
 
     void bindSong(ViewHolder holder, Song song) {
@@ -194,7 +191,6 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         @InjectView(R.id.artwork_thumb) @Optional ImageView artwork;
-        @InjectView(R.id.folder_thumb) @Optional ColorCodedThumbnail folderthumb;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) TextView extraInfo;
