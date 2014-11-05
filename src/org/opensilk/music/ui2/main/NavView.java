@@ -39,6 +39,7 @@ import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.folder.FolderScreen;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
+import org.opensilk.music.ui2.library.LibrarySwitcherScreen;
 import org.opensilk.music.ui2.library.PluginScreen;
 
 import java.util.Collection;
@@ -190,7 +191,7 @@ public class NavView extends ListView {
                 }
                 int bounds = (int) (24 * getContext().getResources().getDisplayMetrics().density);
                 d.setBounds(0,0, bounds, bounds);
-                add(new Item(Item.Type.ITEM, info.title, d, new PluginScreen(info)));
+                add(new Item(Item.Type.ITEM, info.title, d, new LibrarySwitcherScreen(info)));
             }
             add(new Item(Item.Type.HEADER, R.string.menu_settings, R.drawable.ic_settings_grey600_24dp,
                     new StartActivityForResult(new Intent(getContext(), SettingsActivity.class),

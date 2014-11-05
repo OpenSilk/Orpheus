@@ -24,9 +24,11 @@ import android.text.TextUtils;
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
@@ -57,6 +59,12 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
  */
 @Layout(R.layout.library)
 @WithModule(LibraryScreen.Module.class)
+@WithTransitions(
+        single = R.anim.grow_fade_in,
+        forward = { R.anim.slide_out_left, R.anim.slide_in_right },
+        backward = { R.anim.slide_out_right, R.anim.slide_in_left },
+        replace = { R.anim.shrink_fade_out, R.anim.slide_in_left }
+)
 public class LibraryScreen extends Screen {
 
     final LibraryInfo info;
@@ -71,7 +79,7 @@ public class LibraryScreen extends Screen {
     }
 
     @dagger.Module(
-            addsTo = ActivityBlueprint.Module.class,
+            addsTo = LibrarySwitcherScreen.Module.class,
             injects = LibraryView.class,
             library = true
     )
@@ -83,7 +91,7 @@ public class LibraryScreen extends Screen {
             this.screen = screen;
         }
 
-        @Provides
+        @Provides @Singleton
         public LibraryInfo provideLibraryInfo() {
             return screen.info;
         }
@@ -94,7 +102,8 @@ public class LibraryScreen extends Screen {
     public static class Presenter extends ViewPresenter<LibraryView> {
 
         final LibraryConnection loader;
-        final LibraryInfo info;
+        final PluginInfo pluginInfo;
+        final LibraryInfo libraryInfo;
         final ArtworkRequestManager requestor;
 
         final ResultObserver resultObserver;
@@ -104,10 +113,12 @@ public class LibraryScreen extends Screen {
 
         @Inject
         public Presenter(LibraryConnection loader,
-                         LibraryInfo info,
+                         PluginInfo pluginInfo,
+                         LibraryInfo libraryInfo,
                          ArtworkRequestManager requestor) {
             this.loader = loader;
-            this.info = info;
+            this.pluginInfo = pluginInfo;
+            this.libraryInfo = libraryInfo;
             this.requestor = requestor;
 
             resultObserver = new ResultObserver();
@@ -122,7 +133,13 @@ public class LibraryScreen extends Screen {
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            loadMore(null);
+            if (loader.hasCache(libraryInfo)) {
+                LibraryConnection.Result cachedResult = loader.getCache(libraryInfo);
+                resultObserver.lastResult = cachedResult;
+                onNewResult(cachedResult);
+            } else {
+                loadMore(null);
+            }
         }
 
         @Override
@@ -159,7 +176,7 @@ public class LibraryScreen extends Screen {
                     .flatMap(new Func1<Long, Observable<LibraryConnection.Result>>() {
                         @Override
                         public Observable<LibraryConnection.Result> call(Long aLong) {
-                            return loader.browse(token);
+                            return loader.browse(libraryInfo, token);
                         }
                     })
                     .subscribe(resultObserver);
@@ -194,7 +211,7 @@ public class LibraryScreen extends Screen {
                 return;
             }
             if (TextUtils.isEmpty(identity)) return;
-            LibraryInfo newInfo = new LibraryInfo(info.libraryId, info.libraryComponent, identity);
+            LibraryInfo newInfo = libraryInfo.buildUpon(identity, null);
             AppFlow.get(context).goTo(new LibraryScreen(newInfo));
         }
 
@@ -234,7 +251,7 @@ public class LibraryScreen extends Screen {
                             loadMore(token, backoff);
                             break;
                         case OrpheusApi.Error.UNKNOWN:
-                            loader.connectionManager.onException(loader.libraryInfo.libraryComponent);
+                            loader.connectionManager.onException(pluginInfo.componentName);
                             loadMore(token, backoff);
                         default:
                             break;

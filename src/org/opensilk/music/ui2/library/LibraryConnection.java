@@ -17,16 +17,20 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.spi.Bundleable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,13 +38,13 @@ import javax.inject.Singleton;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.exceptions.OnErrorThrowable;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
  * Created by drew on 10/20/14.
  */
-@Singleton
 public class LibraryConnection {
 
     public static class Result {
@@ -50,6 +54,11 @@ public class LibraryConnection {
         public Result(List<Bundleable> items, Bundle token) {
             this.items = items;
             this.token = token;
+        }
+
+        Result copy() {
+            return new Result(new ArrayList<>(items),
+                    token != null ? new Bundle(token) : null);
         }
     }
 
@@ -69,22 +78,21 @@ public class LibraryConnection {
     public static final int STEP = 30;
 
     final PluginConnectionManager connectionManager;
-    final LibraryInfo libraryInfo;
+    final PluginInfo pluginInfo;
 
-    @Inject
-    public LibraryConnection(PluginConnectionManager connectionManager, LibraryInfo libraryInfo) {
+    public LibraryConnection(PluginConnectionManager connectionManager, PluginInfo pluginInfo) {
         this.connectionManager = connectionManager;
-        this.libraryInfo = libraryInfo;
+        this.pluginInfo = pluginInfo;
     }
 
     Observable<RemoteLibrary> getObservable() {
         return connectionManager
-                .bind(libraryInfo.libraryComponent)
+                .bind(pluginInfo.componentName)
                 // subject emmits on io so push it onto a background thread
                 .observeOn(Schedulers.io());
     }
 
-    public Observable<Result> browse(final Bundle previousBundle) {
+    public Observable<Result> browse(final LibraryInfo libraryInfo, final Bundle previousBundle) {
         return getObservable()
                 .flatMap(new Func1<RemoteLibrary, Observable<Result>>() {
                     @Override
@@ -108,8 +116,10 @@ public class LibraryConnection {
                                                             return;
                                                         }
                                                     }
+                                                    final Result result = new Result(list, paginationBundle);
+                                                    updateCache(libraryInfo, result);
                                                     if (subscriber.isUnsubscribed()) return;
-                                                    subscriber.onNext(new Result(list, paginationBundle));
+                                                    subscriber.onNext(result);
                                                     subscriber.onCompleted();
                                                 }
 
@@ -120,7 +130,7 @@ public class LibraryConnection {
                                                 }
                                             });
                                 } catch (RemoteException e) {
-                                    connectionManager.onException(libraryInfo.libraryComponent);
+                                    connectionManager.onException(pluginInfo.componentName);
                                     if (!subscriber.isUnsubscribed()) subscriber.onError(e);
                                 }
                             }
@@ -130,5 +140,57 @@ public class LibraryConnection {
                 // the Result callback will produce on a binder thread
                 // push the results back to main.
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<Integer> getCapabilities() {
+        return getObservable().map(new Func1<RemoteLibrary, Integer>() {
+            @Override
+            public Integer call(RemoteLibrary remoteLibrary) {
+                try {
+                    return remoteLibrary.getCapabilities();
+                } catch (RemoteException e) {
+                    connectionManager.onException(pluginInfo.componentName);
+                    throw OnErrorThrowable.from(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Intent> getLibraryChooserIntent() {
+        return getObservable().map(new Func1<RemoteLibrary, Intent>() {
+            @Override
+            public Intent call(RemoteLibrary remoteLibrary) {
+                try {
+                    Intent intent = new Intent();
+                    remoteLibrary.getLibraryChooserIntent(intent);
+                    return intent;
+                } catch (RemoteException e) {
+                    connectionManager.onException(pluginInfo.componentName);
+                    throw OnErrorThrowable.from(e);
+                }
+            }
+        });
+    }
+
+    private final Map<LibraryInfo, Result> CACHE = new LinkedHashMap<>();
+
+    public synchronized boolean hasCache(LibraryInfo libraryInfo) {
+        return CACHE.containsKey(libraryInfo);
+    }
+
+    public synchronized Result getCache(LibraryInfo libraryInfo) {
+        return CACHE.get(libraryInfo).copy();
+    }
+
+    protected synchronized void updateCache(LibraryInfo libraryInfo, Result result) {
+        Result resultCopy = result.copy();
+        Result cacheResult = CACHE.put(libraryInfo, resultCopy);
+        if (cacheResult != null) {
+            resultCopy.items.addAll(0, cacheResult.items);
+        }
+    }
+
+    protected synchronized void clearCache(LibraryInfo libraryInfo) {
+        if (hasCache(libraryInfo)) CACHE.remove(libraryInfo);
     }
 }
