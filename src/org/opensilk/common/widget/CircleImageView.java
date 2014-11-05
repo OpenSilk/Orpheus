@@ -67,28 +67,9 @@ public class CircleImageView extends SquareImageView {
         setImageDrawable(createRoundDrawable(((BitmapDrawable) getResources().getDrawable(resId)).getBitmap()));
     }
 
-    /*
-     * ANimatedImageView
-     */
-
     @Override
-    public void setImageBitmap(Bitmap bm, boolean shouldAnimate) {
-        if (shouldAnimate) {
-            if (defaultImageSet) {
-                Drawable layer1 = getDrawable();
-                Drawable layer2 = createRoundDrawable(bm);
-                TransitionDrawable td = new TransitionDrawable(new Drawable[]{ layer1, layer2 });
-                td.setCrossFadeEnabled(true);
-                setImageDrawable(td);
-                td.startTransition(TRANSITION_DURATION);
-            } else {
-                setAlpha(0.0f);
-                setImageBitmap(bm);
-                animate().alpha(1.0f).setDuration(TRANSITION_DURATION).start();
-            }
-        } else {
-            setImageBitmap(bm);
-        }
+    protected Drawable createBitmapDrawable(Bitmap bm) {
+        return createRoundDrawable(bm);
     }
 
     protected RoundedBitmapDrawable createRoundDrawable(Bitmap bm) {

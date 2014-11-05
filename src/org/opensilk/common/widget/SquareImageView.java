@@ -120,9 +120,20 @@ public class SquareImageView extends ImageView implements HoldsSubscription, Ani
     public void setImageBitmap(Bitmap bm, boolean shouldAnimate) {
         if (shouldAnimate) {
             if (defaultImageSet) {
+                defaultImageSet = false;
                 Drawable layer1 = getDrawable();
-                Drawable layer2 = new BitmapDrawable(getResources(), bm);
+                Drawable layer2 = createBitmapDrawable(bm);
                 TransitionDrawable td = new TransitionDrawable(new Drawable[]{ layer1, layer2 });
+                td.setCrossFadeEnabled(true);
+                setImageDrawable(td);
+                td.startTransition(TRANSITION_DURATION);
+            } else if (getDrawable() != null) {
+                Drawable layer1 = getDrawable();
+                if (layer1 instanceof TransitionDrawable) {
+                    layer1 = ((TransitionDrawable) layer1).getDrawable(1);
+                }
+                Drawable layer2 = createBitmapDrawable(bm);
+                TransitionDrawable td = new TransitionDrawable(new Drawable[]{layer1, layer2});
                 td.setCrossFadeEnabled(true);
                 setImageDrawable(td);
                 td.startTransition(TRANSITION_DURATION);
@@ -134,6 +145,10 @@ public class SquareImageView extends ImageView implements HoldsSubscription, Ani
         } else {
             setImageBitmap(bm);
         }
+    }
+
+    protected Drawable createBitmapDrawable(Bitmap bm) {
+        return new BitmapDrawable(getResources(), bm);
     }
 
 }
