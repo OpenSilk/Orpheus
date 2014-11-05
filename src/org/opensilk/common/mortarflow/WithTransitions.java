@@ -41,6 +41,8 @@ public @interface WithTransitions {
      *    This will usually correspond to a resetTo() call
      *    which can can be either forward or backward but
      *    also applies to replaceTo() if no current screen
+     *
+     * Optional: If not set no animation will be used
      */
     int[] single() default {};
 
@@ -66,6 +68,8 @@ public @interface WithTransitions {
      * transition to use when we are replacing another screen
      * corresponding to the replaceTo() method. which has
      * no direction and merits its own transition
+     *
+     * Optional if you don't intend to use replaceTo()
      */
     int[] replace() default {};
 }
