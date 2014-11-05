@@ -22,6 +22,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -124,12 +125,13 @@ public class LauncherActivity extends ActionBarActivity implements
 
         mAppFlowPresenter.takeView(this);
         mPauseResumePresenter.takeView(this);
-        mActionBarOwner.takeView(this);
-        mDrawerOwner.takeView(this);
 
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
         initThemeables();
+
+        mActionBarOwner.takeView(this);
+        mDrawerOwner.takeView(this);
 
         setSupportActionBar(mToolbar);
         setupDrawer();
@@ -375,6 +377,26 @@ public class LauncherActivity extends ActionBarActivity implements
     @Override
     public void setUpButtonEnabled(boolean enabled) {
 
+    }
+
+    @Override
+    public void setTitle(int titleId) {
+        mToolbar.setTitle(titleId);
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        mToolbar.setTitle(title);
+    }
+
+    @Override
+    public void setSubtitle(int subTitleRes) {
+        mToolbar.setSubtitle(subTitleRes);
+    }
+
+    @Override
+    public void setSubtitle(CharSequence title) {
+        mToolbar.setSubtitle(title);
     }
 
     @Override
