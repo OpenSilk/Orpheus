@@ -74,7 +74,7 @@ import timber.log.Timber;
  */
 @Singleton
 public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
-    final static boolean DEBUG = true;
+    final static boolean DEBUG = false;
 
     final Context mContext;
     final AppPreferences mPreferences;
