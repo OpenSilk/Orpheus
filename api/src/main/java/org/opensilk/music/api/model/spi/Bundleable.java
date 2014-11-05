@@ -22,8 +22,10 @@ import android.os.Bundle;
  * Created by drew on 6/23/14.
  */
 public interface Bundleable {
-    public Bundle toBundle();
-    public interface BundleCreator<T> {
+    Bundle toBundle();
+    interface BundleCreator<T> {
         public T fromBundle(Bundle b) throws IllegalArgumentException;
     }
+    String getIdentity();
+    String getName();
 }

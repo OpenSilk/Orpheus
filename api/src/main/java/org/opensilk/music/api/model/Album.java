@@ -51,6 +51,16 @@ public class Album implements Bundleable {
     }
 
     @Override
+    public String getIdentity() {
+        return identity;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(14); //2x
         b.putString("clz", Album.class.getName());

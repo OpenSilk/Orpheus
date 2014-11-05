@@ -63,6 +63,16 @@ public class Song implements Bundleable {
     }
 
     @Override
+    public String getIdentity() {
+        return identity;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(22); //2x
         b.putString("clz", Song.class.getName());

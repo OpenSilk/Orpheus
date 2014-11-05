@@ -48,6 +48,16 @@ public class Folder implements Bundleable {
     }
 
     @Override
+    public String getIdentity() {
+        return identity;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(12); //2x
         b.putString("clz", Folder.class.getName());

@@ -17,7 +17,6 @@
 
 package org.opensilk.music.api.meta;
 
-import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -67,7 +66,7 @@ public class LibraryInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "[library="+libraryName+", folder="+folderName+"]";
+        return "["+libraryId+"/"+libraryName+"::"+folderId+"/"+folderName+"]";
     }
 
     @Override

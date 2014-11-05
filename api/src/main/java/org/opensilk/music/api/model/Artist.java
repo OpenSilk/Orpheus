@@ -45,6 +45,16 @@ public class Artist implements Bundleable {
     }
 
     @Override
+    public String getIdentity() {
+        return identity;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(10); //2x
         b.putString("clz", Artist.class.getName());
