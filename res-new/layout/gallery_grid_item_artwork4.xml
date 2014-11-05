@@ -35,7 +35,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="top|left"
             android:layout_marginBottom="1dp"
-            android:layout_marginRight="1dp"/>
+            android:layout_marginRight="1dp"
+            style="@style/Orpheus.Thumbnail"/>
 
         <org.opensilk.common.widget.HalfSizeSquareImageView
             android:id="@+id/artwork_thumb2"
@@ -43,7 +44,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="top|right"
             android:layout_marginBottom="1dp"
-            android:layout_marginLeft="1dp"/>
+            android:layout_marginLeft="1dp"
+            style="@style/Orpheus.Thumbnail"/>
 
         <org.opensilk.common.widget.HalfSizeSquareImageView
             android:id="@+id/artwork_thumb3"
@@ -51,7 +53,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="bottom|left"
             android:layout_marginTop="1dp"
-            android:layout_marginRight="1dp"/>
+            android:layout_marginRight="1dp"
+            style="@style/Orpheus.Thumbnail"/>
 
         <org.opensilk.common.widget.HalfSizeSquareImageView
             android:id="@+id/artwork_thumb4"
@@ -59,7 +62,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="bottom|right"
             android:layout_marginTop="1dp"
-            android:layout_marginLeft="1dp"/>
+            android:layout_marginLeft="1dp"
+            style="@style/Orpheus.Thumbnail"/>
 
     </org.opensilk.music.widgets.SquareFrameLayout>
 
