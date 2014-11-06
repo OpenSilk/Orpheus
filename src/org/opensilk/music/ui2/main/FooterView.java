@@ -17,7 +17,13 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,6 +32,7 @@ import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.artwork.PaletteResponse;
 
 import javax.inject.Inject;
 
@@ -41,7 +48,7 @@ public class FooterView extends RelativeLayout {
     @Inject FooterBlueprint.Presenter presenter;
 
     @InjectView(R.id.footer_thumbnail)
-    ArtworkImageView artworkThumbnail;
+    ImageView artworkThumbnail;
     @InjectView(R.id.footer_progress)
     ProgressBar progressBar;
     @InjectView(R.id.footer_track_title)
@@ -49,11 +56,14 @@ public class FooterView extends RelativeLayout {
     @InjectView(R.id.footer_artist_name)
     TextView artistName;
 
+    boolean lightTheme;
+
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) {
             Mortar.inject(context, this);
         }
+        lightTheme = ThemeUtils.isLightTheme(getContext());
     }
 
     @Override
@@ -79,5 +89,31 @@ public class FooterView extends RelativeLayout {
         if (!isInEditMode()) {
             presenter.dropView(this);
         }
+    }
+
+    public void updateBackground(PaletteResponse paletteResponse) {
+        Palette palette = paletteResponse.palette;
+        Palette.Swatch swatch = lightTheme
+                ? palette.getLightMutedSwatch() : palette.getDarkMutedSwatch();
+        if (swatch == null) swatch = palette.getMutedSwatch();
+        Drawable d1;
+        if (getBackground() == null) {
+            d1 = new ColorDrawable(Color.TRANSPARENT);
+        } else {
+            d1 = getBackground();
+            if (d1 instanceof TransitionDrawable) {
+                d1 = ((TransitionDrawable)d1).getDrawable(1);
+            }
+        }
+        Drawable d2;
+        if (swatch != null) {
+            d2 = new ColorDrawable(swatch.getRgb());
+        } else {
+            d2 = new ColorDrawable(Color.TRANSPARENT);
+        }
+        TransitionDrawable td = new TransitionDrawable(new Drawable[]{d1,d2});
+        td.setCrossFadeEnabled(true);
+        setBackgroundDrawable(td);
+        td.startTransition(600);
     }
 }

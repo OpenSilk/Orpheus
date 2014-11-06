@@ -19,14 +19,27 @@ package org.opensilk.music.ui2.main;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.support.v7.graphics.Palette;
 
 import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
+import org.opensilk.common.rx.HoldsSubscription;
+import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.PaletteObserver;
+import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.util.concurrent.TimeUnit;
@@ -64,6 +77,7 @@ public class FooterBlueprint {
         final Context appContext;
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
         final MusicServiceConnection musicService;
+        final ArtworkRequestManager artworkReqestor;
 
         CompositeSubscription broadcastSubscriptions;
         Subscription progressSubscription;
@@ -79,14 +93,18 @@ public class FooterBlueprint {
         Observer<ArtInfo> artworkObserver;
         Observer<Long> progressObserver;
 
+        PaletteObserver paletteObserver;
+
         @Inject
         public Presenter(@ForApplication Context context,
                          PauseAndResumeRegistrar pauseAndResumeRegistrar,
-                         MusicServiceConnection musicService) {
+                         MusicServiceConnection musicService,
+                         ArtworkRequestManager artworkReqestor) {
             Timber.v("new FooterViewBlueprint.Presenter");
             this.appContext = context;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
             this.musicService = musicService;
+            this.artworkReqestor = artworkReqestor;
         }
 
         @Override
@@ -158,7 +176,16 @@ public class FooterBlueprint {
         void updateArtwork(ArtInfo artInfo) {
             FooterView v = getView();
             if (v == null) return;
-            ArtworkManager.loadImage(artInfo, v.artworkThumbnail);
+            HoldsSubscription sh = (HoldsSubscription) v.artworkThumbnail;
+            AnimatedImageView av = (AnimatedImageView) v.artworkThumbnail;
+            sh.addSubscription(artworkReqestor.newAlbumRequest(av,
+                    /*paletteObserver*/ null, artInfo, ArtworkType.THUMBNAIL));
+        }
+
+        void updateBackground(PaletteResponse paletteResponse) {
+            FooterView v = getView();
+            if (v == null) return;
+            v.updateBackground(paletteResponse);
         }
 
         void setupObserables() {
@@ -310,6 +337,12 @@ public class FooterBlueprint {
                     setProgress(progress.intValue());
                 }
             });
+            paletteObserver = new PaletteObserver() {
+                @Override
+                public void onNext(PaletteResponse paletteResponse) {
+                    updateBackground(paletteResponse);
+                }
+            };
         }
 
         void subscribeBroadcasts() {
