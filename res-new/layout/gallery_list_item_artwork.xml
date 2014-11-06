@@ -34,8 +34,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:scaleType="centerCrop"/>
+        android:layout_marginBottom="8dp"/>
 
     <include layout="@layout/gallery_list_item_common"/>
 
