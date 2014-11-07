@@ -145,6 +145,10 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
                 subtitleRes = resourceId;
                 return this;
             }
+            public Builder setSubtitle(CharSequence subtitle) {
+                this.subtitle = subtitle;
+                return this;
+            }
             public Builder withMenuConfig(MenuConfig menuConfig) {
                 this.menuConfig = menuConfig;
                 return this;
