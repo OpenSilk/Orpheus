@@ -21,4 +21,15 @@
     android:id="@+id/library_plugin"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/btn_chooselibrary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/menu_change_source"
+        android:visibility="gone"
+        style="?android:buttonStyleSmall"/>
+
+</org.opensilk.music.ui2.library.PluginView>

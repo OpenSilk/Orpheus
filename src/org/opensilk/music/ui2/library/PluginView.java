@@ -18,43 +18,40 @@ package org.opensilk.music.ui2.library;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+
+import org.opensilk.music.R;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 import mortar.Mortar;
 import timber.log.Timber;
 
 /**
  * Created by drew on 10/6/14.
  */
-public class PluginView extends LinearLayout {
+public class PluginView extends RelativeLayout {
 
-    @Inject
-    PluginScreen.Presenter presenter;
-
-//    @InjectView(R.id.library_breadcrumbs)
-//    HorizontalScrollView mBreadcrumbs;
-//    @InjectView(R.id.library_container)
-//    FrameScreenSwitcherView mContainer;
+    @Inject PluginScreen.Presenter presenter;
+    @InjectView(R.id.btn_chooselibrary) Button chooser;
 
     public PluginView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Mortar.inject(getContext(), this);
+        if (!isInEditMode()) Mortar.inject(getContext(), this);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        ButterKnife.inject(this);
-        presenter.takeView(this);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        presenter.takeView(this);
+        if (!isInEditMode()) {
+            ButterKnife.inject(this);
+            presenter.takeView(this);
+        }
     }
 
     @Override
@@ -62,6 +59,16 @@ public class PluginView extends LinearLayout {
         Timber.v("onDetachedFromWindow");
         super.onDetachedFromWindow();
         presenter.dropView(this);
+    }
+
+    public void showLanding() {
+        chooser.setVisibility(VISIBLE);
+    }
+
+    @OnClick(R.id.btn_chooselibrary)
+    public void chooseLibrary() {
+        presenter.openPicker();
+        chooser.setVisibility(GONE);
     }
 
 }

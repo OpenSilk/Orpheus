@@ -28,9 +28,12 @@ import com.google.gson.reflect.TypeToken;
 
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.cast.util.Utils;
+import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.home.MusicFragment;
 import org.opensilk.music.ui2.gallery.GalleryPage;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
+import org.opensilk.music.util.MarkedForRemoval;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import java.io.IOException;
@@ -156,9 +159,36 @@ public class AppPreferences {
         return Arrays.asList(GalleryPage.values());
     }
 
+    public LibraryInfo getDefaultLibraryInfo(PluginInfo pluginInfo) {
+        String json = getString(makePluginPrefKey(pluginInfo), null);
+        if (json == null) return null;
+        try {
+            return gson.fromJson(json, LibraryInfo.class);
+        } catch (Exception e) {
+            removeDefaultLibraryInfo(pluginInfo);
+            return null;
+        }
+    }
+
+    public void setDefaultLibraryInfo(PluginInfo pluginInfo, LibraryInfo libraryInfo) {
+        String json = gson.toJson(libraryInfo);
+        if (json != null) {
+            putString(makePluginPrefKey(pluginInfo), json);
+        }
+    }
+
+    public void removeDefaultLibraryInfo(PluginInfo pluginInfo) {
+        remove(makePluginPrefKey(pluginInfo));
+    }
+
+    private String makePluginPrefKey(PluginInfo pluginInfo) {
+        return pluginInfo.componentName.flattenToString().replaceAll("/", "_")+"_defInfo";
+    }
+
     /**
      * @return List of class names for home pager fragments
      */
+    @Deprecated @MarkedForRemoval
     public final List<MusicFragment> getHomePages() {
         String pgs = getString(HOME_PAGES, null);
         if (pgs == null) {
@@ -187,6 +217,7 @@ public class AppPreferences {
      * Saves fragment class names for home pager
      * @param pages
      */
+    @Deprecated @MarkedForRemoval
     public final void setHomePages(List<MusicFragment> pages) {
         StringWriter sw = new StringWriter(400);
         JsonWriter jw = new JsonWriter(sw);

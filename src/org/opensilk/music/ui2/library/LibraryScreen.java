@@ -30,6 +30,7 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
@@ -128,7 +129,7 @@ public class LibraryScreen extends Screen {
         final LibraryInfo libraryInfo;
         final ArtworkRequestManager requestor;
         final Context appContext;
-        final PluginSettings settings;
+        final AppPreferences settings;
         final EventBus bus;
         final ActionBarOwner actionBarOwner;
 
@@ -144,7 +145,7 @@ public class LibraryScreen extends Screen {
                          LibraryInfo libraryInfo,
                          ArtworkRequestManager requestor,
                          @ForApplication Context appContext,
-                         PluginSettings settings,
+                         AppPreferences settings,
                          @Named("activity") EventBus bus,
                          ActionBarOwner actionBarOwner) {
             this.connection = connection;
@@ -323,7 +324,7 @@ public class LibraryScreen extends Screen {
                             //TODO
                             return true;
                         case R.id.menu_change_source:
-                            settings.clearDefaultSource();
+                            settings.removeDefaultLibraryInfo(pluginInfo);
                             if (getView() != null) {
                                 AppFlow.get(getView().getContext()).resetTo(new PluginScreen(pluginInfo));
                             }
@@ -341,6 +342,11 @@ public class LibraryScreen extends Screen {
                                             } else {
                                                 bus.post(new MakeToast(R.string.err_opening_settings));
                                             }
+                                        }
+                                    }, new Action1<Throwable>() {
+                                        @Override
+                                        public void call(Throwable throwable) {
+                                            bus.post(new MakeToast(R.string.err_opening_settings));
                                         }
                                     });
                             return true;
@@ -365,9 +371,8 @@ public class LibraryScreen extends Screen {
             return array;
         }
 
-        // we re use this so we cant use a subscriber
         class ResultObserver implements Observer<LibraryConnection.Result> {
-            final int RETRY_LIMIT = 4;
+            final int RETRY_LIMIT = 5;
 
             LibraryConnection.Result lastResult;
             int retryCount = 0;
@@ -385,8 +390,8 @@ public class LibraryScreen extends Screen {
                     return;
                 }
                 Bundle token = lastResult != null ? lastResult.token : null;
-                int backoff = (int) (Math.pow(2, retryCount) + Math.random() * 1000);
-                Timber.d("retry backoff=%d", backoff);
+                int backoff = (int) ((Math.pow(2, retryCount) + Math.random()) * 1000);
+                Timber.d("retry=%d backoff=%d", retryCount, backoff);
                 if (e instanceof RemoteException) {
                     connection.connectionManager.onException(pluginInfo.componentName);
                     loadMore(token, backoff);
@@ -398,7 +403,7 @@ public class LibraryScreen extends Screen {
                             loadMore(token, backoff);
                             break;
                         case OrpheusApi.Error.AUTH_FAILURE:
-                            settings.clearDefaultSource();
+                            settings.removeDefaultLibraryInfo(pluginInfo);
                             bus.post(new MakeToast(R.string.err_authentication));
                             if (getView() != null) {
                                 AppFlow.get(getView().getContext()).resetTo(new PluginScreen(pluginInfo));

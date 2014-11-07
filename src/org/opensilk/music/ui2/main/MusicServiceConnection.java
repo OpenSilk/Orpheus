@@ -39,6 +39,8 @@ import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -450,6 +452,32 @@ public class MusicServiceConnection {
                 }
             }
         });
+    }
+
+    /**
+     * In the event of RemoteExceptions we cant use Observable.retry() since
+     * it retrys the same observable, we have to create a new observable
+     * that will rebind us to the service
+     */
+    public static <T> Observable<T> wrapForRetry(final Func0<Observable<T>> func) {
+        return func.call()
+                .onErrorResumeNext(new Func1<Throwable, Observable<? extends T>>() {
+                    @Override
+                    public Observable<? extends T> call(Throwable throwable) {
+                        if (throwable instanceof RemoteException) {
+                            // We retry once after delay
+                            return Observable.timer(2, TimeUnit.SECONDS)
+                                    .flatMap(new Func1<Long, Observable<T>>() {
+                                        @Override
+                                        public Observable<T> call(Long aLong) {
+                                            return func.call();
+                                        }
+                                    });
+                        } else {
+                            return Observable.error(throwable);
+                        }
+                    }
+                });
     }
 
 }

@@ -29,7 +29,7 @@ import javax.inject.Singleton;
 /**
  * Created by drew on 7/19/14.
  */
-@Singleton
+@Singleton @Deprecated @MarkedForRemoval
 public class PluginSettings {
 
     public static final String PREF_DEFAULT_SOURCE = "def_source";

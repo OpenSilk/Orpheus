@@ -16,12 +16,16 @@
 
 package org.opensilk.common.rx;
 
+import rx.Observable;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by drew on 10/16/14.
  */
 public class RxUtils {
+
+    private RxUtils(){}
 
     public static boolean notSubscribed(Subscription subscription) {
         return subscription == null || subscription.isUnsubscribed();
@@ -29,5 +33,12 @@ public class RxUtils {
 
     public static boolean isSubscribed(Subscription subscription) {
         return subscription != null && !subscription.isUnsubscribed();
+    }
+
+    /**
+     * Slightly less typing
+     */
+    public static <T> Observable<T> observeOnMain(Observable<T> observable) {
+        return observable.observeOn(AndroidSchedulers.mainThread());
     }
 }

@@ -26,6 +26,7 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
@@ -92,7 +93,7 @@ public class PluginScreen extends Screen {
     public static class Presenter extends ViewPresenter<PluginView> {
 
         final PluginInfo pluginInfo;
-        final PluginSettings settings;
+        final AppPreferences settings;
         final LibraryConnection connection;
         final EventBus bus;
         final ActionBarOwner actionBarOwner;
@@ -101,7 +102,8 @@ public class PluginScreen extends Screen {
         LibraryInfo libraryInfo;
 
         @Inject
-        public Presenter(PluginInfo pluginInfo, PluginSettings settings,
+        public Presenter(PluginInfo pluginInfo,
+                         AppPreferences settings,
                          LibraryConnection connection,
                          @Named("activity") EventBus bus,
                          ActionBarOwner actionBarOwner,
@@ -125,11 +127,15 @@ public class PluginScreen extends Screen {
         public void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
+            setupActionBar();
             if (savedInstanceState != null) {
                 libraryInfo = savedInstanceState.getParcelable("libraryinfo");
+                checkForDefaultLibrary();
+            } else {
+                libraryInfo = settings.getDefaultLibraryInfo(pluginInfo);
+                // TODO might not need to check everytime
+                checkApiVersion();
             }
-            setupActionBar();
-            connect();
         }
 
         @Override
@@ -146,62 +152,47 @@ public class PluginScreen extends Screen {
             bus.unregister(this);
         }
 
-        void connect() {
+        void checkApiVersion() {
+            connection.getApiVersion(pluginInfo)
+                    .subscribe(new Action1<Integer>() {
+                        @Override
+                        public void call(Integer version) {
+                            if (version >= OrpheusApi.API_020) {
+                                checkForDefaultLibrary();
+                            } else {
+                                //TODO show dialog
+                                bus.post(new MakeToast(R.string.err_unimplemented));
+                            }
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            bus.post(new MakeToast(R.string.err_connecting_library));
+                        }
+                    });
+        }
+
+        void checkForDefaultLibrary() {
             if (libraryInfo != null) {
                 openLibrary();
             } else {
-                connection.getDefaultLibraryInfo(pluginInfo).subscribe(new Action1<LibraryInfo>() {
-                    @Override
-                    public void call(LibraryInfo libraryInfo) {
-                        Presenter.this.libraryInfo = libraryInfo;
-                        openLibrary();
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Timber.e(throwable, "getDefaultLibraryInfo");
-                        if (throwable instanceof NullPointerException) {
-                            connection.getLibraryChooserIntent(pluginInfo).subscribe(new Action1<Intent>() {
-                                @Override
-                                public void call(Intent intent) {
-                                    if (intent.getComponent() != null) {
-                                        bus.post(new StartActivityForResult(intent, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
+                openPicker();
             }
         }
 
-        public void onEventMainThread(ActivityResult res) {
-            Timber.v("onActivityResultEvent");
-            switch (res.reqCode) {
-                case StartActivityForResult.PLUGIN_REQUEST_LIBRARY:
-                    if (res.resultCode == Activity.RESULT_OK) {
-                        libraryInfo = res.intent.getParcelableExtra(OrpheusApi.EXTRA_LIBRARY_INFO);
-                        if (libraryInfo == null) {
-                            Timber.e("Library chooser must set EXTRA_LIBRARY_INFO");
-                            String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
-                            if (TextUtils.isEmpty(id)) {
-                                Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
-                                bus.post(new MakeToast(R.string.err_connecting_library));
-                                return;
-                            }
-                            libraryInfo = new LibraryInfo(id, null, null, null);
+        void openPicker() {
+            connection.getLibraryChooserIntent(pluginInfo)
+                    .subscribe(new Action1<Intent>() {
+                        @Override
+                        public void call(Intent intent) {
+                            bus.post(new StartActivityForResult(intent, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
                         }
-                        //TODO save libraryinfo
-//                        settings.setDefaultSource(libraryIdentity);
-                        connect();
-                    } else {
-                        Timber.e("Activity returned bad result");
-                        bus.post(new MakeToast(R.string.err_connecting_library));
-                    }
-                    break;
-                case StartActivityForResult.PLUGIN_REQUEST_SETTINGS:
-                    break;
-            }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            bus.post(new MakeToast(R.string.err_connecting_library));
+                        }
+                    });
         }
 
         void openLibrary() {
@@ -216,6 +207,43 @@ public class PluginScreen extends Screen {
             ActionBarOwner.Config config = new ActionBarOwner.Config.Builder()
                     .setTitle(pluginInfo.title).build();
             actionBarOwner.setConfig(config);
+        }
+
+        void showPickerButton() {
+            if (getView() == null) return;
+            getView().showLanding();
+        }
+
+        public void onEventMainThread(ActivityResult res) {
+            Timber.v("onActivityResultEvent");
+            switch (res.reqCode) {
+                case StartActivityForResult.PLUGIN_REQUEST_LIBRARY:
+                    if (res.resultCode == Activity.RESULT_OK) {
+                        libraryInfo = res.intent.getParcelableExtra(OrpheusApi.EXTRA_LIBRARY_INFO);
+                        if (libraryInfo == null) {
+                            Timber.e("Library chooser must set EXTRA_LIBRARY_INFO");
+                            bus.post(new MakeToast(R.string.err_connecting_library));
+                            showPickerButton();
+                            return;
+//                            String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
+//                            if (TextUtils.isEmpty(id)) {
+//                                Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
+//                                bus.post(new MakeToast(R.string.err_connecting_library));
+//                                return;
+//                            }
+//                            libraryInfo = new LibraryInfo(id, null, null, null);
+                        }
+                        settings.setDefaultLibraryInfo(pluginInfo, libraryInfo);
+                        openLibrary();
+                    } else {
+                        Timber.e("Activity returned bad result");
+                        bus.post(new MakeToast(R.string.err_connecting_library));
+                        showPickerButton();
+                    }
+                    return;
+                case StartActivityForResult.PLUGIN_REQUEST_SETTINGS:
+                    return;
+            }
         }
 
     }

@@ -206,7 +206,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
 
         public void reset() {
             if (artwork != null) artwork.setImageBitmap(null);
-            if (extraInfo.getVisibility() == View.GONE) extraInfo.setVisibility(View.GONE);
+            if (extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
             subscriptions.clear();
         }
     }

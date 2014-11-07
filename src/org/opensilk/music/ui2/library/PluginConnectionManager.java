@@ -22,19 +22,23 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
+import rx.Scheduler;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subjects.AsyncSubject;
@@ -46,14 +50,15 @@ import timber.log.Timber;
 @Singleton
 public class PluginConnectionManager {
 
-    private class Token implements ServiceConnection {
+    class Token implements ServiceConnection {
         final AsyncSubject<RemoteLibrary> subject;
 
-        private Token(AsyncSubject<RemoteLibrary> subject) {
+        Token(AsyncSubject<RemoteLibrary> subject) {
             this.subject = subject;
         }
 
         @Override
+        @DebugLog
         public void onServiceConnected(ComponentName name, IBinder service) {
             RemoteLibrary library = RemoteLibrary.Stub.asInterface(service);
             subject.onNext(library);
@@ -61,14 +66,14 @@ public class PluginConnectionManager {
         }
 
         @Override
+        @DebugLog
         public void onServiceDisconnected(ComponentName name) {
             onException(name);
         }
     }
 
     final Context context;
-    final Map<ComponentName, Token> connections =
-            Collections.synchronizedMap(new HashMap<ComponentName, Token>());
+    final Map<ComponentName, Token> connections = new LinkedHashMap<>();
 
     @Inject
     public PluginConnectionManager(@ForApplication Context context) {
@@ -137,9 +142,22 @@ public class PluginConnectionManager {
     }
 
     public synchronized void onException(ComponentName componentName) {
-        Token token = connections.remove(componentName);
+        final Token token = connections.remove(componentName);
         Timber.v("Unbinding %s", componentName);
-        if (token != null) context.unbindService(token);
+        if (token == null) return;
+        //TODO does unbind have to be called from main thread?
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            context.unbindService(token);
+        } else {
+            final Scheduler.Worker w = AndroidSchedulers.mainThread().createWorker();
+            w.schedule(new Action0() {
+                @Override
+                public void call() {
+                    context.unbindService(token);
+                    w.unsubscribe();
+                }
+            });
+        }
     }
 
 }
