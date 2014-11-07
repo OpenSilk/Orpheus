@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.BuildConfig;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
@@ -42,6 +43,8 @@ import org.opensilk.music.dream.views.IDreamView;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 4/4/14.
@@ -172,9 +175,15 @@ public class DayDreamService extends DreamService {
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE)
                     .setComponent(altDream)
                     .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            bindService(intent, mAltDreamConnection, BIND_AUTO_CREATE);
+            try {
+                bindService(intent, mAltDreamConnection, BIND_AUTO_CREATE);
+            } catch (SecurityException e) {
+                Timber.w("Altdream: %s, requires permission we can't obtain", altDream.flattenToString());
+                DreamPrefs.removeAltDreamComponent(this);
+                unbindService(mAltDreamConnection);
+                setupSaverView();
+            }
         } else {
-            Log.w(TAG, "Alternate dream not set");
             setupSaverView();
         }
     }
@@ -222,10 +231,17 @@ public class DayDreamService extends DreamService {
                 IBinder token = (IBinder) windowToken.get(DayDreamService.this);
                 // forward our token to the alt dream service
                 Class iDreamService = Class.forName("android.service.dreams.IDreamService");
-                Method attach = iDreamService.getDeclaredMethod("attach", IBinder.class);
-                attach.invoke(dreamService, token);
+                if (VersionUtils.hasLollipop()) {
+                    Method attach = iDreamService.getDeclaredMethod("attach", IBinder.class, boolean.class);
+                    attach.invoke(dreamService, token, false);
+                } else {
+                    Method attach = iDreamService.getDeclaredMethod("attach", IBinder.class);
+                    attach.invoke(dreamService, token);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
+                isBoundToAltDream = false;
+                unbindService(mAltDreamConnection);
                 setupSaverView();
             }
         }

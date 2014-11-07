@@ -33,10 +33,13 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.service.dreams.DreamService;
 
+import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 4/4/14.
@@ -68,9 +71,13 @@ public class AlternateDreamFragment extends PreferenceFragment implements
     @Override
     public void onStart() {
         super.onStart();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        if (!prefs.getBoolean("daydream_was_warned", false)) {
-            prefs.edit().putBoolean("daydream_was_warned", true).apply();
+        if (VersionUtils.hasLollipop() && dreamInfos.isEmpty()) {
+            DreamPrefs.removeAltDreamComponent(getActivity());
+            new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.dream_settings_alt_dream_l_error)
+                    .setNeutralButton(android.R.string.ok, null)
+                    .show();
+        } else {
             new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.dream_settings_alt_dream_warning)
                     .setNeutralButton(android.R.string.ok, null)
@@ -116,6 +123,11 @@ public class AlternateDreamFragment extends PreferenceFragment implements
         for (ResolveInfo resolveInfo : resolveInfos) {
             if (resolveInfo.serviceInfo == null)
                 continue;
+            if (VersionUtils.hasLollipop()
+                    && "android.permission.BIND_DREAM_SERVICE".equals(resolveInfo.serviceInfo.permission)) {
+                Timber.w("Ignoring protected daydream %s", getDreamComponentName(resolveInfo).flattenToString());
+                continue;
+            }
             DreamInfo dreamInfo = new DreamInfo();
             dreamInfo.caption = resolveInfo.loadLabel(pm);
             dreamInfo.icon = resolveInfo.loadIcon(pm);
