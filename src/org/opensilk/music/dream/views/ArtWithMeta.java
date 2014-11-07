@@ -21,43 +21,35 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.MusicUtils;
+
+import butterknife.InjectView;
 
 /**
  * Created by drew on 4/13/14.
  */
 public class ArtWithMeta extends ArtOnly {
 
-    protected TextView mTrackTitle;
-    protected TextView mArtistName;
-    protected TextView mAlbumName;
-
-    public ArtWithMeta(Context context) {
-        super(context);
-    }
+    @InjectView(R.id.track_title) TextView mTrackTitle;
+    @InjectView(R.id.artist_name) TextView mArtistName;
+    @InjectView(R.id.album_name) TextView mAlbumName;
 
     public ArtWithMeta(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ArtWithMeta(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    @Override
+    public void updateTrack(String name) {
+        mTrackTitle.setText(name);
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mTrackTitle = (TextView) findViewById(R.id.track_title);
-        mArtistName = (TextView) findViewById(R.id.artist_name);
-        mAlbumName = (TextView) findViewById(R.id.album_name);
-//        update();
+    public void updateArtist(String name) {
+        mArtistName.setText(name);
     }
 
     @Override
-    public void update() {
-        super.update();
-        mTrackTitle.setText(MusicUtils.getTrackName());
-        mArtistName.setText(MusicUtils.getArtistName());
-        mAlbumName.setText(MusicUtils.getAlbumName());
+    public void updateAlbum(String name) {
+        mAlbumName.setText(name);
     }
+
 }

@@ -25,49 +25,83 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.service.dreams.DreamService;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import org.opensilk.common.util.VersionUtils;
-import org.opensilk.music.BuildConfig;
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.MusicUtils;
-import com.squareup.otto.Subscribe;
-
-import org.opensilk.music.bus.EventBus;
-import org.opensilk.music.bus.events.MetaChanged;
-import org.opensilk.music.bus.events.PlaybackModeChanged;
-import org.opensilk.music.bus.events.PlaystateChanged;
-import org.opensilk.music.dream.views.IDreamView;
+import org.opensilk.music.dream.views.ArtOnly;
+import org.opensilk.music.dream.views.ArtWithControls;
+import org.opensilk.music.dream.views.ArtWithMeta;
+import org.opensilk.music.ui2.main.BroadcastObservables;
+import org.opensilk.music.ui2.main.MusicServiceConnection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import dagger.Provides;
+import de.greenrobot.event.EventBus;
+import mortar.Mortar;
+import mortar.MortarActivityScope;
+import rx.Subscription;
+import rx.functions.Action1;
 import timber.log.Timber;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.observeOnMain;
 
 /**
  * Created by drew on 4/4/14.
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 public class DayDreamService extends DreamService {
-    private static final String TAG = DayDreamService.class.getSimpleName();
-    private static final boolean D = BuildConfig.DEBUG;
 
-    private ViewGroup mContentView, mSaverView, mDreamView;
+    public static class Blueprint implements mortar.Blueprint {
+        @Override
+        public String getMortarScopeName() {
+            return getClass().getName();
+        }
 
-    // True if attached to window
-    private boolean isAttached;
+        @Override
+        public Object getDaggerModule() {
+            return new Module();
+        }
 
-    // Music service token
-    private MusicUtils.ServiceToken mMusicServiceToken;
-    // True if bound to music service
-    private boolean isBoundToMusicService;
-    // True if bount to alt dream service
-    private boolean isBoundToAltDream;
+        @dagger.Module(
+                addsTo = AppModule.class,
+                injects = {
+                        DayDreamService.class,
+                        ArtOnly.class,
+                        ArtWithControls.class,
+                        ArtWithMeta.class,
+                }
+        )
+        public static class Module {
+            @Provides @Singleton @Named("activity")
+            public EventBus provideEventBus() {
+                return new EventBus();
+            }
+        }
+    }
 
-    private final Handler mHandler;
-    private final ScreenSaverAnimation mMoveSaverRunnable;
+    @Inject MusicServiceConnection mServiceConnection;
+
+    final Handler mHandler;
+    final ScreenSaverAnimation mMoveSaverRunnable;
+
+    MortarActivityScope mDreamScope;
+    Subscription playStateSubscription;
+    ViewGroup mContentView, mSaverView, mDreamView;
+    LayoutInflater mLayoutInflater;
+
+    boolean isAttached;
+    boolean isBoundToAltDream;
+    boolean isPlaying;
 
     public DayDreamService() {
         mHandler = new Handler();
@@ -78,21 +112,37 @@ public class DayDreamService extends DreamService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mMusicServiceToken = MusicUtils.bindToService(this, mMusicServiceConnection);
+        // Sort of a hack, we dont have a persistence bundle but we do have a window and mortar
+        // requires activity scopes for presenters.
+        mDreamScope = Mortar.requireActivityScope(Mortar.getScope(getApplication()), new Blueprint());
+        mDreamScope.onCreate(null);
+        Mortar.inject(this, this);
+        mServiceConnection.bind();
+        playStateSubscription = observeOnMain(BroadcastObservables.playStateChanged(this)).subscribe(new Action1<Boolean>() {
+            @Override
+            public void call(Boolean playing) {
+                isPlaying = playing;
+                if (playing && isBoundToAltDream) {
+                    switchToSaverView();
+                }
+            }
+        });
     }
 
     //@DebugLog
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (isBoundToMusicService) {
-            MusicUtils.unbindFromService(mMusicServiceToken);
-            isBoundToMusicService = false;
+        if (isSubscribed(playStateSubscription)) {
+            playStateSubscription.unsubscribe();
+            playStateSubscription = null;
         }
+        mServiceConnection.unbind();
         if (isBoundToAltDream) {
-            unbindService(mAltDreamConnection);
             isBoundToAltDream = false;
+            unbindService(mAltDreamConnection);
         }
+        Mortar.getScope(getApplication()).destroyChild(mDreamScope);
     }
 
     //@DebugLog
@@ -100,14 +150,11 @@ public class DayDreamService extends DreamService {
     public void onAttachedToWindow() {
         isAttached = true;
         super.onAttachedToWindow();
-        if (isBoundToMusicService) {
-            if (!MusicUtils.isPlaying()) {
-                bindAltDream();
-            } else {
-                setupSaverView();
-            }
+        if (!isPlaying) {
+            bindAltDream();
+        } else {
+            setupSaverView();
         }
-        EventBus.getInstance().register(this);
     }
 
     //@DebugLog
@@ -116,7 +163,6 @@ public class DayDreamService extends DreamService {
         isAttached = false;
         super.onDetachedFromWindow();
         mHandler.removeCallbacks(mMoveSaverRunnable);
-        EventBus.getInstance().unregister(this);
     }
 
     @Override
@@ -125,6 +171,21 @@ public class DayDreamService extends DreamService {
         if (!isBoundToAltDream) {
             setupSaverView();
         }
+    }
+
+    @Override
+    public Object getSystemService(String name) {
+        if (Mortar.isScopeSystemService(name)) {
+            return mDreamScope;
+        }
+        // We want the child views to be injectable from our scope
+        if (LAYOUT_INFLATER_SERVICE.equals(name)) {
+            if (mLayoutInflater == null) {
+                mLayoutInflater = LayoutInflater.from(getBaseContext()).cloneInContext(this);
+            }
+            return mLayoutInflater;
+        }
+        return super.getSystemService(name);
     }
 
     /**
@@ -178,37 +239,20 @@ public class DayDreamService extends DreamService {
             try {
                 bindService(intent, mAltDreamConnection, BIND_AUTO_CREATE);
             } catch (SecurityException e) {
-                Timber.w("Altdream: %s, requires permission we can't obtain", altDream.flattenToString());
+                Timber.w("Altdream: %s requires permission we can't obtain", altDream.flattenToString());
                 DreamPrefs.removeAltDreamComponent(this);
-                unbindService(mAltDreamConnection);
-                setupSaverView();
+                switchToSaverView();
             }
         } else {
             setupSaverView();
         }
     }
 
-    /**
-     * Music service connection
-     */
-    final ServiceConnection mMusicServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            isBoundToMusicService = true;
-            if (isAttached) {
-                if (!MusicUtils.isPlaying()) {
-                    bindAltDream();
-                } else {
-                    setupSaverView();
-                }
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isBoundToMusicService = false;
-        }
-    };
+    void switchToSaverView() {
+        isBoundToAltDream = false;
+        unbindService(mAltDreamConnection);
+        setupSaverView();
+    }
 
     /**
      * Alt dream service connection
@@ -239,42 +283,15 @@ public class DayDreamService extends DreamService {
                     attach.invoke(dreamService, token);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                isBoundToAltDream = false;
-                unbindService(mAltDreamConnection);
-                setupSaverView();
+                Timber.e(e, "Failed attaching to altDream");
+                switchToSaverView();
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            isBoundToAltDream = false;
+            switchToSaverView();
         }
     };
-
-    /*
-     * Events
-     */
-
-    @Subscribe
-    public void onMetaChanged(MetaChanged e) {
-        updateView();
-    }
-
-    @Subscribe
-    public void onPlaystateChanged(PlaystateChanged e) {
-        updateView();
-    }
-
-    @Subscribe
-    public void onPlaybackModeChanged(PlaybackModeChanged e) {
-        updateView();
-    }
-
-    private void updateView() {
-        if (mDreamView != null) {
-            ((IDreamView) mDreamView).update();
-        }
-    }
 
 }

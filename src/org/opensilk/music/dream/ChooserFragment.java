@@ -17,10 +17,7 @@
 package org.opensilk.music.dream;
 
 import android.app.Fragment;
-import android.content.ComponentName;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -28,9 +25,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import org.opensilk.music.R;
-import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
+
+import org.opensilk.music.R;
 
 /**
  * Created by drew on 4/13/14.

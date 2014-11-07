@@ -18,36 +18,51 @@
 
 <org.opensilk.music.dream.views.ArtWithMeta
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:ignore="RtlCompat">
 
     <TextView
         android:id="@+id/track_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/SingleLineTextView"
-        android:textAppearance="@style/TextAppearanceList.Title"/>
+        android:textAppearance="?android:textAppearanceLarge"/>
 
-    <org.opensilk.music.widgets.FullScreenArtworkImageView
+    <org.opensilk.common.widget.SquareImageView
         android:id="@+id/album_art"
         android:layout_below="@id/track_title"
         android:layout_width="@dimen/dream_art_size"
         android:layout_height="@dimen/dream_art_size" />
 
-    <TextView
-        android:id="@+id/artist_name"
+    <LinearLayout
         android:layout_below="@id/album_art"
+        android:layout_alignStart="@id/album_art"
+        android:layout_alignEnd="@id/album_art"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/SingleLineTextView"
-        android:textAppearance="@style/TextAppearanceList.Title"/>
+        android:baselineAligned="true">
 
-    <TextView
-        android:id="@+id/album_name"
-        android:layout_below="@id/artist_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/SingleLineTextView"
-        android:textAppearance="@style/TextAppearanceList.SubTitle"/>
+        <TextView
+            android:id="@+id/artist_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/SingleLineTextView"
+            android:textAppearance="?android:textAppearanceMedium"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" - "/>
+
+        <TextView
+            android:id="@+id/album_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/SingleLineTextView"
+            android:textAppearance="?android:textAppearanceMedium"/>
+
+    </LinearLayout>
 
 </org.opensilk.music.dream.views.ArtWithMeta>

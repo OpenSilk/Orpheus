@@ -257,7 +257,7 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:label="@string/dream_settings"
-            android:theme="@android:style/Theme.Holo">
+            android:theme="@android:style/Theme.DeviceDefault">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>

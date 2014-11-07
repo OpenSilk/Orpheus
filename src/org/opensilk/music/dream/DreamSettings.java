@@ -21,18 +21,57 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.view.MenuItem;
 
+import org.opensilk.common.util.VersionUtils;
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.MusicUtils;
-
-import org.opensilk.music.util.ConfigHelper;
+import org.opensilk.music.dream.views.ArtOnly;
+import org.opensilk.music.dream.views.ArtWithControls;
+import org.opensilk.music.dream.views.ArtWithMeta;
+import org.opensilk.music.ui2.main.MusicServiceConnection;
 
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import dagger.Provides;
+import de.greenrobot.event.EventBus;
+import mortar.Mortar;
+import mortar.MortarActivityScope;
 
 /**
  * Created by drew on 4/4/14.
  */
-@SuppressWarnings("AppCompatMethod")
 public class DreamSettings extends PreferenceActivity {
+
+    public static class BluePrint implements mortar.Blueprint {
+        @Override
+        public String getMortarScopeName() {
+            return getClass().getName();
+        }
+
+        @Override
+        public Object getDaggerModule() {
+            return new Module();
+        }
+
+        @dagger.Module(
+                addsTo = AppModule.class,
+                injects = {
+                        DreamSettings.class,
+                        ArtOnly.class,
+                        ArtWithControls.class,
+                        ArtWithMeta.class,
+                }
+        )
+        public static class Module {
+            @Provides @Singleton @Named("activity")
+            public EventBus provideEventBus() {
+                return new EventBus();
+            }
+        }
+    }
 
     static final String[] VALID_FRAGMENTS;
 
@@ -44,31 +83,61 @@ public class DreamSettings extends PreferenceActivity {
         };
     }
 
-    private MusicUtils.ServiceToken mToken;
+    @Inject MusicServiceConnection mServiceConnection;
+
+    MortarActivityScope mMortarScope;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mMortarScope = Mortar.requireActivityScope(Mortar.getScope(getApplication()), new BluePrint());
+        mMortarScope.onCreate(savedInstanceState);
+        Mortar.inject(this, this);
+
         ActionBar actionBar = getActionBar();
-        actionBar.setIcon(R.drawable.ic_action_arrow_left_white);
-        actionBar.setHomeButtonEnabled(true);
-        mToken = MusicUtils.bindToService(this, null);
+        if (actionBar != null) {
+            if (VersionUtils.hasLollipop()) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            } else {
+                // Make it look like lollipop
+                actionBar.setIcon(R.drawable.ic_action_arrow_left_white);
+                actionBar.setHomeButtonEnabled(true);
+            }
+        }
+
+        mServiceConnection.bind();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MusicUtils.unbindFromService(mToken);
+
+        mServiceConnection.unbind();
+
+        if (mMortarScope != null) {
+            Mortar.getScope(getApplication()).destroyChild(mMortarScope);
+            mMortarScope = null;
+        }
+    }
+
+    @Override
+    public Object getSystemService(String name) {
+        if (Mortar.isScopeSystemService(name)) {
+            return mMortarScope;
+        }
+        return super.getSystemService(name);
     }
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                finish();
                 return true;
+            default:
+                return super.onMenuItemSelected(featureId, item);
         }
-        return super.onMenuItemSelected(featureId, item);
     }
 
     @Override
@@ -79,15 +148,9 @@ public class DreamSettings extends PreferenceActivity {
     @Override
     protected boolean isValidFragment(String fragmentName) {
         for (String frag : VALID_FRAGMENTS) {
-            if (frag.equals(fragmentName)) {
-                return true;
-            }
+            if (frag.equals(fragmentName)) return true;
         }
         return false;
     }
 
-    @Override
-    public boolean isMultiPane() {
-        return ConfigHelper.isXLargeScreen(getResources());
-    }
 }

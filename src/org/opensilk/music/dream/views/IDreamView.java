@@ -16,9 +16,18 @@
 
 package org.opensilk.music.dream.views;
 
+import org.opensilk.common.mortar.HasScope;
+import org.opensilk.music.api.meta.ArtInfo;
+
 /**
  * Created by drew on 4/22/14.
  */
-public interface IDreamView {
-    public void update();
+public interface IDreamView extends HasScope {
+    void updatePlaystate(boolean playing);
+    void updateShuffleState(int mode);
+    void updateRepeatState(int mode);
+    void updateTrack(String name);
+    void updateArtist(String name);
+    void updateAlbum(String name);
+    void updateArtwork(ArtInfo artInfo);
 }

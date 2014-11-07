@@ -21,7 +21,6 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
@@ -30,7 +29,6 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.service.dreams.DreamService;
 
 import org.opensilk.common.util.VersionUtils;
@@ -75,12 +73,12 @@ public class AlternateDreamFragment extends PreferenceFragment implements
             DreamPrefs.removeAltDreamComponent(getActivity());
             new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.dream_settings_alt_dream_l_error)
-                    .setNeutralButton(android.R.string.ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .show();
         } else {
             new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.dream_settings_alt_dream_warning)
-                    .setNeutralButton(android.R.string.ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .show();
         }
     }

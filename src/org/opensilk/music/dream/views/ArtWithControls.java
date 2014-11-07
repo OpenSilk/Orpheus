@@ -18,46 +18,83 @@ package org.opensilk.music.dream.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.MusicUtils;
+import org.opensilk.music.ui2.main.MusicServiceConnection;
 
-import org.opensilk.music.widgets.PlayPauseButton;
+import javax.inject.Inject;
+
+import butterknife.InjectView;
+import rx.android.events.OnClickEvent;
+import rx.android.observables.ViewObservable;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by drew on 4/13/14.
  */
 public class ArtWithControls extends ArtOnly {
 
-    protected TextView mTrackTitle;
-    protected PlayPauseButton mPlayPauseButton;
+    private static final int[] STATE_CHECKED = new int[]{android.R.attr.state_checked};
+    private static final int[] STATE_UNCHECKED = new int[]{};
 
-    public ArtWithControls(Context context) {
-        super(context);
-    }
+    @Inject MusicServiceConnection mServiceConnection;
+
+    @InjectView(R.id.track_title) TextView mTrackTitle;
+    @InjectView(R.id.dream_action_play) ImageButton mPlayPauseButton;
+    @InjectView(R.id.dream_action_prev) ImageButton mPrevButton;
+    @InjectView(R.id.dream_action_next) ImageButton mNextButton;
+
+    CompositeSubscription subscriptions;
 
     public ArtWithControls(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ArtWithControls(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        subscriptions = new CompositeSubscription(
+                ViewObservable.clicks(mPlayPauseButton).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        mServiceConnection.playOrPause();
+                    }
+                }),
+                ViewObservable.clicks(mPrevButton).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        mServiceConnection.prev();
+                    }
+                }),
+                ViewObservable.clicks(mNextButton).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        mServiceConnection.next();
+                    }
+                })
+        );
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mTrackTitle = (TextView) findViewById(R.id.track_title);
-        mPlayPauseButton = (PlayPauseButton) findViewById(R.id.footer_action_button_play);
-//        update();
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (subscriptions != null) {
+            subscriptions.unsubscribe();
+            subscriptions = null;
+        }
     }
 
     @Override
-    public void update() {
-        super.update();
-        mPlayPauseButton.updateState();
-        mTrackTitle.setText(MusicUtils.getTrackName());
+    public void updatePlaystate(boolean playing) {
+        mPlayPauseButton.setImageState(playing ? STATE_CHECKED : STATE_UNCHECKED, true);
+    }
+
+    @Override
+    public void updateTrack(String name) {
+        mTrackTitle.setText(name);
     }
 
 }

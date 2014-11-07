@@ -21,7 +21,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <org.opensilk.music.widgets.FullScreenArtworkImageView
+    <org.opensilk.common.widget.SquareImageView
         android:id="@+id/album_art"
         android:layout_width="@dimen/dream_art_size"
         android:layout_height="@dimen/dream_art_size" />

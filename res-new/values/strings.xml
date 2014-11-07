@@ -131,7 +131,7 @@
     <string name="dream_settings_configure">Configure</string>
     <string name="dream_settings_night_mode">Night mode</string>
     <string name="dream_settings_night_mode_summary">Dim screen, suitable for dark rooms</string>
-    <string name="dream_settings_alt_dream_warning">The dream chosen here will display while music is not playing.\n\nWARN: This is experimental and may not function properly.</string>
+    <string name="dream_settings_alt_dream_warning">The dream chosen here will display while music is not playing.\n\nWARN: This is experimental and may not function properly.\n\nAs of Lollipop dreams require a system permission. Only dreams that lack this permission will be shown here.</string>
     <string name="dream_settings_alt_dream_l_error">As of Lollipop dreams require a permission we cannot obtain.\n\nNo dreams were found lacking this permission.\n\nThis feature will not work.</string>
     <string name="dream_settings_fullscreen">Fullscreen mode</string>
     <string name="dream_settings_fullscreen_summary">Hide status bar and blacks out navigation bar</string>

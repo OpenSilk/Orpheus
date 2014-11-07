@@ -18,45 +18,80 @@ package org.opensilk.music.dream.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
+import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 
-import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.widgets.FullScreenArtworkImageView;
+import javax.inject.Inject;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import mortar.Mortar;
+import mortar.MortarScope;
 
 /**
  * Created by drew on 4/13/14.
  */
 public class ArtOnly extends RelativeLayout implements IDreamView {
 
-    protected FullScreenArtworkImageView mArtwork;
+    @Inject ArtworkRequestManager mRequestor;
+    @Inject DreamPresenter mPresenter;
 
-    public ArtOnly(Context context) {
-        super(context);
-    }
+    @InjectView(R.id.album_art) protected ImageView mArtwork;
 
     public ArtOnly(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public ArtOnly(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+        Mortar.inject(context, this);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mArtwork = (FullScreenArtworkImageView) findViewById(R.id.album_art);
+        ButterKnife.inject(this);
+        mPresenter.takeView(this);
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        update();
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mPresenter.dropView(this);
     }
 
-    public void update() {
-        ArtworkManager.loadCurrentArtwork(mArtwork);
+    public void updatePlaystate(boolean playing) {
+
+    }
+
+    public void updateShuffleState(int mode) {
+
+    }
+
+    public void updateRepeatState(int mode) {
+
+    }
+
+    public void updateTrack(String name) {
+
+    }
+
+    public void updateArtist(String name) {
+
+    }
+
+    public void updateAlbum(String name) {
+
+    }
+
+    public void updateArtwork(ArtInfo artInfo) {
+        mRequestor.newAlbumRequest((AnimatedImageView) mArtwork, null, artInfo, ArtworkType.LARGE);
+    }
+
+    @Override
+    public MortarScope getScope() {
+        return Mortar.getScope(getContext());
     }
 }

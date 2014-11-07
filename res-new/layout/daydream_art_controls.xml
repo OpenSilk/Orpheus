@@ -18,17 +18,20 @@
 
 <org.opensilk.music.dream.views.ArtWithControls
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:ignore="RtlCompat">
 
     <TextView
         android:id="@+id/track_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/SingleLineTextView"
-        android:textAppearance="@style/TextAppearanceList.Title"/>
+        android:textAppearance="?android:textAppearanceLarge"/>
 
-    <org.opensilk.music.widgets.FullScreenArtworkImageView
+    <org.opensilk.common.widget.SquareImageView
         android:id="@+id/album_art"
         android:layout_below="@id/track_title"
         android:layout_width="@dimen/dream_art_size"
@@ -36,23 +39,36 @@
 
     <LinearLayout
         android:layout_below="@id/album_art"
-        android:layout_width="@dimen/dream_art_size"
-        android:layout_height="wrap_content">
+        android:layout_alignStart="@id/album_art"
+        android:layout_alignEnd="@id/album_art"
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        style="?android:buttonBarStyle">
 
-        <org.opensilk.music.widgets.RepeatingImageButton
-            android:id="@+id/footer_action_button_previous"
-            style="@style/PlaybackControlButton"
-            android:contentDescription="@string/accessibility_prev"/>
+        <ImageButton
+            android:id="@+id/dream_action_prev"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:src="@drawable/ic_skip_previous_white_36dp"
+            android:contentDescription="@string/accessibility_prev"
+            style="?android:buttonBarButtonStyle"/>
 
-        <org.opensilk.music.widgets.PlayPauseButton
-            android:id="@+id/footer_action_button_play"
-            style="@style/PlaybackControlButton"
-            android:contentDescription="@string/accessibility_play"/>
+        <ImageButton
+            android:id="@+id/dream_action_play"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:src="@drawable/action_playpause_white_36dp"
+            android:contentDescription="@string/accessibility_play"
+            style="?android:buttonBarButtonStyle"/>
 
-        <org.opensilk.music.widgets.RepeatingImageButton
-            android:id="@+id/footer_action_button_next"
-            style="@style/PlaybackControlButton"
-            android:contentDescription="@string/accessibility_next"/>
+        <ImageButton
+            android:id="@+id/dream_action_next"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:src="@drawable/ic_skip_next_white_36dp"
+            android:contentDescription="@string/accessibility_next"
+            style="?android:buttonBarButtonStyle"/>
 
     </LinearLayout>
 
