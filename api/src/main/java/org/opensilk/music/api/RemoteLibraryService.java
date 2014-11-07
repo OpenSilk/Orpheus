@@ -28,6 +28,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.opensilk.music.api.callback.Result;
+import org.opensilk.music.api.meta.LibraryInfo;
 
 import java.lang.ref.WeakReference;
 
@@ -46,7 +47,7 @@ public abstract class RemoteLibraryService extends Service {
      * The activity should be of Dialog Style, and should take care of everything needed
      * to allow user to access the library, including selecting from an available library (or
      * account) and any auth/sign in required. The activity must return {@link android.app.Activity#RESULT_OK}
-     * with the extra {@link OrpheusApi#EXTRA_LIBRARY_ID} in the Intent containing the identity Orpheus will pass
+     * with the extra {@link OrpheusApi#EXTRA_LIBRARY_INFO} in the Intent containing the identity Orpheus will pass
      * to all subsequent calls.
      * <p>
      * Although not required, it is preferable the activity utilizes
@@ -70,12 +71,16 @@ public abstract class RemoteLibraryService extends Service {
      * will be called by orpheus during the activity onStop() method. If your plugin does any active
      * scanning or other persistend battry draining activity your should suspend it here
      */
-    protected abstract void pause();
+    protected void pause() {
+
+    }
 
     /**
      * opposite of pause, called during activity onStart(), reverse anything you did in pause() here
      */
-    protected abstract void resume();
+    protected void resume() {
+
+    }
 
     /**
      * Return a list of {@link org.opensilk.music.api.model.spi.Bundleable} objects
@@ -125,6 +130,15 @@ public abstract class RemoteLibraryService extends Service {
      */
     protected abstract void search(@NonNull String libraryIdentity, @NonNull String query, int maxResults,
                                    @Nullable Bundle paginationBundle, @NonNull Result callback);
+
+    /**
+     * @return The users preferred library. If null Orpheus will launch the picker activity.
+     *         At a minimum {@link org.opensilk.music.api.meta.LibraryInfo#libraryId} must be set
+     *         it is preferable that all fields be populated. {@link org.opensilk.music.api.meta.LibraryInfo#folderId}
+     *         should contain the id of the root folder
+     */
+    @Nullable
+    protected abstract LibraryInfo getDefaultLibraryInfo();
 
     private RemoteLibrary.Stub mBinder;
     private Handler mHandler;
@@ -254,6 +268,14 @@ public abstract class RemoteLibraryService extends Service {
             if (s != null) {
                 s.search(libraryIdentity, query, maxResults, paginationBundle, callback);
             }
+        }
+
+        public LibraryInfo getDefaultLibraryInfo() throws RemoteException {
+            RemoteLibraryService s = ref.get();
+            if (s != null) {
+                return s.getDefaultLibraryInfo();
+            }
+            return null;
         }
 
         private static void copyIntent(Intent i, Intent ogi) {

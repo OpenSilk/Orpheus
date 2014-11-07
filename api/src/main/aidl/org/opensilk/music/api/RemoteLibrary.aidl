@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.opensilk.music.api.callback.Result;
+import org.opensilk.music.api.meta.LibraryInfo;
 
 /**
  * @see RemoteLibraryService for doc
@@ -37,4 +38,5 @@ interface RemoteLibrary {
     void browseFolders(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
     void listSongsInFolder(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
     void search(String libraryIdentity, String query, int maxResults, in Bundle paginationBundle, in Result callback);
+    LibraryInfo getDefaultLibraryInfo();
 }
