@@ -30,6 +30,12 @@ public class MakeToast {
     public final int resId;
     public final int arg;
 
+    public MakeToast(int resId) {
+        this.type = Type.NORMAL;
+        this.resId = resId;
+        this.arg = -1;
+    }
+
     public MakeToast(Type type, int resId) {
         this.type = type;
         this.resId = resId;

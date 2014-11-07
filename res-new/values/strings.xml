@@ -154,5 +154,11 @@
     <string name="feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
     <string name="feedback_subject">Feedback for Orpheus Music Player</string>
 
+    <!--Toast errors-->
     <string name="err_addtoqueue">Unable to enqueue songs</string>
+    <string name="err_opening_settings">Unable to open settings</string>
+    <string name="err_retrieving_items">Unable to retrieve items</string>
+    <string name="err_authentication">Error not authorized… Please login again</string>
+    <string name="err_unimplemented">FIXME Unimplemented</string>
+    <string name="err_connecting_library">Error connecting library</string>
 </resources>

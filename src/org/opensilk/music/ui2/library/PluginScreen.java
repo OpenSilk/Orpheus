@@ -19,10 +19,7 @@ package org.opensilk.music.ui2.library;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.text.TextUtils;
 
 import org.opensilk.common.flow.AppFlow;
@@ -31,19 +28,15 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
+import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.util.PluginSettings;
 import org.opensilk.silkdagger.qualifier.ForApplication;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -55,7 +48,6 @@ import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import timber.log.Timber;
 
 /**
@@ -64,46 +56,62 @@ import timber.log.Timber;
 @Layout(R.layout.library_plugin)
 @WithModule(PluginScreen.Module.class)
 @WithTransitions(
-        single = R.anim.grow_fade_in,
         forward = { R.anim.slide_out_left, R.anim.slide_in_right },
         backward = { R.anim.slide_out_right, R.anim.slide_in_left },
         replace = { R.anim.shrink_fade_out, R.anim.slide_in_left }
 )
 public class PluginScreen extends Screen {
 
+    final PluginInfo pluginInfo;
+
+    public PluginScreen(PluginInfo pluginInfo) {
+        this.pluginInfo = pluginInfo;
+    }
+
     @dagger.Module (
-            addsTo = LibrarySwitcherScreen.Module.class,
+            addsTo = ActivityBlueprint.Module.class,
             injects = PluginView.class,
             library = true
     )
     public static class Module {
+
+        final PluginScreen screen;
+
+        public Module(PluginScreen screen) {
+            this.screen = screen;
+        }
+
+        @Provides
+        public PluginInfo providePluginInfo() {
+            return screen.pluginInfo;
+        }
 
     }
 
     @Singleton
     public static class Presenter extends ViewPresenter<PluginView> {
 
-        final PluginInfo plugin;
+        final PluginInfo pluginInfo;
         final PluginSettings settings;
         final LibraryConnection connection;
         final EventBus bus;
         final ActionBarOwner actionBarOwner;
         final Context appContext;
 
-        String libraryIdentity;
+        LibraryInfo libraryInfo;
 
         @Inject
-        public Presenter(PluginInfo plugin, PluginSettings settings,
+        public Presenter(PluginInfo pluginInfo, PluginSettings settings,
                          LibraryConnection connection,
                          @Named("activity") EventBus bus,
                          ActionBarOwner actionBarOwner,
-                         @ForApplication Context context) {
-            this.plugin = plugin;
+                         @ForApplication Context appContext) {
+            this.pluginInfo = pluginInfo;
             this.settings = settings;
             this.connection = connection;
             this.bus = bus;
             this.actionBarOwner = actionBarOwner;
-            this.appContext = context;
+            this.appContext = appContext;
         }
 
         @Override
@@ -118,9 +126,7 @@ public class PluginScreen extends Screen {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
             if (savedInstanceState != null) {
-                libraryIdentity = savedInstanceState.getString("library_id");
-            } else {
-                libraryIdentity = settings.getDefaultSource();
+                libraryInfo = savedInstanceState.getParcelable("libraryinfo");
             }
             setupActionBar();
             connect();
@@ -130,7 +136,7 @@ public class PluginScreen extends Screen {
         public void onSave(Bundle outState) {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
-            outState.putString("library_id", libraryIdentity);
+            outState.putParcelable("libraryinfo", libraryInfo);
         }
 
         @Override
@@ -141,14 +147,28 @@ public class PluginScreen extends Screen {
         }
 
         void connect() {
-            if (!TextUtils.isEmpty(libraryIdentity)) {
+            if (libraryInfo != null) {
                 openLibrary();
             } else {
-                connection.getLibraryChooserIntent().subscribe(new Action1<Intent>() {
+                connection.getDefaultLibraryInfo(pluginInfo).subscribe(new Action1<LibraryInfo>() {
                     @Override
-                    public void call(Intent intent) {
-                        if (intent.getComponent() != null) {
-                            bus.post(new StartActivityForResult(intent, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
+                    public void call(LibraryInfo libraryInfo) {
+                        Presenter.this.libraryInfo = libraryInfo;
+                        openLibrary();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.e(throwable, "getDefaultLibraryInfo");
+                        if (throwable instanceof NullPointerException) {
+                            connection.getLibraryChooserIntent(pluginInfo).subscribe(new Action1<Intent>() {
+                                @Override
+                                public void call(Intent intent) {
+                                    if (intent.getComponent() != null) {
+                                        bus.post(new StartActivityForResult(intent, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
+                                    }
+                                }
+                            });
                         }
                     }
                 });
@@ -160,18 +180,23 @@ public class PluginScreen extends Screen {
             switch (res.reqCode) {
                 case StartActivityForResult.PLUGIN_REQUEST_LIBRARY:
                     if (res.resultCode == Activity.RESULT_OK) {
-                        final String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
-                        if (TextUtils.isEmpty(id)) {
-                            Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
-                            //TODO toast
-                            return;
+                        libraryInfo = res.intent.getParcelableExtra(OrpheusApi.EXTRA_LIBRARY_INFO);
+                        if (libraryInfo == null) {
+                            Timber.e("Library chooser must set EXTRA_LIBRARY_INFO");
+                            String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
+                            if (TextUtils.isEmpty(id)) {
+                                Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
+                                bus.post(new MakeToast(R.string.err_connecting_library));
+                                return;
+                            }
+                            libraryInfo = new LibraryInfo(id, null, null, null);
                         }
-                        libraryIdentity = id;
-                        settings.setDefaultSource(libraryIdentity);
+                        //TODO save libraryinfo
+//                        settings.setDefaultSource(libraryIdentity);
                         connect();
                     } else {
                         Timber.e("Activity returned bad result");
-                        //TODO toast
+                        bus.post(new MakeToast(R.string.err_connecting_library));
                     }
                     break;
                 case StartActivityForResult.PLUGIN_REQUEST_SETTINGS:
@@ -183,13 +208,14 @@ public class PluginScreen extends Screen {
             Timber.v("openLibrary()");
             PluginView v = getView();
             if (v == null) return;
-            LibraryInfo info = new LibraryInfo(libraryIdentity, null, null, null);
-            LibraryScreen screen = new LibraryScreen(info);
+            LibraryScreen screen = new LibraryScreen(pluginInfo, libraryInfo);
             AppFlow.get(v.getContext()).goTo(screen);
         }
 
         void setupActionBar() {
-//            actionBarOwner.setConfig(new ActionBarOwner.Config(true, true, plugin.title, createMenuConfig()));
+            ActionBarOwner.Config config = new ActionBarOwner.Config.Builder()
+                    .setTitle(pluginInfo.title).build();
+            actionBarOwner.setConfig(config);
         }
 
     }

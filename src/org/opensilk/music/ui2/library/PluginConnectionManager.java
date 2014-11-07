@@ -75,10 +75,11 @@ public class PluginConnectionManager {
         this.context = new ContextWrapper(context);
     }
 
-    public Observable<RemoteLibrary> bind(ComponentName componentName) {
+    public synchronized Observable<RemoteLibrary> bind(ComponentName componentName) {
         if (connections.containsKey(componentName)) {
             return connections.get(componentName).subject.asObservable();
         } else {
+            Timber.v("Binding %s", componentName);
             AsyncSubject<RemoteLibrary> subject = AsyncSubject.create();
             Token token = new Token(subject);
             connections.put(componentName, token);
@@ -88,7 +89,7 @@ public class PluginConnectionManager {
         }
     }
 
-    public void onPause() {
+    public synchronized void onPause() {
         for (final Map.Entry<ComponentName, Token> entry : connections.entrySet()) {
             entry.getValue().subject.observeOn(Schedulers.io()).subscribe(new Action1<RemoteLibrary>() {
                 @Override
@@ -105,7 +106,7 @@ public class PluginConnectionManager {
         }
     }
 
-    public void onResume() {
+    public synchronized void onResume() {
         for (final Map.Entry<ComponentName, Token> entry : connections.entrySet()) {
             entry.getValue().subject.observeOn(Schedulers.io()).subscribe(new Action1<RemoteLibrary>() {
                 @Override
@@ -122,7 +123,7 @@ public class PluginConnectionManager {
         }
     }
 
-    public void onDestroy() {
+    public synchronized void onDestroy() {
         for (final Map.Entry<ComponentName, Token> entry : connections.entrySet()) {
             entry.getValue().subject.subscribe(new Action1<RemoteLibrary>() {
                 @Override
@@ -135,8 +136,9 @@ public class PluginConnectionManager {
         connections.clear();
     }
 
-    public void onException(ComponentName componentName) {
+    public synchronized void onException(ComponentName componentName) {
         Token token = connections.remove(componentName);
+        Timber.v("Unbinding %s", componentName);
         if (token != null) context.unbindService(token);
     }
 

@@ -190,7 +190,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        @InjectView(R.id.artwork_thumb) @Optional ImageView artwork;
+        @InjectView(R.id.artwork_thumb) ImageView artwork;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) TextView extraInfo;

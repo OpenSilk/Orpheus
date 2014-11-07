@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,7 +41,9 @@ import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.exceptions.OnErrorThrowable;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/20/14.
@@ -78,22 +81,20 @@ public class LibraryConnection {
     public static final int STEP = 30;
 
     final PluginConnectionManager connectionManager;
-    final PluginInfo pluginInfo;
 
-    public LibraryConnection(PluginConnectionManager connectionManager, PluginInfo pluginInfo) {
+    public LibraryConnection(PluginConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
-        this.pluginInfo = pluginInfo;
     }
 
-    Observable<RemoteLibrary> getObservable() {
+    Observable<RemoteLibrary> getObservable(PluginInfo pluginInfo) {
         return connectionManager
                 .bind(pluginInfo.componentName)
                 // subject emmits on io so push it onto a background thread
                 .observeOn(Schedulers.io());
     }
 
-    public Observable<Result> browse(final LibraryInfo libraryInfo, final Bundle previousBundle) {
-        return getObservable()
+    public Observable<Result> browse(final PluginInfo pluginInfo, final LibraryInfo libraryInfo, final Bundle previousBundle) {
+        return getObservable(pluginInfo)
                 .flatMap(new Func1<RemoteLibrary, Observable<Result>>() {
                     @Override
                     public Observable<Result> call(final RemoteLibrary remoteLibrary) {
@@ -142,8 +143,8 @@ public class LibraryConnection {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Integer> getCapabilities() {
-        return getObservable().map(new Func1<RemoteLibrary, Integer>() {
+    public Observable<Integer> getCapabilities(final PluginInfo pluginInfo) {
+        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, Integer>() {
             @Override
             public Integer call(RemoteLibrary remoteLibrary) {
                 try {
@@ -153,11 +154,11 @@ public class LibraryConnection {
                     throw OnErrorThrowable.from(e);
                 }
             }
-        });
+        }).observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<Intent> getLibraryChooserIntent() {
-        return getObservable().map(new Func1<RemoteLibrary, Intent>() {
+    public Observable<Intent> getLibraryChooserIntent(final PluginInfo pluginInfo) {
+        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, Intent>() {
             @Override
             public Intent call(RemoteLibrary remoteLibrary) {
                 try {
@@ -169,7 +170,69 @@ public class LibraryConnection {
                     throw OnErrorThrowable.from(e);
                 }
             }
+        }).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<Intent> getSettingsIntent(final PluginInfo pluginInfo) {
+        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, Intent>() {
+            @Override
+            public Intent call(RemoteLibrary remoteLibrary) {
+                try {
+                    Intent intent = new Intent();
+                    remoteLibrary.getSettingsIntent(intent);
+                    return intent;
+                } catch (RemoteException e) {
+                    connectionManager.onException(pluginInfo.componentName);
+                    throw OnErrorThrowable.from(e);
+                }
+            }
+        }).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<LibraryInfo> getDefaultLibraryInfo(final PluginInfo pluginInfo) {
+        return _defaultLibraryInfo(pluginInfo)
+                .onErrorResumeNext(new Func1<Throwable, Observable<? extends LibraryInfo>>() {
+                    @Override
+                    public Observable<? extends LibraryInfo> call(Throwable throwable) {
+                        if (throwable instanceof RemoteException) {
+                            return Observable.timer(2, TimeUnit.SECONDS).flatMap(new Func1<Long, Observable<LibraryInfo>>() {
+                                @Override
+                                public Observable<LibraryInfo> call(Long aLong) {
+                                    return _defaultLibraryInfo(pluginInfo);
+                                }
+                            });
+                        } else {
+                            return Observable.error(throwable);
+                        }
+                    }
+                })
+           .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    private Observable<LibraryInfo> _defaultLibraryInfo(final PluginInfo pluginInfo) {
+        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, LibraryInfo>() {
+            @Override
+            public LibraryInfo call(RemoteLibrary remoteLibrary) {
+                Timber.v("getDefaultLibraryInfo called on %s", Thread.currentThread().getName());
+                try {
+                    LibraryInfo info = remoteLibrary.getDefaultLibraryInfo();
+                    if (true) throw new RemoteException();
+                    if (info != null) return info;
+                } catch (RemoteException e) {
+                    connectionManager.onException(pluginInfo.componentName);
+                    rethrow(e);
+                }
+                throw new NullPointerException("No default libraryInfo");
+            }
         });
+    }
+
+    void rethrow(Exception e) {
+        LibraryConnection.<RuntimeException>throwhack(e);
+    }
+
+    static <T extends Exception> void throwhack(Exception e) throws T {
+        throw (T) e;
     }
 
     private final Map<LibraryInfo, Result> CACHE = new LinkedHashMap<>();

@@ -23,6 +23,10 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 
+import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.ui2.library.LibraryConnection;
+import org.opensilk.music.ui2.library.PluginConnectionManager;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -60,6 +64,11 @@ public class LoaderModule {
     @Provides @Singleton
     public RxLoader<LocalSong> provideLocalSongsLoader(LocalSongsLoader l) {
         return l;
+    }
+
+    @Provides @Singleton
+    public LibraryConnection provideLibraryConnection(PluginConnectionManager pcm) {
+        return new LibraryConnection(pcm);
     }
 
 }

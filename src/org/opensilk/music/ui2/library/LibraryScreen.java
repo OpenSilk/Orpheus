@@ -16,10 +16,15 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.app.ActionBar;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -36,19 +41,30 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.event.MakeToast;
+import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.util.PluginSettings;
+import org.opensilk.silkdagger.qualifier.ForApplication;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import de.greenrobot.event.EventBus;
 import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;
 
@@ -60,26 +76,27 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
 @Layout(R.layout.library)
 @WithModule(LibraryScreen.Module.class)
 @WithTransitions(
-        single = R.anim.grow_fade_in,
         forward = { R.anim.slide_out_left, R.anim.slide_in_right },
         backward = { R.anim.slide_out_right, R.anim.slide_in_left },
-        replace = { R.anim.shrink_fade_out, R.anim.slide_in_left }
+        replace = { R.anim.slide_out_right, R.anim.grow_fade_in }
 )
 public class LibraryScreen extends Screen {
 
-    final LibraryInfo info;
+    final PluginInfo pluginInfo;
+    final LibraryInfo libraryInfo;
 
-    public LibraryScreen(LibraryInfo info) {
-        this.info = info;
+    public LibraryScreen(PluginInfo pluginInfo, LibraryInfo libraryInfo) {
+        this.pluginInfo = pluginInfo;
+        this.libraryInfo = libraryInfo;
     }
 
     @Override
     public String getName() {
-        return super.getName() + info.toString();
+        return super.getName() + libraryInfo.toString();
     }
 
     @dagger.Module(
-            addsTo = LibrarySwitcherScreen.Module.class,
+            addsTo = ActivityBlueprint.Module.class,
             injects = LibraryView.class,
             library = true
     )
@@ -91,9 +108,14 @@ public class LibraryScreen extends Screen {
             this.screen = screen;
         }
 
-        @Provides @Singleton
+        @Provides
+        public PluginInfo providePluginInfo() {
+            return screen.pluginInfo;
+        }
+
+        @Provides
         public LibraryInfo provideLibraryInfo() {
-            return screen.info;
+            return screen.libraryInfo;
         }
 
     }
@@ -101,25 +123,38 @@ public class LibraryScreen extends Screen {
     @Singleton
     public static class Presenter extends ViewPresenter<LibraryView> {
 
-        final LibraryConnection loader;
+        final LibraryConnection connection;
         final PluginInfo pluginInfo;
         final LibraryInfo libraryInfo;
         final ArtworkRequestManager requestor;
+        final Context appContext;
+        final PluginSettings settings;
+        final EventBus bus;
+        final ActionBarOwner actionBarOwner;
 
         final ResultObserver resultObserver;
+
         Subscription resultSubscription;
         boolean isloading;
         boolean initialLoad = true;
 
         @Inject
-        public Presenter(LibraryConnection loader,
+        public Presenter(LibraryConnection connection,
                          PluginInfo pluginInfo,
                          LibraryInfo libraryInfo,
-                         ArtworkRequestManager requestor) {
-            this.loader = loader;
+                         ArtworkRequestManager requestor,
+                         @ForApplication Context appContext,
+                         PluginSettings settings,
+                         @Named("activity") EventBus bus,
+                         ActionBarOwner actionBarOwner) {
+            this.connection = connection;
             this.pluginInfo = pluginInfo;
             this.libraryInfo = libraryInfo;
             this.requestor = requestor;
+            this.appContext = appContext;
+            this.settings = settings;
+            this.bus = bus;
+            this.actionBarOwner = actionBarOwner;
 
             resultObserver = new ResultObserver();
         }
@@ -133,8 +168,9 @@ public class LibraryScreen extends Screen {
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            if (loader.hasCache(libraryInfo)) {
-                LibraryConnection.Result cachedResult = loader.getCache(libraryInfo);
+            setupActionBar();
+            if (connection.hasCache(libraryInfo)) {
+                LibraryConnection.Result cachedResult = connection.getCache(libraryInfo);
                 resultObserver.lastResult = cachedResult;
                 onNewResult(cachedResult);
             } else {
@@ -176,7 +212,7 @@ public class LibraryScreen extends Screen {
                     .flatMap(new Func1<Long, Observable<LibraryConnection.Result>>() {
                         @Override
                         public Observable<LibraryConnection.Result> call(Long aLong) {
-                            return loader.browse(libraryInfo, token);
+                            return connection.browse(pluginInfo, libraryInfo, token);
                         }
                     })
                     .subscribe(resultObserver);
@@ -200,24 +236,138 @@ public class LibraryScreen extends Screen {
         }
 
         public void onItemClicked(Context context, Bundleable item) {
-            String identity = null;
-            if (item instanceof Folder) {
-                identity = ((Folder) item).identity;
-            } else if (item instanceof Album) {
-                identity = ((Album) item).identity;
-            } else if (item instanceof Artist) {
-                 identity = ((Artist) item).identity;
-            } else if (item instanceof Song) {
-                return;
+            String identity = item.getIdentity();
+            String name = item.getName();
+            if (TextUtils.isEmpty(identity)) return; //Shouldnt happen
+            LibraryInfo newInfo = libraryInfo.buildUpon(identity, name);
+            AppFlow.get(context).goTo(new LibraryScreen(pluginInfo, newInfo));
+        }
+
+        void setupActionBar() {
+            ActionBarOwner.Config config = new ActionBarOwner.Config.Builder()
+                    .setTitle(pluginInfo.title).setSubtitle(libraryInfo.libraryName).build();
+            actionBarOwner.setConfig(config);
+            connection.getCapabilities(pluginInfo).subscribe(new Action1<Integer>() {
+                @Override
+                public void call(Integer capabilities) {
+                    actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon()
+                            .withMenuConfig(createMenuConfig(capabilities)).build());
+                }
+            });
+        }
+
+        ActionBarOwner.MenuConfig createMenuConfig(int capabilities) {
+            List<Integer> menus = new ArrayList<>();
+            List<ActionBarOwner.CustomMenuItem> customMenus = new ArrayList<>();
+
+            // search
+            if (hasAbility(capabilities, OrpheusApi.Ability.SEARCH)) {
+                menus.add(R.menu.search);
             }
-            if (TextUtils.isEmpty(identity)) return;
-            LibraryInfo newInfo = libraryInfo.buildUpon(identity, null);
-            AppFlow.get(context).goTo(new LibraryScreen(newInfo));
+
+            Resources res = null;
+            try {
+                res = appContext.getPackageManager()
+                        .getResourcesForApplication(pluginInfo.componentName.getPackageName());
+            } catch (PackageManager.NameNotFoundException ignored) {}
+
+            if (res != null) {
+                // device selection
+                try {
+                    String change = res.getString(res.getIdentifier("menu_change_source",
+                            "string", pluginInfo.componentName.getPackageName()));
+                    customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_change_source, change));
+                } catch (Resources.NotFoundException ignored) {
+                    menus.add(R.menu.change_source);
+                }
+                // library settings
+                if (hasAbility(capabilities, OrpheusApi.Ability.SETTINGS)) {
+                    try {
+                        String settings = res.getString(res.getIdentifier("menu_library_settings",
+                                "string", pluginInfo.componentName.getPackageName()));
+                        customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_library_settings, settings));
+                    } catch (Resources.NotFoundException ignored) {
+                        menus.add(R.menu.library_settings);
+                    }
+                }
+            } else {
+                menus.add(R.menu.change_source);
+                if (hasAbility(capabilities, OrpheusApi.Ability.SETTINGS)) {
+                    menus.add(R.menu.library_settings);
+                }
+            }
+
+            int[] menusArray;
+            if (!menus.isEmpty()) {
+                menusArray = toArray(menus);
+            } else {
+                menusArray = new int[0];
+            }
+            ActionBarOwner.CustomMenuItem[] customMenuArray;
+            if (!customMenus.isEmpty()) {
+                customMenuArray = customMenus.toArray(new ActionBarOwner.CustomMenuItem[customMenus.size()]);
+            } else {
+                customMenuArray = new ActionBarOwner.CustomMenuItem[0];
+            }
+
+            return new ActionBarOwner.MenuConfig(createMenuActionHandler(), menusArray, customMenuArray);
+        }
+
+        Func1<Integer, Boolean> createMenuActionHandler() {
+            return new Func1<Integer, Boolean>() {
+                @Override
+                public Boolean call(final Integer integer) {
+                    switch (integer) {
+                        case R.id.menu_search:
+                            bus.post(new MakeToast(R.string.err_unimplemented));
+                            //TODO
+                            return true;
+                        case R.id.menu_change_source:
+                            settings.clearDefaultSource();
+                            if (getView() != null) {
+                                AppFlow.get(getView().getContext()).resetTo(new PluginScreen(pluginInfo));
+                            }
+                            return true;
+                        case R.id.menu_library_settings:
+                            connection.getSettingsIntent(pluginInfo)
+                                    .subscribe(new Action1<Intent>() {
+                                        @Override
+                                        public void call(Intent intent) {
+                                            if (intent.getComponent() != null) {
+                                                intent.putExtra(OrpheusApi.EXTRA_LIBRARY_ID, libraryInfo.libraryId);
+                                                intent.putExtra(OrpheusApi.EXTRA_LIBRARY_INFO, libraryInfo);
+                                                bus.post(new StartActivityForResult(intent,
+                                                        StartActivityForResult.PLUGIN_REQUEST_SETTINGS));
+                                            } else {
+                                                bus.post(new MakeToast(R.string.err_opening_settings));
+                                            }
+                                        }
+                                    });
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            };
+        }
+
+        boolean hasAbility(int capabilities, int ability) {
+            return (capabilities & ability) != 0;
+        }
+
+        static int[] toArray(Collection<Integer> collection) {
+            Object[] boxedArray = collection.toArray();
+            int len = boxedArray.length;
+            int[] array = new int[len];
+            for (int i = 0; i < len; i++) {
+                array[i] = ((Integer) boxedArray[i]).intValue();
+            }
+            return array;
         }
 
         // we re use this so we cant use a subscriber
         class ResultObserver implements Observer<LibraryConnection.Result> {
-            final int RETRY_LIMIT = 5;
+            final int RETRY_LIMIT = 4;
 
             LibraryConnection.Result lastResult;
             int retryCount = 0;
@@ -230,29 +380,37 @@ public class LibraryScreen extends Screen {
             @Override
             public void onError(Throwable e) {
                 Timber.e(e, "ResultObserver.OnError()");
-                if (++retryCount > RETRY_LIMIT) {
-                    //TODO show toast
+                if (retryCount++ >= RETRY_LIMIT) {
+                    bus.post(new MakeToast(R.string.err_retrieving_items));
                     return;
                 }
                 Bundle token = lastResult != null ? lastResult.token : null;
-                int backoff = retryCount * 1000;
+                int backoff = (int) (Math.pow(2, retryCount) + Math.random() * 1000);
+                Timber.d("retry backoff=%d", backoff);
                 if (e instanceof RemoteException) {
+                    connection.connectionManager.onException(pluginInfo.componentName);
                     loadMore(token, backoff);
                 } else if (e instanceof LibraryConnection.ResultException) {
                     int code = ((LibraryConnection.ResultException) e).getCode();
                     switch (code) {
                         case OrpheusApi.Error.NETWORK:
                             //TODO
+                            loadMore(token, backoff);
                             break;
                         case OrpheusApi.Error.AUTH_FAILURE:
-                            //TODO
+                            settings.clearDefaultSource();
+                            bus.post(new MakeToast(R.string.err_authentication));
+                            if (getView() != null) {
+                                AppFlow.get(getView().getContext()).resetTo(new PluginScreen(pluginInfo));
+                            }
                             break;
                         case OrpheusApi.Error.RETRY:
                             loadMore(token, backoff);
                             break;
                         case OrpheusApi.Error.UNKNOWN:
-                            loader.connectionManager.onException(pluginInfo.componentName);
+                            connection.connectionManager.onException(pluginInfo.componentName);
                             loadMore(token, backoff);
+                            break;
                         default:
                             break;
                     }
