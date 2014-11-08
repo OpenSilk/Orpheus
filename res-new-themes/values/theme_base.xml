@@ -108,11 +108,23 @@
     <!-- Settings themes -->
 
     <style name="Theme.Settings.Light" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
+        <item name="colorPrimary">@color/primary_material_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
         <item name="settingsCardBackgroundColor">@android:color/white</item>
     </style>
 
     <style name="Theme.Settings.Dark" parent="Theme.AppCompat.DialogWhenLarge">
-        <item name="settingsCardBackgroundColor">@android:color/black</item>
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarTheme">@style/Toolbar.Dark</item>
+        <item name="settingsCardBackgroundColor">?colorPrimary</item>
     </style>
 
     <!-- end settings themes -->
