@@ -26,10 +26,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 
+import org.opensilk.common.widget.CustomListGridFragment;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.LibraryInfo;
-import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
 import org.opensilk.music.ui.library.adapter.SearchAdapter;
 import org.opensilk.music.ui.modules.ActionBarController;
@@ -43,7 +43,7 @@ import javax.inject.Inject;
 /**
  * Created by drew on 7/22/14.
  */
-public class SearchFragment extends CardListGridFragment implements
+public class SearchFragment extends CustomListGridFragment implements
         LibraryAdapter.Callback, SearchView.OnQueryTextListener {
 
     @Inject @ForActivity

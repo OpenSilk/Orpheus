@@ -26,13 +26,9 @@ import com.andrew.apollo.utils.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.opensilk.cast.util.CastPreferences;
-import org.opensilk.cast.util.Utils;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui.home.MusicFragment;
 import org.opensilk.music.ui2.gallery.GalleryPage;
-import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.util.MarkedForRemoval;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
@@ -40,7 +36,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -183,58 +178,6 @@ public class AppPreferences {
 
     private String makePluginPrefKey(PluginInfo pluginInfo) {
         return pluginInfo.componentName.flattenToString().replaceAll("/", "_")+"_defInfo";
-    }
-
-    /**
-     * @return List of class names for home pager fragments
-     */
-    @Deprecated @MarkedForRemoval
-    public final List<MusicFragment> getHomePages() {
-        String pgs = getString(HOME_PAGES, null);
-        if (pgs == null) {
-            return null;
-        }
-        List<MusicFragment> pages = Lists.newArrayList();
-        JsonReader jw = new JsonReader(new StringReader(pgs));
-        try {
-            jw.beginArray();
-            while (jw.hasNext()) {
-                pages.add(MusicFragment.valueOf(jw.nextString()));
-            }
-            jw.endArray();
-        } catch (IOException |IllegalArgumentException e) {
-            remove(HOME_PAGES);
-            return null;
-        } finally {
-            try {
-                jw.close();
-            } catch (IOException ignored) { }
-        }
-        return pages;
-    }
-
-    /**
-     * Saves fragment class names for home pager
-     * @param pages
-     */
-    @Deprecated @MarkedForRemoval
-    public final void setHomePages(List<MusicFragment> pages) {
-        StringWriter sw = new StringWriter(400);
-        JsonWriter jw = new JsonWriter(sw);
-        try {
-            jw.beginArray();
-            for (MusicFragment p : pages) {
-                jw.value(p.toString());
-            }
-            jw.endArray();
-            putString(HOME_PAGES, sw.toString());
-        } catch (IOException e) {
-            remove(HOME_PAGES);
-        } finally {
-            try {
-                jw.close();
-            } catch (IOException ignored) { }
-        }
     }
 
 }

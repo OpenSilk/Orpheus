@@ -29,11 +29,9 @@ import android.util.JsonReader;
 import android.util.JsonWriter;
 
 import org.apache.commons.io.IOUtils;
-import org.opensilk.music.R;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui.home.HomeFragment;
 
 import java.io.IOException;
 import java.io.StringReader;

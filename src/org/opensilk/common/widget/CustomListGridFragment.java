@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.home;
+package org.opensilk.common.widget;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,10 +39,9 @@ import it.gmariotti.cardslib.library.view.CardListView;
  * to switch to the framework's implementation.  See the framework SDK
  * documentation for a class overview.
  *
- * Opensilk: Switched out ListView for CardListView and CardGridView that
- *           can be swapped out.
+ * OpenSilk: Subclasses can choose custom AbsListView and Empty view layouts
  */
-public abstract class CardListGridFragment extends Fragment {
+public abstract class CustomListGridFragment extends Fragment {
     static final int INTERNAL_EMPTY_ID = R.id.clg__empty_view;
     static final int INTERNAL_PROGRESS_CONTAINER_ID = R.id.clg__progress_container;
     static final int INTERNAL_LIST_CONTAINER_ID = R.id.clg__list_container;
@@ -64,7 +63,7 @@ public abstract class CardListGridFragment extends Fragment {
     CharSequence mEmptyText;
     boolean mListShown;
 
-    public CardListGridFragment() {
+    public CustomListGridFragment() {
     }
 
     public abstract int getListViewLayout();
@@ -89,7 +88,7 @@ public abstract class CardListGridFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View root = inflater.inflate(R.layout.fragment_cardlistgrid, container, false);
+        View root = inflater.inflate(R.layout.fragment_customlistgrid, container, false);
         FrameLayout emptyContainer = (FrameLayout) root.findViewById(INTERNAL_EMPTY_ID);
         inflater.inflate(getEmptyViewLayout(), emptyContainer, true);
         FrameLayout listContainer = (FrameLayout) root.findViewById(INTERNAL_LIST_CONTAINER_ID);

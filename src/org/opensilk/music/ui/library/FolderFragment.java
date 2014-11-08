@@ -26,11 +26,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.opensilk.common.widget.CustomListGridFragment;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.LibraryInfo;
 
-import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
 import org.opensilk.music.ui.modules.DrawerHelper;
@@ -43,7 +43,7 @@ import javax.inject.Inject;
 /**
  * Created by drew on 7/2/14.
  */
-public class FolderFragment extends CardListGridFragment implements LibraryAdapter.Callback {
+public class FolderFragment extends CustomListGridFragment implements LibraryAdapter.Callback {
 
     @Inject @ForActivity
     protected DrawerHelper mDrawerHelper;

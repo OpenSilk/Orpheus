@@ -32,14 +32,7 @@ import dagger.Provides;
 @Module (
         addsTo = org.opensilk.music.ui.activities.HomeModule.class,
         injects = {
-                ArtistFragment.class,
-                AlbumFragment.class,
-                GenreFragment.class,
-                HomeFragment.class,
-                PlaylistFragment.class,
-                HomeRecentFragment.class,
                 SearchFragment.class,
-                SongFragment.class,
         },
         includes = CardModule.class,
         complete = false

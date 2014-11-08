@@ -22,13 +22,13 @@ import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.view.View;
 
+import org.opensilk.common.widget.CustomListGridFragment;
 import org.opensilk.music.R;
 
 import org.opensilk.filebrowser.FileBrowserArgs;
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.FileItemArrayLoader;
 import org.opensilk.music.ui.cards.FolderPickerCard;
-import org.opensilk.music.ui.home.CardListGridFragment;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,7 +41,7 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 /**
  * Created by drew on 7/13/14.
  */
-public class FolderPickerFragment extends CardListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
+public class FolderPickerFragment extends CustomListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
 
     public static FolderPickerFragment newInstance(String startDir) {
         FolderPickerFragment f = new FolderPickerFragment();

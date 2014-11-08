@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -38,9 +37,9 @@ import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.activities.ProfileDialogActivity;
 import org.opensilk.music.ui.folder.FolderFragment;
 import org.opensilk.music.ui.home.SearchFragment;
-import org.opensilk.music.ui.home.HomeFragment;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.settings.SettingsActivity;
+import org.opensilk.music.util.MarkedForRemoval;
 
 import timber.log.Timber;
 
@@ -212,10 +211,8 @@ public final class NavUtils {
      * 
      * @param activity The {@link Activity} to use.
      */
+    @Deprecated @MarkedForRemoval
     public static void goHome(FragmentActivity activity) {
-        FragmentManager fm = activity.getSupportFragmentManager();
-        maybeClearBackstack(fm);
-        fm.beginTransaction().replace(R.id.main, new HomeFragment(), "home").commit();
     }
 
     public static void openFoldersFragment(FragmentActivity activity) {

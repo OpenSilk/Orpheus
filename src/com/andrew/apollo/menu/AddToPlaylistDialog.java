@@ -28,7 +28,6 @@ import org.opensilk.music.R;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.Lists;
 
-import org.opensilk.music.ui.home.loader.PlaylistLoader;
 import org.opensilk.music.util.CursorHelpers;
 
 import java.util.List;

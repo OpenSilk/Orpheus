@@ -27,13 +27,13 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ListView;
 
+import org.opensilk.common.widget.CustomListGridFragment;
 import org.opensilk.music.R;
 
 import org.opensilk.filebrowser.FileBrowserArgs;
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.FileItemArrayLoader;
 import org.opensilk.music.ui.cards.FileItemCard;
-import org.opensilk.music.ui.home.CardListGridFragment;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.qualifier.ForActivity;
@@ -43,15 +43,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import hugo.weaving.DebugLog;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import timber.log.Timber;
 
 /**
  * Created by drew on 7/2/14.
  */
-public class FolderChildFragment extends CardListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
+public class FolderChildFragment extends CustomListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
 
     protected static final int LOADER = 0;
 
