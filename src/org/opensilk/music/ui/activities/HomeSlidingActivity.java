@@ -35,6 +35,7 @@ import android.widget.ListView;
 
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.ThemeHelper;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.meta.PluginInfo;
@@ -45,6 +46,7 @@ import org.opensilk.music.ui.modules.BackButtonListener;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.ui.nav.adapter.NavAdapter;
 import org.opensilk.music.ui.nav.loader.NavLoader;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import java.util.List;
 
@@ -78,8 +80,12 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        setTheme(ThemeHelper.getInstance(this).getPanelTheme());
         super.onCreate(savedInstanceState);
 
+        ((DaggerInjector) getApplication()).getObjectGraph().plus(getModules()).inject(this);
+
+        setContentView(R.layout.activity_homesliding);
         ButterKnife.inject(this);
 
         // Init drawer adapter
@@ -162,10 +168,6 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getInstance().unregister(mBusMonitor);
-        if (isFinishing()) {
-            // schedule cache clear
-            mArtworkService.scheduleCacheClear();
-        }
     }
 
     @Override
@@ -292,12 +294,6 @@ public class HomeSlidingActivity extends BaseSlidingActivity implements
      * Abstract Methods
      */
 
-    @Override
-    protected int getLayoutId() {
-        return R.layout.activity_homesliding;
-    }
-
-    @Override
     protected Object[] getModules() {
         return new Object[] {
                 new ActivityModule(this),

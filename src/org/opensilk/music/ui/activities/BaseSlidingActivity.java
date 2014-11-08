@@ -34,6 +34,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.home.SearchFragment;
+import org.opensilk.music.ui2.BaseActivity;
 
 import butterknife.ButterKnife;
 import timber.log.Timber;
@@ -89,13 +90,13 @@ public class BaseSlidingActivity extends BaseActivity implements
         }
     }
 
-    @Override
+//    @Override
     public void onServiceConnected(final ComponentName name, final IBinder service) {
         boolean handled = mNowPlayingFragment.startPlayback(getIntent());
         if (handled) {
             setIntent(null);
         }
-        super.onServiceConnected(name, service);
+//        super.onServiceConnected(name, service);
     }
 
     @Override
@@ -125,7 +126,7 @@ public class BaseSlidingActivity extends BaseActivity implements
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
             if (savedInstanceState.getBoolean("panel_open", false)) {
-                mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
+//                mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.SYSTEM_EXPAND));
                 if (savedInstanceState.getBoolean("queue_showing", false)) {
                     mNowPlayingFragment.onQueueVisibilityChanged(true);
                 }
@@ -166,11 +167,6 @@ public class BaseSlidingActivity extends BaseActivity implements
         }
     }
 
-    @Override
-    protected int getThemeId() {
-        return ThemeHelper.getInstance(this).getPanelTheme();
-    }
-
     /*
      * implement SlidingUpPanelLayout.PanelSlideListener
      */
@@ -196,12 +192,12 @@ public class BaseSlidingActivity extends BaseActivity implements
 
     @Override
     public void onPanelExpanded(View panel) {
-        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
+//        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_EXPAND));
     }
 
     @Override
     public void onPanelCollapsed(View panel) {
-        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
+//        mActivityBus.post(new PanelStateChanged(PanelStateChanged.Action.USER_COLLAPSE));
     }
 
     @Override

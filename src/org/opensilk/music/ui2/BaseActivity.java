@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.activities;
+package org.opensilk.music.ui2;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
@@ -34,6 +36,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.opensilk.music.R;
+
+import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.utils.MusicUtils;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
@@ -47,6 +51,7 @@ import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
+import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.silkdagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
 
@@ -67,11 +72,7 @@ import static org.opensilk.cast.CastMessage.CAST_FAILED;
 /**
  * Created by drew on 8/10/14.
  */
-public class BaseActivity extends ScopedDaggerActionBarActivity implements
-        ServiceConnection {
-
-    // The service token
-    private MusicUtils.ServiceToken mToken;
+public class BaseActivity extends ActionBarActivity {
 
     // Cast stuff
     private RemoteCastServiceManager.ServiceToken mCastServiceToken;
@@ -82,29 +83,17 @@ public class BaseActivity extends ScopedDaggerActionBarActivity implements
     protected boolean killServiceOnExit;
 
     protected boolean mIsResumed;
+    protected boolean mConfigurationChangeIncoming;
 
-    @Inject
-    protected ArtworkService mArtworkService;
-    @Inject @ForActivity
-    protected Bus mActivityBus;
-    @Inject
-    protected AppPreferences mSettings;
-
+    @Inject protected AppPreferences mSettings;
+    @Inject protected MusicServiceConnection mMusicService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(getThemeId());
-        initTheme();
         super.onCreate(savedInstanceState);
 
-        // Set the layout
-        setContentView(getLayoutId());
-
-        // cancel any pending clear cache request
-        mArtworkService.cancelCacheClear();
-
         // Bind Apollo's service
-        mToken = MusicUtils.bindToService(this, this);
+        mMusicService.bind();
 
         // Control the media volume
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -128,10 +117,13 @@ public class BaseActivity extends ScopedDaggerActionBarActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Unbind from the service
-        if (mToken != null) {
-            MusicUtils.unbindFromService(mToken);
-            mToken = null;
+        if (!mConfigurationChangeIncoming) {
+            Timber.d("Activity is finishing()");
+            // Unbind from the service
+            mMusicService.unbind();
+            if (killServiceOnExit) {
+                stopService(new Intent(this, MusicPlaybackService.class));
+            }
         }
         //Unbind from cast service
         if (mCastServiceToken != null) {
@@ -174,6 +166,12 @@ public class BaseActivity extends ScopedDaggerActionBarActivity implements
     }
 
     @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        mConfigurationChangeIncoming = true;
+        return getObjectForRetain();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Media router
         if (isCastingEnabled) {
@@ -205,39 +203,8 @@ public class BaseActivity extends ScopedDaggerActionBarActivity implements
         return super.onKeyDown(keyCode, event);
     }
 
-    /*
-     * Pseudo abstract methods
-     */
-
-    protected int getThemeId() {
-        throw new UnsupportedOperationException("Subclass must override getThemeId()");
-    }
-
-    protected void initTheme() {
-        //stub
-    }
-
-    protected int getLayoutId() {
-        throw new UnsupportedOperationException("Subclass must override getLayoutId()");
-    }
-
-    @Override
-    protected Object[] getModules() {
-        throw new UnsupportedOperationException("Subclass must override getModules()");
-    }
-
-    /*
-     * Interfaces
-     */
-
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        EventBus.getInstance().post(new MusicServiceConnectionChanged(true));
-    }
-
-    @Override
-    public void onServiceDisconnected(final ComponentName name) {
-        EventBus.getInstance().post(new MusicServiceConnectionChanged(false));
+    protected Object getObjectForRetain() {
+        return new Object();
     }
 
     /**

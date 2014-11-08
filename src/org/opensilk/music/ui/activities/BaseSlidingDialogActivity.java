@@ -36,52 +36,16 @@ public class BaseSlidingDialogActivity extends BaseSlidingActivity {
     @Inject @ForActivity
     protected ActionBarController mActionBarHelper;
 
-    protected boolean mIsDialog;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ThemeHelper.getInstance(this).getPanelDialogTheme();
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_dialogsliding);
 
 //        mActionBarHelper.enableHomeAsUp(R.drawable.blank,
 //                mIsDialog ? R.drawable.ic_action_cancel_white : R.drawable.ic_action_arrow_left_white);
 
-    }
-
-    @Override
-    protected int getThemeId() {
-        return ThemeHelper.getInstance(this).getPanelDialogTheme();
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.activity_dialogsliding;
-    }
-
-    @Override
-    protected void initTheme() { // Thanks dashclock for this
-//        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR);
-
-        // Check if this should be a dialog
-        if (!ThemeHelper.isDialog(this)) {
-            return;
-        }
-
-        // Should be a dialog; set up the window parameters.
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.width = getResources().getDimensionPixelSize(R.dimen.profile_dialog_width);
-        params.height = Math.min(
-                getResources().getDimensionPixelSize(R.dimen.profile_dialog_max_height),
-                dm.heightPixels * 7 / 8);
-        params.alpha = 1.0f;
-        params.dimAmount = 0.5f;
-        getWindow().setAttributes(params);
-
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-
-        mIsDialog = true;
     }
 
 }

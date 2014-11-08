@@ -28,6 +28,7 @@ import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
 import org.opensilk.music.ui.profile.PlaylistFragment;
 import org.opensilk.music.ui.profile.SongGroupFragment;
+import org.opensilk.silkdagger.DaggerInjector;
 
 /**
  * Created by drew on 6/20/14.
@@ -43,6 +44,8 @@ public class ProfileDialogActivity extends BaseSlidingDialogActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ((DaggerInjector) getApplication()).getObjectGraph().plus(getModules()).inject(this);
 
 //        mActionBarHelper.setBackground(null);
 //        mActionBarHelper.setTitle(" ");
@@ -73,7 +76,6 @@ public class ProfileDialogActivity extends BaseSlidingDialogActivity {
 
     }
 
-    @Override
     protected Object[] getModules() {
         return new Object[] {
                 new ActivityModule(this),

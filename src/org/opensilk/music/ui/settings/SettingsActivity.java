@@ -3,21 +3,12 @@ package org.opensilk.music.ui.settings;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
-import android.view.WindowManager;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui.activities.ActivityModule;
-import org.opensilk.music.ui.activities.BaseActivity;
-import org.opensilk.music.ui.activities.BaseDialogActivity;
-
-import butterknife.ButterKnife;
+import org.opensilk.music.ui2.BaseActivity;
 
 /**
  * Created by andrew on 2/28/14.

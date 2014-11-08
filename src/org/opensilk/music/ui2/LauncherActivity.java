@@ -78,18 +78,15 @@ import mortar.MortarScope;
 import timber.log.Timber;
 
 
-public class LauncherActivity extends ActionBarActivity implements
+public class LauncherActivity extends BaseMortarActivity implements
         SlidingUpPanelLayout.PanelSlideListener,
-        PauseAndResumeActivity,
         AppFlowPresenter.Activity,
         ActionBarOwner.Activity,
         DrawerOwner.Activity {
 
     @Inject @Named("activity") EventBus mBus;
-    @Inject PauseAndResumePresenter mPauseResumePresenter;
     @Inject ActionBarOwner mActionBarOwner;
     @Inject DrawerOwner mDrawerOwner;
-    @Inject MusicServiceConnection mMusicService;
     @Inject PluginConnectionManager mPluginConnectionManager;
     @Inject AppFlowPresenter<LauncherActivity> mAppFlowPresenter;
 
@@ -99,32 +96,18 @@ public class LauncherActivity extends ActionBarActivity implements
     @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanelContainer;
 
-    MortarActivityScope mActivityScope;
 
     ActionBarOwner.MenuConfig mMenuConfig;
     ActionBarDrawerToggle mDrawerToggle;
-    boolean mConfigurationChangeIncoming;
-    String mScopeName;
-    boolean mIsResumed;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeHelper.getInstance(this).getTheme());
         super.onCreate(savedInstanceState);
 
-        MortarScope parentScope = Mortar.getScope(getApplication());
-        mActivityScope = Mortar.requireActivityScope(parentScope, new ActivityBlueprint(getScopeName()));
-        Mortar.inject(this, this);
-
-        mActivityScope.onCreate(savedInstanceState);
-
         mBus.register(this);
-        mMusicService.bind();
 
         mAppFlowPresenter.takeView(this);
-        mPauseResumePresenter.takeView(this);
 
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
@@ -142,69 +125,46 @@ public class LauncherActivity extends ActionBarActivity implements
     }
 
     @Override
-    public Object onRetainCustomNonConfigurationInstance() {
-        mConfigurationChangeIncoming = true;
-        return mActivityScope.getName();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
 
         if (mBus != null) mBus.unregister(this);
+
         if (mAppFlowPresenter != null) mAppFlowPresenter.dropView(this);
-        if (mPauseResumePresenter != null) mPauseResumePresenter.dropView(this);
         if (mActionBarOwner != null) mActionBarOwner.dropView(this);
         if (mDrawerOwner != null) mDrawerOwner.dropView(this);
 
         if (!mConfigurationChangeIncoming) {
-            Timber.d("Activity is finishing()");
             // Release service connection
-            mMusicService.unbind();
             mPluginConnectionManager.onDestroy();
-            // Destroy our scope
-            if (mActivityScope != null && !mActivityScope.isDestroyed()) {
-                MortarScope parentScope = Mortar.getScope(getApplication());
-                parentScope.destroyChild(mActivityScope);
-            }
-            mActivityScope = null;
         }
     }
 
     @Override
     protected void onStart() {
-        Timber.v("onStart()");
         super.onStart();
         mPluginConnectionManager.onResume();
     }
 
     @Override
     protected void onStop() {
-        Timber.v("onStop()");
         super.onStop();
         mPluginConnectionManager.onPause();
     }
 
     @Override
     protected void onResume() {
-        Timber.v("onResume()");
         super.onResume();
-        mIsResumed = true;
-        if (mPauseResumePresenter != null) mPauseResumePresenter.activityResumed();
     }
 
     @Override
     protected void onPause() {
-        Timber.v("onPause()");
         super.onPause();
-        mIsResumed = false;
-        if (mPauseResumePresenter != null) mPauseResumePresenter.activityPaused();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mActivityScope.onSaveInstanceState(outState);
     }
 
     @Override
@@ -267,8 +227,9 @@ public class LauncherActivity extends ActionBarActivity implements
 
     @Override
     public Object getSystemService(String name) {
-        if (Mortar.isScopeSystemService(name)) return mActivityScope;
-        if (AppFlow.isAppFlowSystemService(name)) return mAppFlowPresenter.getAppFlow();
+        if (AppFlow.isAppFlowSystemService(name)) {
+            return mAppFlowPresenter.getAppFlow();
+        }
         return super.getSystemService(name);
     }
 
@@ -288,8 +249,7 @@ public class LauncherActivity extends ActionBarActivity implements
                         finish();
                         break;
                     case ActivityResult.RESULT_RESTART_FULL:
-                        //TODO
-//                        killServiceOnExit = true;
+                        killServiceOnExit = true;
                         onActivityResult(StartActivityForResult.APP_REQUEST_SETTINGS,
                                 ActivityResult.RESULT_RESTART_APP, data);
                         break;
@@ -302,14 +262,6 @@ public class LauncherActivity extends ActionBarActivity implements
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
-    }
-
-    private String getScopeName() {
-        if (mScopeName == null) mScopeName = (String) getLastCustomNonConfigurationInstance();
-        if (mScopeName == null) {
-            mScopeName = ObjectUtils.<LauncherActivity>getClass(this).getName() + UUID.randomUUID().toString();
-        }
-        return mScopeName;
     }
 
     /*
@@ -338,23 +290,6 @@ public class LauncherActivity extends ActionBarActivity implements
     public void onEventMainThread(ConfirmDelete e) {
         DeleteDialog.newInstance((String)e.title, e.songids, null) //TODO
                 .show(getSupportFragmentManager(), "DeleteDialog");
-    }
-
-    /*
-     * PausesAndResumes
-     */
-
-    @Override
-    public boolean isRunning() {
-        return mIsResumed;
-    }
-
-    /*
-     * HasScope
-     */
-
-    public MortarScope getScope() {
-        return mActivityScope;
     }
 
     /*
