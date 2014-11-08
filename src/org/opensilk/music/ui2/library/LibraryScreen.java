@@ -168,13 +168,17 @@ public class LibraryScreen extends Screen {
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
+            Timber.v("onLoad(%s)", libraryInfo);
             super.onLoad(savedInstanceState);
             setupActionBar();
             if (connection.hasCache(libraryInfo)) {
+                Timber.v("cacheHit(%s)", libraryInfo);
                 LibraryConnection.Result cachedResult = connection.getCache(libraryInfo);
                 resultObserver.lastResult = cachedResult;
+                initialLoad = true;
                 onNewResult(cachedResult);
             } else {
+                Timber.v("freshLoad(%s)", libraryInfo);
                 loadMore(null);
             }
         }

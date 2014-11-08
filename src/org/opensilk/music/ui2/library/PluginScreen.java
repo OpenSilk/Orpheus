@@ -221,17 +221,19 @@ public class PluginScreen extends Screen {
                     if (res.resultCode == Activity.RESULT_OK) {
                         libraryInfo = res.intent.getParcelableExtra(OrpheusApi.EXTRA_LIBRARY_INFO);
                         if (libraryInfo == null) {
-                            Timber.e("Library chooser must set EXTRA_LIBRARY_INFO");
-                            bus.post(new MakeToast(R.string.err_connecting_library));
-                            showPickerButton();
-                            return;
-//                            String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
-//                            if (TextUtils.isEmpty(id)) {
-//                                Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
-//                                bus.post(new MakeToast(R.string.err_connecting_library));
-//                                return;
-//                            }
-//                            libraryInfo = new LibraryInfo(id, null, null, null);
+                            Timber.e("Library chooser should set EXTRA_LIBRARY_INFO");
+                            String id = res.intent.getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
+                            if (TextUtils.isEmpty(id)) {
+                                Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
+                                bus.post(new MakeToast(R.string.err_connecting_library));
+                                showPickerButton();
+                                return;
+                            }
+                            libraryInfo = new LibraryInfo(id, null, null, null);
+                        }
+                        if (libraryInfo.folderId != null || libraryInfo.folderName != null) {
+                            Timber.w("Please stop setting folderId and folderName in the returned LibraryInfo");
+                            libraryInfo = libraryInfo.buildUpon(null, null);
                         }
                         settings.setDefaultLibraryInfo(pluginInfo, libraryInfo);
                         openLibrary();

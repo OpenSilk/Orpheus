@@ -212,15 +212,6 @@ public class LibraryConnection {
         }));
     }
 
-    public Observable<LibraryInfo> getDefaultLibraryInfo(final PluginInfo pluginInfo) {
-        return observeOnMain(wrapForRetry(new Func0<Observable<LibraryInfo>>() {
-            @Override
-            public Observable<LibraryInfo> call() {
-                return _defaultLibraryInfo(pluginInfo);
-            }
-        }));
-    }
-
     /*
      * Wrapped calls
      */
@@ -268,22 +259,6 @@ public class LibraryConnection {
                     connectionManager.onException(pluginInfo.componentName);
                     throw rethrow(e);
                 }
-            }
-        });
-    }
-
-    Observable<LibraryInfo> _defaultLibraryInfo(final PluginInfo pluginInfo) {
-        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, LibraryInfo>() {
-            @Override
-            public LibraryInfo call(RemoteLibrary remoteLibrary) {
-                try {
-                    LibraryInfo info = remoteLibrary.getDefaultLibraryInfo();
-                    if (info != null) return info;
-                } catch (RemoteException e) {
-                    connectionManager.onException(pluginInfo.componentName);
-                    throw rethrow(e);
-                }
-                throw new NullPointerException("No default libraryInfo");
             }
         });
     }

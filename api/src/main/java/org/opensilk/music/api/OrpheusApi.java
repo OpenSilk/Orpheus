@@ -33,10 +33,8 @@ public class OrpheusApi {
      */
     public static final String ACTION_LIBRARY_SERVICE = "org.opensilk.music.plugin.LIBRARY_SERVICE";
     /**
-     * Intent extra containing library identity, used in multiple places
-     * @deprecated since {@link #API_020} use {@link #EXTRA_LIBRARY_INFO}
+     * Intent extra containing {@link String} library identity, used in multiple places
      */
-    @Deprecated
     public static final String EXTRA_LIBRARY_ID = "org.opensilk.music.api.LIBRARY_ID";
     /**
      * Intent extra containing the {@link org.opensilk.music.api.meta.LibraryInfo}
@@ -100,8 +98,8 @@ public class OrpheusApi {
      * Transforms Bundles passed to Orpheus into a {@link org.opensilk.music.api.model.spi.Bundleable} object
      *
      * @param b Bundle created with {@link org.opensilk.music.api.model.spi.Bundleable#toBundle()}
-     * @return {@link org.opensilk.music.api.model.spi.Bundleable} or null if Bundle is malformed
-     * @throws java.lang.Exception
+     * @return {@link org.opensilk.music.api.model.spi.Bundleable}
+     * @throws java.lang.Exception if bundle is malformed
      */
     @NonNull
     public static Bundleable transformBundle(Bundle b) throws Exception {
@@ -114,9 +112,9 @@ public class OrpheusApi {
      *
      * @param cls Class this bundle is created from
      * @param b Bundle created with {@link org.opensilk.music.api.model.spi.Bundleable#toBundle()}
-     * @return {@link org.opensilk.music.api.model.spi.Bundleable} object or null if passed Bundle
-     *          does not implement {@link org.opensilk.music.api.model.spi.Bundleable}
-     * @throws java.lang.Exception
+     * @return {@link org.opensilk.music.api.model.spi.Bundleable}
+     * @throws java.lang.Exception if passed {@link android.os.Bundle} does not implement
+     *          {@link org.opensilk.music.api.model.spi.Bundleable}
      */
     @NonNull
     public static <T extends Bundleable> T transformBundle(Class<T> cls, Bundle b) throws Exception {

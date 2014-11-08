@@ -38,5 +38,4 @@ interface RemoteLibrary {
     void browseFolders(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
     void listSongsInFolder(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
     void search(String libraryIdentity, String query, int maxResults, in Bundle paginationBundle, in Result callback);
-    LibraryInfo getDefaultLibraryInfo();
 }

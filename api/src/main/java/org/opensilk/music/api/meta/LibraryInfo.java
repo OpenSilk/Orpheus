@@ -19,6 +19,8 @@ package org.opensilk.music.api.meta;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 /**
@@ -26,20 +28,35 @@ import android.text.TextUtils;
  */
 public class LibraryInfo implements Parcelable {
 
+    /**
+     * Unique identifier for this library
+     */
     public final String libraryId;
+    /**
+     * Human readable name for library (used for display)
+     */
     public final String libraryName;
+    /**
+     * Unique folder identifier for this request
+     */
     public final String folderId;
+    /**
+     * Human readable name for folder;
+     */
     public final String folderName;
 
-    public LibraryInfo(String libraryId, String libraryName,
-                       String folderId, String folderName) {
+    public LibraryInfo(@NonNull String libraryId, @Nullable String libraryName,
+                       @Nullable String folderId, @Nullable String folderName) {
         this.libraryId = libraryId;
         this.libraryName = libraryName;
         this.folderId = folderId;
         this.folderName = folderName;
     }
 
-    public LibraryInfo buildUpon(String newFolderId, String newFolderName) {
+    /**
+     * @return a new instance retaining {@link #libraryId} and {@link #libraryName}
+     */
+    public LibraryInfo buildUpon(@Nullable String newFolderId, @Nullable String newFolderName) {
         return new LibraryInfo(this.libraryId, this.libraryName, newFolderId, newFolderName);
     }
 
