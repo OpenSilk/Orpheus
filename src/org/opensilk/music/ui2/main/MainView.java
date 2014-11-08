@@ -52,19 +52,13 @@ import timber.log.Timber;
  */
 public class MainView extends FlingyFabLayout {
 
-    @Inject
-    MainBlueprint.Presenter presenter;
+    @Inject MainScreen.Presenter presenter;
 
-    @InjectView(R.id.floating_action_button)
-    FloatingActionButtonCheckable fabPlay;
-    @InjectView(R.id.floating_action_next)
-    FloatingActionButton fabNext;
-    @InjectView(R.id.floating_action_prev)
-    FloatingActionButton fabPrev;
-    @InjectView(R.id.floating_action_shuffle)
-    FloatingActionButton fabShuffle;
-    @InjectView(R.id.floating_action_repeat)
-    FloatingActionButton fabRepeat;
+    @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable fabPlay;
+    @InjectView(R.id.floating_action_next) FloatingActionButton fabNext;
+    @InjectView(R.id.floating_action_prev) FloatingActionButton fabPrev;
+    @InjectView(R.id.floating_action_shuffle) FloatingActionButton fabShuffle;
+    @InjectView(R.id.floating_action_repeat) FloatingActionButton fabRepeat;
 
     AnimatorSet expandFabs;
     AnimatorSet collapseFabs;
@@ -97,11 +91,8 @@ public class MainView extends FlingyFabLayout {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         Timber.v("onLayout firstLayout=%s", firstLayout);
         super.onLayout(changed, l, t, r, b);
-        if (firstLayout) {
-            firstLayout = false;
-        } else {
-            return;
-        }
+        if (!firstLayout) return;
+        firstLayout = false;
         // Now that everyone knows where they are supposed to be
         // move them into position for the expand animation
         fabNext.setY(fabPlay.getY());

@@ -22,14 +22,19 @@ import android.os.Bundle;
 import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
+import org.opensilk.common.mortar.WithModule;
+import org.opensilk.music.R;
+import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import flow.Flow;
+import flow.Layout;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -50,7 +55,20 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 /**
  * Created by drew on 10/5/14.
  */
-public class MainBlueprint {
+@Layout(R.layout.main)
+@WithModule(MainScreen.Module.class)
+public class MainScreen extends Screen {
+
+    @dagger.Module(
+            addsTo = ActivityBlueprint.Module.class,
+            injects = {
+                    MainView.class,
+                    FooterView.class,
+            }
+    )
+    public static class Module {
+
+    }
 
     @Singleton
     public static class Presenter extends ViewPresenter<MainView> implements PausesAndResumes {

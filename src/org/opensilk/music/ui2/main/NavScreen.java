@@ -20,12 +20,12 @@ package org.opensilk.music.ui2.main;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.squareup.otto.Bus;
-
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.WithModule;
+import org.opensilk.music.R;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.ui2.ActivityBlueprint;
 import org.opensilk.music.util.PluginUtil;
 import org.opensilk.silkdagger.qualifier.ForApplication;
 
@@ -37,13 +37,24 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
+import flow.Layout;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
 
-public class NavBlueprint {
+@Layout(R.layout.drawer_navigation)
+@WithModule(NavScreen.Module.class)
+public class NavScreen extends Screen {
+
+    @dagger.Module(
+            addsTo = ActivityBlueprint.Module.class,
+            injects = NavView.class
+    )
+    public static class Module {
+
+    }
 
     @Singleton
     public static class Presenter extends ViewPresenter<NavView> {
@@ -67,9 +78,7 @@ public class NavBlueprint {
             subscription = loader.getObservable().subscribe(new Action1<List<PluginInfo>>() {
                 @Override
                 public void call(List<PluginInfo> pluginInfos) {
-                    NavView v = getView();
-                    if (v == null) return;
-                    v.onLoad(pluginInfos);
+                    if (getView() != null) getView().onLoad(pluginInfos);
                 }
             });
         }

@@ -22,101 +22,68 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import org.opensilk.common.flow.AppFlow;
-import org.opensilk.common.flow.Screen;
-import org.opensilk.common.mortar.PauseAndResumeActivity;
-import org.opensilk.common.mortar.PauseAndResumePresenter;
-import org.opensilk.common.util.ObjectUtils;
+import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.util.ViewUtils;
 import org.opensilk.music.R;
 
-import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.api.OrpheusApi;
-import com.andrew.apollo.menu.AddToPlaylistDialog;
-import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
-import org.opensilk.music.ui2.event.ConfirmDelete;
-import org.opensilk.music.ui2.event.MakeToast;
-import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.DrawerOwner;
-import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.common.mortarflow.AppFlowPresenter;
-import org.opensilk.common.mortarflow.FrameScreenSwitcherView;
-
-import java.util.UUID;
+import org.opensilk.music.ui2.main.MainScreen;
+import org.opensilk.music.ui2.main.NavScreen;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import de.greenrobot.event.EventBus;
-import flow.Flow;
-import mortar.Mortar;
-import mortar.MortarActivityScope;
-import mortar.MortarScope;
 import timber.log.Timber;
 
 
-public class LauncherActivity extends BaseMortarActivity implements
+public class LauncherActivity extends BaseSwitcherActivity implements
         SlidingUpPanelLayout.PanelSlideListener,
-        AppFlowPresenter.Activity,
-        ActionBarOwner.Activity,
         DrawerOwner.Activity {
 
-    @Inject @Named("activity") EventBus mBus;
-    @Inject ActionBarOwner mActionBarOwner;
     @Inject DrawerOwner mDrawerOwner;
     @Inject PluginConnectionManager mPluginConnectionManager;
-    @Inject AppFlowPresenter<LauncherActivity> mAppFlowPresenter;
 
-    @InjectView(R.id.main) FrameScreenSwitcherView mContainer;
-    @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
+    /*@InjectView(R.id.drawer_layout)*/ DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
-    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanelContainer;
 
-
-    ActionBarOwner.MenuConfig mMenuConfig;
     ActionBarDrawerToggle mDrawerToggle;
+
+    @Override
+    protected void setupView() {
+        setContentView(R.layout.activity_drawer);
+        mDrawerLayout = ButterKnife.findById(this, R.id.drawer_layout);
+        MortarContextFactory contextFactory = new MortarContextFactory();
+        ViewUtils.createView(contextFactory.setUpContext(new MainScreen(), this), MainScreen.class, mDrawerLayout);
+        ViewUtils.createView(contextFactory.setUpContext(new NavScreen(), this), NavScreen.class, mDrawerLayout);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeHelper.getInstance(this).getTheme());
         super.onCreate(savedInstanceState);
 
-        mBus.register(this);
-
-        mAppFlowPresenter.takeView(this);
-
-        setContentView(R.layout.activity_launcher);
-        ButterKnife.inject(this);
-        initThemeables();
-
-        mActionBarOwner.takeView(this);
         mDrawerOwner.takeView(this);
-
-        setSupportActionBar(mToolbar);
         setupDrawer();
 
         setupSlidingPanel();
@@ -127,13 +94,7 @@ public class LauncherActivity extends BaseMortarActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        if (mBus != null) mBus.unregister(this);
-
-        if (mAppFlowPresenter != null) mAppFlowPresenter.dropView(this);
-        if (mActionBarOwner != null) mActionBarOwner.dropView(this);
         if (mDrawerOwner != null) mDrawerOwner.dropView(this);
-
         if (!mConfigurationChangeIncoming) {
             // Release service connection
             mPluginConnectionManager.onDestroy();
@@ -153,43 +114,7 @@ public class LauncherActivity extends BaseMortarActivity implements
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Forward the new configuration the drawer toggle component.
-        if (mDrawerToggle != null) mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (mMenuConfig != null) {
-            for (int item : mMenuConfig.menus) {
-                getMenuInflater().inflate(item, menu);
-            }
-            for (ActionBarOwner.CustomMenuItem item : mMenuConfig.customMenus) {
-                menu.add(item.groupId, item.itemId, item.order, item.title)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                if (item.iconRes >= 0) {
-                    menu.findItem(item.itemId)
-                            .setIcon(item.iconRes)
-                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                }
-            }
-        }
         getMenuInflater().inflate(R.menu.sleep_timer, menu);
         return super.onCreateOptionsMenu(menu);
     }
@@ -199,13 +124,9 @@ public class LauncherActivity extends BaseMortarActivity implements
         if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        if (mMenuConfig != null && mMenuConfig.actionHandler != null
-                && mMenuConfig.actionHandler.call(item.getItemId())) {
-            return true;
-        }
         switch (item.getItemId()) {
             case android.R.id.home:
-                return closePanel() || mContainer.onUpPressed();
+                return closePanel() || super.onOptionsItemSelected(item);
             case R.id.menu_sleep_timer:
                 NavUtils.openSleepTimerDialog(this);
                 return true;
@@ -218,19 +139,16 @@ public class LauncherActivity extends BaseMortarActivity implements
     public void onBackPressed() {
         if (isDrawerOpen()) {
             closeDrawer();
-        } else if (closePanel()) {
-            return;
-        } else if (!mContainer.onBackPressed()) {
+        } else if (!closePanel()) {
             super.onBackPressed();
         }
     }
 
     @Override
-    public Object getSystemService(String name) {
-        if (AppFlow.isAppFlowSystemService(name)) {
-            return mAppFlowPresenter.getAppFlow();
-        }
-        return super.getSystemService(name);
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Forward the new configuration the drawer toggle component.
+        if (mDrawerToggle != null) mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -271,74 +189,6 @@ public class LauncherActivity extends BaseMortarActivity implements
     public void onEventMainThread(StartActivityForResult req) {
         req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeUtils.isLightTheme(this));
         startActivityForResult(req.intent, req.reqCode);
-    }
-
-    public void onEventMainThread(MakeToast e) {
-        if (e.type == MakeToast.Type.PLURALS) {
-            Toast.makeText(this, MusicUtils.makeLabel(this, e.resId, e.arg), Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, e.resId, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    //TODO stop using fragments
-    public void onEventMainThread(OpenAddToPlaylist e) {
-        AddToPlaylistDialog.newInstance(e.songsToAdd)
-            .show(getSupportFragmentManager(), "AddToPlaylistDialog");
-    }
-
-    public void onEventMainThread(ConfirmDelete e) {
-        DeleteDialog.newInstance((String)e.title, e.songids, null) //TODO
-                .show(getSupportFragmentManager(), "DeleteDialog");
-    }
-
-    /*
-     * AppFlowPresenter
-     */
-
-    @Override
-    public void showScreen(Screen screen, Flow.Direction direction, Flow.Callback callback) {
-        mContainer.showScreen(screen, direction, callback);
-    }
-
-    /*
-     * ActionBarOwner.View
-     */
-
-    @Override
-    public void setShowHomeEnabled(boolean enabled) {
-
-    }
-
-    @Override
-    public void setUpButtonEnabled(boolean enabled) {
-
-    }
-
-    @Override
-    public void setTitle(int titleId) {
-        mToolbar.setTitle(titleId);
-    }
-
-    @Override
-    public void setTitle(CharSequence title) {
-        mToolbar.setTitle(title);
-    }
-
-    @Override
-    public void setSubtitle(int subTitleRes) {
-        mToolbar.setSubtitle(subTitleRes);
-    }
-
-    @Override
-    public void setSubtitle(CharSequence title) {
-        mToolbar.setSubtitle(title);
-    }
-
-    @Override
-    public void setMenu(ActionBarOwner.MenuConfig menuConfig) {
-        mMenuConfig = menuConfig;
-        supportInvalidateOptionsMenu();
     }
 
     /*

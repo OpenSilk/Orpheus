@@ -24,6 +24,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import flow.Layout;
+
 /**
  * Created by drew on 10/9/14.
  */
@@ -48,13 +53,34 @@ public class ViewUtils {
         if (state != null) view.restoreHierarchyState(state);
     }
 
+    /** Note this will attach the view to the container use the other method to disable that */
     public static <T extends View> T inflate(Context context, int layout, ViewGroup parent) {
-        return inflate(context, layout, parent, false);
+        return (T) LayoutInflater.from(context).inflate(layout, parent);
     }
 
     public static <T extends View> T inflate(Context context, int layout, ViewGroup parent, boolean attachToRoot) {
         return (T) LayoutInflater.from(context).inflate(layout, parent, attachToRoot);
     }
 
+    /*
+     * Flow helpers see {@link flow.Layouts}
+     */
+
+    /** Create an instance of the view specified in a {@link flow.Layout} annotation. */
+    public static <T extends View> T createView(Context context, Object screen, ViewGroup container) {
+        return createView(context, screen.getClass(), container);
+    }
+
+    /** Create an instance of the view specified in a {@link flow.Layout} annotation. */
+    public static <T extends View> T createView(Context context, Class<?> screenType, ViewGroup container) {
+        Layout screen = screenType.getAnnotation(Layout.class);
+        if (screen == null) {
+            throw new IllegalArgumentException(
+                    String.format("@%s annotation not found on class %s", Layout.class.getSimpleName(),
+                            screenType.getName()));
+        }
+        int layout = screen.value();
+        return inflate(context, layout, container);
+    }
 
 }

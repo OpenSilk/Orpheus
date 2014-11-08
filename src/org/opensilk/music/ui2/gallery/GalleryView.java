@@ -136,7 +136,7 @@ public class GalleryView extends LinearLayout {
             Screen screen = page.screen;
             Timber.v("instantiateItem %s", screen.getName());
             Context newChildContext = contextFactory.setUpContext(screen, getContext());
-            final GalleryPageView newChild = ViewUtils.inflate(newChildContext, R.layout.gallery_page, container);
+            final GalleryPageView newChild = ViewUtils.inflate(newChildContext, R.layout.gallery_page, container, false);
             ViewUtils.restoreState(newChild, savedState, screen.getName());
             container.addView(newChild);
             Page newPage = new Page(screen, newChild);

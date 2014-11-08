@@ -45,14 +45,14 @@ public class BaseMortarActivity extends BaseActivity implements PauseAndResumeAc
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         mActivityScope = Mortar.requireActivityScope(Mortar.getScope(getApplication()), getBlueprint(getScopeName()));
         mActivityScope.onCreate(savedInstanceState);
-        Mortar.inject(this, this);
+        Mortar.inject(this, this); //Must inject before calling super
+
+        super.onCreate(savedInstanceState);
+
 
         mPauseResumePresenter.takeView(this);
-
     }
 
     @Override

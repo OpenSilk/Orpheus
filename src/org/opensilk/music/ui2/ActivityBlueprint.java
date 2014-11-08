@@ -68,9 +68,6 @@ public class ActivityBlueprint implements Blueprint {
             },
             injects = {
                     LauncherActivity.class,
-                    MainView.class,
-                    FooterView.class,
-                    NavView.class,
                     QueueView.class,
             },
             library = true //
@@ -78,13 +75,13 @@ public class ActivityBlueprint implements Blueprint {
     public static class Module {
 
         @Provides @Singleton
-        public AppFlowPresenter<LauncherActivity> providePresenter(Parcer<Object> floParcer) {
+        public AppFlowPresenter<BaseSwitcherActivity> providePresenter(Parcer<Object> floParcer) {
             return new Presenter(floParcer);
         }
 
     }
 
-    static class Presenter extends AppFlowPresenter<LauncherActivity> {
+    static class Presenter extends AppFlowPresenter<BaseSwitcherActivity> {
 
         Presenter(Parcer<Object> floParcer) {
             super(floParcer);
