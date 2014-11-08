@@ -18,24 +18,13 @@ package org.opensilk.music.ui2.main;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
-import android.support.v7.graphics.Palette;
-
-import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.rx.HoldsSubscription;
-import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.AnimatedImageView;
-import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
@@ -51,20 +40,18 @@ import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
-import rx.Scheduler;
 import rx.Subscription;
-import rx.android.observables.AndroidObservable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.observers.Observers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
 import static org.opensilk.common.rx.RxUtils.notSubscribed;
+import static org.opensilk.common.rx.RxUtils.observeOnMain;
 
 /**
  * Created by drew on 10/15/14.
@@ -80,6 +67,9 @@ public class FooterBlueprint {
         final ArtworkRequestManager artworkReqestor;
 
         CompositeSubscription broadcastSubscriptions;
+        //These are separate since they query the service
+        //and need error handling
+        Subscription artworkSubscription;
         Subscription progressSubscription;
 
         Observable<Boolean> playStateObservable;
@@ -189,91 +179,30 @@ public class FooterBlueprint {
         }
 
         void setupObserables() {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-            intentFilter.addAction(MusicPlaybackService.META_CHANGED);
-            Scheduler scheduler = Schedulers.computation();
-            // obr will call onNext on the main thread so we observeOn computation
-            // so our chained operators will be called on computation instead of main.
-            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(appContext, intentFilter).observeOn(scheduler);
-            playStateObservable = intentObservable
-                    // Filter for only PLAYSTATE_CHANGED actions
-                    .filter(new Func1<Intent, Boolean>() {
-                        // called on computation
+            playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
+            metaObservable = observeOnMain(Observable.zip(
+                    BroadcastObservables.trackChanged(appContext),
+                    BroadcastObservables.artistChanged(appContext),
+                    new Func2<String, String, String[]>() {
                         @Override
-                        public Boolean call(Intent intent) {
-                            Timber.v("playstateSubscripion filter called on %s", Thread.currentThread().getName());
-                            return MusicPlaybackService.PLAYSTATE_CHANGED.equals(intent.getAction());
+                        public String[] call(String trackName, String artistName) {
+                            Timber.v("metaObservable(zip) called on %s", Thread.currentThread().getName());
+                            return new String[] {trackName,artistName};
                         }
-                    })
-                    // filter out repeats only taking most recent
-                    .debounce(20, TimeUnit.MILLISECONDS)
-                    // XXX the intent contains the playstate as an extra but it could be out of date
-//                    .map(new Func1<Intent, Boolean>() {
-//                        @Override
-//                        public Boolean call(Intent intent) {
-//                            return intent.getBooleanExtra("playing", false);
-//                        }
-//                    })
-                    // flatMap the intent into a boolean by requesting the playstate
-                    .flatMap(new Func1<Intent, Observable<Boolean>>() {
-                        @Override
-                        public Observable<Boolean> call(Intent intent) {
-                            Timber.v("playstateSubscription flatMap called on %s", Thread.currentThread().getName());
-                            return musicService.isPlaying();
-                        }
-                    })
-                    // observe final result on main thread
-                    .observeOn(AndroidSchedulers.mainThread());
-            Observable<Intent> metaChangedObservable = intentObservable
-                    // filter only the META_CHANGED actions
-                    .filter(new Func1<Intent, Boolean>() {
-                        // will be called on computation
-                        @Override
-                        public Boolean call(Intent intent) {
-                            Timber.v("metaObservable(filter) %s", Thread.currentThread().getName());
-                            return MusicPlaybackService.META_CHANGED.equals(intent.getAction());
-                        }
-                    })
-                    // buffer quick successive calls and only emit the most recent
-                    .debounce(20, TimeUnit.MILLISECONDS);
-            metaObservable = metaChangedObservable
-                    // XXX these are included in the intent as extras but could be out of date
-//                    .map(new Func1<Intent, String[]>() {
-//                        @Override
-//                        public String[] call(Intent intent) {
-//                            return new String[] {intent.getStringExtra("track"), intent.getStringExtra("artist")});
-//                        }
-//                    })
-                    // flatmap the intent into a String[] containing the trackname and artistname
-                    .flatMap(new Func1<Intent, Observable<String[]>>() {
-                        // called on computation
-                        @Override
-                        public Observable<String[]> call(Intent intent) {
-                            Timber.v("metaObservable(flatMap) %s", Thread.currentThread().getName());
-                            return Observable.zip(musicService.getTrackName(), musicService.getArtistName(), new Func2<String, String, String[]>() {
-                                // getTrackName and getArtistName will emit their values on IO threads so this gets called on an IO thread
-                                // as a side note the getTrackName and getArtistName operate in parallel here
-                                @Override
-                                public String[] call(String trackName, String artistName) {
-                                    Timber.v("metaObservable(zip) called on %s", Thread.currentThread().getName());
-                                    return new String[]{trackName, artistName};
-                                }
-                            });
-                        }
-                    })
-                    // we want the final value to come in on the main thread
-                    .observeOn(AndroidSchedulers.mainThread());
-            artworkObservable = metaChangedObservable
+                    }
+            ));
+            artworkObservable = observeOnMain(BroadcastObservables.metaChanged(appContext)
                     .flatMap(new Func1<Intent, Observable<ArtInfo>>() {
                         @Override
                         public Observable<ArtInfo> call(Intent intent) {
                             return musicService.getCurrentArtInfo();
                         }
                     })
-                    .observeOn(AndroidSchedulers.mainThread());
-            currentPositionObservable =
-                    Observable.zip(musicService.getPosition(), musicService.getDuration(), new Func2<Long, Long, Long>() {
+            );
+            currentPositionObservable = Observable.zip(
+                    musicService.getPosition(),
+                    musicService.getDuration(),
+                    new Func2<Long, Long, Long>() {
                         @Override
                         public Long call(Long position, Long duration) {
                             Timber.v("currentPositionObservable(%d, %d) %s", position, duration, Thread.currentThread().getName());
@@ -283,8 +212,9 @@ public class FooterBlueprint {
                                 return (long) 1000;
                             }
                         }
-                    }).observeOn(AndroidSchedulers.mainThread());
-            progressObservable =
+                    }
+            );
+            progressObservable = observeOnMain(
                     // construct an Observable than repeats every .5s,
                     Observable.interval(500, TimeUnit.MILLISECONDS)
                     // we then fetch the progress as a percentage,
@@ -295,48 +225,66 @@ public class FooterBlueprint {
                             return currentPositionObservable;
                         }
                     })
-                    // we want the final result on the ui thread
-                    .observeOn(AndroidSchedulers.mainThread());
+            );
         }
 
         void setupObservers() {
-            playStateObserver = Observers.create(new Action1<Boolean>() {
-                @Override
-                public void call(Boolean playing) {
-                    Timber.v("playStateObserver(result) %s", Thread.currentThread().getName());
-                    if (playing) {
-                        subscribeProgress();
-                    } else {
-                        unsubscribeProgress();
-                        // update the current position
-                        currentPositionObservable.observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(progressObserver);
+            playStateObserver = Observers.create(
+                    new Action1<Boolean>() {
+                        @Override
+                        public void call(Boolean playing) {
+                            Timber.v("playStateObserver(result) %s", Thread.currentThread().getName());
+                            if (playing) {
+                                subscribeProgress();
+                            } else {
+                                unsubscribeProgress();
+                                // update the current position
+                                currentPositionObservable.observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(progressObserver);
+                            }
+                        }
                     }
-                }
-            });
-            metaObserver = Observers.create(new Action1<String[]>() {
-                @Override
-                public void call(String[] strings) {
-                    Timber.v("metaObserver(result) %s", Thread.currentThread().getName());
-                    if (strings.length == 2) {
-                        setTrackName(strings[0]);
-                        setArtistName(strings[1]);
+            );
+            metaObserver = Observers.create(
+                    new Action1<String[]>() {
+                        @Override
+                        public void call(String[] strings) {
+                            Timber.v("metaObserver(result) %s", Thread.currentThread().getName());
+                            if (strings.length == 2) {
+                                setTrackName(strings[0]);
+                                setArtistName(strings[1]);
+                            }
+                        }
                     }
-                }
-            });
-            artworkObserver = Observers.create(new Action1<ArtInfo>() {
-                @Override
-                public void call(ArtInfo artInfo) {
-                    updateArtwork(artInfo);
-                }
-            });
-            progressObserver = Observers.create(new Action1<Long>() {
-                @Override
-                public void call(Long progress) {
+            );
+            artworkObserver = Observers.create(
+                    new Action1<ArtInfo>() {
+                        @Override
+                        public void call(ArtInfo artInfo) {
+                            updateArtwork(artInfo);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            //TODO resubscribe
+                        }
+                    }
+            );
+            progressObserver = Observers.create(
+                    new Action1<Long>() {
+                        @Override
+                        public void call(Long progress) {
 //                    Timber.d("progressObserver(result) %s", Thread.currentThread().getName());
-                    setProgress(progress.intValue());
-                }
-            });
+                            setProgress(progress.intValue());
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            unsubscribeProgress();
+                            subscribeProgress();
+                        }
+                    }
+            );
             paletteObserver = new PaletteObserver() {
                 @Override
                 public void onNext(PaletteResponse paletteResponse) {
@@ -349,16 +297,30 @@ public class FooterBlueprint {
             if (notSubscribed(broadcastSubscriptions)) {
                 broadcastSubscriptions = new CompositeSubscription(
                         playStateObservable.subscribe(playStateObserver),
-                        metaObservable.subscribe(metaObserver),
-                        artworkObservable.subscribe(artworkObserver)
+                        metaObservable.subscribe(metaObserver)
                 );
             }
+            subscribeArtwork();
         }
 
         void unsubscribeBroadcasts() {
             if (isSubscribed(broadcastSubscriptions)) {
                 broadcastSubscriptions.unsubscribe();
                 broadcastSubscriptions = null;
+            }
+            unsubscribeArtwork();
+        }
+
+        void subscribeArtwork() {
+            if (notSubscribed(artworkSubscription)) {
+                artworkSubscription = artworkObservable.subscribe(artworkObserver);
+            }
+        }
+
+        void unsubscribeArtwork() {
+            if (isSubscribed(artworkSubscription)) {
+                artworkSubscription.unsubscribe();
+                artworkSubscription = null;
             }
         }
 

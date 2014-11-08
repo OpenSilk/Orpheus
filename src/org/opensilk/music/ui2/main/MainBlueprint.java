@@ -17,8 +17,6 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
@@ -37,20 +35,17 @@ import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
-import rx.Scheduler;
+import rx.Subscription;
 import rx.android.events.OnClickEvent;
-import rx.android.observables.AndroidObservable;
 import rx.android.observables.ViewObservable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.observers.Observers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
 import static org.opensilk.common.rx.RxUtils.notSubscribed;
+import static org.opensilk.common.rx.RxUtils.observeOnMain;
 
 /**
  * Created by drew on 10/5/14.
@@ -215,73 +210,9 @@ public class MainBlueprint {
         Observable<Integer> repeatModeObservable;
 
         void setupObservables() {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-            intentFilter.addAction(MusicPlaybackService.REPEATMODE_CHANGED);
-            intentFilter.addAction(MusicPlaybackService.SHUFFLEMODE_CHANGED);
-            Scheduler scheduler = Schedulers.computation();
-            // obr will call onNext on the main thread so we observeOn computation
-            // so our chained operators will be called on computation instead of main.
-            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(appContext, intentFilter).observeOn(scheduler);
-            playStateObservable = intentObservable
-                    // Filter for only PLAYSTATE_CHANGED actions
-                    .filter(new Func1<Intent, Boolean>() {
-                        // called on computation
-                        @Override
-                        public Boolean call(Intent intent) {
-                            Timber.v("playstateSubscripion filter called on %s", Thread.currentThread().getName());
-                            return MusicPlaybackService.PLAYSTATE_CHANGED.equals(intent.getAction());
-                        }
-                    })
-                            // filter out repeats only taking most recent
-//                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
-                    // XXX the intent contains the playstate as an extra but it could be out of date
-//                    .map(new Func1<Intent, Boolean>() {
-//                        @Override
-//                        public Boolean call(Intent intent) {
-//                            return intent.getBooleanExtra("playing", false);
-//                        }
-//                    })
-                    // flatMap the intent into a boolean by requesting the playstate
-                    .flatMap(new Func1<Intent, Observable<Boolean>>() {
-                        @Override
-                        public Observable<Boolean> call(Intent intent) {
-                            Timber.v("playstateSubscription flatMap called on %s", Thread.currentThread().getName());
-                            return musicService.isPlaying();
-                        }
-                    })
-                            // observe final result on main thread
-                    .observeOn(AndroidSchedulers.mainThread());
-            shuffleModeObservable = intentObservable
-                    .filter(new Func1<Intent, Boolean>() {
-                        @Override
-                        public Boolean call(Intent intent) {
-                            return MusicPlaybackService.SHUFFLEMODE_CHANGED.equals(intent.getAction());
-                        }
-                    })
-//                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
-                    .flatMap(new Func1<Intent, Observable<Integer>>() {
-                        @Override
-                        public Observable<Integer> call(Intent intent) {
-                            return musicService.getShuffleMode();
-                        }
-                    })
-                    .observeOn(AndroidSchedulers.mainThread());
-            repeatModeObservable = intentObservable
-                    .filter(new Func1<Intent, Boolean>() {
-                        @Override
-                        public Boolean call(Intent intent) {
-                            return MusicPlaybackService.REPEATMODE_CHANGED.equals(intent.getAction());
-                        }
-                    })
-//                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
-                    .flatMap(new Func1<Intent, Observable<Integer>>() {
-                        @Override
-                        public Observable<Integer> call(Intent intent) {
-                            return musicService.getRepeatMode();
-                        }
-                    })
-                    .observeOn(AndroidSchedulers.mainThread());
+            playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
+            shuffleModeObservable = observeOnMain(BroadcastObservables.shuffleModeChanged(appContext, musicService));
+            repeatModeObservable = observeOnMain(BroadcastObservables.repeatModeChanged(appContext, musicService));
         }
 
         Observer<Boolean> playStateObserver;
@@ -289,41 +220,87 @@ public class MainBlueprint {
         Observer<Integer> repeatModeObserver;
 
         void setupObservers() {
-            playStateObserver = Observers.create(new Action1<Boolean>() {
-                @Override
-                public void call(Boolean playing) {
-                    updateFabPlay(playing);
-                }
-            });
-            shuffleModeObserver = Observers.create(new Action1<Integer>() {
-                @Override
-                public void call(Integer integer) {
-                    updateFabShuffle(integer);
-                }
-            });
-            repeatModeObserver = Observers.create(new Action1<Integer>() {
-                @Override
-                public void call(Integer integer) {
-                    updateFabRepeat(integer);
-                }
-            });
-        }
-
-        CompositeSubscription broadcastSubscriptions;
-
-        void subscribeBroadcasts() {
-            if (isSubscribed(broadcastSubscriptions)) return;
-            broadcastSubscriptions = new CompositeSubscription(
-                    playStateObservable.subscribe(playStateObserver),
-                    shuffleModeObservable.subscribe(shuffleModeObserver),
-                    repeatModeObservable.subscribe(repeatModeObserver)
+            playStateObserver = Observers.create(
+                    new Action1<Boolean>() {
+                        @Override
+                        public void call(Boolean playing) {
+                            updateFabPlay(playing);
+                        }
+                    }
+            );
+            shuffleModeObserver = Observers.create(
+                    new Action1<Integer>() {
+                        @Override
+                        public void call(Integer integer) {
+                            updateFabShuffle(integer);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            unsubscribeShuffle();
+                            subscribeShuffle();
+                        }
+                    }
+            );
+            repeatModeObserver = Observers.create(
+                    new Action1<Integer>() {
+                        @Override
+                        public void call(Integer integer) {
+                            updateFabRepeat(integer);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            unsubscribeRepeat();
+                            subscribeRepeat();
+                        }
+                    }
             );
         }
 
+        CompositeSubscription broadcastSubscriptions;
+        Subscription shuffleModeSubscription;
+        Subscription repeatModeSubscription;
+
+        void subscribeBroadcasts() {
+            if (notSubscribed(broadcastSubscriptions)) {
+                broadcastSubscriptions = new CompositeSubscription(
+                        playStateObservable.subscribe(playStateObserver)
+                );
+            }
+            subscribeShuffle();
+            subscribeRepeat();
+        }
+
         void unsubscribeBroadcasts() {
-            if (notSubscribed(broadcastSubscriptions)) return;
-            broadcastSubscriptions.unsubscribe();
-            broadcastSubscriptions = null;
+            if (isSubscribed(broadcastSubscriptions)) {
+                broadcastSubscriptions.unsubscribe();
+                broadcastSubscriptions = null;
+            }
+            unsubscribeShuffle();
+            unsubscribeRepeat();
+        }
+
+        void subscribeShuffle() {
+            if (isSubscribed(shuffleModeSubscription)) return;
+            shuffleModeSubscription = shuffleModeObservable.subscribe(shuffleModeObserver);
+        }
+
+        void unsubscribeShuffle() {
+            if (notSubscribed(shuffleModeSubscription)) return;
+            shuffleModeSubscription.unsubscribe();
+            shuffleModeSubscription = null;
+        }
+
+        void subscribeRepeat() {
+            if (isSubscribed(repeatModeSubscription)) return;
+            repeatModeSubscription = repeatModeObservable.subscribe(repeatModeObserver);
+        }
+
+        void unsubscribeRepeat() {
+            if (notSubscribed(repeatModeSubscription)) return;
+            repeatModeSubscription.unsubscribe();
+            repeatModeSubscription = null;
         }
 
     }
