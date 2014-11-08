@@ -9,6 +9,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui.activities.ActivityModule;
 import org.opensilk.music.ui2.BaseActivity;
+import org.opensilk.silkdagger.DaggerInjector;
 
 /**
  * Created by andrew on 2/28/14.
@@ -18,6 +19,13 @@ public class SettingsActivity extends BaseActivity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ((DaggerInjector) getApplication()).getObjectGraph().plus(getModules()).inject(this);
+
+        setContentView(R.layout.blank_framelayout);
+
+        boolean light = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
+        setTheme(light ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -50,18 +58,6 @@ public class SettingsActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected int getThemeId() {
-        boolean light = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
-        return light ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark;
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.blank_framelayout;
-    }
-
-    @Override
     protected Object[] getModules() {
         return new Object[] {
                 new ActivityModule(this),

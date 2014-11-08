@@ -86,7 +86,7 @@ public class FolderPickerActivity extends BaseDialogActivity implements Card.OnC
         }
     }
 
-    @Override
+
     protected Object[] getModules() {
         return new Object[] {
                 new ActivityModule(this),
