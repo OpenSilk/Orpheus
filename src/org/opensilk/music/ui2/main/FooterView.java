@@ -47,14 +47,10 @@ public class FooterView extends RelativeLayout {
 
     @Inject FooterBlueprint.Presenter presenter;
 
-    @InjectView(R.id.footer_thumbnail)
-    ImageView artworkThumbnail;
-    @InjectView(R.id.footer_progress)
-    ProgressBar progressBar;
-    @InjectView(R.id.footer_track_title)
-    TextView trackTitle;
-    @InjectView(R.id.footer_artist_name)
-    TextView artistName;
+    @InjectView(R.id.footer_thumbnail) ImageView artworkThumbnail;
+    @InjectView(R.id.footer_progress) ProgressBar progressBar;
+    @InjectView(R.id.footer_track_title) TextView trackTitle;
+    @InjectView(R.id.footer_artist_name) TextView artistName;
 
     boolean lightTheme;
 
@@ -72,6 +68,7 @@ public class FooterView extends RelativeLayout {
         if (!isInEditMode()) {
             ButterKnife.inject(this);
             ThemeUtils.themeProgressBar(progressBar, R.attr.colorAccent);
+            presenter.takeView(this);
         }
     }
 

@@ -17,7 +17,6 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -32,7 +31,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.model.RecentSong;
-import com.andrew.apollo.utils.MusicUtils;
 import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.common.widget.AnimatedImageView;
@@ -40,19 +38,13 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.cards.SongQueueCard;
 import org.opensilk.music.ui2.common.OverflowAction;
-import org.opensilk.music.util.Command;
-import org.opensilk.music.util.CommandRunner;
-import org.opensilk.music.widgets.GridTileDescription;
 import org.opensilk.music.widgets.PlayingIndicator;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
-import it.gmariotti.cardslib.library.internal.Card;
 import mortar.Mortar;
 import rx.subscriptions.CompositeSubscription;
 
@@ -64,10 +56,8 @@ public class QueueView extends DragSortListView implements
         DragSortListView.RemoveListener,
         AdapterView.OnItemClickListener {
 
-    @Inject
-    QueueBlueprint.Presenter presenter;
-    @Inject
-    ArtworkRequestManager requestor;
+    @Inject QueueScreen.Presenter presenter;
+    @Inject ArtworkRequestManager requestor;
 
     Adapter adapter;
 
@@ -131,7 +121,6 @@ public class QueueView extends DragSortListView implements
     }
 
     public void setup() {
-        addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.list_footer, this, false));
         setAdapter(adapter);
     }
 
@@ -148,12 +137,12 @@ public class QueueView extends DragSortListView implements
     static class Adapter extends ArrayAdapter<RecentSong> {
 
         final ArtworkRequestManager requestor;
-        final QueueBlueprint.Presenter presenter;
+        final QueueScreen.Presenter presenter;
 
         long currentSong;
         boolean isPlaying;
 
-        Adapter(Context context, ArtworkRequestManager requestor, QueueBlueprint.Presenter presenter) {
+        Adapter(Context context, ArtworkRequestManager requestor, QueueScreen.Presenter presenter) {
             super(context, -1);
             this.requestor = requestor;
             this.presenter = presenter;

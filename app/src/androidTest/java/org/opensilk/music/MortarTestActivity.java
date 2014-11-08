@@ -20,7 +20,7 @@ package org.opensilk.music;
 import android.app.Activity;
 import android.os.Bundle;
 
-import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
 
 import mortar.Blueprint;
 import mortar.Mortar;
@@ -67,7 +67,7 @@ public class MortarTestActivity extends Activity {
     }
 
     protected Blueprint getStartingScope() {
-        return new ActivityBlueprint(getScopeName());
+        return new BaseSwitcherActivityBlueprint(getScopeName());
     }
 
 }

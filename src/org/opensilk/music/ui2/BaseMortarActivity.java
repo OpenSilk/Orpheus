@@ -43,6 +43,10 @@ public class BaseMortarActivity extends BaseActivity implements PauseAndResumeAc
     protected MortarActivityScope mActivityScope;
     protected String mScopeName;
 
+    protected Blueprint getBlueprint(String scopeName) {
+        throw new UnsupportedOperationException("Subclass must override getBlueprint()");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mActivityScope = Mortar.requireActivityScope(Mortar.getScope(getApplication()), getBlueprint(getScopeName()));
@@ -117,10 +121,6 @@ public class BaseMortarActivity extends BaseActivity implements PauseAndResumeAc
     @Override
     protected Object getObjectForRetain() {
         return mActivityScope.getName();
-    }
-
-    protected Blueprint getBlueprint(String scopeName) {
-        return new ActivityBlueprint(scopeName);
     }
 
     private String getScopeName() {

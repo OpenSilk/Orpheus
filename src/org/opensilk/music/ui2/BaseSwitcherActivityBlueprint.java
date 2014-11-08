@@ -18,6 +18,9 @@
 package org.opensilk.music.ui2;
 
 
+import com.google.gson.Gson;
+
+import org.opensilk.common.flow.GsonParcer;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.AppModule;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
@@ -38,7 +41,7 @@ import mortar.Blueprint;
 /**
  * Created by drew on 10/23/14.
  */
-public class ActivityBlueprint implements Blueprint {
+public class BaseSwitcherActivityBlueprint implements Blueprint {
 
     /**
      * Required for a race condition cause by Android when a new scope is created
@@ -48,7 +51,7 @@ public class ActivityBlueprint implements Blueprint {
      */
     private final String scopeName;
 
-    public ActivityBlueprint(String scopeName) {
+    public BaseSwitcherActivityBlueprint(String scopeName) {
         this.scopeName = scopeName;
     }
 
@@ -68,11 +71,15 @@ public class ActivityBlueprint implements Blueprint {
             },
             injects = {
                     LauncherActivity.class,
-                    QueueView.class,
             },
             library = true //
     )
     public static class Module {
+
+        @Provides @Singleton
+        public Parcer<Object> provideParcer(Gson gson) {
+            return new GsonParcer<>(gson);
+        }
 
         @Provides @Singleton
         public AppFlowPresenter<BaseSwitcherActivity> providePresenter(Parcer<Object> floParcer) {

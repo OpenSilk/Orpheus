@@ -27,7 +27,7 @@ import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
@@ -60,7 +60,7 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 public class MainScreen extends Screen {
 
     @dagger.Module(
-            addsTo = ActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivityBlueprint.Module.class,
             injects = {
                     MainView.class,
                     FooterView.class,
@@ -106,8 +106,10 @@ public class MainScreen extends Screen {
         public void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
-            subscribeFabClicks();
-            subscribeBroadcasts();
+            if (pauseAndResumeRegistrar.isRunning()) {
+                subscribeFabClicks();
+                subscribeBroadcasts();
+            }
         }
 
         @Override
@@ -115,19 +117,23 @@ public class MainScreen extends Screen {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             if (getView() == null) {
-                unsubscribeFabClicks();
-                unsubscribeBroadcasts();
+                if (pauseAndResumeRegistrar.isRunning()) {
+                    unsubscribeFabClicks();
+                    unsubscribeBroadcasts();
+                }
             }
         }
 
         @Override
         public void onResume() {
+            Timber.v("onResume()");
             subscribeFabClicks();
             subscribeBroadcasts();
         }
 
         @Override
         public void onPause() {
+            Timber.v("onPause()");
             unsubscribeFabClicks();
             unsubscribeBroadcasts();
         }
@@ -158,23 +164,6 @@ public class MainScreen extends Screen {
                     v.fabRepeat.setImageLevel(2);
                     break;
             }
-        }
-
-        @DebugLog
-        void openQueue() {
-            MainView  v = getView();
-            if (v == null) return;
-            Flow flow = AppFlow.get(v.getContext());
-            if (flow.getBackstack().current().getScreen() instanceof QueueBlueprint) return;
-            flow.goTo(new QueueBlueprint());
-        }
-
-        @DebugLog
-        void closeQueue() {
-            MainView  v = getView();
-            if (v == null) return;
-            Flow flow = AppFlow.get(v.getContext());
-            if (flow.getBackstack().current().getScreen() instanceof QueueBlueprint) flow.goBack();
         }
 
         CompositeSubscription fabClicksSubscription;

@@ -47,33 +47,20 @@
         android:layout_marginRight="104dp"
         app:cardBackgroundColor="?android:colorBackground">
 
-        <com.sothree.slidinguppanel.SlidingUpPanelLayout
-            android:id="@+id/sliding_panel"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="bottom"
-            app:panelHeight="68dp">
+            android:layout_height="match_parent">
 
             <org.opensilk.common.mortarflow.FrameScreenSwitcherView
                 android:id="@+id/main"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            <include layout="@layout/footer"/>
 
-                <include layout="@layout/footer"
-                    android:id="@+id/footer_view"/>
-
-                <include layout="@layout/queue"
-                    android:layout_below="@id/footer_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
-
-            </RelativeLayout>
-
-        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+        </LinearLayout>
 
     </android.support.v7.widget.CardView>
 

@@ -45,6 +45,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 import flow.Flow;
+import mortar.Blueprint;
 
 /**
  * Created by drew on 11/7/14.
@@ -64,6 +65,10 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
 
     protected void setupView() {
         throw new UnsupportedOperationException("Subclass must override setupView()");
+    }
+
+    protected Blueprint getBlueprint(String scopeName) {
+        return new BaseSwitcherActivityBlueprint(scopeName);
     }
 
     @Override

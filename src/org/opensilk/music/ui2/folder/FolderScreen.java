@@ -27,7 +27,7 @@ import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.MediaProviderUtil;
 import org.opensilk.music.R;
 import org.opensilk.music.ui.folder.FolderPickerActivity;
-import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.HashSet;
@@ -79,7 +79,7 @@ public class FolderScreen extends Screen {
     }
 
     @dagger.Module(
-            addsTo = ActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivityBlueprint.Module.class,
             injects = FolderView.class
     )
     public static class Module {

@@ -38,7 +38,6 @@ import org.opensilk.music.R;
 
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.bus.events.IABQueryResult;
@@ -54,13 +53,11 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 
 public class LauncherActivity extends BaseSwitcherActivity implements
-        SlidingUpPanelLayout.PanelSlideListener,
         DrawerOwner.Activity {
 
     @Inject DrawerOwner mDrawerOwner;
@@ -68,7 +65,6 @@ public class LauncherActivity extends BaseSwitcherActivity implements
 
     /*@InjectView(R.id.drawer_layout)*/ DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
-    @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanelContainer;
 
     ActionBarDrawerToggle mDrawerToggle;
 
@@ -88,8 +84,6 @@ public class LauncherActivity extends BaseSwitcherActivity implements
 
         mDrawerOwner.takeView(this);
         setupDrawer();
-
-        setupSlidingPanel();
 
         AppFlow.loadInitialScreen(this);
 
@@ -133,8 +127,6 @@ public class LauncherActivity extends BaseSwitcherActivity implements
             return true;
         }
         switch (item.getItemId()) {
-            case android.R.id.home:
-                return closePanel() || super.onOptionsItemSelected(item);
             case R.id.menu_sleep_timer:
                 NavUtils.openSleepTimerDialog(this);
                 return true;
@@ -147,7 +139,7 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     public void onBackPressed() {
         if (isDrawerOpen()) {
             closeDrawer();
-        } else if (!closePanel()) {
+        } else {
             super.onBackPressed();
         }
     }
@@ -273,53 +265,6 @@ public class LauncherActivity extends BaseSwitcherActivity implements
                 mDrawerToggle.syncState();
             }
         });
-    }
-
-    /*
-     * Sliding panel
-     */
-
-    @Override
-    public void onPanelSlide(View view, float v) {
-
-    }
-
-    @Override
-    public void onPanelCollapsed(View view) {
-        enableDrawer();
-    }
-
-    @Override
-    public void onPanelExpanded(View view) {
-        disableDrawer(true);
-    }
-
-    @Override
-    public void onPanelAnchored(View view) {
-
-    }
-
-    @Override
-    public void onPanelHidden(View view) {
-
-    }
-
-    //Panel helpers
-
-    void setupSlidingPanel() {
-        if (mSlidingPanelContainer == null) return;
-        mSlidingPanelContainer.setDragView(findViewById(R.id.footer_view));
-        mSlidingPanelContainer.setPanelSlideListener(this);
-        mSlidingPanelContainer.setEnableDragViewTouchEvents(true);
-    }
-
-    boolean closePanel() {
-        if (mSlidingPanelContainer != null
-                && mSlidingPanelContainer.isPanelExpanded()) {
-            mSlidingPanelContainer.collapsePanel();
-            return true;
-        }
-        return false;
     }
 
     /*

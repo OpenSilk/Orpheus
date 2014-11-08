@@ -25,8 +25,13 @@ import android.os.Bundle;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.model.RecentSong;
 
+import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
+import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.mortarflow.WithTransitions;
+import org.opensilk.music.R;
+import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
@@ -42,6 +47,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
+import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -62,7 +68,21 @@ import static org.opensilk.common.rx.RxUtils.notSubscribed;
 /**
  * Created by drew on 10/15/14.
  */
-public class QueueBlueprint {
+@Layout(R.layout.queue)
+@WithModule(QueueScreen.Module.class)
+@WithTransitions(
+        forward = { R.anim.shrink_fade_out, R.anim.slide_in_child_bottom },
+        backward = { R.anim.slide_out_child_bottom, R.anim.grow_fade_in }
+)
+public class QueueScreen extends Screen {
+
+    @dagger.Module(
+            addsTo = BaseSwitcherActivityBlueprint.Module.class,
+            injects = QueueView.class
+    )
+    public static class Module {
+
+    }
 
     @Singleton
     public static class Presenter extends ViewPresenter<QueueView> implements PausesAndResumes {

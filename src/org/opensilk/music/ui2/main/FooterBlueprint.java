@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.rx.HoldsSubscription;
@@ -36,11 +37,14 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import flow.Flow;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
+import rx.android.events.OnClickEvent;
+import rx.android.observables.ViewObservable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -66,6 +70,7 @@ public class FooterBlueprint {
         final MusicServiceConnection musicService;
         final ArtworkRequestManager artworkReqestor;
 
+        CompositeSubscription clicksSubscriptions;
         CompositeSubscription broadcastSubscriptions;
         //These are separate since they query the service
         //and need error handling
@@ -116,8 +121,11 @@ public class FooterBlueprint {
             Timber.v("onLoad()");
             super.onLoad(savedInstanceState);
             //just for safety we should always receive a call to onResume()
-            subscribeBroadcasts();
-            //playstate will kick off progress subscription
+            if (pauseAndResumeRegistrar.isRunning()) {
+                subscribeClicks();
+                subscribeBroadcasts();
+                //playstate will kick off progress subscription
+            }
         }
 
         @Override
@@ -125,8 +133,11 @@ public class FooterBlueprint {
             super.onSave(outState);
             if (getView() == null) {
                 //just for safety we should always receive a call to onPause()
-                unsubscribeBroadcasts();
-                unsubscribeProgress();
+                if (pauseAndResumeRegistrar.isRunning()) {
+                    unsubscribeClicks();
+                    unsubscribeBroadcasts();
+                    unsubscribeProgress();
+                }
             }
         }
 
@@ -134,6 +145,7 @@ public class FooterBlueprint {
         public void onResume() {
             Timber.v("onResume()");
             if (getView() == null) return;
+            subscribeClicks();
             subscribeBroadcasts();
             //playstate will kick off progress subscription
         }
@@ -141,6 +153,7 @@ public class FooterBlueprint {
         @Override
         public void onPause() {
             Timber.v("onPause");
+            unsubscribeClicks();
             unsubscribeBroadcasts();
             unsubscribeProgress();
         }
@@ -178,6 +191,36 @@ public class FooterBlueprint {
             v.updateBackground(paletteResponse);
         }
 
+        void toggleQueue() {
+            if (getView() == null) return;
+            Flow flow = AppFlow.get(getView().getContext());
+            if (flow.getBackstack().current().getScreen() instanceof QueueScreen) {
+                flow.goBack();
+            } else {
+                flow.goTo(new QueueScreen());
+            }
+
+        }
+
+        void subscribeClicks() {
+            if (isSubscribed(clicksSubscriptions)) return;
+            if (getView() == null) return;
+            clicksSubscriptions = new CompositeSubscription(
+                    ViewObservable.clicks(getView()).subscribe(new Action1<OnClickEvent>() {
+                        @Override
+                        public void call(OnClickEvent onClickEvent) {
+                            toggleQueue();
+                        }
+                    })
+            );
+        }
+
+        void unsubscribeClicks() {
+            if (notSubscribed(clicksSubscriptions)) return;
+            clicksSubscriptions.unsubscribe();
+            clicksSubscriptions = null;
+        }
+
         void setupObserables() {
             playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
             metaObservable = observeOnMain(Observable.zip(
@@ -191,21 +234,14 @@ public class FooterBlueprint {
                         }
                     }
             ));
-            artworkObservable = observeOnMain(BroadcastObservables.metaChanged(appContext)
-                    .flatMap(new Func1<Intent, Observable<ArtInfo>>() {
-                        @Override
-                        public Observable<ArtInfo> call(Intent intent) {
-                            return musicService.getCurrentArtInfo();
-                        }
-                    })
-            );
+            artworkObservable = observeOnMain(BroadcastObservables.artworkChanged(appContext, musicService));
             currentPositionObservable = Observable.zip(
                     musicService.getPosition(),
                     musicService.getDuration(),
                     new Func2<Long, Long, Long>() {
                         @Override
                         public Long call(Long position, Long duration) {
-                            Timber.v("currentPositionObservable(%d, %d) %s", position, duration, Thread.currentThread().getName());
+//                            Timber.v("currentPositionObservable(%d, %d) %s", position, duration, Thread.currentThread().getName());
                             if (position > 0 && duration > 0) {
                                 return (1000 * position / duration);
                             } else {
@@ -239,8 +275,19 @@ public class FooterBlueprint {
                             } else {
                                 unsubscribeProgress();
                                 // update the current position
-                                currentPositionObservable.observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(progressObserver);
+                                currentPositionObservable
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(new Action1<Long>() {
+                                            @Override
+                                            public void call(Long progress) {
+                                                setProgress(progress.intValue());
+                                            }
+                                        }, new Action1<Throwable>() {
+                                            @Override
+                                            public void call(Throwable throwable) {
+                                                //ignore
+                                            }
+                                        });
                             }
                         }
                     }
@@ -266,7 +313,8 @@ public class FooterBlueprint {
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            //TODO resubscribe
+                            unsubscribeArtwork();
+                            subscribeArtwork();
                         }
                     }
             );

@@ -49,9 +49,4 @@ public class ActivityModule {
     public EventBus provideEventBus() {
         return new EventBus();
     }
-
-    @Provides @Singleton
-    public Parcer<Object> provideParcer(Gson gson) {
-        return new GsonParcer<>(gson);
-    }
 }

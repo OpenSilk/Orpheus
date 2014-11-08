@@ -16,7 +16,6 @@
 
 package org.opensilk.music.ui2.library;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,7 +23,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -35,17 +33,12 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.Artist;
-import org.opensilk.music.api.model.Folder;
-import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.ui2.ActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
-import org.opensilk.music.util.PluginSettings;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.ArrayList;
@@ -97,7 +90,7 @@ public class LibraryScreen extends Screen {
     }
 
     @dagger.Module(
-            addsTo = ActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivityBlueprint.Module.class,
             injects = LibraryView.class,
             library = true
     )
