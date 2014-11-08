@@ -18,7 +18,7 @@ package org.opensilk.music.ui.folder;
 
 import com.squareup.otto.Bus;
 
-import org.opensilk.music.ui.activities.HomeModule;
+import org.opensilk.music.ui.activities.ActivityModule;
 import org.opensilk.music.ui.cards.CardModule;
 import org.opensilk.common.dagger.qualifier.ForFragment;
 
@@ -31,7 +31,7 @@ import dagger.Provides;
  * Created by drew on 7/15/14.
  */
 @Module(
-        addsTo = HomeModule.class,
+        addsTo = ActivityModule.class,
         injects = {
                 FolderFragment.class,
                 FolderChildFragment.class,

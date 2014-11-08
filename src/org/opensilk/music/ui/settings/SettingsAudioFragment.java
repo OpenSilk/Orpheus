@@ -28,7 +28,7 @@ import javax.inject.Inject;
 
 import static android.app.Activity.RESULT_OK;
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
-import static org.opensilk.music.ui.activities.HomeSlidingActivity.RESULT_RESTART_FULL;
+import static org.opensilk.music.ui2.event.ActivityResult.RESULT_RESTART_FULL;
 
 /**
  * Created by andrew on 3/1/14.

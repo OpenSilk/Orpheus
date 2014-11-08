@@ -6,15 +6,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.bus.EventBus;
 import org.opensilk.music.bus.events.IABQueryResult;
 import org.opensilk.music.ui.settings.SettingsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by drew on 4/26/14.
@@ -52,10 +54,9 @@ public class IabUtil {
         return h;
     }
 
-    public static void incrementAppLaunchCount(Context context) {
-        PreferenceUtils p = PreferenceUtils.getInstance(context);
-        int prevCount = p.getInt(PREF_APP_LAUNCHES, 0);
-        p.putInt(PREF_APP_LAUNCHES, ++prevCount);
+    public static void incrementAppLaunchCount(AppPreferences settings) {
+        int prevCount = settings.getInt(PREF_APP_LAUNCHES, 0);
+        settings.putInt(PREF_APP_LAUNCHES, ++prevCount);
     }
 
     public static void maybeShowDonateDialog(Context context) {
@@ -97,9 +98,8 @@ public class IabUtil {
      * Checks if user has purchases
      * posts a {@link org.opensilk.music.bus.events.IABQueryResult}
      * to the global event bus with purchase status
-     * @param context
      */
-    public static void queryDonateAsync(Context context) {
+    public static void queryDonateAsync(Context context, final EventBus bus) {
         final IabHelper helper = newHelper(context);
         helper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
             @Override
@@ -115,27 +115,27 @@ public class IabUtil {
                                 if (D) Log.d(TAG, "skus=" + inv.mSkuMap.toString());
                                 // Debug builds, and other unforseen situations will have zero iab items
                                 if (inv.getSkuCount() == 0) {
-                                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.NO_SKUS));
+                                    bus.post(new IABQueryResult(IABQueryResult.Error.NO_SKUS));
                                     return;
                                 }
                                 for (String sku : PRODUCT_SKUS) {
                                     Purchase p = inv.getPurchase(sku);
                                     if (p != null && verifyDeveloperPayload(p)) {
                                         Log.d(TAG, "purchase: " + p.toString());
-                                        EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.NO_ERROR, true));
+                                        bus.post(new IABQueryResult(IABQueryResult.Error.NO_ERROR, true));
                                         return;
                                     }
                                 }
                                 if (D) Log.d(TAG, "User has no purchases");
-                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.NO_ERROR, false));
+                                bus.post(new IABQueryResult(IABQueryResult.Error.NO_ERROR, false));
                             } else {
-                                EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.QUERY_FAILED));
+                                bus.post(new IABQueryResult(IABQueryResult.Error.QUERY_FAILED));
                             }
                         }
                     });
                 } else {
                     // No billing service
-                    EventBus.getInstance().post(new IABQueryResult(IABQueryResult.Error.BIND_FAILED));
+                    bus.post(new IABQueryResult(IABQueryResult.Error.BIND_FAILED));
                 }
             }
         });

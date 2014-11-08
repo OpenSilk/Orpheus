@@ -14,7 +14,7 @@ import com.andrew.apollo.utils.ThemeStyle;
 
 import java.util.Locale;
 
-import static org.opensilk.music.ui.activities.HomeSlidingActivity.RESULT_RESTART_APP;
+import static org.opensilk.music.ui2.event.ActivityResult.RESULT_RESTART_APP;
 
 /**
  * Created by andrew on 3/1/14.

@@ -33,7 +33,6 @@ import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.dialogs.SleepTimerDialog;
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.ui.activities.ProfileDialogActivity;
 import org.opensilk.music.ui.folder.FolderFragment;
 import org.opensilk.music.ui.home.SearchFragment;
@@ -177,16 +176,9 @@ public final class NavUtils {
      * @param fragment new fragment
      * @param name fragment and backstack entry name
      */
+    @Deprecated @MarkedForRemoval
     private static void replaceFragment(final Context context, final Fragment fragment, final String name) {
-        // We are making teh assumption that all contexts passed through were created
-        // with getActivity()
-        FragmentManager fm = ((HomeSlidingActivity) context).getSupportFragmentManager();
-        fm.beginTransaction()
-                .replace(R.id.main, fragment, name)
-                .setTransition(TRANSIT_FRAGMENT_OPEN)
-                .addToBackStack(name)
-                .commit();
-        ((HomeSlidingActivity) context).maybeClosePanel();
+
     }
 
     /**

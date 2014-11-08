@@ -20,8 +20,6 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Inject;

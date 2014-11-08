@@ -45,7 +45,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkProviderUtil;
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
+import org.opensilk.music.ui2.LauncherActivity;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -217,7 +217,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         }
         if (widget.compareTo(MusicWidget.ULTRA_MINI) > 0) {
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                    new Intent(this, HomeSlidingActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                    new Intent(this, LauncherActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_album_art, pendingIntent);
         }
 

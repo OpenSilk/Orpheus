@@ -41,6 +41,8 @@ import com.andrew.apollo.utils.ThemeHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.bus.events.IABQueryResult;
+import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
@@ -53,6 +55,7 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 
@@ -89,6 +92,11 @@ public class LauncherActivity extends BaseSwitcherActivity implements
         setupSlidingPanel();
 
         AppFlow.loadInitialScreen(this);
+
+        // Update count for donate dialog
+        IabUtil.incrementAppLaunchCount(mSettings);
+        // check for donations
+        IabUtil.queryDonateAsync(getApplicationContext(), mBus);
     }
 
     @Override
@@ -189,6 +197,16 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     public void onEventMainThread(StartActivityForResult req) {
         req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeUtils.isLightTheme(this));
         startActivityForResult(req.intent, req.reqCode);
+    }
+
+    @DebugLog
+    public void onEventMainThread(IABQueryResult r) {
+        if (r.error == IABQueryResult.Error.NO_ERROR) {
+            if (!r.isApproved) {
+                IabUtil.maybeShowDonateDialog(this);
+            }
+        }
+        //TODO handle faliurs
     }
 
     /*

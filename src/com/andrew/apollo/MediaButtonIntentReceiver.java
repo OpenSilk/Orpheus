@@ -23,7 +23,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
+import org.opensilk.music.ui2.LauncherActivity;
 
 /**
  * Used to control headset playback.
@@ -61,7 +61,7 @@ public class MediaButtonIntentReceiver extends WakefulBroadcastReceiver {
                     if (!mLaunched) {
                         final Context context = (Context)msg.obj;
                         final Intent i = new Intent();
-                        i.setClass(context, HomeSlidingActivity.class);
+                        i.setClass(context, LauncherActivity.class);
                         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         context.startActivity(i);
                         mLaunched = true;

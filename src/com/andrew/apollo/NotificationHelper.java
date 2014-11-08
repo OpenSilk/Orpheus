@@ -27,8 +27,8 @@ import android.widget.RemoteViews;
 
 import com.andrew.apollo.utils.ApolloUtils;
 
-import org.opensilk.music.ui.activities.HomeSlidingActivity;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.LauncherActivity;
 
 /**
  * Builds the notification for Apollo's service. Jelly Bean and higher uses the
@@ -175,7 +175,7 @@ public class NotificationHelper {
      */
     private PendingIntent getPendingIntent() {
         return PendingIntent.getActivity(mService, 0,
-                new Intent(mService, HomeSlidingActivity.class)
+                new Intent(mService, LauncherActivity.class)
                         .setAction("org.opensilk.music.AUDIO_PLAYER")
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
