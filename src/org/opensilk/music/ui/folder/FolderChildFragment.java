@@ -36,7 +36,7 @@ import org.opensilk.filebrowser.FileItemArrayLoader;
 import org.opensilk.music.ui.cards.FileItemCard;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import java.util.ArrayList;
 import java.util.List;

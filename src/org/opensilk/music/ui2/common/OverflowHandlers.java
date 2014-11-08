@@ -41,7 +41,7 @@ import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Named;

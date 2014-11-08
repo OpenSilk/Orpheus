@@ -22,7 +22,7 @@ import android.support.v7.app.ActionBarActivity;
 
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.ui.activities.HomeSlidingActivity;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 

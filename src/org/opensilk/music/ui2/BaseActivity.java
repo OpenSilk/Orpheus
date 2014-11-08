@@ -52,7 +52,7 @@ import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
 
 import java.lang.ref.WeakReference;

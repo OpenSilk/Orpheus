@@ -44,7 +44,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.ui.home.adapter.SearchAdapter;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import javax.inject.Inject;

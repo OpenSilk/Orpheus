@@ -25,7 +25,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui2.BaseActivity;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 

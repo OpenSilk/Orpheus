@@ -46,7 +46,7 @@ import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.util.PluginSettings;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.ArrayList;
 import java.util.Collection;

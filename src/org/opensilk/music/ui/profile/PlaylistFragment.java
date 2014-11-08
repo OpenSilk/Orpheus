@@ -45,7 +45,7 @@ import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 

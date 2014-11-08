@@ -35,7 +35,7 @@ import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui.profile.loader.GenreGridLoader;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import java.util.List;
 

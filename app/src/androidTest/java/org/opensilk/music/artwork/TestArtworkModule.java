@@ -10,7 +10,7 @@ import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.Volley;
 
 import org.apache.http.HttpResponse;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.io.IOException;
 import java.util.Map;

@@ -26,7 +26,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 
 import org.opensilk.music.api.RemoteLibrary;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

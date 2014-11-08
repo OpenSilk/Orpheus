@@ -16,7 +16,7 @@
 
 package org.opensilk.music;
 
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;
 

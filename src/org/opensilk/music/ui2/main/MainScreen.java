@@ -28,7 +28,7 @@ import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.ActivityBlueprint;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

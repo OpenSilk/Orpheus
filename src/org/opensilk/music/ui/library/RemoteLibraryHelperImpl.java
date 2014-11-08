@@ -24,8 +24,8 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import org.opensilk.music.api.RemoteLibrary;
-import org.opensilk.silkdagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 

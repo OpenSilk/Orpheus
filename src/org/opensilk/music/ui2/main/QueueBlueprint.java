@@ -32,7 +32,7 @@ import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.NowPlayingCursor;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.ArrayList;
 import java.util.List;

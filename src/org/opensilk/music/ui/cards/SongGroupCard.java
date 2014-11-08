@@ -34,7 +34,7 @@ import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.SongGroupCardClick;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.music.util.PriorityAsyncTask;
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 

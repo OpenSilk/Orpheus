@@ -35,7 +35,7 @@ import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.CardEvent;
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 

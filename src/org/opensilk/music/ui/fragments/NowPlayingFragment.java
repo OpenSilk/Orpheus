@@ -70,7 +70,7 @@ import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
 import org.opensilk.music.widgets.ThumbnailArtworkImageView;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 
 import java.lang.ref.WeakReference;

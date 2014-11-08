@@ -16,7 +16,7 @@
 
 package org.opensilk.music.ui.library;
 
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import javax.inject.Singleton;
 

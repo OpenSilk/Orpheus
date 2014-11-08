@@ -39,7 +39,7 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;

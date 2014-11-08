@@ -43,7 +43,7 @@ import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import java.util.ArrayList;
 import java.util.Collection;

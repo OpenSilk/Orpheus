@@ -30,7 +30,7 @@ import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;
 

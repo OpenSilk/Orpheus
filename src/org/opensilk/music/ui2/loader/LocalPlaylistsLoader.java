@@ -33,7 +33,7 @@ import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.List;
 

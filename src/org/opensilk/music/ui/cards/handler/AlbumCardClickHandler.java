@@ -30,7 +30,7 @@ import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 

@@ -32,7 +32,7 @@ import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
 import org.opensilk.music.widgets.ColorCodedThumbnail;
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 

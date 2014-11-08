@@ -30,7 +30,7 @@ import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.gallery.GalleryPage;
 import org.opensilk.music.util.MarkedForRemoval;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.io.IOException;
 import java.io.StringReader;

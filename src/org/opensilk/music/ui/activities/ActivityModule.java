@@ -28,7 +28,7 @@ import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.ActionBarControllerImpl;
 import org.opensilk.music.ui.settings.SettingsActivity;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Named;
 import javax.inject.Singleton;

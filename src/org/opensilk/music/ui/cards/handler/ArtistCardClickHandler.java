@@ -29,7 +29,7 @@ import com.andrew.apollo.menu.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 

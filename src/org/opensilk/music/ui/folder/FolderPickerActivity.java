@@ -37,7 +37,7 @@ import org.opensilk.filebrowser.FileItem;
 import org.opensilk.music.ui.activities.ActivityModule;
 import org.opensilk.music.ui.activities.BaseDialogActivity;
 import org.opensilk.music.ui.cards.FolderPickerCard;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Inject;
 

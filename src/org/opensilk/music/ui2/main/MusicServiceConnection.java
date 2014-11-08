@@ -37,7 +37,7 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.concurrent.TimeUnit;
 

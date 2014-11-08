@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

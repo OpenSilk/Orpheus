@@ -10,7 +10,7 @@ import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicStore;
 
 import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.Arrays;
 

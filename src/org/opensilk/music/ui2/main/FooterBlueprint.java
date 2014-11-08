@@ -29,7 +29,7 @@ import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
-import org.opensilk.silkdagger.qualifier.ForApplication;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.concurrent.TimeUnit;
 

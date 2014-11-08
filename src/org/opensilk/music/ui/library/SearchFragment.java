@@ -35,8 +35,8 @@ import org.opensilk.music.ui.library.adapter.SearchAdapter;
 import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 

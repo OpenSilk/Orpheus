@@ -34,7 +34,7 @@ import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.ui.cards.event.CardEvent;
 import org.opensilk.music.ui.cards.event.SongQueueCardClick;
 import org.opensilk.music.widgets.PlayingIndicator;
-import org.opensilk.silkdagger.qualifier.ForFragment;
+import org.opensilk.common.dagger.qualifier.ForFragment;
 
 import javax.inject.Inject;
 

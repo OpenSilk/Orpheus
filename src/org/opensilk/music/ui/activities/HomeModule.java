@@ -17,7 +17,7 @@
 package org.opensilk.music.ui.activities;
 
 import org.opensilk.music.ui.modules.DrawerHelper;
-import org.opensilk.silkdagger.qualifier.ForActivity;
+import org.opensilk.common.dagger.qualifier.ForActivity;
 
 import javax.inject.Singleton;
 
