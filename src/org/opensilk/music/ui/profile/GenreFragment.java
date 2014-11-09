@@ -163,6 +163,7 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
 
     @Override
     public void onLoadFinished(Loader<List<Object>> loader, List<Object> data) {
+        mAdapter.clear();
         mAdapter.addAll(data);
     }
 

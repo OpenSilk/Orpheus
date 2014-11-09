@@ -61,28 +61,12 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
         AppFlowPresenter.Activity,
         ActionBarOwner.Activity {
 
-    public static class Blueprint extends BaseMortarActivity.Blueprint {
-        public Blueprint(String scopeName) {
-            super(scopeName);
-        }
-
-        @Override
-        public Object getDaggerModule() {
-            return new Module();
-        }
-
-    }
-
     @dagger.Module(
             includes = {
                     BaseMortarActivity.Module.class,
                     ActionBarOwner.Module.class,
                     LoaderModule.class,
-            },
-            injects = {
-                    LauncherActivity.class,
-                    DetailActivity.class,
-            }
+            }, library = true
     )
     public static class Module {
         @Provides @Singleton @Named("activity")
@@ -107,11 +91,6 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     @InjectView(R.id.main_toolbar) protected Toolbar mToolbar;
 
     protected ActionBarOwner.MenuConfig mMenuConfig;
-
-    @Override
-    protected Blueprint getBlueprint(String scopeName) {
-        return new Blueprint(scopeName);
-    }
 
     @Override
     public Screen getDefaultScreen() {
@@ -232,13 +211,8 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
      */
 
     @Override
-    public void setShowHomeEnabled(boolean enabled) {
-
-    }
-
-    @Override
     public void setUpButtonEnabled(boolean enabled) {
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(enabled);
     }
 
     @Override

@@ -29,20 +29,21 @@
             also the tabstrip needs dark text for light toolbar-->
         <!--<item name="toolbarTheme">@style/Toolbar.Light</item>-->
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
+
+        <item name="colorPrimary">@color/green_500</item>
+        <item name="colorPrimaryDark">@color/green_700</item>
+        <item name="colorAccent">@color/amber_A400</item>
+
         <item name="fabPlayStyle">@style/fabLight.Play</item>
         <item name="fabNextStyle">@style/fabLight.Next</item>
         <item name="fabPrevStyle">@style/fabLight.Prev</item>
         <item name="fabShuffleStyle">@style/fabLight.Shuffle</item>
         <item name="fabRepeatStyle">@style/fabLight.Repeat</item>
+
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
-        <!--Dark Actionbar -->
-        <!--<item name="colorPrimaryDark">@color/primary_material_dark</item>-->
-        <!--<item name="colorPrimary">@color/primary_dark_material_light</item>-->
-        <item name="colorPrimary">@color/green_500</item>
-        <item name="colorPrimaryDark">@color/green_700</item>
-        <item name="colorAccent">@color/amber_A400</item>
+
     </style>
 
     <style name="Theme.Light" parent="Theme.LightBase">
@@ -71,11 +72,13 @@
 
     <style name="Theme.DarkBase" parent="Theme.AppCompat.NoActionBar">
         <item name="toolbarTheme">@style/Toolbar.Dark</item>
+
         <item name="fabPlayStyle">@style/fabDark.Play</item>
         <item name="fabNextStyle">@style/fabDark.Next</item>
         <item name="fabPrevStyle">@style/fabDark.Prev</item>
         <item name="fabShuffleStyle">@style/fabDark.Shuffle</item>
         <item name="fabRepeatStyle">@style/fabDark.Repeat</item>
+
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Dark</item>
@@ -113,8 +116,10 @@
         <item name="android:windowNoTitle">true</item>
         <!--DarkActionBar-->
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
+
         <item name="colorPrimary">@color/primary_material_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+
         <item name="settingsCardBackgroundColor">@android:color/white</item>
     </style>
 
@@ -124,6 +129,7 @@
         <item name="android:windowNoTitle">true</item>
         <!--DarkActionBar-->
         <item name="toolbarTheme">@style/Toolbar.Dark</item>
+
         <item name="settingsCardBackgroundColor">?colorPrimary</item>
     </style>
 
@@ -135,22 +141,38 @@
         <!--NoActionBar-->
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-        <!--DarkActionBar-->
+
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow.Transparent</item>
-        <item name="colorPrimary">@color/primary_material_dark</item>
+
+        <!--<item name="colorPrimary">@color/primary_material_dark</item>-->
+        <item name="colorPrimary">@color/green_500</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+        <item name="colorAccent">@color/amber_A400</item>
+
+        <item name="fabPlayStyle">@style/fabLight.Play</item>
+        <item name="fabNextStyle">@style/fabLight.Next</item>
+        <item name="fabPrevStyle">@style/fabLight.Prev</item>
+        <item name="fabShuffleStyle">@style/fabLight.Shuffle</item>
+        <item name="fabRepeatStyle">@style/fabLight.Repeat</item>
 
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
+
     </style>
 
     <style name="Theme.Profile.Dark" parent="Theme.AppCompat.DialogWhenLarge">
         <!--NoActionBar-->
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-        <!--DarkActionBar-->
+
         <item name="toolbarTheme">@style/Toolbar.Dark.Transparent</item>
+
+        <item name="fabPlayStyle">@style/fabDark.Play</item>
+        <item name="fabNextStyle">@style/fabDark.Next</item>
+        <item name="fabPrevStyle">@style/fabDark.Prev</item>
+        <item name="fabShuffleStyle">@style/fabDark.Shuffle</item>
+        <item name="fabRepeatStyle">@style/fabDark.Repeat</item>
 
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>

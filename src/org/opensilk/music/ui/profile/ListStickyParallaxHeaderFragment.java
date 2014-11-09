@@ -183,7 +183,7 @@ public class ListStickyParallaxHeaderFragment extends Fragment {
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             // logic here derived from http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/
             if (visibleItemCount == 0) return;
-            if (firstVisibleItem == 0) {
+            if (firstVisibleItem == 0 && mList.getChildCount() > 0) {
                 // parallax
                 mHeroContainer.setTranslationY(-mList.getChildAt(0).getTop() / 2);
             }

@@ -137,6 +137,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
 
     @Override
     public void onLoadFinished(Loader<List<Object>> loader, List<Object> data) {
+        mAdapter.clear();
         mAdapter.addAll(data);
     }
 

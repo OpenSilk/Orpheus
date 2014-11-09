@@ -73,49 +73,52 @@ import timber.log.Timber;
 public class LauncherActivity extends BaseSwitcherActivity implements
         DrawerOwner.Activity {
 
-//    public static class Blueprint extends BaseSwitcherActivity.Blueprint {
-//
-//        public Blueprint(String scopeName) {
-//            super(scopeName);
-//        }
-//
-//        @Override
-//        public Object getDaggerModule() {
-//            return new Module();
-//        }
-//
-//    }
-//
-//    @dagger.Module(
-////                addsTo = AppModule.class,
-//            includes = {
-//                    BaseSwitcherActivity.Module.class,
-//                    LoaderModule.class,
-//            },
-//            injects = LauncherActivity.class
-//    )
-//    public static class Module { }
+    public static class Blueprint extends BaseMortarActivity.Blueprint {
+
+        public Blueprint(String scopeName) {
+            super(scopeName);
+        }
+
+        @Override
+        public Object getDaggerModule() {
+            return new Module();
+        }
+
+    }
+
+    @dagger.Module (
+            includes = {
+                    BaseSwitcherActivity.Module.class,
+                    MainScreen.Module.class,
+                    NavScreen.Module.class
+            },
+            injects = LauncherActivity.class
+    )
+    public static class Module {
+
+    }
 
     @Inject DrawerOwner mDrawerOwner;
     @Inject PluginConnectionManager mPluginConnectionManager;
 
-    /*@InjectView(R.id.drawer_layout)*/ DrawerLayout mDrawerLayout;
+    @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
 
     ActionBarDrawerToggle mDrawerToggle;
 
-//    @Override
-//    protected Blueprint getBlueprint(String scopeName) {
-//        return new Blueprint(scopeName);
-//    }
+    @Override
+    protected Blueprint getBlueprint(String scopeName) {
+        return new Blueprint(scopeName);
+    }
+
+    @Override
+    public Screen getDefaultScreen() {
+        return new GalleryScreen();
+    }
 
     @Override
     protected void setupView() {
-        setContentView(R.layout.activity_drawer);
-        mDrawerLayout = ButterKnife.findById(this, R.id.drawer_layout);
-        MortarContextFactory contextFactory = new MortarContextFactory();
-        ViewUtils.createView(contextFactory.setUpContext(new MainScreen(), this), MainScreen.class, mDrawerLayout);
-        ViewUtils.createView(contextFactory.setUpContext(new NavScreen(), this), NavScreen.class, mDrawerLayout);
+        setContentView(R.layout.activity_launcher);
     }
 
     @Override
@@ -228,15 +231,6 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     }
 
     /*
-     * AppFlowPresenter.Activity
-     */
-
-    @Override
-    public Screen getDefaultScreen() {
-        return new GalleryScreen();
-    }
-
-    /*
      * Events
      */
 
@@ -253,6 +247,11 @@ public class LauncherActivity extends BaseSwitcherActivity implements
             }
         }
         //TODO handle faliurs
+    }
+
+    @Override
+    public void setUpButtonEnabled(boolean enabled) {
+        //Ignore drawer does this
     }
 
     /*

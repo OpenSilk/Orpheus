@@ -24,40 +24,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/main"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <include layout="@layout/main"/>
 
-    <!-- The drawer is given a fixed width in dp and extends the full height of
-         the container. -->
-    <LinearLayout
-        android:id="@+id/drawer_container"
-        android:orientation="vertical"
-        android:layout_width="@dimen/navigation_drawer_width"
-        android:layout_height="match_parent"
-        android:background="?android:colorBackground"
-        android:layout_gravity="start"
-        android:showDividers="middle"
-        android:divider="?android:dividerHorizontal">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/action_bar_double_height"
-            android:paddingStart="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingEnd="16dp"
-            android:scaleType="fitStart"
-            android:src="@drawable/orpheus_logo_record"/>
-
-        <org.opensilk.music.ui2.main.NavView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/drawer_list"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:choiceMode="singleChoice"/>
-
-    </LinearLayout>
+    <include layout="@layout/drawer_navigation"/>
 
 </android.support.v4.widget.DrawerLayout>

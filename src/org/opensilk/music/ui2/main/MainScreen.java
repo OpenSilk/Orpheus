@@ -54,16 +54,16 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 /**
  * Created by drew on 10/5/14.
  */
-@Layout(R.layout.main)
-@WithModule(MainScreen.Module.class)
+//@Layout(R.layout.main)
+//@WithModule(MainScreen.Module.class)
 public class MainScreen extends Screen {
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivity.Module.class,
+//            addsTo = BaseSwitcherActivity.Module.class,
             injects = {
                     MainView.class,
                     FooterView.class,
-            }
+            }, complete = false
     )
     public static class Module {
 

@@ -70,7 +70,7 @@ public class PluginScreen extends Screen {
     }
 
     @dagger.Module (
-            addsTo = BaseSwitcherActivity.Module.class,
+            addsTo = LauncherActivity.Module.class,
             injects = PluginView.class,
             library = true
     )

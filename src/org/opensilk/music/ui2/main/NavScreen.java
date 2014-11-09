@@ -45,13 +45,14 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
 
-@Layout(R.layout.drawer_navigation)
-@WithModule(NavScreen.Module.class)
+//@Layout(R.layout.drawer_navigation)
+//@WithModule(NavScreen.Module.class)
 public class NavScreen extends Screen {
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivity.Module.class,
-            injects = NavView.class
+//            addsTo = BaseSwitcherActivity.Module.class,
+            injects = NavView.class,
+            complete = false
     )
     public static class Module {
 

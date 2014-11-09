@@ -45,7 +45,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
     }
 
     public interface Activity extends HasScope {
-        void setShowHomeEnabled(boolean enabled);
+//        void setShowHomeEnabled(boolean enabled);
 
         void setUpButtonEnabled(boolean enabled);
 
@@ -251,7 +251,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
     private void update() {
         Activity view = getView();
         if (view == null) return;
-        view.setShowHomeEnabled(config.showHomeEnabled);
+//        view.setShowHomeEnabled(config.showHomeEnabled);
         view.setUpButtonEnabled(config.upButtonEnabled);
         if (config.titleRes >= 0) {
             view.setTitle(config.titleRes);

@@ -47,6 +47,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.Mortar;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/15/14.
@@ -72,12 +73,20 @@ public class QueueView extends DragSortListView implements
 
     @Override
     protected void onFinishInflate() {
+        Timber.v("onFinishInflate()");
         super.onFinishInflate();
         presenter.takeView(this);
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        Timber.v("onAttachedToWindow()");
+        super.onAttachedToWindow();
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
+        Timber.v("onDetachedFromWindow()");
         super.onDetachedFromWindow();
         presenter.dropView(this);
     }

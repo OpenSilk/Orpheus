@@ -54,7 +54,7 @@ import timber.log.Timber;
 public class GalleryScreen extends Screen {
 
     @dagger.Module (
-            addsTo = BaseSwitcherActivity.Module.class,
+            addsTo = LauncherActivity.Module.class,
             injects = GalleryView.class
     )
     public static class Module {

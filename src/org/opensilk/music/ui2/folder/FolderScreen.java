@@ -80,7 +80,7 @@ public class FolderScreen extends Screen {
     }
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivity.Module.class,
+            addsTo = LauncherActivity.Module.class,
             injects = FolderView.class
     )
     public static class Module {

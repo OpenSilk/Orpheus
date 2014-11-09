@@ -91,7 +91,7 @@ public class LibraryScreen extends Screen {
     }
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivity.Module.class,
+            addsTo = LauncherActivity.Module.class,
             injects = LibraryView.class,
             library = true
     )
