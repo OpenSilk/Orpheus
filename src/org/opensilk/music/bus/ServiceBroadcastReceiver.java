@@ -28,11 +28,6 @@ import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.music.appwidgets.MusicWidget;
 import org.opensilk.music.appwidgets.MusicWidgetService;
-import org.opensilk.music.bus.events.MetaChanged;
-import org.opensilk.music.bus.events.PlaybackModeChanged;
-import org.opensilk.music.bus.events.PlaystateChanged;
-import org.opensilk.music.bus.events.QueueChanged;
-import org.opensilk.music.bus.events.Refresh;
 import org.opensilk.music.muzei.MuzeiService;
 
 import timber.log.Timber;
@@ -58,27 +53,22 @@ public class ServiceBroadcastReceiver extends BroadcastReceiver {
         if (action != null) {
             switch (action) {
                 case MusicPlaybackService.META_CHANGED:
-                    EventBus.getInstance().post(new MetaChanged());
                     updateWidgets(context);
                     maybeUpdateWallpaper(context);
                     break;
                 case MusicPlaybackService.PLAYSTATE_CHANGED:
-                    EventBus.getInstance().post(new PlaystateChanged());
                     updateWidgets(context);
                     break;
                 case MusicPlaybackService.REFRESH:
-                    EventBus.getInstance().post(new Refresh());
                     // Cancel the broadcast so we aren't constantly refreshing
-                    context.removeStickyBroadcast(intent);
+//                    context.removeStickyBroadcast(intent);
                     break;
                 case MusicPlaybackService.REPEATMODE_CHANGED:
                 case MusicPlaybackService.SHUFFLEMODE_CHANGED:
-                    EventBus.getInstance().post(new PlaybackModeChanged());
                     // Large is only one with repeat/shuffle buttons
                     updateWidgets(context, MusicWidget.LARGE);
                     break;
                 case MusicPlaybackService.QUEUE_CHANGED:
-                    EventBus.getInstance().post(new QueueChanged());
                     break;
             }
         }

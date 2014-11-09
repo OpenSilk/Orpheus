@@ -51,13 +51,7 @@ import com.squareup.otto.Subscribe;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkProvider;
-import org.opensilk.music.bus.EventBus;
-import org.opensilk.music.bus.events.IABQueryResult;
-import org.opensilk.music.bus.events.MetaChanged;
-import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.bus.events.PanelStateChanged;
-import org.opensilk.music.bus.events.PlaybackModeChanged;
-import org.opensilk.music.bus.events.PlaystateChanged;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.widgets.AudioVisualizationView;
@@ -186,7 +180,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     public void onStart() {
         super.onStart();
         mGlobalMonitor = new GlobalBusMonitor();
-        EventBus.getInstance().register(mGlobalMonitor);
+//        EventBus.getInstance().register(mGlobalMonitor);
     }
 
     @Override
@@ -210,7 +204,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     public void onStop() {
         super.onStop();
         // unregister the global bus
-        EventBus.getInstance().unregister(mGlobalMonitor);
+//        EventBus.getInstance().unregister(mGlobalMonitor);
         mGlobalMonitor = null;
     }
 
@@ -738,40 +732,40 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     };
 
     class GlobalBusMonitor {
-        @Subscribe
-        public void onMetaChanged(MetaChanged e) {
-            // Current info
-            updateNowPlayingInfo();
-        }
+//        @Subscribe
+//        public void onMetaChanged(MetaChanged e) {
+//            // Current info
+//            updateNowPlayingInfo();
+//        }
 
-        @Subscribe
-        public void onPlaystateChanged(PlaystateChanged e) {
-            // Set the play and pause image
-            mHeaderPlayPauseButton.updateState();
-            mFooterPlayPauseButton.updateState();
-        }
+//        @Subscribe
+//        public void onPlaystateChanged(PlaystateChanged e) {
+//            // Set the play and pause image
+//            mHeaderPlayPauseButton.updateState();
+//            mFooterPlayPauseButton.updateState();
+//        }
 
-        @Subscribe
-        public void onPlaybackModeChanged(PlaybackModeChanged e) {
-            // Set the repeat image
-            mFooterRepeatButton.updateRepeatState();
-            // Set the shuffle image
-            mFooterShuffleButton.updateShuffleState();
-        }
+//        @Subscribe
+//        public void onPlaybackModeChanged(PlaybackModeChanged e) {
+//            // Set the repeat image
+//            mFooterRepeatButton.updateRepeatState();
+//            // Set the shuffle image
+//            mFooterShuffleButton.updateShuffleState();
+//        }
 
         /**
          * Handle changes to music service connection
          * @param e
          */
-        @Subscribe
-        public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
-            if (e.isConnected()) {
-                // Set the playback drawables
-                updatePlaybackControls();
-                // Current info
-                updateNowPlayingInfo();
-            }
-        }
+//        @Subscribe
+//        public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
+//            if (e.isConnected()) {
+//                // Set the playback drawables
+//                updatePlaybackControls();
+//                // Current info
+//                updateNowPlayingInfo();
+//            }
+//        }
 
     }
 

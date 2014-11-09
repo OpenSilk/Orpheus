@@ -52,7 +52,7 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 public class Main {
 
     @dagger.Module(
-            includes = FooterView.class,
+            includes = Footer.Module.class,
             injects = MainView.class,
             complete = false
     )

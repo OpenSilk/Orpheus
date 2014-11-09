@@ -43,12 +43,6 @@ import com.mobeta.android.dslv.DragSortListView.RemoveListener;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import org.opensilk.music.bus.EventBus;
-import org.opensilk.music.bus.events.MetaChanged;
-import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
-import org.opensilk.music.bus.events.PlaystateChanged;
-import org.opensilk.music.bus.events.QueueChanged;
-import org.opensilk.music.bus.events.Refresh;
 import com.andrew.apollo.menu.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.SongQueueCard;
 import org.opensilk.music.ui.cards.event.SongQueueCardClick;
@@ -101,7 +95,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
         super.onCreate(savedInstanceState);
         // Register the music status listener
         mGlobalMonitor = new GlobalBusMonitor();
-        EventBus.getInstance().register(mGlobalMonitor);
+//        EventBus.getInstance().register(mGlobalMonitor);
         // register with localbus
         mFragmentMonitor = new FragmentBusMonitor();
         mFragmentBus.register(mFragmentMonitor);
@@ -156,7 +150,7 @@ public class QueueFragment extends ScopedDaggerFragment implements
     @Override
     public void onDestroy() {
         // Unregister the busses;
-        EventBus.getInstance().unregister(mGlobalMonitor);
+//        EventBus.getInstance().unregister(mGlobalMonitor);
         mFragmentBus.unregister(mFragmentMonitor);
         super.onDestroy();
     }
@@ -307,59 +301,59 @@ public class QueueFragment extends ScopedDaggerFragment implements
             mLoaderRestartRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    restartLoader(null);
+//                    restartLoader(null);
                 }
             };
         }
 
-        @Subscribe
-        public void restartLoader(Refresh e) {
-            if (isAdded()) {
-                // This is a slight hack to give us a refrence if the
-                // items in the queue are moved
-                mLastPosition.prevActiveIndex = getCurrentTrackPosition();
-                // store top most index
-                mLastPosition.index = mListView.getFirstVisiblePosition();
-                View v = mListView.getChildAt(0);
-                // store offset of top item
-                mLastPosition.top = v == null ? 0 : v.getTop();
-                getLoaderManager().restartLoader(0, null, QueueFragment.this);
-            }
-        }
+//        @Subscribe
+//        public void restartLoader(Refresh e) {
+//            if (isAdded()) {
+//                // This is a slight hack to give us a refrence if the
+//                // items in the queue are moved
+//                mLastPosition.prevActiveIndex = getCurrentTrackPosition();
+//                // store top most index
+//                mLastPosition.index = mListView.getFirstVisiblePosition();
+//                View v = mListView.getChildAt(0);
+//                // store offset of top item
+//                mLastPosition.top = v == null ? 0 : v.getTop();
+//                getLoaderManager().restartLoader(0, null, QueueFragment.this);
+//            }
+//        }
 
-        @Subscribe
-        public void onMetaChanged(MetaChanged e) {
-            if (mAdapter != null) {
-                mAdapter.notifyDataSetChanged();
-            }
-        }
+//        @Subscribe
+//        public void onMetaChanged(MetaChanged e) {
+//            if (mAdapter != null) {
+//                mAdapter.notifyDataSetChanged();
+//            }
+//        }
 
-        @Subscribe
-        public void onPlaystateChanged(PlaystateChanged e) {
-            if (mAdapter != null) {
-                mAdapter.notifyDataSetChanged();
-            }
-        }
+//        @Subscribe
+//        public void onPlaystateChanged(PlaystateChanged e) {
+//            if (mAdapter != null) {
+//                mAdapter.notifyDataSetChanged();
+//            }
+//        }
 
-        @Subscribe
-        //@DebugLog
-        public void onQueueChanged(QueueChanged e) {
-            // For auto shuffle when the queue gets adjusted we
-            // can receive several QUEUE_CHANGED updates in quick
-            // succession so we batch the restart calls so our
-            // saved state doesnt alter unexpectedly while
-            // we wait on the loader
-            scheduleLoaderRestart();
-        }
+//        @Subscribe
+//        //@DebugLog
+//        public void onQueueChanged(QueueChanged e) {
+//            // For auto shuffle when the queue gets adjusted we
+//            // can receive several QUEUE_CHANGED updates in quick
+//            // succession so we batch the restart calls so our
+//            // saved state doesnt alter unexpectedly while
+//            // we wait on the loader
+//            scheduleLoaderRestart();
+//        }
 
-        @Subscribe
-        public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
-            if (e.isConnected()) {
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-            }
-        }
+//        @Subscribe
+//        public void onMusicServiceConnectionChanged(MusicServiceConnectionChanged e) {
+//            if (e.isConnected()) {
+//                if (mAdapter != null) {
+//                    mAdapter.notifyDataSetChanged();
+//                }
+//            }
+//        }
 
         private void scheduleLoaderRestart() {
             mHandler.removeCallbacks(mLoaderRestartRunnable);
