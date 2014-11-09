@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.transition.Explode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,15 +33,10 @@ import android.view.Window;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
-import org.opensilk.common.mortarflow.AppFlowPresenter;
-import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.util.VersionUtils;
-import org.opensilk.common.util.ViewUtils;
-import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 
-import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.api.OrpheusApi;
@@ -53,20 +47,14 @@ import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
-import org.opensilk.music.ui2.loader.LoaderModule;
-import org.opensilk.music.ui2.main.DrawerOwner;
-import org.opensilk.music.ui2.main.MainScreen;
-import org.opensilk.music.ui2.main.NavScreen;
+import org.opensilk.music.ui2.core.android.DrawerOwner;
+import org.opensilk.music.ui2.main.Main;
+import org.opensilk.music.ui2.main.Nav;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
-import dagger.Provides;
-import flow.Parcer;
 import hugo.weaving.DebugLog;
-import mortar.Blueprint;
 import timber.log.Timber;
 
 
@@ -89,8 +77,8 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     @dagger.Module (
             includes = {
                     BaseSwitcherActivity.Module.class,
-                    MainScreen.Module.class,
-                    NavScreen.Module.class
+                    Main.Module.class,
+                    Nav.Module.class
             },
             injects = LauncherActivity.class
     )

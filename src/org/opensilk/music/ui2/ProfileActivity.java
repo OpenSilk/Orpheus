@@ -21,13 +21,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.Config;
-import com.google.common.collect.Queues;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -39,19 +37,11 @@ import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
 import org.opensilk.music.ui.profile.PlaylistFragment;
 import org.opensilk.music.ui.profile.SongGroupFragment;
-import org.opensilk.music.ui2.main.FooterView;
-import org.opensilk.music.ui2.main.MainScreen;
-import org.opensilk.music.ui2.main.NavScreen;
+import org.opensilk.music.ui2.main.Main;
 import org.opensilk.music.ui2.main.QueueScreen;
 import org.opensilk.silkdagger.DaggerInjector;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import butterknife.ButterKnife;
 import dagger.ObjectGraph;
-import dagger.Provides;
-import de.greenrobot.event.EventBus;
 import flow.Flow;
 import mortar.Mortar;
 
@@ -76,7 +66,7 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
     @dagger.Module (
             includes = {
                     BaseSwitcherActivity.Module.class,
-                    MainScreen.Module.class,
+                    Main.Module.class,
             },
             injects = ProfileActivity.class
     )
@@ -169,6 +159,10 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
         }
         callback.onComplete();
     }
+
+    /*
+     * DaggerInjector for fragments
+     */
 
     @Override
     public void inject(Object o) {

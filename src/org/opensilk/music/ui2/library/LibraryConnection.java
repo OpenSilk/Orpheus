@@ -41,7 +41,7 @@ import rx.schedulers.Schedulers;
 
 import static org.opensilk.common.rx.RxUtils.observeOnMain;
 import static org.opensilk.common.util.UncheckedThrow.rethrow;
-import static org.opensilk.music.ui2.main.MusicServiceConnection.wrapForRetry;
+import static org.opensilk.music.MusicServiceConnection.wrapForRetry;
 
 /**
  * Created by drew on 10/20/14.

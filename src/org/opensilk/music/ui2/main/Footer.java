@@ -17,20 +17,20 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
-import org.opensilk.common.rx.HoldsSubscription;
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.core.BroadcastObservables;
 
 import java.util.concurrent.TimeUnit;
 
@@ -60,7 +60,15 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 /**
  * Created by drew on 10/15/14.
  */
-public class FooterBlueprint {
+public class Footer {
+
+    @dagger.Module(
+            injects = FooterView.class,
+            complete = false
+    )
+    public static class Module {
+
+    }
 
     @Singleton
     public static class Presenter extends ViewPresenter<FooterView> implements PausesAndResumes {

@@ -53,7 +53,7 @@ import mortar.Mortar;
 public class NavView extends ListView {
 
     @Inject
-    NavScreen.Presenter presenter;
+    Nav.Presenter presenter;
 
     public NavView(Context context, AttributeSet attrs) {
         super(context, attrs);

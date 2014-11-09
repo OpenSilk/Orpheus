@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui2.main;
+package org.opensilk.music.ui2.core;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,23 +24,12 @@ import android.content.IntentFilter;
 import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
-
-import java.util.concurrent.TimeUnit;
+import org.opensilk.music.MusicServiceConnection;
 
 import rx.Observable;
-import rx.Scheduler;
 import rx.android.observables.AndroidObservable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func2;
-import rx.observers.Observers;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
-
-import static org.opensilk.common.rx.RxUtils.observeOnMain;
 
 /**
  * Created by drew on 11/7/14.

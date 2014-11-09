@@ -52,7 +52,7 @@ import timber.log.Timber;
  */
 public class MainView extends FlingyFabLayout {
 
-    @Inject MainScreen.Presenter presenter;
+    @Inject Main.Presenter presenter;
 
     @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable fabPlay;
     @InjectView(R.id.floating_action_next) FloatingActionButton fabNext;

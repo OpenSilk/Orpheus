@@ -17,13 +17,10 @@
 package org.opensilk.music.ui2;
 
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.support.v4.view.MenuItemCompat;
@@ -42,19 +39,13 @@ import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.utils.MusicUtils;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastStatusCodes;
-import com.squareup.otto.Bus;
 
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.artwork.ArtworkService;
-import org.opensilk.music.bus.EventBus;
-import org.opensilk.music.bus.events.MusicServiceConnectionChanged;
 import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
-import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.common.dagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.support.ScopedDaggerActionBarActivity;
+import org.opensilk.music.MusicServiceConnection;
 
 import java.lang.ref.WeakReference;
 import java.util.Locale;

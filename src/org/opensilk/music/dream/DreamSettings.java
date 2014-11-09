@@ -27,7 +27,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.dream.views.ArtOnly;
 import org.opensilk.music.dream.views.ArtWithControls;
 import org.opensilk.music.dream.views.ArtWithMeta;
-import org.opensilk.music.ui2.main.MusicServiceConnection;
+import org.opensilk.music.MusicServiceConnection;
 
 import java.util.List;
 

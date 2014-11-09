@@ -34,8 +34,8 @@ import org.opensilk.music.R;
 import org.opensilk.music.dream.views.ArtOnly;
 import org.opensilk.music.dream.views.ArtWithControls;
 import org.opensilk.music.dream.views.ArtWithMeta;
-import org.opensilk.music.ui2.main.BroadcastObservables;
-import org.opensilk.music.ui2.main.MusicServiceConnection;
+import org.opensilk.music.ui2.core.BroadcastObservables;
+import org.opensilk.music.MusicServiceConnection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

@@ -19,17 +19,14 @@ package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
 
-import com.andrew.apollo.utils.MusicUtils;
-
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.main.MusicServiceConnection;
+import org.opensilk.music.MusicServiceConnection;
 
 import java.util.List;
 

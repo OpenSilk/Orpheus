@@ -23,7 +23,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,7 +31,6 @@ import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 
-import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.PaletteResponse;
 
 import javax.inject.Inject;
@@ -46,7 +44,7 @@ import mortar.Mortar;
  */
 public class FooterView extends RelativeLayout {
 
-    @Inject FooterBlueprint.Presenter presenter;
+    @Inject Footer.Presenter presenter;
 
     @InjectView(R.id.footer_thumbnail) AnimatedImageView artworkThumbnail;
     @InjectView(R.id.footer_progress) ProgressBar progressBar;

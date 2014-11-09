@@ -4,13 +4,11 @@ package org.opensilk.music.util;
 import android.content.Context;
 import android.database.AbstractCursor;
 import android.database.Cursor;
-import android.os.RemoteException;
 
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicStore;
 
-import org.opensilk.music.ui2.main.MusicServiceConnection;
-import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.MusicServiceConnection;
 
 import java.util.Arrays;
 

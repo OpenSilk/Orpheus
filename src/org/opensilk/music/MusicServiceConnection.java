@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.main;
+package org.opensilk.music;
 
 import android.content.ComponentName;
 import android.content.Context;

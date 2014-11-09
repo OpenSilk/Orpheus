@@ -22,7 +22,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.main.MusicServiceConnection;
+import org.opensilk.music.MusicServiceConnection;
 
 import javax.inject.Inject;
 

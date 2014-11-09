@@ -22,11 +22,8 @@ import android.os.Bundle;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
-import org.opensilk.common.mortar.WithModule;
-import org.opensilk.music.R;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui2.BaseSwitcherActivity;
-import org.opensilk.music.ui2.LauncherActivity;
+import org.opensilk.music.ui2.core.android.DrawerOwner;
 import org.opensilk.music.util.PluginUtil;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
@@ -38,19 +35,15 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
-import flow.Layout;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
 
-//@Layout(R.layout.drawer_navigation)
-//@WithModule(NavScreen.Module.class)
-public class NavScreen extends Screen {
+public class Nav {
 
     @dagger.Module(
-//            addsTo = BaseSwitcherActivity.Module.class,
             injects = NavView.class,
             complete = false
     )
