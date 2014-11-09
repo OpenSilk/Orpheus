@@ -24,6 +24,8 @@ import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
@@ -31,10 +33,13 @@ import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.R;
+import org.opensilk.music.api.model.Song;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.event.ConfirmDelete;
+import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.NowPlayingCursor;
@@ -42,6 +47,7 @@ import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -54,9 +60,11 @@ import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Scheduler;
+import rx.Subscription;
 import rx.android.observables.AndroidObservable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.observers.Observers;
 import rx.schedulers.Schedulers;
@@ -65,6 +73,7 @@ import timber.log.Timber;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
 import static org.opensilk.common.rx.RxUtils.notSubscribed;
+import static org.opensilk.common.rx.RxUtils.observeOnMain;
 
 /**
  * Created by drew on 10/15/14.
@@ -92,16 +101,19 @@ public class QueueScreen extends Screen {
         final MusicServiceConnection musicService;
         final EventBus bus;
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
+        final ArtworkRequestManager requestor;
 
         @Inject
         public Presenter(@ForApplication Context context,
                          MusicServiceConnection musicService,
                          @Named("activity") EventBus bus,
-                        PauseAndResumeRegistrar pauseAndResumeRegistrar) {
+                        PauseAndResumeRegistrar pauseAndResumeRegistrar,
+                        ArtworkRequestManager requestor) {
             this.appContext = context;
             this.musicService = musicService;
             this.bus = bus;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
+            this.requestor = requestor;
         }
 
         @Override
@@ -115,14 +127,17 @@ public class QueueScreen extends Screen {
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            getView().setup();
-            subscribeBroadcasts();
+            if (pauseAndResumeRegistrar.isRunning()) {
+                subscribeBroadcasts();
+            }
         }
 
         @Override
         protected void onSave(Bundle outState) {
             super.onSave(outState);
-            unsubscribeBroadcasts();
+            if (getView() == null && pauseAndResumeRegistrar.isRunning()) {
+                unsubscribeBroadcasts();
+            }
         }
 
         @Override
@@ -136,22 +151,22 @@ public class QueueScreen extends Screen {
         }
 
         public void setQueuePosition(int position) {
-
+            musicService.setQueuePosition(position);
         }
 
         public void removeQueueItem(long recentId) {
-
+            musicService.removeTrack(recentId);
         }
 
         public void moveQueueItem(int from, int to) {
-
+            musicService.moveQueueItem(from, to);
         }
 
         public boolean handleItemOverflowClick(OverflowAction action, RecentSong song) {
             switch (action) {
                 case PLAY_NEXT:
                     removeQueueItem(song.recentId);
-                    //MusicUtils.playNext(new long[]{song.recentId});
+                    musicService.enqueueNext(new long[]{song.recentId});
                     return true;
                 case ADD_TO_PLAYLIST:
                     if (song.isLocal) {
@@ -165,18 +180,20 @@ public class QueueScreen extends Screen {
                     return true;
                 case MORE_BY_ARTIST:
                     if (song.isLocal) {
-//                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), song.artistName));
+                        NavUtils.openArtistProfile(appContext, MusicUtils.makeArtist(appContext, song.artistName));
                     } // else TODO
                     return true;
                 case SET_RINGTONE:
-                    if (song.isLocal) {
+                    //TODO
+                    bus.post(new MakeToast(R.string.err_unimplemented));
+//                    if (song.isLocal) {
 //                        try {
 //                            long id = Long.decode(song.identity);
-//                            MusicUtils.setRingtone(getActivity(), id);
+//                            String s = MusicUtils.setRingtone(appContext, id);
 //                        } catch (NumberFormatException ex) {
 //                            //TODO
 //                        }
-                    } // else unsupported
+//                    } // else unsupported
                     return true;
                 case DELETE:
                     if (song.isLocal) {
@@ -221,77 +238,19 @@ public class QueueScreen extends Screen {
         Observable<List<RecentSong>> queueChangedObservable;
 
         void setupObservables() {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-            intentFilter.addAction(MusicPlaybackService.META_CHANGED);
-            intentFilter.addAction(MusicPlaybackService.QUEUE_CHANGED);
-            Scheduler scheduler = Schedulers.computation();
-            // obr will call onNext on the main thread so we observeOn computation
-            // so our chained operators will be called on computation instead of main.
-            Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(appContext, intentFilter);
-            playStateObservable = intentObservable.observeOn(scheduler)
-                    // Filter for only PLAYSTATE_CHANGED actions
-                    .filter(new Func1<Intent, Boolean>() {
-                        // called on computation
-                        @Override
-                        public Boolean call(Intent intent) {
-                            Timber.v("playstateSubscripion filter called on %s", Thread.currentThread().getName());
-                            return MusicPlaybackService.PLAYSTATE_CHANGED.equals(intent.getAction());
-                        }
-                    })
-                            // filter out repeats only taking most recent
-//                    .debounce(20, TimeUnit.MILLISECONDS, scheduler)
-                    // XXX the intent contains the playstate as an extra but it could be out of date
-//                    .map(new Func1<Intent, Boolean>() {
-//                        @Override
-//                        public Boolean call(Intent intent) {
-//                            return intent.getBooleanExtra("playing", false);
-//                        }
-//                    })
-                    // flatMap the intent into a boolean by requesting the playstate
-                    .flatMap(new Func1<Intent, Observable<Boolean>>() {
-                        @Override
-                        public Observable<Boolean> call(Intent intent) {
-                            Timber.v("playstateSubscription flatMap called on %s", Thread.currentThread().getName());
-                            return musicService.isPlaying();
-                        }
-                    })
-                            // observe final result on main thread
-                    .observeOn(AndroidSchedulers.mainThread());
-            metaChangedObservable = intentObservable.observeOn(scheduler)
-                    .filter(new Func1<Intent, Boolean>() {
-                        @Override
-                        public Boolean call(Intent intent) {
-                            return MusicPlaybackService.META_CHANGED.equals(intent.getAction());
-                        }
-                    })
-//                    .map(new Func1<Intent, Long>() {
-//                        @Override
-//                        public Long call(Intent intent) {
-//                            return intent.getLongExtra("id", -1);
-//                        }
-//                    })
-                    .flatMap(new Func1<Intent, Observable<Long>>() {
-                        @Override
-                        public Observable<Long> call(Intent intent) {
-                            return musicService.getAudioId();
-                        }
-                    })
-                    .observeOn(AndroidSchedulers.mainThread());
-            queueChangedObservable = intentObservable.observeOn(Schedulers.io())
-                    .filter(new Func1<Intent, Boolean>() {
-                        @Override
-                        public Boolean call(Intent intent) {
-                            return MusicPlaybackService.QUEUE_CHANGED.equals(intent.getAction());
-                        }
-                    })
-                    .map(new Func1<Intent, List<RecentSong>>() {
-                        @Override
-                        public List<RecentSong> call(Intent intent) {
-                            return getQueue();
-                        }
-                    })
-                    .observeOn(AndroidSchedulers.mainThread());
+            playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
+            metaChangedObservable = observeOnMain(BroadcastObservables.trackIdChanged(appContext));
+            queueChangedObservable = observeOnMain(
+                    BroadcastObservables.queueChanged(appContext)
+                            .debounce(500, TimeUnit.MILLISECONDS)
+                            .observeOn(Schedulers.io())
+                            .map(new Func1<Intent, List<RecentSong>>() {
+                                @Override
+                                public List<RecentSong> call(Intent intent) {
+                                    return getQueue();
+                                }
+                            })
+            );
         }
 
         Observer<Boolean> playStateObserver;
@@ -315,29 +274,51 @@ public class QueueScreen extends Screen {
                     v.onCurrentSongChanged(audioId);
                 }
             });
-            queueChangedObserver = Observers.create(new Action1<List<RecentSong>>() {
-                @Override
-                public void call(List<RecentSong> recentSongs) {
-                    updateQueue(recentSongs);
-                }
-            });
+            queueChangedObserver = Observers.create(
+                    new Action1<List<RecentSong>>() {
+                        @Override
+                        public void call(List<RecentSong> recentSongs) {
+                            updateQueue(recentSongs);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            unsubscribeQueue();
+                            subscribeQueue();
+                        }
+                    });
         }
 
         CompositeSubscription broadcastSubscriptions;
+        Subscription queueChangedSubscription;
 
         void subscribeBroadcasts() {
-            if (isSubscribed(broadcastSubscriptions)) return;
-            broadcastSubscriptions = new CompositeSubscription(
-                    playStateObservable.subscribe(playStateObserver),
-                    metaChangedObservable.subscribe(metaChangedObserver),
-                    queueChangedObservable.subscribe(queueChangedObserver)
-            );
+            if (notSubscribed(broadcastSubscriptions)) {
+                broadcastSubscriptions = new CompositeSubscription(
+                        playStateObservable.subscribe(playStateObserver),
+                        metaChangedObservable.subscribe(metaChangedObserver)
+                );
+            }
+            subscribeQueue();
         }
 
         void unsubscribeBroadcasts() {
-            if (notSubscribed(broadcastSubscriptions)) return;
-            broadcastSubscriptions.unsubscribe();
-            broadcastSubscriptions = null;
+            if (isSubscribed(broadcastSubscriptions)) {
+                broadcastSubscriptions.unsubscribe();
+                broadcastSubscriptions = null;
+            }
+            unsubscribeQueue();
+        }
+
+        void subscribeQueue() {
+            if (isSubscribed(queueChangedSubscription)) return;
+            queueChangedSubscription = queueChangedObservable.subscribe(queueChangedObserver);
+        }
+
+        void unsubscribeQueue() {
+            if (notSubscribed(queueChangedSubscription)) return;
+            queueChangedSubscription.unsubscribe();
+            queueChangedSubscription = null;
         }
     }
 

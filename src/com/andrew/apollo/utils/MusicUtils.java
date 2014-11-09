@@ -848,7 +848,7 @@ public final class MusicUtils {
     /**
      * @param list The list to enqueue.
      */
-    @MarkedForRemoval
+    @MarkedForRemoval @Deprecated
     public static void playNext(long[] recentslist) {
         if (sService == null) {
             return;
@@ -859,7 +859,7 @@ public final class MusicUtils {
         }
     }
 
-    @MarkedForRemoval
+    @MarkedForRemoval @Deprecated
     public static void playNext(Context context, Song[] list) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             throw new RuntimeException("Stop calling from main thread");
@@ -1281,6 +1281,7 @@ public final class MusicUtils {
      * @param from The index the item is currently at.
      * @param to The index the item is moving to.
      */
+    @Deprecated @MarkedForRemoval
     public static void moveQueueItem(final int from, final int to) {
         try {
             if (sService != null) {
@@ -1413,6 +1414,7 @@ public final class MusicUtils {
     /**
      * @param position The position to move the queue to
      */
+    @Deprecated @MarkedForRemoval
     public static void setQueuePosition(final int position) {
         if (sService != null) {
             try {

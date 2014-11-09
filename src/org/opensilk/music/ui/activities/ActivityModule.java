@@ -43,7 +43,6 @@ import de.greenrobot.event.EventBus;
 @Module (
         injects = {
                 ActionBarControllerImpl.class,
-                ProfileDialogActivity.class,
                 NowPlayingFragment.class,
                 SettingsActivity.class,
                 FolderPickerActivity.class,

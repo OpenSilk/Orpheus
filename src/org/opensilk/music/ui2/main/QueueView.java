@@ -58,23 +58,23 @@ public class QueueView extends DragSortListView implements
         AdapterView.OnItemClickListener {
 
     @Inject QueueScreen.Presenter presenter;
-    @Inject ArtworkRequestManager requestor;
 
-    Adapter adapter;
+    final Adapter adapter;
 
     public QueueView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
-        adapter = new Adapter(getContext(), requestor, presenter);
-        setDropListener(this);
-        setRemoveListener(this);
-        setOnItemClickListener(this);
+        adapter = new Adapter(getContext(), presenter);
     }
 
     @Override
     protected void onFinishInflate() {
         Timber.v("onFinishInflate()");
         super.onFinishInflate();
+        setAdapter(adapter);
+        setDropListener(this);
+        setRemoveListener(this);
+        setOnItemClickListener(this);
         presenter.takeView(this);
     }
 
@@ -130,7 +130,7 @@ public class QueueView extends DragSortListView implements
     }
 
     public void setup() {
-        setAdapter(adapter);
+
     }
 
     public void onCurrentSongChanged(long recentId) {
@@ -145,15 +145,13 @@ public class QueueView extends DragSortListView implements
 
     static class Adapter extends ArrayAdapter<RecentSong> {
 
-        final ArtworkRequestManager requestor;
         final QueueScreen.Presenter presenter;
 
         long currentSong;
         boolean isPlaying;
 
-        Adapter(Context context, ArtworkRequestManager requestor, QueueScreen.Presenter presenter) {
+        Adapter(Context context, QueueScreen.Presenter presenter) {
             super(context, -1);
-            this.requestor = requestor;
             this.presenter = presenter;
         }
 
@@ -175,7 +173,7 @@ public class QueueView extends DragSortListView implements
 
             String artist = item.albumArtistName;
             if (TextUtils.isEmpty(artist)) artist = item.artistName;
-            holder.subscriptions.add(requestor.newAlbumRequest(holder.artwork,
+            holder.subscriptions.add(presenter.requestor.newAlbumRequest(holder.artwork,
                     null, new ArtInfo(artist, item.albumName, item.artworkUri), ArtworkType.THUMBNAIL));
 
             holder.overflow.setOnClickListener(new OnClickListener() {

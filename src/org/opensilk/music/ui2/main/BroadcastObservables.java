@@ -50,10 +50,7 @@ public class BroadcastObservables {
     public static Observable<Boolean> playStateChanged(Context appContext) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(MusicPlaybackService.PLAYSTATE_CHANGED);
-        // obr will call onNext on the main thread so we observeOn computation
-        // so our chained operators will be called on computation instead of main.
-        Observable<Intent> intentObservable = AndroidObservable
-                .fromBroadcast(appContext, intentFilter).observeOn(Schedulers.computation());
+        Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(appContext, intentFilter);
         return intentObservable.map(new Func1<Intent, Boolean>() {
             @Override
             public Boolean call(Intent intent) {
@@ -65,11 +62,17 @@ public class BroadcastObservables {
     public static Observable<Intent> metaChanged(Context appContext) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(MusicPlaybackService.META_CHANGED);
-        // obr will call onNext on the main thread so we observeOn computation
-        // so our chained operators will be called on computation instead of main.
-        Observable<Intent> intentObservable = AndroidObservable
-                .fromBroadcast(appContext, intentFilter).observeOn(Schedulers.computation());
+        Observable<Intent> intentObservable = AndroidObservable.fromBroadcast(appContext, intentFilter);
         return intentObservable;
+    }
+
+    public static Observable<Long> trackIdChanged(Context appContext) {
+        return metaChanged(appContext).map(new Func1<Intent, Long>() {
+            @Override
+            public Long call(Intent intent) {
+                return intent.getLongExtra("id", -1);
+            }
+        });
     }
 
     public static Observable<String> trackChanged(Context appContext) {
@@ -100,7 +103,8 @@ public class BroadcastObservables {
     }
 
     public static Observable<ArtInfo> artworkChanged(Context appContext, final MusicServiceConnection connection) {
-        return metaChanged(appContext).flatMap(new Func1<Intent, Observable<ArtInfo>>() {
+        //TODO test and see if we really need to push these to io, i think we dont
+        return metaChanged(appContext).observeOn(Schedulers.io()).flatMap(new Func1<Intent, Observable<ArtInfo>>() {
             @Override
             public Observable<ArtInfo> call(Intent intent) {
                 return connection.getCurrentArtInfo();
@@ -111,10 +115,8 @@ public class BroadcastObservables {
     public static Observable<Integer> shuffleModeChanged(Context appContext, final MusicServiceConnection connection) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(MusicPlaybackService.SHUFFLEMODE_CHANGED);
-        // obr will call onNext on the main thread so we observeOn computation
-        // so our chained operators will be called on computation instead of main.
         Observable<Intent> intentObservable = AndroidObservable
-                .fromBroadcast(appContext, intentFilter).observeOn(Schedulers.computation());
+                .fromBroadcast(appContext, intentFilter).observeOn(Schedulers.io());
         return intentObservable.flatMap(new Func1<Intent, Observable<Integer>>() {
             @Override
             public Observable<Integer> call(Intent intent) {
@@ -126,16 +128,20 @@ public class BroadcastObservables {
     public static Observable<Integer> repeatModeChanged(Context appContext, final MusicServiceConnection connection) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(MusicPlaybackService.REPEATMODE_CHANGED);
-        // obr will call onNext on the main thread so we observeOn computation
-        // so our chained operators will be called on computation instead of main.
         Observable<Intent> intentObservable = AndroidObservable
-                .fromBroadcast(appContext, intentFilter).observeOn(Schedulers.computation());
+                .fromBroadcast(appContext, intentFilter).observeOn(Schedulers.io());
         return intentObservable.flatMap(new Func1<Intent, Observable<Integer>>() {
             @Override
             public Observable<Integer> call(Intent intent) {
                 return connection.getRepeatMode();
             }
         });
+    }
+
+    public static Observable<Intent> queueChanged(Context appContext) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MusicPlaybackService.QUEUE_CHANGED);
+        return AndroidObservable.fromBroadcast(appContext, intentFilter);
     }
 
 }

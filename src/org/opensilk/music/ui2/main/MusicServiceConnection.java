@@ -144,10 +144,10 @@ public class MusicServiceConnection {
     //void prev();
     //void next();
     //void enqueue(in long [] list, int action);
-    void setQueuePosition(int index);
+    //void setQueuePosition(int index);
     //void setShuffleMode(int shufflemode);
     void setRepeatMode(int repeatmode);
-    void moveQueueItem(int from, int to);
+    //void moveQueueItem(int from, int to);
     void toggleFavorite();
     void refresh();
     boolean isFavorite();
@@ -167,7 +167,7 @@ public class MusicServiceConnection {
     int getQueuePosition();
     //int getShuffleMode();
     int removeTracks(int first, int last);
-    int removeTrack(long id);
+    //int removeTrack(long id);
     //int getRepeatMode();
     int getMediaMountedCount();
     int getAudioSessionId();
@@ -189,6 +189,7 @@ public class MusicServiceConnection {
                 try {
                     iApolloService.next();
                 } catch (RemoteException e) {
+                    unbind();
                     //TODO
                 }
             }
@@ -203,6 +204,14 @@ public class MusicServiceConnection {
         enqueueSongs(func, MusicPlaybackService.LAST);
     }
 
+    public void enqueueNext(final long[] recentIds) {
+        enqueue(recentIds, MusicPlaybackService.NEXT);
+    }
+
+    public void enqueueEnd(final long[] recentIds) {
+        enqueue(recentIds, MusicPlaybackService.LAST);
+    }
+
     public void enqueueSongs(final Func0<Song[]> func, final int where) {
         getObservable().subscribe(new SimpleObserver<IApolloService>() {
             @Override
@@ -213,6 +222,22 @@ public class MusicServiceConnection {
                     iApolloService.enqueue(providerIds, where);
                     eventBus.post(new MakeToast(MakeToast.Type.PLURALS, R.plurals.NNNtrackstoqueue, providerIds.length));
                 } catch (RemoteException e) {
+                    unbind();
+                    eventBus.post(new MakeToast(MakeToast.Type.NORMAL, R.string.err_addtoqueue));
+                }
+            }
+        });
+    }
+
+    public void enqueue(final long[] recentIds, final int where) {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.enqueue(recentIds, where);
+                    eventBus.post(new MakeToast(MakeToast.Type.PLURALS, R.plurals.NNNtrackstoqueue, recentIds.length));
+                } catch (RemoteException e) {
+                    unbind();
                     eventBus.post(new MakeToast(MakeToast.Type.NORMAL, R.string.err_addtoqueue));
                 }
             }
@@ -231,6 +256,7 @@ public class MusicServiceConnection {
                         iApolloService.play();
                     }
                 } catch (RemoteException e) {
+                    unbind();
                     //TODO
                 }
             }
@@ -256,6 +282,7 @@ public class MusicServiceConnection {
                             break;
                     }
                 } catch (RemoteException e) {
+                    unbind();
                     //TODO
                 }
             }
@@ -282,6 +309,49 @@ public class MusicServiceConnection {
                             iApolloService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
                     }
                 } catch (RemoteException e) {
+                    unbind();
+                    //TODO
+                }
+            }
+        });
+    }
+
+    public void removeTrack(final long id) {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.removeTrack(id);
+                } catch (RemoteException e) {
+                    unbind();
+                    // TODO
+                }
+            }
+        });
+    }
+
+    public void moveQueueItem(final int from, final int to) {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.moveQueueItem(from, to);
+                } catch (RemoteException e) {
+                    unbind();
+                    //TODO
+                }
+            }
+        });
+    }
+
+    public void setQueuePosition(final int pos) {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.setQueuePosition(pos);
+                } catch (RemoteException e) {
+                    unbind();
                     //TODO
                 }
             }

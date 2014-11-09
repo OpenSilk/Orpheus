@@ -46,6 +46,6 @@
         style="?toolbarTheme"/>
 
     <!--Fabs-->
-    <include layout="@layout/floating_action_buttons"/>
+    <include layout="@layout/floating_action_buttons_profile"/>
 
 </org.opensilk.music.ui2.main.MainView>
