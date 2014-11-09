@@ -165,7 +165,7 @@ public class SongsScreen extends Screen {
         public void onBindViewHolder(final ViewHolder holder, LocalSong song) {
             holder.title.setText(song.name);
             holder.subtitle.setText(song.artistName);
-            holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
+            holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
                     null, song.albumId, ArtworkType.THUMBNAIL));
         }
     }

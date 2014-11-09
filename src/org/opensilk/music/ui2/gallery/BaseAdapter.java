@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.PaletteObserver;
@@ -182,10 +183,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        @InjectView(R.id.artwork_thumb) public ImageView artwork;
-        @InjectView(R.id.artwork_thumb2) @Optional public ImageView artwork2;
-        @InjectView(R.id.artwork_thumb3) @Optional public ImageView artwork3;
-        @InjectView(R.id.artwork_thumb4) @Optional public ImageView artwork4;
+        @InjectView(R.id.artwork_thumb) public AnimatedImageView artwork;
+        @InjectView(R.id.artwork_thumb2) @Optional public AnimatedImageView artwork2;
+        @InjectView(R.id.artwork_thumb3) @Optional public AnimatedImageView artwork3;
+        @InjectView(R.id.artwork_thumb4) @Optional public AnimatedImageView artwork4;
         @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;

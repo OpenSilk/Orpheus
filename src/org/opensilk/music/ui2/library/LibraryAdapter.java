@@ -127,7 +127,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         ArtInfo artInfo = new ArtInfo(album.artistName, album.name, album.artworkUri);
         holder.title.setText(album.name);
         holder.subtitle.setText(album.artistName);
-        holder.subscriptions.add(presenter.requestor.newAlbumRequest((AnimatedImageView) holder.artwork,
+        holder.subscriptions.add(presenter.requestor.newAlbumRequest(holder.artwork,
                 null, artInfo, ArtworkType.THUMBNAIL));
     }
 
@@ -137,7 +137,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         String subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount)
                 + ", " + MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
         holder.subtitle.setText(subtitle);
-        holder.subscriptions.add(presenter.requestor.newArtistRequest((AnimatedImageView) holder.artwork,
+        holder.subscriptions.add(presenter.requestor.newArtistRequest(holder.artwork,
                 null, artInfo, ArtworkType.THUMBNAIL));
     }
 
@@ -163,7 +163,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
             holder.extraInfo.setText(MusicUtils.makeTimeString(holder.itemView.getContext(), song.duration));
             holder.extraInfo.setVisibility(View.VISIBLE);
         }
-        holder.subscriptions.add(presenter.requestor.newAlbumRequest((AnimatedImageView) holder.artwork,
+        holder.subscriptions.add(presenter.requestor.newAlbumRequest(holder.artwork,
                 null, artInfo, ArtworkType.THUMBNAIL));
     }
 
@@ -190,7 +190,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        @InjectView(R.id.artwork_thumb) ImageView artwork;
+        @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) TextView extraInfo;

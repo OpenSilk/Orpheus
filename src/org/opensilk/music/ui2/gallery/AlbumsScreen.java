@@ -180,7 +180,7 @@ public class AlbumsScreen extends Screen {
             holder.subtitle.setText(album.artistName);
             PaletteObserver paletteObserver = holder.descriptionContainer != null
                     ? holder.descriptionContainer.getPaletteObserver() : null;
-            holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
+            holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
                     paletteObserver, artInfo, ArtworkType.THUMBNAIL));
         }
 

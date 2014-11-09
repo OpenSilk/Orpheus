@@ -179,7 +179,7 @@ public class ArtistsScreen extends Screen {
             holder.subtitle.setText(subtitle);
             PaletteObserver paletteObserver = holder.descriptionContainer != null
                     ? holder.descriptionContainer.getPaletteObserver() : null;
-            holder.subscriptions.add(artworkRequestor.newArtistRequest((AnimatedImageView)holder.artwork,
+            holder.subscriptions.add(artworkRequestor.newArtistRequest(holder.artwork,
                     paletteObserver, artInfo, ArtworkType.THUMBNAIL));
         }
     }

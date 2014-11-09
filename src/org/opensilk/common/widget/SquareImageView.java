@@ -33,11 +33,7 @@ import rx.Subscription;
 /**
  * Created by drew on 10/22/14.
  */
-public class SquareImageView extends ImageView implements HoldsSubscription, AnimatedImageView {
-
-    public static final int TRANSITION_DURATION = 300;
-    protected Subscription subscription;
-    protected boolean defaultImageSet;
+public class SquareImageView extends AnimatedImageView  {
 
     public SquareImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -79,78 +75,9 @@ public class SquareImageView extends ImageView implements HoldsSubscription, Ani
      * requestLayout() to its parent, taking advantage of knowing that image size
      * won't change once set.
      */
-    //TODO revisit
-//    @Override
-//    public void requestLayout() {
-//        forceLayout();
-//    }
-
-    /*
-     * Holds subscription
-     */
-
     @Override
-    public void addSubscription(Subscription subscription) {
-        this.subscription = subscription;
-    }
-
-    @Override
-    public void removeSubscription(Subscription subscription) {
-        this.subscription = null;
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (subscription != null) {
-            subscription.unsubscribe();
-            subscription = null;
-        }
-    }
-
-    /*
-     * AnimatedImageView
-     */
-
-    @Override
-    public void setDefaultImage() {
-        setImageResource(R.drawable.default_artwork);
-        defaultImageSet = true;
-    }
-
-    @Override
-    public void setImageBitmap(Bitmap bm, boolean shouldAnimate) {
-        if (shouldAnimate) {
-            if (defaultImageSet) {
-                defaultImageSet = false;
-                Drawable layer1 = getDrawable();
-                Drawable layer2 = createBitmapDrawable(bm);
-                TransitionDrawable td = new TransitionDrawable(new Drawable[]{ layer1, layer2 });
-                td.setCrossFadeEnabled(true);
-                setImageDrawable(td);
-                td.startTransition(TRANSITION_DURATION);
-            } else if (getDrawable() != null) {
-                Drawable layer1 = getDrawable();
-                if (layer1 instanceof TransitionDrawable) {
-                    layer1 = ((TransitionDrawable) layer1).getDrawable(1);
-                }
-                Drawable layer2 = createBitmapDrawable(bm);
-                TransitionDrawable td = new TransitionDrawable(new Drawable[]{layer1, layer2});
-                td.setCrossFadeEnabled(true);
-                setImageDrawable(td);
-                td.startTransition(TRANSITION_DURATION);
-            } else {
-                setAlpha(0.0f);
-                setImageBitmap(bm);
-                animate().alpha(1.0f).setDuration(TRANSITION_DURATION).start();
-            }
-        } else {
-            setImageBitmap(bm);
-        }
-    }
-
-    protected Drawable createBitmapDrawable(Bitmap bm) {
-        return new BitmapDrawable(getResources(), bm);
+    public void requestLayout() {
+        forceLayout();
     }
 
 }

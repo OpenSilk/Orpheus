@@ -104,7 +104,7 @@ public class SongCollectionAdapter extends CursorAdapter {
         holder.subtitle.setText(song.artistName);
         holder.info.setText(MusicUtils.makeTimeString(context, song.duration));
         if (!useSimpleLayout && holder.artwork != null) {
-            holder.subscriptions.add(requestor.newAlbumRequest((AnimatedImageView) holder.artwork,
+            holder.subscriptions.add(requestor.newAlbumRequest(holder.artwork,
                     null, song.albumId, ArtworkType.THUMBNAIL));
         }
         holder.overflow.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +140,7 @@ public class SongCollectionAdapter extends CursorAdapter {
 
     public static class ViewHolder {
         final View itemView;
-        @InjectView(R.id.artwork_thumb) @Optional ImageView artwork;
+        @InjectView(R.id.artwork_thumb) @Optional AnimatedImageView artwork;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) TextView info;

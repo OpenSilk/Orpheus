@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.ArtworkImageView;
@@ -47,7 +48,7 @@ public class FooterView extends RelativeLayout {
 
     @Inject FooterBlueprint.Presenter presenter;
 
-    @InjectView(R.id.footer_thumbnail) ImageView artworkThumbnail;
+    @InjectView(R.id.footer_thumbnail) AnimatedImageView artworkThumbnail;
     @InjectView(R.id.footer_progress) ProgressBar progressBar;
     @InjectView(R.id.footer_track_title) TextView trackTitle;
     @InjectView(R.id.footer_artist_name) TextView artistName;

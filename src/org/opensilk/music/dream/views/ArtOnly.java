@@ -42,7 +42,7 @@ public class ArtOnly extends RelativeLayout implements IDreamView {
     @Inject ArtworkRequestManager mRequestor;
     @Inject DreamPresenter mPresenter;
 
-    @InjectView(R.id.album_art) protected ImageView mArtwork;
+    @InjectView(R.id.album_art) protected AnimatedImageView mArtwork;
 
     public ArtOnly(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -87,7 +87,7 @@ public class ArtOnly extends RelativeLayout implements IDreamView {
     }
 
     public void updateArtwork(ArtInfo artInfo) {
-        mRequestor.newAlbumRequest((AnimatedImageView) mArtwork, null, artInfo, ArtworkType.LARGE);
+        mRequestor.newAlbumRequest(mArtwork, null, artInfo, ArtworkType.LARGE);
     }
 
     @Override

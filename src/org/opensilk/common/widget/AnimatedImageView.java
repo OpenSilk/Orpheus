@@ -17,12 +17,97 @@
 
 package org.opensilk.common.widget;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.util.AttributeSet;
+import android.widget.ImageView;
+
+import org.opensilk.common.rx.HoldsSubscription;
+import org.opensilk.music.R;
+
+import rx.Subscription;
 
 /**
  * Created by drew on 10/26/14.
  */
-public interface AnimatedImageView {
-    void setDefaultImage();
-    void setImageBitmap(Bitmap bm, boolean shouldAnimate);
+public class AnimatedImageView extends ImageView implements HoldsSubscription {
+
+    public static final int TRANSITION_DURATION = 300;
+
+    protected Subscription subscription;
+    protected boolean defaultImageSet;
+
+    public AnimatedImageView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    /*
+     * Holds subscription
+     */
+
+    @Override
+    public void addSubscription(Subscription subscription) {
+        this.subscription = subscription;
+    }
+
+    @Override
+    public void removeSubscription(Subscription subscription) {
+        this.subscription = null;
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (subscription != null) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+    }
+
+    /*
+     * AnimatedImageView
+     */
+
+    public void setDefaultImage() {
+        setImageResource(R.drawable.default_artwork);
+        defaultImageSet = true;
+    }
+
+    public void setImageBitmap(Bitmap bm, boolean shouldAnimate) {
+        if (shouldAnimate) {
+            if (defaultImageSet) {
+                defaultImageSet = false;
+                Drawable layer1 = getDrawable();
+                Drawable layer2 = createBitmapDrawable(bm);
+                TransitionDrawable td = new TransitionDrawable(new Drawable[]{ layer1, layer2 });
+                td.setCrossFadeEnabled(true);
+                setImageDrawable(td);
+                td.startTransition(TRANSITION_DURATION);
+            } else if (getDrawable() != null) {
+                Drawable layer1 = getDrawable();
+                if (layer1 instanceof TransitionDrawable) {
+                    layer1 = ((TransitionDrawable) layer1).getDrawable(1);
+                }
+                Drawable layer2 = createBitmapDrawable(bm);
+                TransitionDrawable td = new TransitionDrawable(new Drawable[]{layer1, layer2});
+                td.setCrossFadeEnabled(true);
+                setImageDrawable(td);
+                td.startTransition(TRANSITION_DURATION);
+            } else {
+                setAlpha(0.0f);
+                setImageBitmap(bm);
+                animate().alpha(1.0f).setDuration(TRANSITION_DURATION).start();
+            }
+        } else {
+            setImageBitmap(bm);
+        }
+    }
+
+    protected Drawable createBitmapDrawable(Bitmap bm) {
+        return new BitmapDrawable(getResources(), bm);
+    }
+
 }

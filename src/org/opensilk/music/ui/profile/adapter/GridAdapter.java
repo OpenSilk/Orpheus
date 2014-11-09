@@ -109,7 +109,7 @@ public class GridAdapter extends ArrayAdapter<Object> {
             vh.subtitle.setText(la.artistName);
             PaletteObserver paletteObserver = vh.descriptionContainer != null
                     ? vh.descriptionContainer.getPaletteObserver() : null;
-            vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork,
+            vh.subscriptions.add(artworkRequestor.newAlbumRequest(vh.artwork,
                     paletteObserver, new ArtInfo(la.artistName, la.name, la.artworkUri), ArtworkType.THUMBNAIL));
             vh.overflow.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -144,21 +144,21 @@ public class GridAdapter extends ArrayAdapter<Object> {
             switch (vh.artNumber) {
                 case 4:
                     if (lsg.albumIds.length >= 4) {
-                        vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork4,
+                        vh.subscriptions.add(artworkRequestor.newAlbumRequest(vh.artwork4,
                                 null, lsg.albumIds[3], ArtworkType.THUMBNAIL));
-                        vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork3,
+                        vh.subscriptions.add(artworkRequestor.newAlbumRequest(vh.artwork3,
                                 null, lsg.albumIds[2], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 2:
                     if (lsg.albumIds.length >= 2) {
-                        vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork2,
+                        vh.subscriptions.add(artworkRequestor.newAlbumRequest(vh.artwork2,
                                 null, lsg.albumIds[1], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 1:
                     if (lsg.albumIds.length >= 1) {
-                        vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork,
+                        vh.subscriptions.add(artworkRequestor.newAlbumRequest(vh.artwork,
                                 null, lsg.albumIds[0], ArtworkType.THUMBNAIL));
                     } else {
                         ((AnimatedImageView) vh.artwork).setDefaultImage();
@@ -219,10 +219,10 @@ public class GridAdapter extends ArrayAdapter<Object> {
     public static class ViewHolder {
 
         final View itemView;
-        @InjectView(R.id.artwork_thumb) ImageView artwork;
-        @InjectView(R.id.artwork_thumb2) @Optional ImageView artwork2;
-        @InjectView(R.id.artwork_thumb3) @Optional ImageView artwork3;
-        @InjectView(R.id.artwork_thumb4) @Optional ImageView artwork4;
+        @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
+        @InjectView(R.id.artwork_thumb2) @Optional AnimatedImageView artwork2;
+        @InjectView(R.id.artwork_thumb3) @Optional AnimatedImageView artwork3;
+        @InjectView(R.id.artwork_thumb4) @Optional AnimatedImageView artwork4;
         @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;

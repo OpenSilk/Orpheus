@@ -103,8 +103,8 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // hero image
-        ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        mRequestor.newArtistRequest((AnimatedImageView)heroImage, mPaletteObserver,
+        AnimatedImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
+        mRequestor.newArtistRequest(heroImage, mPaletteObserver,
                 new ArtInfo(mArtist.name, null, null), ArtworkType.LARGE);
         // Load header text
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_title).setText(mArtist.name);

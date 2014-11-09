@@ -179,9 +179,8 @@ public class FooterBlueprint {
         void updateArtwork(ArtInfo artInfo) {
             FooterView v = getView();
             if (v == null) return;
-            HoldsSubscription sh = (HoldsSubscription) v.artworkThumbnail;
-            AnimatedImageView av = (AnimatedImageView) v.artworkThumbnail;
-            sh.addSubscription(artworkReqestor.newAlbumRequest(av,
+            AnimatedImageView av = v.artworkThumbnail;
+            av.addSubscription(artworkReqestor.newAlbumRequest(av,
                     /*paletteObserver*/ null, artInfo, ArtworkType.THUMBNAIL));
         }
 

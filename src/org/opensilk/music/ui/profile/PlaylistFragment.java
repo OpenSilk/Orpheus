@@ -139,24 +139,24 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
             ((DragSortListView) mList).setRemoveListener(this);
         }
         // hero image
-        ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
+        AnimatedImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
         if (mPlaylist.mAlbumIds.length == 0) {
-            if (heroImage != null) ((AnimatedImageView)heroImage).setDefaultImage();
+            if (heroImage != null) (heroImage).setDefaultImage();
         } else {
             if (mPlaylist.mAlbumIds.length >= 1 && heroImage != null) {
-                mRequestor.newAlbumRequest((AnimatedImageView)heroImage, null, mPlaylist.mAlbumIds[0], ArtworkType.LARGE);
+                mRequestor.newAlbumRequest(heroImage, null, mPlaylist.mAlbumIds[0], ArtworkType.LARGE);
             }
-            ImageView heroImage2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
+            AnimatedImageView heroImage2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
             if (mPlaylist.mAlbumIds.length >= 2 && heroImage2 != null) {
-                mRequestor.newAlbumRequest((AnimatedImageView)heroImage2, null, mPlaylist.mAlbumIds[1], ArtworkType.LARGE);
+                mRequestor.newAlbumRequest(heroImage2, null, mPlaylist.mAlbumIds[1], ArtworkType.LARGE);
             }
-            ImageView heroImage3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
+            AnimatedImageView heroImage3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
             if (mPlaylist.mAlbumIds.length >= 3 && heroImage3 != null) {
-                mRequestor.newAlbumRequest((AnimatedImageView)heroImage3, null, mPlaylist.mAlbumIds[2], ArtworkType.LARGE);
+                mRequestor.newAlbumRequest(heroImage3, null, mPlaylist.mAlbumIds[2], ArtworkType.LARGE);
             }
-            ImageView heroImage4 = ButterKnife.findById(mHeroContainer, R.id.hero_image4);
+            AnimatedImageView heroImage4 = ButterKnife.findById(mHeroContainer, R.id.hero_image4);
             if (mPlaylist.mAlbumIds.length >= 4 && heroImage4 != null) {
-                mRequestor.newAlbumRequest((AnimatedImageView)heroImage4, null, mPlaylist.mAlbumIds[3], ArtworkType.LARGE);
+                mRequestor.newAlbumRequest(heroImage4, null, mPlaylist.mAlbumIds[3], ArtworkType.LARGE);
             }
         }
         // Load header text

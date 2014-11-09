@@ -111,8 +111,8 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // hero image
-        ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        mRequestor.newAlbumRequest((AnimatedImageView)heroImage, mPaletteObserver,
+        AnimatedImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
+        mRequestor.newAlbumRequest(heroImage, mPaletteObserver,
                 new ArtInfo(mAlbum.artistName, mAlbum.name, mAlbum.artworkUri), ArtworkType.LARGE);
         // Load header text
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_title).setText(mAlbum.name);

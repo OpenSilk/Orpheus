@@ -128,24 +128,24 @@ public class PlaylistsScreen extends Screen {
             switch (holder.artNumber) {
                 case 4:
                     if (playlist.mAlbumIds.length >= 4) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork4,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork4,
                                 null, playlist.mAlbumIds[3], ArtworkType.THUMBNAIL));
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork3,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork3,
                                 null, playlist.mAlbumIds[2], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 2:
                     if (playlist.mAlbumIds.length >= 2) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork2,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork2,
                                 null, playlist.mAlbumIds[1], ArtworkType.THUMBNAIL));
                     }
                     //fall
                 case 1:
                     if (playlist.mAlbumIds.length >= 1) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
+                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
                                 null, playlist.mAlbumIds[0], ArtworkType.THUMBNAIL));
                     } else {
-                        ((AnimatedImageView) holder.artwork).setDefaultImage();
+                        holder.artwork.setDefaultImage();
                     }
             }
         }

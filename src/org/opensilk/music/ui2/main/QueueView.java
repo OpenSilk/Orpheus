@@ -175,7 +175,7 @@ public class QueueView extends DragSortListView implements
 
             String artist = item.albumArtistName;
             if (TextUtils.isEmpty(artist)) artist = item.artistName;
-            holder.subscriptions.add(requestor.newAlbumRequest((AnimatedImageView)holder.artwork,
+            holder.subscriptions.add(requestor.newAlbumRequest(holder.artwork,
                     null, new ArtInfo(artist, item.albumName, item.artworkUri), ArtworkType.THUMBNAIL));
 
             holder.overflow.setOnClickListener(new OnClickListener() {
@@ -227,7 +227,7 @@ public class QueueView extends DragSortListView implements
 
     static class ViewHolder {
         final View itemView;
-        @InjectView(R.id.artwork_thumb) ImageView artwork;
+        @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.playing_indicator) PlayingIndicator playingIndicator;

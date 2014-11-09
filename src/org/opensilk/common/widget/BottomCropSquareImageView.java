@@ -23,7 +23,7 @@ import android.util.AttributeSet;
 /**
  * Created by andrew on 2/26/14.
  */
-public class BottomCropSquareImageView extends SquareImageView {
+public class BottomCropSquareImageView extends AnimatedImageView {
 
     public BottomCropSquareImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
