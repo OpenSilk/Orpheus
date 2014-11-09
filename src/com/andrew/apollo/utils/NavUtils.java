@@ -33,16 +33,14 @@ import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.dialogs.SleepTimerDialog;
-import org.opensilk.music.ui.activities.ProfileDialogActivity;
 import org.opensilk.music.ui.folder.FolderFragment;
 import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.settings.SettingsActivity;
+import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.util.MarkedForRemoval;
 
 import timber.log.Timber;
-
-import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
 
 
 /**
@@ -52,12 +50,6 @@ import static android.support.v4.app.FragmentTransaction.TRANSIT_FRAGMENT_OPEN;
  */
 public final class NavUtils {
 
-    /**
-     * Opens the profile of an artist.
-     *
-     * @param context The {@link Activity} to use.
-     * @param artist The artist object
-     */
     public static void openArtistProfile(final Context context, final LocalArtist artist) {
         if (artist == null) {
             return;
@@ -67,45 +59,18 @@ public final class NavUtils {
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, artist);
 
-        startProfileActivity(context, ProfileDialogActivity.ACTION_ARTIST, b);
+        startProfileActivity(context, ProfileActivity.ACTION_ARTIST, b);
     }
 
-    /**
-     * Opens Album profile activity
-     * @param context
-     * @param album
-     */
     public static void openAlbumProfile(final Context context, final LocalAlbum album) {
         // Create a new bundle to transfer the album info
         final Bundle b = new Bundle();
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, album);
 
-        // Completely insane method to prevent 'endless profiles' resulting
-        // from clicking the artwork thumbnail in the sliding pane over and over
-        if (context instanceof ProfileDialogActivity) {
-            ProfileDialogActivity activity = (ProfileDialogActivity) context;
-            if (ProfileDialogActivity.ACTION_ALBUM.equals(activity.getIntent().getAction())) {
-                Bundle b2 = activity.getIntent().getBundleExtra(Config.EXTRA_DATA);
-                if (b2 != null) {
-                    LocalAlbum a = b2.getParcelable(Config.EXTRA_DATA);
-                    if (a != null) {
-                        if (album.equals(a)) {
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        startProfileActivity(context, ProfileDialogActivity.ACTION_ALBUM, b);
+        startProfileActivity(context, ProfileActivity.ACTION_ALBUM, b);
     }
 
-    /**
-     * Opens playlist fragment
-     * @param context
-     * @param playlist
-     */
     public static void openPlaylistProfile(final Context context, final Playlist playlist) {
         final Bundle bundle = new Bundle();
         String playlistName;
@@ -125,14 +90,9 @@ public final class NavUtils {
         bundle.putString(Config.NAME, playlistName);
         bundle.putParcelable(Config.EXTRA_DATA, playlist);
 
-        startProfileActivity(context, ProfileDialogActivity.ACTION_PLAYLIST, bundle);
+        startProfileActivity(context, ProfileActivity.ACTION_PLAYLIST, bundle);
     }
 
-    /**
-     * Opens genre fragment
-     * @param context
-     * @param genre
-     */
     public static void openGenreProfile(final Context context, final Genre genre) {
         // Create a new bundle to transfer the genre info
         final Bundle bundle = new Bundle();
@@ -141,44 +101,20 @@ public final class NavUtils {
         bundle.putString(Config.NAME, genre.mGenreName);
         bundle.putParcelable(Config.EXTRA_DATA, genre);
 
-        startProfileActivity(context, ProfileDialogActivity.ACTION_GENRE, bundle);
+        startProfileActivity(context, ProfileActivity.ACTION_GENRE, bundle);
     }
 
     public static void openSongGroupProfile(Context context, LocalSongGroup songGroup) {
         final Bundle b = new Bundle();
         b.putParcelable(Config.EXTRA_DATA, songGroup);
-        startProfileActivity(context, ProfileDialogActivity.ACTION_SONG_GROUP, b);
+        startProfileActivity(context, ProfileActivity.ACTION_SONG_GROUP, b);
     }
 
-    /**
-     * Opens to {@link SearchActivity}.
-     *
-     * @param context The {@link Activity} to use.
-     */
-    public static void openSearch(final Context context) {
-        replaceFragment(context, new SearchFragment(), "search");
-    }
-
-    /**
-     * Starts the profile activity with given action and bundle extra
-     * @param context
-     * @param action
-     * @param bundle
-     */
     public static void startProfileActivity(final Context context, final String action, final Bundle bundle) {
-        context.startActivity(new Intent(context, ProfileDialogActivity.class)
-                .setAction(action).putExtra(Config.EXTRA_DATA, bundle));
-    }
-
-    /**
-     * Replace current fragment adding transaction to backstack
-     * @param context activity
-     * @param fragment new fragment
-     * @param name fragment and backstack entry name
-     */
-    @Deprecated @MarkedForRemoval
-    private static void replaceFragment(final Context context, final Fragment fragment, final String name) {
-
+        context.startActivity(
+                new Intent(context, ProfileActivity.class)
+                        .setAction(action)
+                        .putExtra(Config.EXTRA_DATA, bundle));
     }
 
     /**

@@ -149,7 +149,7 @@ public class GenresScreen extends Screen {
                         holder.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)holder.artwork,
                                 null, genre.mAlbumIds[0], ArtworkType.THUMBNAIL));
                     } else {
-                        holder.artwork.setImageResource(R.drawable.default_artwork);
+                        ((AnimatedImageView) holder.artwork).setDefaultImage();
                     }
             }
         }

@@ -104,7 +104,7 @@ public class AlbumsScreen extends Screen {
 
         @Override
         protected void onItemClicked(BaseAdapter.ViewHolder holder, LocalAlbum item) {
-            DetailActivity.open(holder, item);
+            NavUtils.openAlbumProfile(holder.itemView.getContext(), item);
         }
 
         @Override

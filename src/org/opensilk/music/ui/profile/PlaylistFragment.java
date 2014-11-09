@@ -23,9 +23,12 @@ import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import com.andrew.apollo.model.Playlist;
 import com.mobeta.android.dslv.DragSortListView;
@@ -33,12 +36,16 @@ import com.squareup.otto.Bus;
 
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkImageView;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui.cards.PlaylistCard;
 import org.opensilk.music.ui.cards.SongPlaylistCard;
 import org.opensilk.music.ui.cards.handler.PlaylistCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
 import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
+import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
@@ -46,6 +53,7 @@ import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.qualifier.ForFragment;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import javax.inject.Inject;
 
@@ -59,19 +67,20 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
         DragSortListView.DropListener,
         DragSortListView.RemoveListener {
 
-    protected ArtworkImageView mHeroImage;
-    protected ArtworkImageView mHeroImage2;
-    protected ArtworkImageView mHeroImage3;
-    protected ArtworkImageView mHeroImage4;
-    protected TextView mInfoTitle;
-    protected TextView mInfoSubTitle;
-    protected View mHeaderOverflow;
+    @dagger.Module (
+            addsTo = ProfileActivity.Module.class,
+            injects = PlaylistFragment.class
+    )
+    public static class Module {
 
-    private Playlist mPlaylist;
+    }
 
-    protected PlaylistAdapter mAdapter;
-    @Inject @ForFragment
-    protected Bus mBus;
+    @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
+    @Inject ArtworkRequestManager mRequestor;
+
+    Playlist mPlaylist;
+
+    PlaylistAdapter mAdapter;
 
     public static PlaylistFragment newInstance(Bundle args) {
         PlaylistFragment f = new PlaylistFragment();
@@ -82,6 +91,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module()).inject(this);
         mPlaylist = getArguments().getParcelable(Config.EXTRA_DATA);
         final Uri uri;
         final String[] projection;
@@ -101,14 +111,13 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
             selectionArgs = SelectionArgs.LOCAL_SONG;
             sortOrder = SortOrder.PLAYLIST_SONGS;
         }
-        mAdapter = new PlaylistAdapter(getActivity(), this,
+        mAdapter = new PlaylistAdapter(getActivity(),
+                mAdapterOverflowHandler,
+                mRequestor,
                 uri, projection, selection, selectionArgs, sortOrder,
                 mPlaylist.mPlaylistId);
-        //We have to set this manually since we arent using CardListView
-        mAdapter.setRowLayoutId(R.layout.list_card_dragsort_layout);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
-        registerHandlers();
     }
 
     @Override
@@ -124,49 +133,31 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
             ((DragSortListView) mList).setRemoveListener(this);
         }
         // hero image
-        mHeroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        mHeroImage.setPaletteListener(this);
-        // Load header images
-        mHeroImage2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
-        mHeroImage3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
-        mHeroImage4 = ButterKnife.findById(mHeroContainer, R.id.hero_image4);
-        if (mHeroImage4 != null && mHeroImage3 != null && mHeroImage2 != null) {
-            new MultipleArtworkLoaderTask(getActivity(), mPlaylist.mAlbumIds, mHeroImage, mHeroImage2, mHeroImage3, mHeroImage4).execute();
-        } else if (mHeroImage2 != null) {
-            new MultipleArtworkLoaderTask(getActivity(), mPlaylist.mAlbumIds, mHeroImage, mHeroImage2).execute();
+        ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
+        if (mPlaylist.mAlbumIds.length == 0) {
+            if (heroImage != null) ((AnimatedImageView)heroImage).setDefaultImage();
         } else {
-            new MultipleArtworkLoaderTask(getActivity(), mPlaylist.mAlbumIds, mHeroImage).execute();
+            if (mPlaylist.mAlbumIds.length >= 1 && heroImage != null) {
+                mRequestor.newAlbumRequest((AnimatedImageView)heroImage, null, mPlaylist.mAlbumIds[0], ArtworkType.LARGE);
+            }
+            ImageView heroImage2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
+            if (mPlaylist.mAlbumIds.length >= 2 && heroImage2 != null) {
+                mRequestor.newAlbumRequest((AnimatedImageView)heroImage2, null, mPlaylist.mAlbumIds[1], ArtworkType.LARGE);
+            }
+            ImageView heroImage3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
+            if (mPlaylist.mAlbumIds.length >= 3 && heroImage3 != null) {
+                mRequestor.newAlbumRequest((AnimatedImageView)heroImage3, null, mPlaylist.mAlbumIds[2], ArtworkType.LARGE);
+            }
+            ImageView heroImage4 = ButterKnife.findById(mHeroContainer, R.id.hero_image4);
+            if (mPlaylist.mAlbumIds.length >= 4 && heroImage4 != null) {
+                mRequestor.newAlbumRequest((AnimatedImageView)heroImage4, null, mPlaylist.mAlbumIds[3], ArtworkType.LARGE);
+            }
         }
         // Load header text
-        mInfoTitle = ButterKnife.findById(mStickyHeader, R.id.info_title);
-        mInfoTitle.setText(mPlaylist.mPlaylistName);
-        mInfoSubTitle = ButterKnife.findById(mStickyHeader, R.id.info_subtitle);
-        mInfoSubTitle.setVisibility(View.GONE);
-        //overflow
-        mHeaderOverflow = ButterKnife.findById(mStickyHeader, R.id.profile_header_overflow);
-        final PlaylistCard playlistCard = new PlaylistCard(getActivity(), mPlaylist);
-        inject(playlistCard);
-        mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playlistCard.onOverflowClicked(v);
-            }
-        });
+        ButterKnife.<TextView>findById(mStickyHeader, R.id.info_title).setText(mPlaylist.mPlaylistName);
+        ButterKnife.<TextView>findById(mStickyHeader, R.id.info_subtitle).setVisibility(View.GONE);
         // set list adapter
         mList.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unregisterHandlers();
-    }
-
-    @Override
-    protected Object[] getModules() {
-        return new Object[] {
-                new ProfileModule(),
-        };
     }
 
     @Override
@@ -176,12 +167,12 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
 
     @Override
     protected int getHeaderLayout() {
-        if (mPlaylist.mAlbumNumber < 2) {
-            return super.getHeaderLayout();
-        } else if (mPlaylist.mAlbumNumber < 4) {
+        if (mPlaylist.mAlbumIds.length >= 4) {
+            return R.layout.profile_hero_quad_header;
+        } else if (mPlaylist.mAlbumIds.length >= 2) {
             return R.layout.profile_hero_dual_header;
         } else {
-            return R.layout.profile_hero_quad_header;
+            return super.getHeaderLayout();
         }
     }
 
@@ -207,6 +198,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
                     mPlaylist.mPlaylistId, from, to);
         }
     }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new PlaylistSongLoader(getActivity(), mPlaylist.mPlaylistId);
@@ -230,18 +222,4 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
         return mPlaylist.mPlaylistId == -2;
     }
 
-    private PlaylistCardClickHandler mPlaylistHandler;
-    private SongCardClickHandler mSongHandler;
-
-    private void registerHandlers() {
-        mPlaylistHandler = getObjectGraph().get(PlaylistCardClickHandler.class);
-        mSongHandler = getObjectGraph().get(SongCardClickHandler.class);
-        mBus.register(mPlaylistHandler);
-        mBus.register(mSongHandler);
-    }
-
-    private void unregisterHandlers() {
-        mBus.unregister(mPlaylistHandler);
-        mBus.unregister(mSongHandler);
-    }
 }

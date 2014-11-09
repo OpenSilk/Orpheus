@@ -30,39 +30,28 @@
 
     <LinearLayout
         android:id="@+id/sticky_header"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/profile_sticky_header_height">
+        android:layout_height="?actionBarSize"
+        android:paddingStart="16dp"
+        android:paddingLeft="16dp"
+        android:paddingEnd="16dp"
+        android:paddingRight="16dp"
+        android:orientation="vertical">
 
         <!-- Album title / artist -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:gravity="left|center_vertical"
-            android:orientation="vertical"
-            android:layout_marginLeft="16dp"
-            android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/info_title"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textAppearance="@style/TextAppearanceProfileHeader.Title"/>
-
-            <TextView
-                android:id="@+id/info_subtitle"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:textAppearance="@style/TextAppearanceProfileHeader.SubTitle"/>
-
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/profile_header_overflow"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/info_title"
             android:layout_height="wrap_content"
-            style="@style/Orpheus.MenuButton"/>
+            android:layout_width="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"/>
+
+        <TextView
+            android:id="@+id/info_subtitle"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textAppearance="?android:textAppearance"/>
+
 
     </LinearLayout>
 

@@ -23,6 +23,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.graphics.Palette;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -51,7 +52,7 @@ import butterknife.ButterKnife;
  *
  * Created by drew on 7/9/14.
  */
-public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment implements Palette.PaletteAsyncListener {
+public class ListStickyParallaxHeaderFragment extends Fragment implements Palette.PaletteAsyncListener {
 
     protected View mListHeader;
     protected FrameLayout mHeroContainer;
@@ -209,13 +210,4 @@ public  class ListStickyParallaxHeaderFragment extends ScopedDaggerFragment impl
         }
     };
 
-    @Override
-    protected Object[] getModules() {
-        return new Object[0];
-    }
-
-    @Override
-    protected DaggerInjector getParentInjector(Activity activity) {
-        return (DaggerInjector) activity;
-    }
 }

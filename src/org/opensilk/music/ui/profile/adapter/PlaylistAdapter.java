@@ -19,14 +19,19 @@ package org.opensilk.music.ui.profile.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupMenu;
 
-import org.opensilk.music.ui.cards.SongCollectionCard;
+import org.opensilk.music.R;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui.cards.SongPlaylistCard;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.silkdagger.DaggerInjector;
 
+import butterknife.ButterKnife;
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 
 /**
  * Created by drew on 2/18/14.
@@ -35,26 +40,26 @@ public class PlaylistAdapter extends SongCollectionAdapter {
 
     private final long playlistId;
 
-    public PlaylistAdapter(Context context, DaggerInjector mInjector,
+    public PlaylistAdapter(Context context,
+                           OverflowHandlers.LocalSongs overflowHandler,
+                           ArtworkRequestManager requestor,
                            Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder,
                            long playlistId) {
-        super(context, mInjector, false, uri, projection, selection, selectionArgs, sortOrder);
+        super(context, overflowHandler, requestor, false, uri, projection, selection, selectionArgs, sortOrder);
         this.playlistId = playlistId;
     }
 
     @Override
-    protected Card getCardFromCursor(Cursor cursor) {
-        SongPlaylistCard c = new SongPlaylistCard(getContext(), CursorHelpers.makeLocalSongFromCursor(getContext(), cursor));
-        c.setPosition(cursor.getPosition());
-        c.setQueryParams(uri, projection, selection, selectionArgs, sortOrder);
-        if (useSimpleLayout) {
-            c.useSimpleLayout();
-        }
-        if (playlistId == -2) {
-            c.forLastAdded();
-        }
-        injector.inject(c);
-        return c;
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        View v = LayoutInflater.from(context).inflate(R.layout.gallery_list_item_dragsort, parent, false);
+        v.setTag(new ViewHolder(v));
+        if (playlistId == -2) ButterKnife.findById(v, R.id.drag_handle).setVisibility(View.GONE);
+        return v;
+    }
+
+    @Override
+    protected void onPostPopulateOverflow(PopupMenu m) {
+        m.getMenu().removeItem(R.id.popup_delete);
     }
 
 }

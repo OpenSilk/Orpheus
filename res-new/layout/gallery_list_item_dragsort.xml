@@ -42,48 +42,9 @@
         android:id="@+id/artwork_thumb"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"/>
 
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tile_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearance"
-            android:textSize="16sp"
-            tools:text="Title"
-            style="@style/SingleLineTextView"/>
-
-        <TextView
-            android:id="@+id/tile_subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceSmall"
-            android:textSize="14sp"
-            tools:text="SubTitle"
-            style="@style/SingleLineTextView"/>
-
-    </LinearLayout>
-
-    <org.opensilk.music.widgets.PlayingIndicator
-        android:id="@+id/playing_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    <org.opensilk.common.widget.TintImageButton
-        android:id="@+id/tile_overflow"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:src="@drawable/ic_menu_moreoverflow_mtrl_alpha"
-        style="@style/TileOverflow"/>
+    <include layout="@layout/gallery_list_item_common"/>
 
 </org.opensilk.common.widget.ForegroundLinearLayout>

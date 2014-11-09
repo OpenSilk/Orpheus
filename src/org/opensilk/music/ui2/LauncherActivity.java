@@ -47,6 +47,7 @@ import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.bus.events.IABQueryResult;
+import org.opensilk.music.dialogs.SleepTimerDialog;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
@@ -172,7 +173,7 @@ public class LauncherActivity extends BaseSwitcherActivity implements
         }
         switch (item.getItemId()) {
             case R.id.menu_sleep_timer:
-                NavUtils.openSleepTimerDialog(this);
+                new SleepTimerDialog().show(getSupportFragmentManager(), "SleepTimer");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

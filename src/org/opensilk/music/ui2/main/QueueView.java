@@ -153,7 +153,7 @@ public class QueueView extends DragSortListView implements
             View v = convertView;
             ViewHolder holder;
             if (v == null) {
-                v = LayoutInflater.from(getContext()).inflate(R.layout.queue_list_item, parent, false);
+                v = LayoutInflater.from(getContext()).inflate(R.layout.gallery_list_item_dragsort, parent, false);
                 holder = new ViewHolder(v);
                 v.setTag(holder);
             } else {

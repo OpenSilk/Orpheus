@@ -21,20 +21,28 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import com.andrew.apollo.model.LocalAlbum;
 import com.squareup.otto.Bus;
 
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui.cards.AlbumCard;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.AlbumSongLoader;
+import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
@@ -42,6 +50,7 @@ import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.qualifier.ForFragment;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import javax.inject.Inject;
 
@@ -52,16 +61,20 @@ import butterknife.ButterKnife;
  */
 public class AlbumFragment extends ListStickyParallaxHeaderFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    protected ArtworkImageView mHeroImage;
-    protected TextView mInfoTitle;
-    protected TextView mInfoSubTitle;
-    protected View mHeaderOverflow;
+    @dagger.Module (
+            addsTo = ProfileActivity.Module.class,
+            injects = AlbumFragment.class
+    )
+    public static class Module {
 
-    private LocalAlbum mAlbum;
+    }
 
-    protected SongCollectionAdapter mAdapter;
-    @Inject @ForFragment
-    protected Bus mBus;
+    @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
+    @Inject ArtworkRequestManager mRequestor;
+
+    LocalAlbum mAlbum;
+
+    SongCollectionAdapter mAdapter;
 
     public static AlbumFragment newInstance(Bundle args) {
         AlbumFragment f = new AlbumFragment();
@@ -72,8 +85,12 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module()).inject(this);
         mAlbum = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new SongCollectionAdapter(getActivity(), this, true,
+        mAdapter = new SongCollectionAdapter(getActivity(),
+                mAdapterOverflowHandler,
+                mRequestor,
+                true,
                 Uris.LOCAL_ALBUM_SONGS,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_ALBUM_SONGS,
@@ -81,47 +98,20 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
                 SortOrder.LOCAL_ALBUM_SONGS);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
-        registerHandlers();
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // hero image
-        mHeroImage = (ArtworkImageView) mHeroContainer.findViewById(R.id.hero_image);
-        mHeroImage.setPaletteListener(this);
-        // Load header images
-        ArtworkManager.loadAlbumImage(mAlbum.artistName, mAlbum.name, CursorHelpers.generateArtworkUri(mAlbum.albumId), mHeroImage);
+        ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
+        mRequestor.newAlbumRequest((AnimatedImageView)heroImage, null, //TODO
+                new ArtInfo(mAlbum.artistName, mAlbum.name, mAlbum.artworkUri), ArtworkType.LARGE);
         // Load header text
-        mInfoTitle = ButterKnife.findById(mStickyHeader, R.id.info_title);
-        mInfoTitle.setText(mAlbum.name);
-        mInfoSubTitle = ButterKnife.findById(mStickyHeader, R.id.info_subtitle);
-        mInfoSubTitle.setText(mAlbum.artistName);
-        //overflow
-        mHeaderOverflow = ButterKnife.findById(mStickyHeader, R.id.profile_header_overflow);
-        final AlbumCard albumCard = new AlbumCard(getActivity(), mAlbum);
-        inject(albumCard);
-        mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                albumCard.onOverflowClicked(v);
-            }
-        });
+        ButterKnife.<TextView>findById(mStickyHeader, R.id.info_title).setText(mAlbum.name);
+        ButterKnife.<TextView>findById(mStickyHeader, R.id.info_subtitle).setText(mAlbum.artistName);
         // set list adapter
         mList.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        unregisterHandlers();
-    }
-
-    @Override
-    protected Object[] getModules() {
-        return new Object[] {
-                new ProfileModule(),
-        };
     }
 
     @Override
@@ -144,18 +134,4 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
         mAdapter.swapCursor(null);
     }
 
-    private AlbumCardClickHandler mAlbumHandler;
-    private SongCardClickHandler mSongHandler;
-
-    private void registerHandlers() {
-        mAlbumHandler = getObjectGraph().get(AlbumCardClickHandler.class);
-        mSongHandler = getObjectGraph().get(SongCardClickHandler.class);
-        mBus.register(mAlbumHandler);
-        mBus.register(mSongHandler);
-    }
-
-    private void unregisterHandlers() {
-        mBus.unregister(mAlbumHandler);
-        mBus.unregister(mSongHandler);
-    }
 }

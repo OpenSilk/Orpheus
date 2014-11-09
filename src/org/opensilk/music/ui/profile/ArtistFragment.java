@@ -20,15 +20,21 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import com.andrew.apollo.model.LocalArtist;
 import com.squareup.otto.Bus;
 
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui.cards.ArtistCard;
 import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
 import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
@@ -37,6 +43,9 @@ import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui.profile.loader.ArtistGridLoader;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.common.dagger.qualifier.ForFragment;
+import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowHandlers;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import java.util.List;
 
@@ -49,14 +58,20 @@ import butterknife.ButterKnife;
  */
 public class ArtistFragment extends ListStickyParallaxHeaderFragment implements LoaderManager.LoaderCallbacks<List<Object>> {
 
-    protected ArtworkImageView mHeroImage;
-    protected TextView mInfoTitle;
-    protected TextView mInfoSubTitle;
-    protected View mHeaderOverflow;
+    @dagger.Module (
+            addsTo = ProfileActivity.Module.class,
+            injects = ArtistFragment.class
+    )
+    public static class Module {
 
-    private LocalArtist mArtist;
+    }
 
-    @Inject
+    @Inject OverflowHandlers.LocalAlbums mAdapterAlbumOverflowHandler;
+    @Inject OverflowHandlers.LocalSongGroups mAdapterSongGroupOverflowHandler;
+    @Inject ArtworkRequestManager mRequestor;
+
+    LocalArtist mArtist;
+
     GridAdapter mAdapter;
 
     public static ArtistFragment newInstance(Bundle args) {
@@ -68,7 +83,12 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module()).inject(this);
         mArtist = getArguments().getParcelable(Config.EXTRA_DATA);
+        mAdapter = new GridAdapter(getActivity(),
+                mRequestor,
+                mAdapterAlbumOverflowHandler,
+                mAdapterSongGroupOverflowHandler);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
     }
@@ -77,34 +97,14 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // hero image
-        mHeroImage = (ArtworkImageView) mHeroContainer.findViewById(R.id.hero_image);
-        mHeroImage.setPaletteListener(this);
-        // Load header images
-        ArtworkManager.loadArtistImage(mArtist.name, mHeroImage);
+        ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
+        mRequestor.newArtistRequest((AnimatedImageView)heroImage, null, //TODO
+                new ArtInfo(mArtist.name, null, null), ArtworkType.LARGE);
         // Load header text
-        mInfoTitle = ButterKnife.findById(mStickyHeader, R.id.info_title);
-        mInfoTitle.setText(mArtist.name);
-        mInfoSubTitle = ButterKnife.findById(mStickyHeader, R.id.info_subtitle);
-        mInfoSubTitle.setVisibility(View.GONE);
-        //overflow
-        mHeaderOverflow = ButterKnife.findById(mStickyHeader, R.id.profile_header_overflow);
-        final ArtistCard artistCard = new ArtistCard(getActivity(), mArtist);
-        inject(artistCard);
-        mHeaderOverflow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                artistCard.onOverflowClicked(v);
-            }
-        });
+        ButterKnife.<TextView>findById(mStickyHeader, R.id.info_title).setText(mArtist.name);
+        ButterKnife.<TextView>findById(mStickyHeader, R.id.info_subtitle).setVisibility(View.GONE);
         // set list adapter
         mList.setAdapter(mAdapter);
-    }
-
-    @Override
-    protected Object[] getModules() {
-        return new Object[] {
-                new ProfileModule(),
-        };
     }
 
     @Override

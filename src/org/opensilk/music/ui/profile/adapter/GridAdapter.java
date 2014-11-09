@@ -42,6 +42,7 @@ import org.opensilk.music.ui.cards.AlbumCard;
 import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
+import org.opensilk.music.widgets.GridTileDescription;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 
@@ -66,8 +67,7 @@ public class GridAdapter extends ArrayAdapter<Object> {
     final OverflowHandlers.LocalAlbums albumsOverflowHandler;
     final OverflowHandlers.LocalSongGroups songGroupOverflowHandler;
 
-    @Inject
-    public GridAdapter(@ForActivity Context context, ArtworkRequestManager requestor,
+    public GridAdapter(Context context, ArtworkRequestManager requestor,
                        OverflowHandlers.LocalAlbums albumsOverflowHandler,
                        OverflowHandlers.LocalSongGroups songGroupOverflowHandler) {
         super(context, -1);
@@ -106,8 +106,8 @@ public class GridAdapter extends ArrayAdapter<Object> {
             final LocalAlbum la = (LocalAlbum)obj;
             vh.title.setText(la.name);
             vh.subtitle.setText(la.artistName);
-            PaletteObserver paletteObserver = null;// vh.descriptionContainer != null
-//                    ? vh.descriptionContainer.getPaletteObserver() : null;
+            PaletteObserver paletteObserver = vh.descriptionContainer != null
+                    ? vh.descriptionContainer.getPaletteObserver() : null;
             vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork,
                     paletteObserver, new ArtInfo(la.artistName, la.name, la.artworkUri), ArtworkType.THUMBNAIL));
             vh.overflow.setOnClickListener(new View.OnClickListener() {
@@ -154,7 +154,7 @@ public class GridAdapter extends ArrayAdapter<Object> {
                         vh.subscriptions.add(artworkRequestor.newAlbumRequest((AnimatedImageView)vh.artwork,
                                 null, lsg.albumIds[0], ArtworkType.THUMBNAIL));
                     } else {
-                        vh.artwork.setImageResource(R.drawable.default_artwork);
+                        ((AnimatedImageView) vh.artwork).setDefaultImage();
                     }
             }
             vh.overflow.setOnClickListener(new View.OnClickListener() {
@@ -206,17 +206,14 @@ public class GridAdapter extends ArrayAdapter<Object> {
     public static class ViewHolder {
 
         final View itemView;
-        @InjectView(R.id.artwork_thumb)
-        ImageView artwork;
-        @InjectView(R.id.artwork_thumb2) @Optional
-        ImageView artwork2;
+        @InjectView(R.id.artwork_thumb) ImageView artwork;
+        @InjectView(R.id.artwork_thumb2) @Optional ImageView artwork2;
         @InjectView(R.id.artwork_thumb3) @Optional ImageView artwork3;
         @InjectView(R.id.artwork_thumb4) @Optional ImageView artwork4;
-        @InjectView(R.id.tile_title)
-        TextView title;
+        @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
+        @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
-        @InjectView(R.id.tile_overflow)
-        ImageButton overflow;
+        @InjectView(R.id.tile_overflow) ImageButton overflow;
 
         final CompositeSubscription subscriptions;
         final int artNumber;
@@ -240,6 +237,7 @@ public class GridAdapter extends ArrayAdapter<Object> {
             if (artwork2 != null) artwork2.setImageBitmap(null);
             if (artwork3 != null) artwork3.setImageBitmap(null);
             if (artwork4 != null) artwork4.setImageBitmap(null);
+            if (descriptionContainer != null) descriptionContainer.resetBackground();
             subscriptions.clear();
         }
 

@@ -129,11 +129,38 @@
 
     <!-- end settings themes -->
 
+    <!-- Profile themes -->
+
+    <style name="Theme.Profile.Light" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow.Transparent</item>
+        <item name="colorPrimary">@color/primary_material_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+    </style>
+
+    <style name="Theme.Profile.Dark" parent="Theme.AppCompat.DialogWhenLarge">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarTheme">@style/Toolbar.Dark.Transparent</item>
+    </style>
+
+    <!-- end profile themes -->
+
     <!--Toolbar Styles -->
+
     <style name="Toolbar.Light" parent="Widget.AppCompat.Toolbar">
         <item name="android:background">?colorPrimary</item>
         <item name="theme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <style name="Toolbar.Light.Transparent">
+        <item name="android:background">@null</item>
     </style>
 
     <style name="Toolbar.Dark" parent="Widget.AppCompat.Toolbar">
@@ -141,9 +168,19 @@
         <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
 
+    <style name="Toolbar.Dark.Transparent">
+        <item name="android:background">@null</item>
+    </style>
+
     <style name="Toolbar.Dark.WhiteOverflow">
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
     </style>
+
+    <style name="Toolbar.Dark.WhiteOverflow.Transparent">
+        <item name="android:background">@null</item>
+    </style>
+
+    <!-- end toolbar styles -->
 
     <!--grid tile-->
     <style name="GridTileDescriptionLight">
