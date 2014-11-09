@@ -26,11 +26,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <org.opensilk.common.widget.SquareImageView
+        <org.opensilk.common.widget.BottomCropSquareImageView
             android:id="@+id/hero_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            style="@style/Orpheus.Thumbnail"/>
+            android:layout_gravity="center"
+            android:gravity="center" />
 
     </org.opensilk.music.widgets.SquareFrameLayout>
 

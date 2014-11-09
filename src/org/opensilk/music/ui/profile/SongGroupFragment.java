@@ -20,6 +20,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +43,7 @@ import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.SongGroupLoader;
 import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.music.util.Projections;
@@ -68,10 +72,11 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
     }
 
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
+    @Inject OverflowHandlers.LocalSongGroups mSongGroupOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
 
+    int numHeros;
     LocalSongGroup mSongGroup;
-
     SongCollectionAdapter mAdapter;
 
     public static SongGroupFragment newInstance(Bundle args) {
@@ -96,6 +101,7 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
                 SortOrder.SONG_GROUP);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -130,6 +136,23 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        for (int ii : OverflowHandlers.LocalSongGroups.MENUS) {
+            inflater.inflate(ii, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        try {
+            return mSongGroupOverflowHandler.handleClick(OverflowAction.valueOf(item.getItemId()), mSongGroup);
+        } catch (IllegalArgumentException e) {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected int getListLayout() {
         return R.layout.profile_list_frame;
     }
@@ -137,10 +160,13 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
     @Override
     protected int getHeaderLayout() {
         if (mSongGroup.albumIds.length >= 4) {
+            numHeros = 4;
             return R.layout.profile_hero_quad_header;
         } else if (mSongGroup.albumIds.length >= 2) {
+            numHeros = 2;
             return R.layout.profile_hero_dual_header;
         } else {
+            numHeros = 0;
             return super.getHeaderLayout();
         }
     }

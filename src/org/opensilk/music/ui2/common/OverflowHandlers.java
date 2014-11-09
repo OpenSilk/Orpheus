@@ -74,6 +74,16 @@ public class OverflowHandlers {
 
     @Singleton
     public static class LocalAlbums implements OverflowHandler<LocalAlbum> {
+
+        public static final int[] MENUS = new int[] {
+                R.menu.popup_play_all,
+                R.menu.popup_shuffle_all,
+                R.menu.popup_add_to_queue,
+                R.menu.popup_add_to_playlist,
+                R.menu.popup_more_by_artist,
+                R.menu.popup_delete,
+        };
+
         final MusicServiceConnection connection;
         final Context context;
         final EventBus bus;
@@ -88,12 +98,9 @@ public class OverflowHandlers {
         }
 
         public void populateMenu(PopupMenu m, LocalAlbum album) {
-            m.inflate(R.menu.popup_play_all);
-            m.inflate(R.menu.popup_shuffle_all);
-            m.inflate(R.menu.popup_add_to_queue);
-            m.inflate(R.menu.popup_add_to_playlist);
-            m.inflate(R.menu.popup_more_by_artist);
-            m.inflate(R.menu.popup_delete);
+            for (int ii : MENUS) {
+                m.inflate(ii);
+            }
         }
 
         public boolean handleClick(OverflowAction action, final LocalAlbum album) {
@@ -143,6 +150,15 @@ public class OverflowHandlers {
 
     @Singleton
     public static class LocalArtists implements OverflowHandler<LocalArtist> {
+
+        public static final int[] MENUS = new int[] {
+                R.menu.popup_play_all,
+                R.menu.popup_shuffle_all,
+                R.menu.popup_add_to_queue,
+                R.menu.popup_add_to_playlist,
+                R.menu.popup_delete,
+        };
+
         final MusicServiceConnection connection;
         final Context context;
         final EventBus bus;
@@ -157,11 +173,9 @@ public class OverflowHandlers {
         }
 
         public void populateMenu(PopupMenu m, LocalArtist artist) {
-            m.inflate(R.menu.popup_play_all);
-            m.inflate(R.menu.popup_shuffle_all);
-            m.inflate(R.menu.popup_add_to_queue);
-            m.inflate(R.menu.popup_add_to_playlist);
-            m.inflate(R.menu.popup_delete);
+            for (int ii : MENUS) {
+                m.inflate(ii);
+            }
         }
 
         public boolean handleClick(OverflowAction action, final LocalArtist artist) {
@@ -207,6 +221,14 @@ public class OverflowHandlers {
 
     @Singleton
     public static class Genres implements OverflowHandler<Genre> {
+
+        public static final int[] MENUS = new int[] {
+                R.menu.popup_play_all,
+                R.menu.popup_shuffle_all,
+                R.menu.popup_add_to_queue,
+                R.menu.popup_add_to_playlist,
+        };
+
         final MusicServiceConnection connection;
         final Context context;
         final EventBus bus;
@@ -221,10 +243,9 @@ public class OverflowHandlers {
         }
 
         public void populateMenu(PopupMenu m, Genre genre) {
-            m.inflate(R.menu.popup_play_all);
-            m.inflate(R.menu.popup_shuffle_all);
-            m.inflate(R.menu.popup_add_to_queue);
-            m.inflate(R.menu.popup_add_to_playlist);
+            for (int ii : MENUS) {
+                m.inflate(ii);
+            }
         }
 
         public boolean handleClick(OverflowAction action, final Genre genre) {
@@ -266,6 +287,18 @@ public class OverflowHandlers {
 
     @Singleton
     public static class Playlists implements OverflowHandler<Playlist> {
+
+        public static final int[] MENUS_COMMON = new int[] {
+                R.menu.popup_play_all,
+                R.menu.popup_shuffle_all,
+                R.menu.popup_add_to_queue,
+        };
+
+        public static final int[] MENUS_USER = new int[] {
+                R.menu.popup_rename,
+                R.menu.popup_delete,
+        };
+
         final MusicServiceConnection connection;
         final Context context;
         final EventBus bus;
@@ -280,13 +313,14 @@ public class OverflowHandlers {
         }
 
         public void populateMenu(PopupMenu m, Playlist playlist) {
-            m.inflate(R.menu.popup_play_all);
-            m.inflate(R.menu.popup_shuffle_all);
-            m.inflate(R.menu.popup_add_to_queue);
+            for (int ii : MENUS_COMMON) {
+                m.inflate(ii);
+            }
             if (playlist.mPlaylistId != -2) {
                 // cant rename or delete last added
-                m.inflate(R.menu.popup_rename);
-                m.inflate(R.menu.popup_delete);
+                for (int ii : MENUS_USER) {
+                    m.inflate(ii);
+                }
             }
         }
 
@@ -365,6 +399,16 @@ public class OverflowHandlers {
 
     @Singleton
     public static class LocalSongs implements OverflowHandler<LocalSong> {
+
+        public static final int[] MENUS = new int[] {
+                R.menu.popup_play_next,
+                R.menu.popup_add_to_queue,
+                R.menu.popup_add_to_playlist,
+                R.menu.popup_more_by_artist,
+                R.menu.popup_set_ringtone,
+                R.menu.popup_delete,
+        };
+
         final MusicServiceConnection connection;
         final Context context;
         final EventBus bus;
@@ -379,12 +423,9 @@ public class OverflowHandlers {
         }
 
         public void populateMenu(PopupMenu m, LocalSong song) {
-            m.inflate(R.menu.popup_play_next);
-            m.inflate(R.menu.popup_add_to_queue);
-            m.inflate(R.menu.popup_add_to_playlist);
-            m.inflate(R.menu.popup_more_by_artist);
-            m.inflate(R.menu.popup_set_ringtone);
-            m.inflate(R.menu.popup_delete);
+            for (int ii : MENUS) {
+                m.inflate(ii);
+            }
         }
 
         public void play(final LocalSong song) {
@@ -439,6 +480,14 @@ public class OverflowHandlers {
     }
 
     public static class LocalSongGroups implements OverflowHandler<LocalSongGroup> {
+
+        public static final int[] MENUS = new int[] {
+                R.menu.popup_play_all,
+                R.menu.popup_shuffle_all,
+                R.menu.popup_add_to_queue,
+                R.menu.popup_add_to_playlist,
+        };
+
         final MusicServiceConnection connection;
         final Context context;
         final EventBus bus;
@@ -453,10 +502,9 @@ public class OverflowHandlers {
         }
 
         public void populateMenu(PopupMenu m, LocalSongGroup group) {
-            m.inflate(R.menu.popup_play_all);
-            m.inflate(R.menu.popup_shuffle_all);
-            m.inflate(R.menu.popup_add_to_queue);
-            m.inflate(R.menu.popup_add_to_playlist);
+            for (int ii : MENUS) {
+                m.inflate(ii);
+            }
         }
 
         public boolean handleClick(OverflowAction action, final LocalSongGroup group) {

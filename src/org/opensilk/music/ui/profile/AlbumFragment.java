@@ -20,8 +20,12 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
@@ -42,6 +46,7 @@ import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.AlbumSongLoader;
 import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
@@ -70,6 +75,7 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
     }
 
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
+    @Inject OverflowHandlers.LocalAlbums mAlbumsOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
 
     LocalAlbum mAlbum;
@@ -98,6 +104,7 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
                 SortOrder.LOCAL_ALBUM_SONGS);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -105,13 +112,30 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
         super.onViewCreated(view, savedInstanceState);
         // hero image
         ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        mRequestor.newAlbumRequest((AnimatedImageView)heroImage, null, //TODO
+        mRequestor.newAlbumRequest((AnimatedImageView)heroImage, mPaletteObserver,
                 new ArtInfo(mAlbum.artistName, mAlbum.name, mAlbum.artworkUri), ArtworkType.LARGE);
         // Load header text
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_title).setText(mAlbum.name);
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_subtitle).setText(mAlbum.artistName);
         // set list adapter
         mList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        for (int ii : OverflowHandlers.LocalAlbums.MENUS) {
+            inflater.inflate(ii, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        try {
+            return mAlbumsOverflowHandler.handleClick(OverflowAction.valueOf(item.getItemId()), mAlbum);
+        } catch (IllegalArgumentException e) {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

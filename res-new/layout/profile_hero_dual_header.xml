@@ -24,7 +24,7 @@
         android:id="@+id/hero_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/profile_sticky_header_height">
+        android:layout_marginBottom="?actionBarSize">
 
         <org.opensilk.common.widget.SquareImageView
             android:id="@+id/hero_image"

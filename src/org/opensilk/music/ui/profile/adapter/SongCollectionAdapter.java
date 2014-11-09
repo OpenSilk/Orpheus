@@ -89,7 +89,7 @@ public class SongCollectionAdapter extends CursorAdapter {
         if (useSimpleLayout) {
             v = LayoutInflater.from(context).inflate(R.layout.gallery_list_item_simple, parent, false);
         } else {
-            v = LayoutInflater.from(context).inflate(R.layout.gallery_grid_item_artwork, parent, false);
+            v = LayoutInflater.from(context).inflate(R.layout.gallery_list_item_artwork, parent, false);
         }
         v.setTag(new ViewHolder(v));
         return v;
@@ -99,9 +99,14 @@ public class SongCollectionAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         final LocalSong song = CursorHelpers.makeLocalSongFromCursor(cursor);
         ViewHolder holder = (ViewHolder) view.getTag();
+        holder.reset();
         holder.title.setText(song.name);
         holder.subtitle.setText(song.artistName);
         holder.info.setText(MusicUtils.makeTimeString(context, song.duration));
+        if (!useSimpleLayout && holder.artwork != null) {
+            holder.subscriptions.add(requestor.newAlbumRequest((AnimatedImageView) holder.artwork,
+                    null, song.albumId, ArtworkType.THUMBNAIL));
+        }
         holder.overflow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,10 +132,6 @@ public class SongCollectionAdapter extends CursorAdapter {
                 overflowHandler.play(song);
             }
         });
-        if (!useSimpleLayout && holder.artwork != null) {
-            holder.subscriptions.add(requestor.newAlbumRequest((AnimatedImageView) holder.artwork,
-                    null, song.albumId, ArtworkType.THUMBNAIL));
-        }
     }
 
     protected void onPostPopulateOverflow(PopupMenu m) {
@@ -150,6 +151,7 @@ public class SongCollectionAdapter extends CursorAdapter {
         public ViewHolder(View itemView) {
             this.itemView = itemView;
             ButterKnife.inject(this, itemView);
+            info.setVisibility(View.VISIBLE);
             subscriptions = new CompositeSubscription();
         }
 

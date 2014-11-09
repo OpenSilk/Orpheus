@@ -71,6 +71,7 @@ public class SquareImageView extends ImageView implements HoldsSubscription, Ani
 
         final int newMeasureSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
         super.onMeasure(newMeasureSpec, newMeasureSpec);
+        requestLayout();
     }
 
     /**
@@ -78,10 +79,11 @@ public class SquareImageView extends ImageView implements HoldsSubscription, Ani
      * requestLayout() to its parent, taking advantage of knowing that image size
      * won't change once set.
      */
-    @Override
-    public void requestLayout() {
-        forceLayout();
-    }
+    //TODO revisit
+//    @Override
+//    public void requestLayout() {
+//        forceLayout();
+//    }
 
     /*
      * Holds subscription

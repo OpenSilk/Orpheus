@@ -31,6 +31,7 @@ import android.widget.TextView;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
@@ -128,6 +129,12 @@ public class GridAdapter extends ArrayAdapter<Object> {
                     m.show();
                 }
             });
+            vh.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    NavUtils.openAlbumProfile(v.getContext(), la);
+                }
+            });
         } else if (obj instanceof LocalSongGroup) {
             final LocalSongGroup lsg = (LocalSongGroup) obj;
             vh.title.setText(lsg.name);
@@ -173,6 +180,12 @@ public class GridAdapter extends ArrayAdapter<Object> {
                         }
                     });
                     m.show();
+                }
+            });
+            vh.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    NavUtils.openSongGroupProfile(v.getContext(), lsg);
                 }
             });
         }

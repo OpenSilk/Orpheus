@@ -139,6 +139,10 @@
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow.Transparent</item>
         <item name="colorPrimary">@color/primary_material_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+
+        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
+        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
+        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
     </style>
 
     <style name="Theme.Profile.Dark" parent="Theme.AppCompat.DialogWhenLarge">
@@ -147,6 +151,10 @@
         <item name="android:windowNoTitle">true</item>
         <!--DarkActionBar-->
         <item name="toolbarTheme">@style/Toolbar.Dark.Transparent</item>
+
+        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
+        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
+        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Dark</item>
     </style>
 
     <!-- end profile themes -->

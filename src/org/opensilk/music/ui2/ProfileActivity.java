@@ -72,6 +72,8 @@ public class ProfileActivity extends BaseActivity implements DaggerInjector {
 
         setContentView(R.layout.blank_framelayout_toolbar_overlay);
         setSupportActionBar(ButterKnife.<Toolbar>findById(this, R.id.main_toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(" ");
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
         Fragment f = null;

@@ -33,10 +33,14 @@ import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
+import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.etsy.android.grid.StaggeredGridView;
 
+import org.opensilk.music.artwork.PaletteObserver;
+import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.util.PaletteUtil;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
@@ -52,7 +56,7 @@ import butterknife.ButterKnife;
  *
  * Created by drew on 7/9/14.
  */
-public class ListStickyParallaxHeaderFragment extends Fragment implements Palette.PaletteAsyncListener {
+public class ListStickyParallaxHeaderFragment extends Fragment {
 
     protected View mListHeader;
     protected FrameLayout mHeroContainer;
@@ -64,20 +68,16 @@ public class ListStickyParallaxHeaderFragment extends Fragment implements Palett
 
     // determines when to animate the dummy views drawable
     private boolean mIsStuck = false;
-    // starting color of sticky header
-    private int mPreviousPaletteColor;
-    // stores sticky header color for save instance
-    private int mPaletteColor;
+
+    boolean mLightTheme;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mIsStuck = savedInstanceState.getBoolean("was_stuck");
-            mPreviousPaletteColor = mPaletteColor = savedInstanceState.getInt("palette_color");
-        } else {
-            mPreviousPaletteColor = mPaletteColor = ThemeHelper.getAccentColor(getActivity());
         }
+        mLightTheme = ThemeUtils.isLightTheme(getActivity());
     }
 
     @Override
@@ -105,33 +105,24 @@ public class ListStickyParallaxHeaderFragment extends Fragment implements Palett
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if (mList instanceof ListView) {
             ((ListView) mList).addHeaderView(mListHeader);
-            ((ListView) mList).addFooterView(mListFooter);
+//            ((ListView) mList).addFooterView(mListFooter);
         } else if (mList instanceof StaggeredGridView) {
             ((StaggeredGridView) mList).addHeaderView(mListHeader);
-            ((StaggeredGridView) mList).addFooterView(mListFooter);
+//            ((StaggeredGridView) mList).addFooterView(mListFooter);
         } else {
             throw new RuntimeException("List must extend ListView or StaggeredGridView");
         }
         mList.setOnScrollListener(mScrollListener);
-        initPalette(false);
+        //setup the dummy header background with the same color as the stickyheader
+        final ClipDrawable dummyBackground = new ClipDrawable(mStickyHeader.getBackground(), Gravity.BOTTOM, ClipDrawable.VERTICAL);
+        dummyBackground.setLevel(mIsStuck ? 10000 : 0);
+        mHeaderDummy.setBackgroundDrawable(dummyBackground);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("was_stuck", mIsStuck);
-        outState.putInt("palette_color", mPaletteColor);
-    }
-
-    @Override
-    public void onGenerated(Palette palette) {
-        Palette.Swatch item = PaletteUtil.getBackgroundItem(palette);
-        if (item != null) {
-            mPaletteColor = item.getRgb();
-        }
-        if (mPaletteColor != mPreviousPaletteColor) {
-            initPalette(true);
-        }
     }
 
     protected int getHeaderLayout() {
@@ -140,27 +131,6 @@ public class ListStickyParallaxHeaderFragment extends Fragment implements Palett
 
     protected int getListLayout() {
         return R.layout.profile_staggeredgrid_frame;
-    }
-
-    private void initPalette(boolean animate) {
-        final ClipDrawable dummyBackground = new ClipDrawable(new ColorDrawable(mPaletteColor),
-                Gravity.BOTTOM, ClipDrawable.VERTICAL);
-        if (mIsStuck) {
-            dummyBackground.setLevel(10000);
-        } else {
-            dummyBackground.setLevel(0);
-        }
-        mHeaderDummy.setBackgroundDrawable(dummyBackground);
-        if (animate) {
-            final TransitionDrawable stickyBackground = new TransitionDrawable(new Drawable[] {
-                    new ColorDrawable(mPreviousPaletteColor),
-                    new ColorDrawable(mPaletteColor),
-            });
-            stickyBackground.startTransition(200);
-            mStickyHeader.setBackgroundDrawable(stickyBackground);
-        } else {
-            mStickyHeader.setBackgroundColor(mPaletteColor);
-        }
     }
 
     private ValueAnimator makeSlideAnimator(int start, int end, final ClipDrawable drawable) {
@@ -177,6 +147,31 @@ public class ListStickyParallaxHeaderFragment extends Fragment implements Palett
         });
         return animator;
     }
+
+    protected final PaletteObserver mPaletteObserver = new PaletteObserver() {
+        @Override
+        public void onNext(PaletteResponse paletteResponse) {
+            Palette palette = paletteResponse.palette;
+            Palette.Swatch swatch = mLightTheme ? palette.getLightMutedSwatch() : palette.getDarkMutedSwatch();
+            if (swatch == null) swatch = palette.getMutedSwatch();
+            if (swatch != null) {
+                final ClipDrawable dummyBackground =
+                        new ClipDrawable(new ColorDrawable(swatch.getRgb()), Gravity.BOTTOM, ClipDrawable.VERTICAL);
+                dummyBackground.setLevel(mIsStuck ? 10000 : 0);
+                mHeaderDummy.setBackgroundDrawable(dummyBackground);
+                if (paletteResponse.shouldAnimate) {
+                    final Drawable d = mStickyHeader.getBackground();
+                    final Drawable d2 = new ColorDrawable(swatch.getRgb());
+                    TransitionDrawable td = new TransitionDrawable(new Drawable[]{d,d2});
+                    td.setCrossFadeEnabled(true);
+                    mStickyHeader.setBackgroundDrawable(td);
+                    td.startTransition(SquareImageView.TRANSITION_DURATION);
+                } else {
+                    mStickyHeader.setBackgroundColor(swatch.getRgb());
+                }
+            }
+        }
+    };
 
     private final AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
         @Override

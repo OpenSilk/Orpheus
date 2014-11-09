@@ -19,6 +19,9 @@ package org.opensilk.music.ui.profile;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -44,6 +47,7 @@ import org.opensilk.music.ui.profile.loader.ArtistGridLoader;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.common.dagger.qualifier.ForFragment;
 import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.silkdagger.DaggerInjector;
 
@@ -68,6 +72,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
 
     @Inject OverflowHandlers.LocalAlbums mAdapterAlbumOverflowHandler;
     @Inject OverflowHandlers.LocalSongGroups mAdapterSongGroupOverflowHandler;
+    @Inject OverflowHandlers.LocalArtists mArtistsOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
 
     LocalArtist mArtist;
@@ -91,6 +96,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
                 mAdapterSongGroupOverflowHandler);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -98,13 +104,30 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
         super.onViewCreated(view, savedInstanceState);
         // hero image
         ImageView heroImage = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        mRequestor.newArtistRequest((AnimatedImageView)heroImage, null, //TODO
+        mRequestor.newArtistRequest((AnimatedImageView)heroImage, mPaletteObserver,
                 new ArtInfo(mArtist.name, null, null), ArtworkType.LARGE);
         // Load header text
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_title).setText(mArtist.name);
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_subtitle).setVisibility(View.GONE);
         // set list adapter
         mList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        for (int ii : OverflowHandlers.LocalArtists.MENUS) {
+            inflater.inflate(ii, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        try {
+            return mArtistsOverflowHandler.handleClick(OverflowAction.valueOf(item.getItemId()), mArtist);
+        } catch (IllegalArgumentException e) {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

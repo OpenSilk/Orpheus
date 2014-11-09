@@ -22,6 +22,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,6 +48,7 @@ import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
 import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
 import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.music.util.Projections;
@@ -76,6 +80,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
     }
 
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
+    @Inject OverflowHandlers.Playlists mPlaylistOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
 
     Playlist mPlaylist;
@@ -118,6 +123,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
                 mPlaylist.mPlaylistId);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -158,6 +164,28 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_subtitle).setVisibility(View.GONE);
         // set list adapter
         mList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        for (int ii : OverflowHandlers.Playlists.MENUS_COMMON) {
+            inflater.inflate(ii, menu);
+        }
+        if (!isLastAdded()) {
+            for (int ii : OverflowHandlers.Playlists.MENUS_USER) {
+                inflater.inflate(ii, menu);
+            }
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        try {
+            return mPlaylistOverflowHandler.handleClick(OverflowAction.valueOf(item.getItemId()), mPlaylist);
+        } catch (IllegalArgumentException e) {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

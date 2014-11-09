@@ -47,6 +47,17 @@
         <item name="android:scrollbars">none</item>
     </style>
 
+    <style name="ProfileDragSortList">
+        <!-- Setup dragsort options-->
+        <item name="use_default_controller">true</item>
+        <item name="drag_handle_id">@id/drag_handle</item>
+        <item name="fling_handle_id">@id/fling_handle</item>
+        <item name="remove_enabled">true</item>
+        <item name="remove_mode">flingRemove</item>
+        <item name="drag_start_mode">onMove</item>
+        <item name="float_background_color">@android:color/transparent</item>
+    </style>
+
     <style name="DragSortSwipeListPreference">
         <item name="use_default_controller">true</item>
         <item name="drag_handle_id">@id/item_handle</item>

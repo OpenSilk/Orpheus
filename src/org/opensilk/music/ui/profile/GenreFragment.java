@@ -19,6 +19,9 @@ package org.opensilk.music.ui.profile;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,6 +43,7 @@ import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui.profile.loader.GenreGridLoader;
 import org.opensilk.music.ui2.ProfileActivity;
+import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.common.dagger.qualifier.ForFragment;
@@ -66,6 +70,7 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
 
     @Inject OverflowHandlers.LocalAlbums mAdapterAlbumOverflowHandler;
     @Inject OverflowHandlers.LocalSongGroups mAdapterSongGroupOverflowHandler;
+    @Inject OverflowHandlers.Genres mGenreOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
 
     Genre mGenre;
@@ -89,6 +94,7 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
                 mAdapterSongGroupOverflowHandler);
         // start the loader
         getLoaderManager().initLoader(0, null, this);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -120,6 +126,23 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
         ButterKnife.<TextView>findById(mStickyHeader, R.id.info_subtitle).setVisibility(View.GONE);
         // set list adapter
         mList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        for (int ii : OverflowHandlers.Genres.MENUS) {
+            inflater.inflate(ii, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        try {
+            return mGenreOverflowHandler.handleClick(OverflowAction.valueOf(item.getItemId()), mGenre);
+        } catch (IllegalArgumentException e) {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
