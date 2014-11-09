@@ -48,9 +48,7 @@ import org.opensilk.music.ui.cards.event.AlbumCardClick;
 import org.opensilk.music.ui.cards.event.ArtistCardClick;
 import org.opensilk.music.ui.cards.event.FolderCardClick;
 import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
-import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.music.ui.modules.BackButtonListener;
-import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.util.PluginSettings;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForActivity;
@@ -71,10 +69,6 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public static final int REQUEST_SETTINGS = 1002;
     public static final String ARG_LIBRARY_INFO = "argLibraryInfo";
 
-    @Inject @ForActivity
-    protected ActionBarController mActionBarHelper;
-    @Inject @ForActivity
-    protected DrawerHelper mDrawerHelper;
     @Inject @ForFragment
     protected Bus mFragmentBus;
     @Inject @ForFragment
@@ -131,7 +125,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // set title
-        mActionBarHelper.setTitle(mPluginInfo.title);
+//        mActionBarHelper.setTitle(mPluginInfo.title);
         // enable overflow
         setHasOptionsMenu(true);
     }
@@ -199,9 +193,9 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        if (!mDrawerHelper.isDrawerOpen()) {
+//        if (!mDrawerHelper.isDrawerOpen()) {
             // set title (hacks)
-            mActionBarHelper.setTitle(mPluginInfo.title);
+//            mActionBarHelper.setTitle(mPluginInfo.title);
             // search
             if ((mCapabilities & OrpheusApi.Ability.SEARCH) != 0) {
                 inflater.inflate(R.menu.search, menu);
@@ -236,7 +230,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
             }
 
 
-        }
+//        }
 
     }
 

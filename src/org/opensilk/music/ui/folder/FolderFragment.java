@@ -38,7 +38,6 @@ import org.opensilk.music.AppPreferences;
 import com.andrew.apollo.menu.AddToPlaylistDialog;
 import org.opensilk.music.ui.cards.event.FileItemCardClick;
 import org.opensilk.music.ui.modules.BackButtonListener;
-import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.music.util.Command;
 import org.opensilk.music.util.CommandRunner;
 import org.opensilk.silkdagger.DaggerInjector;
@@ -56,8 +55,6 @@ import javax.inject.Inject;
  */
 public class FolderFragment extends ScopedDaggerFragment implements BackButtonListener {
 
-    @Inject @ForActivity
-    DrawerHelper mDrawerHelper;
     @Inject
     AppPreferences mSettings;
 

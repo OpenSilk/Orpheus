@@ -25,8 +25,6 @@ import com.squareup.otto.Bus;
 import org.opensilk.music.AppModule;
 import org.opensilk.music.ui.folder.FolderPickerActivity;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
-import org.opensilk.music.ui.modules.ActionBarController;
-import org.opensilk.music.ui.modules.ActionBarControllerImpl;
 import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 
@@ -42,7 +40,6 @@ import de.greenrobot.event.EventBus;
  */
 @Module (
         injects = {
-                ActionBarControllerImpl.class,
                 NowPlayingFragment.class,
                 SettingsActivity.class,
                 FolderPickerActivity.class,
@@ -71,11 +68,6 @@ public class ActivityModule {
     @Provides @Singleton @ForActivity
     public Context provideActivityContext() {
         return activity;
-    }
-
-    @Provides @Singleton @ForActivity
-    public ActionBarController provideActionBarHelper(ActionBarControllerImpl controller) {
-        return controller;
     }
 
     @Provides @Singleton @ForActivity

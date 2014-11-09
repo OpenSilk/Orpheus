@@ -32,8 +32,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
 import org.opensilk.music.ui.library.adapter.SearchAdapter;
-import org.opensilk.music.ui.modules.ActionBarController;
-import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.common.dagger.qualifier.ForFragment;
@@ -46,10 +44,6 @@ import javax.inject.Inject;
 public class SearchFragment extends CustomListGridFragment implements
         LibraryAdapter.Callback, SearchView.OnQueryTextListener {
 
-    @Inject @ForActivity
-    protected ActionBarController mActionBarHelper;
-    @Inject @ForActivity
-    protected DrawerHelper mDrawerHelper;
     @Inject @ForFragment
     protected RemoteLibraryHelper mLibrary;
 
@@ -98,7 +92,7 @@ public class SearchFragment extends CustomListGridFragment implements
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (!mDrawerHelper.isDrawerOpen()) {
+//        if (!mDrawerHelper.isDrawerOpen()) {
             menu.removeItem(R.id.menu_search);
             // Search view
             inflater.inflate(R.menu.searchview, menu);
@@ -106,7 +100,7 @@ public class SearchFragment extends CustomListGridFragment implements
             mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
             mSearchView.setOnQueryTextListener(this);
             mSearchView.setIconified(false);
-        }
+//        }
     }
 
     @Override

@@ -33,7 +33,6 @@ import org.opensilk.music.api.meta.LibraryInfo;
 
 import org.opensilk.music.ui.library.adapter.FolderListArrayAdapter;
 import org.opensilk.music.ui.library.adapter.LibraryAdapter;
-import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.common.dagger.qualifier.ForFragment;
@@ -45,8 +44,6 @@ import javax.inject.Inject;
  */
 public class FolderFragment extends CustomListGridFragment implements LibraryAdapter.Callback {
 
-    @Inject @ForActivity
-    protected DrawerHelper mDrawerHelper;
     @Inject @ForFragment
     protected RemoteLibraryHelper mLibrary;
 
@@ -98,14 +95,14 @@ public class FolderFragment extends CustomListGridFragment implements LibraryAda
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (!mDrawerHelper.isDrawerOpen()) {
+//        if (!mDrawerHelper.isDrawerOpen()) {
             if (mLibraryInfo.folderId != null) {
                 inflater.inflate(R.menu.popup_play_all, menu);
                 inflater.inflate(R.menu.popup_shuffle_all, menu);
                 inflater.inflate(R.menu.popup_add_to_queue, menu);
             }
             inflater.inflate(R.menu.refresh, menu);
-        }
+//        }
     }
 
     @Override

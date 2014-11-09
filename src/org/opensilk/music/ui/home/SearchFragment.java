@@ -42,7 +42,6 @@ import android.widget.ListView;
 import org.opensilk.music.R;
 
 import org.opensilk.music.ui.home.adapter.SearchAdapter;
-import org.opensilk.music.ui.modules.DrawerHelper;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ScopedDaggerFragment;
@@ -57,9 +56,6 @@ import it.gmariotti.cardslib.library.view.CardListView;
 public class SearchFragment extends ScopedDaggerFragment implements
         LoaderManager.LoaderCallbacks<Cursor>,
         SearchView.OnQueryTextListener {
-
-    @Inject @ForActivity
-    protected DrawerHelper mDrawerHelper;
 
     private String mFilterString;
     private ListView mListView;
@@ -126,7 +122,7 @@ public class SearchFragment extends ScopedDaggerFragment implements
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        if (!mDrawerHelper.isDrawerOpen()) {
+//        if (!mDrawerHelper.isDrawerOpen()) {
             // remove old search item
             menu.removeItem(R.id.menu_search);
 
@@ -143,7 +139,7 @@ public class SearchFragment extends ScopedDaggerFragment implements
             final SearchManager searchManager = (SearchManager)getActivity().getSystemService(Context.SEARCH_SERVICE);
             final SearchableInfo searchableInfo = searchManager.getSearchableInfo(getActivity().getComponentName());
             mSearchView.setSearchableInfo(searchableInfo);
-        }
+//        }
     }
 
     @Override

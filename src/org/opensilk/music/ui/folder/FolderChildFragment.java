@@ -34,7 +34,6 @@ import org.opensilk.filebrowser.FileBrowserArgs;
 import org.opensilk.filebrowser.FileItem;
 import org.opensilk.filebrowser.FileItemArrayLoader;
 import org.opensilk.music.ui.cards.FileItemCard;
-import org.opensilk.music.ui.modules.ActionBarController;
 import org.opensilk.silkdagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 
@@ -52,9 +51,6 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 public class FolderChildFragment extends CustomListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
 
     protected static final int LOADER = 0;
-
-    @Inject @ForActivity
-    ActionBarController mActionBarController;
 
     protected DaggerInjector mInjector;
     private CardArrayAdapter mAdapter;
@@ -98,8 +94,8 @@ public class FolderChildFragment extends CustomListGridFragment implements Loade
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActionBarController.setTitle(FolderPickerActivity.makeTitle(mBrowserArgs.getPath()));
-        mActionBarController.setSubTitle(FolderPickerActivity.makeSubtitle(mBrowserArgs.getPath()));
+//        mActionBarController.setTitle(FolderPickerActivity.makeTitle(mBrowserArgs.getPath()));
+//        mActionBarController.setSubTitle(FolderPickerActivity.makeSubtitle(mBrowserArgs.getPath()));
     }
 
     @Override
