@@ -26,25 +26,32 @@ import android.widget.Toast;
 import com.andrew.apollo.menu.AddToPlaylistDialog;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.utils.MusicUtils;
+import com.google.gson.Gson;
 
 import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.GsonParcer;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.AppFlowPresenter;
 import org.opensilk.common.mortarflow.FrameScreenSwitcherView;
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.core.android.ActionBarOwner.CustomMenuItem;
 import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
+import org.opensilk.music.ui2.loader.LoaderModule;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import dagger.Provides;
 import de.greenrobot.event.EventBus;
 import flow.Flow;
+import flow.Parcer;
 import mortar.Blueprint;
 
 /**
@@ -53,6 +60,44 @@ import mortar.Blueprint;
 public class BaseSwitcherActivity extends BaseMortarActivity implements
         AppFlowPresenter.Activity,
         ActionBarOwner.Activity {
+
+    public static class Blueprint extends BaseMortarActivity.Blueprint {
+        public Blueprint(String scopeName) {
+            super(scopeName);
+        }
+
+        @Override
+        public Object getDaggerModule() {
+            return new Module();
+        }
+
+    }
+
+    @dagger.Module(
+            includes = {
+                    BaseMortarActivity.Module.class,
+                    ActionBarOwner.Module.class,
+                    LoaderModule.class,
+            },
+            injects = {
+                    LauncherActivity.class,
+                    DetailActivity.class,
+            }
+    )
+    public static class Module {
+        @Provides @Singleton @Named("activity")
+        public EventBus provideEventBus() {
+            return new EventBus();
+        }
+        @Provides @Singleton
+        public Parcer<Object> provideParcer(Gson gson) {
+            return new GsonParcer<>(gson);
+        }
+        @Provides @Singleton
+        public AppFlowPresenter<BaseSwitcherActivity> providePresenter(Parcer<Object> floParcer) {
+            return new AppFlowPresenter<>(floParcer);
+        }
+    }
 
     @Inject @Named("activity") protected EventBus mBus;
     @Inject protected ActionBarOwner mActionBarOwner;
@@ -63,12 +108,18 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
 
     protected ActionBarOwner.MenuConfig mMenuConfig;
 
-    protected void setupView() {
-        throw new UnsupportedOperationException("Subclass must override setupView()");
+    @Override
+    protected Blueprint getBlueprint(String scopeName) {
+        return new Blueprint(scopeName);
     }
 
-    protected Blueprint getBlueprint(String scopeName) {
-        return new BaseSwitcherActivityBlueprint(scopeName);
+    @Override
+    public Screen getDefaultScreen() {
+        throw new UnsupportedOperationException("Subclass must override getDefaultScreen()");
+    }
+
+    protected void setupView() {
+        throw new UnsupportedOperationException("Subclass must override setupView()");
     }
 
     @Override

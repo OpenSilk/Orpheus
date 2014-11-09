@@ -18,9 +18,10 @@ package org.opensilk.music.ui.library;
 
 import com.squareup.otto.Bus;
 
+import org.opensilk.music.AppModule;
 import org.opensilk.music.ui.cards.CardModule;
 import org.opensilk.common.dagger.qualifier.ForFragment;
-import org.opensilk.music.ui2.ActivityModule;
+import org.opensilk.music.ui2.BaseActivity;
 
 import javax.inject.Singleton;
 
@@ -36,7 +37,7 @@ import dagger.Provides;
                 FolderFragment.class,
                 SearchFragment.class,
         },
-        addsTo = ActivityModule.class,
+        addsTo = AppModule.class,
         complete = false,
         includes = {
                 CardModule.class,

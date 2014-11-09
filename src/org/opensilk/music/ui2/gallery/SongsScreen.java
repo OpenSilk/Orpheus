@@ -97,7 +97,7 @@ public class SongsScreen extends Screen {
         }
 
         @Override
-        protected void onItemClicked(View view, LocalSong item) {
+        protected void onItemClicked(BaseAdapter.ViewHolder holder, LocalSong item) {
             ((OverflowHandlers.LocalSongs) popupHandler).play(item);
         }
 

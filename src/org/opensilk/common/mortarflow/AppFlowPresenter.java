@@ -31,35 +31,34 @@ import flow.Parcer;
 import mortar.MortarScope;
 import mortar.Presenter;
 
-public abstract class AppFlowPresenter<A extends AppFlowPresenter.Activity> extends Presenter<A> implements Flow.Listener {
+public class AppFlowPresenter<A extends AppFlowPresenter.Activity> extends Presenter<A> implements Flow.Listener {
 
     public interface Activity extends CanShowScreen, HasScope {
-
+        Screen getDefaultScreen();
     }
 
-    /**
-     * Persists the {@link Flow} in the bundle. Initialized with the home screen,
-     */
-    private final FlowBundler flowBundler;
-
+    private final Parcer<Object> flowParcer;
+    /** Persists the {@link Flow} in the bundle. Initialized with the home screen */
+    private FlowBundler flowBundler;
     private AppFlow appFlow;
 
     public AppFlowPresenter(Parcer<Object> flowParcer) {
-        flowBundler = new FlowBundler(getDefaultScreen(), this, flowParcer);
+        this.flowParcer = flowParcer;
     }
-
-    public abstract Screen getDefaultScreen();
 
     @Override protected MortarScope extractScope(A activity) {
         return activity.getScope();
     }
 
     @Override public void onLoad(Bundle savedInstanceState) {
-        if (appFlow == null) appFlow = new AppFlow(flowBundler.onCreate(savedInstanceState).getFlow());
+        if (appFlow == null) {
+            flowBundler = new FlowBundler(getView().getDefaultScreen(), this, flowParcer);
+            appFlow = new AppFlow(flowBundler.onCreate(savedInstanceState).getFlow());
+        }
     }
 
     @Override public void onSave(Bundle outState) {
-        flowBundler.onSaveInstanceState(outState);
+        if (flowBundler != null) flowBundler.onSaveInstanceState(outState);
     }
 
     @Override public void go(Backstack nextBackstack, Flow.Direction flowDirection,

@@ -129,7 +129,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     }
 
     //handle item clicks
-    protected abstract void onItemClicked(View view, T item);
+    protected abstract void onItemClicked(BaseAdapter.ViewHolder holder, T item);
     // make a new adapter
     protected abstract BaseAdapter<T> newAdapter();
     // start the loader

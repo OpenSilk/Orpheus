@@ -26,7 +26,8 @@ import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivity;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
 import java.util.List;
@@ -53,7 +54,7 @@ import timber.log.Timber;
 public class GalleryScreen extends Screen {
 
     @dagger.Module (
-            addsTo = BaseSwitcherActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivity.Module.class,
             injects = GalleryView.class
     )
     public static class Module {

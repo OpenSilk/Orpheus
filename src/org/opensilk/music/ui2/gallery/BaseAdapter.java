@@ -78,12 +78,12 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int i) {
+    public void onBindViewHolder(final ViewHolder holder, int i) {
         final T item = getItem(i);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                presenter.onItemClicked(v, item);
+                presenter.onItemClicked(holder, item);
             }
         });
         holder.overflow.setOnClickListener(new View.OnClickListener() {
@@ -182,10 +182,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        @InjectView(R.id.artwork_thumb) ImageView artwork;
-        @InjectView(R.id.artwork_thumb2) @Optional ImageView artwork2;
-        @InjectView(R.id.artwork_thumb3) @Optional ImageView artwork3;
-        @InjectView(R.id.artwork_thumb4) @Optional ImageView artwork4;
+        @InjectView(R.id.artwork_thumb) public ImageView artwork;
+        @InjectView(R.id.artwork_thumb2) @Optional public ImageView artwork2;
+        @InjectView(R.id.artwork_thumb3) @Optional public ImageView artwork3;
+        @InjectView(R.id.artwork_thumb4) @Optional public ImageView artwork4;
         @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;

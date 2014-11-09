@@ -31,7 +31,8 @@ import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivity;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
@@ -77,7 +78,7 @@ import static org.opensilk.common.rx.RxUtils.notSubscribed;
 public class QueueScreen extends Screen {
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivity.Module.class,
             injects = QueueView.class
     )
     public static class Module {

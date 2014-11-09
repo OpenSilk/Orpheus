@@ -32,6 +32,7 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
+import org.opensilk.music.ui2.DetailActivity;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
@@ -102,8 +103,8 @@ public class AlbumsScreen extends Screen {
         }
 
         @Override
-        protected void onItemClicked(View view, LocalAlbum item) {
-            NavUtils.openAlbumProfile(view.getContext(), item);
+        protected void onItemClicked(BaseAdapter.ViewHolder holder, LocalAlbum item) {
+            DetailActivity.open(holder, item);
         }
 
         @Override

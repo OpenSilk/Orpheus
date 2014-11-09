@@ -65,7 +65,7 @@
             android:value="org.opensilk.music.ui.activities.HomeSlidingActivity" />
 
         <activity android:name="org.opensilk.music.ui2.LauncherActivity"
-            android:theme="@style/Theme.Light.Panel"
+            android:theme="@style/Theme.Dark"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan"/>
 
@@ -145,8 +145,8 @@
                 android:resource="@xml/searchable" />
         </activity-alias>
 
-        <activity android:name="org.opensilk.music.ui.activities.ProfileDialogActivity"
-            android:theme="@style/Theme.Dialog.Light.Panel">
+        <activity android:name="org.opensilk.music.ui2.DetailActivity"
+            android:theme="@style/Theme.Dark">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
@@ -155,7 +155,7 @@
         <activity
             android:name="org.opensilk.music.ui.settings.SettingsActivity"
             android:label="@string/menu_settings"
-            android:theme="@style/Theme.Dialog.Light">
+            android:theme="@style/Theme.Dark">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>

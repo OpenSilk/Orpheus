@@ -21,21 +21,20 @@ import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
 
-import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.ModuleFactory;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivity;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import flow.Flow;
 import flow.Layout;
-import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -60,7 +59,7 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 public class MainScreen extends Screen {
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivity.Module.class,
             injects = {
                     MainView.class,
                     FooterView.class,

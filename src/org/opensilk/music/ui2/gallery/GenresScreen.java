@@ -95,8 +95,8 @@ public class GenresScreen extends Screen {
         }
 
         @Override
-        protected void onItemClicked(View view, Genre item) {
-            NavUtils.openGenreProfile(view.getContext(), item);
+        protected void onItemClicked(BaseAdapter.ViewHolder holder, Genre item) {
+            NavUtils.openGenreProfile(holder.itemView.getContext(), item);
         }
 
         @Override

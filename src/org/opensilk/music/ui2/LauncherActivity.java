@@ -25,15 +25,21 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.transition.Explode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 
 import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortarflow.AppFlowPresenter;
 import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.util.VersionUtils;
 import org.opensilk.common.util.ViewUtils;
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 
 import com.andrew.apollo.utils.NavUtils;
@@ -44,21 +50,50 @@ import org.opensilk.music.bus.events.IABQueryResult;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
+import org.opensilk.music.ui2.loader.LoaderModule;
 import org.opensilk.music.ui2.main.DrawerOwner;
 import org.opensilk.music.ui2.main.MainScreen;
 import org.opensilk.music.ui2.main.NavScreen;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import dagger.Provides;
+import flow.Parcer;
 import hugo.weaving.DebugLog;
+import mortar.Blueprint;
 import timber.log.Timber;
 
 
 public class LauncherActivity extends BaseSwitcherActivity implements
         DrawerOwner.Activity {
+
+//    public static class Blueprint extends BaseSwitcherActivity.Blueprint {
+//
+//        public Blueprint(String scopeName) {
+//            super(scopeName);
+//        }
+//
+//        @Override
+//        public Object getDaggerModule() {
+//            return new Module();
+//        }
+//
+//    }
+//
+//    @dagger.Module(
+////                addsTo = AppModule.class,
+//            includes = {
+//                    BaseSwitcherActivity.Module.class,
+//                    LoaderModule.class,
+//            },
+//            injects = LauncherActivity.class
+//    )
+//    public static class Module { }
 
     @Inject DrawerOwner mDrawerOwner;
     @Inject PluginConnectionManager mPluginConnectionManager;
@@ -67,6 +102,11 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
 
     ActionBarDrawerToggle mDrawerToggle;
+
+//    @Override
+//    protected Blueprint getBlueprint(String scopeName) {
+//        return new Blueprint(scopeName);
+//    }
 
     @Override
     protected void setupView() {
@@ -80,6 +120,10 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeHelper.getInstance(this).getTheme());
+        if (VersionUtils.hasLollipop()) {
+            getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+//            getWindow().setSharedElementExitTransition(new Explode());
+        }
         super.onCreate(savedInstanceState);
 
         mDrawerOwner.takeView(this);
@@ -180,6 +224,15 @@ public class LauncherActivity extends BaseSwitcherActivity implements
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    /*
+     * AppFlowPresenter.Activity
+     */
+
+    @Override
+    public Screen getDefaultScreen() {
+        return new GalleryScreen();
     }
 
     /*

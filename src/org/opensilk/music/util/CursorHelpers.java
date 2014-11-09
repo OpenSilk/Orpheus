@@ -57,7 +57,7 @@ public class CursorHelpers {
         // static
     }
 
-    @MarkedForRemoval
+    @MarkedForRemoval @Deprecated
     public static LocalSong makeLocalSongFromCursor(Context context, final Cursor c) {
         // Copy the song Id
         final long id = getLongOrZero(c, BaseColumns._ID);

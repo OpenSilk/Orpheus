@@ -94,8 +94,8 @@ public class PlaylistsScreen extends Screen {
         }
 
         @Override
-        protected void onItemClicked(View view, Playlist item) {
-            NavUtils.openPlaylistProfile(view.getContext(), item);
+        protected void onItemClicked(BaseAdapter.ViewHolder holder, Playlist item) {
+            NavUtils.openPlaylistProfile(holder.itemView.getContext(), item);
         }
 
         @Override

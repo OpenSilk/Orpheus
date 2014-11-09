@@ -25,7 +25,8 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivity;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.util.PluginUtil;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
@@ -49,7 +50,7 @@ import rx.functions.Action1;
 public class NavScreen extends Screen {
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivity.Module.class,
             injects = NavView.class
     )
     public static class Module {

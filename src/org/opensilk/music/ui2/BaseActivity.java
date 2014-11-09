@@ -35,6 +35,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 
 import com.andrew.apollo.MusicPlaybackService;
@@ -73,6 +74,11 @@ import static org.opensilk.cast.CastMessage.CAST_FAILED;
  * Created by drew on 8/10/14.
  */
 public class BaseActivity extends ActionBarActivity {
+
+    @dagger.Module(addsTo = AppModule.class)
+    public static class Module {
+
+    }
 
     // Cast stuff
     private RemoteCastServiceManager.ServiceToken mCastServiceToken;

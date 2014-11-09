@@ -31,7 +31,8 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.ui2.BaseSwitcherActivityBlueprint;
+import org.opensilk.music.ui2.BaseSwitcherActivity;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.MakeToast;
@@ -69,7 +70,7 @@ public class PluginScreen extends Screen {
     }
 
     @dagger.Module (
-            addsTo = BaseSwitcherActivityBlueprint.Module.class,
+            addsTo = BaseSwitcherActivity.Module.class,
             injects = PluginView.class,
             library = true
     )

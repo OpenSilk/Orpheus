@@ -103,8 +103,8 @@ public class ArtistsScreen extends Screen {
         }
 
         @Override
-        protected void onItemClicked(View view, LocalArtist item) {
-            NavUtils.openArtistProfile(view.getContext(), item);
+        protected void onItemClicked(BaseAdapter.ViewHolder holder, LocalArtist item) {
+            NavUtils.openArtistProfile(holder.itemView.getContext(), item);
         }
 
         @Override
