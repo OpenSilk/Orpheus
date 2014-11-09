@@ -109,7 +109,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
 
         public static class Builder {
             public boolean setHomeEnabled = true;
-            public boolean setUpButtonEnabled = true;
+            public boolean setUpButtonEnabled = false;
             public int titleRes = -1;
             public CharSequence title = null;
             public int subtitleRes = -1;

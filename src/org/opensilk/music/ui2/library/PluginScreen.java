@@ -204,9 +204,9 @@ public class PluginScreen extends Screen {
         }
 
         void setupActionBar() {
-            ActionBarOwner.Config config = new ActionBarOwner.Config.Builder()
-                    .setTitle(pluginInfo.title).build();
-            actionBarOwner.setConfig(config);
+            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
+                    .setTitle(pluginInfo.title)
+                    .build());
         }
 
         void showPickerButton() {

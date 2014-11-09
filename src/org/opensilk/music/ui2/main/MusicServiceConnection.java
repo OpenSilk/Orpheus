@@ -166,7 +166,7 @@ public class MusicServiceConnection {
     Uri getArtworkUri();
     int getQueuePosition();
     //int getShuffleMode();
-    int removeTracks(int first, int last);
+    //int removeTracks(int first, int last);
     //int removeTrack(long id);
     //int getRepeatMode();
     int getMediaMountedCount();
@@ -330,6 +330,20 @@ public class MusicServiceConnection {
         });
     }
 
+    public void removeTracks(final int first, final int last) {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.removeTracks(first, last);
+                } catch (RemoteException e) {
+                    unbind();
+                    //TODO
+                }
+            }
+        });
+    }
+
     public void moveQueueItem(final int from, final int to) {
         getObservable().subscribe(new Action1<IApolloService>() {
             @Override
@@ -350,6 +364,24 @@ public class MusicServiceConnection {
             public void call(IApolloService iApolloService) {
                 try {
                     iApolloService.setQueuePosition(pos);
+                } catch (RemoteException e) {
+                    unbind();
+                    //TODO
+                }
+            }
+        });
+    }
+
+    public void clearQueue() {
+        removeTracks(0, Integer.MAX_VALUE);
+    }
+
+    public void startPartyShuffle() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.setShuffleMode(MusicPlaybackService.SHUFFLE_AUTO);
                 } catch (RemoteException e) {
                     unbind();
                     //TODO

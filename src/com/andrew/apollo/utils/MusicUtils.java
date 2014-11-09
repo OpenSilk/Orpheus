@@ -532,6 +532,7 @@ public final class MusicUtils {
     /**
      * @return The queue.
      */
+    @Deprecated @MarkedForRemoval
     public static final long[] getQueue() {
         try {
             if (sService != null) {
@@ -915,6 +916,7 @@ public final class MusicUtils {
     /**
      * Starts auto shuffle mode
      */
+    @Deprecated @MarkedForRemoval
     public static void startPartyShuffle() {
         if (sService != null) {
             try {
@@ -1427,6 +1429,7 @@ public final class MusicUtils {
     /**
      * Clears the qeueue
      */
+    @Deprecated @MarkedForRemoval
     public static void clearQueue() {
         try {
             sService.removeTracks(0, Integer.MAX_VALUE);

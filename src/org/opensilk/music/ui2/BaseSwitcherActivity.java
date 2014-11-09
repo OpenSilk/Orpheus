@@ -217,22 +217,22 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
 
     @Override
     public void setTitle(int titleId) {
-        mToolbar.setTitle(titleId);
+        getSupportActionBar().setTitle(titleId);
     }
 
     @Override
     public void setTitle(CharSequence title) {
-        mToolbar.setTitle(title);
+        getSupportActionBar().setTitle(title);
     }
 
     @Override
     public void setSubtitle(int subTitleRes) {
-        mToolbar.setSubtitle(subTitleRes);
+        getSupportActionBar().setSubtitle(subTitleRes);
     }
 
     @Override
     public void setSubtitle(CharSequence title) {
-        mToolbar.setSubtitle(title);
+        getSupportActionBar().setSubtitle(title);
     }
 
     @Override

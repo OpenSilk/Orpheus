@@ -29,6 +29,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.main.MusicServiceConnection;
 
 import java.util.List;
 
@@ -66,15 +67,18 @@ public class GalleryScreen extends Screen {
 
         final AppPreferences preferences;
         final ActionBarOwner actionBarOwner;
+        final MusicServiceConnection musicService;
 
         DelegateActionHandler delegateActionHandler;
 
         @Inject
         public Presenter(AppPreferences preferences,
-                         ActionBarOwner actionBarOwner) {
+                         ActionBarOwner actionBarOwner,
+                         MusicServiceConnection musicService) {
             Timber.v("new GalleryScreen.Presenter()");
             this.preferences = preferences;
             this.actionBarOwner = actionBarOwner;
+            this.musicService = musicService;
         }
 
         @Override
@@ -125,8 +129,12 @@ public class GalleryScreen extends Screen {
                 delegateActionHandler.setDelegate(null);
                 menus = new int[] { R.menu.shuffle, R.menu.search};
             }
-            actionBarOwner.setConfig(new ActionBarOwner.Config(true, true, R.string.my_library,
-                    new ActionBarOwner.MenuConfig(delegateActionHandler, menus)));
+            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
+                .setTitle(R.string.my_library)
+                .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
+                    .withMenus(menus)
+                    .setActionHandler(delegateActionHandler).build())
+                .build());
         }
 
         class DelegateActionHandler implements Func1<Integer, Boolean> {
@@ -141,10 +149,10 @@ public class GalleryScreen extends Screen {
             public Boolean call(Integer integer) {
                 switch (integer) {
                     case R.id.menu_search:
+                        //TODO
                         return true;
                     case R.id.menu_shuffle:
-                        // Starts autoshuffle mode
-                        MusicUtils.startPartyShuffle();
+                        musicService.startPartyShuffle();
                         return true;
                     default:
                         return delegate != null && delegate.call(integer);

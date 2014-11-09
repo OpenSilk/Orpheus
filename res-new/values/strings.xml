@@ -155,6 +155,8 @@
     <string name="feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
     <string name="feedback_subject">Feedback for Orpheus Music Player</string>
 
+    <string name="queue">Queue</string>
+
     <!--Toast errors-->
     <string name="err_addtoqueue">Unable to enqueue songs</string>
     <string name="err_opening_settings">Unable to open settings</string>

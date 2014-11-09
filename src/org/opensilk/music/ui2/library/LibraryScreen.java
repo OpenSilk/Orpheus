@@ -243,9 +243,10 @@ public class LibraryScreen extends Screen {
         }
 
         void setupActionBar() {
-            ActionBarOwner.Config config = new ActionBarOwner.Config.Builder()
-                    .setTitle(pluginInfo.title).setSubtitle(libraryInfo.libraryName).build();
-            actionBarOwner.setConfig(config);
+            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
+                    .setTitle(pluginInfo.title)
+                    .setSubtitle(libraryInfo.libraryName)
+                    .build());
             connection.getCapabilities(pluginInfo).subscribe(new Action1<Integer>() {
                 @Override
                 public void call(Integer capabilities) {

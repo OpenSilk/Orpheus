@@ -251,7 +251,11 @@ public class LauncherActivity extends BaseSwitcherActivity implements
 
     @Override
     public void setUpButtonEnabled(boolean enabled) {
-        //Ignore drawer does this
+        if (enabled) {
+            disableDrawer(true);
+        } else {
+            enableDrawer();
+        }
     }
 
     /*

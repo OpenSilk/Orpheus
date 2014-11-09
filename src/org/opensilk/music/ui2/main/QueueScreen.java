@@ -23,10 +23,13 @@ import android.database.Cursor;
 import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
+import com.andrew.apollo.menu.CreateNewPlaylist;
 import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
@@ -38,6 +41,7 @@ import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
@@ -102,18 +106,21 @@ public class QueueScreen extends Screen {
         final EventBus bus;
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
         final ArtworkRequestManager requestor;
+        final ActionBarOwner actionBarOwner;
 
         @Inject
         public Presenter(@ForApplication Context context,
                          MusicServiceConnection musicService,
                          @Named("activity") EventBus bus,
                         PauseAndResumeRegistrar pauseAndResumeRegistrar,
-                        ArtworkRequestManager requestor) {
+                        ArtworkRequestManager requestor,
+                        ActionBarOwner actionBarOwner) {
             this.appContext = context;
             this.musicService = musicService;
             this.bus = bus;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
             this.requestor = requestor;
+            this.actionBarOwner = actionBarOwner;
         }
 
         @Override
@@ -130,6 +137,7 @@ public class QueueScreen extends Screen {
             if (pauseAndResumeRegistrar.isRunning()) {
                 subscribeBroadcasts();
             }
+            setupActionBar();
         }
 
         @Override
@@ -319,6 +327,43 @@ public class QueueScreen extends Screen {
             if (notSubscribed(queueChangedSubscription)) return;
             queueChangedSubscription.unsubscribe();
             queueChangedSubscription = null;
+        }
+
+        void setupActionBar() {
+            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
+                    .setTitle(R.string.queue)
+                    .upButtonEnabled(true)
+                    .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
+                            .withMenus(R.menu.panel_save_queue, R.menu.panel_clear_queue)
+                            .setActionHandler(new Func1<Integer, Boolean>() {
+                                @Override
+                                public Boolean call(Integer integer) {
+                                    switch (integer) {
+                                        case R.id.panel_menu_save_queue:
+                                            musicService.getQueue().subscribe(new Action1<long[]>() {
+                                                @Override
+                                                public void call(long[] queue) {
+                                                    if (queue != null && queue.length > 0) {
+                                                        long[] playlist = MusicProviderUtil.transformListToRealIds(appContext, queue);
+                                                        if (playlist.length > 0) {
+                                                            bus.post(new OpenAddToPlaylist(playlist));
+                                                            return;
+                                                        }
+                                                    }
+                                                    //TODO toast
+                                                }
+                                            });
+                                            return true;
+                                        case R.id.panel_menu_clear_queue:
+                                            musicService.clearQueue();
+                                            if (getView() != null) AppFlow.get(getView().getContext()).goBack();
+                                            return true;
+                                        default:
+                                            return false;
+                                    }
+                                }
+                            }).build())
+                    .build());
         }
     }
 
