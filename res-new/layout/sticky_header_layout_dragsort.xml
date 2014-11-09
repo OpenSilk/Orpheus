@@ -16,31 +16,11 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.common.widget.ForegroundLinearLayout
+<org.opensilk.music.ui2.details.StickyHeaderListView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:gravity="center_vertical"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:foreground="?selectableItemBackground">
+    android:layout_height="match_parent">
 
-    <org.opensilk.music.widgets.ColorCodedThumbnail
-        android:id="@+id/folder_thumb"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:gravity="center"
-        android:padding="0dp"
-        android:textAppearance="?android:textAppearanceLarge"
-        android:textSize="32sp"
-        android:textColor="@android:color/white"/>
-
-    <include layout="@layout/gallery_list_item_common"/>
-
-</org.opensilk.common.widget.ForegroundLinearLayout>
+</org.opensilk.music.ui2.details.StickyHeaderListView>

@@ -16,24 +16,22 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.common.widget.ForegroundLinearLayout
+<org.opensilk.music.ui2.details.StickyHeaderListView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:foreground="?selectableItemBackground"
-    android:layout_margin="2dp">
+    android:layout_height="match_parent">
 
-    <org.opensilk.common.widget.SquareImageView
-        android:id="@+id/artwork_thumb"
+    <com.etsy.android.grid.StaggeredGridView
+        android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:transitionName="artwork"
-        style="@style/Orpheus.Thumbnail"/>
+        android:layout_height="match_parent"
+        app:item_margin="2dp"
+        app:column_count_portrait="@integer/profile_grid_cols_vertical"
+        app:column_count_landscape="@integer/profile_grid_cols_horizontal"
+        />
 
-    <include layout="@layout/gallery_grid_item_description"
-        android:layout_width="match_parent"
-        android:layout_height="58dp"/>
+    <include layout="@layout/sticky_header"/>
 
-</org.opensilk.common.widget.ForegroundLinearLayout>
+</org.opensilk.music.ui2.details.StickyHeaderListView>
