@@ -45,7 +45,14 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.Mortar;
+import rx.android.events.OnClickEvent;
+import rx.android.observables.ViewObservable;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.notSubscribed;
 
 /**
  * Created by drew on 10/14/14.
@@ -82,8 +89,16 @@ public class MainView extends FlingyFabLayout {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        subscribeFabClicks();
+        if (!isInEditMode()) presenter.takeView(this);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        unsubscribeFabClicks();
         if (!isInEditMode()) presenter.dropView(this);
     }
 
@@ -126,6 +141,51 @@ public class MainView extends FlingyFabLayout {
         }
         return false;
     }
+
+    CompositeSubscription fabClicksSubscription;
+
+    void subscribeFabClicks() {
+        if (isSubscribed(fabClicksSubscription)) return;
+        fabClicksSubscription = new CompositeSubscription(
+                ViewObservable.clicks(fabPlay).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        presenter.musicService.playOrPause();
+                    }
+                }),
+                ViewObservable.clicks(fabNext).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        presenter.musicService.next();
+                    }
+                }),
+                ViewObservable.clicks(fabPrev).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        presenter.musicService.prev();
+                    }
+                }),
+                ViewObservable.clicks(fabShuffle).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        presenter.musicService.cycleShuffleMode();
+                    }
+                }),
+                ViewObservable.clicks(fabRepeat).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        presenter.musicService.cycleRepeatMode();
+                    }
+                })
+        );
+    }
+
+    void unsubscribeFabClicks() {
+        if (notSubscribed(fabClicksSubscription)) return;
+        fabClicksSubscription.unsubscribe();
+        fabClicksSubscription = null;
+    }
+
 
     void setupActionButton() {
         fabPlay.setOnDoubleClickListener(new FloatingActionButton.OnDoubleClickListener() {

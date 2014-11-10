@@ -97,7 +97,7 @@ public class Main {
             Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
             if (pauseAndResumeRegistrar.isRunning()) {
-                subscribeFabClicks();
+                Timber.v("missed onResume()");
                 subscribeBroadcasts();
             }
         }
@@ -106,25 +106,22 @@ public class Main {
         public void onSave(Bundle outState) {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
-            if (getView() == null) {
-                if (pauseAndResumeRegistrar.isRunning()) {
-                    unsubscribeFabClicks();
-                    unsubscribeBroadcasts();
-                }
+            if (getView() == null
+                    && pauseAndResumeRegistrar.isRunning()) {
+                Timber.v("missed onPause()");
+                unsubscribeBroadcasts();
             }
         }
 
         @Override
         public void onResume() {
             Timber.v("onResume()");
-            subscribeFabClicks();
             subscribeBroadcasts();
         }
 
         @Override
         public void onPause() {
             Timber.v("onPause()");
-            unsubscribeFabClicks();
             unsubscribeBroadcasts();
         }
 
@@ -154,52 +151,6 @@ public class Main {
                     v.fabRepeat.setImageLevel(2);
                     break;
             }
-        }
-
-        CompositeSubscription fabClicksSubscription;
-
-        void subscribeFabClicks() {
-            if (isSubscribed(fabClicksSubscription)) return;
-            MainView v = getView();
-            if (v == null) return;
-            fabClicksSubscription = new CompositeSubscription(
-                    ViewObservable.clicks(v.fabPlay).subscribe(new Action1<OnClickEvent>() {
-                        @Override
-                        public void call(OnClickEvent onClickEvent) {
-                            musicService.playOrPause();
-                        }
-                    }),
-                    ViewObservable.clicks(v.fabNext).subscribe(new Action1<OnClickEvent>() {
-                        @Override
-                        public void call(OnClickEvent onClickEvent) {
-                            musicService.next();
-                        }
-                    }),
-                    ViewObservable.clicks(v.fabPrev).subscribe(new Action1<OnClickEvent>() {
-                        @Override
-                        public void call(OnClickEvent onClickEvent) {
-                            musicService.prev();
-                        }
-                    }),
-                    ViewObservable.clicks(v.fabShuffle).subscribe(new Action1<OnClickEvent>() {
-                        @Override
-                        public void call(OnClickEvent onClickEvent) {
-                            musicService.cycleShuffleMode();
-                        }
-                    }),
-                    ViewObservable.clicks(v.fabRepeat).subscribe(new Action1<OnClickEvent>() {
-                        @Override
-                        public void call(OnClickEvent onClickEvent) {
-                            musicService.cycleRepeatMode();
-                        }
-                    })
-            );
-        }
-
-        void unsubscribeFabClicks() {
-            if (notSubscribed(fabClicksSubscription)) return;
-            fabClicksSubscription.unsubscribe();
-            fabClicksSubscription = null;
         }
 
         Observable<Boolean> playStateObservable;

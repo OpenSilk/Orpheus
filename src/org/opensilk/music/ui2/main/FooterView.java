@@ -38,6 +38,13 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.Mortar;
+import rx.android.events.OnClickEvent;
+import rx.android.observables.ViewObservable;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.notSubscribed;
 
 /**
  * Created by drew on 10/15/14.
@@ -51,13 +58,12 @@ public class FooterView extends RelativeLayout {
     @InjectView(R.id.footer_track_title) TextView trackTitle;
     @InjectView(R.id.footer_artist_name) TextView artistName;
 
-    boolean lightTheme;
+    CompositeSubscription clicksSubscriptions;
+    final boolean lightTheme;
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (!isInEditMode()) {
-            Mortar.inject(context, this);
-        }
+        if (!isInEditMode()) Mortar.inject(context, this);
         lightTheme = ThemeUtils.isLightTheme(getContext());
     }
 
@@ -74,17 +80,33 @@ public class FooterView extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (!isInEditMode()) {
-            presenter.takeView(this);
-        }
+        subscribeClicks();
+        if (!isInEditMode()) presenter.takeView(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (!isInEditMode()) {
-            presenter.dropView(this);
-        }
+        unsubscribeClicks();
+        if (!isInEditMode()) presenter.dropView(this);
+    }
+
+    void subscribeClicks() {
+        if (isSubscribed(clicksSubscriptions)) return;
+        clicksSubscriptions = new CompositeSubscription(
+                ViewObservable.clicks(this).subscribe(new Action1<OnClickEvent>() {
+                    @Override
+                    public void call(OnClickEvent onClickEvent) {
+                        presenter.toggleQueue();
+                    }
+                })
+        );
+    }
+
+    void unsubscribeClicks() {
+        if (notSubscribed(clicksSubscriptions)) return;
+        clicksSubscriptions.unsubscribe();
+        clicksSubscriptions = null;
     }
 
     public void updateBackground(PaletteResponse paletteResponse) {

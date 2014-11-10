@@ -128,9 +128,8 @@ public class Footer {
         protected void onLoad(Bundle savedInstanceState) {
             Timber.v("onLoad()");
             super.onLoad(savedInstanceState);
-            //just for safety we should always receive a call to onResume()
             if (pauseAndResumeRegistrar.isRunning()) {
-                subscribeClicks();
+                Timber.v("missed onResume()");
                 subscribeBroadcasts();
                 //playstate will kick off progress subscription
             }
@@ -138,14 +137,13 @@ public class Footer {
 
         @Override
         protected void onSave(Bundle outState) {
+            Timber.v("onSave()");
             super.onSave(outState);
-            if (getView() == null) {
-                //just for safety we should always receive a call to onPause()
-                if (pauseAndResumeRegistrar.isRunning()) {
-                    unsubscribeClicks();
-                    unsubscribeBroadcasts();
-                    unsubscribeProgress();
-                }
+            if (getView() == null
+                    && pauseAndResumeRegistrar.isRunning()) {
+                Timber.v("missed onPause()");
+                unsubscribeBroadcasts();
+                unsubscribeProgress();
             }
         }
 
@@ -153,7 +151,6 @@ public class Footer {
         public void onResume() {
             Timber.v("onResume()");
             if (getView() == null) return;
-            subscribeClicks();
             subscribeBroadcasts();
             //playstate will kick off progress subscription
         }
@@ -161,7 +158,6 @@ public class Footer {
         @Override
         public void onPause() {
             Timber.v("onPause");
-            unsubscribeClicks();
             unsubscribeBroadcasts();
             unsubscribeProgress();
         }
@@ -207,25 +203,6 @@ public class Footer {
                 flow.goTo(new QueueScreen());
             }
 
-        }
-
-        void subscribeClicks() {
-            if (isSubscribed(clicksSubscriptions)) return;
-            if (getView() == null) return;
-            clicksSubscriptions = new CompositeSubscription(
-                    ViewObservable.clicks(getView()).subscribe(new Action1<OnClickEvent>() {
-                        @Override
-                        public void call(OnClickEvent onClickEvent) {
-                            toggleQueue();
-                        }
-                    })
-            );
-        }
-
-        void unsubscribeClicks() {
-            if (notSubscribed(clicksSubscriptions)) return;
-            clicksSubscriptions.unsubscribe();
-            clicksSubscriptions = null;
         }
 
         void setupObserables() {
