@@ -28,23 +28,27 @@ public class MakeToast {
 
     public final Type type;
     public final int resId;
+    public final Object[] params;
     public final int arg;
 
     public MakeToast(int resId) {
         this.type = Type.NORMAL;
         this.resId = resId;
+        this.params = new Object[0];
         this.arg = -1;
     }
 
-    public MakeToast(Type type, int resId) {
-        this.type = type;
+    public MakeToast(int resId, Object... params) {
+        this.type = Type.NORMAL;
         this.resId = resId;
+        this.params = params;
         this.arg = -1;
     }
 
-    public MakeToast(Type type, int resId, int arg) {
-        this.type = type;
+    public MakeToast(int resId, int arg) {
+        this.type = Type.PLURALS;
         this.resId = resId;
+        this.params = new Object[0];
         this.arg = arg;
     }
 }

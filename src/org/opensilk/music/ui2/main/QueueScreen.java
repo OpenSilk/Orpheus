@@ -37,6 +37,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
+import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.ConfirmDelete;
@@ -99,6 +100,7 @@ public class QueueScreen extends Screen {
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
         final ArtworkRequestManager requestor;
         final ActionBarOwner actionBarOwner;
+        final OverflowHandlers.RecentSongs overflowHandler;
 
         @Inject
         public Presenter(@ForApplication Context context,
@@ -106,13 +108,15 @@ public class QueueScreen extends Screen {
                          @Named("activity") EventBus bus,
                         PauseAndResumeRegistrar pauseAndResumeRegistrar,
                         ArtworkRequestManager requestor,
-                        ActionBarOwner actionBarOwner) {
+                        ActionBarOwner actionBarOwner,
+                        OverflowHandlers.RecentSongs overflowHandler) {
             this.appContext = context;
             this.musicService = musicService;
             this.bus = bus;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
             this.requestor = requestor;
             this.actionBarOwner = actionBarOwner;
+            this.overflowHandler = overflowHandler;
         }
 
         @Override
@@ -160,54 +164,6 @@ public class QueueScreen extends Screen {
 
         public void moveQueueItem(int from, int to) {
             musicService.moveQueueItem(from, to);
-        }
-
-        public boolean handleItemOverflowClick(OverflowAction action, RecentSong song) {
-            switch (action) {
-                case PLAY_NEXT:
-                    removeQueueItem(song.recentId);
-                    musicService.enqueueNext(new long[]{song.recentId});
-                    return true;
-                case ADD_TO_PLAYLIST:
-                    if (song.isLocal) {
-                        try {
-                            long id = Long.decode(song.identity);
-                            bus.post(new OpenAddToPlaylist(new long[]{id}));
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
-                    } // else unsupported
-                    return true;
-                case MORE_BY_ARTIST:
-                    if (song.isLocal) {
-                        NavUtils.openArtistProfile(appContext, MusicUtils.makeArtist(appContext, song.artistName));
-                    } // else TODO
-                    return true;
-                case SET_RINGTONE:
-                    //TODO
-                    bus.post(new MakeToast(R.string.err_unimplemented));
-//                    if (song.isLocal) {
-//                        try {
-//                            long id = Long.decode(song.identity);
-//                            String s = MusicUtils.setRingtone(appContext, id);
-//                        } catch (NumberFormatException ex) {
-//                            //TODO
-//                        }
-//                    } // else unsupported
-                    return true;
-                case DELETE:
-                    if (song.isLocal) {
-                        try {
-                            long id = Long.decode(song.identity);
-                            bus.post(new ConfirmDelete(new long[]{id}, song.name));
-                        } catch (NumberFormatException ex) {
-                            //TODO
-                        }
-                    } // else unsupported
-                    return true;
-                default:
-                    return false;
-            }
         }
 
         List<RecentSong> getQueue() {

@@ -181,6 +181,8 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     public void onEventMainThread(MakeToast e) {
         if (e.type == MakeToast.Type.PLURALS) {
             Toast.makeText(this, MusicUtils.makeLabel(this, e.resId, e.arg), Toast.LENGTH_SHORT).show();
+        } else if (e.params.length > 0) {
+            Toast.makeText(this, getString(e.resId, e.params), Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, e.resId, Toast.LENGTH_SHORT).show();
         }

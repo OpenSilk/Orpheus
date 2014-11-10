@@ -220,10 +220,10 @@ public class MusicServiceConnection {
                     Song[] songs = func.call();
                     long[] providerIds = addSongsToMusicProvider(songs);
                     iApolloService.enqueue(providerIds, where);
-                    eventBus.post(new MakeToast(MakeToast.Type.PLURALS, R.plurals.NNNtrackstoqueue, providerIds.length));
+                    eventBus.post(new MakeToast(R.plurals.NNNtrackstoqueue, providerIds.length));
                 } catch (RemoteException e) {
                     unbind();
-                    eventBus.post(new MakeToast(MakeToast.Type.NORMAL, R.string.err_addtoqueue));
+                    eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
         });
@@ -235,10 +235,10 @@ public class MusicServiceConnection {
             public void call(IApolloService iApolloService) {
                 try {
                     iApolloService.enqueue(recentIds, where);
-                    eventBus.post(new MakeToast(MakeToast.Type.PLURALS, R.plurals.NNNtrackstoqueue, recentIds.length));
+                    eventBus.post(new MakeToast(R.plurals.NNNtrackstoqueue, recentIds.length));
                 } catch (RemoteException e) {
                     unbind();
-                    eventBus.post(new MakeToast(MakeToast.Type.NORMAL, R.string.err_addtoqueue));
+                    eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
         });
@@ -550,7 +550,7 @@ public class MusicServiceConnection {
                     long[] providerids = addSongsToMusicProvider(songs);
                     MusicUtils.playAll(iApolloService, providerids, startPos, shuffle);
                 } catch (Exception e) {
-                    eventBus.post(new MakeToast(MakeToast.Type.NORMAL, R.string.err_addtoqueue));
+                    eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
         });

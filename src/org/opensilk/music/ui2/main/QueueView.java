@@ -82,6 +82,7 @@ public class QueueView extends DragSortListView implements
     protected void onAttachedToWindow() {
         Timber.v("onAttachedToWindow()");
         super.onAttachedToWindow();
+        presenter.takeView(this);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class QueueView extends DragSortListView implements
         presenter.dropView(this);
     }
 
-       /*
+    /*
      * RemoveListener
      */
 
@@ -180,18 +181,13 @@ public class QueueView extends DragSortListView implements
                 @Override
                 public void onClick(View v) {
                     PopupMenu m = new PopupMenu(getContext(), v);
-                    m.inflate(R.menu.popup_play_next);
-                    if (item.isLocal) {
-                        m.inflate(R.menu.popup_add_to_playlist);
-                        m.inflate(R.menu.popup_more_by_artist);
-                        m.inflate(R.menu.popup_set_ringtone);
-                        m.inflate(R.menu.popup_delete);
-                    }
+                    presenter.overflowHandler.populateMenu(m, item);
                     m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem i) {
                             try {
-                                return presenter.handleItemOverflowClick(OverflowAction.valueOf(i.getItemId()), item);
+                                return presenter.overflowHandler
+                                        .handleClick(OverflowAction.valueOf(i.getItemId()), item);
                             } catch (IllegalArgumentException e) {
                                 return false;
                             }

@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.util.MarkedForRemoval;
 import org.opensilk.music.util.OrderPreservingCursor;
 
@@ -1171,7 +1172,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use
      * @param id The song ID.
      */
-    public static void setRingtone(final Context context, final long id) {
+    public static MakeToast setRingtone(final Context context, final long id) {
         final ContentResolver resolver = context.getContentResolver();
         final Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id);
         try {
@@ -1180,7 +1181,7 @@ public final class MusicUtils {
             values.put(AudioColumns.IS_ALARM, "1");
             resolver.update(uri, values, null, null);
         } catch (final UnsupportedOperationException ingored) {
-            return;
+            return new MakeToast(R.string.err_generic);
         }
 
         final String[] projection = new String[] {
@@ -1194,9 +1195,7 @@ public final class MusicUtils {
             if (cursor != null && cursor.getCount() == 1) {
                 cursor.moveToFirst();
                 Settings.System.putString(resolver, Settings.System.RINGTONE, uri.toString());
-                final String message = context.getString(R.string.set_as_ringtone,
-                        cursor.getString(2));
-                Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
+                return new MakeToast(R.string.set_as_ringtone, cursor.getString(2));
             }
         } finally {
             if (cursor != null) {
@@ -1204,6 +1203,7 @@ public final class MusicUtils {
                 cursor = null;
             }
         }
+        return new MakeToast(R.string.err_generic);
     }
 
     /**

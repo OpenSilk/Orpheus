@@ -158,10 +158,13 @@
     <string name="queue">Queue</string>
 
     <!--Toast errors-->
+    <string name="err_generic">Operation Failed</string>
+    <string name="err_unimplemented">FIXME Unimplemented</string>
+    <!--MusicService-->
     <string name="err_addtoqueue">Unable to enqueue songs</string>
+    <!--Libraries-->
     <string name="err_opening_settings">Unable to open settings</string>
     <string name="err_retrieving_items">Unable to retrieve items</string>
     <string name="err_authentication">Error not authorized… Please login again</string>
-    <string name="err_unimplemented">FIXME Unimplemented</string>
     <string name="err_connecting_library">Error connecting library</string>
 </resources>

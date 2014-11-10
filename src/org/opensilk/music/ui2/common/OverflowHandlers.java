@@ -26,12 +26,16 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.R;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui2.event.ConfirmDelete;
+import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.util.CursorHelpers;
@@ -78,15 +82,15 @@ public class OverflowHandlers {
                 R.menu.popup_delete,
         };
 
-        final MusicServiceConnection connection;
+        final MusicServiceConnection musicService;
         final Context context;
         final EventBus bus;
 
         @Inject
-        public LocalAlbums(MusicServiceConnection connection,
+        public LocalAlbums(MusicServiceConnection musicService,
                             @ForApplication Context context,
                             @Named("activity") EventBus bus) {
-            this.connection = connection;
+            this.musicService = musicService;
             this.context = context;
             this.bus = bus;
         }
@@ -101,7 +105,7 @@ public class OverflowHandlers {
             final long albumId = album.albumId;
             switch (action) {
                 case PLAY_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getLocalSongListForAlbum(context, albumId);
@@ -109,7 +113,7 @@ public class OverflowHandlers {
                     }, 0, false);
                     return true;
                 case SHUFFLE_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getLocalSongListForAlbum(context, albumId);
@@ -117,7 +121,7 @@ public class OverflowHandlers {
                     }, 0, true);
                     return true;
                 case ADD_TO_QUEUE:
-                    connection.enqueueEnd(new Func0<Song[]>() {
+                    musicService.enqueueEnd(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getLocalSongListForAlbum(context, albumId);
@@ -153,15 +157,15 @@ public class OverflowHandlers {
                 R.menu.popup_delete,
         };
 
-        final MusicServiceConnection connection;
+        final MusicServiceConnection musicService;
         final Context context;
         final EventBus bus;
 
         @Inject
-        public LocalArtists(MusicServiceConnection connection,
+        public LocalArtists(MusicServiceConnection musicService,
                             @ForApplication Context context,
                             @Named("activity") EventBus bus) {
-            this.connection = connection;
+            this.musicService = musicService;
             this.context = context;
             this.bus = bus;
         }
@@ -176,7 +180,7 @@ public class OverflowHandlers {
             final long artistId = artist.artistId;
             switch (action) {
                 case PLAY_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsForLocalArtist(context, artistId);
@@ -184,7 +188,7 @@ public class OverflowHandlers {
                     }, 0, false);
                     return true;
                 case SHUFFLE_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsForLocalArtist(context, artistId);
@@ -192,7 +196,7 @@ public class OverflowHandlers {
                     }, 0, true);
                     return true;
                 case ADD_TO_QUEUE:
-                    connection.enqueueEnd(new Func0<Song[]>() {
+                    musicService.enqueueEnd(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsForLocalArtist(context, artistId);
@@ -223,15 +227,15 @@ public class OverflowHandlers {
                 R.menu.popup_add_to_playlist,
         };
 
-        final MusicServiceConnection connection;
+        final MusicServiceConnection musicService;
         final Context context;
         final EventBus bus;
 
         @Inject
-        public Genres(MusicServiceConnection connection,
+        public Genres(MusicServiceConnection musicService,
                             @ForApplication Context context,
                             @Named("activity") EventBus bus) {
-            this.connection = connection;
+            this.musicService = musicService;
             this.context = context;
             this.bus = bus;
         }
@@ -246,7 +250,7 @@ public class OverflowHandlers {
             final long genreId = genre.mGenreId;
             switch (action) {
                 case PLAY_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsForGenre(context, genreId);
@@ -254,7 +258,7 @@ public class OverflowHandlers {
                     }, 0, false);
                     return true;
                 case SHUFFLE_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsForGenre(context, genreId);
@@ -262,7 +266,7 @@ public class OverflowHandlers {
                     }, 0, true);
                     return true;
                 case ADD_TO_QUEUE:
-                    connection.enqueueEnd(new Func0<Song[]>() {
+                    musicService.enqueueEnd(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsForGenre(context, genreId);
@@ -293,15 +297,15 @@ public class OverflowHandlers {
                 R.menu.popup_delete,
         };
 
-        final MusicServiceConnection connection;
+        final MusicServiceConnection musicService;
         final Context context;
         final EventBus bus;
 
         @Inject
-        public Playlists(MusicServiceConnection connection,
+        public Playlists(MusicServiceConnection musicService,
                             @ForApplication Context context,
                             @Named("activity") EventBus bus) {
-            this.connection = connection;
+            this.musicService = musicService;
             this.context = context;
             this.bus = bus;
         }
@@ -322,7 +326,7 @@ public class OverflowHandlers {
             final long playlistId = playlist.mPlaylistId;
             switch (action) {
                 case PLAY_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             if (playlistId == -2) {
@@ -334,7 +338,7 @@ public class OverflowHandlers {
                     }, 0, false);
                     return true;
                 case SHUFFLE_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             if (playlistId == -2) {
@@ -346,7 +350,7 @@ public class OverflowHandlers {
                     }, 0, true);
                     return true;
                 case ADD_TO_QUEUE:
-                    connection.enqueueEnd(new Func0<Song[]>() {
+                    musicService.enqueueEnd(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             if (playlistId == -2) {
@@ -403,15 +407,15 @@ public class OverflowHandlers {
                 R.menu.popup_delete,
         };
 
-        final MusicServiceConnection connection;
+        final MusicServiceConnection musicService;
         final Context context;
         final EventBus bus;
 
         @Inject
-        public LocalSongs(MusicServiceConnection connection,
+        public LocalSongs(MusicServiceConnection musicService,
                             @ForApplication Context context,
                             @Named("activity") EventBus bus) {
-            this.connection = connection;
+            this.musicService = musicService;
             this.context = context;
             this.bus = bus;
         }
@@ -423,7 +427,7 @@ public class OverflowHandlers {
         }
 
         public void play(final LocalSong song) {
-            connection.playAllSongs(new Func0<Song[]>() {
+            musicService.playAllSongs(new Func0<Song[]>() {
                 @Override
                 public Song[] call() {
                     return new Song[]{song};
@@ -434,7 +438,7 @@ public class OverflowHandlers {
         public boolean handleClick(OverflowAction action, final LocalSong song) {
             switch (action) {
                 case PLAY_NEXT:
-                    connection.enqueueNext(new Func0<Song[]>() {
+                    musicService.enqueueNext(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return new Song[]{song};
@@ -442,7 +446,7 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_QUEUE:
-                    connection.enqueueEnd(new Func0<Song[]>() {
+                    musicService.enqueueEnd(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return new Song[]{song};
@@ -482,15 +486,15 @@ public class OverflowHandlers {
                 R.menu.popup_add_to_playlist,
         };
 
-        final MusicServiceConnection connection;
+        final MusicServiceConnection musicService;
         final Context context;
         final EventBus bus;
 
         @Inject
-        public LocalSongGroups(MusicServiceConnection connection,
+        public LocalSongGroups(MusicServiceConnection musicService,
                           @ForApplication Context context,
                           @Named("activity") EventBus bus) {
-            this.connection = connection;
+            this.musicService = musicService;
             this.context = context;
             this.bus = bus;
         }
@@ -504,7 +508,7 @@ public class OverflowHandlers {
         public boolean handleClick(OverflowAction action, final LocalSongGroup group) {
             switch (action) {
                 case PLAY_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsFromId(context, group.songIds);
@@ -512,7 +516,7 @@ public class OverflowHandlers {
                     }, 0, false);
                     return true;
                 case SHUFFLE_ALL:
-                    connection.playAllSongs(new Func0<Song[]>() {
+                    musicService.playAllSongs(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsFromId(context, group.songIds);
@@ -520,7 +524,7 @@ public class OverflowHandlers {
                     }, 0, true);
                     return true;
                 case ADD_TO_QUEUE:
-                    connection.enqueueEnd(new Func0<Song[]>() {
+                    musicService.enqueueEnd(new Func0<Song[]>() {
                         @Override
                         public Song[] call() {
                             return CursorHelpers.getSongsFromId(context, group.songIds);
@@ -534,6 +538,93 @@ public class OverflowHandlers {
                     return false;
             }
         }
+    }
+
+    public static class RecentSongs implements OverflowHandler<RecentSong> {
+
+        public static final int[] MENUS_COMMON = new int[] {
+                R.menu.popup_play_next,
+        };
+
+        public static final int[] MENUS_LOCAL = new int[] {
+                R.menu.popup_add_to_playlist,
+                R.menu.popup_more_by_artist,
+                R.menu.popup_set_ringtone,
+                R.menu.popup_delete,
+        };
+
+        final MusicServiceConnection musicService;
+        final Context context;
+        final EventBus bus;
+
+        @Inject
+        public RecentSongs(MusicServiceConnection musicService,
+                               @ForApplication Context context,
+                               @Named("activity") EventBus bus) {
+            this.musicService = musicService;
+            this.context = context;
+            this.bus = bus;
+        }
+
+        public void populateMenu(PopupMenu m, RecentSong song) {
+            for (int ii: MENUS_COMMON) {
+                m.inflate(ii);
+            }
+            if (song.isLocal) {
+                for (int ii: MENUS_LOCAL) {
+                    m.inflate(ii);
+                }
+            }
+        }
+
+        public boolean handleClick(OverflowAction action, RecentSong song) {
+            switch (action) {
+                case PLAY_NEXT:
+                    musicService.removeTrack(song.recentId);
+                    musicService.enqueueNext(new long[]{song.recentId});
+                    return true;
+                case ADD_TO_PLAYLIST:
+                    if (song.isLocal) {
+                        try {
+                            long id = Long.decode(song.identity);
+                            bus.post(new OpenAddToPlaylist(new long[]{id}));
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    return true;
+                case MORE_BY_ARTIST:
+                    if (song.isLocal) {
+                        NavUtils.openArtistProfile(context, MusicUtils.makeArtist(context, song.artistName));
+                    } // else TODO
+                    return true;
+                case SET_RINGTONE:
+                    if (song.isLocal) {
+                        //TODO push to background
+                        try {
+                            long id = Long.decode(song.identity);
+                            MakeToast toast = MusicUtils.setRingtone(context, id);
+                            bus.post(toast);
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    return true;
+                case DELETE:
+                    if (song.isLocal) {
+                        try {
+                            long id = Long.decode(song.identity);
+                            bus.post(new ConfirmDelete(new long[]{id}, song.name));
+                        } catch (NumberFormatException ex) {
+                            //TODO
+                        }
+                    } // else unsupported
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
     }
 
 }
