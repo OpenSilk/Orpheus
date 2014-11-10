@@ -34,7 +34,6 @@ import com.andrew.apollo.model.Playlist;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.dialogs.SleepTimerDialog;
 import org.opensilk.music.ui.folder.FolderFragment;
-import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.music.ui2.ProfileActivity;

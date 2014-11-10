@@ -59,15 +59,9 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <!-- Searchable -->
-        <meta-data
-            android:name="android.app.default_searchable"
-            android:value="org.opensilk.music.ui.activities.HomeSlidingActivity" />
-
         <activity android:name="org.opensilk.music.ui2.LauncherActivity"
             android:theme="@style/Theme.Dark"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustPan"/>
+            android:launchMode="singleTop"/>
 
         <!-- The God Activity -->
         <activity-alias
@@ -133,22 +127,27 @@
                 <category android:name="android.intent.category.OPENABLE" />
                 <data android:mimeType="vnd.android.cursor.dir/audio"/>
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="android.intent.action.MEDIA_SEARCH" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
         </activity-alias>
 
         <activity android:name="org.opensilk.music.ui2.ProfileActivity"
             android:theme="@style/Theme.Profile.Light">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+        </activity>
+
+        <activity android:name="org.opensilk.music.ui2.SearchActivity"
+            android:theme="@style/Theme.Profile.Light"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.MEDIA_SEARCH" />
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+            </intent-filter>
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                       android:value="org.opensilk.ui.activities.HomeSlidingActivity"/>
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable" />
         </activity>
 
         <!-- Used to set options -->

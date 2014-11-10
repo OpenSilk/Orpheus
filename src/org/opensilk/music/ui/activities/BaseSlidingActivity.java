@@ -33,7 +33,6 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
-import org.opensilk.music.ui.home.SearchFragment;
 import org.opensilk.music.ui2.BaseActivity;
 
 import butterknife.ButterKnife;
@@ -76,11 +75,6 @@ public class BaseSlidingActivity extends BaseActivity implements
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(QUERY);
             if (!TextUtils.isEmpty(query)) {
-                SearchFragment f = (SearchFragment) getSupportFragmentManager().findFragmentByTag("search");
-                if (f != null) {
-                    f.onNewQuery(query);
-                    return;
-                }
             }
         }
         setIntent(intent);
