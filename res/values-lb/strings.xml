@@ -18,6 +18,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="page_recent">Rezent</string>
+  <string name="page_albums">Alben</string>
   <string name="page_playlists">Ofspilllëschten</string>
   <string name="page_genres">Genren</string>
   <string name="menu_settings">Astellungen</string>
@@ -53,6 +54,10 @@
   <string name="accessibility_shuffle">Mëschen</string>
   <string name="accessibility_shuffle_all">All mëschen</string>
   <string name="accessibility_repeat">Widderhuelen</string>
+  <string name="settings_about_category">Iwwer</string>
+  <string name="settings_author_title">Auteur</string>
+  <string name="settings_about_apollo">Iwwer Apollo</string>
+  <string name="settings_special_thanks">Speziell Mercien</string>
   <string name="settings_version_title">Versiounsnummer</string>
   <string name="color_picker_title">Faarfschema</string>
   <string name="current_color">Aktuell</string>

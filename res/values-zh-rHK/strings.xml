@@ -121,7 +121,7 @@
   <string name="app_widget_large_alt">Orpheus: 4×2 (替代)</string>
   <string name="app_widget_recent">Orpheus: 最近播放</string>
   <string name="no_effects_for_you">無法打開等化器。</string>
-  <string name="empty_music">使用 USB 連接線將音樂從您的電腦複製到您的裝置中。</string>
+  <string name="empty_music">使用 USB 連接綫將音樂從你的電腦複製到你的裝置中。</string>
   <string name="empty_last_added">你最近一個月新增的歌曲將會在這裏顯示。</string>
   <string name="empty_search">沒有搜尋結果</string>
   <string name="empty_favorite">你標記為最愛收藏的歌曲將會在這裏顯示。</string>

@@ -50,7 +50,7 @@
   <string name="sort_order_entry_year">Jaar</string>
   <string name="sort_order_entry_duration">Duur</string>
   <string name="sort_order_entry_date_added">Datum toegevoegd</string>
-  <string name="sort_order_entry_track_list">Nummerlijst</string>
+  <string name="sort_order_entry_track_list">Tracklist</string>
   <string name="sort_order_entry_number_of_songs">Aantal nummers</string>
   <string name="sort_order_entry_number_of_albums">Aantal albums</string>
   <string name="sort_order_entry_filename">Bestandsnaam</string>
