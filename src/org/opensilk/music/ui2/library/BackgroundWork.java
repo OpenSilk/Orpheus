@@ -85,6 +85,7 @@ public class BackgroundWork {
             @Override
             public void onNext(Observable<List<Song>> listObservable) {
                 Timber.v("onNext(outer) %s", Thread.currentThread().getName());
+                //add the inner to the outer so it is canceled when outer is canceled
                 add(listObservable.subscribe(new Subscriber<List<Song>>() {
                     @Override
                     public void onCompleted() {
@@ -100,8 +101,6 @@ public class BackgroundWork {
                     public void onNext(List<Song> songs) {
                         Timber.v("onNext(inner) %s", Thread.currentThread().getName());
                         allSongs.addAll(songs);
-                        //TODO
-//                        presenter.updateProgressDialog(allSongs.size());
                     }
                 }));
             }

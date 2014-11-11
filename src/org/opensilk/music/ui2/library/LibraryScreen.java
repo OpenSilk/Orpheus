@@ -140,7 +140,6 @@ public class LibraryScreen extends Screen {
         boolean initialLoad = true;
 
         boolean progressShowing;
-        int lastprogressCount;
 
         @Inject
         public Presenter(LibraryConnection connection,
@@ -180,7 +179,6 @@ public class LibraryScreen extends Screen {
             setupActionBar();
             if (savedInstanceState != null) {
                 progressShowing = savedInstanceState.getBoolean("progress_showing", false);
-                lastprogressCount = savedInstanceState.getInt("progress_message", 0);
             }
             if (connection.hasCache(libraryInfo)) {
                 Timber.v("cacheHit(%s)", libraryInfo);
@@ -194,9 +192,6 @@ public class LibraryScreen extends Screen {
             }
             if (progressShowing) {
                 getView().showProgressDialog();
-                if (lastprogressCount > 0) {
-                    getView().updateProgressDialog(lastprogressCount);
-                }
             }
         }
 
@@ -204,7 +199,6 @@ public class LibraryScreen extends Screen {
         protected void onSave(Bundle outState) {
             super.onSave(outState);
             outState.putBoolean("progress_showing", progressShowing);
-            outState.putInt("progress_message", lastprogressCount);
         }
 
         @Override
@@ -281,14 +275,8 @@ public class LibraryScreen extends Screen {
             backgroundWorker.cancelWork();
         }
 
-        public void updateProgressDialog(int newCount) {
-            lastprogressCount = newCount;
-            if (getView() != null) getView().updateProgressDialog(newCount);
-        }
-
         public void dismissProgressDialog() {
             progressShowing = false;
-            lastprogressCount = 0;
             if (getView() != null) getView().dismissProgressDialog();
         }
 

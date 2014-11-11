@@ -189,12 +189,6 @@ public class LibraryView extends FrameLayout implements HandlesBack {
         if (isProgressDialogShowing()) mProgressDialog.dismiss();
     }
 
-    void updateProgressDialog(int newCount) {
-        String msg = getResources().getString(R.string.fetching_song_list)
-                + MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, newCount);
-        if (isProgressDialogShowing()) mProgressDialog.setMessage(msg);
-    }
-
     boolean isProgressDialogShowing() {
         return (mProgressDialog != null && mProgressDialog.isShowing());
     }
