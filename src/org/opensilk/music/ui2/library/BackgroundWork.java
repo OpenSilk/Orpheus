@@ -19,9 +19,11 @@ package org.opensilk.music.ui2.library;
 
 import android.os.Bundle;
 
+import org.opensilk.music.R;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui2.common.OverflowAction;
+import org.opensilk.music.ui2.event.MakeToast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,12 +57,17 @@ public class BackgroundWork {
             @Override
             public void onCompleted() {
                 Timber.v("onCompleted(outer) %s", Thread.currentThread().getName());
-                onListFetched(action, allSongs);
+                if (!allSongs.isEmpty()) {
+                    onListFetched(action, allSongs);
+                } else {
+                    presenter.bus.post(new MakeToast(R.string.err_unable_to_fetch_songs));
+                }
+                presenter.dismissProgressDialog();
             }
 
             @Override
             public void onError(Throwable e) {
-                Timber.e(e, "onError(outer) %s", Thread.currentThread().getName());
+                Timber.e(e, "onError(outer) %s ", Thread.currentThread().getName());
             }
 
             @Override
@@ -71,10 +78,12 @@ public class BackgroundWork {
                     @Override
                     public void onCompleted() {
                         Timber.v("onCompleted(inner) %s", Thread.currentThread().getName());
+                        //unused observable resubscibes itself
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        //TODO why does canceling cause this to be called?
                         Timber.e(e, "onError(inner) %s", Thread.currentThread().getName());
                     }
 
@@ -168,7 +177,6 @@ public class BackgroundWork {
                 }, 0, true);
                 break;
         }
-        presenter.dismissProgressDialog();
     }
 
 }
