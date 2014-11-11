@@ -89,6 +89,12 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mAdapter = null;
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // hero image

@@ -88,6 +88,12 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mAdapter = null;
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // hero image
