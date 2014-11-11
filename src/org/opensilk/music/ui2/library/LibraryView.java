@@ -41,7 +41,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/5/14.
  */
-public class LibraryView extends FrameLayout implements HandlesBack {
+public class LibraryView extends FrameLayout {
 
     @Inject LibraryScreen.Presenter presenter;
 
@@ -191,12 +191,4 @@ public class LibraryView extends FrameLayout implements HandlesBack {
         return (mProgressDialog != null && mProgressDialog.isShowing());
     }
 
-    @Override
-    public boolean onBackPressed() {
-        if (isProgressDialogShowing()) {
-            mProgressDialog.cancel();
-            return true;
-        }
-        return false;
-    }
 }
