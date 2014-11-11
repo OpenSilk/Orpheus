@@ -69,6 +69,11 @@ public class PluginScreen extends Screen {
         this.pluginInfo = pluginInfo;
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + pluginInfo.componentName;
+    }
+
     @dagger.Module (
             addsTo = LauncherActivity.Module.class,
             injects = PluginView.class,
