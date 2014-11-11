@@ -75,7 +75,7 @@ public class PluginUtil {
                 description = null;
             }
             PluginInfo pluginInfo = new PluginInfo(title, description, cn);
-            //if (wantIcon) pluginInfo.icon = icon;
+            if (wantIcon) pluginInfo.icon = icon;
             for (ComponentName c : disabledPlugins) {
                 if (c.equals(pluginInfo.componentName)) {
                     pluginInfo.isActive = false;
@@ -177,9 +177,7 @@ public class PluginUtil {
         } catch (IOException e) {
             sp.edit().remove(PREF_DISABLED_PLUGINS).apply();
         } finally {
-            try {
-                jw.close();
-            } catch (IOException ignored) {}
+            IOUtils.closeQuietly(jw);
         }
     }
 

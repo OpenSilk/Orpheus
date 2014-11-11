@@ -27,11 +27,26 @@ import android.text.TextUtils;
  */
 public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
 
+    /**
+     * Manifest attribute android:label
+     */
     public final CharSequence title;
+    /**
+     * Manifest attribute android:description
+     */
     public final CharSequence description;
+    /**
+     * Manifest attribute android:name
+     */
     public final ComponentName componentName;
-    public boolean isActive = true;
-    //public Drawable icon;
+    /**
+     * Manifest attribute android:icon
+     */
+    public transient Drawable icon;
+    /**
+     * Internal use true if plugin shows in drawer
+     */
+    public transient boolean isActive = true;
 
     public PluginInfo(CharSequence title, CharSequence description, ComponentName componentName) {
         this.title = title;
@@ -47,7 +62,6 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
         this.title = in.readString();
         this.description = in.readString();
         this.componentName = ComponentName.unflattenFromString(in.readString());
-        this.isActive = in.readInt() == 1;
     }
 
     @Override
@@ -55,7 +69,6 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
         dest.writeString(title.toString());
         dest.writeString(description.toString());
         dest.writeString(componentName.flattenToString());
-        dest.writeInt(isActive ? 1 : 0);
     }
 
     @Override
@@ -65,7 +78,6 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
         result = prime * result + ((title == null) ? 0 : title.hashCode());
         result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((componentName == null) ? 0 : componentName.hashCode());
-        // leaving out isActive
         return result;
     }
 
@@ -77,7 +89,6 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
         if (!TextUtils.equals(p.title, this.title)) return false;
         if (!TextUtils.equals(p.description, this.description)) return false;
         if (!p.componentName.equals(this.componentName)) return false;
-        // leaving out isActive
         return true;
     }
 
