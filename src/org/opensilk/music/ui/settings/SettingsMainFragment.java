@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -90,7 +89,7 @@ public class SettingsMainFragment extends Fragment {
                     R.drawable.ic_settings_data_light,
                     R.drawable.ic_settings_data_dark));
             mFragments.add(new Holder(SettingsAudioFragment.class.getName(),
-                    mContext.getString(R.string.settings_audio_title),
+                    mContext.getString(R.string.settings_audio_category),
                     R.drawable.ic_settings_audio_light,
                     R.drawable.ic_settings_audio_dark));
             mFragments.add(new Holder(SettingsPluginFragment.class.getName(),
@@ -99,7 +98,7 @@ public class SettingsMainFragment extends Fragment {
                     R.drawable.ic_action_puzzle_white));
             // Must be last, add new items above this one.
             mFragments.add(new Holder(SettingsDonateFragment.class.getName(),
-                    mContext.getString(R.string.settings_donate),
+                    mContext.getString(R.string.settings_donate_category),
                     R.drawable.ic_settings_donate_light,
                     R.drawable.ic_settings_donate_dark));
             mFragments.add(new Holder(SettingsAboutFragment.class.getName(),

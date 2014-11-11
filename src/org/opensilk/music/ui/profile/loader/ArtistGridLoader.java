@@ -68,7 +68,7 @@ public class ArtistGridLoader extends WrappedAsyncTaskLoader<List<Object>> {
                 for (int ii=0; ii<albumsL.length; ii++) {
                     albums[ii] = albumsL[ii];
                 }
-                objs.add(new LocalSongGroup(getContext().getString(R.string.all_songs), artist.name, songs, albums));
+                objs.add(new LocalSongGroup(getContext().getString(R.string.title_all_songs), artist.name, songs, albums));
             }
             c.close();
         }

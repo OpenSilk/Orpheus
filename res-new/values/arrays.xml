@@ -19,10 +19,10 @@
     </string-array>
 
     <string-array name="cache_size" translatable="false">
-        <item>@string/settings_data_cache_size_20</item>
-        <item>@string/settings_data_cache_size_40</item>
-        <item>@string/settings_data_cache_size_60</item>
-        <item>@string/settings_data_cache_size_80</item>
+        <item>@string/settings_cache_size_20</item>
+        <item>@string/settings_cache_size_40</item>
+        <item>@string/settings_cache_size_60</item>
+        <item>@string/settings_cache_size_80</item>
     </string-array>
 
     <string-array name="cache_size_values" translatable="false">

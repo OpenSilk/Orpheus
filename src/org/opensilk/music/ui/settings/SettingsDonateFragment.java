@@ -114,7 +114,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
     private void createWaitDialog() {
         mWaitDialog = new ProgressDialog(getActivity());
         mWaitDialog.setIndeterminate(true);
-        mWaitDialog.setMessage(getString(R.string.iab_fetching_inventory));
+        mWaitDialog.setMessage(getString(R.string.iab_msg_fetching_inventory));
         mWaitDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
@@ -197,7 +197,7 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                 }
             } else {
                 new AlertDialog.Builder(getActivity())
-                        .setMessage(R.string.iab_unable_to_fetch_inventory)
+                        .setMessage(R.string.iab_err_unable_to_fetch_inventory)
                         .setNegativeButton(android.R.string.ok, null)
                         .setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
                             @Override
@@ -227,11 +227,11 @@ public class SettingsDonateFragment extends SettingsFragment implements Preferen
                     p.setEnabled(false);
                     p.isPurchased = true;
                 }
-                Toast.makeText(getActivity(), R.string.iab_thanks, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), R.string.iab_msg_thanks, Toast.LENGTH_LONG).show();
             } else {
                 if (D) Log.d(TAG, "purchase failed");
                 new AlertDialog.Builder(getActivity())
-                        .setTitle(R.string.iab_purchase_failed)
+                        .setTitle(R.string.iab_err_purchase_failed)
                         .setMessage(result.getMessage())
                         .setNeutralButton(android.R.string.ok, null)
                         .show();

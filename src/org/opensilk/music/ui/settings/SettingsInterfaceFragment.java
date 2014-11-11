@@ -103,7 +103,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
     private void doRestart() {
         // notify user of restart
         new AlertDialog.Builder(getActivity())
-                .setMessage(R.string.settings_interface_restart_app)
+                .setMessage(R.string.settings_msg_restart_app)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override

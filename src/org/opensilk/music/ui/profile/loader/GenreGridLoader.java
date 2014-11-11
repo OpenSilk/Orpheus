@@ -46,7 +46,7 @@ public class GenreGridLoader extends WrappedAsyncTaskLoader<List<Object>> {
     public List<Object> loadInBackground() {
         List<Object> objs = new ArrayList<>();
         // make the all songs card
-        objs.add(new LocalSongGroup(getContext().getString(R.string.all_songs), genre.mGenreName, genre.mSongIds, genre.mAlbumIds));
+        objs.add(new LocalSongGroup(getContext().getString(R.string.title_all_songs), genre.mGenreName, genre.mSongIds, genre.mAlbumIds));
         // make the albumcards
         Cursor c = CursorHelpers.makeLocalAlbumsCursor(getContext(), genre.mAlbumIds);
         if (c != null) {

@@ -81,8 +81,8 @@ public class IabUtil {
 
     public static void showDonateDialog(final Context context) {
         new AlertDialog.Builder(context)
-                .setTitle(R.string.iab_donate)
-                .setMessage(R.string.iab_donate_message)
+                .setTitle(R.string.iab_donate_dialog_title)
+                .setMessage(R.string.iab_donate_dialog_message)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

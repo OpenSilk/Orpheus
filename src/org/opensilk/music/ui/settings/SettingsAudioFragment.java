@@ -90,7 +90,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
             if (MusicUtils.getAudioSessionId() == ERROR_BAD_VALUE) {
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.error)
-                        .setMessage(R.string.no_audio_id)
+                        .setMessage(R.string.settings_err_no_audio_id)
                         .setNeutralButton(android.R.string.ok, null)
                         .show();
             } else {
@@ -142,7 +142,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
     private void doRestart() {
         // notify user of restart
         new AlertDialog.Builder(getActivity())
-                .setMessage(R.string.settings_interface_restart_app)
+                .setMessage(R.string.settings_msg_restart_app)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override

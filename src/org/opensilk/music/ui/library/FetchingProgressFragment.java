@@ -20,7 +20,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.widget.Toast;
 
 import org.opensilk.music.R;
@@ -71,7 +70,7 @@ public class FetchingProgressFragment extends DialogFragment implements Backgrou
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         ProgressDialog progressDialog = new ProgressDialog(getActivity());
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage(getString(R.string.fetching_song_list));
+        progressDialog.setMessage(getString(R.string.msg_fetching_song_list));
         progressDialog.setCancelable(false);
         return progressDialog;
     }

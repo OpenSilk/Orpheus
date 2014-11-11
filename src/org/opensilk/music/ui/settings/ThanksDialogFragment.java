@@ -37,8 +37,6 @@ import com.andrew.apollo.utils.ThemeHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-import hugo.weaving.DebugLog;
-
 /**
  * Created by drew on 3/6/14.
  */
@@ -77,15 +75,15 @@ public class ThanksDialogFragment extends DialogFragment {
             int lastFmRes = ThemeHelper.isLightTheme(getContext()) ? R.drawable.lastfm_logo_light
                     : R.drawable.lastfm_logo_dark;
             thankees.add(new Thankee(null, getResources().getDrawable(lastFmRes),
-                    getString(R.string.settings_about_thanks_lfm_desc),
-                    getString(R.string.settings_about_thanks_lfm_url)));
-            thankees.add(new Thankee(getString(R.string.settings_about_thanks_caa), null,
-                    getString(R.string.settings_about_thanks_caa_desc),
-                    getString(R.string.settings_about_thanks_caa_url)));
-            thankees.add(new Thankee(getString(R.string.settings_about_thanks_an), null,
-                    getString(R.string.settings_about_thanks_an_desc), null));
-            thankees.add(new Thankee(getString(R.string.settings_about_thanks_ac), null,
-                    getString(R.string.settings_about_thanks_ac_desc), null));
+                    getString(R.string.settings_thanks_dialog_lfm_desc),
+                    getString(R.string.settings_thanks_dialog_lfm_url)));
+            thankees.add(new Thankee(getString(R.string.settings_thanks_dialog_caa), null,
+                    getString(R.string.settings_thanks_dialog_caa_desc),
+                    getString(R.string.settings_thanks_dialog_caa_url)));
+            thankees.add(new Thankee(getString(R.string.settings_thanks_dialog_an), null,
+                    getString(R.string.settings_thanks_dialog_an_desc), null));
+            thankees.add(new Thankee(getString(R.string.settings_thanks_dialog_ac), null,
+                    getString(R.string.settings_thanks_dialog_ac_desc), null));
             mAdapter = new ThanksAdapter(getContext(), thankees);
             mListView = (ListView) findViewById(android.R.id.list);
             mListView.setAdapter(mAdapter);

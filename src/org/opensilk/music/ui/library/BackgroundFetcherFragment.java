@@ -116,7 +116,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
         mLibrary = new RemoteLibraryHelperImpl(getActivity().getApplicationContext());
         //mLibrary.acquireService(mLibraryInfo.libraryComponent, this);
 
-        mMessage = getString(R.string.fetching_song_list);
+        mMessage = getString(R.string.msg_fetching_song_list);
     }
 
     @Override
@@ -233,7 +233,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
             }
             if (result.songs == null || result.songs.length == 0) {
                 if (numadded == 0) {
-                    mToastString = getString(R.string.unable_to_fetch_songs);
+                    mToastString = getString(R.string.err_unable_to_fetch_songs);
                 } else {
                     mToastString = getResources().getQuantityString(R.plurals.NNNtrackstoqueue, numadded, numadded);
                 }
@@ -278,7 +278,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
                     h.post(new Runnable() {
                         @Override
                         public void run() {
-                            mMessage = getString(R.string.fetching_song_list)
+                            mMessage = getString(R.string.msg_fetching_song_list)
                                     + " " + getResources().getQuantityString(R.plurals.Nsongs, numadded, numadded);
                             if (mListener != null) {
                                 mListener.onMessageUpdated(mMessage);

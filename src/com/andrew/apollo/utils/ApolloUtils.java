@@ -15,8 +15,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -25,7 +23,6 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -38,12 +35,6 @@ import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import org.opensilk.music.R;
-
-import org.opensilk.music.util.PriorityAsyncTask;
-
-import java.util.concurrent.RejectedExecutionException;
-
-import timber.log.Timber;
 
 /**
  * Mostly general and UI helpers.
@@ -240,7 +231,7 @@ public final class ApolloUtils {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.changes_dialog, null);
         return new AlertDialog.Builder(context)
-                .setTitle(R.string.settings_about_version_changes_title)
+                .setTitle(R.string.settings_changes_dialog_title)
                 .setView(v)
                 .setPositiveButton(android.R.string.ok, null)
                 .create();

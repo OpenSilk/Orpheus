@@ -4,16 +4,13 @@
 
     <string name="app_name" translatable="false">Orpheus</string>
 
-    <!-- ################ GENERAL ################ -->
+    <!--  ### GENERAL ### -->
     <string name="add">Add</string>
     <string name="accessibility_select">select</string>
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="empty"> </string>
     <string name="dash"> - </string>
-
-    <!-- Menus -->
-    <string name="menu_party_shuffle">Party shuffle</string>
 
     <!-- ### DRAWER ### -->
     <string name="drawer_library">Libraries</string>
@@ -23,94 +20,104 @@
     <string name="my_library">My Library</string>
     <string name="folders">Folders</string>
 
-    <!-- ################ SETTINGS ################ -->
+    <!-- ### SETTINGS ### -->
 
     <!-- Main settings screen -->
     <string name="settings_title">Settings</string>
-    <string name="settings_audio_title">Audio</string>
-    <string name="settings_donate">Donate</string>
-
-    <!-- Subcategories -->
-    <string name="settings_about_legal_category">Legal</string>
-    <string name="settings_interface_home_category">Home</string>
-    <string name="settings_interface_theme_category">Theme</string>
-    <string name="settings_interface_visualizations_category">Visualizations</string>
-    <string name="settings_data_download_category">Download</string>
-    <string name="settings_data_storage_category">Storage</string>
+    <!-- about NOTE some string in res/ -->
+    <string name="settings_created_by">Created by OpenSilk Productions LLC</string>
+    <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
+    <!-- about version -->
+    <string name="settings_changes_dialog_title">What\'s new</string>
+    <!-- legal -->
+    <string name="settings_legal_category">Legal</string>
+    <!-- legal last.fm -->
+    <string name="settings_thanks_dialog_lfm" translatable="false">Last.fm</string>
+    <string name="settings_thanks_dialog_lfm_desc">Cover art and artist images</string>
+    <string name="settings_thanks_dialog_lfm_url">http://last.fm/</string><!--has localized domains-->
+    <!-- legal coverartarchive.org-->
+    <string name="settings_thanks_dialog_caa" translatable="false">coverartarchive.org</string>
+    <string name="settings_thanks_dialog_caa_desc">Cover art</string>
+    <string name="settings_thanks_dialog_caa_url" translatable="false">http://coverartarchive.org/</string>
+    <!-- lecal people -->
+    <string name="settings_thanks_dialog_an" translatable="false">Andrew Neal</string>
+    <string name="settings_thanks_dialog_an_desc" translatable="false">Apollo</string>
+    <string name="settings_thanks_dialog_ac" translatable="false">Alex Cruz</string>
+    <string name="settings_thanks_dialog_ac_desc">Banner and icon design</string>
+    <string name="settings_feedback">Send feedback</string>
+    <string name="settings_feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
+    <string name="settings_feedback_email_subject">Feedback for Orpheus Music Player</string>
+    <!-- interface -->
+    <!-- interface theme -->
+    <string name="settings_theme_category">Theme</string>
+    <string name="settings_dark_theme">Use dark themes</string>
+    <string name="settings_pick_theme">Select a theme</string>
+    <string name="settings_msg_restart_app">Orpheus will now restart to apply changes.</string>
+    <!-- interface visualizations -->
+    <string name="settings_visualizations_category">Visualizations</string>
+    <string name="settings_visualizations">Enable visualizations</string>
+    <string name="settings_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
+    <!-- interface home -->
+    <string name="settings_home_category">Home</string>
+    <string name="settings_pick_home_pages">Select home pages</string>
+    <string name="settings_pick_home_pages_summary">Sort &amp; manage home pages</string>
+    <!-- data NOTE Some strings in res/-->
+    <!-- data download -->
+    <string name="settings_download_category">Download</string>
+    <string name="settings_prefer_download_art">Prefer downloading artwork</string>
+    <string name="settings_prefer_download_art_summary">Tries to download album art before checking device storage</string>
+    <string name="settings_low_resolution">Use lower resolution art work</string>
+    <string name="settings_low_resolution_summary">Enable to reduce image size and bandwidth used</string>
+    <!-- data storage -->
+    <string name="settings_cache_size">Set image cache limit</string>
+    <string name="settings_cache_size_20" translatable="false">20MB</string>
+    <string name="settings_cache_size_40" translatable="false">40MB</string>
+    <string name="settings_cache_size_60" translatable="false">60MB</string>
+    <string name="settings_cache_size_80" translatable="false">80MB</string>
+    <!-- audio NOTE Some strings in res/-->
+    <string name="settings_audio_category">Audio</string>
+    <!-- audio general -->
     <string name="settings_general_category">General</string>
-    <string name="settings_cast_category">Cast</string>
-    <string name="settings_plugin_category">Plugins</string>
-
-    <!-- Preference titles and summaries -->
-    <string name="settings_about_author_title">Created by OpenSilk Productions LLC</string>
-    <string name="settings_about_version_changes_title">What\'s new</string>
-    <string name="settings_about_thanks_lfm" translatable="false">Last.fm</string>
-    <string name="settings_about_thanks_lfm_desc">Cover art and artist images</string>
-    <string name="settings_about_thanks_lfm_url">http://last.fm/</string><!--has localized domains-->
-    <string name="settings_about_thanks_caa" translatable="false">coverartarchive.org</string>
-    <string name="settings_about_thanks_caa_desc">Cover art</string>
-    <string name="settings_about_thanks_caa_url" translatable="false">http://coverartarchive.org/</string>
-    <string name="settings_about_thanks_an" translatable="false">Andrew Neal</string>
-    <string name="settings_about_thanks_an_desc" translatable="false">Apollo</string>
-    <string name="settings_about_thanks_ac" translatable="false">Alex Cruz</string>
-    <string name="settings_about_thanks_ac_desc">Banner and icon design</string>
-
-    <string name="settings_interface_use_theme_title">Use dark themes</string>
-    <string name="settings_interface_theme_title">Select a theme</string>
-    <string name="settings_interface_visualizations_title">Enable visualizations</string>
-    <string name="settings_interface_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
-    <string name="settings_interface_home_pages_title">Select home pages</string>
-    <string name="settings_interface_home_pages_summary">Sort &amp; manage home pages</string>
-
-    <string name="settings_download_prefer_network">Prefer downloading artwork</string>
-    <string name="settings_download_prefer_network_summary">Tries to download album art before checking device storage</string>
-    <string name="settings_data_low_resolution_title">Use lower resolution art work</string>
-    <string name="settings_data_low_resolution_summary">Enable to reduce image size and bandwidth used</string>
-    <string name="settings_data_cache_size">Set image cache limit</string>
-    <string name="settings_data_cache_size_20" translatable="false">20MB</string>
-    <string name="settings_data_cache_size_40" translatable="false">40MB</string>
-    <string name="settings_data_cache_size_60" translatable="false">60MB</string>
-    <string name="settings_data_cache_size_80" translatable="false">80MB</string>
-
     <string name="settings_equalizer_summary">Fine tune audio settings</string>
     <string name="settings_equalizer_none">No equalizer found</string>
+    <string name="settings_err_no_audio_id">Could not get audio id. Please play a song and try again.</string>
+    <!-- audio storage -->
     <string name="settings_storage_default_folder_title">Pick shuffle folder</string>
     <string name="settings_storage_default_folder_summary">Only songs in this folder will be included in party shuffle</string>
+    <!-- audio cast -->
+    <string name="settings_cast_category">Cast</string>
     <string name="settings_cast_enable_title">Enable casting</string>
     <string name="settings_cast_enable_summary">Allow remote playback on Chromecast</string>
     <string name="settings_gms_unavailable">Google services unavailable, casting will not work</string>
-
-    <string name="settings_plugin_get">Get plugins</string>
-    <string name="settings_plugin_get_summary">Search Play Store for Orpheus plugins</string>
-
-    <!-- IAB -->
+    <!-- plugins -->
+    <string name="settings_plugin_category">Plugins</string>
+    <string name="settings_get_plugins">Get plugins</string>
+    <string name="settings_get_plugins_summary">Search Play Store for Orpheus plugins</string>
+    <!-- donate -->
+    <string name="settings_donate_category">Donate</string>
+    <!-- donate/IAB -->
     <string name="iab_donate_unpurchased">Click for details</string>
     <string name="iab_purchased">Purchased</string>
-    <string name="iab_purchase_failed">Purchase failed</string>
-    <string name="iab_fetching_inventory">Obtaining product list</string>
-    <string name="iab_unable_to_fetch_inventory">Unable to fetch inventory</string>
-    <string name="iab_service_error">Billing service unavailable</string>
-    <string name="iab_donate">Donate</string>
-    <string name="iab_donate_message">Thank you for using Orpheus. Please consider a donation to support the developers.</string>
-    <string name="iab_thanks">Thank you for your kindness</string>
+    <string name="iab_err_purchase_failed">Purchase failed</string>
+    <string name="iab_msg_fetching_inventory">Obtaining product list</string>
+    <string name="iab_err_unable_to_fetch_inventory">Unable to fetch inventory</string>
+    <string name="iab_err_service_error">Billing service unavailable</string>
+    <string name="iab_donate_dialog_title">Donate</string>
+    <string name="iab_donate_dialog_message">Thank you for using Orpheus. Please consider a donation to support the developers.</string>
+    <string name="iab_msg_thanks">Thank you for your kindness</string>
     <string name="iab_opensilk_donate_url" translatable="false">http://opensilk.org/donate/</string>
     <string name="iab_opensilk_donate">Billing services unavailable. Please visit our website for donate options.</string>
 
-    <!-- Interface -->
-    <string name="settings_interface_restart_app">Orpheus will now restart to apply changes.</string>
+    <!-- ### Themes ### -->
 
-    <!-- Miscellaneous -->
-    <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
-    <string name="no_audio_id">Could not get audio id. Please play a song and try again.</string>
-
-    <!-- Themes -->
     <string name="theme_orpheus" translatable="false">Orpheus</string>
     <string name="theme_repheus" translatable="false">Repheus</string>
     <string name="theme_purpheus" translatable="false">Purpheus</string>
     <string name="theme_blupheus" translatable="false">Blupheus</string>
     <string name="theme_grepheus" translatable="false">Grepheus</string>
 
-    <!-- Widgets -->
+    <!-- ### Widgets ### -->
+
     <string name="widget_settings_label">Configure widget</string>
     <string name="widget_ultra_mini_label">Orpheus Ultra-Mini</string>
     <string name="widget_mini_label">Orpheus Mini</string>
@@ -120,11 +127,11 @@
     <string name="widget_settings_pick_label">Pick a style:</string>
     <string name="widget_settings_preview_label">Preview</string>
 
-    <!-- Large Widget styles -->
     <string name="widget_large_style_one">Style one</string>
     <string name="widget_large_style_two">Style two</string>
 
-    <!--Daydream-->
+    <!-- ### Daydream ### -->
+
     <string name="dream_settings">Orpheus Daydream</string>
     <string name="dream_settings_alt_dream">Alternate dream</string>
     <string name="dream_settings_choose_dream">Style</string>
@@ -136,29 +143,37 @@
     <string name="dream_settings_fullscreen">Fullscreen mode</string>
     <string name="dream_settings_fullscreen_summary">Hide status bar and blacks out navigation bar</string>
 
-    <!--Muzei-->
+    <!-- ### Muzei ### -->
+
     <string name="muzei_description">Album art</string>
 
-    <string name="fetching_song_list">Fetching song list…</string>
-    <string name="unable_to_fetch_songs">Unable to get songs</string>
+    <!-- ### Uncategorized ### -->
 
+    <!-- song collections title -->
+    <string name="title_all_songs">All songs</string>
+    <!-- queue title -->
+    <string name="title_queue">Queue</string>
+
+    <!-- ### MENUS ### -->
+
+    <string name="menu_party_shuffle">Party shuffle</string>
     <string name="menu_refresh">Refresh</string>
-    <string name="all_songs">All songs</string>
+    <string name="menu_sleep_timer">Sleep timer</string>
+    <!-- library menus -->
     <string name="menu_library_settings">Library settings</string>
     <string name="menu_change_source">Change source</string>
 
-    <string name="sleep_timer">Sleep timer</string>
-    <string name="sleep_timer_set">Sleep timer set for %d minutes</string>
-    <string name="cancel_current_timer">Cancel current timer</string>
+    <!-- ### Toast/Dialog Messages ### -->
 
-    <string name="send_feedback">Send feedback</string>
-    <string name="feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
-    <string name="feedback_subject">Feedback for Orpheus Music Player</string>
+    <!-- sleep timer -->
+    <string name="msg_sleep_timer_set">Sleep timer set for %d minutes</string>
+    <string name="btn_cancel_current_timer">Cancel current timer</string>
+    <!-- library messages -->
+    <string name="msg_fetching_song_list">Fetching song list…</string>
 
-    <string name="queue">Queue</string>
+    <!-- ### Toast Errors ### -->
 
-    <!--Toast errors-->
-    <string name="err_generic">Operation Failed</string>
+    <string name="err_generic">Operation failed</string>
     <string name="err_unimplemented">FIXME Unimplemented</string>
     <!--MusicService-->
     <string name="err_addtoqueue">Unable to enqueue songs</string>
@@ -167,4 +182,6 @@
     <string name="err_retrieving_items">Unable to retrieve items</string>
     <string name="err_authentication">Error not authorized… Please login again</string>
     <string name="err_connecting_library">Error connecting library</string>
+    <string name="err_unable_to_fetch_songs">Unable to get songs</string>
+
 </resources>

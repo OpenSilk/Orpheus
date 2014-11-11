@@ -83,8 +83,8 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
 
     private void addFindPluginPref() {
         Preference p = new Preference(getActivity());
-        p.setTitle(getString(R.string.settings_plugin_get));
-        p.setSummary(getString(R.string.settings_plugin_get_summary));
+        p.setTitle(getString(R.string.settings_get_plugins));
+        p.setSummary(getString(R.string.settings_get_plugins_summary));
         p.setIntent(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://play.google.com/store/search?q=Orpheus&c=apps")));
         getPreferenceScreen().addPreference(p);
     }

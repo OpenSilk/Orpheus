@@ -28,7 +28,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import org.opensilk.common.flow.HandlesBack;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
@@ -172,7 +171,7 @@ public class LibraryView extends FrameLayout {
     void showProgressDialog() {
         mProgressDialog = new ProgressDialog(getContext());
         mProgressDialog.setIndeterminate(true);
-        mProgressDialog.setMessage(getContext().getString(R.string.fetching_song_list));
+        mProgressDialog.setMessage(getContext().getString(R.string.msg_fetching_song_list));
         mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {

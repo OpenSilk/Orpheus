@@ -64,7 +64,7 @@
             android:id="@+id/timer_cancel_previous"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/cancel_current_timer"
+            android:text="@string/btn_cancel_current_timer"
             style="?android:buttonBarButtonStyle"/>
 
     </LinearLayout>

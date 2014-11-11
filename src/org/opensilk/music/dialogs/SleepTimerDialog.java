@@ -91,7 +91,7 @@ public class SleepTimerDialog extends DialogFragment {
                     am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + min * 60 * 1000, pi);
                     // notify
                     Timber.i("Sleep timer set for %d minutes from now", min);
-                    Toast.makeText(getContext(), getContext().getResources().getString(R.string.sleep_timer_set, min), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getContext().getResources().getString(R.string.msg_sleep_timer_set, min), Toast.LENGTH_SHORT).show();
                 }
             });
             setButton(BUTTON_NEGATIVE, getContext().getResources().getString(android.R.string.cancel), new OnClickListener() {
@@ -100,7 +100,7 @@ public class SleepTimerDialog extends DialogFragment {
 
                 }
             });
-            setTitle(R.string.sleep_timer);
+            setTitle(R.string.menu_sleep_timer);
             super.onCreate(savedInstanceState);
             ButterKnife.inject(this);
             final int prevMin = mSettings.getInt(PREF_PREVIOUS_TIMER_VALUE, 30);

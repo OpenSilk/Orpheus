@@ -23,8 +23,6 @@ import android.os.Bundle;
 
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicProviderUtil;
-import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -36,12 +34,9 @@ import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.BaseSwitcherActivity;
-import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.event.ConfirmDelete;
-import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.NowPlayingCursor;
@@ -279,7 +274,7 @@ public class QueueScreen extends Screen {
 
         void setupActionBar() {
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
-                    .setTitle(R.string.queue)
+                    .setTitle(R.string.title_queue)
                     .upButtonEnabled(true)
                     .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
                             .withMenus(R.menu.panel_save_queue, R.menu.panel_clear_queue)

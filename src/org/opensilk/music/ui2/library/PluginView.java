@@ -16,6 +16,8 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
@@ -39,6 +41,8 @@ public class PluginView extends RelativeLayout {
     @Inject PluginScreen.Presenter presenter;
     @InjectView(R.id.btn_chooselibrary) Button chooser;
 
+    AlertDialog upgradeAlert;
+
     public PluginView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) Mortar.inject(getContext(), this);
@@ -51,6 +55,12 @@ public class PluginView extends RelativeLayout {
             ButterKnife.inject(this);
             presenter.takeView(this);
         }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
     }
 
     @Override
@@ -68,6 +78,11 @@ public class PluginView extends RelativeLayout {
     public void chooseLibrary() {
         presenter.openPicker();
         chooser.setVisibility(GONE);
+    }
+
+    void showUpgradeAlert(String packagename) {
+        upgradeAlert = new AlertDialog.Builder(getContext())
+                .setTitle()
     }
 
 }
