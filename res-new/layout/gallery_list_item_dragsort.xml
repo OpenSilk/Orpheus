@@ -16,15 +16,12 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.common.widget.ForegroundLinearLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fling_handle"
-    android:gravity="center_vertical"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:foreground="?selectableItemBackground">
+    android:layout_height="72dp">
 
     <ImageView
         android:id="@+id/drag_handle"
@@ -38,13 +35,22 @@
         android:scaleType="center"
         android:src="@drawable/card_drag"/>
 
-    <org.opensilk.common.widget.CircleImageView
-        android:id="@+id/artwork_thumb"
-        android:layout_width="wrap_content"
+    <org.opensilk.common.widget.ForegroundLinearLayout
+        android:id="@+id/tile_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"/>
+        android:gravity="center_vertical"
+        android:foreground="?selectableItemBackground">
 
-    <include layout="@layout/gallery_list_item_common"/>
+        <org.opensilk.common.widget.CircleImageView
+            android:id="@+id/artwork_thumb"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
 
-</org.opensilk.common.widget.ForegroundLinearLayout>
+        <include layout="@layout/gallery_list_item_common"/>
+
+    </org.opensilk.common.widget.ForegroundLinearLayout>
+
+</LinearLayout>

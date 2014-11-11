@@ -75,6 +75,7 @@ public class QueueView extends DragSortListView implements
         setDropListener(this);
         setRemoveListener(this);
         setOnItemClickListener(this);
+        setDividerHeight(0);
         presenter.takeView(this);
     }
 
@@ -127,11 +128,8 @@ public class QueueView extends DragSortListView implements
         // When selecting a track from the queue, just jump there instead of
         // reloading the queue. This is both faster, and prevents accidentally
         // dropping out of party shuffle.
+        Timber.d("onItemClick(%d)", position);
         presenter.setQueuePosition(position);
-    }
-
-    public void setup() {
-
     }
 
     public void onCurrentSongChanged(long recentId) {
@@ -157,7 +155,7 @@ public class QueueView extends DragSortListView implements
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             View v = convertView;
             ViewHolder holder;
             if (v == null) {
@@ -176,6 +174,13 @@ public class QueueView extends DragSortListView implements
             if (TextUtils.isEmpty(artist)) artist = item.artistName;
             holder.subscriptions.add(presenter.requestor.newAlbumRequest(holder.artwork,
                     null, new ArtInfo(artist, item.albumName, item.artworkUri), ArtworkType.THUMBNAIL));
+
+            holder.clickableContent.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    presenter.setQueuePosition(position);
+                }
+            });
 
             holder.overflow.setOnClickListener(new OnClickListener() {
                 @Override
@@ -226,6 +231,7 @@ public class QueueView extends DragSortListView implements
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.playing_indicator) PlayingIndicator playingIndicator;
         @InjectView(R.id.tile_overflow) ImageButton overflow;
+        @InjectView(R.id.tile_content) View clickableContent;
 
         final CompositeSubscription subscriptions;
 

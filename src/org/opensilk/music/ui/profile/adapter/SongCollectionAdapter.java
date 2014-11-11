@@ -25,30 +25,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.cards.SongCollectionCard;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.widgets.GridTileDescription;
-import org.opensilk.silkdagger.DaggerInjector;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardCursorAdapter;
 import rx.subscriptions.CompositeSubscription;
 
 /**
@@ -126,7 +119,7 @@ public class SongCollectionAdapter extends CursorAdapter {
                 m.show();
             }
         });
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.clicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 overflowHandler.play(song);
@@ -145,6 +138,7 @@ public class SongCollectionAdapter extends CursorAdapter {
         @InjectView(R.id.tile_subtitle) TextView subtitle;
         @InjectView(R.id.tile_info) TextView info;
         @InjectView(R.id.tile_overflow) ImageButton overflow;
+        @InjectView(R.id.tile_content) View clicker;
 
         final CompositeSubscription subscriptions;
 

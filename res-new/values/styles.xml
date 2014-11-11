@@ -51,9 +51,10 @@
         <!-- Setup dragsort options-->
         <item name="use_default_controller">true</item>
         <item name="drag_handle_id">@id/drag_handle</item>
-        <item name="fling_handle_id">@id/fling_handle</item>
+        <item name="fling_handle_id">@id/drag_handle</item>
         <item name="remove_enabled">true</item>
         <item name="remove_mode">flingRemove</item>
+        <item name="drag_enabled">true</item>
         <item name="drag_start_mode">onMove</item>
         <item name="float_background_color">@android:color/transparent</item>
     </style>

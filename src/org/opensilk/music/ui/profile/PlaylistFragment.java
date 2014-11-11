@@ -26,37 +26,28 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+import com.andrew.apollo.model.Playlist;
+import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
-import com.andrew.apollo.model.Playlist;
-import com.mobeta.android.dslv.DragSortListView;
-import com.squareup.otto.Bus;
-
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.cards.PlaylistCard;
-import org.opensilk.music.ui.cards.SongPlaylistCard;
-import org.opensilk.music.ui.cards.handler.PlaylistCardClickHandler;
-import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
 import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.util.MultipleArtworkLoaderTask;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
-import org.opensilk.common.dagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.DaggerInjector;
 
 import javax.inject.Inject;
@@ -210,7 +201,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
 
     @Override
     public void remove(final int which) {
-        Song song = ((SongPlaylistCard) mAdapter.getItem(which)).getData();
+        Song song = CursorHelpers.makeLocalSongFromCursor((Cursor) mAdapter.getItem(which));
         if (!isFavorites()) {
             final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", mPlaylist.mPlaylistId);
             getActivity().getContentResolver().delete(uri,
