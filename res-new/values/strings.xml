@@ -26,7 +26,6 @@
     <string name="settings_title">Settings</string>
     <!-- about NOTE some string in res/ -->
     <string name="settings_created_by">Created by OpenSilk Productions LLC</string>
-    <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
     <!-- about version -->
     <string name="settings_changes_dialog_title">What\'s new</string>
     <!-- legal -->
@@ -149,6 +148,9 @@
 
     <!-- ### Uncategorized ### -->
 
+    <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
+    <string name="playstore_package_url" translatable="false">https://play.google.com/store/apps/details?id=%s</string>
+
     <!-- song collections title -->
     <string name="title_all_songs">All songs</string>
     <!-- queue title -->
@@ -170,6 +172,8 @@
     <string name="btn_cancel_current_timer">Cancel current timer</string>
     <!-- library messages -->
     <string name="msg_fetching_song_list">Fetching song list…</string>
+    <string name="msg_newer_plugin_needed">Update required</string>
+    <string name="msg_newer_plugin_message">Orpheus requires a newer version of %s.</string>
 
     <!-- ### Toast Errors ### -->
 

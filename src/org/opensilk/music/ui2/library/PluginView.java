@@ -19,10 +19,14 @@ package org.opensilk.music.ui2.library;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
@@ -80,9 +84,25 @@ public class PluginView extends RelativeLayout {
         chooser.setVisibility(GONE);
     }
 
-    void showUpgradeAlert(String packagename) {
+    void showUpgradeAlert(final String pluginName, final String packagename) {
         upgradeAlert = new AlertDialog.Builder(getContext())
-                .setTitle()
+                .setTitle(R.string.msg_newer_plugin_needed)
+                .setMessage(getResources().getString(R.string.msg_newer_plugin_message, pluginName))
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AppFlow.loadInitialScreen(getContext());
+                    }
+                })
+                .setPositiveButton(R.string.common_google_play_services_update_button,//Piggyback
+                        new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getContext().startActivity(new Intent(Intent.ACTION_VIEW).setData(
+                                Uri.parse(getResources().getString(R.string.playstore_package_url, packagename))));
+                    }
+                })
+            .show();
     }
 
 }

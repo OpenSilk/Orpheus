@@ -164,8 +164,10 @@ public class PluginScreen extends Screen {
                             if (version >= OrpheusApi.API_020) {
                                 checkForDefaultLibrary();
                             } else {
-                                //TODO show dialog
-                                bus.post(new MakeToast(R.string.err_unimplemented));
+                                if (getView() != null) getView().showUpgradeAlert(
+                                        pluginInfo.title.toString(),
+                                        pluginInfo.componentName.getPackageName()
+                                );
                             }
                         }
                     }, new Action1<Throwable>() {

@@ -43,7 +43,7 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
 
         addPreferencesFromResource(R.xml.blank_prefscreen);
         // Pull list of available dreams
-        pluginInfos = PluginUtil.getPluginInfos(getActivity());
+        pluginInfos = PluginUtil.getPluginInfos(getActivity(), true);
         // Add all available dreams to preference screen
         // yea its hackish but much less typing compared to a list view
         for (PluginInfo info : pluginInfos) {
@@ -85,7 +85,7 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
         Preference p = new Preference(getActivity());
         p.setTitle(getString(R.string.settings_get_plugins));
         p.setSummary(getString(R.string.settings_get_plugins_summary));
-        p.setIntent(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://play.google.com/store/search?q=Orpheus&c=apps")));
+        p.setIntent(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://play.google.com/store/search?q=Orpheus%20Plugin&c=apps")));
         getPreferenceScreen().addPreference(p);
     }
 
@@ -96,7 +96,7 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
             pluginInfo = info;
             setTitle(info.title);
             setSummary(info.description);
-//            setIcon(info.icon);
+            setIcon(info.icon);
             setChecked(info.isActive);
         }
     }
