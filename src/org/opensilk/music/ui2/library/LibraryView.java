@@ -28,8 +28,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.andrew.apollo.utils.MusicUtils;
-
 import org.opensilk.common.flow.HandlesBack;
 import org.opensilk.music.R;
 

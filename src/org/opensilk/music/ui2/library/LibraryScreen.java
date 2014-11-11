@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
@@ -42,7 +43,6 @@ import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
-import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.ArrayList;
 import java.util.Collection;

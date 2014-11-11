@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.library;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import org.opensilk.music.R;

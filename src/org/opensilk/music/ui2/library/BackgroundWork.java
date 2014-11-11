@@ -18,38 +18,19 @@
 package org.opensilk.music.ui2.library;
 
 import android.os.Bundle;
-import android.os.RemoteException;
 
-import com.andrew.apollo.model.RecentSong;
-
-import org.opensilk.common.flow.AppFlow;
-import org.opensilk.music.MusicServiceConnection;
-import org.opensilk.music.R;
-import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.api.meta.LibraryInfo;
-import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.ui2.common.OverflowAction;
-import org.opensilk.music.ui2.event.MakeToast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
-import de.umass.lastfm.Result;
 import rx.Observable;
-import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.functions.Action1;
 import rx.functions.Func0;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
-import rx.subjects.AsyncSubject;
-import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 import timber.log.Timber;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
@@ -79,7 +60,7 @@ public class BackgroundWork {
 
             @Override
             public void onError(Throwable e) {
-                Timber.v("onError(outer) %s", Thread.currentThread().getName());
+                Timber.e(e, "onError(outer) %s", Thread.currentThread().getName());
             }
 
             @Override
@@ -94,7 +75,7 @@ public class BackgroundWork {
 
                     @Override
                     public void onError(Throwable e) {
-                        Timber.v("onError(inner) %s", Thread.currentThread().getName());
+                        Timber.e(e, "onError(inner) %s", Thread.currentThread().getName());
                     }
 
                     @Override
@@ -114,7 +95,7 @@ public class BackgroundWork {
         }
     }
 
-    public Observable<Observable<List<Song>>> getAll(final Bundleable item) {
+    Observable<Observable<List<Song>>> getAll(final Bundleable item) {
         return Observable.create(new Observable.OnSubscribe<Observable<List<Song>>>() {
             @Override
             public void call(Subscriber<? super Observable<List<Song>>> subscriber) {
@@ -124,7 +105,7 @@ public class BackgroundWork {
         });
     }
 
-    public Observable<List<Song>> getSome(final Subscriber<? super Observable<List<Song>>> outerSubscriber,
+    Observable<List<Song>> getSome(final Subscriber<? super Observable<List<Song>>> outerSubscriber,
                                           final Bundleable item,
                                           final Bundle token) {
         return Observable.create(new Observable.OnSubscribe<List<Song>>() {
@@ -160,7 +141,7 @@ public class BackgroundWork {
         });
     }
 
-    public void onListFetched(OverflowAction action, final List<Song> songs) {
+    void onListFetched(OverflowAction action, final List<Song> songs) {
         switch (action) {
             case ADD_TO_QUEUE:
                 presenter.musicService.enqueueEnd(new Func0<Song[]>() {
