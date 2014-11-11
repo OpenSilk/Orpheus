@@ -17,14 +17,12 @@
 package org.opensilk.music.ui.profile.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -39,24 +37,13 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.ui.cards.AlbumCard;
-import org.opensilk.music.ui.cards.SongGroupCard;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.widgets.GridTileDescription;
-import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.common.dagger.qualifier.ForActivity;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import it.gmariotti.cardslib.library.extra.staggeredgrid.internal.CardGridStaggeredArrayAdapter;
-import it.gmariotti.cardslib.library.internal.Card;
 import rx.subscriptions.CompositeSubscription;
 
 /**

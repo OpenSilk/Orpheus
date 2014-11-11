@@ -23,29 +23,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+import com.andrew.apollo.model.LocalArtist;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
-import com.andrew.apollo.model.LocalArtist;
-import com.squareup.otto.Bus;
-
 import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.ArtworkImageView;
-import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.cards.ArtistCard;
-import org.opensilk.music.ui.cards.handler.AlbumCardClickHandler;
-import org.opensilk.music.ui.cards.handler.ArtistCardClickHandler;
-import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui.profile.loader.ArtistGridLoader;
-import org.opensilk.common.dagger.qualifier.ForActivity;
-import org.opensilk.common.dagger.qualifier.ForFragment;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;

@@ -26,12 +26,9 @@ import android.widget.PopupMenu;
 
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.ui.cards.SongPlaylistCard;
 import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.util.CursorHelpers;
 
 import butterknife.ButterKnife;
-import it.gmariotti.cardslib.library.internal.Card;
 
 /**
  * Created by drew on 2/18/14.

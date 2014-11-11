@@ -17,7 +17,6 @@
 package org.opensilk.music.ui.profile;
 
 import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -33,17 +32,13 @@ import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
+import com.etsy.android.grid.StaggeredGridView;
+
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
-import com.etsy.android.grid.StaggeredGridView;
-
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
-import org.opensilk.music.util.PaletteUtil;
-import org.opensilk.silkdagger.DaggerInjector;
-import org.opensilk.silkdagger.support.ScopedDaggerFragment;
 
 import butterknife.ButterKnife;
 

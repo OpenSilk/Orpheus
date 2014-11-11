@@ -19,12 +19,12 @@ package org.opensilk.music.ui.profile.loader;
 import android.content.Context;
 import android.database.Cursor;
 
-import org.opensilk.music.R;
 import com.andrew.apollo.loaders.WrappedAsyncTaskLoader;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSongGroup;
 
+import org.opensilk.music.R;
 import org.opensilk.music.util.CursorHelpers;
 
 import java.util.ArrayList;

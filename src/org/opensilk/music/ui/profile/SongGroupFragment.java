@@ -24,34 +24,25 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+import com.andrew.apollo.model.LocalSongGroup;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
-import com.andrew.apollo.model.LocalSongGroup;
-import com.squareup.otto.Bus;
-
-import org.opensilk.music.artwork.ArtworkImageView;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.cards.SongGroupCard;
-import org.opensilk.music.ui.cards.handler.SongCardClickHandler;
-import org.opensilk.music.ui.cards.handler.SongGroupCardClickHandler;
 import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
 import org.opensilk.music.ui.profile.loader.SongGroupLoader;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.util.MultipleArtworkLoaderTask;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
-import org.opensilk.common.dagger.qualifier.ForFragment;
 import org.opensilk.silkdagger.DaggerInjector;
 
 import javax.inject.Inject;
