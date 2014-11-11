@@ -77,9 +77,47 @@ public class LibraryConnection {
         }
     }
 
-    public static final int STEP = 30;
+    class Callback extends org.opensilk.music.api.callback.Result.Stub {
 
-    final Map<LibraryInfo, Result> CACHE = new LinkedHashMap<>();
+        final LibraryInfo libraryInfo;
+        final Subscriber<? super Result> subscriber;
+        final boolean cacheable;
+
+        public Callback(LibraryInfo libraryInfo, Subscriber<? super Result> subscriber, boolean cacheable) {
+            this.libraryInfo = libraryInfo;
+            this.subscriber = subscriber;
+            this.cacheable = cacheable;
+        }
+
+        @Override
+        public void success(List<Bundle> items, Bundle paginationBundle) throws RemoteException {
+            List<Bundleable> list = new ArrayList<>(items.size());
+            for (Bundle b : items) {
+                try {
+                    list.add(OrpheusApi.transformBundle(b));
+                } catch (Exception e) {
+                    if (!subscriber.isUnsubscribed()) subscriber.onError(e);
+                    return;
+                }
+            }
+            final Result result = new Result(list, paginationBundle);
+            if (cacheable) updateCache(libraryInfo, result);
+            if (subscriber.isUnsubscribed()) return;
+            subscriber.onNext(result);
+            subscriber.onCompleted();
+        }
+
+        @Override
+        public void failure(int code, String reason) throws RemoteException {
+            if (subscriber.isUnsubscribed()) return;
+            subscriber.onError(new ResultException(reason, code));
+        }
+    }
+
+    public static final boolean D = true;
+    public static final int STEP = D ? 4 : 30;
+
+    final Map<LibraryInfo, Result> browseCache = new LinkedHashMap<>();
     final PluginConnectionManager connectionManager;
 
     public LibraryConnection(PluginConnectionManager connectionManager) {
@@ -98,23 +136,23 @@ public class LibraryConnection {
     }
 
     public synchronized boolean hasCache(LibraryInfo libraryInfo) {
-        return CACHE.containsKey(libraryInfo);
+        return browseCache.containsKey(libraryInfo);
     }
 
     public synchronized Result getCache(LibraryInfo libraryInfo) {
-        return CACHE.get(libraryInfo).copy();
+        return browseCache.get(libraryInfo).copy();
     }
 
     synchronized void updateCache(LibraryInfo libraryInfo, Result result) {
         Result resultCopy = result.copy();
-        Result cacheResult = CACHE.put(libraryInfo, resultCopy);
+        Result cacheResult = browseCache.put(libraryInfo, resultCopy);
         if (cacheResult != null) {
             resultCopy.items.addAll(0, cacheResult.items);
         }
     }
 
     public synchronized void clearCache(LibraryInfo libraryInfo) {
-        if (hasCache(libraryInfo)) CACHE.remove(libraryInfo);
+        if (hasCache(libraryInfo)) browseCache.remove(libraryInfo);
     }
 
     /*
@@ -132,32 +170,7 @@ public class LibraryConnection {
                                 try {
                                     remoteLibrary.browseFolders(libraryInfo.libraryId,
                                             libraryInfo.folderId, STEP, previousBundle,
-                                            new org.opensilk.music.api.callback.Result.Stub() {
-                                                @Override
-                                                public void success(List<Bundle> items, Bundle paginationBundle) throws RemoteException {
-                                                    List<Bundleable> list = new ArrayList<>(items.size());
-                                                    for (Bundle b : items) {
-                                                        try {
-                                                            list.add(OrpheusApi.transformBundle(b));
-                                                        } catch (Exception e) {
-                                                            if (!subscriber.isUnsubscribed())
-                                                                subscriber.onError(e);
-                                                            return;
-                                                        }
-                                                    }
-                                                    final Result result = new Result(list, paginationBundle);
-                                                    updateCache(libraryInfo, result);
-                                                    if (subscriber.isUnsubscribed()) return;
-                                                    subscriber.onNext(result);
-                                                    subscriber.onCompleted();
-                                                }
-
-                                                @Override
-                                                public void failure(int code, String reason) throws RemoteException {
-                                                    if (subscriber.isUnsubscribed()) return;
-                                                    subscriber.onError(new ResultException(reason, code));
-                                                }
-                                            });
+                                            new Callback(libraryInfo, subscriber, true));
                                 } catch (RemoteException e) {
                                     connectionManager.onException(pluginInfo.componentName);
                                     if (!subscriber.isUnsubscribed()) subscriber.onError(e);
@@ -169,6 +182,30 @@ public class LibraryConnection {
                 // the Result callback will produce on a binder thread
                 // push the results back to main.
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<Result> listSongsInFolder(final PluginInfo pluginInfo,
+                                                final LibraryInfo libraryInfo,
+                                                final Bundle previousBundle) {
+        return getObservable(pluginInfo)
+                .flatMap(new Func1<RemoteLibrary, Observable<Result>>() {
+                    @Override
+                    public Observable<Result> call(final RemoteLibrary remoteLibrary) {
+                        return Observable.create(new Observable.OnSubscribe<Result>() {
+                            @Override
+                            public void call(final Subscriber<? super Result> subscriber) {
+                                try {
+                                    remoteLibrary.listSongsInFolder(libraryInfo.libraryId,
+                                            libraryInfo.folderId, STEP, previousBundle,
+                                            new Callback(libraryInfo, subscriber, false));
+                                } catch (RemoteException e) {
+                                    connectionManager.onException(pluginInfo.componentName);
+                                    if (!subscriber.isUnsubscribed()) subscriber.onError(e);
+                                }
+                            }
+                        });
+                    }
+                });
     }
 
     public Observable<Integer> getApiVersion(final PluginInfo pluginInfo) {

@@ -29,14 +29,16 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.LauncherActivity;
+import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
@@ -126,12 +128,19 @@ public class LibraryScreen extends Screen {
         final AppPreferences settings;
         final EventBus bus;
         final ActionBarOwner actionBarOwner;
+        final MusicServiceConnection musicService;
 
         final ResultObserver resultObserver;
+        final BackgroundWork backgroundWorker;
+
+        final LibraryOverflowHandlers.Bundleables overflowHandler;
 
         Subscription resultSubscription;
         boolean isloading;
         boolean initialLoad = true;
+
+        boolean progressShowing;
+        int lastprogressCount;
 
         @Inject
         public Presenter(LibraryConnection connection,
@@ -141,7 +150,8 @@ public class LibraryScreen extends Screen {
                          @ForApplication Context appContext,
                          AppPreferences settings,
                          @Named("activity") EventBus bus,
-                         ActionBarOwner actionBarOwner) {
+                         ActionBarOwner actionBarOwner,
+                         MusicServiceConnection musicService) {
             this.connection = connection;
             this.pluginInfo = pluginInfo;
             this.libraryInfo = libraryInfo;
@@ -150,8 +160,11 @@ public class LibraryScreen extends Screen {
             this.settings = settings;
             this.bus = bus;
             this.actionBarOwner = actionBarOwner;
+            this.musicService = musicService;
 
             resultObserver = new ResultObserver();
+            backgroundWorker = new BackgroundWork(this);
+            overflowHandler = new LibraryOverflowHandlers.Bundleables(this);
         }
 
         @Override
@@ -165,6 +178,10 @@ public class LibraryScreen extends Screen {
             Timber.v("onLoad(%s)", libraryInfo);
             super.onLoad(savedInstanceState);
             setupActionBar();
+            if (savedInstanceState != null) {
+                progressShowing = savedInstanceState.getBoolean("progress_showing", false);
+                lastprogressCount = savedInstanceState.getInt("progress_message", 0);
+            }
             if (connection.hasCache(libraryInfo)) {
                 Timber.v("cacheHit(%s)", libraryInfo);
                 LibraryConnection.Result cachedResult = connection.getCache(libraryInfo);
@@ -175,11 +192,19 @@ public class LibraryScreen extends Screen {
                 Timber.v("freshLoad(%s)", libraryInfo);
                 loadMore(null);
             }
+            if (progressShowing) {
+                getView().showProgressDialog();
+                if (lastprogressCount > 0) {
+                    getView().updateProgressDialog(lastprogressCount);
+                }
+            }
         }
 
         @Override
         protected void onSave(Bundle outState) {
             super.onSave(outState);
+            outState.putBoolean("progress_showing", progressShowing);
+            outState.putInt("progress_message", lastprogressCount);
         }
 
         @Override
@@ -235,11 +260,36 @@ public class LibraryScreen extends Screen {
         }
 
         public void onItemClicked(Context context, Bundleable item) {
+            if (item instanceof Song) {
+                bus.post(new MakeToast(R.string.err_unimplemented));
+                return;
+            }
             String identity = item.getIdentity();
             String name = item.getName();
             if (TextUtils.isEmpty(identity)) return; //Shouldnt happen
             LibraryInfo newInfo = libraryInfo.buildUpon(identity, name);
             AppFlow.get(context).goTo(new LibraryScreen(pluginInfo, newInfo));
+        }
+
+        public void startWork(OverflowAction action, Bundleable item) {
+            progressShowing = true;
+            if (getView() != null) getView().showProgressDialog();
+            backgroundWorker.startWork(action, item);
+        }
+
+        public void cancelWork() {
+            backgroundWorker.cancelWork();
+        }
+
+        public void updateProgressDialog(int newCount) {
+            lastprogressCount = newCount;
+            if (getView() != null) getView().updateProgressDialog(newCount);
+        }
+
+        public void dismissProgressDialog() {
+            progressShowing = false;
+            lastprogressCount = 0;
+            if (getView() != null) getView().dismissProgressDialog();
         }
 
         void setupActionBar() {
@@ -259,6 +309,11 @@ public class LibraryScreen extends Screen {
         ActionBarOwner.MenuConfig createMenuConfig(int capabilities) {
             List<Integer> menus = new ArrayList<>();
             List<ActionBarOwner.CustomMenuItem> customMenus = new ArrayList<>();
+
+            // Common items
+            for (int ii : LibraryOverflowHandlers.Bundleables.MENUS_COLLECTION) {
+                menus.add(ii);
+            }
 
             // search
             if (hasAbility(capabilities, OrpheusApi.Ability.SEARCH)) {
@@ -350,7 +405,16 @@ public class LibraryScreen extends Screen {
                                     });
                             return true;
                         default:
-                            return false;
+                            try {
+                                OverflowAction action = OverflowAction.valueOf(integer);
+                                return overflowHandler.handleClick(action, new Bundleable() {
+                                    @Override public Bundle toBundle() { return null; }
+                                    @Override public String getIdentity() { return libraryInfo.folderId; }
+                                    @Override public String getName() { return libraryInfo.folderName; }
+                                });
+                            } catch (IllegalArgumentException e) {
+                                return false;
+                            }
                     }
                 }
             };

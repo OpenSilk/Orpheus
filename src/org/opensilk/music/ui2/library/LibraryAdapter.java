@@ -19,10 +19,11 @@ package org.opensilk.music.ui2.library;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.andrew.apollo.utils.MusicUtils;
@@ -37,13 +38,12 @@ import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.widgets.ColorCodedThumbnail;
+import org.opensilk.music.ui2.common.OverflowAction;
 
 import java.util.ArrayList;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
@@ -88,7 +88,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         } else if (b instanceof Song) {
             bindSong(viewHolder, (Song)b);
         } else {
-            Timber.e("Some how an invalid Bundleable slipped through.");
+            Timber.e("Somehow an invalid Bundleable slipped through.");
         }
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +99,20 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         viewHolder.overflow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                PopupMenu m = new PopupMenu(v.getContext(), v);
+                presenter.overflowHandler.populateMenu(m, b);
+                m.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        try {
+                            OverflowAction action = OverflowAction.valueOf(item.getItemId());
+                            return presenter.overflowHandler.handleClick(action, b);
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
+                    }
+                });
+                m.show();
             }
         });
     }

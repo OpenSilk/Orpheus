@@ -16,7 +16,9 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +28,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.common.flow.HandlesBack;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
@@ -33,11 +38,12 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.Mortar;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/5/14.
  */
-public class LibraryView extends FrameLayout {
+public class LibraryView extends FrameLayout implements HandlesBack {
 
     @Inject LibraryScreen.Presenter presenter;
 
@@ -49,6 +55,8 @@ public class LibraryView extends FrameLayout {
     @InjectView(R.id.more_loading_progress) ContentLoadingProgressBar mMoreLoadingProgress;
 
     final LibraryAdapter adapter;
+
+    ProgressDialog mProgressDialog;
 
     boolean mLoadingShown;
     boolean mListShown;
@@ -74,6 +82,7 @@ public class LibraryView extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         presenter.dropView(this);
+        dismissProgressDialog();
     }
 
     public void setEmptyText(int stringRes) {
@@ -162,4 +171,40 @@ public class LibraryView extends FrameLayout {
         }
     }
 
+    void showProgressDialog() {
+        mProgressDialog = new ProgressDialog(getContext());
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setMessage(getContext().getString(R.string.fetching_song_list));
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                Timber.v("ProgressDialog Canceled");
+                presenter.cancelWork();
+            }
+        });
+        mProgressDialog.show();
+    }
+
+    void dismissProgressDialog() {
+        if (isProgressDialogShowing()) mProgressDialog.dismiss();
+    }
+
+    void updateProgressDialog(int newCount) {
+        String msg = getResources().getString(R.string.fetching_song_list)
+                + MusicUtils.makeLabel(getContext(), R.plurals.Nsongs, newCount);
+        if (isProgressDialogShowing()) mProgressDialog.setMessage(msg);
+    }
+
+    boolean isProgressDialogShowing() {
+        return (mProgressDialog != null && mProgressDialog.isShowing());
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (isProgressDialogShowing()) {
+            mProgressDialog.cancel();
+            return true;
+        }
+        return false;
+    }
 }

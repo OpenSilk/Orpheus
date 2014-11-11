@@ -421,7 +421,7 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
             public Observable<Long> call(IApolloService iApolloService) {
-                Timber.v("getDuration %s", Thread.currentThread().getName());
+//                Timber.v("getDuration %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.duration());
                 } catch (RemoteException e) {
@@ -435,7 +435,7 @@ public class MusicServiceConnection {
         return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
             @Override
             public Observable<Long> call(IApolloService iApolloService) {
-                Timber.v("getPosition %s", Thread.currentThread().getName());
+//                Timber.v("getPosition %s", Thread.currentThread().getName());
                 try {
                     return Observable.just(iApolloService.position());
                 } catch (RemoteException e) {
