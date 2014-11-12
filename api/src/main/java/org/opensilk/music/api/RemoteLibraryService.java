@@ -29,59 +29,32 @@ import android.util.Log;
 
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.api.model.Folder;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by drew on 6/9/14.
  */
 public abstract class RemoteLibraryService extends Service {
 
-    /**
-     * @return Bitmask of {@link org.opensilk.music.api.OrpheusApi.Ability}
-     */
-    protected abstract int getCapabilities();
+    protected abstract Config getConfig();
 
     /**
-     * Return intent for activity to allow user to choose from available libraries.
-     * The activity should be of Dialog Style, and should take care of everything needed
-     * to allow user to access the library, including selecting from an available library (or
-     * account) and any auth/sign in required. The activity must return {@link android.app.Activity#RESULT_OK}
-     * with the extra {@link OrpheusApi#EXTRA_LIBRARY_ID} in the Intent containing the identity Orpheus will pass
-     * to all subsequent calls. Or pass a {@link org.opensilk.music.api.meta.LibraryInfo} as the extra
-     * {@link OrpheusApi#EXTRA_LIBRARY_INFO} with the {@link org.opensilk.music.api.meta.LibraryInfo#libraryId}
-     * and {@link org.opensilk.music.api.meta.LibraryInfo#libraryName} populated.
-     * <p>
-     * Although not required, it is preferable the activity utilizes
-     * {@link OrpheusApi#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
-     * current Orpheus theme.
-     */
-    protected abstract Intent getLibraryChooserIntent();
-
-    /**
-     * Return intent for settings activity. The settings activity must process the
-     * {@link OrpheusApi#EXTRA_LIBRARY_ID} and only manipulate preferences concerning the
-     * given identity.
-     * <p>
-     * Although not required, it is preferable the activity utilizes
-     * {@link OrpheusApi#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
-     * current Orpheus theme.
-     */
-    protected abstract Intent getSettingsIntent();
-
-    /**
-     * will be called by orpheus during the activity onStop() method. If your plugin does any active
-     * scanning or other persistend battry draining activity your should suspend it here
+     * will be called by Orpheus during the activity onStop() method. If your plugin does any active
+     * scanning or other persistent battery draining activity your should suspend it here
      */
     protected void pause() {
-
+        //Stub
     }
 
     /**
      * opposite of pause, called during activity onStart(), reverse anything you did in pause() here
      */
     protected void resume() {
-
+        //Stub
     }
 
     /**
@@ -134,15 +107,10 @@ public abstract class RemoteLibraryService extends Service {
                                    @Nullable Bundle paginationBundle, @NonNull Result callback);
 
     private RemoteLibrary.Stub mBinder;
-    private Handler mHandler;
-    private Runnable mShutdownTask;
-    private int clientCount = 0;
 
     @Override
     public IBinder onBind(Intent intent) {
         Log.v("RemoteLibrary", "onBind()");
-        mHandler.removeCallbacks(mShutdownTask);
-        clientCount++;
         return mBinder;
     }
 
@@ -150,25 +118,19 @@ public abstract class RemoteLibraryService extends Service {
     public void onRebind(Intent intent) {
         Log.v("RemoteLibrary", "onRebind()");
         super.onRebind(intent);
-        mHandler.removeCallbacks(mShutdownTask);
-        clientCount++;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         Log.v("RemoteLibrary", "onUnbind()");
-        if (--clientCount == 0) {
-            mHandler.postDelayed(mShutdownTask, 60000);
-        }
         return true;
     }
 
     @Override
     public void onCreate() {
+        Log.v("RemoteLibrary", "onCreate()");
         super.onCreate();
         mBinder = new ServiceBinder(this);
-        mHandler = new Handler();
-        mShutdownTask = new ShutdownTask(this);
     }
 
     @Override
@@ -176,91 +138,73 @@ public abstract class RemoteLibraryService extends Service {
         Log.v("RemoteLibrary", "onDestroy()");
         super.onDestroy();
         mBinder = null;
-        mHandler = null;
-        mShutdownTask = null;
     }
 
     private final static class ServiceBinder extends RemoteLibrary.Stub {
-        private final WeakReference<RemoteLibraryService> ref;
+        private final RemoteLibraryService service;
 
         protected ServiceBinder(RemoteLibraryService service) {
-            this.ref = new WeakReference<>(service);
+            this.service = service;
         }
 
-        @Override
+        @Override @Deprecated
         public int getApiVersion() throws RemoteException {
-            return OrpheusApi.API_VERSION;
+            return getConfig().apiVersion;
         }
 
-        @Override
+        @Override @Deprecated
         public int getCapabilities() throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                return s.getCapabilities();
-            }
-            return 0;
+            return getConfig().capabilities;
         }
 
-        /*
-         * XXX intent is passed as param because it doesn't seem to work
-         * if you just return an intent.
-         */
-        @Override
+        @Override @Deprecated
         public void getLibraryChooserIntent(Intent i) throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                Intent ogi = s.getLibraryChooserIntent();
-                copyIntent(i, ogi);
-            }
+            copyIntent(i, getConfig().pickerIntent);
         }
 
-        @Override
+        @Override @Deprecated
         public void getSettingsIntent(Intent i) throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                Intent ogi = s.getSettingsIntent();
-                copyIntent(i, ogi);
-            }
+            copyIntent(i, getConfig().settingsIntent);
         }
 
         @Override
         public void pause() throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                s.pause();
-            }
+            service.pause();
         }
 
         @Override
         public void resume() throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                s.resume();
-            }
+            service.resume();
+        }
+
+        @Override @Deprecated
+        public void browseFolders(String libraryIdentity, String folderIdentity,
+                                  int maxResults, Bundle paginationBundle, Result callback) throws RemoteException {
+            sendUpdateNotice(callback);
+        }
+
+        @Override @Deprecated
+        public void listSongsInFolder(String libraryIdentity, String folderIdentity,
+                                      int maxResults, Bundle paginationBundle, Result callback) throws RemoteException {
+            sendUpdateNotice(callback);
+        }
+
+        @Override @Deprecated
+        public void search(String libraryIdentity, String query, int maxResults,
+                           Bundle paginationBundle, Result callback) throws RemoteException {
+            sendUpdateNotice(callback);
         }
 
         @Override
-        public void browseFolders(String libraryIdentity, String folderIdentity, int maxResults, Bundle paginationBundle, Result callback) throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                s.browseFolders(libraryIdentity, folderIdentity, maxResults, paginationBundle, callback);
-            }
+        public Config getConfig() throws RemoteException {
+            return service.getConfig();
         }
 
-        @Override
-        public void listSongsInFolder(String libraryIdentity, String folderIdentity, int maxResults, Bundle paginationBundle, Result callback) throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                s.listSongsInFolder(libraryIdentity, folderIdentity, maxResults, paginationBundle, callback);
-            }
-        }
-
-        @Override
-        public void search(String libraryIdentity, String query, int maxResults, Bundle paginationBundle, Result callback) throws RemoteException {
-            RemoteLibraryService s = ref.get();
-            if (s != null) {
-                s.search(libraryIdentity, query, maxResults, paginationBundle, callback);
-            }
+        //Notify user they need to update Orpheus to use the new plugins
+        private void sendUpdateNotice(Result callback) throws RemoteException {
+            List<Bundle> list = new ArrayList<>(1);
+            list.add(new Folder.Builder().setIdentity("ident").setName("Upgrade Orpheus to use plugin").build().toBundle());
+            callback.success(list, null);
         }
 
         private static void copyIntent(Intent i, Intent ogi) {
@@ -271,22 +215,6 @@ public abstract class RemoteLibraryService extends Service {
             i.fillIn(ogi,flags);
         }
 
-    }
-
-    private static final class ShutdownTask implements Runnable {
-        private final WeakReference<Service> ref;
-
-        private ShutdownTask(Service service) {
-            this.ref = new WeakReference<>(service);
-        }
-
-        @Override
-        public void run() {
-            Service s = ref.get();
-            if (s != null) {
-                s.stopSelf();
-            }
-        }
     }
 
 }

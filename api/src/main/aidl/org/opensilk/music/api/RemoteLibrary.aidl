@@ -20,6 +20,7 @@ package org.opensilk.music.api;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.opensilk.music.api.Config;
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.meta.LibraryInfo;
 
@@ -29,13 +30,34 @@ import org.opensilk.music.api.meta.LibraryInfo;
  * Created by drew on 6/9/14.
  */
 interface RemoteLibrary {
+
+    /*
+     * API_010
+     */
+
+    //Deprecated since API_020
     int getApiVersion();
+    //Deprecated since API_020
     int getCapabilities();
+    //Deprecated since API_020
     void getLibraryChooserIntent(out Intent i);
+    //Deprecated since API_020
     void getSettingsIntent(out Intent i);
+
     void pause();
+
     void resume();
+
+    //Deprecated since API_020
     void browseFolders(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
+    //Deprecated since API_020
     void listSongsInFolder(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
+    //Deprecated since API_020
     void search(String libraryIdentity, String query, int maxResults, in Bundle paginationBundle, in Result callback);
+
+    /*
+     * API_020
+     */
+
+    Config getConfig();
 }
