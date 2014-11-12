@@ -36,19 +36,6 @@ public class ArtInfo implements Parcelable {
         this.artworkUri = (artworkUri != null) ? artworkUri : Uri.EMPTY;
     }
 
-    private ArtInfo(Parcel in) {
-        this.artistName = in.readString();
-        this.albumName = in.readString();
-        this.artworkUri = Uri.parse(in.readString());
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(artistName);
-        dest.writeString(albumName);
-        dest.writeString(artworkUri.toString());
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -80,10 +67,25 @@ public class ArtInfo implements Parcelable {
         return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(artistName);
+        dest.writeString(albumName);
+        dest.writeString(artworkUri.toString());
+    }
+
+    private static ArtInfo readParcel(Parcel in) {
+        return new ArtInfo(
+                in.readString(),
+                in.readString(),
+                Uri.parse(in.readString())
+        );
+    }
+
     public static final Creator<ArtInfo> CREATOR = new Creator<ArtInfo>() {
         @Override
         public ArtInfo createFromParcel(Parcel source) {
-            return new ArtInfo(source);
+            return readParcel(source);
         }
 
         @Override

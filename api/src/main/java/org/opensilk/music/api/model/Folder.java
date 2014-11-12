@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -36,10 +37,11 @@ public class Folder implements Bundleable {
     public final int childCount;
     public final String date;
 
-    public Folder(@NonNull String identity, @NonNull String name, String parentIdentity, int childCount, String date) {
-        if (identity == null || name == null) {
-            throw new NullPointerException("identity and name are required");
-        }
+    protected Folder(@NonNull String identity,
+                  @NonNull String name,
+                  @Nullable String parentIdentity,
+                  int childCount,
+                  @Nullable String date) {
         this.identity = identity;
         this.name =name;
         this.parentIdentity = parentIdentity;
@@ -155,6 +157,9 @@ public class Folder implements Bundleable {
         }
 
         public Folder build() {
+            if (identity == null || name == null) {
+                throw new NullPointerException("identity and name are required");
+            }
             return new Folder(identity, name, parentIdentity, childCount, date);
         }
     }

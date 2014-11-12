@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 /**
@@ -58,19 +59,6 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
         }
     }
 
-    private PluginInfo(Parcel in) {
-        this.title = in.readString();
-        this.description = in.readString();
-        this.componentName = ComponentName.unflattenFromString(in.readString());
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(title.toString());
-        dest.writeString(description.toString());
-        dest.writeString(componentName.flattenToString());
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -102,10 +90,25 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
         return 0;
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title.toString());
+        dest.writeString(description.toString());
+        dest.writeString(componentName.flattenToString());
+    }
+
+    private static PluginInfo readParcel(Parcel in) {
+        return new PluginInfo(
+                in.readString(),
+                in.readString(),
+                ComponentName.unflattenFromString(in.readString())
+        );
+    }
+
     public static final Creator<PluginInfo> CREATOR = new Creator<PluginInfo>() {
         @Override
         public PluginInfo createFromParcel(Parcel source) {
-            return new PluginInfo(source);
+            return readParcel(source);
         }
 
         @Override
@@ -115,8 +118,8 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
     };
 
     @Override
-    public int compareTo(PluginInfo another) {
-        return this.title.toString().toLowerCase().compareTo(another.title.toString().toLowerCase());
+    public int compareTo(@NonNull PluginInfo another) {
+        return this.title.toString().compareTo(another.title.toString());
     }
 
 }

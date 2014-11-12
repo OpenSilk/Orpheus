@@ -87,6 +87,11 @@ public class LibraryInfo implements Parcelable {
     }
 
     @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(libraryId);
         dest.writeString(libraryName);
@@ -101,11 +106,6 @@ public class LibraryInfo implements Parcelable {
                 source.readString(),
                 source.readString()
         );
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 
     public static final Creator<LibraryInfo> CREATOR = new Creator<LibraryInfo>() {

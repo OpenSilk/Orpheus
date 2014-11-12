@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -44,12 +45,16 @@ public class Song implements Bundleable {
     public final Uri artworkUri;
     public final String mimeType;
 
-    public Song(@NonNull String identity, @NonNull String name, String albumName, String artistName,
-                String albumArtistName, String albumIdentity, int duration, @NonNull Uri dataUri,
-                Uri artworkUri, String mimeType) {
-        if (identity == null || name == null || dataUri == null) {
-            throw new NullPointerException("identity, name, and dataUri are required");
-        }
+    protected Song(@NonNull String identity,
+                @NonNull String name,
+                @Nullable String albumName,
+                @Nullable String artistName,
+                @Nullable String albumArtistName,
+                @Nullable String albumIdentity,
+                int duration,
+                @NonNull Uri dataUri,
+                @Nullable Uri artworkUri,
+                @Nullable String mimeType) {
         this.identity = identity;
         this.name = name;
         this.albumName = albumName;
@@ -224,6 +229,9 @@ public class Song implements Bundleable {
         }
 
         public Song build() {
+            if (identity == null || name == null || dataUri == null) {
+                throw new NullPointerException("identity, name, and dataUri are required");
+            }
             return new Song(identity, name, albumName, artistName, albumArtistName,
                     albumIdentity, duration, dataUri, artworkUri, mimeType);
         }
