@@ -21,9 +21,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.opensilk.music.api.callback.Result;
-import org.opensilk.music.api.meta.LibraryInfo;
-import org.opensilk.music.api.spi.IBundleObserver;
-import org.opensilk.music.api.spi.ISubscription;
 
 /**
  * @see RemoteLibraryService for doc
@@ -32,36 +29,11 @@ import org.opensilk.music.api.spi.ISubscription;
  */
 interface RemoteLibrary {
 
-    /*
-     * API_010
-     */
-
-    //Deprecated since API_020
-    int getApiVersion();
-    //Deprecated since API_020
-    int getCapabilities();
-    //Deprecated since API_020
-    void getLibraryChooserIntent(out Intent i);
-    //Deprecated since API_020
-    void getSettingsIntent(out Intent i);
-
+    Bundle getConfig();
     void pause();
-
     void resume();
-
-    //Deprecated since API_020
     void browseFolders(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
-    //Deprecated since API_020
     void listSongsInFolder(String libraryIdentity, String folderIdentity, int maxResults, in Bundle paginationBundle, in Result callback);
-    //Deprecated since API_020
     void search(String libraryIdentity, String query, int maxResults, in Bundle paginationBundle, in Result callback);
 
-    /*
-     * API_020
-     */
-
-    Bundle getConfig();
-    ISubscription browse(String libraryIdentity, String folderIdentity, IBundleObserver bundleObserver);
-    ISubscription browseSongs(String libraryIdentity, String folderIdentity, IBundleObserver bundleObserver);
-    ISubscription search2(String libraryIdentity, String query, IBundleObserver bundleObserver);
 }

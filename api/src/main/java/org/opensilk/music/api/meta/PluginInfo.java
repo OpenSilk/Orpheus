@@ -48,6 +48,14 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
      * Internal use true if plugin shows in drawer
      */
     public transient boolean isActive = true;
+    /**
+     * Whether or not this library is protected by one of
+     * {@link org.opensilk.music.api.OrpheusApi#PERMISSION_BIND_LIBRARY_SERVICE} or
+     * {@link org.opensilk.music.api.OrpheusApi#PERMISSION_BIND_LIBRARY_SERVICE_PROTECTED}
+     * if not defined Orpheus will refuse to bind the service.
+     */
+    public boolean hasPermission = false;
+
 
     public PluginInfo(CharSequence title, CharSequence description, ComponentName componentName) {
         this.title = title;

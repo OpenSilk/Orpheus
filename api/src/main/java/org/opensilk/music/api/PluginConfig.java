@@ -18,19 +18,13 @@
 package org.opensilk.music.api;
 
 import android.content.ComponentName;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
-import java.util.Iterator;
 
 /**
  * Created by drew on 11/11/14.
  */
-public class Config {
+public class PluginConfig {
 
     /*
      * Capabilities the service exposes
@@ -66,28 +60,30 @@ public class Config {
      */
     public final ComponentName pickerComponent;
     /**
-     * Component for settings activity. The settings activity must process the
-     * {@link OrpheusApi#EXTRA_LIBRARY_ID} and only manipulate preferences concerning the
-     * given identity.
-     * <p>
-     * Although not required, it is preferable the activity utilizes
-     * {@link OrpheusApi#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
-     * current Orpheus theme.
+     * Contains optional config information
      */
-    public final ComponentName settingsComponent;
+    public final Bundle meta;
 
-    protected Config(int apiVersion,
-                     int capabilities,
-                     @NonNull ComponentName pickerComponent,
-                     @Nullable ComponentName settingsComponent) {
+    public static final String META_MENU_NAME_PICKER = "menu_picker";
+    public static final String META_SETTINGS_COMPONENT = "settingsComponent";
+    public static final String META_MENU_NAME_SETTINGS = "menu_settings";
+
+    protected PluginConfig(int apiVersion,
+                           int capabilities,
+                           @NonNull ComponentName pickerComponent,
+                           @NonNull Bundle meta) {
         this.apiVersion = apiVersion;
         this.capabilities = capabilities;
         this.pickerComponent = pickerComponent;
-        this.settingsComponent = settingsComponent;
+        this.meta = meta;
     }
 
     public boolean hasAbility(int ability) {
         return (capabilities & ability) != 0;
+    }
+
+    public <T> T getMeta(String key) {
+        return (T) meta.get(key);
     }
 
     public Bundle dematerialize() {
@@ -95,16 +91,16 @@ public class Config {
         b.putInt("_1", apiVersion);
         b.putInt("_2", capabilities);
         b.putParcelable("_3", pickerComponent);
-        b.putParcelable("_4", settingsComponent);
+        b.putBundle("_4", meta);
         return b;
     }
 
-    public static Config materialize(Bundle b) {
-        return new Config(
+    public static PluginConfig materialize(Bundle b) {
+        return new PluginConfig(
                 b.getInt("_1"),
                 b.getInt("_2"),
                 b.<ComponentName>getParcelable("_3"),
-                b.<ComponentName>getParcelable("_4")
+                b.getBundle("_4")
         );
     }
 
@@ -112,7 +108,7 @@ public class Config {
         private int apiVersion = OrpheusApi.API_VERSION;
         private int capabilities;
         private ComponentName pickerComponent;
-        private ComponentName settingsComponent;
+        private Bundle meta = new Bundle();
 
         public Builder setCapabilities(int capabilities) {
             this.capabilities = capabilities;
@@ -124,24 +120,36 @@ public class Config {
             return this;
         }
 
-        public Builder setPickerComponent(ComponentName pickerComponent) {
+        public Builder setPickerComponent(ComponentName pickerComponent, String menuName) {
             this.pickerComponent = pickerComponent;
+            meta.putString(META_MENU_NAME_PICKER, menuName);
             return this;
         }
 
-        public Builder setSettingsComponent(ComponentName settingsComponent) {
-            this.settingsComponent = settingsComponent;
+        /**
+         * Component for settings activity. The settings activity must process the
+         * {@link OrpheusApi#EXTRA_LIBRARY_ID} and only manipulate preferences concerning the
+         * given identity.
+         * <p>
+         * Although not required, it is preferable the activity utilizes
+         * {@link OrpheusApi#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
+         * current Orpheus theme.
+         */
+        public Builder setSettingsComponent(ComponentName settingsComponent, String menuName) {
+            addAbility(SETTINGS);
+            meta.putParcelable(META_SETTINGS_COMPONENT, settingsComponent);
+            meta.putString(META_MENU_NAME_SETTINGS, menuName);
             return this;
         }
 
-        public Config build() {
+        public PluginConfig build() {
             if (pickerComponent == null) {
                 throw new IllegalArgumentException("pickerComponent must not be null");
             }
-            if ((capabilities & SETTINGS) != 0 && settingsComponent == null) {
+            if ((capabilities & SETTINGS) != 0 && meta.getParcelable(META_SETTINGS_COMPONENT) == null) {
                 throw new IllegalArgumentException("You defined SETTINGS but left settingsComponent null");
             }
-            return new Config(apiVersion, capabilities, pickerComponent, settingsComponent);
+            return new PluginConfig(apiVersion, capabilities, pickerComponent, meta);
         }
 
     }

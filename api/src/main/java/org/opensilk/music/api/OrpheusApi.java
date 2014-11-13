@@ -37,6 +37,10 @@ public class OrpheusApi {
      */
     public static final String PERMISSION_BIND_LIBRARY_SERVICE = "org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE";
     /**
+     * Manifest permission declared by Orpheus. (this permission is signature protected)
+     */
+    public static final String PERMISSION_BIND_LIBRARY_SERVICE_PROTECTED = "org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE_PROTECTED";
+    /**
      * Intent extra containing {@link String} library identity, used in multiple places
      */
     public static final String EXTRA_LIBRARY_ID = "org.opensilk.music.api.LIBRARY_ID";
@@ -61,20 +65,6 @@ public class OrpheusApi {
      * Api version 0.2.0, used internally
      */
     public static final int API_020 = 20000;
-
-    @Deprecated
-    public static class Ability {
-        public static final int SEARCH = 1 << 0;
-        public static final int SETTINGS = 1 << 1;
-    }
-
-    @Deprecated
-    public static class Error {
-        public static final int UNKNOWN = -1;
-        public static final int RETRY = 1;
-        public static final int AUTH_FAILURE = 2;
-        public static final int NETWORK = 3;
-    }
 
     /**
      * Transforms Bundles passed to Orpheus into a {@link org.opensilk.music.api.model.spi.Bundleable} object

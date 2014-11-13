@@ -21,6 +21,8 @@ import android.os.Bundle;
 
 import java.util.List;
 
+import org.opensilk.music.api.exception.ParcelableException;
+
 oneway interface Result {
     /**
      * @param items list of objects, may be any object (or combination) in the model package
@@ -28,9 +30,9 @@ oneway interface Result {
      *              need to continue retrieving results, a null bundle is
      *              interpreted as end of results.
      */
-    void success(in List<Bundle> items, in Bundle paginationBundle);
+    void onNext(in List<Bundle> items, in Bundle paginationBundle);
     /**
-     * Stub
+     * @param A special kind of execption that can pass through aidl
      */
-    void failure(int code, String reason);
+    void onError(in ParcelableException e);
 }

@@ -18,16 +18,13 @@
 package org.opensilk.music.api;
 
 import android.content.ComponentName;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.shadows.ShadowLog;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -36,13 +33,13 @@ import static org.fest.assertions.api.Assertions.assertThat;
  */
 @RunWith(RobolectricTestRunner.class)
 @org.robolectric.annotation.Config( manifest = org.robolectric.annotation.Config.NONE)
-public class ConfigTest {
+public class PluginConfigTest {
 
-    Config config_1;
+    PluginConfig config_1;
 
     @Before
     public void setUp() {
-        config_1 = new Config.Builder().addAbility(Config.SEARCHABLE).addAbility(Config.SETTINGS)
+        config_1 = new PluginConfig.Builder().addAbility(PluginConfig.SEARCHABLE).addAbility(PluginConfig.SETTINGS)
                 .setPickerComponent(new ComponentName("com.test", "TestClass"))
                 .setSettingsComponent(new ComponentName("com.test", "TestClassSettings"))
                 .build();
@@ -55,7 +52,7 @@ public class ConfigTest {
         b.writeToParcel(p, 0);
         p.setDataPosition(0);
         Bundle b2 = Bundle.CREATOR.createFromParcel(p);
-        Config fromB = Config.materialize(b2);
+        PluginConfig fromB = PluginConfig.materialize(b2);
         assertThat(config_1.apiVersion).isEqualTo(fromB.apiVersion);
         assertThat(config_1.capabilities).isEqualTo(fromB.capabilities);
         assertThat(config_1.pickerComponent).isEqualTo(fromB.pickerComponent);
