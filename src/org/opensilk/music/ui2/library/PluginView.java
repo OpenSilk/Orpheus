@@ -22,12 +22,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.music.R;
+import org.opensilk.music.api.PluginConfig;
 
 import javax.inject.Inject;
 
@@ -75,6 +77,10 @@ public class PluginView extends RelativeLayout {
     }
 
     public void showLanding() {
+        try {
+            String name = presenter.pluginConfig.getMeta(PluginConfig.META_MENU_NAME_PICKER);
+            if (!TextUtils.isEmpty(name)) chooser.setText(name);
+        } catch (NullPointerException ignored) {/*pluginConfig shouldn't be null but shit happens*/}
         chooser.setVisibility(VISIBLE);
     }
 
