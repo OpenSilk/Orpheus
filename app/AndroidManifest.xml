@@ -44,6 +44,10 @@
     <!-- sdcard access Kitkat+ -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
+    <!-- permissions for librarys -->
+    <uses-permission android:name="org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE"/>
+    <uses-permission android:name="org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE_PROTECTED"/>
+
     <!-- Casting is currently only supported over wifi -->
     <uses-feature android:name="android.hardware.wifi"/>
 

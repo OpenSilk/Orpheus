@@ -25,6 +25,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
@@ -63,6 +64,12 @@ public class PluginUtil {
         for (ResolveInfo resolveInfo : resolveInfos) {
             if (resolveInfo.serviceInfo == null)
                 continue;
+            boolean hasPermission = false;
+            String permission = resolveInfo.serviceInfo.permission;
+            if (TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE)
+                    || TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE_PROTECTED)) {
+                hasPermission = true;
+            }
             CharSequence title = resolveInfo.loadLabel(pm);
             ComponentName cn = getComponentName(resolveInfo);
             Drawable icon = resolveInfo.loadIcon(pm);
@@ -75,6 +82,7 @@ public class PluginUtil {
                 description = null;
             }
             PluginInfo pluginInfo = new PluginInfo(title, description, cn);
+            pluginInfo.hasPermission = hasPermission;
             if (wantIcon) pluginInfo.icon = icon;
             for (ComponentName c : disabledPlugins) {
                 if (c.equals(pluginInfo.componentName)) {

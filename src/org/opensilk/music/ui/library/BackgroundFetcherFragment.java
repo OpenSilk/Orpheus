@@ -25,6 +25,7 @@ import android.support.v4.app.FragmentActivity;
 
 import org.opensilk.music.R;
 
+import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.api.meta.LibraryInfo;
 
 import com.andrew.apollo.utils.MusicUtils;
@@ -205,7 +206,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
             try {
                 RemoteLibrary l = mLibrary.getService();
                 if (l != null) {
-                    int apiVersion = l.getApiVersion();
+                    //int apiVersion = l.getApiVersion();
                     //TODO version check
                     {
                         l.listSongsInFolder(mLibraryInfo.libraryId, mLibraryInfo.folderId, STEP, bundle, result);
@@ -313,7 +314,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
         }
 
         @Override
-        public synchronized void success(List<Bundle> items, Bundle paginationBundle) throws RemoteException {
+        public synchronized void onNext(List<Bundle> items, Bundle paginationBundle) throws RemoteException {
             this.paginationBundle = paginationBundle;
             songs = new Song[items.size()];
             int ii=0;
@@ -328,7 +329,7 @@ public class BackgroundFetcherFragment extends Fragment implements RemoteLibrary
         }
 
         @Override
-        public synchronized void failure(int code, String reason) throws RemoteException {
+        public synchronized void onError(ParcelableException e) throws RemoteException {
             done = true;
             notifyAll();
         }

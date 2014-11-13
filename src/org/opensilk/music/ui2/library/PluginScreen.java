@@ -29,6 +29,7 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.api.PluginConfig;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
@@ -104,6 +105,7 @@ public class PluginScreen extends Screen {
         final Context appContext;
 
         LibraryInfo libraryInfo;
+        PluginConfig pluginConfig;
 
         @Inject
         public Presenter(PluginInfo pluginInfo,
@@ -134,11 +136,16 @@ public class PluginScreen extends Screen {
             setupActionBar();
             if (savedInstanceState != null) {
                 libraryInfo = savedInstanceState.getParcelable("libraryinfo");
-                checkForDefaultLibrary();
+                Bundle b = savedInstanceState.getBundle("pluginConfig");
+                if (b != null) pluginConfig = PluginConfig.materialize(b);
+                if (pluginConfig == null) {
+                    getConfig();
+                } else {
+                    checkForDefaultLibrary();
+                }
             } else {
                 libraryInfo = settings.getDefaultLibraryInfo(pluginInfo);
-                // TODO might not need to check everytime
-                checkApiVersion();
+                getConfig();
             }
         }
 
@@ -147,6 +154,7 @@ public class PluginScreen extends Screen {
             Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             outState.putParcelable("libraryinfo", libraryInfo);
+            outState.putBundle("pluginConfig", pluginConfig != null ? pluginConfig.dematerialize() : null);
         }
 
         @Override
@@ -156,26 +164,32 @@ public class PluginScreen extends Screen {
             bus.unregister(this);
         }
 
-        void checkApiVersion() {
-            connection.getApiVersion(pluginInfo)
-                    .subscribe(new Action1<Integer>() {
-                        @Override
-                        public void call(Integer version) {
-                            if (version >= OrpheusApi.API_020) {
-                                checkForDefaultLibrary();
-                            } else {
-                                if (getView() != null) getView().showUpgradeAlert(
-                                        pluginInfo.title.toString(),
-                                        pluginInfo.componentName.getPackageName()
-                                );
-                            }
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            bus.post(new MakeToast(R.string.err_connecting_library));
-                        }
-                    });
+        void getConfig() {
+            if (isApi010()) return;
+            connection.getConfig(pluginInfo).subscribe(new Action1<PluginConfig>() {
+                @Override
+                public void call(PluginConfig config) {
+                    Presenter.this.pluginConfig = config;
+                    checkForDefaultLibrary();
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    bus.post(new MakeToast(R.string.err_connecting_library));
+                }
+            });
+        }
+
+        boolean isApi010() {
+            // Api 010 doesnt have a getConfig() method it also doesnt
+            // define any permissions so im using the lack of permissions
+            // as an indication of api 010 and alerting the user to upgrade;
+            if (pluginInfo.hasPermission) return false;
+            if (getView() != null) getView().showUpgradeAlert(
+                    pluginInfo.title.toString(),
+                    pluginInfo.componentName.getPackageName()
+            );
+            return true;
         }
 
         void checkForDefaultLibrary() {
@@ -187,25 +201,15 @@ public class PluginScreen extends Screen {
         }
 
         void openPicker() {
-            connection.getLibraryChooserIntent(pluginInfo)
-                    .subscribe(new Action1<Intent>() {
-                        @Override
-                        public void call(Intent intent) {
-                            bus.post(new StartActivityForResult(intent, StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            bus.post(new MakeToast(R.string.err_connecting_library));
-                        }
-                    });
+            bus.post(new StartActivityForResult(new Intent().setComponent(pluginConfig.pickerComponent),
+                    StartActivityForResult.PLUGIN_REQUEST_LIBRARY));
         }
 
         void openLibrary() {
             Timber.v("openLibrary()");
             PluginView v = getView();
             if (v == null) return;
-            LibraryScreen screen = new LibraryScreen(pluginInfo, libraryInfo);
+            LibraryScreen screen = new LibraryScreen(pluginInfo, pluginConfig, libraryInfo);
             AppFlow.get(v.getContext()).goTo(screen);
         }
 

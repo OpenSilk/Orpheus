@@ -52,7 +52,7 @@ public class SearchAdapter extends FolderListArrayAdapter {
             mLoadingInProgress = true;
             RemoteLibrary l = mLibrary.getService();
             if (l != null) {
-                final int apiVersion = l.getApiVersion();
+                //final int apiVersion = l.getApiVersion();
                 //TODO api check
                 {
                     l.search(mLibraryInfo.libraryId, this.query,

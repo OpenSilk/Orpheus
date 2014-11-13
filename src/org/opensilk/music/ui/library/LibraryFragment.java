@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.music.R;
+import org.opensilk.music.api.PluginConfig;
 import org.opensilk.music.api.meta.LibraryInfo;
 
 import com.andrew.apollo.utils.NavUtils;
@@ -197,7 +198,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
             // set title (hacks)
 //            mActionBarHelper.setTitle(mPluginInfo.title);
             // search
-            if ((mCapabilities & OrpheusApi.Ability.SEARCH) != 0) {
+            if ((mCapabilities & PluginConfig.SEARCHABLE) != 0) {
                 inflater.inflate(R.menu.search, menu);
             }
 
@@ -218,7 +219,7 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
             }
 
             // settings
-            if ((mCapabilities & OrpheusApi.Ability.SETTINGS) != 0) {
+            if ((mCapabilities & PluginConfig.SETTINGS) != 0) {
                 inflater.inflate(R.menu.library_settings, menu);
                 if (res != null) {
                     try {
@@ -279,22 +280,22 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
 
     @Override
     public void onConnected() {
-        if (!mFromSavedInstance) {
-            try {
-                if (TextUtils.isEmpty(mLibraryIdentity)) {
-                    Intent i = new Intent();
-                    mLibrary.getService().getLibraryChooserIntent(i);
-                    if (i.getComponent() != null) {
-                        i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
-                        startActivityForResult(i, REQUEST_LIBRARY);
-                    }
-                } else {
-                    initFolderFragment();
-                }
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
+//        if (!mFromSavedInstance) {
+//            try {
+//                if (TextUtils.isEmpty(mLibraryIdentity)) {
+//                    Intent i = new Intent();
+////                    mLibrary.getService().getLibraryChooserIntent(i);
+//                    if (i.getComponent() != null) {
+//                        i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
+//                        startActivityForResult(i, REQUEST_LIBRARY);
+//                    }
+//                } else {
+//                    initFolderFragment();
+//                }
+//            } catch (RemoteException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
     @Override
@@ -352,26 +353,26 @@ public class LibraryFragment extends ScopedDaggerFragment implements BackButtonL
     }
 
     private void openLibrarySettings() {
-        try {
-            Intent i = new Intent();
-            mLibrary.getService().getSettingsIntent(i);
-            if (i.getComponent() != null) {
-                i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
-                i.putExtra(OrpheusApi.EXTRA_LIBRARY_ID, mLibraryIdentity);
-                startActivityForResult(i, REQUEST_SETTINGS);
-            }
-        } catch (RemoteException|NullPointerException e) {
-            //TODO
-        }
+//        try {
+//            Intent i = new Intent();
+//            mLibrary.getService().getSettingsIntent(i);
+//            if (i.getComponent() != null) {
+//                i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeHelper.isLightTheme(getActivity()));
+//                i.putExtra(OrpheusApi.EXTRA_LIBRARY_ID, mLibraryIdentity);
+//                startActivityForResult(i, REQUEST_SETTINGS);
+//            }
+//        } catch (RemoteException|NullPointerException e) {
+//            //TODO
+//        }
     }
 
     private void resolveCapabilities() {
-        try {
-            mCapabilities = mLibrary.getService().getCapabilities();
-            getActivity().invalidateOptionsMenu();
-        } catch (RemoteException|NullPointerException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            mCapabilities = mLibrary.getService().getCapabilities();
+//            getActivity().invalidateOptionsMenu();
+//        } catch (RemoteException|NullPointerException e) {
+//            e.printStackTrace();
+//        }
     }
 
     class FragmentBusMonitor {

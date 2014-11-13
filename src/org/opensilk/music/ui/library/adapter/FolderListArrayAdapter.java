@@ -22,6 +22,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 
+import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.api.meta.LibraryInfo;
 
 import org.opensilk.music.api.OrpheusApi;
@@ -72,7 +73,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
             mLoadingInProgress = true;
             RemoteLibrary l = mLibrary.getService();
             if (l != null) {
-                final int apiVersion = l.getApiVersion();
+                //final int apiVersion = l.getApiVersion();
                 //TODO api check
                 {
                     l.browseFolders(mLibraryInfo.libraryId, mLibraryInfo.folderId,
@@ -102,7 +103,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
     @Override
     protected Card makeCard(Bundle data) {
         try {
-            Bundleable b = OrpheusApi.transformBundle(data);
+            Bundleable b = OrpheusApi.materializeBundle(data);
             if (b instanceof Folder) {
                 FolderCard c = new FolderCard(getContext(), (Folder)b);
                 mInjector.inject(c);
@@ -154,7 +155,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
         @Override
         @DebugLog
-        public void success(final List<Bundle> items, final Bundle paginationBundle) throws RemoteException {
+        public void onNext(final List<Bundle> items, final Bundle paginationBundle) throws RemoteException {
             final FolderListArrayAdapter a = adapter.get();
             if (a != null) {
                 a.runOnUiThread(new Runnable() {
@@ -168,8 +169,9 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
 
         @Override
         @DebugLog
-        public void failure(int code, String reason) throws RemoteException {
-            if (code == OrpheusApi.Error.RETRY) {
+        public void onError(ParcelableException e) throws RemoteException {
+            int code = e.getCode();
+            if (code == ParcelableException.RETRY) {
                 final FolderListArrayAdapter a = adapter.get();
                 if (a != null) {
                     a.runOnUiThread(new Runnable() {
@@ -180,7 +182,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                         }
                     }, a.mRetryAttempts > 0 ? 1000 * a.mRetryAttempts : 1000);
                 }
-            } else if (code == OrpheusApi.Error.NETWORK) {
+            } else if (code == ParcelableException.NETWORK) {
                 final FolderListArrayAdapter a = adapter.get();
                 if (a != null) {
                     a.runOnUiThread(new Runnable() {
@@ -203,7 +205,7 @@ public class FolderListArrayAdapter extends AbsEndlessListArrayAdapter {
                         @Override
                         public void run() {
                             if (a.mCallback != null) {
-                                a.mCallback.onLoadingFailure(err == OrpheusApi.Error.AUTH_FAILURE);
+                                a.mCallback.onLoadingFailure(err == ParcelableException.AUTH_FAILURE);
                             }
                         }
                     });

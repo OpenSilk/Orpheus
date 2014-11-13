@@ -16,10 +16,13 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -32,7 +35,9 @@ import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
+import org.opensilk.music.api.PluginConfig;
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.Song;
@@ -80,10 +85,12 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
 public class LibraryScreen extends Screen {
 
     final PluginInfo pluginInfo;
+    final PluginConfig pluginConfig;
     final LibraryInfo libraryInfo;
 
-    public LibraryScreen(PluginInfo pluginInfo, LibraryInfo libraryInfo) {
+    public LibraryScreen(PluginInfo pluginInfo, PluginConfig pluginConfig, LibraryInfo libraryInfo) {
         this.pluginInfo = pluginInfo;
+        this.pluginConfig = pluginConfig;
         this.libraryInfo = libraryInfo;
     }
 
@@ -115,6 +122,11 @@ public class LibraryScreen extends Screen {
             return screen.libraryInfo;
         }
 
+        @Provides
+        public PluginConfig provideLibraryConfig() {
+            return screen.pluginConfig;
+        }
+
     }
 
     @Singleton
@@ -122,6 +134,7 @@ public class LibraryScreen extends Screen {
 
         final LibraryConnection connection;
         final PluginInfo pluginInfo;
+        final PluginConfig pluginConfig;
         final LibraryInfo libraryInfo;
         final ArtworkRequestManager requestor;
         final Context appContext;
@@ -144,6 +157,7 @@ public class LibraryScreen extends Screen {
         @Inject
         public Presenter(LibraryConnection connection,
                          PluginInfo pluginInfo,
+                         final PluginConfig pluginConfig,
                          LibraryInfo libraryInfo,
                          ArtworkRequestManager requestor,
                          @ForApplication Context appContext,
@@ -153,6 +167,7 @@ public class LibraryScreen extends Screen {
                          MusicServiceConnection musicService) {
             this.connection = connection;
             this.pluginInfo = pluginInfo;
+            this.pluginConfig = pluginConfig;
             this.libraryInfo = libraryInfo;
             this.requestor = requestor;
             this.appContext = appContext;
@@ -262,7 +277,7 @@ public class LibraryScreen extends Screen {
             String name = item.getName();
             if (TextUtils.isEmpty(identity)) return; //Shouldnt happen
             LibraryInfo newInfo = libraryInfo.buildUpon(identity, name);
-            AppFlow.get(context).goTo(new LibraryScreen(pluginInfo, newInfo));
+            AppFlow.get(context).goTo(new LibraryScreen(pluginInfo, pluginConfig, newInfo));
         }
 
         public void startWork(OverflowAction action, Bundleable item) {
@@ -281,20 +296,16 @@ public class LibraryScreen extends Screen {
         }
 
         void setupActionBar() {
-            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
-                    .setTitle(pluginInfo.title)
-                    .setSubtitle(libraryInfo.libraryName)
-                    .build());
-            connection.getCapabilities(pluginInfo).subscribe(new Action1<Integer>() {
-                @Override
-                public void call(Integer capabilities) {
-                    actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon()
-                            .withMenuConfig(createMenuConfig(capabilities)).build());
-                }
-            });
+            actionBarOwner.setConfig(
+                    new ActionBarOwner.Config.Builder()
+                            .setTitle(pluginInfo.title)
+                            .setSubtitle(libraryInfo.libraryName)
+                            .withMenuConfig(createMenuConfig())
+                            .build()
+            );
         }
 
-        ActionBarOwner.MenuConfig createMenuConfig(int capabilities) {
+        ActionBarOwner.MenuConfig createMenuConfig() {
             List<Integer> menus = new ArrayList<>();
             List<ActionBarOwner.CustomMenuItem> customMenus = new ArrayList<>();
 
@@ -304,38 +315,24 @@ public class LibraryScreen extends Screen {
             }
 
             // search
-            if (hasAbility(capabilities, OrpheusApi.Ability.SEARCH)) {
+            if (pluginConfig.hasAbility(PluginConfig.SEARCHABLE)) {
                 menus.add(R.menu.search);
             }
 
-            Resources res = null;
-            try {
-                res = appContext.getPackageManager()
-                        .getResourcesForApplication(pluginInfo.componentName.getPackageName());
-            } catch (PackageManager.NameNotFoundException ignored) {}
-
-            if (res != null) {
-                // device selection
-                try {
-                    String change = res.getString(res.getIdentifier("menu_change_source",
-                            "string", pluginInfo.componentName.getPackageName()));
-                    customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_change_source, change));
-                } catch (Resources.NotFoundException ignored) {
-                    menus.add(R.menu.change_source);
-                }
-                // library settings
-                if (hasAbility(capabilities, OrpheusApi.Ability.SETTINGS)) {
-                    try {
-                        String settings = res.getString(res.getIdentifier("menu_library_settings",
-                                "string", pluginInfo.componentName.getPackageName()));
-                        customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_library_settings, settings));
-                    } catch (Resources.NotFoundException ignored) {
-                        menus.add(R.menu.library_settings);
-                    }
-                }
+            // device selection
+            String selectName = pluginConfig.getMeta(PluginConfig.META_MENU_NAME_PICKER);
+            if (!TextUtils.isEmpty(selectName)) {
+                customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_change_source, selectName));
             } else {
                 menus.add(R.menu.change_source);
-                if (hasAbility(capabilities, OrpheusApi.Ability.SETTINGS)) {
+            }
+
+            // library settings
+            if (pluginConfig.hasAbility(PluginConfig.SETTINGS)) {
+                String settingsName = pluginConfig.getMeta(PluginConfig.META_MENU_NAME_SETTINGS);
+                if (!TextUtils.isEmpty(settingsName)) {
+                    customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_library_settings, settingsName));
+                } else {
                     menus.add(R.menu.library_settings);
                 }
             }
@@ -372,25 +369,12 @@ public class LibraryScreen extends Screen {
                             }
                             return true;
                         case R.id.menu_library_settings:
-                            connection.getSettingsIntent(pluginInfo)
-                                    .subscribe(new Action1<Intent>() {
-                                        @Override
-                                        public void call(Intent intent) {
-                                            if (intent.getComponent() != null) {
-                                                intent.putExtra(OrpheusApi.EXTRA_LIBRARY_ID, libraryInfo.libraryId);
-                                                intent.putExtra(OrpheusApi.EXTRA_LIBRARY_INFO, libraryInfo);
-                                                bus.post(new StartActivityForResult(intent,
-                                                        StartActivityForResult.PLUGIN_REQUEST_SETTINGS));
-                                            } else {
-                                                bus.post(new MakeToast(R.string.err_opening_settings));
-                                            }
-                                        }
-                                    }, new Action1<Throwable>() {
-                                        @Override
-                                        public void call(Throwable throwable) {
-                                            bus.post(new MakeToast(R.string.err_opening_settings));
-                                        }
-                                    });
+                            Intent intent = new Intent()
+                                    .setComponent(pluginConfig.<ComponentName>getMeta(PluginConfig.META_SETTINGS_COMPONENT))
+                                    .putExtra(OrpheusApi.EXTRA_LIBRARY_ID, libraryInfo.libraryId)
+                                    .putExtra(OrpheusApi.EXTRA_LIBRARY_INFO, libraryInfo);
+                            bus.post(new StartActivityForResult(intent,
+                                    StartActivityForResult.PLUGIN_REQUEST_SETTINGS));
                             return true;
                         default:
                             try {
@@ -406,10 +390,6 @@ public class LibraryScreen extends Screen {
                     }
                 }
             };
-        }
-
-        boolean hasAbility(int capabilities, int ability) {
-            return (capabilities & ability) != 0;
         }
 
         static int[] toArray(Collection<Integer> collection) {
@@ -446,24 +426,29 @@ public class LibraryScreen extends Screen {
                 if (e instanceof RemoteException) {
                     connection.connectionManager.onException(pluginInfo.componentName);
                     loadMore(token, backoff);
-                } else if (e instanceof LibraryConnection.ResultException) {
-                    int code = ((LibraryConnection.ResultException) e).getCode();
+                } else if (e instanceof ParcelableException) {
+                    int code = ((ParcelableException) e).getCode();
                     switch (code) {
-                        case OrpheusApi.Error.NETWORK:
-                            //TODO
-                            loadMore(token, backoff);
+                        case ParcelableException.NETWORK:
+                            ConnectivityManager cm = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                            NetworkInfo info = cm.getActiveNetworkInfo();
+                            if (info != null && info.isConnectedOrConnecting()) {
+                                loadMore(token, backoff);
+                            } else {
+                                bus.post(new MakeToast(R.string.err_offline));
+                            }
                             break;
-                        case OrpheusApi.Error.AUTH_FAILURE:
+                        case ParcelableException.AUTH_FAILURE:
                             settings.removeDefaultLibraryInfo(pluginInfo);
                             bus.post(new MakeToast(R.string.err_authentication));
                             if (getView() != null) {
                                 AppFlow.get(getView().getContext()).resetTo(new PluginScreen(pluginInfo));
                             }
                             break;
-                        case OrpheusApi.Error.RETRY:
+                        case ParcelableException.RETRY:
                             loadMore(token, backoff);
                             break;
-                        case OrpheusApi.Error.UNKNOWN:
+                        case ParcelableException.UNKNOWN:
                             connection.connectionManager.onException(pluginInfo.componentName);
                             loadMore(token, backoff);
                             break;

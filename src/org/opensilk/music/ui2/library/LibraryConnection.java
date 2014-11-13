@@ -17,12 +17,13 @@
 
 package org.opensilk.music.ui2.library;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 
+import org.opensilk.music.api.PluginConfig;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
+import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.spi.Bundleable;
@@ -35,13 +36,11 @@ import java.util.Map;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import static org.opensilk.common.rx.RxUtils.observeOnMain;
 import static org.opensilk.common.util.UncheckedThrow.rethrow;
-import static org.opensilk.music.MusicServiceConnection.wrapForRetry;
 
 /**
  * Created by drew on 10/20/14.
@@ -64,19 +63,6 @@ public class LibraryConnection {
         }
     }
 
-    public static class ResultException extends Exception {
-        final int code;
-
-        public ResultException(String detailMessage, int code) {
-            super(detailMessage);
-            this.code = code;
-        }
-
-        public int getCode() {
-            return code;
-        }
-    }
-
     class Callback extends org.opensilk.music.api.callback.Result.Stub {
 
         final LibraryInfo libraryInfo;
@@ -90,11 +76,11 @@ public class LibraryConnection {
         }
 
         @Override
-        public void success(List<Bundle> items, Bundle paginationBundle) throws RemoteException {
+        public void onNext(List<Bundle> items, Bundle paginationBundle) throws RemoteException {
             List<Bundleable> list = new ArrayList<>(items.size());
             for (Bundle b : items) {
                 try {
-                    list.add(OrpheusApi.transformBundle(b));
+                    list.add(OrpheusApi.materializeBundle(b));
                 } catch (Exception e) {
                     if (!subscriber.isUnsubscribed()) subscriber.onError(e);
                     return;
@@ -108,9 +94,9 @@ public class LibraryConnection {
         }
 
         @Override
-        public void failure(int code, String reason) throws RemoteException {
+        public void onError(ParcelableException e) throws RemoteException {
             if (subscriber.isUnsubscribed()) return;
-            subscriber.onError(new ResultException(reason, code));
+            subscriber.onError(e);
         }
     }
 
@@ -208,96 +194,18 @@ public class LibraryConnection {
                 });
     }
 
-    public Observable<Integer> getApiVersion(final PluginInfo pluginInfo) {
-        return observeOnMain(getObservable(pluginInfo).map(new Func1<RemoteLibrary, Integer>() {
+    public Observable<PluginConfig> getConfig(final PluginInfo pluginInfo) {
+        return observeOnMain(getObservable(pluginInfo).map(new Func1<RemoteLibrary, PluginConfig>() {
             @Override
-            public Integer call(RemoteLibrary remoteLibrary) {
+            public PluginConfig call(RemoteLibrary remoteLibrary) {
                 try {
-                    return remoteLibrary.getApiVersion();
+                    return PluginConfig.materialize(remoteLibrary.getConfig());
                 } catch (RemoteException e) {
                     connectionManager.onException(pluginInfo.componentName);
                     throw rethrow(e);
                 }
             }
         }));
-    }
-
-    public Observable<Integer> getCapabilities(final PluginInfo pluginInfo) {
-        return observeOnMain(wrapForRetry(new Func0<Observable<Integer>>() {
-            @Override
-            public Observable<Integer> call() {
-                return _capabilities(pluginInfo);
-            }
-        }));
-    }
-
-    public Observable<Intent> getLibraryChooserIntent(final PluginInfo pluginInfo) {
-        return observeOnMain(wrapForRetry(new Func0<Observable<Intent>>() {
-            @Override
-            public Observable<Intent> call() {
-                return _libraryChooserIntent(pluginInfo);
-            }
-        }));
-    }
-
-    public Observable<Intent> getSettingsIntent(final PluginInfo pluginInfo) {
-        return observeOnMain(wrapForRetry(new Func0<Observable<Intent>>() {
-            @Override
-            public Observable<Intent> call() {
-                return _settingsIntent(pluginInfo);
-            }
-        }));
-    }
-
-    /*
-     * Wrapped calls
-     */
-
-    public Observable<Integer> _capabilities(final PluginInfo pluginInfo) {
-        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, Integer>() {
-            @Override
-            public Integer call(RemoteLibrary remoteLibrary) {
-                try {
-                    return remoteLibrary.getCapabilities();
-                } catch (RemoteException e) {
-                    connectionManager.onException(pluginInfo.componentName);
-                    throw rethrow(e);
-                }
-            }
-        });
-    }
-
-    Observable<Intent> _libraryChooserIntent(final PluginInfo pluginInfo) {
-        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, Intent>() {
-            @Override
-            public Intent call(RemoteLibrary remoteLibrary) {
-                try {
-                    Intent intent = new Intent();
-                    remoteLibrary.getLibraryChooserIntent(intent);
-                    if (intent.getComponent() != null) return intent;
-                } catch (RemoteException e) {
-                    connectionManager.onException(pluginInfo.componentName);
-                    throw rethrow(e);
-                }
-                throw new NullPointerException("Library chooser intent not populated");
-            }
-        });
-    }
-
-    Observable<Intent> _settingsIntent(final PluginInfo pluginInfo) {
-        return getObservable(pluginInfo).map(new Func1<RemoteLibrary, Intent>() {
-            @Override
-            public Intent call(RemoteLibrary remoteLibrary) {
-                try {
-                    Intent intent = new Intent();
-                    remoteLibrary.getSettingsIntent(intent);
-                    return intent;
-                } catch (RemoteException e) {
-                    connectionManager.onException(pluginInfo.componentName);
-                    throw rethrow(e);
-                }
-            }
-        });
     }
 
 }

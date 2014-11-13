@@ -187,5 +187,6 @@
     <string name="err_authentication">Error not authorized… Please login again</string>
     <string name="err_connecting_library">Error connecting library</string>
     <string name="err_unable_to_fetch_songs">Unable to get songs</string>
+    <string name="err_offline">You are offline</string>
 
 </resources>
