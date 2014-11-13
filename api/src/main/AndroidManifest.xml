@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.opensilk.music.api">
 
+    <permission android:name="org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE"
+                android:protectionLevel="signature"/>
+
     <application/>
 
 </manifest>

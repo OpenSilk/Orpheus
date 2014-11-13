@@ -28,12 +28,23 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.opensilk.music.api.callback.Result;
+import org.opensilk.music.api.exception.ParcelableException;
+import org.opensilk.music.api.internal.BundleSubscriber;
+import org.opensilk.music.api.internal.ISubscriptionImpl;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.model.Folder;
+import org.opensilk.music.api.spi.IBundleObserver;
+import org.opensilk.music.api.spi.ISubscription;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.Observable;
+import rx.Producer;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by drew on 6/9/14.
@@ -106,6 +117,10 @@ public abstract class RemoteLibraryService extends Service {
     protected abstract void search(@NonNull String libraryIdentity, @NonNull String query, int maxResults,
                                    @Nullable Bundle paginationBundle, @NonNull Result callback);
 
+    protected abstract Observable<Bundle> browse(@NonNull String libraryIdentity, @Nullable String folderIdentity);
+    protected abstract Observable<Bundle> browseSongs(@NonNull String libraryIdentity, @Nullable String folderIdentity);
+    protected abstract Observable<Bundle> search(@NonNull String libraryIdentity, @NonNull String query);
+
     private RemoteLibrary.Stub mBinder;
 
     @Override
@@ -149,22 +164,22 @@ public abstract class RemoteLibraryService extends Service {
 
         @Override @Deprecated
         public int getApiVersion() throws RemoteException {
-            return getConfig().apiVersion;
+            return Config.materialize(getConfig()).apiVersion;
         }
 
         @Override @Deprecated
         public int getCapabilities() throws RemoteException {
-            return getConfig().capabilities;
+            return Config.materialize(getConfig()).capabilities;
         }
 
         @Override @Deprecated
         public void getLibraryChooserIntent(Intent i) throws RemoteException {
-            copyIntent(i, getConfig().pickerIntent);
+            copyIntent(i, new Intent().setComponent(Config.materialize(getConfig()).pickerComponent));
         }
 
         @Override @Deprecated
         public void getSettingsIntent(Intent i) throws RemoteException {
-            copyIntent(i, getConfig().settingsIntent);
+            copyIntent(i, new Intent().setComponent(Config.materialize(getConfig()).settingsComponent));
         }
 
         @Override
@@ -196,8 +211,29 @@ public abstract class RemoteLibraryService extends Service {
         }
 
         @Override
-        public Config getConfig() throws RemoteException {
-            return service.getConfig();
+        public Bundle getConfig() throws RemoteException {
+            return service.getConfig().dematerialize();
+        }
+
+        @Override
+        public ISubscription browse(String libraryIdentity, String folderIdentity, IBundleObserver bundleObserver) throws RemoteException {
+            final BundleSubscriber s = new BundleSubscriber(bundleObserver);
+            service.browse(libraryIdentity, folderIdentity).subscribe(s);
+            return new ISubscriptionImpl(s);
+        }
+
+        @Override
+        public ISubscription browseSongs(String libraryIdentity, String folderIdentity, IBundleObserver bundleObserver) throws RemoteException {
+            final BundleSubscriber s = new BundleSubscriber(bundleObserver);
+            service.browseSongs(libraryIdentity, folderIdentity).subscribe(s);
+            return new ISubscriptionImpl(s);
+        }
+
+        @Override
+        public ISubscription search2(String libraryIdentity, String query, IBundleObserver bundleObserver) throws RemoteException {
+            final BundleSubscriber s = new BundleSubscriber(bundleObserver);
+            service.search(libraryIdentity, query).subscribe(s);
+            return new ISubscriptionImpl(s);
         }
 
         //Notify user they need to update Orpheus to use the new plugins

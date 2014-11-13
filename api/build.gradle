@@ -73,6 +73,7 @@ tasks.whenTaskAdded { task ->
 
 dependencies {
     compile 'com.android.support:support-annotations:21.0.0'
+    compile 'io.reactivex:rxjava:1.0.0-rc.6'
 
     androidTestCompile('junit:junit:4.11')
     androidTestCompile('org.robolectric:robolectric:2.3') {

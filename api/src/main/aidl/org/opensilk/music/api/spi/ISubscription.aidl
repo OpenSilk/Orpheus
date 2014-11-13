@@ -15,9 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.api;
+package org.opensilk.music.api.spi;
 
 /**
- * Created by drew on 11/11/14.
+ * Created by drew on 11/12/14.
  */
-parcelable Config;
+interface ISubscription {
+    void unsubscribe();
+    boolean isUnsubscribed();
+    void request(long n);
+}

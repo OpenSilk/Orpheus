@@ -15,17 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.api;
+package org.opensilk.music.api.exception;
 
-import android.os.Bundle;
+import android.os.Parcel;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.opensilk.music.api.model.Folder;
-import org.opensilk.music.api.model.spi.Bundleable;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.io.IOException;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -34,25 +33,18 @@ import static org.fest.assertions.api.Assertions.assertThat;
  */
 @RunWith(RobolectricTestRunner.class)
 @Config( manifest = Config.NONE)
-public class OrpheusApiTest {
+public class ParcelableExceptionTest {
 
     @Test
-    public void ensureTransformBundleWorks() throws Exception {
-        Folder f = new Folder.Builder().setIdentity("1").setName("Folder1").build();
-        Bundle b = f.toBundle();
-
-        Bundleable b2 = OrpheusApi.materializeBundle(b);
-        Assert.assertTrue((b2 instanceof Folder));
-        assertThat((Folder) b2).isEqualTo(f);
-
-        Folder f2 = OrpheusApi.materializeBundle(Folder.class, b);
-        assertThat(f).isEqualTo(f2);
+    public void testParcelableExceptionWorks() {
+        ParcelableException ex =
+                new ParcelableException(ParcelableException.NETWORK, new IOException("No network"));
+        Parcel p = Parcel.obtain();
+        ex.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        ParcelableException fromP = ParcelableException.CREATOR.createFromParcel(p);
+        assertThat(ex.getCode() == fromP.getCode());
+        assertThat(ex.getCause().toString().equals(fromP.getCause().toString()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void ensureMalformedBundleThrows() throws Exception {
-        Bundle b =  new Folder.Builder().setIdentity("1").setName("Folder1").build().toBundle();
-        b.putString("clz", null);
-        Folder f = OrpheusApi.materializeBundle(Folder.class, b);
-    }
 }

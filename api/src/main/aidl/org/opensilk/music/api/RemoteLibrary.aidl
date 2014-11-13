@@ -20,9 +20,10 @@ package org.opensilk.music.api;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.opensilk.music.api.Config;
 import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.api.spi.IBundleObserver;
+import org.opensilk.music.api.spi.ISubscription;
 
 /**
  * @see RemoteLibraryService for doc
@@ -59,5 +60,8 @@ interface RemoteLibrary {
      * API_020
      */
 
-    Config getConfig();
+    Bundle getConfig();
+    ISubscription browse(String libraryIdentity, String folderIdentity, IBundleObserver bundleObserver);
+    ISubscription browseSongs(String libraryIdentity, String folderIdentity, IBundleObserver bundleObserver);
+    ISubscription search2(String libraryIdentity, String query, IBundleObserver bundleObserver);
 }

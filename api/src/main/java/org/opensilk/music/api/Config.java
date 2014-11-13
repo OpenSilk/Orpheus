@@ -17,6 +17,7 @@
 
 package org.opensilk.music.api;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -24,11 +25,16 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.Iterator;
+
 /**
  * Created by drew on 11/11/14.
  */
-public class Config implements Parcelable {
+public class Config {
 
+    /*
+     * Capabilities the service exposes
+     */
 
     public static final int SEARCHABLE = 1 << 0;
     public static final int SETTINGS = 1 << 1;
@@ -37,7 +43,7 @@ public class Config implements Parcelable {
     public static final int RENAME = 1 << 4;
 
     /**
-     * Api version of plugin. Set automatically by {@link Builder}
+     * Api version of plugin. Set automatically by {@code Builder}
      */
     public final int apiVersion;
     /**
@@ -45,7 +51,7 @@ public class Config implements Parcelable {
      */
     public final int capabilities;
     /**
-     * Intent for activity to allow user to choose from available libraries.
+     * Component for activity to allow user to choose from available libraries.
      * The activity should be of Dialog Style, and should take care of everything needed
      * to allow user to access the library, including selecting from an available library (or
      * account) and any auth/sign in required. The activity must return {@link android.app.Activity#RESULT_OK}
@@ -58,9 +64,9 @@ public class Config implements Parcelable {
      * {@link OrpheusApi#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
      * current Orpheus theme.
      */
-    public final Intent pickerIntent;
+    public final ComponentName pickerComponent;
     /**
-     * Intent for settings activity. The settings activity must process the
+     * Component for settings activity. The settings activity must process the
      * {@link OrpheusApi#EXTRA_LIBRARY_ID} and only manipulate preferences concerning the
      * given identity.
      * <p>
@@ -68,80 +74,45 @@ public class Config implements Parcelable {
      * {@link OrpheusApi#EXTRA_WANT_LIGHT_THEME} to style the activity to match the
      * current Orpheus theme.
      */
-    public final Intent settingsIntent;
+    public final ComponentName settingsComponent;
 
-    protected Config(int apiVersion, int capabilities, @NonNull Intent pickerIntent, @Nullable Intent settingsIntent) {
+    protected Config(int apiVersion,
+                     int capabilities,
+                     @NonNull ComponentName pickerComponent,
+                     @Nullable ComponentName settingsComponent) {
         this.apiVersion = apiVersion;
         this.capabilities = capabilities;
-        this.pickerIntent = pickerIntent;
-        this.settingsIntent = settingsIntent;
+        this.pickerComponent = pickerComponent;
+        this.settingsComponent = settingsComponent;
     }
 
     public boolean hasAbility(int ability) {
         return (capabilities & ability) != 0;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || !(o instanceof Config)) return false;
-        Config config = (Config) o;
-        if (apiVersion != config.apiVersion) return false;
-        if (capabilities != config.capabilities) return false;
-        if (!pickerIntent.equals(config.pickerIntent)) return false;
-        if (settingsIntent != null ? !settingsIntent.equals(config.settingsIntent) : config.settingsIntent != null)
-            return false;
-        return true;
+    public Bundle dematerialize() {
+        Bundle b = new Bundle(4);
+        b.putInt("_1", apiVersion);
+        b.putInt("_2", capabilities);
+        b.putParcelable("_3", pickerComponent);
+        b.putParcelable("_4", settingsComponent);
+        return b;
     }
 
-    @Override
-    public int hashCode() {
-        int result = apiVersion;
-        result = 31 * result + capabilities;
-        result = 31 * result + pickerIntent.hashCode();
-        result = 31 * result + (settingsIntent != null ? settingsIntent.hashCode() : 0);
-        return result;
+    public static Config materialize(Bundle b) {
+        return new Config(
+                b.getInt("_1"),
+                b.getInt("_2"),
+                b.<ComponentName>getParcelable("_3"),
+                b.<ComponentName>getParcelable("_4")
+        );
     }
 
-    @Override public int describeContents() {
-        return 0;
-    }
-
-    @Override public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(apiVersion);
-        out.writeInt(capabilities);
-        pickerIntent.writeToParcel(out, flags);
-        if (settingsIntent != null) {
-            out.writeInt(1);
-            settingsIntent.writeToParcel(out, flags);
-        } else {
-            out.writeInt(0);
-        }
-    }
-
-    private static Config readParcel(Parcel in) {
-        final int ver = in.readInt();
-        final int caps = in.readInt();
-        final Intent picker = Intent.CREATOR.createFromParcel(in);
-        final Intent settings =
-            (in.readInt() == 1) ? Intent.CREATOR.createFromParcel(in) : null;
-        return new Config(ver, caps, picker, settings);
-    }
-
-    public static final Creator<Config> CREATOR = new Creator<Config>() {
-        @Override public Config createFromParcel(Parcel source) {
-            return readParcel(source);
-        }
-        @Override public Config[] newArray(int size) {
-            return new Config[size];
-        }
-    };
-
-    public static class Builder {
+    public static final class Builder {
         private int apiVersion = OrpheusApi.API_VERSION;
         private int capabilities;
-        private Intent pickerIntent;
-        private Intent settingsIntent;
+        private ComponentName pickerComponent;
+        private ComponentName settingsComponent;
 
         public Builder setCapabilities(int capabilities) {
             this.capabilities = capabilities;
@@ -153,24 +124,24 @@ public class Config implements Parcelable {
             return this;
         }
 
-        public Builder setPickerIntent(Intent intent) {
-            this.pickerIntent = intent;
+        public Builder setPickerComponent(ComponentName pickerComponent) {
+            this.pickerComponent = pickerComponent;
             return this;
         }
 
-        public Builder setSettingsIntent(Intent intent) {
-            this.settingsIntent = intent;
+        public Builder setSettingsComponent(ComponentName settingsComponent) {
+            this.settingsComponent = settingsComponent;
             return this;
         }
 
         public Config build() {
-            if (pickerIntent == null) {
-                throw new IllegalArgumentException("pickerIntent must not be null");
+            if (pickerComponent == null) {
+                throw new IllegalArgumentException("pickerComponent must not be null");
             }
-            if ((capabilities & SETTINGS) != 0 && settingsIntent == null) {
-                throw new IllegalArgumentException("You defined SETTINGS but left settingsIntent null");
+            if ((capabilities & SETTINGS) != 0 && settingsComponent == null) {
+                throw new IllegalArgumentException("You defined SETTINGS but left settingsComponent null");
             }
-            return new Config(apiVersion, capabilities, pickerIntent, settingsIntent);
+            return new Config(apiVersion, capabilities, pickerComponent, settingsComponent);
         }
 
     }

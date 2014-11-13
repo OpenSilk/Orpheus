@@ -17,7 +17,9 @@
 
 package org.opensilk.music.api;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 
@@ -37,48 +39,27 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class ConfigTest {
 
     Config config_1;
-    Config config_1_copy;
-    Config config_2;
 
     @Before
     public void setUp() {
         config_1 = new Config.Builder().addAbility(Config.SEARCHABLE).addAbility(Config.SETTINGS)
-                .setPickerIntent(new Intent("PICKER")).setSettingsIntent(new Intent("SETTINGS")).build();
-        config_1_copy = new Config.Builder().addAbility(Config.SEARCHABLE).addAbility(Config.SETTINGS)
-                .setPickerIntent(new Intent("PICKER")).setSettingsIntent(new Intent("SETTINGS")).build();
-        config_2 = new Config.Builder().setCapabilities(Config.SEARCHABLE)
-                .setPickerIntent(new Intent("PICKER")).build();
+                .setPickerComponent(new ComponentName("com.test", "TestClass"))
+                .setSettingsComponent(new ComponentName("com.test", "TestClassSettings"))
+                .build();
     }
 
     @Test
-    public void ensureConfigHashCodeWorks() {
-        assertThat(config_1.hashCode()).isEqualTo(config_1_copy.hashCode());
-        assertThat(config_1.hashCode()).isNotEqualTo(config_2.hashCode());
-    }
-
-    @Test
-    public void ensureConfigEqualsWorks() {
-        assertThat(config_1).isEqualTo(config_1_copy);
-        assertThat(config_1).isNotEqualTo(config_2);
-    }
-
-    @Test
-    public void ensureConfigParcelableWorks() {
+    public void testConfigMaterializes() {
+        Bundle b = config_1.dematerialize();
         Parcel p = Parcel.obtain();
-        config_1.writeToParcel(p, 0);
+        b.writeToParcel(p, 0);
         p.setDataPosition(0);
-        Config fromP = Config.CREATOR.createFromParcel(p);
-        //Holy shit soo fucking long to figure out /this/ was the problem
-        //dont know why it works in the other tests
-//        assertThat(fromP).isEqualTo(config_1);
-        assertThat(config_1.equals(fromP));
-
-        Parcel p2 = Parcel.obtain();
-        config_2.writeToParcel(p2, 0);
-        p.setDataPosition(0);
-        Config fromP2 = Config.CREATOR.createFromParcel(p2);
-//        assertThat(fromP2).isEqualTo(config_2);
-        assertThat(config_2.equals(fromP2));
+        Bundle b2 = Bundle.CREATOR.createFromParcel(p);
+        Config fromB = Config.materialize(b2);
+        assertThat(config_1.apiVersion).isEqualTo(fromB.apiVersion);
+        assertThat(config_1.capabilities).isEqualTo(fromB.capabilities);
+        assertThat(config_1.pickerComponent).isEqualTo(fromB.pickerComponent);
+        assertThat(config_1.settingsComponent).isEqualTo(fromB.settingsComponent);
     }
 
 }

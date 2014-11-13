@@ -33,6 +33,10 @@ public class OrpheusApi {
      */
     public static final String ACTION_LIBRARY_SERVICE = "org.opensilk.music.plugin.LIBRARY_SERVICE";
     /**
+     * Manifest permission declared by Orpheus.
+     */
+    public static final String PERMISSION_BIND_LIBRARY_SERVICE = "org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE";
+    /**
      * Intent extra containing {@link String} library identity, used in multiple places
      */
     public static final String EXTRA_LIBRARY_ID = "org.opensilk.music.api.LIBRARY_ID";
@@ -58,39 +62,17 @@ public class OrpheusApi {
      */
     public static final int API_020 = 20000;
 
-    /**
-     * Bits used in {@link RemoteLibraryService#getCapabilities()}
-     */
+    @Deprecated
     public static class Ability {
-        /**
-         * Plugin implements {@link RemoteLibraryService#search(String, String, int, android.os.Bundle, org.opensilk.music.api.callback.Result) search()}
-         */
         public static final int SEARCH = 1 << 0;
-        /**
-         * Plugin implements {@link RemoteLibraryService#getSettingsIntent()}
-         */
         public static final int SETTINGS = 1 << 1;
     }
 
-    /**
-     * Error codes used in {@link org.opensilk.music.api.callback.Result#failure(int, String)}
-     */
+    @Deprecated
     public static class Error {
-        /**
-         * Permanent failure, Orpheus will attempt to rebind service
-         */
         public static final int UNKNOWN = -1;
-        /**
-         * Temporary failure, Orpheus will retry request immediately (up to 4 times)
-         */
         public static final int RETRY = 1;
-        /**
-         * Permanent auth failure, Orpheus will relaunch the library picker activity
-         */
         public static final int AUTH_FAILURE = 2;
-        /**
-         * IO or Network error, Orpheus will check connectivity and retry (up to 4 times)
-         */
         public static final int NETWORK = 3;
     }
 
@@ -102,9 +84,9 @@ public class OrpheusApi {
      * @throws java.lang.Exception if bundle is malformed
      */
     @NonNull
-    public static Bundleable transformBundle(Bundle b) throws Exception {
+    public static Bundleable materializeBundle(Bundle b) throws Exception {
         Class cls = Class.forName(b.getString("clz"));
-        return transformBundle(cls, b);
+        return materializeBundle(cls, b);
     }
 
     /**
@@ -116,11 +98,11 @@ public class OrpheusApi {
      * @throws java.lang.Exception if passed {@link android.os.Bundle} does not implement
      *          {@link org.opensilk.music.api.model.spi.Bundleable}
      */
-    @NonNull
-    public static <T extends Bundleable> T transformBundle(Class<T> cls, Bundle b) throws Exception {
-        // TODO better way?
+    @NonNull @SuppressWarnings("unchecked")
+    public static <T extends Bundleable> T materializeBundle(Class<T> cls, Bundle b) throws Exception {
         Field f = cls.getDeclaredField("BUNDLE_CREATOR");
         Bundleable.BundleCreator<T> creator = (Bundleable.BundleCreator<T>) f.get(null);
         return creator.fromBundle(b);
     }
+
 }
