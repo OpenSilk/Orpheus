@@ -17,12 +17,10 @@
 
 package com.andrew.apollo;
 
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,11 +30,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.AudioManager.OnAudioFocusChangeListener;
-import android.media.MediaMetadataRetriever;
-import android.media.RemoteControlClient;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -75,7 +70,14 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -86,7 +88,7 @@ public class MusicPlaybackService extends Service {
     private static final String TAG = "MusicPlaybackService";
     private static final boolean D = BuildConfig.DEBUG;
 
-    public static final String APOLLO_PACKAGE_NAME = BuildConfig.PACKAGE_NAME;
+    public static final String APOLLO_PACKAGE_NAME = BuildConfig.APPLICATION_ID;
 
     /**
      * Indicates that the music has paused or resumed
@@ -273,24 +275,6 @@ public class MusicPlaybackService extends Service {
     static final int MAX_HISTORY_SIZE = 100;
 
     /**
-     * The columns used to retrieve any info from the current track
-     */
-    public static final String[] PROJECTION = new String[] {
-            "audio._id AS _id", MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA,
-            MediaStore.Audio.Media.MIME_TYPE, MediaStore.Audio.Media.ALBUM_ID,
-            MediaStore.Audio.Media.ARTIST_ID
-    };
-
-    /**
-     * The columns used to retrieve any info from the current album
-     */
-    public static final String[] ALBUM_PROJECTION = new String[] {
-            MediaStore.Audio.Albums.ALBUM, MediaStore.Audio.Albums.ARTIST,
-            MediaStore.Audio.Albums.LAST_YEAR
-    };
-
-    /**
      * Keeps a mapping of the track history
      */
     private static final LinkedList<Integer> mHistory = Lists.newLinkedList();
@@ -372,7 +356,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Used to track what type of audio focus loss caused the playback to pause
      */
-    private boolean mPausedByTransientLossOfFocus = false;
+    private volatile boolean mPausedByTransientLossOfFocus = false;
 
     /**
      * Used to track whether any of Apollo's activities is in the foreground
@@ -418,15 +402,13 @@ public class MusicPlaybackService extends Service {
     private MediaSessionHelper mMediaSessionHelper;
 
     /**
-     * Favorites database
-     */
-//    private FavoritesStore mFavoritesCache;
-
-    /**
      * Proxy for artwork provider
      */
     private ArtworkProviderUtil mArtworkUtil;
 
+    /**
+     *
+     */
     private boolean isCastingEnabled;
 
     /**
@@ -465,17 +447,18 @@ public class MusicPlaybackService extends Service {
     /**
      * Fetches remote progress while we are in background
      */
-    private RemoteProgressHandler mRemoteProgressHandler;
+    private Subscription mRemoteProgressSubscription;
+
+    /**
+     * Worker used to process intents
+     */
+    Scheduler.Worker mHandleIntentWorker;
 
     public MusicPlaybackService() {
         super();
         mBinder = new ApolloServiceBinder(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //@DebugLog
     @Override
     public IBinder onBind(final Intent intent) {
         if (D) Log.d(TAG, "Service bound, intent = " + intent);
@@ -484,10 +467,6 @@ public class MusicPlaybackService extends Service {
         return mBinder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //@DebugLog
     @Override
     public boolean onUnbind(final Intent intent) {
         if (D) Log.d(TAG, "Service unbound");
@@ -512,26 +491,16 @@ public class MusicPlaybackService extends Service {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //@DebugLog
     @Override
     public void onRebind(final Intent intent) {
         cancelShutdown();
         mConnectedClients++;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate() {
         if (D) Log.d(TAG, "Creating service");
         super.onCreate();
-
-        // Initialize the favorites and recents databases
-//        mFavoritesCache = FavoritesStore.getInstance(this);
 
         // Initialize the notification helper
         mNotificationHelper = new NotificationHelper(this);
@@ -549,6 +518,8 @@ public class MusicPlaybackService extends Service {
 
         // Initialize the handler
         mPlayerHandler = new MusicPlayerHandler(this, thread.getLooper());
+
+        mHandleIntentWorker = Schedulers.newThread().createWorker();
 
         // Initialize the audio manager and register any headset controls for
         // playback
@@ -571,9 +542,6 @@ public class MusicPlaybackService extends Service {
         if (isCastingEnabled) {
             // Bind to the cast service
             mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);
-
-            // Initialize the remote progress updater task
-            mRemoteProgressHandler = new RemoteProgressHandler(this);
         }
 
         // Initialize the intent filter and each action
@@ -610,13 +578,7 @@ public class MusicPlaybackService extends Service {
         notifyChange(META_CHANGED);
     }
 
-
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    //@DebugLog
     public void onDestroy() {
         if (D) Log.d(TAG, "Destroying service");
         super.onDestroy();
@@ -645,6 +607,9 @@ public class MusicPlaybackService extends Service {
         // Kill player thread
         mPlayerHandler.getLooper().quit();
 
+        //release the worker
+        mHandleIntentWorker.unsubscribe();
+
         // Close the cursor
         closeCursor();
 
@@ -665,7 +630,10 @@ public class MusicPlaybackService extends Service {
             mCastManager = null;
         }
 
-        mRemoteProgressHandler = null;
+        if (mRemoteProgressSubscription != null) {
+            mRemoteProgressSubscription.unsubscribe();
+            mRemoteProgressSubscription = null;
+        }
 
         if (mCastPlayer != null) {
             mCastPlayer.release();
@@ -684,9 +652,6 @@ public class MusicPlaybackService extends Service {
         releaseWakeLock();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         if (D) Log.d(TAG, "Got new intent " + intent + ", startId = " + startId);
@@ -713,7 +678,12 @@ public class MusicPlaybackService extends Service {
                 return START_NOT_STICKY;
             }
 
-            handleCommandIntent(intent);
+            mHandleIntentWorker.schedule(new Action0() {
+                @Override
+                public void call() {
+                    handleCommandIntent(intent);
+                }
+            });
         }
 
         // Make sure the service will shut down on its own if it was
@@ -734,14 +704,16 @@ public class MusicPlaybackService extends Service {
         if (mCastManager != null) {
             if (visible) {
                 mCastManager.incrementUiCounter();
-                if (mRemoteProgressHandler != null) {
-                    mRemoteProgressHandler.removeMessages(0);
+                if (mRemoteProgressSubscription != null) {
+                    mRemoteProgressSubscription.unsubscribe();
+                    mRemoteProgressSubscription =null;
                 }
             } else {
                 mCastManager.decrementUiCounter();
-                if (mRemoteProgressHandler != null) {
-                    mRemoteProgressHandler.sendEmptyMessage(0);
-                }//TODO init progress handler
+                if (mRemoteProgressSubscription == null
+                        || mRemoteProgressSubscription.isUnsubscribed()) {
+                    mRemoteProgressSubscription = createRemoteProgressHandler();
+                }
             }
         } else {
             // if we haven't bound to the cast service yet we will wait a little and try again.
@@ -764,8 +736,9 @@ public class MusicPlaybackService extends Service {
         if (D) Log.d(TAG, "Nothing is playing anymore, releasing notification");
         mNotificationHelper.killNotification();
         mAudioManager.abandonAudioFocus(mAudioFocusListener);
-        if (mRemoteProgressHandler != null) {
-            mRemoteProgressHandler.removeMessages(0);
+        if (mRemoteProgressSubscription != null) {
+            mRemoteProgressSubscription.unsubscribe();
+            mRemoteProgressSubscription = null;
         }
 
         if (mConnectedClients <= 0) {
@@ -942,9 +915,10 @@ public class MusicPlaybackService extends Service {
                 if (mCastManager.isRemoteMediaLoaded() && mCastManager.isRemoteMediaPlaying()) {
                     Log.d(TAG, "onConnectivityRecovered: remote media currently playing");
                     position();// force update the local position
-                    if (!mRemoteProgressHandler.hasMessages(0)) {
+                    if (mRemoteProgressSubscription == null
+                            || mRemoteProgressSubscription.isUnsubscribed()) {
                         // restart progress updater if needed
-                        mRemoteProgressHandler.sendEmptyMessage(0);
+                        mRemoteProgressSubscription = createRemoteProgressHandler();
                     }
                 } else {
                     switchToCastPlayer();
@@ -1519,11 +1493,6 @@ public class MusicPlaybackService extends Service {
         sendStickyBroadcast(musicIntent);
 
         if (what.equals(META_CHANGED)) {
-            // Increase the play count for favorite songs.
-//            if (mFavoritesCache.getSongId(getAudioId()) != null) {
-//                mFavoritesCache.addSongId(getAudioId(), getTrackName(), getAlbumName(),
-//                        getArtistName());
-//            }
             // Add the track to the recently played list.
             MusicProviderUtil.updatePlaycount(this, getAudioId());
         } else if (what.equals(QUEUE_CHANGED)) {
@@ -2165,12 +2134,6 @@ public class MusicPlaybackService extends Service {
      * True if the current track is a "favorite", false otherwise
      */
     public boolean isFavorite() {
-//        if (mFavoritesCache != null) {
-//            synchronized (this) {
-//                final Long id = mFavoritesCache.getSongId(getAudioId());
-//                return id != null ? true : false;
-//            }
-//        }
         return false;
     }
 
@@ -2370,12 +2333,7 @@ public class MusicPlaybackService extends Service {
      * Toggles the current song as a favorite.
      */
     public void toggleFavorite() {
-//        if (mFavoritesCache != null) {
-//            synchronized (this) {
-//                mFavoritesCache.toggleSong(getAudioId(), getTrackName(), getAlbumName(),
-//                        getArtistName());
-//            }
-//        }
+
     }
 
     /**
@@ -2544,7 +2502,6 @@ public class MusicPlaybackService extends Service {
     /**
      * @return The album art for the current album.
      */
-    //@DebugLog
     public Bitmap getAlbumArt() {
         String artist = getAlbumArtistName();
         if (TextUtils.isEmpty(artist)) {
@@ -2591,7 +2548,6 @@ public class MusicPlaybackService extends Service {
      * Starts cast http server, creating it if needed.
      * @return success of operation
      */
-    //@DebugLog
     private boolean startCastServer() {
         if (mCastServer == null) {
             try {
@@ -2618,7 +2574,6 @@ public class MusicPlaybackService extends Service {
     /**
      * Stops cast http server if running
      */
-    //@DebugLog
     private void stopCastServer() {
         if (mCastServer != null) {
             mCastServer.stop();
@@ -2627,13 +2582,44 @@ public class MusicPlaybackService extends Service {
         releaseWakeLock();
     }
 
+    /**
+     * When the ui is running the progress bar updater task will
+     * fetch the remote progress for us, when we are in the background
+     * this will do it
+     */
+    private Subscription createRemoteProgressHandler() {
+        return Observable.timer(1000, 3000, TimeUnit.MILLISECONDS)
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        synchronized (MusicPlaybackService.this) {
+                            try {
+                                if (isRemotePlayback()) {
+                                    try {
+                                        //Check first so we dont fill up the log with TransientDisconnects
+                                        mCastManager.checkConnectivity();
+                                        if (mCastPlayer != null) {
+                                            mLastKnowPosition = mCastPlayer.position();
+                                        }
+                                    } catch (TransientNetworkDisconnectionException|NoConnectionException ignored) { }
+                                } else {
+                                    mRemoteProgressSubscription.unsubscribe();
+                                }
+                            } catch (Exception ignored) {/*the old handler had frequent npe*/}
+                        }
+                    }
+                });
+    }
+
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            handleCommandIntent(intent);
+            mHandleIntentWorker.schedule(new Action0() {
+                @Override
+                public void call() {
+                    handleCommandIntent(intent);
+                }
+            });
         }
     };
 
@@ -2667,42 +2653,5 @@ public class MusicPlaybackService extends Service {
             mCastManager = null;
         }
     };
-
-    /**
-     * When the ui is running the progress bar updater task will
-     * fetch the remote progress for us, when we are in the background
-     * this will do it
-     */
-    private static final class RemoteProgressHandler extends Handler {
-        private final WeakReference<MusicPlaybackService> mService;
-
-        public RemoteProgressHandler(MusicPlaybackService service) {
-            super();
-            mService = new WeakReference<>(service);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (D) Log.d(TAG, "Fetching remote progress");
-            MusicPlaybackService service = mService.get();
-            if (service != null) {
-                if (service.isRemotePlayback()) {
-                    try {
-                        //Check first so we dont fill up the log with TransientDisconnects
-                        service.mCastManager.checkConnectivity();
-                        CastMusicPlayer player = service.mCastPlayer;
-                        if (player != null) {
-                            service.mLastKnowPosition = player.position();
-                        }
-                    } catch (TransientNetworkDisconnectionException|NoConnectionException ignored) { }
-                    RemoteProgressHandler.this.sendEmptyMessageDelayed(0, 3000); //Might increase this
-                } else {
-                    RemoteProgressHandler.this.removeMessages(0);
-                }
-            }
-        }
-    }
-
-
 
 }
