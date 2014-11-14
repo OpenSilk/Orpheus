@@ -34,6 +34,7 @@ import org.opensilk.music.ui2.common.OverflowHandler;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Subscription;
@@ -92,7 +93,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         if (!viewNotNull()) return;
         BaseAdapter<T> adapter = newAdapter();
         adapter.setGridStyle(isGrid() || isStaggered());
-        if (loader.hasCache()) adapter.getItems().addAll(loader.getCache());
+        if (clear && loader.hasCache()) adapter.getItems().addAll(loader.getCache());
         RecyclerView v = getView().getListView();
         v.setHasFixedSize(!isStaggered());
         v.setLayoutManager(getLayoutManager(v.getContext()));
@@ -136,6 +137,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected abstract void load();
 
     // cancels any ongoing load and starts a new one
+    @DebugLog
     public void reload() {
         if (subscription != null) subscription.unsubscribe();
         if (viewNotNull()) getAdapter().clear();
