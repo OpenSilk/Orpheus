@@ -62,6 +62,7 @@ public class NavView extends ListView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        setDividerHeight(0);
         presenter.takeView(this);
     }
 

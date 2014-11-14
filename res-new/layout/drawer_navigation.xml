@@ -26,7 +26,6 @@
     android:layout_height="match_parent"
     android:background="?android:colorBackground"
     android:layout_gravity="start"
-    android:showDividers="middle"
     android:divider="?android:dividerHorizontal">
 
     <ImageView
