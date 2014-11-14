@@ -87,7 +87,7 @@ public class DreamSettings extends PreferenceActivity {
 
     MortarActivityScope mMortarScope;
 
-    @Override
+    @Override @SuppressWarnings("AppCompatMethod")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
