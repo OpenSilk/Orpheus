@@ -27,7 +27,6 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import org.opensilk.music.BuildConfig;
-import com.andrew.apollo.provider.RecentStore;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
@@ -165,7 +164,6 @@ public class MusicApp extends Application implements DaggerInjector {
                     .detectAll()
                     .penaltyLog()
                     .setClassInstanceLimit(MusicUtils.class, 1)
-                    .setClassInstanceLimit(RecentStore.class, 1)
                     .setClassInstanceLimit(PreferenceUtils.class, 1)
                     .setClassInstanceLimit(ThemeHelper.class, 1)
                     .setClassInstanceLimit(MediaCastManager.class, 1)

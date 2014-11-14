@@ -20,6 +20,8 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 
 import org.opensilk.music.R;
+import org.opensilk.music.util.Uris;
+
 import com.andrew.apollo.format.Capitalize;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.utils.MusicUtils;
@@ -89,7 +91,7 @@ public class RenamePlaylist extends BasePlaylistDialog {
                             String.valueOf(mRenameId)
                     }
             );
-            resolver.notifyChange(MusicProvider.PLAYLIST_URI, null);
+            resolver.notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
             closeKeyboard();
             getDialog().dismiss();
         }

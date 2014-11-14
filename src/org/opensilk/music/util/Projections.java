@@ -37,7 +37,6 @@ public class Projections {
     public static final String[] PLAYLIST_SONGS;
     public static final String[] GENRE_SONGS;
     public static final String[] RECENT_SONGS;
-    public static final String[] CACHED_GROUP;
     public static final String[] GENRE;
     public static final String[] GENRE_MEMBER;
     public static final String[] PLAYLIST;
@@ -104,14 +103,6 @@ public class Projections {
                 MusicStore.Cols.ISLOCAL,
                 MusicStore.Cols.PLAYCOUNT,
                 MusicStore.Cols.LAST_PLAYED,
-        };
-        CACHED_GROUP = new String[] {
-                MusicStore.GroupCols._ID,
-                MusicStore.GroupCols.NAME,
-                MusicStore.GroupCols.SONG_COUNT,
-                MusicStore.GroupCols.ALBUM_COUNT,
-                MusicStore.GroupCols.SONG_IDS,
-                MusicStore.GroupCols.ALBUM_IDS,
         };
         GENRE = new String[] {
                 BaseColumns._ID,

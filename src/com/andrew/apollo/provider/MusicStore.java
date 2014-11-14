@@ -16,12 +16,12 @@
 
 package com.andrew.apollo.provider;
 
-import android.content.ContentProviderOperation;
 import android.content.Context;
-import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+
+import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,15 +32,13 @@ import javax.inject.Singleton;
 @Singleton
 public class MusicStore extends SQLiteOpenHelper {
 
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
     public static final String FILENAME = "music.db";
 
     public static final String RECENT_TABLE = "recent";
-    public static final String GENRE_TABLE = "genres";
-    public static final String PLAYLIST_TABLE = "playlists";
 
     @Inject
-    public MusicStore(Context context) {
+    public MusicStore(@ForApplication Context context) {
         super(context, FILENAME, null, VERSION);
     }
 
@@ -62,35 +60,24 @@ public class MusicStore extends SQLiteOpenHelper {
                 + Cols.PLAYCOUNT + " INTEGER NOT NULL,"
                 + Cols.LAST_PLAYED + " INTEGER NOT NULL);"
         );
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + GENRE_TABLE + " ("
-                + GroupCols._ID + " INTEGER NOT NULL, "
-                + GroupCols.NAME + " TEXT NOT NULL, "
-                + GroupCols.SONG_COUNT + " INTEGER NOT NULL, "
-                + GroupCols.ALBUM_COUNT + " INTEGER NOT NULL, "
-                + GroupCols.SONG_IDS + " TEXT, "
-                + GroupCols.ALBUM_IDS + " TEXT);"
-        );
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + PLAYLIST_TABLE + " ("
-                        + GroupCols._ID + " INTEGER NOT NULL, "
-                        + GroupCols.NAME + " TEXT NOT NULL, "
-                        + GroupCols.SONG_COUNT + " INTEGER NOT NULL, "
-                        + GroupCols.ALBUM_COUNT + " INTEGER NOT NULL, "
-                        + GroupCols.SONG_IDS + " TEXT, "
-                        + GroupCols.ALBUM_IDS + " TEXT);"
-        );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + RECENT_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + GENRE_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + PLAYLIST_TABLE);
-        onCreate(db);
+        if (oldVersion == 2 && newVersion == 3) {
+            db.execSQL("DROP TABLE IF EXISTS genres");
+            db.execSQL("DROP TABLE IF EXISTS playlists");
+        } else {
+            db.execSQL("DROP TABLE IF EXISTS genres");
+            db.execSQL("DROP TABLE IF EXISTS playlists");
+            db.execSQL("DROP TABLE IF EXISTS " + RECENT_TABLE);
+            onCreate(db);
+        }
     }
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        onUpgrade(db, newVersion, oldVersion);
+        onUpgrade(db, 0, 0);
     }
 
     public static interface Cols extends BaseColumns {
@@ -109,15 +96,6 @@ public class MusicStore extends SQLiteOpenHelper {
         public static final String ISLOCAL = "islocal";
         public static final String PLAYCOUNT = "playcount";
         public static final String LAST_PLAYED = "lastplayed";
-
-    }
-
-    public static interface GroupCols extends BaseColumns {
-        public static final String NAME = "name";
-        public static final String SONG_COUNT = "songcount";
-        public static final String ALBUM_COUNT = "albumcount";
-        public static final String SONG_IDS = "songids";
-        public static final String ALBUM_IDS = "albumids";
     }
 
 }

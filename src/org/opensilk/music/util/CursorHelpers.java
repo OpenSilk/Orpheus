@@ -152,30 +152,6 @@ public class CursorHelpers {
         return new LocalArtist(id, artistName, albumCount, songCount);
     }
 
-    @MarkedForRemoval
-    @Deprecated
-    public static Genre makeGenreFromCursor(final Cursor c) {
-        final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
-        final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
-        final int songNumber = getIntOrZero(c, MusicStore.GroupCols.SONG_COUNT);
-        final int albumNumber = getIntOrZero(c, MusicStore.GroupCols.ALBUM_COUNT);
-        final long[] songs = fromCsv(getStringOrNull(c, MusicStore.GroupCols.SONG_IDS));
-        final long[] albums = fromCsv(getStringOrNull(c, MusicStore.GroupCols.ALBUM_IDS));
-        return new Genre(id, name, songNumber, albumNumber, songs, albums);
-    }
-
-    @MarkedForRemoval
-    @Deprecated
-    public static Playlist makePlaylistFromCursor(final Cursor c) {
-        final long id = getLongOrZero(c, MusicStore.GroupCols._ID);
-        final String name= getStringOrEmpty(c, MusicStore.GroupCols.NAME);
-        final int songNumber = getIntOrZero(c, MusicStore.GroupCols.SONG_COUNT);
-        final int albumNumber = getIntOrZero(c, MusicStore.GroupCols.ALBUM_COUNT);
-        final long[] songs = fromCsv(getStringOrNull(c, MusicStore.GroupCols.SONG_IDS));
-        final long[] albums = fromCsv(getStringOrNull(c, MusicStore.GroupCols.ALBUM_IDS));
-        return new Playlist(id, name, songNumber, albumNumber, songs, albums);
-    }
-
     public static Cursor makePlaylistCursor(Context context) {
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_PLAYLISTS,

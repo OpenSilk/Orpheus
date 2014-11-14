@@ -50,7 +50,6 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicProviderUtil;
-import com.andrew.apollo.provider.RecentStore;
 
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.util.CursorHelpers;
@@ -59,6 +58,7 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.Uris;
 
 import java.io.File;
 import java.util.Arrays;
@@ -1062,7 +1062,7 @@ public final class MusicUtils {
     public static void clearPlaylist(final Context context, final int playlistId) {
         final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
         context.getContentResolver().delete(uri, null, null);
-        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
+        context.getContentResolver().notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
     }
 
     /**
@@ -1090,7 +1090,7 @@ public final class MusicUtils {
         final String message = context.getResources().getQuantityString(
                 R.plurals.NNNtrackstoplaylist, numinserted, numinserted);
         Toast.makeText((Activity) context, message, Toast.LENGTH_LONG).show();
-        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
+        context.getContentResolver().notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
     }
 
     /**
@@ -1109,7 +1109,7 @@ public final class MusicUtils {
         final String message = context.getResources().getQuantityString(
                 R.plurals.NNNtracksfromplaylist, 1, 1);
         Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
-        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
+        context.getContentResolver().notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
     }
 
     /**
@@ -1363,17 +1363,6 @@ public final class MusicUtils {
     }
 
     /**
-     * Queries {@link RecentStore} for the last album played by an artist
-     *
-     * @param context The {@link Context} to use
-     * @param artistName The artist name
-     * @return The last album name played by an artist
-     */
-    public static final String getLastAlbumForArtist(final Context context, final String artistName) {
-        return RecentStore.getInstance(context).getAlbumName(artistName);
-    }
-
-    /**
      * Seeks the current track to a desired position
      *
      * @param position The position to seek to
@@ -1526,8 +1515,6 @@ public final class MusicUtils {
         // things
         // in the media content domain, so update everything.
         context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
-        context.getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
-        context.getContentResolver().notifyChange(MusicProvider.GENRES_URI, null);
         // Notify the lists to update
         refresh();
 

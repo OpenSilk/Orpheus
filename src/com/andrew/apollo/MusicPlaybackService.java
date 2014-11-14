@@ -52,8 +52,6 @@ import android.util.Log;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.provider.MusicStore;
-import com.andrew.apollo.provider.RecentStore;
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.Lists;
 import com.andrew.apollo.utils.MusicUtils;
 
@@ -290,13 +288,6 @@ public class MusicPlaybackService extends Service {
     public static final String[] ALBUM_PROJECTION = new String[] {
             MediaStore.Audio.Albums.ALBUM, MediaStore.Audio.Albums.ARTIST,
             MediaStore.Audio.Albums.LAST_YEAR
-    };
-
-    /**
-     * Used to check existence of item in recents store
-     */
-    private static String[] RECENTS_PROJECTION = new String[] {
-            RecentStore.RecentStoreColumns._ID
     };
 
     /**
