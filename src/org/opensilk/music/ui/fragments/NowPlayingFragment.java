@@ -350,19 +350,19 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     }
 
     public void pushQueueFragment() {
-        mActivity.getSupportFragmentManager().beginTransaction()
-                .add(R.id.panel_middle_content, new QueueFragment(), "queue")
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commit();
-        onQueueVisibilityChanged(true);
+//        mActivity.getSupportFragmentManager().beginTransaction()
+//                .add(R.id.panel_middle_content, new QueueFragment(), "queue")
+//                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+//                .commit();
+//        onQueueVisibilityChanged(true);
     }
 
     public void popQueueFragment() {
-        mActivity.getSupportFragmentManager().beginTransaction()
-                .remove(mActivity.getSupportFragmentManager().findFragmentByTag("queue"))
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
-                .commit();
-        onQueueVisibilityChanged(false);
+//        mActivity.getSupportFragmentManager().beginTransaction()
+//                .remove(mActivity.getSupportFragmentManager().findFragmentByTag("queue"))
+//                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
+//                .commit();
+//        onQueueVisibilityChanged(false);
     }
 
     public void onQueueVisibilityChanged(boolean visible) {

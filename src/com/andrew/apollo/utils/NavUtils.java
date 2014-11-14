@@ -18,9 +18,6 @@ import android.content.Intent;
 import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.widget.Toast;
 
 import com.andrew.apollo.Config;
@@ -31,14 +28,7 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
 
-import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.dialogs.SleepTimerDialog;
-import org.opensilk.music.ui.library.LibraryFragment;
-import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.music.ui2.ProfileActivity;
-import org.opensilk.music.util.MarkedForRemoval;
-
-import timber.log.Timber;
 
 
 /**
@@ -132,36 +122,4 @@ public final class NavUtils {
         }
     }
 
-    /**
-     * Opens to {@link org.opensilk.music.ui.activities.HomeSlidingActivity}.
-     * 
-     * @param activity The {@link Activity} to use.
-     */
-    @Deprecated @MarkedForRemoval
-    public static void goHome(FragmentActivity activity) {
-    }
-
-    public static void openSettings(Activity activity) {
-        activity.startActivityForResult(new Intent(activity, SettingsActivity.class), 0);
-    }
-
-    public static void openLibrary(FragmentActivity activity, PluginInfo info) {
-        FragmentManager fm = activity.getSupportFragmentManager();
-        maybeClearBackstack(fm);
-        fm.beginTransaction().replace(R.id.main, LibraryFragment.newInstance(info), "library").commit();
-    }
-
-    public static void maybeClearBackstack(FragmentManager fm) {
-        if (fm.getBackStackEntryCount() > 0) {
-            try {
-                fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            } catch (IllegalStateException e) {
-                Timber.e(e, "maybeClearBackstack()::popBackStackImmediate");
-            }
-        }
-    }
-
-    public static void openSleepTimerDialog(FragmentActivity context) {
-        new SleepTimerDialog().show(context.getSupportFragmentManager(), "SleepTimer");
-    }
 }
