@@ -1,5 +1,6 @@
 include ':app'
 include ':api'
+include ':../OrpheusPlugins:folders'
 //include ':../SilkCastService:library'
 //include ':../SilkFileBrowser:lib_sfb'
 //include ':../AndroidSlidingUpPanel:library'
