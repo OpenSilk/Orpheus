@@ -103,7 +103,7 @@ public class ArtworkRequestManagerTest {
 
     @Test
     public void testAlbumRequest() {
-        Album album = artworkManager.createAlbumLastFmApiRequestObservable()
+
     }
 
 }

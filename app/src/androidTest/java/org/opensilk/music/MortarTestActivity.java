@@ -67,7 +67,7 @@ public class MortarTestActivity extends Activity {
     }
 
     protected Blueprint getStartingScope() {
-        return new BaseSwitcherActivity.Blueprint(getScopeName());
+        return null;
     }
 
 }

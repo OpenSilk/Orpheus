@@ -30,7 +30,8 @@ import hugo.weaving.DebugLog;
         injects = {
                 ArtworkRequestManagerTest.class,
         },
-        library = true
+        library = true,
+        complete = false
 )
 public class TestArtworkModule {
 

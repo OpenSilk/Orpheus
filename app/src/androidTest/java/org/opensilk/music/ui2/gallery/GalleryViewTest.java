@@ -23,6 +23,8 @@ import android.view.LayoutInflater;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opensilk.common.mortar.ScreenScoper;
+import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.music.MortarTestActivity;
 import org.opensilk.music.R;
 import org.robolectric.Robolectric;
@@ -48,8 +50,13 @@ public class GalleryViewTest {
     @Before
     public void setup() {
         MortarTestActivity activity = Robolectric.buildActivity(MortarTestActivity.class).create().get();
-        MortarScope galleryScope = activity.mActivityScope.requireChild(new GalleryScreen());
-        Context galleryContext = galleryScope.createContext(activity);
+        MortarContextFactory contextFactory = new MortarContextFactory();
+        GalleryScreen screen = new GalleryScreen();
+        Context galleryContext = contextFactory.setUpContext(screen, activity);
+//        ScreenScoper screenScoper = new ScreenScoper();
+//        MortarScope scope = screenScoper.getScreenScope(activity, screen.getName(), screen);
+//        MortarScope galleryScope = activity.mActivityScope.requireChild(new GalleryScreen());
+//        Context galleryContext = galleryScope.createContext(activity);
         galleryView = (GalleryView) LayoutInflater.from(galleryContext).inflate(R.layout.gallery, null);
     }
 

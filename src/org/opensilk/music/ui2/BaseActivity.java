@@ -102,7 +102,7 @@ public class BaseActivity extends ActionBarActivity {
         // Control the media volume
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        isCastingEnabled = CastPreferences.getBoolean(this, CastPreferences.KEY_CAST_ENABLED, true);
+        isCastingEnabled = checkCastingEnabled();
 
         if (isCastingEnabled) {
             // Bind cast service
@@ -205,6 +205,10 @@ public class BaseActivity extends ActionBarActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public boolean checkCastingEnabled() {
+        return CastPreferences.getBoolean(this, CastPreferences.KEY_CAST_ENABLED, true);
     }
 
     protected Object getObjectForRetain() {
