@@ -67,6 +67,7 @@ import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.functions.Action1;
+import rx.functions.Func0;
 import rx.functions.Func1;
 import timber.log.Timber;
 
@@ -270,7 +271,13 @@ public class LibraryScreen extends Screen {
 
         public void onItemClicked(Context context, Bundleable item) {
             if (item instanceof Song) {
-                bus.post(new MakeToast(R.string.err_unimplemented));
+                final Song song = (Song) item;
+                musicService.playAllSongs(new Func0<Song[]>() {
+                    @Override
+                    public Song[] call() {
+                        return new Song[] {song};
+                    }
+                }, 0, false);
                 return;
             }
             String identity = item.getIdentity();
