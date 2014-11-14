@@ -42,10 +42,6 @@ import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.R;
-import org.opensilk.music.ui.cards.AlbumCard;
-import org.opensilk.music.ui.cards.ArtistCard;
-import org.opensilk.music.ui.cards.SongCard;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.ui2.main.Main;
 
 import it.gmariotti.cardslib.library.internal.Card;
