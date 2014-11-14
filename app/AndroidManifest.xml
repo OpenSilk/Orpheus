@@ -163,6 +163,12 @@
                 android:value="org.opensilk.music.ui2.LauncherActivity"/>
         </activity>
 
+        <activity android:name="org.opensilk.music.ui.settings.FolderPickerActivity"
+            android:theme="@style/Theme.Settings.Light">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.opensilk.music.ui2.LauncherActivity"/>
+        </activity>
+
         <activity
             android:name="org.opensilk.music.appwidgets.MusicWidgetSettings"
             android:label="@string/widget_settings_label"
@@ -175,8 +181,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.settings.FolderPickerActivity"
-            android:theme="@style/Theme.Dialog.Light"/>
+
 
         <!-- 1x1 Ultra-mini widget -->
         <receiver

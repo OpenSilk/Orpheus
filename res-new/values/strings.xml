@@ -82,6 +82,7 @@
     <!-- audio storage -->
     <string name="settings_storage_default_folder_title">Pick shuffle folder</string>
     <string name="settings_storage_default_folder_summary">Only songs in this folder will be included in party shuffle</string>
+    <string name="settings_storage_msg_select_help">Long click folder to select</string>
     <!-- audio cast -->
     <string name="settings_cast_category">Cast</string>
     <string name="settings_cast_enable_title">Enable casting</string>

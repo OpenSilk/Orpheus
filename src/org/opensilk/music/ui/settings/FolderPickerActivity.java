@@ -19,41 +19,54 @@ package org.opensilk.music.ui.settings;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.support.v4.app.ListFragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import org.opensilk.common.widget.CustomListGridFragment;
-import org.opensilk.filebrowser.FileBrowserArgs;
-import org.opensilk.filebrowser.FileItemArrayLoader;
+import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.widget.LetterTileDrawable;
 import org.opensilk.music.R;
-
-import org.opensilk.filebrowser.FileItem;
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.ui.cards.FolderPickerCard;
+import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.ui2.BaseActivity;
 import org.opensilk.silkdagger.DaggerInjector;
 
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by drew on 7/13/14.
  */
-public class FolderPickerActivity extends BaseActivity implements Card.OnCardClickListener, Card.OnLongCardClickListener {
+public class FolderPickerActivity extends BaseActivity {
 
     @dagger.Module(includes = BaseActivity.Module.class, injects = FolderPickerActivity.class)
     public static class Module {
@@ -81,6 +94,8 @@ public class FolderPickerActivity extends BaseActivity implements Card.OnCardCli
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(makeTitle(null));
+        getSupportActionBar().setSubtitle(makeSubtitle(null));
 
         setResult(RESULT_CANCELED, getIntent());
 
@@ -92,52 +107,6 @@ public class FolderPickerActivity extends BaseActivity implements Card.OnCardCli
                     .commit();
         }
 
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public void onClick(Card card, View view) {
-        boolean addToBackstack = true;
-        final FolderPickerCard c = (FolderPickerCard) card;
-        final String path = c.getData().getPath();
-        final String title = c.getData().getTitle();
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(makeTitle(path));
-        actionBar.setSubtitle(makeSubtitle(path));
-        if (c.getData().getMediaType() == FileItem.MediaType.UP_DIRECTORY) {
-            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                getSupportFragmentManager().popBackStack();
-                return;
-            } else {
-                getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                addToBackstack = false;
-            }
-        }
-        FolderPickerFragment f = FolderPickerFragment.newInstance(path);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.main, f, title);
-        if (addToBackstack) {
-            ft.addToBackStack(title);
-        }
-        ft.commit();
-    }
-
-    @Override
-    public boolean onLongClick(Card card, View view) {
-        Intent i = new Intent().putExtra(EXTRA_DIR, ((FolderPickerCard) card).getData().getPath());
-        setResult(RESULT_OK, i);
-        finish();
-        return true;
     }
 
     protected static String makeSubtitle(String path) {
@@ -163,7 +132,69 @@ public class FolderPickerActivity extends BaseActivity implements Card.OnCardCli
         }
     }
 
-    public static class FolderPickerFragment extends CustomListGridFragment implements LoaderManager.LoaderCallbacks<List<FileItem>> {
+    static List<Folder> doListing(File rootDir) {
+        if (!rootDir.exists() || !rootDir.isDirectory()) {
+            return Collections.emptyList();
+        }
+        File[] dirList = rootDir.listFiles();
+        List<Folder> folders = new ArrayList<>(dirList.length);
+        for (File f : dirList) {
+            if (f.isDirectory()) {
+                folders.add(makeFolder(f));
+            }
+        }
+        Collections.sort(folders, new Comparator<Folder>() {
+            @Override
+            public int compare(Folder lhs, Folder rhs) {
+                return lhs.name.compareTo(rhs.name);
+            }
+        });
+        return folders;
+    }
+
+    static Folder makeFolder(File dir) {
+        return new Folder.Builder()
+                .setIdentity(dir.getAbsolutePath())
+                .setName(dir.getName())
+                .setChildCount(dir.list().length)
+                .setDate(formatDate(dir.lastModified()))
+                .build();
+    }
+
+    static String formatDate(long ms) {
+        Date date = new Date(ms);
+        DateFormat out = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        return out.format(date);
+    }
+
+    static class ViewHolder {
+        final View itemView;
+        @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
+        @InjectView(R.id.tile_title) TextView title;
+        @InjectView(R.id.tile_subtitle) TextView subtitle;
+        @InjectView(R.id.tile_info) TextView extraInfo;
+        @InjectView(R.id.tile_overflow) ImageButton overflow;
+
+        public ViewHolder(View itemView) {
+            this.itemView = itemView;
+            ButterKnife.inject(this, itemView);
+            itemView.setFocusable(false);
+            itemView.setClickable(false);
+            overflow.setVisibility(View.GONE);
+        }
+
+        public void initImage(String s) {
+            LetterTileDrawable drawable = new LetterTileDrawable(itemView.getResources());
+            drawable.setText(s);
+            artwork.setImageDrawable(drawable);
+        }
+
+        public void reset() {
+            if (artwork != null) artwork.setImageBitmap(null);
+        }
+    }
+
+    public static class FolderPickerFragment extends ListFragment implements AdapterView.OnItemLongClickListener {
 
         public static FolderPickerFragment newInstance(String startDir) {
             FolderPickerFragment f = new FolderPickerFragment();
@@ -173,75 +204,104 @@ public class FolderPickerActivity extends BaseActivity implements Card.OnCardCli
             return f;
         }
 
-        private CardArrayAdapter mAdapter;
-        private FileBrowserArgs args;
+        private String mPath;
+        private ArrayAdapter<Folder> mAdapter;
+        private Subscription mSubscription;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            args = new FileBrowserArgs();
-            String path = getArguments().getString(FolderPickerActivity.EXTRA_DIR);
-            if (TextUtils.isEmpty(path)) {
-                path = FolderPickerActivity.SDCARD_ROOT;
+            mPath = getArguments().getString(FolderPickerActivity.EXTRA_DIR);
+            if (TextUtils.isEmpty(mPath)) {
+                mPath = FolderPickerActivity.SDCARD_ROOT;
             }
-            args.setPath(path);
-            Set<Integer> mediaTypes = new HashSet<Integer>();
-            mediaTypes.add(FileItem.MediaType.DIRECTORY);
-            args.setMediaTypes(mediaTypes);
 
-            mAdapter = new CardArrayAdapter(getActivity(), new ArrayList<Card>());
+            mAdapter = new ArrayAdapter<Folder>(getActivity(), -1) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View v = convertView;
+                    ViewHolder h;
+                    if (v == null) {
+                        v = LayoutInflater.from(getContext()).inflate(R.layout.gallery_list_item_artwork, parent, false);
+                        h = new ViewHolder(v);
+                        v.setTag(h);
+                    } else {
+                        h = (ViewHolder) v.getTag();
+                        h.reset();
+                    }
+                    Folder f = getItem(position);
+                    h.title.setText(f.name);
+                    h.subtitle.setText(MusicUtils.makeLabel(getContext(), R.plurals.Nitems, f.childCount));
+                    h.extraInfo.setText(f.date);
+                    h.initImage(f.name);
+                    return v;
+                }
+            };
 
-            getLoaderManager().initLoader(0, getArguments(), this);
+            mSubscription = Observable.create(new Observable.OnSubscribe<List<Folder>>() {
+                @Override
+                public void call(Subscriber<? super List<Folder>> subscriber) {
+                    List<Folder> l = doListing(new File(mPath));
+                    if (subscriber.isUnsubscribed()) return;
+                    subscriber.onNext(l);
+                    subscriber.onCompleted();
+                }
+            })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<List<Folder>>() {
+                @Override
+                public void call(List<Folder> folders) {
+                    mAdapter.addAll(folders);
+                    setListAdapter(mAdapter);
+                }
+            });
+
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            mSubscription.unsubscribe();
+            mAdapter = null;
         }
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
-            setEmptyText("No folders");
             super.onViewCreated(view, savedInstanceState);
-            setListAdapter(mAdapter);
-            if (mAdapter.isEmpty()) {
-                setListShown(false);
-            }
+            getListView().setOnItemLongClickListener(this);
         }
 
         @Override
-        public int getListViewLayout() {
-            return R.layout.card_listview;
+        public void onResume() {
+            super.onResume();
+            Toast.makeText(getActivity(), R.string.settings_storage_msg_select_help, Toast.LENGTH_LONG).show();
         }
 
         @Override
-        public int getEmptyViewLayout() {
-            return R.layout.list_empty_view;
+        public void onListItemClick(ListView l, View v, int position, long id) {
+            FolderPickerActivity activity = (FolderPickerActivity)getActivity();
+
+            final String path = mAdapter.getItem(position).getIdentity();
+            final String title = mAdapter.getItem(position).getName();
+            ActionBar actionBar = activity.getSupportActionBar();
+            actionBar.setTitle(makeTitle(path));
+            actionBar.setSubtitle(makeSubtitle(path));
+
+            FolderPickerFragment f = FolderPickerFragment.newInstance(path);
+
+            FragmentTransaction ft = activity.getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.main, f, title);
+            ft.addToBackStack(title);
+            ft.commit();
         }
 
         @Override
-        public Loader<List<FileItem>> onCreateLoader(int id, Bundle args) {
-            return new FileItemArrayLoader(getActivity(), this.args);
-        }
-
-        @Override
-        public void onLoadFinished(Loader<List<FileItem>> loader, List<FileItem> data) {
-            if (data == null || data.size() == 0) {
-                mAdapter.clear();
-                return;
-            }
-            if (!mAdapter.isEmpty() && isViewCreated()) {
-                setListShown(false);
-            }
-            mAdapter.clear();
-            List<Card> cards = new ArrayList<>(data.size());
-            for (FileItem item : data) {
-                cards.add(new FolderPickerCard(getActivity(), item));
-            }
-            mAdapter.addAll(cards);
-            if (isViewCreated()) {
-                setListShown(true);
-            }
-        }
-
-        @Override
-        public void onLoaderReset(Loader<List<FileItem>> loader) {
-            mAdapter.clear();
+        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            Intent i = new Intent().putExtra(EXTRA_DIR, mAdapter.getItem(position).getIdentity());
+            getActivity().setResult(RESULT_OK, i);
+            getActivity().finish();
+            return true;
         }
     }
 

@@ -96,13 +96,9 @@ public class SettingsAudioFragment extends SettingsFragment implements
             }
             return true;
         } else if (preference == mDefaultFolder) {
-            Intent i = new Intent(getActivity(), FolderPickerActivity.class);
-            i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME,
-                    getActivity().getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false));
-            String folder = mSettings.getString(PREF_DEFAULT_FOLDER, null);
-            if (!TextUtils.isEmpty(folder)) {
-                i.putExtra(FolderPickerActivity.EXTRA_DIR, folder);
-            }
+            Intent i = new Intent(getActivity(), FolderPickerActivity.class)
+                    .putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME,
+                        getActivity().getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false));
             startActivityForResult(i, 0);
             return true;
         }
