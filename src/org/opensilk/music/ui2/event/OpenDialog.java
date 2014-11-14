@@ -17,13 +17,14 @@
 
 package org.opensilk.music.ui2.event;
 
-/**
- * Created by drew on 10/29/14.
- */
-public class OpenAddToPlaylist {
-    public final long[] songsToAdd;
+import android.support.v4.app.DialogFragment;
 
-    public OpenAddToPlaylist(long[] songsToAdd) {
-        this.songsToAdd = songsToAdd;
+/**
+ * Created by drew on 11/14/14.
+ */
+public class OpenDialog {
+    public final DialogFragment dialog;
+    public OpenDialog(DialogFragment dialogFragment) {
+        this.dialog = dialogFragment;
     }
 }

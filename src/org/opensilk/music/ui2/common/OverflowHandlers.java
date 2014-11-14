@@ -20,6 +20,10 @@ package org.opensilk.music.ui2.common;
 import android.content.Context;
 import android.widget.PopupMenu;
 
+import com.andrew.apollo.menu.AddToPlaylistDialog;
+import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.menu.DeletePlaylistDialog;
+import com.andrew.apollo.menu.RenamePlaylist;
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
@@ -31,13 +35,11 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.R;
-import org.opensilk.music.api.model.Album;
-import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.MakeToast;
-import org.opensilk.music.ui2.event.OpenAddToPlaylist;
 import org.opensilk.music.MusicServiceConnection;
+import org.opensilk.music.ui2.event.OpenDialog;
+import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
@@ -52,23 +54,6 @@ import rx.functions.Func0;
  * Created by drew on 10/24/14.
  */
 public class OverflowHandlers {
-
-    public static void populateMenu(PopupMenu m, Album a) {
-        m.inflate(R.menu.popup_play_all);
-        m.inflate(R.menu.popup_shuffle_all);
-        m.inflate(R.menu.popup_add_to_queue);
-    }
-
-    public static void populateMenu(PopupMenu m, Artist a) {
-        m.inflate(R.menu.popup_play_all);
-        m.inflate(R.menu.popup_shuffle_all);
-        m.inflate(R.menu.popup_add_to_queue);
-    }
-
-    public static void populateMenu(PopupMenu m, Song s) {
-        m.inflate(R.menu.popup_play_next);
-        m.inflate(R.menu.popup_add_to_queue);
-    }
 
     @Singleton
     public static class LocalAlbums implements OverflowHandler<LocalAlbum> {
@@ -129,16 +114,16 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_PLAYLIST:
-
                     long[] plist = CursorHelpers.getSongIdsForAlbum(context, albumId);
-                    bus.post(new OpenAddToPlaylist(plist));
+                    bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(plist)));
                     return true;
                 case MORE_BY_ARTIST:
-//                    NavUtils.openArtistProfile(context, MusicUtils.makeArtist(context, album.artistName));
+                    bus.post(new StartActivityForResult(NavUtils.makeArtistProfileIntent(context,
+                            MusicUtils.makeArtist(context, album.artistName)), 0));
                     return true;
                 case DELETE:
                     long[] dlist = CursorHelpers.getSongIdsForAlbum(context, albumId);
-                    bus.post(new ConfirmDelete(dlist, album.name));
+                    bus.post(new OpenDialog(DeleteDialog.newInstance(album.name, dlist)));
                     return true;
                 default:
                     return false;
@@ -205,11 +190,11 @@ public class OverflowHandlers {
                     return true;
                 case ADD_TO_PLAYLIST:
                     long[] plist = CursorHelpers.getSongIdsForArtist(context, artistId);
-                    bus.post(new OpenAddToPlaylist(plist));
+                    bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(plist)));
                     return true;
                 case DELETE:
                     long[] dlist = CursorHelpers.getSongIdsForArtist(context, artistId);
-                    bus.post(new ConfirmDelete(dlist, artist.name));
+                    bus.post(new OpenDialog(DeleteDialog.newInstance(artist.name, dlist)));
                     return true;
                 default:
                     return false;
@@ -275,7 +260,7 @@ public class OverflowHandlers {
                     return true;
                 case ADD_TO_PLAYLIST:
                     long[] plist = CursorHelpers.getSongIdsForGenre(context, genreId);
-                    bus.post(new OpenAddToPlaylist(plist));
+                    bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(plist)));
                     return true;
                 default:
                     return false;
@@ -362,32 +347,14 @@ public class OverflowHandlers {
                     });
                     return true;
                 case RENAME:
-//                    RenamePlaylist.getInstance(playlist.mPlaylistId)
-//                            .show(getActivity().getSupportFragmentManager(), "RenameDialog");
+                    if (playlistId != -2) {
+                        bus.post(new OpenDialog(RenamePlaylist.getInstance(playlistId)));
+                    }
                     return true;
                 case DELETE:
-//                    new AlertDialog.Builder(getActivity())
-//                            .setTitle(getActivity().getString(R.string.delete_dialog_title, playlist.mPlaylistName))
-//                            .setPositiveButton(R.string.context_menu_delete, new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(final DialogInterface dialog, final int which) {
-//                                    final Uri mUri = ContentUris.withAppendedId(
-//                                            MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-//                                            playlist.mPlaylistId);
-//                                    getActivity().getContentResolver().delete(mUri, null, null);
-//                                    getActivity().getContentResolver().notifyChange(MusicProvider.PLAYLIST_URI, null);
-//                                    MusicUtils.refresh();
-//                                }
-//                            })
-//                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(final DialogInterface dialog, final int which) {
-//                                    dialog.dismiss();
-//                                }
-//                            })
-//                            .setMessage(R.string.cannot_be_undone)
-//                            .create()
-//                            .show();
+                    if (playlistId != -2) {
+                        bus.post(new OpenDialog(DeletePlaylistDialog.newInstance(playlist.mPlaylistName, playlistId)));
+                    }
                     return true;
                 default:
                     return false;
@@ -454,22 +421,18 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_PLAYLIST:
-                    bus.post(new OpenAddToPlaylist(new long[]{song.songId}));
+                    bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(new long[]{song.songId})));
                     return true;
                 case MORE_BY_ARTIST:
-//                    if (song instanceof LocalSong) {
-//                        LocalSong localsong = (LocalSong) song;
-//                        NavUtils.openArtistProfile(getActivity(), MusicUtils.makeArtist(getActivity(), localsong.artistName));
-//                    }
+                    bus.post(new StartActivityForResult(NavUtils.makeArtistProfileIntent(context,
+                            MusicUtils.makeArtist(context, song.artistName)), 0));
                     return true;
                 case SET_RINGTONE:
-//                    if (song instanceof LocalSong) {
-//                        LocalSong localsong = (LocalSong) song;
-//                        MusicUtils.setRingtone(getActivity(), localsong.songId);
-//                    }
+                    MakeToast mt = MusicUtils.setRingtone(context, song.songId);
+                    if (mt != null) bus.post(mt);
                     return true;
                 case DELETE:
-                    bus.post(new ConfirmDelete(new long[]{song.songId}, song.name));
+                    bus.post(new OpenDialog(DeleteDialog.newInstance(song.name, new long[]{song.songId})));
                     return true;
                 default:
                     return false;
@@ -532,7 +495,7 @@ public class OverflowHandlers {
                     });
                     return true;
                 case ADD_TO_PLAYLIST:
-                    bus.post(new OpenAddToPlaylist(group.songIds));
+                    bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(group.songIds)));
                     return true;
                 default:
                     return false;
@@ -587,15 +550,16 @@ public class OverflowHandlers {
                     if (song.isLocal) {
                         try {
                             long id = Long.decode(song.identity);
-                            bus.post(new OpenAddToPlaylist(new long[]{id}));
+                            bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(new long[]{id})));
                         } catch (NumberFormatException ex) {
-                            //TODO
+                            bus.post(new MakeToast(R.string.err_generic));
                         }
                     } // else unsupported
                     return true;
                 case MORE_BY_ARTIST:
                     if (song.isLocal) {
-                        NavUtils.openArtistProfile(context, MusicUtils.makeArtist(context, song.artistName));
+                        bus.post(new StartActivityForResult(NavUtils.makeArtistProfileIntent(context,
+                                MusicUtils.makeArtist(context, song.artistName)), 0));
                     } // else TODO
                     return true;
                 case SET_RINGTONE:
@@ -604,9 +568,9 @@ public class OverflowHandlers {
                         try {
                             long id = Long.decode(song.identity);
                             MakeToast toast = MusicUtils.setRingtone(context, id);
-                            bus.post(toast);
+                            if (toast != null) bus.post(toast);
                         } catch (NumberFormatException ex) {
-                            //TODO
+                            bus.post(new MakeToast(R.string.err_generic));
                         }
                     } // else unsupported
                     return true;
@@ -614,9 +578,9 @@ public class OverflowHandlers {
                     if (song.isLocal) {
                         try {
                             long id = Long.decode(song.identity);
-                            bus.post(new ConfirmDelete(new long[]{id}, song.name));
+                            bus.post(new OpenDialog(DeleteDialog.newInstance(song.name, new long[]{id})));
                         } catch (NumberFormatException ex) {
-                            //TODO
+                            bus.post(new MakeToast(R.string.err_generic));
                         }
                     } // else unsupported
                     return true;

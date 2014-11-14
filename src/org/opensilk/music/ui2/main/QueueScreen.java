@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 
+import com.andrew.apollo.menu.AddToPlaylistDialog;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicProviderUtil;
 
@@ -37,7 +38,7 @@ import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.event.OpenAddToPlaylist;
+import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.NowPlayingCursor;
 import org.opensilk.common.dagger.qualifier.ForApplication;
@@ -289,7 +290,7 @@ public class QueueScreen extends Screen {
                                                     if (queue != null && queue.length > 0) {
                                                         long[] playlist = MusicProviderUtil.transformListToRealIds(appContext, queue);
                                                         if (playlist.length > 0) {
-                                                            bus.post(new OpenAddToPlaylist(playlist));
+                                                            bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(playlist)));
                                                             return;
                                                         }
                                                     }

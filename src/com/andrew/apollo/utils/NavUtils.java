@@ -38,16 +38,26 @@ import org.opensilk.music.ui2.ProfileActivity;
  */
 public final class NavUtils {
 
-    public static void openArtistProfile(final Context context, final LocalArtist artist) {
-        if (artist == null) {
-            return;
-        }
+    public static Intent getProfileIntent(Context context) {
+        return new Intent(context, ProfileActivity.class);
+    }
+
+    public static Intent makeArtistProfileIntent(Context context, LocalArtist artist) {
         // Create a new bundle to transfer the artist info
         final Bundle b = new Bundle();
         b.putString(Config.MIME_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
         b.putParcelable(Config.EXTRA_DATA, artist);
 
-        startProfileActivity(context, ProfileActivity.ACTION_ARTIST, b);
+        return getProfileIntent(context)
+                .setAction(ProfileActivity.ACTION_ARTIST)
+                .putExtra(Config.EXTRA_DATA, b);
+    }
+
+    public static void openArtistProfile(final Context context, final LocalArtist artist) {
+        if (artist == null) {
+            return;
+        }
+        context.startActivity(makeArtistProfileIntent(context, artist));
     }
 
     public static void openAlbumProfile(final Context context, final LocalAlbum album) {

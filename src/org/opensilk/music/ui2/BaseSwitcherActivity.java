@@ -37,9 +37,8 @@ import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.core.android.ActionBarOwner.CustomMenuItem;
-import org.opensilk.music.ui2.event.ConfirmDelete;
 import org.opensilk.music.ui2.event.MakeToast;
-import org.opensilk.music.ui2.event.OpenAddToPlaylist;
+import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.ui2.loader.LoaderModule;
 
 import javax.inject.Inject;
@@ -185,14 +184,8 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     }
 
     //TODO stop using fragments
-    public void onEventMainThread(OpenAddToPlaylist e) {
-        AddToPlaylistDialog.newInstance(e.songsToAdd)
-                .show(getSupportFragmentManager(), "AddToPlaylistDialog");
-    }
-
-    public void onEventMainThread(ConfirmDelete e) {
-        DeleteDialog.newInstance((String) e.title, e.songids)
-                .show(getSupportFragmentManager(), "DeleteDialog");
+    public void onEventMainThread(OpenDialog e) {
+        e.dialog.show(getSupportFragmentManager(), "Dialog");
     }
 
     /*
