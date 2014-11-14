@@ -40,8 +40,8 @@ public class PluginConfigTest {
     @Before
     public void setUp() {
         config_1 = new PluginConfig.Builder().addAbility(PluginConfig.SEARCHABLE).addAbility(PluginConfig.SETTINGS)
-                .setPickerComponent(new ComponentName("com.test", "TestClass"))
-                .setSettingsComponent(new ComponentName("com.test", "TestClassSettings"))
+                .setPickerComponent(new ComponentName("com.test", "TestClass"), null)
+                .setSettingsComponent(new ComponentName("com.test", "TestClassSettings"), null)
                 .build();
     }
 
@@ -56,7 +56,8 @@ public class PluginConfigTest {
         assertThat(config_1.apiVersion).isEqualTo(fromB.apiVersion);
         assertThat(config_1.capabilities).isEqualTo(fromB.capabilities);
         assertThat(config_1.pickerComponent).isEqualTo(fromB.pickerComponent);
-        assertThat(config_1.settingsComponent).isEqualTo(fromB.settingsComponent);
+        assertThat(config_1.<ComponentName>getMeta(PluginConfig.META_SETTINGS_COMPONENT))
+                .isEqualTo(fromB.<ComponentName>getMeta(PluginConfig.META_SETTINGS_COMPONENT));
     }
 
 }

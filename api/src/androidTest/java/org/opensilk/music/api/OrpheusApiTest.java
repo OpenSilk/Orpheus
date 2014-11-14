@@ -18,6 +18,7 @@
 package org.opensilk.music.api;
 
 import android.os.Bundle;
+import android.os.Parcel;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,11 +38,16 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class OrpheusApiTest {
 
     @Test
-    public void ensureTransformBundleWorks() throws Exception {
+    public void testMaterilizeBundleWorks() throws Exception {
         Folder f = new Folder.Builder().setIdentity("1").setName("Folder1").build();
         Bundle b = f.toBundle();
 
-        Bundleable b2 = OrpheusApi.materializeBundle(b);
+        Parcel p = Parcel.obtain();
+        b.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        Bundle b1 = p.readBundle();
+
+        Bundleable b2 = OrpheusApi.materializeBundle(b1);
         Assert.assertTrue((b2 instanceof Folder));
         assertThat((Folder) b2).isEqualTo(f);
 
