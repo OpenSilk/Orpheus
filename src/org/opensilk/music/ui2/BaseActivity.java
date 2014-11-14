@@ -51,7 +51,11 @@ import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
+import dagger.Provides;
+import de.greenrobot.event.EventBus;
 import timber.log.Timber;
 
 import static org.opensilk.cast.CastMessage.CAST_APPLICATION_CONNECTION_FAILED;
@@ -66,9 +70,12 @@ import static org.opensilk.cast.CastMessage.CAST_FAILED;
  */
 public class BaseActivity extends ActionBarActivity {
 
-    @dagger.Module(addsTo = AppModule.class)
+    @dagger.Module(addsTo = AppModule.class, library = true)
     public static class Module {
-
+        @Provides @Singleton @Named("activity")
+        public EventBus provideEventBus() {
+            return new EventBus();
+        }
     }
 
     // Cast stuff

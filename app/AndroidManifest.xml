@@ -175,7 +175,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="org.opensilk.music.ui.folder.FolderPickerActivity"
+        <activity android:name=".ui.settings.FolderPickerActivity"
             android:theme="@style/Theme.Dialog.Light"/>
 
         <!-- 1x1 Ultra-mini widget -->

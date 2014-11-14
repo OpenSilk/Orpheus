@@ -33,7 +33,6 @@ import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.dialogs.SleepTimerDialog;
-import org.opensilk.music.ui.folder.FolderFragment;
 import org.opensilk.music.ui.library.LibraryFragment;
 import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.music.ui2.ProfileActivity;
@@ -140,12 +139,6 @@ public final class NavUtils {
      */
     @Deprecated @MarkedForRemoval
     public static void goHome(FragmentActivity activity) {
-    }
-
-    public static void openFoldersFragment(FragmentActivity activity) {
-        FragmentManager fm = activity.getSupportFragmentManager();
-        maybeClearBackstack(fm);
-        fm.beginTransaction().replace(R.id.main, new FolderFragment(), "folders").commit();
     }
 
     public static void openSettings(Activity activity) {

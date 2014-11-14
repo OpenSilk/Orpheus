@@ -20,6 +20,10 @@ import butterknife.InjectView;
  */
 public class SettingsActivity extends BaseActivity {
 
+    @dagger.Module(includes = BaseActivity.Module.class, injects = SettingsActivity.class)
+    public static class Module {
+    }
+
     @InjectView(R.id.main_toolbar) Toolbar mToolbar;
 
     @Override
@@ -27,7 +31,7 @@ public class SettingsActivity extends BaseActivity {
         boolean light = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
         setTheme(light ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
 
-        ((DaggerInjector) getApplication()).getObjectGraph().plus(getModules()).inject(this);
+        ((DaggerInjector) getApplication()).getObjectGraph().plus(new Module()).inject(this);
 
         super.onCreate(savedInstanceState);
 
@@ -66,9 +70,4 @@ public class SettingsActivity extends BaseActivity {
         }
     }
 
-    protected Object[] getModules() {
-        return new Object[] {
-                new ActivityModule(this),
-        };
-    }
 }

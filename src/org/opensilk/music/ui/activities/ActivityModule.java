@@ -23,7 +23,7 @@ import android.support.v7.app.ActionBarActivity;
 import com.squareup.otto.Bus;
 
 import org.opensilk.music.AppModule;
-import org.opensilk.music.ui.folder.FolderPickerActivity;
+import org.opensilk.music.ui.settings.FolderPickerActivity;
 import org.opensilk.music.ui.fragments.NowPlayingFragment;
 import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.common.dagger.qualifier.ForActivity;
@@ -41,8 +41,6 @@ import de.greenrobot.event.EventBus;
 @Module (
         injects = {
                 NowPlayingFragment.class,
-                SettingsActivity.class,
-                FolderPickerActivity.class,
         },
         addsTo = AppModule.class,
         library = true

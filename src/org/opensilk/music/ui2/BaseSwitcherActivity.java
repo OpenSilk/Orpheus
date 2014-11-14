@@ -69,10 +69,6 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
             }, library = true
     )
     public static class Module {
-        @Provides @Singleton @Named("activity")
-        public EventBus provideEventBus() {
-            return new EventBus();
-        }
         @Provides @Singleton
         public Parcer<Object> provideParcer(Gson gson) {
             return new GsonParcer<>(gson);

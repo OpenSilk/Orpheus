@@ -20,8 +20,8 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.AppModule;
-import org.opensilk.music.ui.folder.FolderPickerActivity;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.silkdagger.DaggerInjector;
 
 import javax.inject.Inject;
@@ -47,11 +47,9 @@ public class SettingsAudioFragment extends SettingsFragment implements
     private CheckBoxPreference mCasting;
     private Preference mDefaultFolder;
 
-    @dagger.Module (
-            injects = { SettingsAudioFragment.class },
-            addsTo = AppModule.class
-    )
-    public static class Module {}
+    @dagger.Module (addsTo = AppModule.class, injects = SettingsAudioFragment.class)
+    public static class Module {
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -99,6 +97,8 @@ public class SettingsAudioFragment extends SettingsFragment implements
             return true;
         } else if (preference == mDefaultFolder) {
             Intent i = new Intent(getActivity(), FolderPickerActivity.class);
+            i.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME,
+                    getActivity().getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false));
             String folder = mSettings.getString(PREF_DEFAULT_FOLDER, null);
             if (!TextUtils.isEmpty(folder)) {
                 i.putExtra(FolderPickerActivity.EXTRA_DIR, folder);
