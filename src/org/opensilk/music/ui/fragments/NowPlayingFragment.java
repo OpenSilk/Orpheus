@@ -701,7 +701,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                             realid = MusicProviderUtil.getRealId(mActivity, id);
                         }
                         if (realid >= 0) {
-                            DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid}, null)
+                            DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid})
                                     .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
                         } else {
                             //TODo toast

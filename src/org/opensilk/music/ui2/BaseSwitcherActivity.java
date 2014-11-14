@@ -191,7 +191,7 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     }
 
     public void onEventMainThread(ConfirmDelete e) {
-        DeleteDialog.newInstance((String) e.title, e.songids, null) //TODO
+        DeleteDialog.newInstance((String) e.title, e.songids)
                 .show(getSupportFragmentManager(), "DeleteDialog");
     }
 
