@@ -112,10 +112,6 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(ThemeHelper.getInstance(this).getTheme());
-        if (VersionUtils.hasLollipop()) {
-            getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-//            getWindow().setSharedElementExitTransition(new Explode());
-        }
         super.onCreate(savedInstanceState);
 
         mDrawerOwner.takeView(this);
