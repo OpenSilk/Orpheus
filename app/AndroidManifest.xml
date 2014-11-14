@@ -136,7 +136,7 @@
         <activity android:name="org.opensilk.music.ui2.ProfileActivity"
             android:theme="@style/Theme.Profile.Light">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+                android:value="org.opensilk.music.ui2.LauncherActivity"/>
         </activity>
 
         <activity android:name="org.opensilk.music.ui2.SearchActivity"
@@ -149,7 +149,7 @@
                 <!--<category android:name="android.intent.category.DEFAULT" />-->
             </intent-filter>
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value="org.opensilk.ui.activities.HomeSlidingActivity"/>
+                       android:value="org.opensilk.music.ui2.LauncherActivity"/>
             <meta-data android:name="android.app.searchable"
                        android:resource="@xml/searchable" />
         </activity>
@@ -160,7 +160,7 @@
             android:label="@string/menu_settings"
             android:theme="@style/Theme.Settings.Light">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+                android:value="org.opensilk.music.ui2.LauncherActivity"/>
         </activity>
 
         <activity
@@ -226,6 +226,9 @@
                 android:resource="@xml/music_widget_large" />
         </receiver>
 
+        <!-- Widget service runs in activity process-->
+        <service android:name="org.opensilk.music.appwidgets.MusicWidgetService" />
+
         <!-- Media button receiver -->
         <receiver android:name="com.andrew.apollo.MediaButtonIntentReceiver" >
             <intent-filter>
@@ -234,9 +237,29 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="org.opensilk.music.artwork.ArtworkBroadcastReceiver">
+        <!-- Local Content Provider-->
+        <provider
+            android:name="com.andrew.apollo.provider.MusicProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"/>
+
+        <!-- Artwork provider -->
+        <provider
+            android:name="org.opensilk.music.artwork.ArtworkProvider"
+            android:authorities="${applicationId}.artwork.provider"
+            android:enabled="true"
+            android:exported="true"
+            android:grantUriPermissions="true"/>
+
+        <receiver
+            android:name="org.opensilk.music.bus.ServiceBroadcastReceiver">
             <intent-filter>
-                <action android:name="org.opensilk.music.artwork.clear_cache"/>
+                <action android:name="${applicationId}.playstatechanged" />
+                <action android:name="${applicationId}.metachanged" />
+                <action android:name="${applicationId}.repeatmodechanged" />
+                <action android:name="${applicationId}.shufflemodechanged" />
+                <action android:name="${applicationId}.refresh" />
+                <action android:name="${applicationId}.queuechanged" />
             </intent-filter>
         </receiver>
 
@@ -254,6 +277,7 @@
             <meta-data android:name="android.service.dream"
                     android:resource="@xml/daydream"/>
         </service>
+
         <!--Daydream settings-->
         <activity android:name="org.opensilk.music.dream.DreamSettings"
             android:taskAffinity=""
@@ -265,16 +289,15 @@
                 <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
          </activity>
+
         <!-- Music service -->
         <service
             android:name="com.andrew.apollo.MusicPlaybackService"
             android:process=":service"/>
+
         <!-- Cast Service -->
         <service android:name="org.opensilk.cast.SilkCastService"
             android:process=":service"/>
-
-        <!-- Widget service runs in activity process-->
-        <service android:name="org.opensilk.music.appwidgets.MusicWidgetService" />
 
         <!--Muzei extension-->
         <service android:name="org.opensilk.music.muzei.MuzeiService"

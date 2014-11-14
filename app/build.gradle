@@ -55,11 +55,9 @@ android {
             assets.srcDirs = ['../assets']
         }
         debug {
-            manifest.srcFile 'variants/debug/AndroidManifest.xml'
             res.srcDirs = ['variants/debug/res']
         }
         release {
-            manifest.srcFile 'variants/release/AndroidManifest.xml'
             res.srcDirs = ['variants/release/res']
         }
 //        androidTest {
@@ -92,8 +90,8 @@ android {
         debug {
             applicationIdSuffix ".debug"
             versionNameSuffix "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
-            buildConfigField "String", "MUSIC_AUTHORITY", "\"org.opensilk.music.provider.debug\""
-            buildConfigField "String", "ARTWORK_AUTHORITY", "\"org.opensilk.music.artwork.provider.debug\""
+            buildConfigField "String", "MUSIC_AUTHORITY", "\"org.opensilk.music.debug.provider\""
+            buildConfigField "String", "ARTWORK_AUTHORITY", "\"org.opensilk.music.debug.artwork.provider\""
             runProguard false //true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
@@ -106,8 +104,6 @@ android {
             signingConfig signingConfigs.release
         }
     }
-
-    useOldManifestMerger true
 
 }
 
