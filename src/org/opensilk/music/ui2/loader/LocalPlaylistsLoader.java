@@ -106,7 +106,7 @@ public class LocalPlaylistsLoader extends AbsGenrePlaylistLoader<Playlist> {
         Observable<Playlist> lastAddedObservable = performSomeMagick(
                 // performSomeMagick subscribes us on io so we dont need to do that here
                 lastAddedLoader.createObservable(),
-                -1, context.getResources().getString(R.string.playlist_last_added));
+                -2, context.getResources().getString(R.string.playlist_last_added));
 
         // we want last added first so concat them together
         return Observable.concat(lastAddedObservable, super.getObservable())
