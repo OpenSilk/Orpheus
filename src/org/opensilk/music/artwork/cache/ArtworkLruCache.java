@@ -18,7 +18,6 @@
 package org.opensilk.music.artwork.cache;
 
 import android.annotation.TargetApi;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.util.LruCache;
 

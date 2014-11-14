@@ -17,6 +17,8 @@
 
 package org.opensilk.music.artwork;
 
+import android.os.ParcelFileDescriptor;
+
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.api.meta.ArtInfo;
 
@@ -30,5 +32,11 @@ public interface ArtworkRequestManager {
     Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
     Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, long albumId, ArtworkType artworkType);
     Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
+
+    ParcelFileDescriptor getArtwork(String artistName, String albumName);
+    ParcelFileDescriptor getArtworkThumbnail(String artistName, String albumName);
+
+    boolean clearCaches();
+    void evictL1();
 
 }

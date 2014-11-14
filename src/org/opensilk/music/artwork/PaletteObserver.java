@@ -17,8 +17,6 @@
 
 package org.opensilk.music.artwork;
 
-import android.support.v7.graphics.Palette;
-
 import rx.Observer;
 
 /**

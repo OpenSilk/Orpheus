@@ -1,13 +1,10 @@
 
 package org.opensilk.music.artwork.cache;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.jakewharton.disklrucache.DiskLruCache;
-
-import org.opensilk.music.artwork.ArtworkLoader;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -20,8 +17,10 @@ import java.io.OutputStream;
  * Implementation of DiskLruCache by Jake Wharton
  * modified from http://stackoverflow.com/questions/10185898/using-disklrucache-in-android-4-0-does-not-provide-for-opencache-method
  */
-public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
+public class BitmapDiskLruCache {
 
+    private File mDiskCacheDir;
+    private int mDiskCacheSize;
     private DiskLruCache mDiskCache;
     private Bitmap.CompressFormat mCompressFormat = Bitmap.CompressFormat.JPEG;
     private static int IO_BUFFER_SIZE = 8*1024;
@@ -32,10 +31,11 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
     public static final Object sDecodeLock = new Object();
 
     private BitmapDiskLruCache(File diskCacheDir, int diskCacheSize, Bitmap.CompressFormat compressFormat, int quality) throws IOException {
-        mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
+        mDiskCacheDir = diskCacheDir;
+        mDiskCacheSize = diskCacheSize;
         mCompressFormat = compressFormat;
         mCompressQuality = quality;
-
+        mDiskCache = DiskLruCache.open(diskCacheDir, APP_VERSION, VALUE_COUNT, diskCacheSize);
     }
 
     public static BitmapDiskLruCache open(File diskCacheDir, int diskCacheSize, Bitmap.CompressFormat compressFormat, int quality) {
@@ -70,12 +70,9 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         }
     }
 
-    public void clearCache() {
-        try {
-            mDiskCache.delete();
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        }
+    public void clearCache() throws IOException {
+        mDiskCache.delete();
+        mDiskCache = DiskLruCache.open(mDiskCacheDir, APP_VERSION, VALUE_COUNT, mDiskCacheSize);
     }
 
     public File getCacheFolder() {
@@ -95,11 +92,6 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         }
     }
 
-    /*
-     * Implement ImageCache interface
-     */
-
-    @Override
     public void putBitmap(String url, Bitmap data) {
         DiskLruCache.Editor editor = null;
         try {
@@ -124,7 +116,6 @@ public class BitmapDiskLruCache implements ArtworkLoader.ImageCache {
         }
     }
 
-    @Override
     public Bitmap getBitmap(String url) {
         Bitmap bitmap = null;
         DiskLruCache.Snapshot snapshot = null;

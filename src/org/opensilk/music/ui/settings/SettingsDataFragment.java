@@ -7,27 +7,41 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.widget.Toast;
 
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.apache.commons.io.FileUtils;
-import org.opensilk.music.artwork.ArtworkManager;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.cache.CacheUtil;
+import org.opensilk.silkdagger.DaggerInjector;
 
 import java.util.Locale;
 
-import static org.opensilk.music.artwork.ArtworkManager.DISK_CACHE_DIRECTORY;
+import javax.inject.Inject;
+
+import static org.opensilk.music.artwork.ArtworkModule.DISK_CACHE_DIRECTORY;
 
 /**
  * Created by andrew on 3/1/14.
  */
 public class SettingsDataFragment extends SettingsFragment {
 
+    @dagger.Module(addsTo = AppModule.class, injects = SettingsDataFragment.class)
+    public static class Module {
+
+    }
+
+    @Inject ArtworkRequestManager mRequestor;
+
     private ListPreference mCacheSize;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ((DaggerInjector) getActivity().getApplication()).getObjectGraph().plus(new Module()).inject(this);
+
         addPreferencesFromResource(R.xml.settings_data);
 
 
@@ -67,7 +81,7 @@ public class SettingsDataFragment extends SettingsFragment {
                                 @Override
                                 public void onClick(final DialogInterface dialog, final int which) {
                                     dialog.dismiss();
-                                    if (ArtworkManager.clearCaches()) {
+                                    if (mRequestor.clearCaches()) {
                                         Toast.makeText(getActivity(), "Caches cleared", Toast.LENGTH_LONG).show();
                                     } else {
                                         Toast.makeText(getActivity(), "Failed to clear caches", Toast.LENGTH_LONG).show();

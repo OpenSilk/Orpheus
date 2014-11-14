@@ -27,13 +27,11 @@ import android.util.Log;
 
 import org.opensilk.music.BuildConfig;
 import org.opensilk.music.R;
-
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
 import java.io.IOException;
 
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**

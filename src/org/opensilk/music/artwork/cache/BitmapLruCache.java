@@ -21,12 +21,10 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.util.LruCache;
 
-import org.opensilk.music.artwork.ArtworkLoader;
-
 /**
  * Created by drew on 3/11/14.
  */
-public class BitmapLruCache extends LruCache<String, Bitmap> implements ArtworkLoader.ImageCache {
+public class BitmapLruCache extends LruCache<String, Bitmap> {
 
     public BitmapLruCache(int maxSize) {
         super(maxSize);
@@ -44,21 +42,14 @@ public class BitmapLruCache extends LruCache<String, Bitmap> implements ArtworkL
         }
     }
 
-    /*
-     * Implement ImageCache interface
-     */
-
-    @Override
     public Bitmap getBitmap(String url) {
         return get(CacheUtil.md5(url));
     }
 
-    @Override
     public void putBitmap(String url, Bitmap bitmap) {
         put(CacheUtil.md5(url), bitmap);
     }
 
-    @Override
     public boolean containsKey(String url) {
         return get(CacheUtil.md5(url)) != null;
     }

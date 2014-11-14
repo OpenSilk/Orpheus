@@ -49,13 +49,11 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Album;
-import org.opensilk.music.artwork.ArtworkManager;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.widgets.AudioVisualizationView;
-import org.opensilk.music.widgets.FullScreenArtworkImageView;
 import org.opensilk.music.widgets.HeaderOverflowButton;
 import org.opensilk.music.widgets.PanelHeaderLayout;
 import org.opensilk.music.widgets.PlayPauseButton;
@@ -63,7 +61,6 @@ import org.opensilk.music.widgets.QueueButton;
 import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
-import org.opensilk.music.widgets.ThumbnailArtworkImageView;
 import org.opensilk.common.dagger.qualifier.ForActivity;
 import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 
@@ -88,7 +85,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     private TimeHandler mTimeHandler;
 
     // Background art
-    private FullScreenArtworkImageView mArtBackground;
+//    private FullScreenArtworkImageView mArtBackground;
 
     /*
      * Panel Header
@@ -274,7 +271,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         mPanelHeader = (PanelHeaderLayout) v.findViewById(R.id.panel_header);
 
         // Background art
-        mArtBackground = (FullScreenArtworkImageView) v.findViewById(R.id.panel_background_art);
+//        mArtBackground = (FullScreenArtworkImageView) v.findViewById(R.id.panel_background_art);
 //        mArtBackground.setPaletteListener(mPanelHeader);
 
         // Previous button
@@ -369,12 +366,12 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         if (visible) {
             mQueueShowing = true;
             //TODO any reason to set visiblity GONE?
-            mArtBackground.animate().alpha(0.0f).setDuration(500).start();
+//            mArtBackground.animate().alpha(0.0f).setDuration(500).start();
             mFooterCurrentTime.setVisibility(View.INVISIBLE);
             mFooterTotalTime.setVisibility(View.INVISIBLE);
         } else {
             mQueueShowing = false;
-            mArtBackground.animate().alpha(1.0f).setDuration(500).start();
+//            mArtBackground.animate().alpha(1.0f).setDuration(500).start();
             refreshCurrentTime();
             mFooterTotalTime.setVisibility(View.VISIBLE);
         }
@@ -400,7 +397,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
         // Set the total time
         mFooterTotalTime.setText(MusicUtils.makeTimeString(mActivity, MusicUtils.duration() / 1000));
         // Set the album art
-        ArtworkManager.loadCurrentArtwork(mArtBackground);
+//        ArtworkManager.loadCurrentArtwork(mArtBackground);
         // Update the current time
         queueNextRefresh(1);
     }

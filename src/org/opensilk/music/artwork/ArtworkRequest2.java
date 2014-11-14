@@ -16,6 +16,11 @@
 
 package org.opensilk.music.artwork;
 
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.support.v7.graphics.Palette;
+
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
@@ -23,14 +28,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.HttpHeaderParser;
-
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.support.v7.graphics.Palette;
-
-import org.opensilk.music.artwork.Artwork;
-import org.opensilk.music.artwork.ArtworkType;
 
 /**
  * A canned request for getting an image at a given URL and calling

@@ -20,6 +20,7 @@ package org.opensilk.music.artwork;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 
@@ -30,8 +31,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
+import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.common.rx.HoldsSubscription;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
@@ -39,9 +42,10 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
-import org.opensilk.common.dagger.qualifier.ForApplication;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.AbstractMap;
 import java.util.Map;
@@ -477,6 +481,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     }
 
+    /*
+     * Start IMPL
+     */
+
     @Override
     public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType) {
         return new AlbumArtworkRequest(imageView, paletteObserver, artInfo, artworkType).start();
@@ -491,6 +499,52 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     public Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType) {
         return new ArtistArtworkRequest(imageView, paletteObserver, artInfo, artworkType).start();
     }
+
+    @Override
+    public ParcelFileDescriptor getArtwork(String artistName, String albumName) {
+        final ArtInfo artInfo = new ArtInfo(artistName, albumName, null);
+        final String cacheKey = getCacheKey(artInfo, ArtworkType.LARGE);
+        ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
+        // Create request so it will be there next time
+        if (pfd == null) newAlbumRequest(null, null, artInfo, ArtworkType.LARGE);
+        return pfd;
+    }
+
+    @Override
+    public ParcelFileDescriptor getArtworkThumbnail(String artistName, String albumName) {
+        final ArtInfo artInfo = new ArtInfo(artistName, albumName, null);
+        final String cacheKey = getCacheKey(artInfo, ArtworkType.THUMBNAIL);
+        ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
+        // Create request so it will be there next time
+        if (pfd == null) newAlbumRequest(null, null, artInfo, ArtworkType.THUMBNAIL);
+        return pfd;
+    }
+
+    @Override
+    public boolean clearCaches() {
+        try {
+            mVolleyQueue.cancelAll(new RequestQueue.RequestFilter() {
+                @Override public boolean apply(Request<?> request) {
+                    return true;
+                }
+            });
+            mVolleyQueue.getCache().clear();
+            mL1Cache.evictAll();
+            mL2Cache.clearCache();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public void evictL1() {
+        mL1Cache.evictAll();
+    }
+
+    /*
+     * End IMPL
+     */
 
     public Observable<CacheResponse> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
         final String cacheKey = getCacheKey(artInfo, artworkType);
@@ -710,21 +764,23 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 // this second request is attached to the first and processed afterwards
                 // saving bandwidth and ensuring both kinds of images are available next time
                 // we need them.
-                final ArtworkType oppositeArtworkType = ArtworkType.opposite(artworkType);
-                ArtworkRequest2.Listener oppositeListener = new ArtworkRequest2.Listener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        //pass
-                    }
-                    @Override
-                    public void onResponse(Artwork artwork) {
-                        putInDiskCache(getCacheKey(artInfo, oppositeArtworkType), artwork.bitmap);
-                    }
-                };
-                ArtworkRequest2 oppositeRequest = new ArtworkRequest2(url, oppositeArtworkType, oppositeListener);
-                mVolleyQueue.add(oppositeRequest);
+                createImageRequestForCache(url, artInfo, ArtworkType.opposite(artworkType));
             }
         });
+    }
+
+    public void createImageRequestForCache(final String url, final ArtInfo artInfo, final ArtworkType artworkType) {
+        ArtworkRequest2.Listener listener = new ArtworkRequest2.Listener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                //pass
+            }
+            @Override
+            public void onResponse(Artwork artwork) {
+                putInDiskCache(getCacheKey(artInfo, artworkType), artwork.bitmap);
+            }
+        };
+        mVolleyQueue.add(new ArtworkRequest2(url, artworkType, listener));
     }
 
     public Observable<Artwork> createMediaStoreRequestObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
@@ -765,7 +821,6 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
-
     final BlockingDeque<Map.Entry<String, Bitmap>> diskCacheQueue = new LinkedBlockingDeque<>();
     Scheduler.Worker diskCacheWorker;
 
@@ -793,6 +848,43 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 }
             });
         }
+    }
+
+    private ParcelFileDescriptor pullSnapshot(String cacheKey) {
+        Timber.d("Checking DiskCache for " + cacheKey);
+        try {
+            if (mL2Cache == null) {
+                throw new IOException("Unable to obtain cache instance");
+            }
+            final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+            final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
+            final DiskLruCache.Snapshot snapshot = mL2Cache.get(cacheKey);
+            if (snapshot != null && snapshot.getInputStream(0) != null) {
+                final Scheduler.Worker worker = Schedulers.io().createWorker();
+                worker.schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        try {
+                            IOUtils.copy(snapshot.getInputStream(0), out);
+                        } catch (IOException e) {
+//                            e.printStackTrace();
+                        } finally {
+                            snapshot.close();
+                            IOUtils.closeQuietly(out);
+                            worker.unsubscribe();
+                        }
+                    }
+                });
+                return pipe[0];
+            } else {
+                pipe[0].close();
+                out.close();
+            }
+        } catch (IOException e) {
+            Timber.e(""+e.getClass() + " " + e.getMessage());
+//            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

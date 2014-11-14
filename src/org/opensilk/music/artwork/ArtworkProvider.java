@@ -16,33 +16,21 @@
 
 package org.opensilk.music.artwork;
 
-import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.UriMatcher;
-import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
-import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
-import android.util.Log;
 
 import org.opensilk.music.BuildConfig;
-
 import org.opensilk.music.GraphHolder;
-import org.opensilk.music.util.PriorityAsyncTask;
 
 import java.io.FileNotFoundException;
 import java.util.List;
 
 import javax.inject.Inject;
-
-import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 3/25/14.
@@ -80,23 +68,13 @@ public class ArtworkProvider extends ContentProvider {
         return ARTWORK_THUMB_URI.buildUpon().appendPath(artistName).appendPath(albumName).build();
     }
 
-    GraphHolder mGraphHolder;
-    @Inject
-    ArtworkService mArtworkService;
+    @Inject ArtworkRequestManager mArtworkRequestor;
 
     @Override
     //@DebugLog
     public boolean onCreate() {
-        mGraphHolder = GraphHolder.get(getContext());
-        mGraphHolder.inject(this);
+        GraphHolder.get(getContext()).inject(this);
         return true;
-    }
-
-    @Override
-    public void attachInfo(Context context, ProviderInfo info) {
-        super.attachInfo(context, info);
-        //Background tasks will fail without
-        PriorityAsyncTask.init();
     }
 
     @Override
@@ -147,7 +125,7 @@ public class ArtworkProvider extends ContentProvider {
                 if (seg == null || seg.size() < 2) {
                     break;
                 }
-                pfd = mArtworkService.getArtwork(seg.get(seg.size()-2), seg.get(seg.size()-1));
+                pfd = mArtworkRequestor.getArtwork(seg.get(seg.size()-2), seg.get(seg.size()-1));
                 if (pfd != null) {
                     return pfd;
                 }
@@ -157,7 +135,7 @@ public class ArtworkProvider extends ContentProvider {
                 if (seg == null || seg.size() < 2) {
                     break;
                 }
-                pfd = mArtworkService.getArtworkThumbnail(seg.get(seg.size()-2), seg.get(seg.size()-1));
+                pfd = mArtworkRequestor.getArtworkThumbnail(seg.get(seg.size()-2), seg.get(seg.size()-1));
                 if (pfd != null) {
                     return pfd;
                 }

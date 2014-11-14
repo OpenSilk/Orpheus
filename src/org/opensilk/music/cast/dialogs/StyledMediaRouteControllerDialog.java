@@ -27,12 +27,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
-import org.opensilk.music.artwork.ArtworkManager;
-import org.opensilk.music.widgets.ThumbnailArtworkImageView;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.silkdagger.DaggerInjector;
+
+import javax.inject.Inject;
 
 /**
  * A custom {@link MediaRouteControllerDialog} that provides an album art, a play/pause button and
@@ -40,9 +43,14 @@ import org.opensilk.music.widgets.ThumbnailArtworkImageView;
  */
 public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog {
 
+    @dagger.Module(addsTo = AppModule.class, injects = StyledMediaRouteControllerDialog.class)
+    public static class Module {
+
+    }
+
     private static final String TAG = StyledMediaRouteControllerDialog.class.getSimpleName();
 
-    private ThumbnailArtworkImageView mIcon;
+//    private ThumbnailArtworkImageView mIcon;
     private ImageView mPausePlay;
     private TextView mTitle;
     private TextView mSubTitle;
@@ -54,8 +62,11 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
 
     private boolean mIsRemotePlayback;
 
+    @Inject ArtworkRequestManager mRequestor;
+
     public StyledMediaRouteControllerDialog(Context context) {
         this(context, ThemeHelper.isLightTheme(context) ? R.style.CastDialogLight : R.style.CastDialogDark);
+        ((DaggerInjector) context.getApplicationContext()).getObjectGraph().plus(new Module()).inject(this);
     }
 
     /**
@@ -81,7 +92,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
      */
     private void hideControls(boolean hide, int resId) {
         int visibility = hide ? View.GONE : View.VISIBLE;
-        mIcon.setVisibility(visibility);
+//        mIcon.setVisibility(visibility);
         mIconContainer.setVisibility(visibility);
         mPausePlay.setVisibility(visibility);
         mTitle.setVisibility(visibility);
@@ -93,7 +104,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     private void updateMetadata() {
         mTitle.setText(MusicUtils.getTrackName());
         mSubTitle.setText(MusicUtils.getArtistName());
-        ArtworkManager.loadCurrentArtwork(mIcon);
+//        ArtworkManager.loadCurrentArtwork(mIcon);
     }
 
     private void updatePlayPauseState() {
@@ -144,7 +155,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     }
 
     private void loadViews(View controls) {
-        mIcon = (ThumbnailArtworkImageView) controls.findViewById(R.id.iconView);
+//        mIcon = (ThumbnailArtworkImageView) controls.findViewById(R.id.iconView);
         mIconContainer = controls.findViewById(R.id.iconContainer);
         mPausePlay = (ImageView) controls.findViewById(R.id.playPauseView);
         mTitle = (TextView) controls.findViewById(R.id.titleView);

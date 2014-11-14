@@ -19,18 +19,18 @@ package org.opensilk.music.artwork;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HurlStack;
 
+import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
-import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
-import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;
 
@@ -43,22 +43,18 @@ import dagger.Provides;
 @Module (
         injects = {
                 ArtworkProvider.class,
-                ArtworkBroadcastReceiver.class,
         },
         complete = false,
         library = true
 )
 public class ArtworkModule {
 
-    @Provides @Singleton
-    public ArtworkService provideArtworkService(ArtworkServiceImpl impl) {
-        return impl;
-    }
+    private static final int VOLLEY_CACHE_SIZE = 16 * 1024 * 1024;
+    private static final String VOLLEY_CACHE_DIR = "volley/1";
+    private static final int VOLLEY_POOL_SIZE = 4;
 
-    @Provides @Singleton
-    public ArtworkManager provideArtworkManager(@ForApplication Context context) {
-        return ArtworkManager.getInstance(context);
-    }
+    private static final float THUMB_MEM_CACHE_DIVIDER = 0.20f;
+    public static final String DISK_CACHE_DIRECTORY = "artworkcache";
 
     @Provides @Singleton
     public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl impl) {
@@ -67,32 +63,30 @@ public class ArtworkModule {
 
     @Provides @Singleton
     public RequestQueue provideRequestQueue(@ForApplication Context context) {
-        RequestQueue q = Volley.newRequestQueue(context);
-        q.start();
-        return q;
-    }
-
-    @Provides @Singleton
-    public BitmapLruCache provideBitmapLruCache(@ForApplication Context context) {
-        return new BitmapLruCache(getL1CacheSize(context));
+        RequestQueue queue = new RequestQueue(
+                new DiskBasedCache(CacheUtil.getCacheDir(context, VOLLEY_CACHE_DIR), VOLLEY_CACHE_SIZE),
+                new BasicNetwork(new HurlStack()),
+                VOLLEY_POOL_SIZE
+        );
+        queue.start();
+        return queue;
     }
 
     @Provides @Singleton
     public ArtworkLruCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(getL1CacheSize(context));
+        return new ArtworkLruCache(calculateL1CacheSize(context));
     }
 
-    @Provides @Singleton
+    @Provides @Singleton //TODO when/how to close this?
     public BitmapDiskLruCache provideBitmapDiskLruCache(@ForApplication Context context, AppPreferences preferences) {
         final int size = Integer.decode(preferences.getString(AppPreferences.IMAGE_DISK_CACHE_SIZE, "60")) * 1024 * 1024;
-        return BitmapDiskLruCache.open(CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY),
-                size, Bitmap.CompressFormat.PNG, 100);
+        return BitmapDiskLruCache.open(
+                CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY),
+                size, Bitmap.CompressFormat.PNG, 100
+        );
     }
 
-    private static final float THUMB_MEM_CACHE_DIVIDER = 0.20f;
-    public static final String DISK_CACHE_DIRECTORY = "artworkcache";
-
-    private static int getL1CacheSize(Context context) {
+    private static int calculateL1CacheSize(Context context) {
         final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         final int memClass = context.getResources().getBoolean(R.bool.config_largeHeap) ?
                 activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
