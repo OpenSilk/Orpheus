@@ -37,7 +37,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui.settings.SettingsActivity;
 import org.opensilk.music.ui2.event.StartActivityForResult;
-import org.opensilk.music.ui2.folder.FolderScreen;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.library.PluginScreen;
 
@@ -181,7 +180,6 @@ public class NavView extends ListView {
 
         public void loadPlugins(Collection<PluginInfo> infos) {
             add(new Item(Item.Type.ITEM, R.string.my_library, R.drawable.ic_my_library_music_grey600_24dp, new GalleryScreen()));
-            add(new Item(Item.Type.ITEM, R.string.folders, R.drawable.ic_folder_grey600_24dp, new FolderScreen()));
             for (final PluginInfo info : infos) {
                 Drawable d = info.icon;
                 info.icon = null; //free plugin reference
