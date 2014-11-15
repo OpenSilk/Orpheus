@@ -14,15 +14,18 @@ import org.opensilk.common.dagger.DaggerInjector;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import dagger.ObjectGraph;
 
 /**
  * Created by andrew on 2/28/14.
  */
-public class SettingsActivity extends BaseActivity {
+public class SettingsActivity extends BaseActivity implements DaggerInjector {
 
     @dagger.Module(includes = BaseActivity.Module.class, injects = SettingsActivity.class)
     public static class Module {
     }
+
+    ObjectGraph mGraph;
 
     @InjectView(R.id.main_toolbar) Toolbar mToolbar;
 
@@ -31,7 +34,8 @@ public class SettingsActivity extends BaseActivity {
         boolean light = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
         setTheme(light ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
 
-        ((DaggerInjector) getApplication()).getObjectGraph().plus(new Module()).inject(this);
+        mGraph = ((DaggerInjector) getApplication()).getObjectGraph().plus(new Module());
+        inject(this);
 
         super.onCreate(savedInstanceState);
 
@@ -48,6 +52,12 @@ public class SettingsActivity extends BaseActivity {
                     .commit();
         }
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mGraph = null;
     }
 
     @Override
@@ -70,4 +80,13 @@ public class SettingsActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void inject(Object obj) {
+        mGraph.inject(this);
+    }
+
+    @Override
+    public ObjectGraph getObjectGraph() {
+        return mGraph;
+    }
 }

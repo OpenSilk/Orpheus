@@ -2,6 +2,7 @@ package org.opensilk.music.ui.settings;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,10 +12,11 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.text.TextUtils;
+import android.widget.Toast;
 
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
@@ -23,6 +25,7 @@ import org.opensilk.music.AppModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.ui2.BaseActivity;
 
 import javax.inject.Inject;
 
@@ -37,24 +40,24 @@ public class SettingsAudioFragment extends SettingsFragment implements
         Preference.OnPreferenceClickListener,
         Preference.OnPreferenceChangeListener {
 
+    @dagger.Module (addsTo = SettingsActivity.Module.class, injects = SettingsAudioFragment.class)
+    public static class Module {
+    }
+
     private static final String PREF_EQUALIZER = "pref_equalizer";
     private static final String PREF_DEFAULT_FOLDER = AppPreferences.PREF_AUTO_SHUFFLE_FOLDER;
     private static final String PREF_CASTING = CastPreferences.KEY_CAST_ENABLED;
 
-    @Inject
-    protected AppPreferences mSettings;
+    @Inject MusicServiceConnection mMusicService;
+
     private Preference mEqualizer;
     private CheckBoxPreference mCasting;
     private Preference mDefaultFolder;
 
-    @dagger.Module (addsTo = AppModule.class, injects = SettingsAudioFragment.class)
-    public static class Module {
-    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((DaggerInjector) activity.getApplication()).getObjectGraph().plus(new Object[]{new Module()}).inject(this);
+        ((DaggerInjector) activity).getObjectGraph().plus(new Object[]{new Module()}).inject(this);
     }
 
     @Override
@@ -62,9 +65,11 @@ public class SettingsAudioFragment extends SettingsFragment implements
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.settings_audio);
         mPrefSet = getPreferenceScreen();
+
         mEqualizer = mPrefSet.findPreference(PREF_EQUALIZER);
         mEqualizer.setOnPreferenceClickListener(this);
         resolveEqualizer();
+
         mCasting = (CheckBoxPreference) mPrefSet.findPreference(PREF_CASTING);
         mCasting.setChecked(CastPreferences.getBoolean(getActivity(), PREF_CASTING, true));
         mCasting.setOnPreferenceChangeListener(this);
@@ -74,8 +79,9 @@ public class SettingsAudioFragment extends SettingsFragment implements
             mCasting.setEnabled(false);
             mCasting.setSummary(R.string.settings_gms_unavailable);
         }
+
         mDefaultFolder = mPrefSet.findPreference(PREF_DEFAULT_FOLDER);
-        String folder = mSettings.getString(PREF_DEFAULT_FOLDER, null);
+        String folder = AppPreferences.readAutoShuffleDirectory(getActivity());
         if (!TextUtils.isEmpty(folder)) {
             mDefaultFolder.setSummary(folder);
         }
@@ -85,21 +91,29 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mEqualizer) {
-            if (MusicUtils.getAudioSessionId() == ERROR_BAD_VALUE) {
+            int sessionId = mMusicService.getAudioId().toBlocking().first();
+            if (sessionId == ERROR_BAD_VALUE) {
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.error)
                         .setMessage(R.string.settings_err_no_audio_id)
                         .setNeutralButton(android.R.string.ok, null)
                         .show();
             } else {
-                NavUtils.openEffectsPanel(getActivity());
+                try {
+                    final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                    effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, sessionId);
+                    effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
+                    startActivityForResult(effects, 0);
+                } catch (final ActivityNotFoundException notFound) {
+                    Toast.makeText(getActivity(), getString(R.string.no_effects_for_you), Toast.LENGTH_LONG).show();
+                }
             }
             return true;
         } else if (preference == mDefaultFolder) {
             Intent i = new Intent(getActivity(), FolderPickerActivity.class)
                     .putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME,
                         getActivity().getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false));
-            startActivityForResult(i, 0);
+            startActivityForResult(i, 11);
             return true;
         }
         return false;
@@ -107,14 +121,14 @@ public class SettingsAudioFragment extends SettingsFragment implements
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 0) {
+        if (requestCode == 11) {
             if (resultCode == RESULT_OK) {
                 final String folder = data.getStringExtra(FolderPickerActivity.EXTRA_DIR);
                 if (!TextUtils.isEmpty(folder)) {
                     mDefaultFolder.setSummary(folder);
                     AppPreferences.writeAutoShuffleDirectory(getActivity(), folder);
                 }
-            } else  {
+            } else {
                 mDefaultFolder.setSummary(getString(R.string.settings_storage_default_folder_summary));
                 AppPreferences.writeAutoShuffleDirectory(getActivity(), null);
             }
@@ -144,8 +158,8 @@ public class SettingsAudioFragment extends SettingsFragment implements
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Tells home activity is should initate a restart
-                        if (MusicUtils.isPlaying()) {
-                            MusicUtils.playOrPause();
+                        if (mMusicService.isPlaying().toBlocking().first()) {
+                            mMusicService.playOrPause();
                         }
                         getActivity().setResult(RESULT_RESTART_FULL);
                         getActivity().finish();

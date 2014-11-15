@@ -40,10 +40,7 @@ import javax.inject.Inject;
  */
 public class SettingsPluginFragment extends SettingsFragment implements Preference.OnPreferenceChangeListener {
 
-    @dagger.Module(
-            addsTo = AppModule.class,
-            injects = SettingsPluginFragment.class
-    )
+    @dagger.Module(addsTo = AppModule.class, injects = SettingsPluginFragment.class)
     public static class Module {
 
     }
@@ -59,7 +56,7 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((DaggerInjector) activity.getApplication()).getObjectGraph().plus(new Module()).inject(this);
+        ((DaggerInjector) activity).getObjectGraph().plus(new Module()).inject(this);
     }
 
     @Override

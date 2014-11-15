@@ -115,21 +115,4 @@ public final class NavUtils {
                         .putExtra(Config.EXTRA_DATA, bundle));
     }
 
-    /**
-     * Opens the sound effects panel or DSP manager in CM
-     * 
-     * @param context The {@link Activity} to use.
-     */
-    public static void openEffectsPanel(final Activity context) {
-        try {
-            final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-            effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, MusicUtils.getAudioSessionId());
-            effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
-            context.startActivityForResult(effects, 0);
-        } catch (final ActivityNotFoundException notFound) {
-            Toast.makeText(context, context.getString(R.string.no_effects_for_you),
-                    Toast.LENGTH_LONG).show();
-        }
-    }
-
 }

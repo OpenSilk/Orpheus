@@ -1,5 +1,6 @@
 package org.opensilk.music.ui.settings;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -7,9 +8,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.widget.Toast;
 
-import org.opensilk.music.AppModule;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -27,25 +27,29 @@ import static org.opensilk.music.artwork.ArtworkModule.DISK_CACHE_DIRECTORY;
  */
 public class SettingsDataFragment extends SettingsFragment {
 
-    @dagger.Module(addsTo = AppModule.class, injects = SettingsDataFragment.class)
+    @dagger.Module(addsTo = SettingsActivity.Module.class, injects = SettingsDataFragment.class)
     public static class Module {
 
     }
 
+    @Inject AppPreferences mSettings;
     @Inject ArtworkRequestManager mRequestor;
 
     private ListPreference mCacheSize;
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((DaggerInjector) activity).getObjectGraph().plus(new Module()).inject(this);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ((DaggerInjector) getActivity().getApplication()).getObjectGraph().plus(new Module()).inject(this);
-
         addPreferencesFromResource(R.xml.settings_data);
 
-
-        mCacheSize = (ListPreference) findPreference(PreferenceUtils.PREF_CACHE_SIZE);
+        mCacheSize = (ListPreference) findPreference(AppPreferences.IMAGE_DISK_CACHE_SIZE);
         mCacheSize.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -54,8 +58,8 @@ public class SettingsDataFragment extends SettingsFragment {
             }
         });
 
-        setCacheSizeSummary(PreferenceUtils.getInstance(
-                getActivity()).imageCacheSizeBytes() / 1024 / 1024);
+        setCacheSizeSummary(Integer.decode(
+                mSettings.getString(AppPreferences.IMAGE_DISK_CACHE_SIZE, "60")) / 1024 / 1024);
         setupDeleteCache();
     }
 

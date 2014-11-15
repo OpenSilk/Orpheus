@@ -56,6 +56,8 @@ import rx.schedulers.Schedulers;
 import rx.subjects.AsyncSubject;
 import timber.log.Timber;
 
+import static org.opensilk.common.util.UncheckedThrow.rethrow;
+
 /**
  * Created by drew on 10/15/14.
  */
@@ -444,15 +446,16 @@ public class MusicServiceConnection {
         });
     }
 
-    public Observable<Long> getAudioId() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
+    public Observable<Integer> getAudioId() {
+        return getObservable().map(new Func1<IApolloService, Integer>() {
             @Override
-            public Observable<Long> call(IApolloService iApolloService) {
+            public Integer call(IApolloService iApolloService) {
                 Timber.v("getAudioId %s", Thread.currentThread().getName());
                 try {
-                    return Observable.just(iApolloService.getAudioId());
+                    return (int) iApolloService.getAudioId();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    unbind();
+                    throw rethrow(e);
                 }
             }
         });
