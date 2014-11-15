@@ -19,8 +19,6 @@ package org.opensilk.music.ui2.library;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -66,7 +64,6 @@ import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
-import rx.functions.Action1;
 import rx.functions.Func0;
 import rx.functions.Func1;
 import timber.log.Timber;
@@ -331,7 +328,7 @@ public class LibraryScreen extends Screen {
             if (!TextUtils.isEmpty(selectName)) {
                 customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_change_source, selectName));
             } else {
-                menus.add(R.menu.change_source);
+                menus.add(R.menu.library_change_source);
             }
 
             // library settings

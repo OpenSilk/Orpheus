@@ -22,7 +22,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <org.opensilk.common.widget.FloatingActionButtonCheckable
-        android:id="@+id/floating_action_button"
+        android:id="@id/floating_action_button"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
         android:layout_marginEnd="@dimen/fab_margin_end"
@@ -34,7 +34,7 @@
         style="?fabPlayStyle"/>
 
     <org.opensilk.common.widget.FloatingActionButton
-        android:id="@+id/floating_action_next"
+        android:id="@id/floating_action_next"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
         android:layout_marginEnd="@dimen/fab_margin_end"
@@ -46,7 +46,7 @@
         style="?fabNextStyle"/>
 
     <org.opensilk.common.widget.FloatingActionButton
-        android:id="@+id/floating_action_prev"
+        android:id="@id/floating_action_prev"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
         android:layout_marginEnd="@dimen/fab_margin_end"
@@ -58,7 +58,7 @@
         style="?fabPrevStyle"/>
 
     <org.opensilk.common.widget.FloatingActionButton
-        android:id="@+id/floating_action_shuffle"
+        android:id="@id/floating_action_shuffle"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
         android:layout_marginEnd="@dimen/fab_margin_end"
@@ -70,7 +70,7 @@
         style="?fabShuffleStyle"/>
 
     <org.opensilk.common.widget.FloatingActionButton
-        android:id="@+id/floating_action_repeat"
+        android:id="@id/floating_action_repeat"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
         android:layout_marginEnd="@dimen/fab_margin_end"

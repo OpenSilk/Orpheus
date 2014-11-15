@@ -158,7 +158,6 @@
 
     <!-- ### MENUS ### -->
 
-    <string name="menu_party_shuffle">Party shuffle</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_sleep_timer">Sleep timer</string>
     <!-- library menus -->

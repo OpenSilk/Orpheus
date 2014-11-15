@@ -26,7 +26,7 @@
         android:alpha="0.4" />
 
     <TextView
-        android:id="@android:id/empty"
+        android:id="@+id/empty_text"
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
