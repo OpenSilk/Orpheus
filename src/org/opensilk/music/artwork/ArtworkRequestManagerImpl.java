@@ -19,12 +19,13 @@ package org.opensilk.music.artwork;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 
-import com.andrew.apollo.utils.ApolloUtils;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -234,7 +235,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             addBreadcrumb("onCacheMiss");
             setDefaultImage();
             if (TextUtils.isEmpty(artInfo.artistName)) return;
-            boolean isOnline = ApolloUtils.isOnline(mContext);
+            boolean isOnline = isOnline(mPreferences.getBoolean(AppPreferences.ONLY_ON_WIFI, true));
             boolean wantArtistImages = mPreferences.getBoolean(AppPreferences.DOWNLOAD_MISSING_ARTIST_IMAGES, true);
             if (isOnline && wantArtistImages) {
                 addBreadcrumb("goingForNetwork");
@@ -275,7 +276,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             //check if we have everything we need to download artwork
             boolean hasAlbumArtist = !TextUtils.isEmpty(artInfo.albumName) && !TextUtils.isEmpty(artInfo.artistName);
             boolean hasUri = artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY);
-            boolean isOnline = ApolloUtils.isOnline(mContext);
+            boolean isOnline = isOnline(mPreferences.getBoolean(AppPreferences.ONLY_ON_WIFI, true));
             boolean wantAlbumArt = mPreferences.getBoolean(AppPreferences.DOWNLOAD_MISSING_ARTWORK, true);
             boolean preferDownload = mPreferences.getBoolean(AppPreferences.PREFER_DOWNLOAD_ARTWORK, false);
             boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
@@ -323,10 +324,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             } else if (hasUri) {
                 addBreadcrumb("hasUri");
                 if (isLocalArt) {
-                    addBreadcrumb("goingForMediaStore("+isOnline+")");
+                    addBreadcrumb("goingForMediaStore(false)");
                     //Wait what? this should never happen
-                    tryForMediaStore(isOnline);
-                } else if (isOnline) {
+                    tryForMediaStore(false);
+                } else if (isOnline(false)) { //ignore wifi only request for remote urls
                     addBreadcrumb("goingForUrl");
                     //all we have is a url so go for it
                     tryForUrl();
@@ -946,6 +947,42 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             }
         }
         return false;
+    }
+
+    boolean isOnline(boolean wifiOnly) {
+
+        boolean state = false;
+
+        /* Monitor network connections */
+        final ConnectivityManager connectivityManager =
+                (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        /* Wi-Fi connection */
+        final NetworkInfo wifiNetwork =
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (wifiNetwork != null) {
+            state = wifiNetwork.isConnectedOrConnecting();
+        }
+
+        // Don't bother checking the rest if we are connected or we have opted out of mobile
+        if (wifiOnly || state) {
+            return state;
+        }
+
+        /* Mobile data connection */
+        final NetworkInfo mbobileNetwork =
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        if (mbobileNetwork != null) {
+            state = mbobileNetwork.isConnectedOrConnecting();
+        }
+
+        /* Other networks */
+        final NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        if (activeNetwork != null) {
+            state = activeNetwork.isConnectedOrConnecting();
+        }
+
+        return state;
     }
 
 }
