@@ -16,6 +16,7 @@
 
 package org.opensilk.music.ui.settings;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,19 +24,43 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 
+import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.meta.PluginInfo;
-import org.opensilk.music.util.PluginUtil;
+import org.opensilk.music.ui2.loader.PluginLoader;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Created by drew on 6/8/14.
  */
 public class SettingsPluginFragment extends SettingsFragment implements Preference.OnPreferenceChangeListener {
 
+    @dagger.Module(
+            addsTo = AppModule.class,
+            injects = SettingsPluginFragment.class
+    )
+    public static class Module {
+
+    }
+
+    private static final Uri SEARCH_URI;
+    static {
+        SEARCH_URI = Uri.parse("https://play.google.com/store/search?q=Orpheus%20Plugin&c=apps");
+    }
+
+    @Inject PluginLoader loader;
     List<PluginInfo> pluginInfos;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((DaggerInjector) activity.getApplication()).getObjectGraph().plus(new Module()).inject(this);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,7 +68,7 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
 
         addPreferencesFromResource(R.xml.blank_prefscreen);
         // Pull list of available dreams
-        pluginInfos = PluginUtil.getPluginInfos(getActivity(), true);
+        pluginInfos = loader.getPluginInfos(true);
         // Add all available dreams to preference screen
         // yea its hackish but much less typing compared to a list view
         for (PluginInfo info : pluginInfos) {
@@ -71,9 +96,9 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
                     pluginPref.pluginInfo.isActive = isChecked;
                     // Store the new dream component
                     if (isChecked) {
-                        PluginUtil.setPluginEnabled(getActivity(), pluginPref.pluginInfo.componentName);
+                        loader.setPluginEnabled(pluginPref.pluginInfo.componentName);
                     } else {
-                        PluginUtil.setPluginDisabled(getActivity(), pluginPref.pluginInfo.componentName);
+                        loader.setPluginDisabled(pluginPref.pluginInfo.componentName);
                     }
                 }
             }
@@ -85,7 +110,7 @@ public class SettingsPluginFragment extends SettingsFragment implements Preferen
         Preference p = new Preference(getActivity());
         p.setTitle(getString(R.string.settings_get_plugins));
         p.setSummary(getString(R.string.settings_get_plugins_summary));
-        p.setIntent(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://play.google.com/store/search?q=Orpheus%20Plugin&c=apps")));
+        p.setIntent(new Intent(Intent.ACTION_VIEW).setData(SEARCH_URI));
         getPreferenceScreen().addPreference(p);
     }
 

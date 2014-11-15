@@ -24,10 +24,8 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.core.android.DrawerOwner;
-import org.opensilk.music.util.PluginUtil;
-import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.PluginLoader;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -36,8 +34,6 @@ import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
 import mortar.ViewPresenter;
-import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
 
@@ -56,12 +52,12 @@ public class Nav {
 
         final EventBus bus;
         final DrawerOwner drawerOwner;
-        final Loader loader;
+        final PluginLoader loader;
 
         Subscription subscription;
 
         @Inject
-        public Presenter(@Named("activity") EventBus bus, DrawerOwner drawerOwner, Loader loader) {
+        public Presenter(@Named("activity") EventBus bus, DrawerOwner drawerOwner, PluginLoader loader) {
             this.bus = bus;
             this.drawerOwner = drawerOwner;
             this.loader = loader;
@@ -96,36 +92,4 @@ public class Nav {
         }
     }
 
-    @Singleton
-    public static class Loader {
-        final Context context;
-
-        @Inject
-        public Loader(@ForApplication Context context) {
-            this.context = context;
-        }
-
-        public Observable<List<PluginInfo>> getObservable() {
-            return Observable.create(new Observable.OnSubscribe<List<PluginInfo>>() {
-                @Override
-                public void call(Subscriber<? super List<PluginInfo>> subscriber) {
-                    try {
-                        List<PluginInfo> list = PluginUtil.getActivePlugins(context, true);
-                        if (list == null) {
-                            list = Collections.emptyList();
-                        } else {
-                            Collections.sort(list);
-                        }
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onNext(list);
-                        subscriber.onCompleted();
-                    } catch (Exception e) {
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onError(e);
-                    }
-                }
-            });
-        }
-
-    }
 }
