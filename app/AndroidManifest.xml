@@ -65,7 +65,8 @@
 
         <activity android:name="org.opensilk.music.ui2.LauncherActivity"
             android:theme="@style/Theme.Dark"
-            android:launchMode="singleTop"/>
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan"/>
 
         <!-- The God Activity -->
         <activity-alias
