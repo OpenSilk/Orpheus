@@ -22,6 +22,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.andrew.apollo.model.LocalSong;
 
@@ -33,23 +34,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.functions.Action2;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/23/14.
  */
 public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
 
-    private class UriObserver extends ContentObserver {
-        private UriObserver(Handler handler) {
+    class UriObserver extends ContentObserver {
+        UriObserver(Handler handler) {
             super(handler);
         }
         @Override
+        @DebugLog
         public void onChange(boolean selfChange) {
+            cachePopulated = false;
             cache.clear();
             for (ContentChangedListener l : contentChangedListeners) {
                 l.reload();
@@ -57,7 +62,7 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
         }
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange);
+            onChange(selfChange);
         }
     }
 
@@ -174,14 +179,16 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
         return cache;
     }
 
+    @DebugLog
     public void addContentChangedListener(ContentChangedListener l) {
         contentChangedListeners.add(l);
         if (uriObserver == null) {
-            uriObserver = new UriObserver(new Handler());
+            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
             context.getContentResolver().registerContentObserver(uri, true, uriObserver);
         }
     }
 
+    @DebugLog
     public void removeContentChangedListener(ContentChangedListener l) {
         contentChangedListeners.remove(l);
         if (contentChangedListeners.isEmpty()) {
@@ -235,6 +242,12 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
             array[i] = ((Long) boxedArray[i]).longValue();
         }
         return array;
+    }
+
+    protected void dump(Throwable throwable) {
+        Timber.e(throwable, "AbsGenrePlaylistLoader(uri=%s\nprojection=%s\nselection=%s\n" +
+                        "selectionArgs=%s\nsortOrder=%s",
+                uri, projection, selection, selectionArgs, sortOrder);
     }
 
 }

@@ -22,6 +22,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 
 import org.apache.commons.io.IOUtils;
 
@@ -42,12 +43,13 @@ import timber.log.Timber;
  */
 public abstract class RxCursorLoader<T> implements RxLoader<T> {
 
-    private class UriObserver extends ContentObserver {
-        private UriObserver(Handler handler) {
+    class UriObserver extends ContentObserver {
+        UriObserver(Handler handler) {
             super(handler);
         }
         @Override
         public void onChange(boolean selfChange) {
+            cachePopulated = false;
             cache.clear();
             for (ContentChangedListener l : contentChangedListeners) {
                 l.reload();
@@ -55,7 +57,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
         }
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange);
+            onChange(selfChange);
         }
     }
 
@@ -191,7 +193,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
     public void addContentChangedListener(ContentChangedListener l) {
         contentChangedListeners.add(l);
         if (uriObserver == null) {
-            uriObserver = new UriObserver(new Handler());
+            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
             context.getContentResolver().registerContentObserver(uri, true, uriObserver);
         }
     }
