@@ -38,7 +38,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
         Preference.OnPreferenceChangeListener {
 
     private static final String PREF_EQUALIZER = "pref_equalizer";
-    private static final String PREF_DEFAULT_FOLDER = AppPreferences.PREF_DEFAULT_MEDIA_FOLDER;
+    private static final String PREF_DEFAULT_FOLDER = AppPreferences.PREF_AUTO_SHUFFLE_FOLDER;
     private static final String PREF_CASTING = CastPreferences.KEY_CAST_ENABLED;
 
     @Inject
@@ -112,11 +112,11 @@ public class SettingsAudioFragment extends SettingsFragment implements
                 final String folder = data.getStringExtra(FolderPickerActivity.EXTRA_DIR);
                 if (!TextUtils.isEmpty(folder)) {
                     mDefaultFolder.setSummary(folder);
-                    mSettings.putString(PREF_DEFAULT_FOLDER, folder);
+                    AppPreferences.writeAutoShuffleDirectory(getActivity(), folder);
                 }
             } else  {
                 mDefaultFolder.setSummary(getString(R.string.settings_storage_default_folder_summary));
-                mSettings.remove(PREF_DEFAULT_FOLDER);
+                AppPreferences.writeAutoShuffleDirectory(getActivity(), null);
             }
         }
     }

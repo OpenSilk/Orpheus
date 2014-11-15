@@ -26,15 +26,14 @@ import android.text.TextUtils;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
-import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicStore;
 
 import org.opensilk.music.GraphHolder;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.ui2.loader.OrderPreservingCursor;
 
 import java.util.Collection;
 
@@ -171,7 +170,8 @@ public class CursorHelpers {
     }
 
     public static Cursor makeLastAddedCursor(final Context context) {
-        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_MEDIA,
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LAST_ADDED,
                 SelectionArgs.LAST_ADDED(),
@@ -229,7 +229,7 @@ public class CursorHelpers {
                 if (cursor.moveToFirst()) {
                     int ii=0;
                     do {
-                        songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
+                        songs[ii++] = makeLocalSongFromCursor(cursor);
                     } while (cursor.moveToNext());
                 }
                 return songs;
@@ -240,12 +240,13 @@ public class CursorHelpers {
         return sEmptySongList;
     }
 
-    @MarkedForRemoval
+    @MarkedForRemoval @Deprecated
     public static Cursor makeSongCursor(final Context context) {
         AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
         final String sortOrder = settings.getString(AppPreferences.SONG_SORT_ORDER,
                 com.andrew.apollo.utils.SortOrder.SongSortOrder.SONG_A_Z);
-        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_MEDIA,
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_SONG,
                 SelectionArgs.LOCAL_SONG,
@@ -253,7 +254,8 @@ public class CursorHelpers {
     }
 
     public static Cursor makeSingleLocalSongCursor(final Context context, long id) {
-        return context.getContentResolver().query(Uris.EXTERNAL_MEDIASTORE_MEDIA,
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_SONG + " AND " + BaseColumns._ID + "=" + String.valueOf(id),
                 SelectionArgs.LOCAL_SONG,
@@ -281,8 +283,7 @@ public class CursorHelpers {
 
     public static Cursor getCursorForAutoShuffle(Context context) {
         String selection = Selections.LOCAL_SONG;
-        AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
-        String deffldr = settings.getString(AppPreferences.PREF_DEFAULT_MEDIA_FOLDER, null);
+        String deffldr = AppPreferences.readAutoShuffleDirectory(context);
         if (!TextUtils.isEmpty(deffldr)) {
             selection += " AND " + MediaStore.Audio.AudioColumns.DATA + " like '" + deffldr + "%'";
         }
@@ -368,7 +369,7 @@ public class CursorHelpers {
                 if (c.moveToFirst()) {
                     int ii=0;
                     do {
-                        list[ii++] = makeLocalSongFromCursor(context, c);
+                        list[ii++] = makeLocalSongFromCursor(c);
                     } while (c.moveToNext());
                 }
                 return list;
@@ -388,7 +389,7 @@ public class CursorHelpers {
         if (c.getCount() > 0 && c.moveToFirst()) {
             int ii=0;
             do {
-                final LocalSong s = CursorHelpers.makeLocalSongFromCursor(context, c);
+                final LocalSong s = makeLocalSongFromCursor(c);
                 songs[ii++] = s;
             } while (c.moveToNext());
         }
@@ -441,7 +442,7 @@ public class CursorHelpers {
                 if (cursor.moveToFirst()) {
                     int ii=0;
                     do {
-                        songs[ii++] = makeLocalSongFromCursor(context, cursor);
+                        songs[ii++] = makeLocalSongFromCursor(cursor);
                     } while (cursor.moveToNext());
                 }
                 return songs;
@@ -465,7 +466,7 @@ public class CursorHelpers {
                 if (cursor.moveToFirst()) {
                     int ii=0;
                     do {
-                        list[ii++] = makeLocalSongFromCursor(context, cursor);
+                        list[ii++] = makeLocalSongFromCursor(cursor);
                     } while (cursor.moveToNext());
                 }
                 return list;
@@ -484,7 +485,7 @@ public class CursorHelpers {
                 if (cursor.moveToFirst()) {
                     int ii=0;
                     do {
-                        list[ii++] = makeLocalSongFromCursor(context, cursor);
+                        list[ii++] = makeLocalSongFromCursor(cursor);
                     } while (cursor.moveToNext());
                 }
                 return list;

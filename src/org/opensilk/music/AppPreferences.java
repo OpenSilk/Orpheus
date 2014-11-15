@@ -26,17 +26,20 @@ import com.andrew.apollo.utils.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.apache.commons.io.FileUtils;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.gallery.GalleryPage;
 import org.opensilk.music.util.MarkedForRemoval;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -48,7 +51,7 @@ import javax.inject.Singleton;
 @Singleton
 public class AppPreferences {
 
-    public static final String PREF_DEFAULT_MEDIA_FOLDER = "default_media_folder";
+    public static final String PREF_AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
 
     public static final String PREF_LAST_FOLDER_BROWSER_PATH = "last_folder_browser_path";
 
@@ -178,6 +181,30 @@ public class AppPreferences {
 
     private String makePluginPrefKey(PluginInfo pluginInfo) {
         return pluginInfo.componentName.flattenToString().replaceAll("/", "_")+"_defInfo";
+    }
+
+    /*
+     * This might not be the best way but since it is used in multiple processes
+     * im excluding it from the standard prefs in order to avoid MODE_MULTI_PROCESS
+     * since that doesnt cache values and we hit the SharedPrefs /a lot/
+     */
+    public static boolean writeAutoShuffleDirectory(Context context, String directory) {
+        try {
+            File f = new File(context.getFilesDir(), PREF_AUTO_SHUFFLE_FOLDER);
+            FileUtils.writeLines(f, Collections.singleton(directory));
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public static String readAutoShuffleDirectory(Context context) {
+        try {
+            File f = new File(context.getFilesDir(), PREF_AUTO_SHUFFLE_FOLDER);
+            return FileUtils.readLines(f).get(0);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

@@ -43,7 +43,7 @@ import com.andrew.apollo.MusicPlaybackService;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.util.MarkedForRemoval;
-import org.opensilk.music.util.OrderPreservingCursor;
+import org.opensilk.music.ui2.loader.OrderPreservingCursor;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;

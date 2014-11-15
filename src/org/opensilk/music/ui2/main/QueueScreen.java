@@ -40,7 +40,7 @@ import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.NowPlayingCursor;
+import org.opensilk.music.ui2.loader.NowPlayingCursor;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.ArrayList;

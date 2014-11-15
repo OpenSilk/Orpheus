@@ -43,7 +43,7 @@
         android:title="@string/settings_storage_category">
 
         <Preference
-            android:key="default_media_folder"
+            android:key="auto_shuffle_directory"
             android:title="@string/settings_storage_default_folder_title"
             android:summary="@string/settings_storage_default_folder_summary"
             />
