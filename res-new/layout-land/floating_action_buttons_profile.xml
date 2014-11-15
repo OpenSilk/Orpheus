@@ -18,7 +18,8 @@
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
        xmlns:app="http://schemas.android.com/apk/res-auto"
-       xmlns:tools="http://schemas.android.com/tools">
+       xmlns:tools="http://schemas.android.com/tools"
+       tools:ignore="InconsistentLayout">
 
     <org.opensilk.common.widget.FloatingActionButtonCheckable
         android:id="@id/floating_action_button"

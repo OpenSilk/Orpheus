@@ -35,7 +35,6 @@
         android:id="@+id/now_playing_seekprogress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/panel_footer"
         android:layout_marginTop="-16dp"
         android:gravity="center_vertical"
         android:layout_below="@id/now_playing_image"
