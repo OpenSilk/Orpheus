@@ -11,8 +11,10 @@
 
 package com.andrew.apollo.menu;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
@@ -24,8 +26,17 @@ import com.andrew.apollo.Config;
 
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.BaseMortarActivity;
+import org.opensilk.music.ui2.event.MakeToast;
+
 import com.andrew.apollo.utils.MusicUtils;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import de.greenrobot.event.EventBus;
+import mortar.Blueprint;
+import mortar.Mortar;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -40,10 +51,32 @@ import rx.schedulers.Schedulers;
  */
 public class DeleteDialog extends DialogFragment {
 
+    public static class Blueprint implements mortar.Blueprint {
+        @Override
+        public String getMortarScopeName() {
+            return getClass().getName();
+        }
+
+        @Override
+        public Object getDaggerModule() {
+            return new Module();
+        }
+    }
+
+    @dagger.Module(
+            addsTo = BaseMortarActivity.Module.class,
+            injects = DeleteDialog.class
+    )
+    public static class Module {
+
+    }
+
     /**
      * The item(s) to delete
      */
     private long[] mItemList;
+
+    @Inject @Named("activity") EventBus mBus;
 
     /**
      * @param title The title of the artist, album, or song to delete
@@ -57,6 +90,12 @@ public class DeleteDialog extends DialogFragment {
         args.putLongArray("items", items);
         frag.setArguments(args);
         return frag;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Mortar.getScope(activity).requireChild(new Blueprint()).getObjectGraph().inject(this);
     }
 
     @Override
@@ -75,26 +114,24 @@ public class DeleteDialog extends DialogFragment {
                 .setPositiveButton(delete, new OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialog, final int which) {
+                        final Context appContext = getActivity().getApplicationContext();
+                        final EventBus bus = mBus;
                         // Delete the selected item(s)
-                        Observable.create(new Observable.OnSubscribe<CharSequence>() {
+                        Observable.create(new Observable.OnSubscribe<Integer>() {
                             @Override
-                            public void call(Subscriber<? super CharSequence> subscriber) {
-                                CharSequence msg = MusicUtils.deleteTracks(getActivity(), mItemList);
-                                if (!TextUtils.isEmpty(msg)) {
-                                    subscriber.onNext(msg);
-                                }
+                            public void call(Subscriber<? super Integer> subscriber) {
+                                int numdel = MusicUtils.deleteTracks(appContext, mItemList);
+                                subscriber.onNext(numdel);
                                 subscriber.onCompleted();
                             }
                         })
                         .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new SimpleObserver<CharSequence>() {
+                        .subscribe(new SimpleObserver<Integer>() {
                             @Override
-                            public void onNext(CharSequence charSequence) {
-                                Toast.makeText(getActivity(), charSequence, Toast.LENGTH_SHORT).show();
+                            public void onNext(Integer numdel) {
+                                bus.post(new MakeToast(R.plurals.NNNtracksdeleted, numdel));
                             }
                         });
-                        dialog.dismiss();
                     }
                 })
                 .setNegativeButton(R.string.cancel, null)

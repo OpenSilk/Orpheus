@@ -1454,7 +1454,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use.
      * @param list The item(s) to delete.
      */
-    public static CharSequence deleteTracks(final Context context, final long[] list) {
+    public static int deleteTracks(final Context context, final long[] list) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             throw new RuntimeException("Stop calling from main thread");
         }
@@ -1510,6 +1510,8 @@ public final class MusicUtils {
                 } while (c.moveToNext());
             }
             c.close();
+        } else {
+            return 0;
         }
         // We deleted a number of tracks, which could affect any number of
         // things
@@ -1518,8 +1520,6 @@ public final class MusicUtils {
         // Notify the lists to update
         refresh();
 
-        final String message = makeLabel(context, R.plurals.NNNtracksdeleted, list.length);
-
-        return message;
+        return list.length;
     }
 }
