@@ -29,6 +29,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.HttpHeaderParser;
 
+import hugo.weaving.DebugLog;
+import timber.log.Timber;
+
 /**
  * A canned request for getting an image at a given URL and calling
  * back with a decoded Bitmap.
@@ -40,7 +43,7 @@ public class ArtworkRequest2 extends Request<Artwork> {
 
     }
 
-    public static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.RGB_565;
+    public static final Config BITMAP_CONFIG = Config.ARGB_8888;
 
     /** Socket timeout in milliseconds for image requests */
     private static final int IMAGE_TIMEOUT_MS = 1000;
@@ -148,6 +151,7 @@ public class ArtworkRequest2 extends Request<Artwork> {
     /**
      * The real guts of parseNetworkResponse. Broken out for readability.
      */
+//    @DebugLog
     private Bitmap doParse(NetworkResponse response) {
         byte[] data = response.data;
         BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
@@ -170,22 +174,46 @@ public class ArtworkRequest2 extends Request<Artwork> {
 
             // Decode to the nearest power of two scaling factor.
             decodeOptions.inJustDecodeBounds = false;
-            // TODO(ficus): Do we need this or is it okay since API 8 doesn't support it?
-            // decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
+            decodeOptions.inPreferQualityOverSpeed = true;
             decodeOptions.inSampleSize =
                     findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
             Bitmap tempBitmap =
                     BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
 
+            Bitmap tempBitmap2;
+
             // If necessary, scale down to the maximal acceptable size.
             if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth ||
                     tempBitmap.getHeight() > desiredHeight)) {
-                bitmap = Bitmap.createScaledBitmap(tempBitmap,
+                tempBitmap2 = Bitmap.createScaledBitmap(tempBitmap,
                         desiredWidth, desiredHeight, true);
                 tempBitmap.recycle();
+            } else if (tempBitmap == null) {
+                return null;
             } else {
-                bitmap = tempBitmap;
+                tempBitmap2 = tempBitmap;
             }
+
+            // Clip to squares so our circles dont become ovals
+            int w = tempBitmap2.getWidth();
+            int h = tempBitmap2.getHeight();
+            if (w > h) {
+//                Timber.d("Center cropping %d %d %s", w, h, getUrl());
+                //center crop
+                bitmap = Bitmap.createBitmap(tempBitmap2, w/2 - h/2, 0, h, h);
+                tempBitmap2.recycle();
+            } else if (h > w) {
+//                Timber.d("Top cropping %d %d %s", w, h, getUrl());
+                // top crop
+                bitmap = Bitmap.createBitmap(tempBitmap2, 0, 0, w, w);
+                tempBitmap2.recycle();
+            } else {
+//                Timber.d("No cropping %d %d %s", w, h, getUrl());
+                bitmap = tempBitmap2;
+            }
+
+//            Timber.d("Bitmap %d %d %s", bitmap.getWidth(), bitmap.getHeight(), getUrl());
+
         }
 
         return bitmap;

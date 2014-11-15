@@ -40,7 +40,7 @@ public class CircleImageView extends SquareImageView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        radius = Math.min(w, h) * 2; // *2 what? id think it would be /2;
+        radius = Math.max(w, h) * 2; // *2 what? id think it would be /2;
         Drawable d = getDrawable();
         if (d != null) {
             if (d instanceof RoundedBitmapDrawable) {
