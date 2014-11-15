@@ -30,10 +30,6 @@
         <!--<item name="toolbarTheme">@style/Toolbar.Light</item>-->
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
 
-        <item name="colorPrimary">@color/green_500</item>
-        <item name="colorPrimaryDark">@color/green_700</item>
-        <item name="colorAccent">@color/amber_A400</item>
-
         <item name="fabPlayStyle">@style/fabLight.Play</item>
         <item name="fabNextStyle">@style/fabLight.Next</item>
         <item name="fabPrevStyle">@style/fabLight.Prev</item>
@@ -48,24 +44,10 @@
 
     <style name="Theme.Light" parent="Theme.LightBase">
 
-    </style>
+        <item name="colorPrimary">@color/green_500</item>
+        <item name="colorPrimaryDark">@color/green_700</item>
+        <item name="colorAccent">@color/amber_A400</item>
 
-    <style name="Theme.Light.Panel">
-        <!-- Panel background -->
-        <item name="nowPlayingBackground">@drawable/drop_shadow_light</item>
-    </style>
-
-    <style name="Theme.Dialog.LightBase" parent="Theme.LightBase">
-        <item name="isDialog">false</item>
-    </style>
-
-    <style name="Theme.Dialog.Light" parent="Theme.Dialog.LightBase">
-
-    </style>
-
-    <style name="Theme.Dialog.Light.Panel">
-        <!-- Panel background -->
-        <item name="nowPlayingBackground">@drawable/drop_shadow_light</item>
     </style>
 
     <!--Common styles for dark theme-->
@@ -86,24 +68,6 @@
 
     <style name="Theme.Dark" parent="Theme.DarkBase">
 
-    </style>
-
-    <style name="Theme.Dark.Panel">
-        <!-- Panel background -->
-        <item name="nowPlayingBackground">@drawable/drop_shadow_dark</item>
-    </style>
-
-    <style name="Theme.Dialog.DarkBase" parent="Theme.DarkBase">
-        <item name="isDialog">false</item>
-    </style>
-
-    <style name="Theme.Dialog.Dark" parent="Theme.Dialog.DarkBase">
-
-    </style>
-
-    <style name="Theme.Dialog.Dark.Panel">
-        <!-- Panel background -->
-        <item name="nowPlayingBackground">@drawable/drop_shadow_dark</item>
     </style>
 
     <!-- End common themes -->
@@ -145,7 +109,7 @@
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow.Transparent</item>
 
         <!--<item name="colorPrimary">@color/primary_material_dark</item>-->
-        <item name="colorPrimary">@color/green_500</item>
+        <item name="colorPrimary">@color/primary_material_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
         <item name="colorAccent">@color/amber_A400</item>
 
@@ -243,8 +207,8 @@
     </style>
 
     <style name="GridTileDescriptionSubTitle.Dark">
-    </style>
 
+    </style>
 
     <!-- fabs -->
     <style name="fabDark">
