@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.bus;
+package org.opensilk.music;
 
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
@@ -26,9 +26,12 @@ import android.preference.PreferenceManager;
 
 import com.andrew.apollo.MusicPlaybackService;
 
+import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.music.appwidgets.MusicWidget;
 import org.opensilk.music.appwidgets.MusicWidgetService;
 import org.opensilk.music.muzei.MuzeiService;
+
+import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -37,17 +40,23 @@ import static com.google.android.apps.muzei.api.internal.ProtocolConstants.EXTRA
 
 /**
  * Handles broadcasts send by the music service
- *
- * Fragments/Activities must register with the bus to receive events
- *
- * Widgets and such are handled here since they cannot register
- * with the bus
+ * for non persistent services that run in the ui process
  *
  * Created by drew on 4/22/14.
  */
 public class ServiceBroadcastReceiver extends BroadcastReceiver {
+
+    @dagger.Module(
+            addsTo = AppModule.class,
+            injects = ServiceBroadcastReceiver.class
+    )
+    public static class Module {}
+
+    @Inject AppPreferences mSettings;
+
     @Override
     public void onReceive(Context context, Intent intent) {
+        ((DaggerInjector) context.getApplicationContext()).getObjectGraph().plus(new Module()).inject(this);
         final String action = intent.getAction();
         Timber.d("Received action=%s", action);
         if (action != null) {
@@ -106,8 +115,7 @@ public class ServiceBroadcastReceiver extends BroadcastReceiver {
      * @param context
      */
     private void maybeUpdateWallpaper(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if (prefs.getBoolean(MuzeiService.MUZEI_EXTENSION_ENABLED, false)) {
+        if (mSettings.getBoolean(MuzeiService.MUZEI_EXTENSION_ENABLED, false)) {
             context.startService(new Intent(context, MuzeiService.class)
                     .setAction(ACTION_HANDLE_COMMAND)
                     .putExtra(EXTRA_COMMAND_ID, MuzeiService.BUILTIN_COMMAND_ID_NEXT_ARTWORK));

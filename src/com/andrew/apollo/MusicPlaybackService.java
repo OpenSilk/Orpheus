@@ -21,6 +21,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -61,6 +62,7 @@ import org.opensilk.music.BuildConfig;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
+import org.opensilk.music.ServiceBroadcastReceiver;
 import org.opensilk.music.cast.CastWebServer;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
@@ -1491,6 +1493,10 @@ public class MusicPlaybackService extends Service {
         musicIntent.putExtra("player", getString(R.string.app_name));
         musicIntent.putExtra("package", getPackageName());
         sendStickyBroadcast(musicIntent);
+
+        final Intent widgetIntent = new Intent(intent);
+        widgetIntent.setComponent(new ComponentName(this, ServiceBroadcastReceiver.class));
+        sendBroadcast(widgetIntent);
 
         if (what.equals(META_CHANGED)) {
             // Add the track to the recently played list.

@@ -258,16 +258,7 @@
             android:grantUriPermissions="true"/>
 
         <receiver
-            android:name="org.opensilk.music.bus.ServiceBroadcastReceiver">
-            <intent-filter>
-                <action android:name="${applicationId}.playstatechanged" />
-                <action android:name="${applicationId}.metachanged" />
-                <action android:name="${applicationId}.repeatmodechanged" />
-                <action android:name="${applicationId}.shufflemodechanged" />
-                <action android:name="${applicationId}.refresh" />
-                <action android:name="${applicationId}.queuechanged" />
-            </intent-filter>
-        </receiver>
+            android:name=".ServiceBroadcastReceiver"/>
 
         <!--Daydream-->
         <service
