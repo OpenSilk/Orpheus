@@ -36,7 +36,7 @@ import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui2.LauncherActivity;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

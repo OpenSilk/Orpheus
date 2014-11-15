@@ -22,7 +22,7 @@ import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.AppModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import javax.inject.Inject;
 

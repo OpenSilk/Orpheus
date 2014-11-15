@@ -55,7 +55,6 @@
                 android:id="@+id/header_track_info"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:textAppearance="@style/TextAppearancePanelHeader.Title"
                 android:background="@android:color/transparent"
                 style="@style/SingleLineTextView"/>
 
@@ -64,7 +63,6 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:background="@android:color/transparent"
-                android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
                 style="@style/SingleLineTextView"/>
 
         </LinearLayout>

@@ -44,7 +44,6 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.main.Main;
 
-import it.gmariotti.cardslib.library.internal.Card;
 
 import static android.app.SearchManager.QUERY;
 
@@ -204,7 +203,7 @@ public class SearchActivity extends BaseSwitcherActivity implements SearchView.O
         return true;
     }
 
-    protected Card getCardFromCursor(Cursor cursor) {
+    protected Object getCardFromCursor(Cursor cursor) {
         // Get the MIME type
         final String mimetype = cursor.getString(cursor
                 .getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));

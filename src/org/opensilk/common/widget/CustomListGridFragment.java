@@ -26,11 +26,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.opensilk.music.R;
-
-import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Static library support version of the framework's {@link android.app.ListFragment}.
@@ -282,7 +281,7 @@ public abstract class CustomListGridFragment extends Fragment {
             throw new IllegalStateException("Content view not yet created");
         }
         if (root instanceof AbsListView) {
-            mList = (CardListView)root;
+            mList = (AbsListView)root;
         } else {
             View ev = root.findViewById(INTERNAL_EMPTY_ID);
             if (ev instanceof TextView) {

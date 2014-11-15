@@ -164,11 +164,6 @@ public class ThemeHelper {
         return new BitmapDrawable(context.getResources(), outBitmap);
     }
 
-    public static boolean isDialog(Context context) {
-        TypedValue tv = new TypedValue();
-        return context.getTheme().resolveAttribute(R.attr.isDialog, tv, true) && tv.data != 0;
-    }
-
     /**
      * Whether or not theme is light
      *

@@ -14,7 +14,7 @@ import com.andrew.apollo.utils.PreferenceUtils;
 import org.apache.commons.io.FileUtils;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.cache.CacheUtil;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import java.util.Locale;
 

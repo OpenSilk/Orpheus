@@ -19,7 +19,7 @@ package org.opensilk.music;
 import android.content.Context;
 
 import org.opensilk.music.artwork.ArtworkModule;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;

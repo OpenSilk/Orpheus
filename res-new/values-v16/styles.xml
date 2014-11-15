@@ -17,35 +17,4 @@
 
 <resources>
 
-    <!-- List item text appearance -->
-
-    <style name="TextAppearanceList.Title" parent="TextAppearanceListBase">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-    </style>
-
-    <style name="TextAppearanceList.SubTitle" parent="TextAppearanceListSecondaryBase">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-    </style>
-
-    <!-- Grid item text appearance -->
-
-    <style name="TextAppearanceGrid" parent="TextAppearanceGridBase">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-    </style>
-
-    <style name="TextAppearanceGridTitle" parent="TextAppearanceGridTitleBase">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-    </style>
-
-
-    <!-- panel header text -->
-
-    <style name="TextAppearancePanelHeader.Title" parent="TextAppearancePanelHeaderBase">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-    </style>
-
-    <style name="TextAppearancePanelHeader.SubTitle" parent="TextAppearancePanelHeaderSmallBase">
-        <item name="android:fontFamily">sans-serif-condensed</item>
-    </style>
-
 </resources>

@@ -28,7 +28,6 @@ import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
-import com.squareup.otto.Bus;
 
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.common.util.ObjectUtils;

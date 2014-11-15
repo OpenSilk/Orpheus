@@ -20,7 +20,6 @@ import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 
-import com.squareup.otto.Bus;
 
 import org.opensilk.music.AppModule;
 import org.opensilk.music.ui.settings.FolderPickerActivity;
@@ -66,11 +65,6 @@ public class ActivityModule {
     @Provides @Singleton @ForActivity
     public Context provideActivityContext() {
         return activity;
-    }
-
-    @Provides @Singleton @ForActivity
-    public Bus provideActivityBus() {
-        return new Bus("activity");
     }
 
     @Provides @Singleton @Named("activity")

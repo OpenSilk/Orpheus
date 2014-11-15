@@ -42,7 +42,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.ui2.BaseActivity;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import java.io.File;
 import java.text.DateFormat;

@@ -33,7 +33,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import javax.inject.Inject;
 

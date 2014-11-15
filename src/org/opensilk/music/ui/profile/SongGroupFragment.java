@@ -43,7 +43,7 @@ import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import javax.inject.Inject;
 

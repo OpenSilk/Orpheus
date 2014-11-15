@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.MediaRouteButton;
 import android.text.TextUtils;
@@ -45,14 +46,11 @@ import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.PreferenceUtils;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.bus.events.PanelStateChanged;
 import org.opensilk.music.iab.IabUtil;
-import org.opensilk.music.ui.activities.BaseSlidingActivity;
 import org.opensilk.music.widgets.AudioVisualizationView;
 import org.opensilk.music.widgets.HeaderOverflowButton;
 import org.opensilk.music.widgets.PanelHeaderLayout;
@@ -62,11 +60,12 @@ import org.opensilk.music.widgets.RepeatButton;
 import org.opensilk.music.widgets.RepeatingImageButton;
 import org.opensilk.music.widgets.ShuffleButton;
 import org.opensilk.common.dagger.qualifier.ForActivity;
-import org.opensilk.silkdagger.support.ActivityScopedDaggerFragment;
 
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
+
+import de.greenrobot.event.EventBus;
 
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
 import static com.andrew.apollo.utils.MusicUtils.sService;
@@ -74,7 +73,7 @@ import static com.andrew.apollo.utils.MusicUtils.sService;
 /**
  * Created by drew on 4/10/14.
  */
-public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
+public class NowPlayingFragment extends Fragment implements
         SeekBar.OnSeekBarChangeListener {
     private static final String TAG = NowPlayingFragment.class.getSimpleName();
 
@@ -137,10 +136,10 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     private long mLastShortSeekEventTime;
     private boolean mFromTouch = false;
 
-    protected BaseSlidingActivity mActivity;
+    protected Activity mActivity;
 
-    @Inject @ForActivity
-    Bus mActivityBus;
+//    @Inject @ForActivity
+    EventBus mActivityBus;
 
     private GlobalBusMonitor mGlobalMonitor;
     private ActivityBusMonitor mActivityMonitor;
@@ -148,7 +147,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mActivity = (BaseSlidingActivity) activity;
+        mActivity = (Activity) activity;
     }
 
     @Override
@@ -698,8 +697,8 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                             realid = MusicProviderUtil.getRealId(mActivity, id);
                         }
                         if (realid >= 0) {
-                            DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid})
-                                    .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
+//                            DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid})
+//                                    .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
                         } else {
                             //TODo toast
                         }
@@ -710,8 +709,8 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                     if (queue != null && queue.length > 0) {
                         long[] playlist = MusicProviderUtil.transformListToRealIds(mActivity, queue);
                         if (playlist.length > 0) {
-                            CreateNewPlaylist.getInstance(playlist)
-                                    .show(mActivity.getSupportFragmentManager(), "CreatePlaylist");
+//                            CreateNewPlaylist.getInstance(playlist)
+//                                    .show(mActivity.getSupportFragmentManager(), "CreatePlaylist");
                         } else {
                             // TODO toast
                         }
@@ -719,7 +718,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
                     return true;
                 case R.id.panel_menu_clear_queue:
                     MusicUtils.clearQueue();
-                    mActivity.maybeClosePanel();
+//                    mActivity.maybeClosePanel();
                     return true;
                 default:
                     break;
@@ -771,7 +770,7 @@ public class NowPlayingFragment extends ActivityScopedDaggerFragment implements
          * Handle panel change events posted by activity
          * @param e
          */
-        @Subscribe
+//        @Subscribe
         public void onPanelStateChanged(PanelStateChanged e) {
             PanelStateChanged.Action action = e.getAction();
             switch (action) {

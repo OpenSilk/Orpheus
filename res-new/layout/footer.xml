@@ -50,7 +50,9 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         tools:text="Track Title"
-        android:textAppearance="@style/TextAppearancePanelHeader.Title"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
         style="@style/SingleLineTextView"/>
 
     <TextView
@@ -63,7 +65,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         tools:text="Artist Name"
-        android:textAppearance="@style/TextAppearancePanelHeader.SubTitle"
+        android:textAppearance="?android:textAppearance"
+        android:fontFamily="sans-serif-condensed"
         style="@style/SingleLineTextView"/>
 
 </org.opensilk.music.ui2.main.FooterView>

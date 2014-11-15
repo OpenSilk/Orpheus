@@ -39,7 +39,7 @@ import org.opensilk.music.ui.profile.PlaylistFragment;
 import org.opensilk.music.ui.profile.SongGroupFragment;
 import org.opensilk.music.ui2.main.Main;
 import org.opensilk.music.ui2.main.QueueScreen;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import dagger.ObjectGraph;
 import flow.Flow;

@@ -22,14 +22,6 @@
         <!--namespace-->
     </style>
 
-    <style name="CardListView">
-        <item name="android:layout_marginRight">@dimen/listview_marginRight</item>
-        <item name="android:layout_marginLeft">@dimen/listview_marginLeft</item>
-        <item name="android:scrollbars">none</item>
-    </style>
-
-    <!-- common dragsort options -->
-
     <style name="DragSortList">
         <!-- Setup dragsort options-->
         <item name="use_default_controller">true</item>
@@ -57,107 +49,12 @@
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="Orpheus.Thumbnail.List">
-        <item name="android:layout_gravity">left|center_vertical</item>
-        <item name="android:layout_marginLeft">16dp</item>
-        <item name="android:layout_marginRight">16dp</item>
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
-    </style>
-
-    <!-- List item text appearance -->
-
-    <style name="TextAppearanceListBase" parent="@android:style/TextAppearance.Holo">
-        <!--<item name="android:textStyle">bold</item>-->
-    </style>
-
-    <style name="TextAppearanceListSecondaryBase" parent="@android:style/TextAppearance.Holo.Small">
-
-    </style>
-
-    <style name="TextAppearanceList.Title" parent="TextAppearanceListBase">
-
-    </style>
-
-    <style name="TextAppearanceList.SubTitle" parent="TextAppearanceListSecondaryBase">
-
-    </style>
-
-    <!-- grid item text appearance base -->
-
-    <style name="TextAppearanceGridBase" parent="@android:style/TextAppearance.Holo.Small">
-        <item name="android:textSize">12sp</item>
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-
-    <style name="TextAppearanceGridTitleBase" parent="@android:style/TextAppearance.Holo">
-        <!--<item name="android:textStyle">bold</item>-->
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-
-    <!-- Grid item text appearance -->
-
-    <style name="TextAppearanceGrid" parent="TextAppearanceGridBase">
-
-    </style>
-
-    <style name="TextAppearanceGridTitle" parent="TextAppearanceGridTitleBase">
-
-    </style>
-
-    <!-- text views for lists and grids -->
-
     <style name="SingleLineTextView">
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
         <item name="android:layout_gravity">start|center_vertical</item>
         <item name="android:gravity">start|center_vertical</item>
     </style>
-
-    <!-- PANEL -->
-    <style name="SlidingPanelBase">
-        <item name="android:layout_gravity">center_horizontal</item>
-        <!--set in themes-->
-        <item name="android:background">?nowPlayingBackground</item>
-    </style>
-
-    <style name="SlidingPanel" parent="SlidingPanelBase">
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="SlidingPanelDialog" parent="SlidingPanelBase">
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <!--PANEL HEADER-->
-
-    <style name="TextAppearancePanelHeaderBase" parent="@android:style/TextAppearance.Holo.Medium">
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="TextAppearancePanelHeaderSmallBase" parent="@android:style/TextAppearance.Holo">
-
-    </style>
-
-    <style name="TextAppearancePanelHeader.Title" parent="TextAppearancePanelHeaderBase">
-
-    </style>
-
-    <style name="TextAppearancePanelHeader.SubTitle" parent="TextAppearancePanelHeaderSmallBase">
-
-    </style>
-
-    <style name="TextAppearanceProfileHeader.Title" parent="TextAppearancePanelHeaderBase">
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-
-    <style name="TextAppearanceProfileHeader.SubTitle" parent="TextAppearancePanelHeaderSmallBase">
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-
-    <!--PANEL FOOTER-->
 
     <style name="PlaybackControlButton" parent="@android:style/Widget.Holo.Button.Borderless">
         <item name="android:layout_width">0dp</item>

@@ -38,7 +38,7 @@ import org.opensilk.music.ui.profile.loader.ArtistGridLoader;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.silkdagger.DaggerInjector;
+import org.opensilk.common.dagger.DaggerInjector;
 
 import java.util.List;
 
