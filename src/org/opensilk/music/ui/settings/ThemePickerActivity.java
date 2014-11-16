@@ -28,67 +28,83 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.mortarflow.MortarContextFactory;
+import org.opensilk.common.mortarflow.MortarPagerAdapter;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui2.BaseActivity;
+import org.opensilk.music.ui2.BaseMortarActivity;
+import org.opensilk.music.ui2.main.Main;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import flow.Layout;
 
 /**
  * Created by drew on 11/15/14.
  */
-public class ThemePickerActivity extends BaseActivity {
+public class ThemePickerActivity extends BaseMortarActivity {
 
-    @dagger.Module(includes = BaseActivity.Module.class, injects = ThemePickerActivity.class)
+    public static class Blueprint extends BaseMortarActivity.Blueprint {
+
+        public Blueprint(String scopeName) {
+            super(scopeName);
+        }
+
+        @Override
+        public Object getDaggerModule() {
+            return new Module();
+        }
+    }
+
+    @dagger.Module(includes = {
+            BaseMortarActivity.Module.class,
+    }, injects = ThemePickerActivity.class)
     public static class Module {
 
     }
 
-    static int[] THEMES_LIGHT = new int[] {
-            R.style.Theme_Light,
-            R.style.Theme_Light_RedYellow,
-            R.style.Theme_Light_RedBlue,
-    };
-
-    static int[] THEMES_DARK = new int[] {
-            R.style.Theme_Dark,
-            R.style.Theme_Dark_RedYellow,
-            R.style.Theme_Dark_RedBlue,
-    };
-
-    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.pager) ViewPager mPager;
-    @InjectView(R.id.faux_fab) ImageButton mFab;
 
-    ChooserPagerAdapter mAdapter;
+    Adapter mAdapter;
 
     boolean mLightTheme;
     OrpheusTheme mNewTheme;
 
     @Override
+    protected BaseMortarActivity.Blueprint getBlueprint(String scopeName) {
+        return new Blueprint(scopeName);
+    }
+
+    @Override
     public void onCreate(final Bundle savedInstanceState) {
         mLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
         setTheme(mLightTheme ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
-        ((DaggerInjector) getApplication()).getObjectGraph().plus(new Module()).inject(this);
 
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.settings_theme_picker);
         ButterKnife.inject(this);
 
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        mAdapter = new ChooserPagerAdapter(this, mLightTheme);
+        List<PageScreen> screens = new ArrayList<>(OrpheusTheme.values().length);
+        for (OrpheusTheme t : OrpheusTheme.values()) {
+            screens.add(new PageScreen(t));
+        }
+        mAdapter = new Adapter(this, screens, mLightTheme);
         mPager.setAdapter(mAdapter);
         mPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override public void onPageScrolled(int i, float v, int i2) { }
@@ -119,92 +135,46 @@ public class ThemePickerActivity extends BaseActivity {
     }
 
     void updateTheme(int i) {
-        PageHolder h = mAdapter.getPage(i);
-        mNewTheme = h.orpheusTheme;
-        mToolbar.setBackgroundColor(h.primaryColor);
-        ShapeDrawable bg = new ShapeDrawable(new OvalShape());
-        bg.getPaint().setColor(h.accentColor);
-        mFab.setBackgroundDrawable(bg);
+        mNewTheme = mAdapter.getTheme(i);
     }
 
-    public static int resolveAttr(Resources.Theme theme, int attr) {
-        TypedValue outValue = new TypedValue();
-        theme.resolveAttribute(attr, outValue, true);
-        return outValue.data;
-    }
+    @Layout(R.layout.settings_theme_picker_page)
+    @WithModule(PageScreen.Module.class)
+    public static class PageScreen extends Screen {
+        OrpheusTheme orpheusTheme;
 
-    static class ChooserPagerAdapter extends PagerAdapter {
-
-        final Context mContext;
-        final LayoutInflater mInflater;
-        final boolean mLightTheme;
-        final SparseArrayCompat<PageHolder> mPages = new SparseArrayCompat<>();
-
-        ChooserPagerAdapter(Context context, boolean lightTheme) {
-            mContext = context;
-            mInflater = LayoutInflater.from(context);
-            mLightTheme = lightTheme;
-        }
-
-        PageHolder getPage(int position) {
-            return mPages.get(position);
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            OrpheusTheme orpheusTheme = OrpheusTheme.values()[position];
-            View v = mInflater.inflate(R.layout.settings_theme_picker_page, container, false);
-            PageHolder h = new PageHolder(v, orpheusTheme, mLightTheme);
-            mPages.put(position, h);
-            container.addView(v);
-            return h;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView(((PageHolder) object).itemView);
-            mPages.remove(position);
-        }
-
-        @Override
-        public int getCount() {
-            return OrpheusTheme.values().length;
-        }
-
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == ((PageHolder) object).itemView;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return super.getPageTitle(position);
-        }
-    }
-
-    static class PageHolder {
-        final View itemView;
-        @InjectView(R.id.primary) View primary;
-        @InjectView(R.id.secondary) View secondary;
-        final OrpheusTheme orpheusTheme;
-        final int primaryColor;
-        final int primaryColorDark;
-        final int accentColor;
-
-        PageHolder(View itemView, OrpheusTheme orpheusTheme, boolean lightTheme) {
-            this.itemView = itemView;
+        PageScreen(OrpheusTheme orpheusTheme) {
             this.orpheusTheme = orpheusTheme;
-            // create new theme
-            Resources.Theme t = itemView.getResources().newTheme();
-            t.applyStyle((lightTheme ? orpheusTheme.light : orpheusTheme.dark), true);
-            // resolve the colors for nev theme
-            primaryColor = resolveAttr(t, R.attr.colorPrimary);
-            primaryColorDark = resolveAttr(t, R.attr.colorPrimaryDark);
-            accentColor = resolveAttr(t, R.attr.colorAccent);
-            ButterKnife.inject(this, itemView);
-            // update the views with the theme colors
-            primary.setBackgroundColor(primaryColor);
-            secondary.setBackgroundColor(accentColor);
+        }
+
+        @Override
+        public String getName() {
+            return super.getName() + orpheusTheme.toString();
+        }
+
+        @dagger.Module(addsTo = ThemePickerActivity.Module.class, includes = Main.Module.class)
+        public static class Module {
+
+        }
+
+    }
+
+    static class Adapter extends MortarPagerAdapter<PageScreen, View> {
+        final boolean lightTHeme;
+
+        Adapter(Context context, List<PageScreen> screens, boolean lighTHeme) {
+            super(context, screens);
+            this.lightTHeme = lighTHeme;
+        }
+
+        @Override
+        protected Context decorateContext(Context newChildContext, int position) {
+            OrpheusTheme theme = getTheme(position);
+            return new ContextThemeWrapper(newChildContext, lightTHeme ? theme.light : theme.dark);
+        }
+
+        OrpheusTheme getTheme(int position) {
+            return screens.get(position).orpheusTheme;
         }
     }
 
