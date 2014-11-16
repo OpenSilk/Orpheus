@@ -58,6 +58,48 @@ public enum OrpheusTheme {
             R.style.Theme_Dark_IndigoRed,
             R.style.Theme_Profile_Light_IndigoRed,
             R.style.Theme_Profile_Dark_IndigoRed
+    ),
+    PINK_YELLOW(
+            R.style.Theme_Light_PinkYellow,
+            R.style.Theme_Dark_PinkYellow,
+            R.style.Theme_Profile_Light_PinkYellow,
+            R.style.Theme_Profile_Dark_PinkYellow
+    ),
+    PINK_BLUE(
+            R.style.Theme_Light_PinkBlue,
+            R.style.Theme_Dark_PinkBlue,
+            R.style.Theme_Profile_Light_PinkBlue,
+            R.style.Theme_Profile_Dark_PinkBlue
+    ),
+    BLUE_YELLOW(
+            R.style.Theme_Light_BlueYellow,
+            R.style.Theme_Dark_BlueYellow,
+            R.style.Theme_Profile_Light_BlueYellow,
+            R.style.Theme_Profile_Dark_BlueYellow
+    ),
+    BLUE_ORANGE(
+            R.style.Theme_Light_BlueOrange,
+            R.style.Theme_Dark_BlueOrange,
+            R.style.Theme_Profile_Light_BlueOrange,
+            R.style.Theme_Profile_Dark_BlueOrange
+    ),
+    BLUE_RED(
+            R.style.Theme_Light_BlueRed,
+            R.style.Theme_Dark_BlueRed,
+            R.style.Theme_Profile_Light_BlueRed,
+            R.style.Theme_Profile_Dark_BlueRed
+    ),
+    TEAL_ORANGE(
+            R.style.Theme_Light_TealOrange,
+            R.style.Theme_Dark_TealOrange,
+            R.style.Theme_Profile_Light_TealOrange,
+            R.style.Theme_Profile_Dark_TealOrange
+    ),
+    TEAL_PURPLE(
+            R.style.Theme_Light_TealPurple,
+            R.style.Theme_Dark_TealPurple,
+            R.style.Theme_Profile_Light_TealPurple,
+            R.style.Theme_Profile_Dark_TealPurple
     );
 
     public final int light;

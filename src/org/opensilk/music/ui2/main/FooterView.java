@@ -99,6 +99,11 @@ public class FooterView extends RelativeLayout {
                     public void call(OnClickEvent onClickEvent) {
                         presenter.toggleQueue();
                     }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        //pass, Theme picker has no appflow
+                    }
                 })
         );
     }

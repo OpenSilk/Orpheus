@@ -21,7 +21,7 @@
     <style name="Theme.Light.RedYellow" parent="Theme.LightBase">
         <item name="colorPrimary">@color/red2_500</item>
         <item name="colorPrimaryDark">@color/red2_700</item>
-        <item name="colorAccent">@color/amber_A400</item>
+        <item name="colorAccent">@color/amber_A200</item>
     </style>
 
     <style name="Theme.Dark.RedYellow" parent="Theme.DarkBase">
@@ -31,7 +31,7 @@
     </style>
 
     <style name="Theme.Profile.Light.RedYellow" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/amber_A400</item>
+        <item name="colorAccent">@color/amber_A200</item>
     </style>
 
     <style name="Theme.Profile.Dark.RedYellow" parent="Theme.Profile.DarkBase">

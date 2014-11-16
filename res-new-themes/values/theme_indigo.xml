@@ -20,7 +20,7 @@
     <style name="Theme.Light.IndigoYellow" parent="Theme.LightBase">
         <item name="colorPrimary">@color/indigo_500</item>
         <item name="colorPrimaryDark">@color/indigo_700</item>
-        <item name="colorAccent">@color/amber_A400</item>
+        <item name="colorAccent">@color/amber_A200</item>
     </style>
 
     <style name="Theme.Dark.IndigoYellow" parent="Theme.DarkBase">
@@ -30,7 +30,7 @@
     </style>
 
     <style name="Theme.Profile.Light.IndigoYellow" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/amber_A400</item>
+        <item name="colorAccent">@color/amber_A200</item>
     </style>
 
     <style name="Theme.Profile.Dark.IndigoYellow" parent="Theme.Profile.DarkBase">
@@ -40,7 +40,7 @@
     <style name="Theme.Light.IndigoRed" parent="Theme.LightBase">
         <item name="colorPrimary">@color/indigo_500</item>
         <item name="colorPrimaryDark">@color/indigo_700</item>
-        <item name="colorAccent">@color/red_A400</item>
+        <item name="colorAccent">@color/red_A200</item>
     </style>
 
     <style name="Theme.Dark.IndigoRed" parent="Theme.DarkBase">
@@ -50,7 +50,7 @@
     </style>
 
     <style name="Theme.Profile.Light.IndigoRed" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/red_A400</item>
+        <item name="colorAccent">@color/red_A200</item>
     </style>
 
     <style name="Theme.Profile.Dark.IndigoRed" parent="Theme.Profile.DarkBase">
