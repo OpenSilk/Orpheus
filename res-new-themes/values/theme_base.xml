@@ -72,28 +72,36 @@
 
     <!-- End common themes -->
 
-    <!-- Settings themes -->
+    <!-- Base themes for dialog activities -->
 
-    <style name="Theme.Settings.Light" parent="Theme.AppCompat.Light.DialogWhenLarge">
+    <style name="Theme.Dialog.LightBase" parent="Theme.AppCompat.Light.DialogWhenLarge">
         <!--NoActionBar-->
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <!--DarkActionBar-->
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
-
+        <!--Light dark actionbar-->
         <item name="colorPrimary">@color/primary_material_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
-
-        <item name="settingsCardBackgroundColor">@android:color/white</item>
     </style>
 
-    <style name="Theme.Settings.Dark" parent="Theme.AppCompat.DialogWhenLarge">
+    <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.NoActionBar">
         <!--NoActionBar-->
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
         <!--DarkActionBar-->
         <item name="toolbarTheme">@style/Toolbar.Dark</item>
+    </style>
 
+    <!-- end base dialog themes -->
+
+    <!-- Settings themes -->
+
+    <style name="Theme.Settings.Light" parent="Theme.Dialog.LightBase">
+        <item name="settingsCardBackgroundColor">@android:color/white</item>
+    </style>
+
+    <style name="Theme.Settings.Dark" parent="Theme.Dialog.DarkBase">
         <item name="settingsCardBackgroundColor">?colorPrimary</item>
     </style>
 
@@ -101,17 +109,9 @@
 
     <!-- Profile themes -->
 
-    <style name="Theme.Profile.Light" parent="Theme.AppCompat.Light.DialogWhenLarge">
-        <!--NoActionBar-->
-        <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+    <style name="Theme.Profile.LightBase" parent="Theme.Dialog.LightBase">
 
         <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow.Transparent</item>
-
-        <!--<item name="colorPrimary">@color/primary_material_dark</item>-->
-        <item name="colorPrimary">@color/primary_material_dark</item>
-        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
-        <item name="colorAccent">@color/amber_A400</item>
 
         <item name="fabPlayStyle">@style/fabLight.Play</item>
         <item name="fabNextStyle">@style/fabLight.Next</item>
@@ -125,10 +125,11 @@
 
     </style>
 
-    <style name="Theme.Profile.Dark" parent="Theme.AppCompat.DialogWhenLarge">
-        <!--NoActionBar-->
-        <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
+    <style name="Theme.Profile.Light" parent="Theme.Profile.LightBase">
+        <item name="colorAccent">@color/amber_A400</item>
+    </style>
+
+    <style name="Theme.Profile.DarkBase" parent="Theme.Dialog.DarkBase">
 
         <item name="toolbarTheme">@style/Toolbar.Dark.Transparent</item>
 
@@ -141,6 +142,10 @@
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Dark</item>
+    </style>
+
+    <style name="Theme.Profile.Dark" parent="Theme.Profile.DarkBase">
+
     </style>
 
     <!-- end profile themes -->
@@ -175,92 +180,5 @@
     </style>
 
     <!-- end toolbar styles -->
-
-    <!--grid tile-->
-    <style name="GridTileDescriptionLight">
-        <item name="android:background">@color/primary_material_light</item>
-    </style>
-
-    <style name="GridTileDescriptionDark">
-        <item name="android:background">@color/primary_dark_material_dark</item>
-    </style>
-
-    <style name="GridTileDescriptionTitle" parent="SingleLineTextView">
-        <item name="android:textAppearance">?android:textAppearance</item>
-        <item name="android:textSize">16sp</item>
-    </style>
-
-    <style name="GridTileDescriptionTitle.Light">
-        <!--<item name="android:textAppearance">?android:textAppearanceInverse</item>-->
-    </style>
-
-    <style name="GridTileDescriptionTitle.Dark">
-    </style>
-
-    <style name="GridTileDescriptionSubTitle" parent="SingleLineTextView">
-        <item name="android:textAppearance">?android:textAppearanceSmall</item>
-        <item name="android:textSize">12sp</item>
-    </style>
-
-    <style name="GridTileDescriptionSubTitle.Light">
-        <!--<item name="android:textAppearance">?android:textAppearanceSmallInverse</item>-->
-    </style>
-
-    <style name="GridTileDescriptionSubTitle.Dark">
-
-    </style>
-
-    <!-- fabs -->
-    <style name="fabDark">
-        <item name="fabColor">black</item>
-        <item name="android:scaleType">centerInside</item>
-    </style>
-
-    <style name="fabLight">
-        <item name="fabColor">white</item>
-        <item name="android:scaleType">centerInside</item>
-    </style>
-
-    <style name="fabLight.Play">
-        <item name="fabColor">accent</item>
-        <item name="android:src">@drawable/fab_playpause_black</item>
-    </style>
-
-    <style name="fabDark.Play">
-        <item name="fabColor">accent</item>
-        <item name="android:src">@drawable/fab_playpause_white</item>
-    </style>
-
-    <style name="fabLight.Next">
-        <item name="android:src">@drawable/ic_skip_next_black_24dp</item>
-    </style>
-
-    <style name="fabDark.Next">
-        <item name="android:src">@drawable/ic_skip_next_white_24dp</item>
-    </style>
-
-    <style name="fabLight.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_black_24dp</item>
-    </style>
-
-    <style name="fabDark.Prev">
-        <item name="android:src">@drawable/ic_skip_previous_white_24dp</item>
-    </style>
-
-    <style name="fabLight.Shuffle">
-        <item name="android:src">@drawable/fab_shuffle_black</item>
-    </style>
-
-    <style name="fabDark.Shuffle">
-        <item name="android:src">@drawable/fab_shuffle_white</item>
-    </style>
-
-    <style name="fabLight.Repeat">
-        <item name="android:src">@drawable/fab_repeat_black</item>
-    </style>
-
-    <style name="fabDark.Repeat">
-        <item name="android:src">@drawable/fab_repeat_white</item>
-    </style>
 
 </resources>

@@ -21,40 +21,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    style="@style/Theme.AppCompat.Dialog">
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        style="?toolbarTheme"/>
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/pager1"
+        android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager2"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+    <ImageButton
+        android:id="@+id/faux_fab"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginBottom="8dp"
+        android:layout_gravity="end"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="end"
-        style="?buttonBarStyle">
+        android:showDividers="none"
+        style="?android:buttonBarStyle">
 
         <Button
             android:id="@+id/btn_negative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/cancel"
-            style="?buttonBarButtonStyle"/>
+            style="?android:buttonBarButtonStyle"/>
 
         <Button
             android:id="@+id/btn_positive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ok"
-            style="?buttonBarButtonStyle"/>
+            android:text="@android:string/ok"
+            style="?android:buttonBarButtonStyle"/>
 
     </LinearLayout>
 

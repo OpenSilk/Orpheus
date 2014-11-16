@@ -20,11 +20,9 @@
             android:title="@string/settings_dark_theme"
             android:defaultValue="false"/>
 
-        <org.opensilk.music.ui.settings.ThemeListPreference
-            android:key="pref_theme"
-            android:title="@string/settings_pick_theme"
-            android:entries="@array/theme_list_names"
-            android:entryValues="@array/theme_list_values"/>
+        <Preference
+            android:key="theme_picker"
+            android:title="@string/settings_pick_theme"/>
 
     </PreferenceCategory>
 

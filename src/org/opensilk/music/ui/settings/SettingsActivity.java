@@ -3,7 +3,9 @@ package org.opensilk.music.ui.settings;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import org.opensilk.music.R;
 

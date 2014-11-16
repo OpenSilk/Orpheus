@@ -87,9 +87,101 @@
         <item name="invertedTabBar">false</item>
     </style>
 
-    <!--Tiles-->
+    <!-- Tiles -->
+
     <style name="TileOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
         <item name="tibTint">?attr/colorControlNormal</item>
     </style>
+
+    <style name="GridTileDescriptionLight">
+        <item name="android:background">@color/primary_material_light</item>
+    </style>
+
+    <style name="GridTileDescriptionDark">
+        <item name="android:background">@color/primary_dark_material_dark</item>
+    </style>
+
+    <style name="GridTileDescriptionTitle" parent="SingleLineTextView">
+        <item name="android:textAppearance">?android:textAppearance</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="GridTileDescriptionTitle.Light">
+        <!--<item name="android:textAppearance">?android:textAppearanceInverse</item>-->
+    </style>
+
+    <style name="GridTileDescriptionTitle.Dark">
+    </style>
+
+    <style name="GridTileDescriptionSubTitle" parent="SingleLineTextView">
+        <item name="android:textAppearance">?android:textAppearanceSmall</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="GridTileDescriptionSubTitle.Light">
+        <!--<item name="android:textAppearance">?android:textAppearanceSmallInverse</item>-->
+    </style>
+
+    <style name="GridTileDescriptionSubTitle.Dark">
+
+    </style>
+
+    <!-- end tiles -->
+
+    <!-- fabs -->
+
+    <style name="fabDark">
+        <item name="fabColor">black</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="fabLight">
+        <item name="fabColor">white</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+
+    <style name="fabLight.Play">
+        <item name="fabColor">accent</item>
+        <item name="android:src">@drawable/fab_playpause_black</item>
+    </style>
+
+    <style name="fabDark.Play">
+        <item name="fabColor">accent</item>
+        <item name="android:src">@drawable/fab_playpause_white</item>
+    </style>
+
+    <style name="fabLight.Next">
+        <item name="android:src">@drawable/ic_skip_next_black_24dp</item>
+    </style>
+
+    <style name="fabDark.Next">
+        <item name="android:src">@drawable/ic_skip_next_white_24dp</item>
+    </style>
+
+    <style name="fabLight.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_black_24dp</item>
+    </style>
+
+    <style name="fabDark.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_white_24dp</item>
+    </style>
+
+    <style name="fabLight.Shuffle">
+        <item name="android:src">@drawable/fab_shuffle_black</item>
+    </style>
+
+    <style name="fabDark.Shuffle">
+        <item name="android:src">@drawable/fab_shuffle_white</item>
+    </style>
+
+    <style name="fabLight.Repeat">
+        <item name="android:src">@drawable/fab_repeat_black</item>
+    </style>
+
+    <style name="fabDark.Repeat">
+        <item name="android:src">@drawable/fab_repeat_white</item>
+    </style>
+
+    <!-- end fabs-->
 
 </resources>

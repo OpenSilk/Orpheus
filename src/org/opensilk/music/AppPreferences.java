@@ -19,10 +19,7 @@ package org.opensilk.music;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.JsonReader;
-import android.util.JsonWriter;
 
-import com.andrew.apollo.utils.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -30,13 +27,10 @@ import org.apache.commons.io.FileUtils;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.gallery.GalleryPage;
-import org.opensilk.music.util.MarkedForRemoval;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,35 +45,39 @@ import javax.inject.Singleton;
 @Singleton
 public class AppPreferences {
 
-    public static final String PREF_AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
-
-    public static final String PREF_LAST_FOLDER_BROWSER_PATH = "last_folder_browser_path";
-
+    //Gallery pages
     public static final int DEFAULT_PAGE = 2;
     public static final String START_PAGE = "start_page";
     public static final String HOME_PAGES = "pref_home_pages";
 
+    //Gallery sort orders
     public static final String ARTIST_SORT_ORDER = "artist_sort_order";
     public static final String ALBUM_SORT_ORDER = "album_sort_order";
     public static final String SONG_SORT_ORDER = "song_sort_order";
 
+    //Gallery list styles
     public static final String ARTIST_LAYOUT = "artist_layout";
     public static final String ALBUM_LAYOUT = "album_layout";
+    // values for list styles
     public static final String SIMPLE = "simple";
     public static final String GRID = "grid";
 
-    // Key used to download images only on Wi-Fi
+    // Artwork
     public static final String ONLY_ON_WIFI = "only_on_wifi";
-    // Key that gives permissions to download missing album covers
     public static final String DOWNLOAD_MISSING_ARTWORK = "download_missing_artwork";
-    // Key to determine whether to try the network before local storage
     public static final String PREFER_DOWNLOAD_ARTWORK = "prefer_download_artwork";
-    // Key that gives permissions to download missing artist images
     public static final String DOWNLOAD_MISSING_ARTIST_IMAGES = "download_missing_artist_images";
-    // Key used to set image cache size
     public static final String IMAGE_DISK_CACHE_SIZE = "pref_cache_size";
-    // Key to decide whether we prefer high quality art
     public static final String WANT_LOW_RESOLUTION_ART = "pref_low_resolution";
+
+    //Theme
+    public static final String WANT_DARK_THEME = "pref_dark_theme";
+    public static final String ORPHEUS_THEME = "orpheus_theme";
+
+    //Misc
+    public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
+
+
 
     private final Context appContext;
     private final SharedPreferences prefs;
@@ -128,20 +126,14 @@ public class AppPreferences {
         prefs.edit().remove(key).apply();
     }
 
-
-    public final String serializeGalleryPages(List<GalleryPage> pages) {
-        Type type = new TypeToken<List<GalleryPage>>() {}.getType();
-        return gson.toJson(pages, type);
-    }
-
-    public final List<GalleryPage> deserializeGalleryPages(String json) {
-        Type type = new TypeToken<List<GalleryPage>>() {}.getType();
-        return gson.fromJson(json, type);
-    }
+    /*
+     * Home pages
+     */
 
     public final void saveGalleryPages(List<GalleryPage> pages) {
         try {
-            putString(HOME_PAGES, serializeGalleryPages(pages));
+            Type type = new TypeToken<List<GalleryPage>>() {}.getType();
+            putString(HOME_PAGES, gson.toJson(pages, type));
         } catch (Exception e) {
             remove(HOME_PAGES);
         }
@@ -151,11 +143,18 @@ public class AppPreferences {
         String pgs = getString(HOME_PAGES, null);
         if (pgs != null) {
             try {
-                return deserializeGalleryPages(pgs);
-            } catch (Exception ignored) {}
+                Type type = new TypeToken<List<GalleryPage>>() {}.getType();
+                return gson.fromJson(pgs, type);
+            } catch (Exception ignored) {
+                remove(HOME_PAGES);
+            }
         }
         return Arrays.asList(GalleryPage.values());
     }
+
+    /*
+     * Plugins
+     */
 
     public LibraryInfo getDefaultLibraryInfo(PluginInfo pluginInfo) {
         String json = getString(makePluginPrefKey(pluginInfo), null);
@@ -184,13 +183,17 @@ public class AppPreferences {
     }
 
     /*
+     * Auto shuffle
+     */
+
+    /*
      * This might not be the best way but since it is used in multiple processes
      * im excluding it from the standard prefs in order to avoid MODE_MULTI_PROCESS
      * since that doesnt cache values and we hit the SharedPrefs /a lot/
      */
     public static boolean writeAutoShuffleDirectory(Context context, String directory) {
         try {
-            File f = new File(context.getFilesDir(), PREF_AUTO_SHUFFLE_FOLDER);
+            File f = new File(context.getFilesDir(), AUTO_SHUFFLE_FOLDER);
             FileUtils.writeLines(f, Collections.singleton(directory));
             return true;
         } catch (IOException e) {
@@ -200,11 +203,17 @@ public class AppPreferences {
 
     public static String readAutoShuffleDirectory(Context context) {
         try {
-            File f = new File(context.getFilesDir(), PREF_AUTO_SHUFFLE_FOLDER);
+            File f = new File(context.getFilesDir(), AUTO_SHUFFLE_FOLDER);
             return FileUtils.readLines(f).get(0);
         } catch (Exception e) {
             return null;
         }
     }
+
+    /*
+     * Theme
+     */
+
+
 
 }

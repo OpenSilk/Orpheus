@@ -109,6 +109,12 @@ public class FolderPickerActivity extends BaseActivity {
 
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
     protected static String makeSubtitle(String path) {
         if (TextUtils.isEmpty(path)) {
             path = SDCARD_ROOT;

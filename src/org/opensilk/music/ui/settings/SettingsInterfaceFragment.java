@@ -1,18 +1,27 @@
 package org.opensilk.music.ui.settings;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 
+import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.api.OrpheusApi;
+
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 import com.andrew.apollo.utils.ThemeStyle;
 
 import java.util.Locale;
+
+import javax.inject.Inject;
 
 import static org.opensilk.music.ui2.event.ActivityResult.RESULT_RESTART_APP;
 
@@ -20,15 +29,27 @@ import static org.opensilk.music.ui2.event.ActivityResult.RESULT_RESTART_APP;
  * Created by andrew on 3/1/14.
  */
 public class SettingsInterfaceFragment extends SettingsFragment implements
-        Preference.OnPreferenceChangeListener {
+        Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
-    private static final String PREF_THEME = "pref_theme";
-    private static final String PREF_DARK_THEME = "pref_dark_theme";
-    private static final String PREF_HOME_PAGES = "pref_home_pages";
+    @dagger.Module(addsTo = SettingsActivity.Module.class, injects = SettingsInterfaceFragment.class)
+    public static class Module {
+    }
+
+    private static final String PREF_THEME_PICKER = "theme_picker";
+    private static final String PREF_DARK_THEME = AppPreferences.WANT_DARK_THEME;
+    private static final String PREF_HOME_PAGES = AppPreferences.HOME_PAGES;
+
+    @Inject AppPreferences mSettings;
 
     private CheckBoxPreference mDarkTheme;
-    private ThemeListPreference mThemeList;
+    private Preference mThemePicker;
     private DragSortSwipeListPreference mHomePages;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        ((DaggerInjector) activity).getObjectGraph().plus(new Object[]{new Module()}).inject(this);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,11 +58,9 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         mPrefSet = getPreferenceScreen();
 
         mDarkTheme = (CheckBoxPreference) mPrefSet.findPreference(PREF_DARK_THEME);
-        mDarkTheme.setOnPreferenceChangeListener(this);
 
-        mThemeList = (ThemeListPreference) mPrefSet.findPreference(PREF_THEME);
-        mThemeList.setOnPreferenceChangeListener(this);
-        updateThemeIcon(ThemeHelper.getInstance(getActivity()).getThemeName());
+        mThemePicker = mPrefSet.findPreference(PREF_THEME_PICKER);
+        mThemePicker.setOnPreferenceClickListener(this);
 
         mHomePages = (DragSortSwipeListPreference) mPrefSet.findPreference(PREF_HOME_PAGES);
         mHomePages.setOnPreferenceChangeListener(this);
@@ -50,53 +69,31 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        if (preference == mThemeList) {
-            String newTheme = (String) newValue;
-            String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName();
-            if (PreferenceUtils.getInstance(getActivity()).wantDarkTheme()) {
-                newTheme += "DARK"; //Chooser only has reg themes, so append dark
-            }
-            if (!newTheme.equalsIgnoreCase(currentTheme)) {
-                updateThemeIcon(newTheme);
-                applyTheme(ThemeStyle.valueOf(newTheme.toUpperCase(Locale.US)));
-                doRestart();
-            }
-            return false; // We set preference
-        } else if (preference == mDarkTheme) {
-            String currentTheme = ThemeHelper.getInstance(getActivity()).getThemeName().toUpperCase(Locale.US);
-            ThemeStyle newTheme;
-            if ((Boolean) newValue) {
-                if (currentTheme.contains("DARK")) {
-                    //Already on dark theme use it
-                    newTheme = ThemeStyle.valueOf(currentTheme);
-                } else {
-                    //Convert to equivalent dark theme
-                    newTheme = ThemeStyle.valueOf(currentTheme + "DARK");
-                }
-            } else {
-                if (currentTheme.contains("DARK")) {
-                    //Convert ot equivalent light theme
-                    newTheme = ThemeStyle.valueOf(currentTheme.replace("DARK", ""));
-                } else {
-                    // Already on light theme use it
-                    newTheme = ThemeStyle.valueOf(currentTheme);
-                }
-            }
-            applyTheme(newTheme);
-            doRestart();
-            return true;
-        } else if (preference == mHomePages) {
+        if (preference == mHomePages) {
             doRestart();
             return true;
         }
         return false;
     }
 
-    private void applyTheme(ThemeStyle newTheme) {
-        // Update prefrence
-        PreferenceUtils.getInstance(getActivity()).setThemeStyle(newTheme);
-        // refresh the singleton
-        ThemeHelper.getInstance(getActivity()).reloadTheme();
+    @Override
+    public boolean onPreferenceClick(Preference preference) {
+        if (preference == mThemePicker) {
+            Intent intent = new Intent(getActivity(), ThemePickerActivity.class);
+            intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, !mDarkTheme.isChecked());
+            startActivityForResult(intent, 11);
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 11) {
+            if (resultCode == Activity.RESULT_OK) {
+
+            }
+        }
     }
 
     private void doRestart() {
@@ -113,11 +110,6 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
                     }
                 })
                 .show();
-    }
-
-    private void updateThemeIcon(String name) {
-        mThemeList.setIcon(new ColorDrawable(ThemeHelper.getInstance(getActivity())
-                .getThemePrimaryColor(ThemeStyle.valueOf(name.toUpperCase(Locale.US)))));
     }
 
 }

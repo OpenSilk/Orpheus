@@ -21,11 +21,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.opensilk.cast.util.CastPreferences;
-import org.opensilk.music.AppModule;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.common.dagger.DaggerInjector;
-import org.opensilk.music.ui2.BaseActivity;
 
 import javax.inject.Inject;
 
@@ -45,7 +43,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
     }
 
     private static final String PREF_EQUALIZER = "pref_equalizer";
-    private static final String PREF_DEFAULT_FOLDER = AppPreferences.PREF_AUTO_SHUFFLE_FOLDER;
+    private static final String PREF_DEFAULT_FOLDER = AppPreferences.AUTO_SHUFFLE_FOLDER;
     private static final String PREF_CASTING = CastPreferences.KEY_CAST_ENABLED;
 
     @Inject MusicServiceConnection mMusicService;

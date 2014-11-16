@@ -167,7 +167,13 @@
         <activity android:name="org.opensilk.music.ui.settings.FolderPickerActivity"
             android:theme="@style/Theme.Settings.Light">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui2.LauncherActivity"/>
+                android:value="org.opensilk.music.ui.settings.SettingsActivity"/>
+        </activity>
+
+        <activity android:name="org.opensilk.music.ui.settings.ThemePickerActivity"
+                  android:theme="@style/Theme.Settings.Light">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                       android:value="org.opensilk.music.ui.settings.SettingsActivity"/>
         </activity>
 
         <activity
