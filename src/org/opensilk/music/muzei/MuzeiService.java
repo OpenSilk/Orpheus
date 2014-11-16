@@ -16,54 +16,61 @@
 
 package org.opensilk.music.muzei;
 
-import android.content.ComponentName;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
-import com.andrew.apollo.utils.MusicUtils;
 import com.google.android.apps.muzei.api.Artwork;
 import com.google.android.apps.muzei.api.MuzeiArtSource;
 
-import org.opensilk.music.api.model.Album;
+import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.AppModule;
+import org.opensilk.music.AppPreferences;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProvider;
 
-import hugo.weaving.DebugLog;
-import timber.log.Timber;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import dagger.Provides;
+import de.greenrobot.event.EventBus;
+import rx.Observable;
+import rx.functions.Func2;
 
 /**
  * Created by drew on 4/16/14.
  */
-public class MuzeiService extends MuzeiArtSource implements ServiceConnection {
+public class MuzeiService extends MuzeiArtSource {
     private static final String TAG = MuzeiService.class.getSimpleName();
+
+    @dagger.Module(addsTo = AppModule.class, injects = MuzeiService.class)
+    public static class Module {
+        @Provides @Singleton @Named("activity")
+        public EventBus provideEventBus() {
+            return EventBus.getDefault();
+        }
+    }
 
     public static final String MUZEI_EXTENSION_ENABLED = "is_muzei_enabled";
 
-    private MusicUtils.ServiceToken mToken;
-    private boolean isBound;
+    @Inject MusicServiceConnection mMusicService;
+    @Inject AppPreferences mSettings;
 
     public MuzeiService() {
-        this ("Orpheus");
-    }
-
-    public MuzeiService(String name) {
-        super(name);
+        super("Orpheus");
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mToken = MusicUtils.bindToService(this, this);
+        ((DaggerInjector) getApplication()).getObjectGraph().plus(new Module()).inject(this);
+        mMusicService.bind();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        MusicUtils.unbindFromService(mToken);
+        mMusicService.unbind();
     }
 
     @Override
@@ -73,68 +80,38 @@ public class MuzeiService extends MuzeiArtSource implements ServiceConnection {
         // Note: can't simply enable/disable the receiver because
         // muzei detects package changes and doing so will result
         // in an endless loop on enable/disable
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit().putBoolean(MUZEI_EXTENSION_ENABLED, true).apply();
+        mSettings.putBoolean(MUZEI_EXTENSION_ENABLED, true);
     }
 
     @Override
     //@DebugLog
     public void onDisabled() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit().putBoolean(MUZEI_EXTENSION_ENABLED, false).apply();
+        mSettings.putBoolean(MUZEI_EXTENSION_ENABLED, false);
     }
 
     @Override
     //@DebugLog
     protected void onUpdate(int reason) {
-        if (!isBound && !waitForBind()) {
-            return;
-        }
-        final ArtInfo info = MusicUtils.getCurrentArtInfo();
-        if (info == null) {
-            Timber.e("Nothing currently playing");
-            return;
-        }
-        final Uri artworUri = ArtworkProvider.createArtworkUri(info.artistName, info.albumName);
-        publishArtwork(new Artwork.Builder()
-                .imageUri(artworUri)
-                .title(MusicUtils.getAlbumName())
-                .byline(MusicUtils.getArtistName())
-                .build());
-    }
-
-    private synchronized boolean waitForBind() {
         try {
-            long waitTime = 0;
-            while (!isBound) {
-                // Don' block for more than a second
-                if (waitTime > 1000) return false;
-                Log.i(TAG, "Waiting on service");
-                // We were called too soon after onCreate, give the service some time
-                // to spin up, This is run in a Handler thread so we can block it
-                long start = System.currentTimeMillis();
-                wait(100);
-                Log.i(TAG, "Waited for " + (waitTime += (System.currentTimeMillis() - start)) + "ms");
+            ArtInfo info = mMusicService.getCurrentArtInfo().toBlocking().first();
+            if (info != null) {
+                final Uri artworUri = ArtworkProvider.createArtworkUri(info.artistName, info.albumName);
+                String[] meta = Observable.zip(mMusicService.getAlbumName(), mMusicService.getArtistName(),
+                        new Func2<String, String, String[]>() {
+                            @Override
+                            public String[] call(String s, String s2) {
+                                return new String[] {s, s2};
+                            }
+                        }).toBlocking().first();
+                publishArtwork(new Artwork.Builder()
+                        .imageUri(artworUri)
+                        .title(meta[0])
+                        .byline(meta[1])
+                        .build());
             }
-        } catch (InterruptedException e) {
-            return false;
+        } catch (Exception e) {
+
         }
-        return isBound;
-    }
-
-    /*
-     * Service Connection callbacks
-     */
-
-    @Override
-    public synchronized void onServiceConnected(ComponentName name, IBinder service) {
-        isBound = true;
-        notifyAll();
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        isBound = false;
     }
 
 }

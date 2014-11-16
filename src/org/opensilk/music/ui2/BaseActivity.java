@@ -192,7 +192,7 @@ public class BaseActivity extends ActionBarActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (MusicUtils.isRemotePlayback()) {
+        if (mMusicService.isRemotePlayback().toBlocking().first()) {
             double increment = 0;
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 increment = 0.05;
@@ -236,8 +236,8 @@ public class BaseActivity extends ActionBarActivity {
         public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
             //
             if (!mTransientNetworkDisconnection) {
-                if (MusicUtils.isPlaying()) {
-                    MusicUtils.playOrPause();
+                if (mMusicService.isPlaying().toBlocking().first()) {
+                    mMusicService.playOrPause();
                 }
                 CastUtils.notifyRouteUnselected();
             }

@@ -89,7 +89,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mEqualizer) {
-            int sessionId = mMusicService.getAudioId().toBlocking().first();
+            int sessionId = mMusicService.getAudioSessionId().toBlocking().first();
             if (sessionId == ERROR_BAD_VALUE) {
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.error)

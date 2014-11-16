@@ -75,8 +75,6 @@ public final class MusicUtils {
 
     private static int sForegroundActivities = 0;
 
-    private static final WeakHashMap<Context, ServiceBinder> mConnectionMap;
-
     private static final long[] sEmptyList;
     private static final Song[] sEmptySongList;
     private static final LocalSong[] sEmptyLocalSongList;
@@ -84,7 +82,6 @@ public final class MusicUtils {
     private static ContentValues[] mContentValuesCache = null;
 
     static {
-        mConnectionMap = new WeakHashMap<Context, ServiceBinder>();
         sEmptyList = new long[0];
         sEmptySongList = new Song[0];
         sEmptyLocalSongList = new LocalSong[0];
@@ -92,101 +89,6 @@ public final class MusicUtils {
 
     /* This class is never initiated */
     public MusicUtils() {
-    }
-
-    /**
-     * @param context The {@link Context} to use
-     * @param callback The {@link ServiceConnection} to use
-     * @return The new instance of {@link ServiceToken}
-     */
-    public static final ServiceToken bindToService(final Context context,
-            final ServiceConnection callback) {
-        final ContextWrapper contextWrapper;
-        if (context instanceof Activity) {
-            Activity realActivity = ((Activity)context).getParent();
-            if (realActivity == null) {
-                realActivity = (Activity) context;
-            }
-            contextWrapper = new ContextWrapper(realActivity);
-        } else {
-            contextWrapper = new ContextWrapper(context);
-        }
-        contextWrapper.startService(new Intent(contextWrapper, MusicPlaybackService.class));
-        final ServiceBinder binder = new ServiceBinder(callback);
-        if (contextWrapper.bindService(
-                new Intent().setClass(contextWrapper, MusicPlaybackService.class), binder, 0)) {
-            mConnectionMap.put(contextWrapper, binder);
-            return new ServiceToken(contextWrapper);
-        }
-        return null;
-    }
-
-    /**
-     * @param token The {@link ServiceToken} to unbind from
-     */
-    public static void unbindFromService(final ServiceToken token) {
-        if (token == null) {
-            return;
-        }
-        final ContextWrapper mContextWrapper = token.mWrappedContext;
-        final ServiceBinder mBinder = mConnectionMap.remove(mContextWrapper);
-        if (mBinder == null) {
-            return;
-        }
-        mContextWrapper.unbindService(mBinder);
-        if (mConnectionMap.isEmpty()) {
-            sService = null;
-        }
-    }
-
-    public static final class ServiceBinder implements ServiceConnection {
-        private final ServiceConnection mCallback;
-
-        /**
-         * Constructor of <code>ServiceBinder</code>
-         *
-         * @param context The {@link ServiceConnection} to use
-         */
-        public ServiceBinder(final ServiceConnection callback) {
-            mCallback = callback;
-        }
-
-        @Override
-        public void onServiceConnected(final ComponentName className, final IBinder service) {
-            sService = IApolloService.Stub.asInterface(service);
-            if (mCallback != null) {
-                mCallback.onServiceConnected(className, service);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(final ComponentName className) {
-            if (mCallback != null) {
-                mCallback.onServiceDisconnected(className);
-            }
-            sService = null;
-        }
-    }
-
-    public static final class ServiceToken {
-        public ContextWrapper mWrappedContext;
-
-        /**
-         * Constructor of <code>ServiceToken</code>
-         *
-         * @param context The {@link ContextWrapper} to use
-         */
-        public ServiceToken(final ContextWrapper context) {
-            mWrappedContext = context;
-        }
-    }
-
-    /**
-     * Used by activity to decide whether it can show error dialogs
-     * @return
-     */
-    public static boolean isForeground() {
-        return sForegroundActivities > 0;
     }
 
     /**

@@ -40,45 +40,69 @@ import android.view.WindowManager;
 import android.widget.RemoteViews;
 
 import com.andrew.apollo.MusicPlaybackService;
+
+import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.AppModule;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
+import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
 import org.opensilk.music.ui2.LauncherActivity;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import dagger.Provides;
+import de.greenrobot.event.EventBus;
+import rx.Observable;
+import rx.Scheduler;
+import rx.functions.Action0;
+import rx.functions.Func6;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
  * Created by drew on 3/31/14.
  */
-public class MusicWidgetService extends Service implements ServiceConnection {
+public class MusicWidgetService extends Service {
+
+    @dagger.Module(addsTo = AppModule.class, injects = MusicWidgetService.class)
+    public static class Module {
+        @Provides @Singleton @Named("activity")
+        public EventBus provideEventBus() {
+            return EventBus.getDefault();
+        }
+    }
+
+    private static class Meta {
+        ArtInfo artInfo;
+        String artistName;
+        String trackName;
+        int shuffleMode;
+        int repeatMode;
+        boolean isplaying;
+        Bitmap artwork;
+    }
 
     public static final String WIDGET_TYPE = "widget_type";
 
     public static final int STYLE_LARGE_ONE = 0;
     public static final int STYLE_LARGE_TWO = 1;
 
-    private Looper mUpdateLooper;
-    private Handler mUpdateHandler;
-    private Deque<Runnable> mPendingUpdates = new ArrayDeque<>(4);
+    @Inject MusicServiceConnection mMusicService;
 
-    private boolean isBound = false;
-    private MusicUtils.ServiceToken mToken;
+    private Scheduler.Worker mUpdateWorker;
 
     private AppWidgetManager mAppWidgetManager;
     private ArtworkProviderUtil mArtworkProvider;
     private ThemeHelper mThemeHelper;
 
-    private String mArtistName;
-    private String mTrackName;
-    private int mShuffleMode;
-    private int mRepeatMode;
-    private boolean mIsPlaying;
-    private Bitmap mArtwork;
     private int mAllocUpperBound;
 
     @Override
@@ -89,31 +113,24 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     @Override
     //@DebugLog
     public void onCreate() {
+        Timber.v("onCreate()");
         super.onCreate();
-        mToken = MusicUtils.bindToService(this, this);
+        ((DaggerInjector)getApplication()).getObjectGraph().plus(new Module()).inject(this);
+        mMusicService.bind();
         mAppWidgetManager = AppWidgetManager.getInstance(this);
         mArtworkProvider = new ArtworkProviderUtil(this);
         mThemeHelper = ThemeHelper.getInstance(this);
-        HandlerThread thread = new HandlerThread("WidgetService", Process.THREAD_PRIORITY_BACKGROUND);
-        thread.start();
-        // All widget updates are posted here to prevent blocking the main thread,
-        // This mostly has to be done for bootup and reinstalls since the widget
-        // might request an update before our content provider is ready
-        // if we call into the ArtworkProvider /from/ the main thread we will prevent
-        // the ArtworkService from starting.
-        mUpdateLooper = thread.getLooper();
-        if (mUpdateLooper != null) {
-            mUpdateHandler = new Handler(mUpdateLooper);
-        }
+        mUpdateWorker = Schedulers.newThread().createWorker();
         mAllocUpperBound = computeMaximumWidgetBitmapMemory();
     }
 
     @Override
     //@DebugLog
     public void onDestroy() {
+        Timber.v("onDestroy()");
         super.onDestroy();
-        MusicUtils.unbindFromService(mToken);
-        mUpdateLooper.quit();
+        mMusicService.unbind();
+        mUpdateWorker.unsubscribe();
     }
 
     @Override
@@ -123,17 +140,12 @@ public class MusicWidgetService extends Service implements ServiceConnection {
             final int appId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
             final int widgetType = intent.getIntExtra(WIDGET_TYPE, -1);
             if (appId != -1 && widgetType != -1) {
-                final Runnable update = new Runnable() {
+                mUpdateWorker.schedule(new Action0() {
                     @Override
-                    public void run() {
+                    public void call() {
                         updateWidget(appId, startId, widgetType);
                     }
-                };
-                if (isBound) {
-                    mUpdateHandler.post(update);
-                } else {
-                    mPendingUpdates.add(update);
-                }
+                });
             }
         }
         return START_NOT_STICKY;
@@ -141,30 +153,50 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
     //@DebugLog
     private void updateWidget(int appId, int startId, int widgetType) {
-        String albumName = MusicUtils.getAlbumName();
-        String albumArtistName = MusicUtils.getAlbumArtistName();
-        if (TextUtils.isEmpty(albumArtistName)) {
-            albumArtistName = MusicUtils.getArtistName();
+        Meta meta;
+        try {
+            meta = Observable.zip(
+                    mMusicService.getCurrentArtInfo(),
+                    mMusicService.getArtistName(),
+                    mMusicService.getTrackName(),
+                    mMusicService.getShuffleMode(),
+                    mMusicService.getRepeatMode(),
+                    mMusicService.isPlaying(),
+                    new Func6<ArtInfo, String, String, Integer, Integer, Boolean, Meta>() {
+                        @Override
+                        public Meta call(ArtInfo artInfo, String s, String s2,
+                                         Integer integer, Integer integer2, Boolean aBoolean) {
+                            Meta meta = new Meta();
+                            meta.artInfo = artInfo;
+                            meta.artistName = s;
+                            meta.trackName = s2;
+                            meta.shuffleMode = integer;
+                            meta.repeatMode = integer2;
+                            meta.isplaying = aBoolean;
+                            meta.artwork = mArtworkProvider.getArtworkThumbnail(meta.artInfo.artistName, meta.artInfo.albumName);
+                            return meta;
+                        }
+                    }
+            ).toBlocking().first();
+        } catch (Exception e) {
+            stopSelf(startId); //Will shut us down when last item is processed
+            return;
         }
-        mArtistName = MusicUtils.getArtistName();
-        mTrackName = MusicUtils.getTrackName();
-        mShuffleMode = MusicUtils.getShuffleMode();
-        mRepeatMode = MusicUtils.getRepeatMode();
-        mIsPlaying = MusicUtils.isPlaying();
-        mArtwork = mArtworkProvider.getArtworkThumbnail(albumArtistName, albumName);
-        final int bitmapSize = getBitmapSize(mArtwork);
+        final int bitmapSize = getBitmapSize(meta.artwork);
         Timber.i("Artwork size = %d, allocSize = %d, free = %d", bitmapSize, mAllocUpperBound, mAllocUpperBound - bitmapSize);
         if (bitmapSize >= mAllocUpperBound) {
             Timber.i("Artwork too large: %d > %d", bitmapSize, mAllocUpperBound);
             try {
-                Bitmap tmp = Bitmap.createScaledBitmap(mArtwork, mArtwork.getWidth()/2, mArtwork.getHeight()/2, false);
+                Bitmap tmp = meta.artwork;
+                meta.artwork = Bitmap.createScaledBitmap(tmp, meta.artwork.getWidth()/2, meta.artwork.getHeight()/2, false);
                 Timber.i("Artwork scaled down: new size = %d", getBitmapSize(tmp));
-                mArtwork = tmp;
+                if (meta.artwork != tmp) tmp.recycle();
             } catch (OutOfMemoryError e) {
+                stopSelf(startId); //Will shut us down when last item is processed
                 return;
             }
         }
-        RemoteViews views = createView(appId, widgetType);
+        RemoteViews views = createView(appId, widgetType, meta);
         if (views != null) {
             try {
                 mAppWidgetManager.updateAppWidget(appId, views);
@@ -178,7 +210,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
     /*
      * Create views depending on size, and style
      */
-    public RemoteViews createView(int appId, int widgetType) {
+    public RemoteViews createView(int appId, int widgetType, Meta meta) {
         final MusicWidget widget = MusicWidget.valueOf(widgetType);
         int layoutId = -1;
         switch (widget) {
@@ -210,8 +242,8 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         RemoteViews views = new RemoteViews(getPackageName(), layoutId);
 
         /* Album artwork -- set for all widgets */
-        if (mArtwork != null) {
-            views.setImageViewBitmap(R.id.widget_album_art, mArtwork);
+        if (meta.artwork != null) {
+            views.setImageViewBitmap(R.id.widget_album_art, meta.artwork);
         } else {
             views.setImageViewResource(R.id.widget_album_art, R.drawable.default_artwork);
         }
@@ -222,7 +254,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         }
 
         /* Pause / Play -- set for all widgets */
-        views.setImageViewResource(R.id.widget_play, mIsPlaying ?
+        views.setImageViewResource(R.id.widget_play, meta.isplaying ?
                 R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
         views.setOnClickPendingIntent(R.id.widget_play, buildPendingIntent(MusicPlaybackService.TOGGLEPAUSE_ACTION));
 
@@ -234,8 +266,8 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
         /* Artist name and song title */
         if (widget.compareTo(MusicWidget.SMALL) >= 0) { //Small, Large
-            views.setTextViewText(R.id.widget_artist_name, mArtistName);
-            views.setTextViewText(R.id.widget_song_title, mTrackName);
+            views.setTextViewText(R.id.widget_artist_name, meta.artistName);
+            views.setTextViewText(R.id.widget_song_title, meta.trackName);
         }
 
         /* Shuffle / Repeat */
@@ -245,7 +277,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
 
             Drawable drawable;
 
-            switch (mShuffleMode) {
+            switch (meta.shuffleMode) {
                 case MusicPlaybackService.SHUFFLE_NONE:
                     drawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_white);
                     break;
@@ -259,7 +291,7 @@ public class MusicWidgetService extends Service implements ServiceConnection {
                 drawable = null;
             }
 
-            switch (mRepeatMode) {
+            switch (meta.repeatMode) {
                 case MusicPlaybackService.REPEAT_ALL:
                     drawable = mThemeHelper.getPrimaryColorRepeatButtonDrawable();
                     break;
@@ -298,25 +330,6 @@ public class MusicWidgetService extends Service implements ServiceConnection {
         } else {
             return bitmap.getByteCount();
         }
-    }
-
-    /*
-     * Service Connection callbacks
-     */
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        isBound = true;
-        while (mPendingUpdates.peek() != null) {
-            mUpdateHandler.post(mPendingUpdates.poll());
-        }
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
-        isBound = false;
-        mToken = null;
-        // Nothing to do, just shutdown and wait for next update
-        stopSelf();
     }
 
 }

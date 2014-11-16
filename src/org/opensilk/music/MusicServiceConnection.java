@@ -126,6 +126,11 @@ public class MusicServiceConnection {
         unbind();
     }
 
+    void onRemoteException(RemoteException e) {
+        Timber.e(e, "MusicServiceConnection");
+        unbind();
+    }
+
     Observable<IApolloService> getObservable() {
         ensureConnection();
         // NOTE: onServiceConnected() is called from main thread
@@ -190,8 +195,8 @@ public class MusicServiceConnection {
                 try {
                     iApolloService.next();
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -223,7 +228,7 @@ public class MusicServiceConnection {
                     iApolloService.enqueue(providerIds, where);
                     eventBus.post(new MakeToast(R.plurals.NNNtrackstoqueue, providerIds.length));
                 } catch (RemoteException e) {
-                    unbind();
+                    onRemoteException(e);
                     eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
@@ -238,7 +243,7 @@ public class MusicServiceConnection {
                     iApolloService.enqueue(recentIds, where);
                     eventBus.post(new MakeToast(R.plurals.NNNtrackstoqueue, recentIds.length));
                 } catch (RemoteException e) {
-                    unbind();
+                    onRemoteException(e);
                     eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
@@ -257,8 +262,8 @@ public class MusicServiceConnection {
                         iApolloService.play();
                     }
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -283,8 +288,8 @@ public class MusicServiceConnection {
                             break;
                     }
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -310,8 +315,8 @@ public class MusicServiceConnection {
                             iApolloService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
                     }
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -324,8 +329,8 @@ public class MusicServiceConnection {
                 try {
                     iApolloService.removeTrack(id);
                 } catch (RemoteException e) {
-                    unbind();
-                    // TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -338,8 +343,8 @@ public class MusicServiceConnection {
                 try {
                     iApolloService.removeTracks(first, last);
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -352,8 +357,8 @@ public class MusicServiceConnection {
                 try {
                     iApolloService.moveQueueItem(from, to);
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -366,8 +371,8 @@ public class MusicServiceConnection {
                 try {
                     iApolloService.setQueuePosition(pos);
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
@@ -384,77 +389,92 @@ public class MusicServiceConnection {
                 try {
                     iApolloService.setShuffleMode(MusicPlaybackService.SHUFFLE_AUTO);
                 } catch (RemoteException e) {
-                    unbind();
-                    //TODO
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
                 }
             }
         });
     }
 
     public Observable<Boolean> isPlaying() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Boolean>>() {
+        return getObservable().map(new Func1<IApolloService, Boolean>() {
             @Override
-            public Observable<Boolean> call(IApolloService iApolloService) {
-                Timber.v("isPlaying %s", Thread.currentThread().getName());
+            public Boolean call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.isPlaying());
+                    return iApolloService.isPlaying();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
     public Observable<long[]> getQueue() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<long[]>>() {
+        return getObservable().map(new Func1<IApolloService, long[]>() {
             @Override
-            public Observable<long[]> call(IApolloService iApolloService) {
+            public long[] call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.getQueue());
-                } catch (Exception e) {
-                    return Observable.error(e);
+                    return iApolloService.getQueue();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
     public Observable<Long> getDuration() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
+        return getObservable().map(new Func1<IApolloService, Long>() {
             @Override
-            public Observable<Long> call(IApolloService iApolloService) {
-//                Timber.v("getDuration %s", Thread.currentThread().getName());
+            public Long call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.duration());
+                    return iApolloService.duration();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
     public Observable<Long> getPosition() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Long>>() {
+        return getObservable().map(new Func1<IApolloService, Long>() {
             @Override
-            public Observable<Long> call(IApolloService iApolloService) {
-//                Timber.v("getPosition %s", Thread.currentThread().getName());
+            public Long call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.position());
+                    return iApolloService.position();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
-    public Observable<Integer> getAudioId() {
-        return getObservable().map(new Func1<IApolloService, Integer>() {
+    public Observable<Long> getAudioId() {
+        return getObservable().map(new Func1<IApolloService, Long>() {
             @Override
-            public Integer call(IApolloService iApolloService) {
+            public Long call(IApolloService iApolloService) {
                 Timber.v("getAudioId %s", Thread.currentThread().getName());
                 try {
-                    return (int) iApolloService.getAudioId();
+                    return iApolloService.getAudioId();
                 } catch (RemoteException e) {
-                    unbind();
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
+    public Observable<String> getAlbumName() {
+        return getObservable().map(new Func1<IApolloService, String>() {
+            @Override
+            public String call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.getAlbumName();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
                     throw rethrow(e);
                 }
             }
@@ -462,70 +482,98 @@ public class MusicServiceConnection {
     }
 
     public Observable<String> getArtistName() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<String>>() {
+        return getObservable().map(new Func1<IApolloService, String>() {
             @Override
-            public Observable<String> call(IApolloService iApolloService) {
-                Timber.v("getArtistName %s", Thread.currentThread().getName());
+            public String call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.getArtistName());
+                    return iApolloService.getArtistName();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
     public Observable<String> getTrackName() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<String>>() {
+        return getObservable().map(new Func1<IApolloService, String>() {
             @Override
-            public Observable<String> call(IApolloService iApolloService) {
-                Timber.v("getTrackName %s", Thread.currentThread().getName());
+            public String call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.getTrackName());
+                    return iApolloService.getTrackName();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
     public Observable<Integer> getShuffleMode() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Integer>>() {
+        return getObservable().map(new Func1<IApolloService, Integer>() {
             @Override
-            public Observable<Integer> call(IApolloService iApolloService) {
-                Timber.v("getShuffleMode %s", Thread.currentThread().getName());
+            public Integer call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.getShuffleMode());
+                    return iApolloService.getShuffleMode();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
     public Observable<Integer> getRepeatMode() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<Integer>>() {
+        return getObservable().map(new Func1<IApolloService, Integer>() {
             @Override
-            public Observable<Integer> call(IApolloService iApolloService) {
-                Timber.v("getRepeatMode %s", Thread.currentThread().getName());
+            public Integer call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.getRepeatMode());
+                    return iApolloService.getRepeatMode();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
     }
 
     public Observable<ArtInfo> getCurrentArtInfo() {
-        return getObservable().flatMap(new Func1<IApolloService, Observable<ArtInfo>>() {
+        return getObservable().map(new Func1<IApolloService, ArtInfo>() {
             @Override
-            public Observable<ArtInfo> call(IApolloService iApolloService) {
-                Timber.v("getCurrentArtInfo %s", Thread.currentThread().getName());
+            public ArtInfo call(IApolloService iApolloService) {
                 try {
-                    return Observable.just(iApolloService.getCurrentArtInfo());
+                    return iApolloService.getCurrentArtInfo();
                 } catch (RemoteException e) {
-                    return Observable.error(e);
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Integer> getAudioSessionId() {
+        return getObservable().map(new Func1<IApolloService, Integer>() {
+            @Override
+            public Integer call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.getAudioSessionId();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Boolean> isRemotePlayback() {
+        return getObservable().map(new Func1<IApolloService, Boolean>() {
+            @Override
+            public Boolean call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.isRemotePlayback();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
                 }
             }
         });
