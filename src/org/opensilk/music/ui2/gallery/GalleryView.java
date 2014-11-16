@@ -20,23 +20,29 @@ package org.opensilk.music.ui2.gallery;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.MortarContextFactory;
+import org.opensilk.common.mortarflow.MortarPagerAdapter;
 import org.opensilk.common.util.ViewUtils;
 import org.opensilk.common.widget.SlidingTabLayout;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -52,12 +58,9 @@ import timber.log.Timber;
  */
 public class GalleryView extends LinearLayout {
 
-    @Inject
-    GalleryScreen.Presenter presenter;
-    @InjectView(R.id.tab_bar)
-    SlidingTabLayout tabBar;
-    @InjectView(R.id.pager)
-    ViewPager viewPager;
+    @Inject GalleryScreen.Presenter presenter;
+    @InjectView(R.id.tab_bar) SlidingTabLayout tabBar;
+    @InjectView(R.id.pager) ViewPager viewPager;
 
     public GalleryView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -96,69 +99,46 @@ public class GalleryView extends LinearLayout {
         super.onRestoreInstanceState(state);
     }
 
-
     public void setup(List<GalleryPage> galleryPages, int startPage) {
-        Adapter adapter = new Adapter(galleryPages);
+        Adapter adapter = new Adapter(getContext(), presenter, galleryPages);
         viewPager.setAdapter(adapter);
         tabBar.setViewPager(viewPager);
         viewPager.setCurrentItem(startPage);
     }
 
-    class Adapter extends PagerAdapter {
-        private final MortarContextFactory contextFactory = new MortarContextFactory();
-        private final List<GalleryPage> galleryPages;
-        private final Set<Page> activePages;
-        private Bundle savedState;
+    static class Adapter extends MortarPagerAdapter<Screen, GalleryPageView> {
         private Object mCurrentPrimaryItem;
+        private List<Integer> titles;
+        private GalleryScreen.Presenter presenter;
 
-        private class Page {
-            Screen screen;
-            GalleryPageView view;
-            private Page(Screen screen, GalleryPageView view) {
-                this.screen = screen;
-                this.view = view;
+        Adapter(Context context, GalleryScreen.Presenter presenter, List<GalleryPage> pages) {
+            super(context, extractScreens(pages));
+            this.presenter = presenter;
+            titles = extractTitles(pages);
+        }
+
+        static List<Screen> extractScreens(List<GalleryPage> pages) {
+            List<Screen> sceens = new ArrayList<>(pages.size());
+            for (GalleryPage p : pages) {
+                sceens.add(p.screen);
             }
+            return sceens;
         }
 
-        public Adapter(GalleryPage[] galleryPages) {
-            this(Arrays.asList(galleryPages));
-        }
-
-        public Adapter(List<GalleryPage> galleryPages) {
-            this.galleryPages = galleryPages;
-            this.activePages = new LinkedHashSet<>(galleryPages.size());
-            this.savedState = new Bundle(galleryPages.size());
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            GalleryPage page = galleryPages.get(position);
-            Screen screen = page.screen;
-            Timber.v("instantiateItem %s", screen.getName());
-            Context newChildContext = contextFactory.setUpContext(screen, getContext());
-            final GalleryPageView newChild = ViewUtils.inflate(newChildContext, R.layout.gallery_page, container, false);
-            ViewUtils.restoreState(newChild, savedState, screen.getName());
-            container.addView(newChild);
-            Page newPage = new Page(screen, newChild);
-            activePages.add(newPage);
-            return newPage;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            Page oldPage = (Page) object;
-            Timber.v("destroyItem %s", oldPage.screen.getName());
-            activePages.remove(oldPage);
-            ViewUtils.saveState(oldPage.view, savedState, oldPage.screen.getName());
-            contextFactory.tearDownContext(oldPage.view.getContext());
-            container.removeView(oldPage.view);
+        //TODO annotate screens instead
+        static List<Integer> extractTitles(List<GalleryPage> pages) {
+            List<Integer> titles = new ArrayList<>(pages.size());
+            for (GalleryPage p : pages) {
+                titles.add(p.titleResource);
+            }
+            return titles;
         }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             if (object != mCurrentPrimaryItem) {
                 Page currentPage = (Page) object;
-                ViewPresenter<GalleryPageView> childPresenter = currentPage.view.getPresenter();
+                ViewPresenter<GalleryPageView> childPresenter = ((GalleryPageView) currentPage.view).getPresenter();
                 ActionBarOwner.MenuConfig menuConfig = null;
                 if (childPresenter != null && childPresenter instanceof HasOptionsMenu) {
                     menuConfig = ((HasOptionsMenu) childPresenter).getMenuConfig();
@@ -169,35 +149,10 @@ public class GalleryView extends LinearLayout {
         }
 
         @Override
-        public int getCount() {
-            return galleryPages.size();
-        }
-
-        @Override
-        public boolean isViewFromObject(android.view.View view, Object o) {
-            return view.equals(((Page) o).view);
-        }
-
-        @Override
         public CharSequence getPageTitle(int position) {
-            return getContext().getString(galleryPages.get(position).titleResource).toUpperCase(Locale.getDefault());
+            return context.getString(titles.get(position)).toUpperCase(Locale.getDefault());
         }
 
-        @Override
-        public Parcelable saveState() {
-            for (Page p : activePages) {
-                ViewUtils.saveState(p.view, savedState, p.screen.getName());
-            }
-            return savedState;
-        }
-
-        @Override
-        public void restoreState(Parcelable state, ClassLoader loader) {
-            if (state == null || !(state instanceof Bundle)) return;
-            Bundle b = (Bundle) state;
-            b.setClassLoader(loader);
-            savedState = b;
-        }
     }
 
 }

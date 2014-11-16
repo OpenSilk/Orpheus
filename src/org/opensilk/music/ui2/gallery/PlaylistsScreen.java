@@ -38,6 +38,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import flow.Layout;
 import mortar.ViewPresenter;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -45,6 +46,7 @@ import rx.functions.Action1;
 /**
  * Created by drew on 10/19/14.
  */
+@Layout(R.layout.gallery_page)
 @WithModule(PlaylistsScreen.Module.class)
 public class PlaylistsScreen extends Screen {
 
