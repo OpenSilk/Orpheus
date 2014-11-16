@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.OrpheusApi;
@@ -33,11 +34,11 @@ public class SettingsActivity extends BaseActivity implements DaggerInjector {
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
-        boolean light = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
-        setTheme(light ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
-
         mGraph = ((DaggerInjector) getApplication()).getObjectGraph().plus(new Module());
         inject(this);
+
+        boolean lightTheme = !mSettings.isDarkTheme();
+        setTheme(lightTheme ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
 
         super.onCreate(savedInstanceState);
 

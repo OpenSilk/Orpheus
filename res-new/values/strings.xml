@@ -50,6 +50,9 @@
     <string name="settings_theme_category">Theme</string>
     <string name="settings_dark_theme">Use dark themes</string>
     <string name="settings_pick_theme">Select a theme</string>
+    <!-- interface theme picker activity -->
+    <string name="settings_theme_preview">Theme Preview</string>
+    <string name="settings_theme_picker_help">Swipe to change.</string>
     <string name="settings_msg_restart_app">Orpheus will now restart to apply changes.</string>
     <!-- interface visualizations -->
     <string name="settings_visualizations_category">Visualizations</string>

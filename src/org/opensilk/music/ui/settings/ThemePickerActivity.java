@@ -39,6 +39,7 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.mortarflow.MortarPagerAdapter;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.theme.OrpheusTheme;
@@ -71,18 +72,16 @@ public class ThemePickerActivity extends BaseMortarActivity {
         }
     }
 
-    @dagger.Module(includes = {
-            BaseMortarActivity.Module.class,
-    }, injects = ThemePickerActivity.class)
+    @dagger.Module(includes = BaseMortarActivity.Module.class, injects = ThemePickerActivity.class)
     public static class Module {
 
     }
 
+    static final String EXTRA_PICKED_THEME = "picked_theme";
+
     @InjectView(R.id.pager) ViewPager mPager;
 
     Adapter mAdapter;
-
-    boolean mLightTheme;
     OrpheusTheme mNewTheme;
 
     @Override
@@ -91,20 +90,24 @@ public class ThemePickerActivity extends BaseMortarActivity {
     }
 
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        mLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
-        setTheme(mLightTheme ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
+    protected void setupTheme() {
+        boolean lightTheme = !mSettings.isDarkTheme();
+        setTheme(lightTheme ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
+    }
 
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.settings_theme_picker);
         ButterKnife.inject(this);
 
+        OrpheusTheme currentTheme = mSettings.getTheme();
         List<PageScreen> screens = new ArrayList<>(OrpheusTheme.values().length);
         for (OrpheusTheme t : OrpheusTheme.values()) {
             screens.add(new PageScreen(t));
         }
-        mAdapter = new Adapter(this, screens, mLightTheme);
+        mAdapter = new Adapter(this, screens, !mSettings.isDarkTheme());
         mPager.setAdapter(mAdapter);
         mPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override public void onPageScrolled(int i, float v, int i2) { }
@@ -113,6 +116,7 @@ public class ThemePickerActivity extends BaseMortarActivity {
                 updateTheme(i);
             }
         });
+        mPager.setCurrentItem(currentTheme.ordinal());
 
         setResult(RESULT_CANCELED, new Intent());
 
@@ -120,17 +124,19 @@ public class ThemePickerActivity extends BaseMortarActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        onCancel();
         return true;
     }
 
     @OnClick(R.id.btn_negative) void onCancel() {
-        setResult(RESULT_CANCELED);
+        setResult(RESULT_CANCELED, new Intent());
         finish();
     }
 
     @OnClick(R.id.btn_positive) void onOk() {
-        setResult(RESULT_OK);
+        setResult(RESULT_OK,
+                new Intent().putExtra(EXTRA_PICKED_THEME, mNewTheme.toString())
+        );
         finish();
     }
 

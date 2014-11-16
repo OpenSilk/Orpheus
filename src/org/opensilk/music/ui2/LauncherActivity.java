@@ -43,6 +43,7 @@ import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.bus.events.IABQueryResult;
 import org.opensilk.music.dialogs.SleepTimerDialog;
 import org.opensilk.music.iab.IabUtil;
+import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
@@ -100,6 +101,12 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     }
 
     @Override
+    protected void setupTheme() {
+        OrpheusTheme orpheusTheme = mSettings.getTheme();
+        setTheme(mSettings.isDarkTheme() ? orpheusTheme.dark : orpheusTheme.light);
+    }
+
+    @Override
     public Screen getDefaultScreen() {
         return new GalleryScreen();
     }
@@ -111,7 +118,6 @@ public class LauncherActivity extends BaseSwitcherActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(ThemeHelper.getInstance(this).getTheme());
         super.onCreate(savedInstanceState);
 
         mDrawerOwner.takeView(this);

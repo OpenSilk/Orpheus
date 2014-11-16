@@ -18,6 +18,7 @@
 
 <org.opensilk.music.ui2.main.MainView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mainview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -27,13 +28,16 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:layout_alignParentTop="true"
+        app:title="@string/settings_theme_preview"
         style="?toolbarTheme"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Theme Preview"/>
+        android:gravity="center"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:text="@string/settings_theme_picker_help"/>
 
     <include layout="@layout/footer"
              android:layout_width="match_parent"

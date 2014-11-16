@@ -85,12 +85,16 @@ public class BaseMortarActivity extends BaseActivity implements PauseAndResumeAc
         throw new UnsupportedOperationException("Subclass must override getBlueprint()");
     }
 
+    protected void setupTheme() {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mActivityScope = Mortar.requireActivityScope(Mortar.getScope(getApplication()), getBlueprint(getScopeName()));
         mActivityScope.onCreate(savedInstanceState);
         Mortar.inject(this, this); //Must inject before calling super
-
+        setupTheme();
         super.onCreate(savedInstanceState);
 
         mPauseResumePresenter.takeView(this);

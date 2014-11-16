@@ -14,6 +14,7 @@ import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.theme.OrpheusTheme;
 
 import com.andrew.apollo.utils.PreferenceUtils;
 import com.andrew.apollo.utils.ThemeHelper;
@@ -58,6 +59,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         mPrefSet = getPreferenceScreen();
 
         mDarkTheme = (CheckBoxPreference) mPrefSet.findPreference(PREF_DARK_THEME);
+        mDarkTheme.setOnPreferenceChangeListener(this);
 
         mThemePicker = mPrefSet.findPreference(PREF_THEME_PICKER);
         mThemePicker.setOnPreferenceClickListener(this);
@@ -69,7 +71,10 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        if (preference == mHomePages) {
+        if (preference == mDarkTheme) {
+            doRestart();
+            return true;
+        } else if (preference == mHomePages) {
             doRestart();
             return true;
         }
@@ -80,7 +85,6 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mThemePicker) {
             Intent intent = new Intent(getActivity(), ThemePickerActivity.class);
-            intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, !mDarkTheme.isChecked());
             startActivityForResult(intent, 11);
             return false;
         }
@@ -91,7 +95,14 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 11) {
             if (resultCode == Activity.RESULT_OK) {
+                try {
+                    OrpheusTheme orpheusTheme =
+                            OrpheusTheme.valueOf(data.getStringExtra(ThemePickerActivity.EXTRA_PICKED_THEME));
+                    mSettings.putString(AppPreferences.ORPHEUS_THEME, orpheusTheme.toString());
+                    doRestart();
+                } catch (IllegalArgumentException e) {
 
+                }
             }
         }
     }

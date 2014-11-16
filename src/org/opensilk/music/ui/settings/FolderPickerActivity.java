@@ -38,6 +38,7 @@ import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.common.widget.LetterTileDrawable;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.model.Folder;
@@ -82,10 +83,10 @@ public class FolderPickerActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        boolean light = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
-        setTheme(light ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
-
         ((DaggerInjector) getApplication()).getObjectGraph().plus(new Module()).inject(this);
+
+        boolean lightTheme = !mSettings.isDarkTheme();
+        setTheme(lightTheme ? R.style.Theme_Settings_Light : R.style.Theme_Settings_Dark);
 
         super.onCreate(savedInstanceState);
 

@@ -32,6 +32,7 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.util.ViewUtils;
 import org.opensilk.music.R;
+import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
@@ -86,6 +87,12 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
     }
 
     @Override
+    protected void setupTheme() {
+        OrpheusTheme orpheusTheme = mSettings.getTheme();
+        setTheme(mSettings.isDarkTheme() ? orpheusTheme.profileDark : orpheusTheme.profileLight);
+    }
+
+    @Override
     public Screen getDefaultScreen() {
         return new FakeScreen();
     }
@@ -97,8 +104,6 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_Profile_Light);
-
         super.onCreate(savedInstanceState);
 
         setUpButtonEnabled(true);

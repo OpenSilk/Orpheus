@@ -26,6 +26,7 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui2.gallery.GalleryPage;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
@@ -214,6 +215,17 @@ public class AppPreferences {
      * Theme
      */
 
+    public OrpheusTheme getTheme() {
+        try {
+            return OrpheusTheme.valueOf(getString(ORPHEUS_THEME, OrpheusTheme.DEFAULT.toString()));
+        } catch (Exception e) {
+            remove(ORPHEUS_THEME);
+            return OrpheusTheme.DEFAULT;
+        }
+    }
 
+    public boolean isDarkTheme() {
+        return getBoolean(WANT_DARK_THEME, false);
+    }
 
 }
