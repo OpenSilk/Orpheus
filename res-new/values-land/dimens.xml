@@ -16,9 +16,6 @@
   -->
 
 <resources>
-    <!-- Profile -->
-    <dimen name="profile_sticky_header_height">56dp</dimen>
-
     <!-- Daydream -->
     <dimen name="dream_art_size">200dp</dimen>
 

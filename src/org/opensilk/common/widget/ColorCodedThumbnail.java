@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.widgets;
+package org.opensilk.common.widget;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

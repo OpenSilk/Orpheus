@@ -16,7 +16,5 @@
   -->
 
 <resources>
-    <dimen name="listview_marginRight">64dp</dimen>
-    <dimen name="listview_marginLeft">64dp</dimen>
 
 </resources>

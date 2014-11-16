@@ -1,27 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--====Card overrides====-->
-
-    <!-- og 96dp -->
-    <dimen name="card_base_empty_height">60dp</dimen>
-    <!-- og 3dp -->
-    <dimen name="card_shadow_height">4dp</dimen>
-    <!-- og 8dp -->
-    <dimen name="list_card_padding_left">0dp</dimen>
-    <!-- og 8dp -->
-    <dimen name="list_card_padding_right">0dp</dimen>
-    <!-- og 6dp -->
-    <dimen name="list_card_padding_bottom">0dp</dimen>
-    <!-- og 2dp -->
-    <dimen name="list_card_padding_top">0dp</dimen>
-
-    <!--====Panel====-->
-
+    <!--Panel-->
     <dimen name="panel_header_height">68dp</dimen>
 
-    <!--====Widgets====-->
-
+    <!--Widgets-->
     <dimen name="music_widget_large_min_width">250dp</dimen>
     <dimen name="music_widget_large_min_height">110dp</dimen>
 
@@ -37,25 +20,14 @@
 
     <dimen name="music_widget_mini_button_bar_height">48.0dip</dimen>
     <dimen name="music_widget_large_button_bar_width">48.0dip</dimen>
+    <!--end Widgets-->
 
-    <!--====Daydream====-->
-
+    <!--Daydream-->
     <dimen name="dream_art_size">300dp</dimen>
-
-    <!--====Drawer====-->
 
     <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
      https://developer.android.com/design/patterns/navigation-drawer.html -->
     <dimen name="navigation_drawer_width">280dp</dimen>
-
-    <!--====Profile====-->
-
-    <dimen name="profile_sticky_header_height">72dp</dimen>
-
-    <!--====Lists====-->
-
-    <dimen name="listview_marginRight">0dp</dimen>
-    <dimen name="listview_marginLeft">0dp</dimen>
 
     <dimen name="action_bar_double_height">112dp</dimen>
 

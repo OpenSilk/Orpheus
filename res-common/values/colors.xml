@@ -44,6 +44,7 @@
     <color name="letter_tile_default_color">#cccccc</color>
     <color name="letter_tile_font_color">#ffffff</color>
 
+    <!-- Colors for colorcoded thumbnail -->
     <color name="blue">#0000B4</color>
     <color name="red_violet">#AF0D66</color>
     <color name="green_yellow">#92F846</color>
