@@ -793,7 +793,7 @@ public class MusicPlaybackService extends Service {
     private void updateNotification() {
         if (!mAnyActivityInForeground && isPlaying()) {
             mNotificationHelper.buildNotification(getAlbumName(), getArtistName(),
-                    getTrackName(), getAlbumArtThumbnail(), isPlaying());
+                    getTrackName(), getAlbumArtThumbnail(), isPlaying(), mMediaSessionHelper.getSessionToken());
         } else if (mAnyActivityInForeground) {
             mNotificationHelper.killNotification();
         }
@@ -1413,7 +1413,7 @@ public class MusicPlaybackService extends Service {
                 list[i] = mAutoShuffleList[idx];
             }
             ensurePlayListCapacity(mPlayListLen + list.length);
-            Song[] songs = MusicUtils.getLocalSongList(this, list);
+            Song[] songs = CursorHelpers.getSongsFromId(this, list);
             for (Song s : songs) {
                 long id = MusicProviderUtil.insertSong(this, s);
                 mPlayList[mPlayListLen++] = id;

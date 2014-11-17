@@ -4,12 +4,15 @@ package org.opensilk.music.ui2.loader;
 import android.content.Context;
 import android.database.AbstractCursor;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.Uris;
 
 import java.util.Arrays;
 
@@ -32,6 +35,11 @@ public class OrderPreservingCursor extends AbstractCursor {
 
     private Cursor mDelegateCursor;
 
+    private Uri mUri;
+    private String[] mProjection;
+    private String mSelection;
+    private String[] mSelectionArgs;
+
     /**
      * Constructor of <code>NowPlayingCursor</code>
      *
@@ -41,6 +49,23 @@ public class OrderPreservingCursor extends AbstractCursor {
         super();
         mContext = context;
         mQuery = ids;
+        mUri = Uris.EXTERNAL_MEDIASTORE_MEDIA;
+        mProjection= Projections.LOCAL_SONG;
+        mSelection = Selections.LOCAL_SONG + " AND ";
+        mSelectionArgs = SelectionArgs.LOCAL_SONG;
+        makeNowPlayingCursor();
+    }
+
+    public OrderPreservingCursor(Context context, long[] ids,
+                                 Uri uri, String[] projection,
+                                 String selection, String[] selectionArgs) {
+        super();
+        mContext = context;
+        mQuery = ids;
+        mUri = uri;
+        mProjection = projection;
+        mSelection = !TextUtils.isEmpty(selection) ? selection + " AND " : "";
+        mSelectionArgs = selectionArgs;
         makeNowPlayingCursor();
     }
 
@@ -156,7 +181,7 @@ public class OrderPreservingCursor extends AbstractCursor {
      */
     @Override
     public String[] getColumnNames() {
-        return Projections.LOCAL_SONG;
+        return mProjection;
     }
 
     /**
@@ -219,10 +244,10 @@ public class OrderPreservingCursor extends AbstractCursor {
         }
 
         mDelegateCursor = mContext.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG + " AND " + selection.toString(),
-                SelectionArgs.LOCAL_SONG,
+                mUri,
+                mProjection,
+                mSelection + selection.toString(),
+                mSelectionArgs,
                 BaseColumns._ID);
 
         if (mDelegateCursor == null) {

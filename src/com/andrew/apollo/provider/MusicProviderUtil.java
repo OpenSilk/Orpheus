@@ -16,18 +16,29 @@
 
 package com.andrew.apollo.provider;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaDescription;
+import android.media.session.MediaSession;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.BaseColumns;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.RecentSong;
 
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui2.loader.OrderPreservingCursor;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.Selections;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by drew on 6/26/14.
@@ -100,6 +111,28 @@ public class MusicProviderUtil {
                         new String[]{ String.valueOf(id) });
             } catch (Exception ignored) {} // This isnt that important so just dont crash
         }
+    }
+
+    @DebugLog @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static List<MediaSession.QueueItem> buildQueueList(Context context, long[] songs) {
+        List<MediaSession.QueueItem> list = new ArrayList<>(15);
+        if (songs.length == 0) return list;
+        OrderPreservingCursor c = new OrderPreservingCursor(context, songs,
+                MusicProvider.RECENTS_URI, Projections.RECENT_SONGS, "", null);
+        c.moveToFirst();
+        int ii=0;
+        do {
+            list.add(new MediaSession.QueueItem(
+                    new MediaDescription.Builder()
+                        .setTitle(c.getString(c.getColumnIndex(MusicStore.Cols.NAME)))
+                        .setSubtitle(c.getString(c.getColumnIndex(MusicStore.Cols.ARTIST_NAME)))
+                        .setMediaId(c.getString(c.getColumnIndex(MusicStore.Cols.IDENTITY)))
+                        .build(),
+                    songs[ii]
+            ));
+        } while (c.moveToNext() && ++ii<15);
+        c.close();
+        return list;
     }
 
     public static long getIdForSong(Context context, Song song) {

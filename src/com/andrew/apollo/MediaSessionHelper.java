@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.MediaMetadataRetriever;
 import android.media.RemoteControlClient;
@@ -33,7 +34,14 @@ import android.os.*;
 import android.os.Process;
 import android.text.TextUtils;
 
+import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.ApolloUtils;
+import com.andrew.apollo.utils.MusicUtils;
+
+import org.opensilk.music.ui2.LauncherActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.andrew.apollo.MusicPlaybackService.PLAYSTATE_CHANGED;
 import static com.andrew.apollo.MusicPlaybackService.POSITION_CHANGED;
@@ -45,18 +53,15 @@ import static com.andrew.apollo.MusicPlaybackService.QUEUE_CHANGED;
  */
 public class MediaSessionHelper {
 
-    private final HandlerThread mHandlerThread;
     private final Impl IMPL;
 
     public MediaSessionHelper(MusicPlaybackService service) {
-        mHandlerThread = new HandlerThread(getClass().getName(), Process.THREAD_PRIORITY_BACKGROUND);
-        mHandlerThread.start();
         if (ApolloUtils.hasLollipop()) {
-            IMPL = new JellybeanMR2Impl(service, mHandlerThread.getLooper());
+            IMPL = new LollipopImpl(service);
         } else if (ApolloUtils.hasJellyBeanMR2()) {
-            IMPL = new JellybeanMR2Impl(service, mHandlerThread.getLooper());
+            IMPL = new JellybeanMR2Impl(service);
         } else {
-            IMPL = new IceCreamSandwichImpl(service, mHandlerThread.getLooper());
+            IMPL = new IceCreamSandwichImpl(service);
         }
     }
 
@@ -66,7 +71,6 @@ public class MediaSessionHelper {
 
     public void teardown() {
         IMPL.teardown();
-        mHandlerThread.getLooper().quit();
     }
 
     public void updateMeta(String what) {
@@ -77,19 +81,25 @@ public class MediaSessionHelper {
         IMPL.ping();
     }
 
+    public MediaSession.Token getSessionToken() {
+        return IMPL.getMediaToken();
+    }
+
     static abstract class Impl {
         final MusicPlaybackService mService;
-        final Looper mLooper;
 
-        protected Impl(MusicPlaybackService mService, Looper mLooper) {
+        protected Impl(MusicPlaybackService mService) {
             this.mService = mService;
-            this.mLooper = mLooper;
         }
 
         abstract void setup();
         abstract void teardown();
         abstract void updateMeta(String what);
         abstract void ping();
+
+        MediaSession.Token getMediaToken() {
+            return null;
+        }
 
     }
 
@@ -100,8 +110,8 @@ public class MediaSessionHelper {
         ComponentName mMediaButtonReceiverComponent;
         AudioManager mAudioManager;
 
-        IceCreamSandwichImpl(MusicPlaybackService mService, Looper mLooper) {
-            super(mService, mLooper);
+        IceCreamSandwichImpl(MusicPlaybackService mService) {
+            super(mService);
         }
 
         @Override
@@ -152,7 +162,7 @@ public class MediaSessionHelper {
                     // to make sure not to hand out our cache copy
                     Bitmap.Config config = albumArt.getConfig();
                     if (config == null) {
-                        config = Bitmap.Config.RGB_565;
+                        config = Bitmap.Config.ARGB_8888;
                     }
                     albumArt = albumArt.copy(config, false);
                 }
@@ -187,10 +197,11 @@ public class MediaSessionHelper {
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    @SuppressWarnings("deprecation")
     static class JellybeanMR2Impl extends IceCreamSandwichImpl  {
 
-        JellybeanMR2Impl(MusicPlaybackService mService, Looper mLooper) {
-            super(mService, mLooper);
+        JellybeanMR2Impl(MusicPlaybackService mService) {
+            super(mService);
         }
 
         @Override
@@ -226,23 +237,38 @@ public class MediaSessionHelper {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     static class LollipopImpl extends Impl {
-        MusicPlaybackService mService;
         MediaSession mMediaSession;
-        Handler mHandler;
-        MediaMetadata mMetadata;
+        HandlerThread mHandlerThread;
 
-        LollipopImpl(MusicPlaybackService mService, Looper mLooper) {
-            super(mService, mLooper);
+        LollipopImpl(MusicPlaybackService mService) {
+            super(mService);
         }
 
         @Override
         void setup() {
+            mHandlerThread = new HandlerThread(getClass().getName(), Process.THREAD_PRIORITY_BACKGROUND);
+            mHandlerThread.start();
             mMediaSession = new MediaSession(mService, mService.getClass().getName());
+            mMediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS|MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+            mMediaSession.setCallback(new Callback(), new Handler(mHandlerThread.getLooper()));
+            mMediaSession.setMediaButtonReceiver(PendingIntent.getBroadcast(
+                    mService,
+                    1,
+                    new Intent(mService, MediaButtonIntentReceiver.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT
+            ));
+            mMediaSession.setSessionActivity(PendingIntent.getActivity(
+                    mService,
+                    2,
+                    new Intent(mService, LauncherActivity.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT
+            ));
         }
 
         @Override
         void teardown() {
             mMediaSession.release();
+            mHandlerThread.getLooper().quit();
         }
 
         @Override
@@ -250,15 +276,30 @@ public class MediaSessionHelper {
             switch (what) {
                 case PLAYSTATE_CHANGED:
                 case POSITION_CHANGED:
-                    PlaybackState state = new PlaybackState.Builder().setState(
-                            mService.isPlaying() ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED,
-                            mService.position(), 1.0f
-                    ).build();
+                    PlaybackState state = new PlaybackState.Builder()
+                            .setActions(
+                                    PlaybackState.ACTION_PLAY|
+                                    PlaybackState.ACTION_PAUSE|
+                                    PlaybackState.ACTION_SEEK_TO|
+                                    PlaybackState.ACTION_SKIP_TO_NEXT|
+                                    PlaybackState.ACTION_SKIP_TO_PREVIOUS|
+                                    PlaybackState.ACTION_STOP|
+                                    PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM
+                            )
+                            .setActiveQueueItemId(mService.getAudioId())
+                            .setState(
+                                    mService.isPlaying() ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED,
+                                    mService.position(),
+                                    1.0f
+                            )
+                            .build();
                     mMediaSession.setPlaybackState(state);
                     break;
                 case QUEUE_CHANGED:
+                    mMediaSession.setQueue(MusicProviderUtil.buildQueueList(mService, mService.getQueue()));
                     break;
                 case META_CHANGED:
+                    mMediaSession.setMetadata(buildMeta());
                     break;
             }
         }
@@ -268,31 +309,66 @@ public class MediaSessionHelper {
             mMediaSession.setActive(true);
         }
 
-        /*
-        .putString(MediaMetadataRetriever.METADATA_KEY_ARTIST, mService.getArtistName())
-                        .putString(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST,
-                                !TextUtils.isEmpty(mService.getAlbumArtistName()) ? mService.getAlbumArtistName() : mService.getArtistName())
-                        .putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, mService.getAlbumName())
-                        .putString(MediaMetadataRetriever.METADATA_KEY_TITLE, mService.getTrackName())
-                        .putLong(MediaMetadataRetriever.METADATA_KEY_DURATION, mService.duration())
-                        .putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, albumArt)
-         */
+        @Override
+        MediaSession.Token getMediaToken() {
+            return mMediaSession.getSessionToken();
+        }
 
-        void buildMeta() {
-            MediaMetadata m = new MediaMetadata.Builder()
+        MediaMetadata buildMeta() {
+            return new MediaMetadata.Builder()
                     .putString(MediaMetadata.METADATA_KEY_ARTIST, mService.getArtistName())
                     .putString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST,
-                            !TextUtils.isEmpty(mService.getAlbumArtistName()) ? mService.getAlbumArtistName() : mService.getArtistName())
+                            !TextUtils.isEmpty(mService.getAlbumArtistName())
+                                    ? mService.getAlbumArtistName() : mService.getArtistName())
                     .putString(MediaMetadata.METADATA_KEY_ALBUM, mService.getAlbumName())
                     .putString(MediaMetadata.METADATA_KEY_TITLE, mService.getTrackName())
                     .putLong(MediaMetadata.METADATA_KEY_DURATION, mService.duration())
                     .putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI, mService.getArtworkUri().toString())
-
                     .build();
         }
 
         class Callback extends MediaSession.Callback  {
+            @Override
+            public void onPause() {
+                mService.pause();
+            }
 
+            @Override
+            public void onPlay() {
+                mService.play();
+            }
+
+            @Override
+            public void onSeekTo(long pos) {
+                mService.seek(pos);
+            }
+
+            @Override
+            public void onSkipToNext() {
+                mService.gotoNext(true);
+            }
+
+            @Override
+            public void onSkipToPrevious() {
+                MusicUtils.previous(mService);
+            }
+
+            @Override
+            public void onStop() {
+                mService.startService(new Intent(mService, MusicPlaybackService.class)
+                        .setAction(MusicPlaybackService.STOP_ACTION));
+            }
+
+            @Override
+            public void onSkipToQueueItem(long id) {
+                long[] queue = mService.getQueue();
+                for (int ii=0; ii<queue.length; ii++) {
+                    if (queue[ii] == id) {
+                        mService.setQueuePosition(ii);
+                        break;
+                    }
+                }
+            }
         }
 
     }

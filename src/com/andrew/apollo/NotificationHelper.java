@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.session.MediaSession;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -29,6 +30,8 @@ import com.andrew.apollo.utils.ApolloUtils;
 
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.LauncherActivity;
+
+import timber.log.Timber;
 
 /**
  * Builds the notification for Apollo's service. Jelly Bean and higher uses the
@@ -85,10 +88,11 @@ public class NotificationHelper {
      */
     public void buildNotification(final String albumName, final String artistName,
             final String trackName, final Bitmap albumArt,
-            final boolean isPlaying) {
+            final boolean isPlaying, MediaSession.Token mediaToken) {
 
         if (ApolloUtils.hasLollipop()) {
-            Notification.Builder builder = new Notification.Builder(mService)
+            Timber.d("mediaToken=%s", mediaToken);
+            mNotification = new Notification.Builder(mService)
                     .setSmallIcon(R.drawable.stat_notify_music)
                     .setLargeIcon(albumArt)
                     .setContentTitle(trackName)
@@ -99,9 +103,11 @@ public class NotificationHelper {
                     .addAction(getNextAction())
                     .setPriority(Notification.PRIORITY_DEFAULT)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .setShowWhen(false);
-            mNotification = new Notification.MediaStyle(builder)
-                    .setShowActionsInCompactView(1,2)
+                    .setShowWhen(false)
+                    .setStyle(new Notification.MediaStyle()
+                        .setShowActionsInCompactView(1,2)
+                        .setMediaSession(mediaToken)
+                    )
                     .build();
         } else {
             // Default notfication layout
