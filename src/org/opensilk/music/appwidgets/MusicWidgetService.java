@@ -45,11 +45,12 @@ import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.music.AppModule;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
+
+import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
-import org.opensilk.music.ui2.LauncherActivity;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -249,7 +250,7 @@ public class MusicWidgetService extends Service {
         }
         if (widget.compareTo(MusicWidget.ULTRA_MINI) > 0) {
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-                    new Intent(this, LauncherActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                    NavUtils.makeLauncherIntent(this), PendingIntent.FLAG_UPDATE_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_album_art, pendingIntent);
         }
 

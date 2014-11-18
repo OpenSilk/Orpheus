@@ -12,6 +12,7 @@
 package com.andrew.apollo;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -23,7 +24,8 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import org.opensilk.music.ui2.LauncherActivity;
+import com.andrew.apollo.utils.NavUtils;
+
 
 /**
  * Used to control headset playback.
@@ -60,10 +62,7 @@ public class MediaButtonIntentReceiver extends WakefulBroadcastReceiver {
                     if (DEBUG) Log.v(TAG, "Handling longpress timeout, launched " + mLaunched);
                     if (!mLaunched) {
                         final Context context = (Context)msg.obj;
-                        final Intent i = new Intent();
-                        i.setClass(context, LauncherActivity.class);
-                        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        context.startActivity(i);
+                        context.startActivity(NavUtils.makeLauncherIntent(context));
                         mLaunched = true;
                     }
                     break;

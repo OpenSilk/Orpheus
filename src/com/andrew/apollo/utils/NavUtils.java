@@ -13,6 +13,7 @@ package com.andrew.apollo.utils;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.audiofx.AudioEffect;
@@ -37,6 +38,18 @@ import org.opensilk.music.ui2.ProfileActivity;
  * @author Andrew Neal (andrewdneal@gmail.com)
  */
 public final class NavUtils {
+
+    /**
+     * Alias wrapper after renaming home activity
+     */
+    public static Intent makeLauncherIntent(Context context) {
+        return new Intent()
+                .setComponent(new ComponentName(context, "org.opensilk.music.ui.activities.HomeSlidingActivity"))
+                .setAction("org.opensilk.music.AUDIO_PLAYER")
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
 
     public static Intent getProfileIntent(Context context) {
         return new Intent(context, ProfileActivity.class);

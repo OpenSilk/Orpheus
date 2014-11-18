@@ -137,7 +137,7 @@
         <activity android:name="org.opensilk.music.ui2.ProfileActivity"
             android:theme="@style/Theme.Profile.Light">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui2.LauncherActivity"/>
+                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <activity android:name="org.opensilk.music.ui2.SearchActivity"
@@ -150,7 +150,7 @@
                 <!--<category android:name="android.intent.category.DEFAULT" />-->
             </intent-filter>
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value="org.opensilk.music.ui2.LauncherActivity"/>
+                       android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
             <meta-data android:name="android.app.searchable"
                        android:resource="@xml/searchable" />
         </activity>
@@ -161,7 +161,7 @@
             android:label="@string/menu_settings"
             android:theme="@style/Theme.Settings.Light">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.opensilk.music.ui2.LauncherActivity"/>
+                android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <activity android:name="org.opensilk.music.ui.settings.FolderPickerActivity"

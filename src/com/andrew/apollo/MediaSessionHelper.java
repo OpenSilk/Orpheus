@@ -37,8 +37,7 @@ import android.text.TextUtils;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-
-import org.opensilk.music.ui2.LauncherActivity;
+import com.andrew.apollo.utils.NavUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -260,7 +259,7 @@ public class MediaSessionHelper {
             mMediaSession.setSessionActivity(PendingIntent.getActivity(
                     mService,
                     2,
-                    new Intent(mService, LauncherActivity.class),
+                    NavUtils.makeLauncherIntent(mService),
                     PendingIntent.FLAG_UPDATE_CURRENT
             ));
         }

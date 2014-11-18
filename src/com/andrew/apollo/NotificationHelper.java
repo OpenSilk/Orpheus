@@ -27,9 +27,9 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.andrew.apollo.utils.ApolloUtils;
+import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.LauncherActivity;
 
 import timber.log.Timber;
 
@@ -181,12 +181,8 @@ public class NotificationHelper {
      */
     private PendingIntent getPendingIntent() {
         return PendingIntent.getActivity(mService, 0,
-                new Intent(mService, LauncherActivity.class)
-                        .setAction("org.opensilk.music.AUDIO_PLAYER")
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                PendingIntent.FLAG_CANCEL_CURRENT);
+                NavUtils.makeLauncherIntent(mService),
+                PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
