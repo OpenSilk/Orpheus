@@ -394,12 +394,16 @@ public class OverflowHandlers {
         }
 
         public void play(final LocalSong song) {
+            playAll(new LocalSong[]{song}, 0);
+        }
+
+        public void playAll(final LocalSong[] songs, int startpos) {
             musicService.playAllSongs(new Func0<Song[]>() {
                 @Override
                 public Song[] call() {
-                    return new Song[]{song};
+                    return songs;
                 }
-            }, 0, false);
+            }, startpos, false);
         }
 
         public boolean handleClick(OverflowAction action, final LocalSong song) {

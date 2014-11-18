@@ -17,19 +17,29 @@
 package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
+import com.andrew.apollo.model.LocalSong;
+
+import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.RxCursorLoader;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 /**
  * Created by drew on 2/21/14.
  */
-public class AlbumSongLoader extends CursorLoader {
+public class AlbumSongLoader extends RxCursorLoader<LocalSong> {
 
-    public AlbumSongLoader(Context context, long albumId) {
+    @Inject
+    public AlbumSongLoader(@ForApplication Context context, @Named("album") long albumId) {
         super(context);
         setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         setProjection(Projections.LOCAL_SONG);
@@ -38,4 +48,8 @@ public class AlbumSongLoader extends CursorLoader {
         setSortOrder(Selections.LOCAL_ALBUM_SONGS);
     }
 
+    @Override
+    protected LocalSong makeFromCursor(Cursor c) {
+        return CursorHelpers.makeLocalSongFromCursor(c);
+    }
 }

@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
@@ -33,6 +34,7 @@ import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
+import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.common.OverflowAction;
@@ -47,14 +49,9 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 7/10/14.
  */
-public class SongCollectionAdapter extends CursorAdapter {
+public class SongCollectionAdapter extends ArrayAdapter<LocalSong> {
 
     protected final boolean useSimpleLayout;
-    protected final Uri uri;
-    protected final String[] projection;
-    protected final String selection;
-    protected final String[] selectionArgs;
-    protected final String sortOrder;
 
     final OverflowHandlers.LocalSongs overflowHandler;
     final ArtworkRequestManager requestor;
@@ -62,22 +59,24 @@ public class SongCollectionAdapter extends CursorAdapter {
     public SongCollectionAdapter(Context context,
                                  OverflowHandlers.LocalSongs overflowHandler,
                                  ArtworkRequestManager requestor,
-                                 boolean useSimpleLayout,
-                                 Uri uri, String[] projection, String selection,
-                                 String[] selectionArgs, String sortOrder) {
-        super(context, null, 0);
+                                 boolean useSimpleLayout) {
+        super(context, 0);
         this.overflowHandler = overflowHandler;
         this.requestor = requestor;
         this.useSimpleLayout = useSimpleLayout;
-        this.uri = uri;
-        this.projection = projection;
-        this.selection = selection;
-        this.selectionArgs = selectionArgs;
-        this.sortOrder = sortOrder;
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v = convertView;
+        if (v == null) {
+            v = newView(parent.getContext(), parent);
+        }
+        bindView(v, getItem(position));
+        return v;
+    }
+
+    public View newView(Context context, ViewGroup parent) {
         View v;
         if (useSimpleLayout) {
             v = LayoutInflater.from(context).inflate(R.layout.gallery_list_item_simple, parent, false);
@@ -88,14 +87,12 @@ public class SongCollectionAdapter extends CursorAdapter {
         return v;
     }
 
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        final LocalSong song = CursorHelpers.makeLocalSongFromCursor(cursor);
+    public void bindView(View view, final LocalSong song) {
         ViewHolder holder = (ViewHolder) view.getTag();
         holder.reset();
         holder.title.setText(song.name);
         holder.subtitle.setText(song.artistName);
-        holder.info.setText(MusicUtils.makeTimeString(context, song.duration));
+        holder.info.setText(MusicUtils.makeTimeString(view.getContext(), song.duration));
         if (!useSimpleLayout && holder.artwork != null) {
             holder.subscriptions.add(requestor.newAlbumRequest(holder.artwork,
                     null, song.albumId, ArtworkType.THUMBNAIL));
@@ -122,7 +119,15 @@ public class SongCollectionAdapter extends CursorAdapter {
         holder.clicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                overflowHandler.play(song);
+                int pos = 0; int count = getCount();
+                LocalSong[] songs = new LocalSong[count];
+                for (int ii=0; ii<count; ii++) {
+                    songs[ii] = getItem(ii);
+                    if (getItem(ii).songId == song.songId) {
+                        pos = ii;
+                    }
+                }
+                overflowHandler.playAll(songs, pos);
             }
         });
     }

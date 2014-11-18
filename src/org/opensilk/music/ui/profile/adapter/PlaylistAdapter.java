@@ -40,14 +40,13 @@ public class PlaylistAdapter extends SongCollectionAdapter {
     public PlaylistAdapter(Context context,
                            OverflowHandlers.LocalSongs overflowHandler,
                            ArtworkRequestManager requestor,
-                           Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder,
                            long playlistId) {
-        super(context, overflowHandler, requestor, false, uri, projection, selection, selectionArgs, sortOrder);
+        super(context, overflowHandler, requestor, false);
         this.playlistId = playlistId;
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+    public View newView(Context context, ViewGroup parent) {
         View v = LayoutInflater.from(context).inflate(R.layout.gallery_list_item_dragsort, parent, false);
         v.setTag(new ViewHolder(v));
         if (playlistId == -2) ButterKnife.findById(v, R.id.drag_handle).setVisibility(View.GONE);

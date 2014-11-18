@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.LocalSongGroup;
 
 import org.opensilk.common.widget.AnimatedImageView;
@@ -45,29 +46,50 @@ import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.DaggerInjector;
 
+import java.util.List;
+
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import butterknife.ButterKnife;
+import dagger.Provides;
+import rx.Subscription;
+import rx.functions.Action1;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 7/11/14.
  */
-public class SongGroupFragment extends ListStickyParallaxHeaderFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class SongGroupFragment extends ListStickyParallaxHeaderFragment {
 
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = SongGroupFragment.class
     )
     public static class Module {
+        final LocalSongGroup songGroup;
 
+        public Module(LocalSongGroup songGroup) {
+            this.songGroup = songGroup;
+        }
+
+        @Provides @Singleton @Named("songgroup")
+        public long[] provideSongIds() {
+            return songGroup.songIds;
+        }
     }
 
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
     @Inject OverflowHandlers.LocalSongGroups mSongGroupOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
+    @Inject SongGroupLoader mLoader;
 
     int numHeros;
     LocalSongGroup mSongGroup;
+
+    Subscription mLoaderSubscription;
     SongCollectionAdapter mAdapter;
 
     public static SongGroupFragment newInstance(Bundle args) {
@@ -79,19 +101,22 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module()).inject(this);
         mSongGroup = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new SongCollectionAdapter(getActivity(),
-                mAdapterOverflowHandler,
-                mRequestor,
-                false,
-                Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                Projections.LOCAL_SONG,
-                Selections.SONG_GROUP(mSongGroup.songIds),
-                SelectionArgs.SONG_GROUP,
-                SortOrder.SONG_GROUP);
+        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module(mSongGroup)).inject(this);
+
+        mAdapter = new SongCollectionAdapter(getActivity(), mAdapterOverflowHandler, mRequestor, false);
         // start the loader
-        getLoaderManager().initLoader(0, null, this);
+        mLoaderSubscription = mLoader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
+            @Override
+            public void call(List<LocalSong> localSongs) {
+                mAdapter.addAll(localSongs);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+
+            }
+        });
         setHasOptionsMenu(true);
     }
 
@@ -99,6 +124,10 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
     public void onDestroy() {
         super.onDestroy();
         mAdapter = null;
+        if (isSubscribed(mLoaderSubscription)) {
+            mLoaderSubscription.unsubscribe();
+            mLoaderSubscription = null;
+        }
     }
 
     @Override
@@ -166,21 +195,6 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment implemen
             numHeros = 0;
             return super.getHeaderLayout();
         }
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new SongGroupLoader(getActivity(), mSongGroup.songIds);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
     }
 
 }

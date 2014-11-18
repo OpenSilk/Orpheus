@@ -16,10 +16,7 @@
 
 package org.opensilk.music.ui.profile;
 
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +25,7 @@ import android.widget.TextView;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
@@ -46,29 +44,49 @@ import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.DaggerInjector;
 
+import java.util.List;
+
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import butterknife.ButterKnife;
+import dagger.Provides;
+import rx.Subscription;
+import rx.functions.Action1;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 7/10/14.
  */
-public class AlbumFragment extends ListStickyParallaxHeaderFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class AlbumFragment extends ListStickyParallaxHeaderFragment {
 
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = AlbumFragment.class
     )
     public static class Module {
+        final LocalAlbum album;
 
+        public Module(LocalAlbum album) {
+            this.album = album;
+        }
+
+        @Provides @Singleton @Named("album")
+        public long provideAlbumId() {
+            return album.albumId;
+        }
     }
 
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
     @Inject OverflowHandlers.LocalAlbums mAlbumsOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
+    @Inject AlbumSongLoader mLoader;
 
     LocalAlbum mAlbum;
 
+    Subscription mLoaderSubscription;
     SongCollectionAdapter mAdapter;
 
     public static AlbumFragment newInstance(Bundle args) {
@@ -80,19 +98,22 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module()).inject(this);
         mAlbum = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new SongCollectionAdapter(getActivity(),
-                mAdapterOverflowHandler,
-                mRequestor,
-                true,
-                Uris.LOCAL_ALBUM_SONGS,
-                Projections.LOCAL_SONG,
-                Selections.LOCAL_ALBUM_SONGS,
-                SelectionArgs.LOCAL_ALBUM_SONGS(mAlbum.albumId),
-                SortOrder.LOCAL_ALBUM_SONGS);
+        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module(mAlbum)).inject(this);
+
+        mAdapter = new SongCollectionAdapter(getActivity(), mAdapterOverflowHandler, mRequestor, true);
         // start the loader
-        getLoaderManager().initLoader(0, null, this);
+        mLoaderSubscription = mLoader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
+            @Override
+            public void call(List<LocalSong> localSongs) {
+                mAdapter.addAll(localSongs);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+
+            }
+        });
         setHasOptionsMenu(true);
     }
 
@@ -100,6 +121,10 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
     public void onDestroy() {
         super.onDestroy();
         mAdapter = null;
+        if (isSubscribed(mLoaderSubscription)) {
+            mLoaderSubscription.unsubscribe();
+            mLoaderSubscription = null;
+        }
     }
 
     @Override
@@ -136,21 +161,6 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment implements L
     @Override
     protected int getListLayout() {
         return R.layout.profile_list_frame;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new AlbumSongLoader(getActivity(), mAlbum.albumId);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
     }
 
 }

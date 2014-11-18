@@ -17,20 +17,31 @@
 package org.opensilk.music.ui.profile.loader;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v4.content.CursorLoader;
 
+import com.andrew.apollo.model.LocalSong;
+import com.andrew.apollo.model.Playlist;
+
+import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.ui2.loader.RxCursorLoader;
+import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 /**
  * Created by drew on 2/24/14.
  */
-public class PlaylistSongLoader extends CursorLoader {
+public class PlaylistSongLoader extends RxCursorLoader<LocalSong> {
 
-    public PlaylistSongLoader(Context context, long playlistId) {
+    @Inject
+    public PlaylistSongLoader(@ForApplication Context context, @Named("playlist") long playlistId) {
         super(context);
         if (isLastAdded(playlistId)) {
             setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);
@@ -45,6 +56,11 @@ public class PlaylistSongLoader extends CursorLoader {
             setSelectionArgs(SelectionArgs.PLAYLIST_SONGS);
             setSortOrder(SortOrder.PLAYLIST_SONGS);
         }
+    }
+
+    @Override
+    protected LocalSong makeFromCursor(Cursor c) {
+        return CursorHelpers.makeLocalSongFromCursor(c);
     }
 
     private boolean isFavorites(long playlistId) {

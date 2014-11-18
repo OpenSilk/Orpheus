@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.andrew.apollo.Config;
+import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 import com.mobeta.android.dslv.DragSortListView;
 
@@ -50,15 +51,23 @@ import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.DaggerInjector;
 
+import java.util.List;
+
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 import butterknife.ButterKnife;
+import dagger.Provides;
+import rx.Subscription;
+import rx.functions.Action1;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 7/11/14.
  */
 public class PlaylistFragment extends ListStickyParallaxHeaderFragment implements
-        LoaderManager.LoaderCallbacks<Cursor>,
         DragSortListView.DropListener,
         DragSortListView.RemoveListener {
 
@@ -67,15 +76,26 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
             injects = PlaylistFragment.class
     )
     public static class Module {
+        final Playlist playlist;
 
+        public Module(Playlist playlist) {
+            this.playlist = playlist;
+        }
+
+        @Provides @Singleton @Named("playlist")
+        public long providePlaylistId() {
+            return playlist.mPlaylistId;
+        }
     }
 
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
     @Inject OverflowHandlers.Playlists mPlaylistOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
+    @Inject PlaylistSongLoader mLoader;
 
     Playlist mPlaylist;
 
+    Subscription mLoaderSubscription;
     PlaylistAdapter mAdapter;
 
     public static PlaylistFragment newInstance(Bundle args) {
@@ -87,33 +107,22 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module()).inject(this);
         mPlaylist = getArguments().getParcelable(Config.EXTRA_DATA);
-        final Uri uri;
-        final String[] projection;
-        final String selection;
-        final String[] selectionArgs;
-        final String sortOrder;
-        if (isLastAdded()) {
-            uri = Uris.EXTERNAL_MEDIASTORE_MEDIA;
-            projection = Projections.LOCAL_SONG;
-            selection = Selections.LAST_ADDED;
-            selectionArgs = SelectionArgs.LAST_ADDED();
-            sortOrder = SortOrder.LAST_ADDED;
-        } else { //User generated playlist
-            uri = Uris.PLAYLIST(mPlaylist.mPlaylistId);
-            projection = Projections.PLAYLIST_SONGS;
-            selection = Selections.LOCAL_SONG;
-            selectionArgs = SelectionArgs.LOCAL_SONG;
-            sortOrder = SortOrder.PLAYLIST_SONGS;
-        }
-        mAdapter = new PlaylistAdapter(getActivity(),
-                mAdapterOverflowHandler,
-                mRequestor,
-                uri, projection, selection, selectionArgs, sortOrder,
-                mPlaylist.mPlaylistId);
+        ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module(mPlaylist)).inject(this);
+
+        mAdapter = new PlaylistAdapter(getActivity(), mAdapterOverflowHandler, mRequestor, mPlaylist.mPlaylistId);
         // start the loader
-        getLoaderManager().initLoader(0, null, this);
+        mLoaderSubscription = mLoader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
+            @Override
+            public void call(List<LocalSong> localSongs) {
+                mAdapter.addAll(localSongs);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+
+            }
+        });
         setHasOptionsMenu(true);
     }
 
@@ -121,6 +130,10 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
     public void onDestroy() {
         super.onDestroy();
         mAdapter = null;
+        if (isSubscribed(mLoaderSubscription)) {
+            mLoaderSubscription.unsubscribe();
+            mLoaderSubscription = null;
+        }
     }
 
     @Override
@@ -222,21 +235,6 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
             MediaStore.Audio.Playlists.Members.moveItem(getActivity().getContentResolver(),
                     mPlaylist.mPlaylistId, from, to);
         }
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new PlaylistSongLoader(getActivity(), mPlaylist.mPlaylistId);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
     }
 
     private boolean isFavorites() {
