@@ -94,7 +94,7 @@ public class SearchActivity extends BaseSwitcherActivity implements SearchView.O
 
 
     @Override
-    protected Blueprint getBlueprint(String scopeName) {
+    protected mortar.Blueprint getBlueprint(String scopeName) {
         return new Blueprint(scopeName);
     }
 

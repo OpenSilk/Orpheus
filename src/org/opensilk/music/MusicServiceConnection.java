@@ -144,9 +144,9 @@ public class MusicServiceConnection {
     /*
         void openFile(String path);
     void open(in long [] list, int position);
-    void stop();
-    void pause();
-    void play();
+    //void stop();
+    //void pause();
+    //void play();
     //void prev();
     //void next();
     //void enqueue(in long [] list, int action);
@@ -181,6 +181,48 @@ public class MusicServiceConnection {
     //ArtInfo getCurrentArtInfo();
     boolean isFromSDCard();
      */
+
+    public void stop() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.stop();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
+                }
+            }
+        });
+    }
+
+    public void pause() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.pause();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
+                }
+            }
+        });
+    }
+
+    public void play() {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    iApolloService.play();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    eventBus.post(new MakeToast(R.string.err_generic));
+                }
+            }
+        });
+    }
 
     public void prev() {
         final Intent previous = new Intent(context, MusicPlaybackService.class);
@@ -444,6 +486,20 @@ public class MusicServiceConnection {
             public Long call(IApolloService iApolloService) {
                 try {
                     return iApolloService.position();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Long> seek(final long pos) {
+        return getObservable().map(new Func1<IApolloService, Long>() {
+            @Override
+            public Long call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.seek(pos);
                 } catch (RemoteException e) {
                     onRemoteException(e);
                     throw rethrow(e);

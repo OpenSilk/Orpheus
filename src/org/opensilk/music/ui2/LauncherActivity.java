@@ -96,7 +96,7 @@ public class LauncherActivity extends BaseSwitcherActivity implements
     ActionBarDrawerToggle mDrawerToggle;
 
     @Override
-    protected Blueprint getBlueprint(String scopeName) {
+    protected mortar.Blueprint getBlueprint(String scopeName) {
         return new Blueprint(scopeName);
     }
 

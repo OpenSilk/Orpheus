@@ -16,28 +16,147 @@
   ~ limitations under the License.
   -->
 
-<RelativeLayout
+<org.opensilk.music.ui2.nowplaying.NowPlayingView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     >
 
-    <org.opensilk.common.widget.SquareImageView
-        android:id="@+id/now_playing_image"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/now_playing_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/transparent"
+        style="?toolbarTheme"/>
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/now_playing_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingTop="24dp"
+        android:gravity="center"
+        android:layout_gravity="bottom"
+        android:layout_alignParentBottom="true"
+        android:showDividers="none"
+        style="?android:buttonBarStyle">
+        <!--^^Extra top padding here to compensate for 16dp overhang of seekbar-->
+
+        <ImageButton
+            android:id="@+id/now_playing_shuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_shuffle_black_36dp"
+            android:contentDescription="@string/accessibility_shuffle"
+            style="?android:buttonBarButtonStyle"/>
+
+        <ImageButton
+            android:id="@+id/now_playing_previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_shuffle_black_36dp"
+            android:contentDescription="@string/accessibility_prev"
+            style="?android:buttonBarButtonStyle"/>
+
+        <ImageButton
+            android:id="@+id/now_playing_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_shuffle_black_36dp"
+            android:contentDescription="@string/accessibility_play"
+            style="?android:buttonBarButtonStyle"/>
+
+        <ImageButton
+            android:id="@+id/now_playing_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_shuffle_black_36dp"
+            android:contentDescription="@string/accessibility_next"
+            style="?android:buttonBarButtonStyle"/>
+
+        <ImageButton
+            android:id="@+id/now_playing_repeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_shuffle_black_36dp"
+            android:contentDescription="@string/accessibility_repeat"
+            style="?android:buttonBarButtonStyle"/>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/now_playing_footer"
+        android:layout_below="@id/now_playing_toolbar">
+
+        <org.opensilk.common.widget.SquareImageView
+            android:id="@+id/now_playing_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal|bottom"/>
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/now_playing_track_title"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_below="@id/now_playing_toolbar"
+        android:gravity="center"
+        android:textAppearance="?android:textAppearanceLarge"
+        style="@style/SingleLineTextView"
+        tools:text="Track Title"/>
+
+    <LinearLayout
+        android:id="@+id/now_playing_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/now_playing_track_title"
+        android:gravity="center"
+        android:baselineAligned="true">
+
+        <TextView
+            android:id="@+id/now_playing_artist_name"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            style="@style/SingleLineTextView"
+            tools:text="Artist Name"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:text="@string/dash"/>
+
+        <TextView
+            android:id="@+id/now_playing_album_name"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"
+            style="@style/SingleLineTextView"
+            tools:text="Album Name"/>
+
+    </LinearLayout>
 
     <!-- Our scrubber height is 32dp making the seekbar view
-         32dp so as a hack to get the bar to sit on the edge
-         of the footer we set a negative bottom margin -->
+        32dp so as a hack to get the bar to sit on the edge
+        of the footer we set a negative bottom margin -->
     <org.opensilk.common.widget.CompatSeekBar
         android:id="@+id/now_playing_seekprogress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-16dp"
         android:gravity="center_vertical"
-        android:layout_below="@id/now_playing_image"
+        android:layout_above="@id/now_playing_footer"
+        android:layout_marginBottom="-16dp"
         android:padding="0dp"
         android:max="1000" />
 
@@ -71,34 +190,4 @@
         android:textAppearance="@style/TextAppearancePlayTime"
         tools:text="0:00"/>
 
-    <TextView
-        android:id="@+id/now_playing_track_title"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_below="@id/now_playing_seekprogress"
-        android:layout_centerHorizontal="true"
-        android:textAppearance="?android:textAppearanceLarge"
-        style="@style/SingleLineTextView"
-        tools:text="Track Title"/>
-
-    <TextView
-        android:id="@+id/now_playing_artist_name"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_below="@id/now_playing_track_title"
-        android:layout_centerHorizontal="true"
-        android:textAppearance="?android:textAppearanceMedium"
-        style="@style/SingleLineTextView"
-        tools:text="Artist Name"/>
-
-    <TextView
-        android:id="@+id/now_playing_album_name"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_below="@id/now_playing_artist_name"
-        android:layout_centerHorizontal="true"
-        android:textAppearance="?android:textAppearance"
-        style="@style/SingleLineTextView"
-        tools:text="Album Name"/>
-
-</RelativeLayout>
+</org.opensilk.music.ui2.nowplaying.NowPlayingView>

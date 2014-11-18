@@ -17,12 +17,14 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,6 +34,7 @@ import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.PaletteResponse;
+import org.opensilk.music.ui2.NowPlayingActivity;
 
 import javax.inject.Inject;
 
@@ -106,6 +109,13 @@ public class FooterView extends RelativeLayout {
                     }
                 })
         );
+        this.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                getContext().startActivity(new Intent(getContext(), NowPlayingActivity.class));
+                return true;
+            }
+        });
     }
 
     void unsubscribeClicks() {

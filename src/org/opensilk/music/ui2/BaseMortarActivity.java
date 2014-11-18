@@ -81,7 +81,7 @@ public class BaseMortarActivity extends BaseActivity implements PauseAndResumeAc
     protected MortarActivityScope mActivityScope;
     protected String mScopeName;
 
-    protected Blueprint getBlueprint(String scopeName) {
+    protected mortar.Blueprint getBlueprint(String scopeName) {
         throw new UnsupportedOperationException("Subclass must override getBlueprint()");
     }
 

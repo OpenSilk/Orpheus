@@ -176,19 +176,22 @@ public class ThemeUtils {
     }
 
     public static void themeSeekBar(SeekBar seekBar, int colorAttr) {
-        int color = getThemeAttrColor(seekBar.getContext(), colorAttr);
-        seekBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        themeSeekBar2(seekBar, getThemeAttrColor(seekBar.getContext(), colorAttr));
+    }
+
+    public static void themeSeekBar2(SeekBar seekBar, int color) {
+        seekBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            seekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            seekBar.getThumb().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
         } else if (seekBar instanceof CompatSeekBar) {
             Drawable thumb = ((CompatSeekBar) seekBar).getThumb();
-            if (thumb != null) thumb.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            if (thumb != null) thumb.mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
         }
     }
 
     public static void themeProgressBar(ProgressBar progressBar, int colorAttr) {
         int color = getThemeAttrColor(progressBar.getContext(), colorAttr);
-        progressBar.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        progressBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }
 
 }

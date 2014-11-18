@@ -85,7 +85,7 @@ public class ThemePickerActivity extends BaseMortarActivity {
     OrpheusTheme mNewTheme;
 
     @Override
-    protected BaseMortarActivity.Blueprint getBlueprint(String scopeName) {
+    protected mortar.Blueprint getBlueprint(String scopeName) {
         return new Blueprint(scopeName);
     }
 

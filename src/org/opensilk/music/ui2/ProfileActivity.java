@@ -82,7 +82,7 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
     public static final String ACTION_SONG_GROUP = "open_song_group";
 
     @Override
-    protected Blueprint getBlueprint(String scopeName) {
+    protected mortar.Blueprint getBlueprint(String scopeName) {
         return new Blueprint(scopeName);
     }
 
