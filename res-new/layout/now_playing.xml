@@ -37,113 +37,87 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp"
-        android:paddingTop="24dp"
         android:gravity="center"
         android:layout_gravity="bottom"
         android:layout_alignParentBottom="true"
         android:showDividers="none"
         style="?android:buttonBarStyle">
-        <!--^^Extra top padding here to compensate for 16dp overhang of seekbar-->
 
         <ImageButton
             android:id="@+id/now_playing_shuffle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_shuffle_black_36dp"
-            android:contentDescription="@string/accessibility_shuffle"
-            style="?android:buttonBarButtonStyle"/>
+            tools:src="@drawable/ic_shuffle_black_36dp"
+            android:padding="8dp"
+            style="?nowPlayingShuffleStyle"/>
 
         <ImageButton
             android:id="@+id/now_playing_previous"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_shuffle_black_36dp"
-            android:contentDescription="@string/accessibility_prev"
-            style="?android:buttonBarButtonStyle"/>
+            android:padding="8dp"
+            tools:src="@drawable/ic_skip_previous_black_36dp"
+            style="?nowPlayingPrevStyle"/>
 
         <ImageButton
             android:id="@+id/now_playing_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_shuffle_black_36dp"
-            android:contentDescription="@string/accessibility_play"
-            style="?android:buttonBarButtonStyle"/>
+            android:padding="8dp"
+            tools:src="@drawable/ic_play_arrow_black_36dp"
+            style="?nowPlayingPlayStyle"/>
 
         <ImageButton
             android:id="@+id/now_playing_next"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_shuffle_black_36dp"
-            android:contentDescription="@string/accessibility_next"
-            style="?android:buttonBarButtonStyle"/>
+            android:padding="8dp"
+            tools:src="@drawable/ic_skip_next_black_36dp"
+            style="?nowPlayingNextStyle"/>
 
         <ImageButton
             android:id="@+id/now_playing_repeat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_shuffle_black_36dp"
-            android:contentDescription="@string/accessibility_repeat"
-            style="?android:buttonBarButtonStyle"/>
+            android:padding="8dp"
+            tools:src="@drawable/ic_repeat_black_36dp"
+            style="?nowPlayingRepeatStyle"/>
 
     </LinearLayout>
 
-    <FrameLayout
+    <org.opensilk.common.widget.SquareImageView
+        android:id="@+id/now_playing_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/now_playing_footer"
-        android:layout_below="@id/now_playing_toolbar">
-
-        <org.opensilk.common.widget.SquareImageView
-            android:id="@+id/now_playing_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_horizontal|bottom"/>
-
-    </FrameLayout>
-
-    <TextView
-        android:id="@+id/now_playing_track_title"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:layout_below="@id/now_playing_toolbar"
-        android:gravity="center"
-        android:textAppearance="?android:textAppearanceLarge"
-        style="@style/SingleLineTextView"
-        tools:text="Track Title"/>
+        android:layout_above="@id/now_playing_meta"
+        tools:src="@drawable/default_artwork"/>
 
     <LinearLayout
-        android:id="@+id/now_playing_header"
+        android:id="@+id/now_playing_meta"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/now_playing_track_title"
-        android:gravity="center"
-        android:baselineAligned="true">
+        android:layout_height="?actionBarSize"
+        android:layout_above="@id/now_playing_footer"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        android:gravity="center">
 
         <TextView
-            android:id="@+id/now_playing_artist_name"
+            android:id="@+id/now_playing_track"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:gravity="center"
             android:textAppearance="?android:textAppearanceMedium"
             style="@style/SingleLineTextView"
-            tools:text="Artist Name"/>
+            tools:text="Track"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/now_playing_artist"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:textAppearance="?android:textAppearanceMedium"
-            android:text="@string/dash"/>
-
-        <TextView
-            android:id="@+id/now_playing_album_name"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
+            android:textAppearance="?android:textAppearance"
             style="@style/SingleLineTextView"
-            tools:text="Album Name"/>
+            android:gravity="center"
+            tools:text="Artist"/>
 
     </LinearLayout>
 
@@ -155,10 +129,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:layout_above="@id/now_playing_footer"
+        android:layout_above="@id/now_playing_meta"
         android:layout_marginBottom="-16dp"
         android:padding="0dp"
-        android:max="1000" />
+        android:max="1000"
+        tools:progress="200"/>
 
     <!-- current playtime -->
     <TextView

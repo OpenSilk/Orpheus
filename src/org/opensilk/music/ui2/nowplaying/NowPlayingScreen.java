@@ -60,6 +60,7 @@ import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.observeOnMain;
 
 /**
  * Created by drew on 11/17/14.
@@ -166,29 +167,20 @@ public class NowPlayingScreen extends Screen {
                     }),
                     BroadcastObservables.trackChanged(appContext).subscribe(new Action1<String>() {
                         @Override
-                        @DebugLog
                         public void call(String s) {
                             if (getView() == null) return;
-                            getView().track.setText(s);
+                            getView().toolbar.setTitle(s);
+                            refreshTotalTimeText();
                         }
                     }),
                     BroadcastObservables.artistChanged(appContext).subscribe(new Action1<String>() {
                         @Override
                         public void call(String s) {
                             if (getView() == null) return;
-                            getView().artist.setText(s);
+                            getView().toolbar.setSubtitle(s);
                         }
                     }),
-                    BroadcastObservables.albumChanged(appContext).subscribe(new Action1<String>() {
-                        @Override
-                        @DebugLog
-                        public void call(String s) {
-                            if (getView() == null) return;
-                            getView().album.setText(s);
-                        }
-                    }),
-                    BroadcastObservables.artworkChanged(appContext, musicService)
-                            .observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<ArtInfo>() {
+                    observeOnMain(BroadcastObservables.artworkChanged(appContext, musicService)).subscribe(new Action1<ArtInfo>() {
                         @Override
                         public void call(ArtInfo artInfo) {
                             if (getView() == null) return;
@@ -254,6 +246,25 @@ public class NowPlayingScreen extends Screen {
         void updateProgress(int progress) {
             if (getView() == null) return;
             getView().seekBar.setProgress(progress);
+        }
+
+        void refreshTotalTimeText() {
+            observeOnMain(musicService.getDuration()).subscribe(
+                    new Action1<Long>() {
+                        @Override
+                        public void call(Long duration) {
+                            if (getView() == null) return;
+                            getView().totalTime.setText(
+                                    MusicUtils.makeTimeString(getView().getContext(), duration / 1000)
+                            );
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+
+                        }
+                    }
+            );
         }
 
         void refreshCurrentTimeText(final long pos) {

@@ -39,6 +39,7 @@ import org.opensilk.music.R;
 
 import org.opensilk.common.widget.FloatingActionButton;
 import org.opensilk.common.widget.FlingyFabLayout;
+import org.opensilk.music.theme.PlaybackDrawableTint;
 
 import javax.inject.Inject;
 
@@ -203,8 +204,8 @@ public class MainView extends FlingyFabLayout {
         });
         fabPlay.bringToFront();
 
-        setupShuffleDrawable();
-        setupRepeatDrawable();
+        PlaybackDrawableTint.shuffleDrawable24(fabShuffle);
+        PlaybackDrawableTint.repeatDrawable24(fabRepeat);
     }
 
     void setupFabAnimatiors() {
@@ -308,27 +309,6 @@ public class MainView extends FlingyFabLayout {
             collapseFabs.cancel();
             expandFabs.start();
         }
-    }
-
-    void setupShuffleDrawable() {
-        if (VersionUtils.hasLollipop()) return;
-        LevelListDrawable d = (LevelListDrawable) fabShuffle.getDrawable();
-//        Drawable d1 = getResources().getDrawable(R.drawable.ic_shuffle_black_36dp);
-//        d1.setColorFilter(Themer.getColorAccent(getContext()), PorterDuff.Mode.MULTIPLY);
-        Drawable d1 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_shuffle_white_24dp,
-                ThemeUtils.getColorAccent(getContext()));
-        d.addLevel(1, 2, d1);
-    }
-
-    void setupRepeatDrawable() {
-        if (VersionUtils.hasLollipop()) return;
-        LevelListDrawable d = (LevelListDrawable) fabRepeat.getDrawable();
-        Drawable d1 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_repeat_one_white_24dp,
-                ThemeUtils.getColorAccent(getContext()));
-        d.addLevel(1, 1, d1);
-        Drawable d2 = ThemeHelper.themeDrawable(getContext(), R.drawable.ic_repeat_white_24dp,
-                ThemeUtils.getColorAccent(getContext()));
-        d.addLevel(2, 2, d2);
     }
 
     void setupLayoutTransitions() {

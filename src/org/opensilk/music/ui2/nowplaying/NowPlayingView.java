@@ -55,9 +55,6 @@ public class NowPlayingView extends RelativeLayout {
     @InjectView(R.id.now_playing_seekprogress) SeekBar seekBar;
     @InjectView(R.id.now_playing_current_time) TextView currentTime;
     @InjectView(R.id.now_playing_total_time) TextView totalTime;
-    @InjectView(R.id.now_playing_track_title) TextView track;
-    @InjectView(R.id.now_playing_album_name) TextView album;
-    @InjectView(R.id.now_playing_artist_name) TextView artist;
     @InjectView(R.id.now_playing_shuffle) ImageButton shuffle;
     @InjectView(R.id.now_playing_previous) ImageButton prev;
     @InjectView(R.id.now_playing_play) ImageButton play;
@@ -65,10 +62,6 @@ public class NowPlayingView extends RelativeLayout {
     @InjectView(R.id.now_playing_repeat) ImageButton repeat;
 
     CompositeSubscription clicks;
-
-    int trackColor;
-    int artistColor;
-    int albumColor;
 
     public NowPlayingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -79,9 +72,6 @@ public class NowPlayingView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        trackColor = track.getCurrentTextColor();
-        artistColor = artist.getCurrentTextColor();
-        albumColor = album.getCurrentTextColor();
         ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
         if (!isInEditMode()) presenter.takeView(this);
     }
@@ -155,21 +145,19 @@ public class NowPlayingView extends RelativeLayout {
         if (s == null) s = p.getVibrantSwatch();
         Palette.Swatch s2 = light ? p.getLightMutedSwatch() : p.getDarkMutedSwatch();
         if (s2 == null) s2 = p.getMutedSwatch();
-        if (s == null) {
-            setBackgroundColor(Color.TRANSPARENT);
-            track.setTextColor(trackColor);
-            artist.setTextColor(artistColor);
-            album.setTextColor(albumColor);
-        } else {
+        if (s != null) {
             setBackgroundColor(s.getRgb());
-            track.setTextColor(s.getTitleTextColor());
-            album.setTextColor(s.getTitleTextColor());
-            artist.setTextColor(s.getTitleTextColor());
-        }
-        if (s2 == null) {
-            ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
+//            toolbar.setTitleTextColor(s.getTitleTextColor());
+//            toolbar.setSubtitleTextColor(s.getTitleTextColor());
         } else {
+            setBackgroundColor(ThemeUtils.getThemeAttrColor(getContext(), R.attr.colorPrimary));
+//            toolbar.setTitleTextColor(Color.WHITE);
+//            toolbar.setSubtitleTextColor(Color.WHITE);
+        }
+        if (s2 != null) {
             ThemeUtils.themeSeekBar2(seekBar, s2.getRgb());
+        } else {
+            ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
         }
     }
 }

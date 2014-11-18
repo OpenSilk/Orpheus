@@ -83,6 +83,12 @@
         <!--Light dark actionbar-->
         <item name="colorPrimary">@color/primary_material_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+
+        <item name="nowPlayingPlayStyle">@style/nowPlayingActionLight.Play</item>
+        <item name="nowPlayingNextStyle">@style/nowPlayingActionLight.Next</item>
+        <item name="nowPlayingPrevStyle">@style/nowPlayingActionLight.Prev</item>
+        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionLight.Shuffle</item>
+        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
     </style>
 
     <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.NoActionBar">
@@ -91,6 +97,12 @@
         <item name="android:windowNoTitle">true</item>
         <!--DarkActionBar-->
         <item name="toolbarTheme">@style/Toolbar.Dark</item>
+
+        <item name="nowPlayingPlayStyle">@style/nowPlayingActionDark.Play</item>
+        <item name="nowPlayingNextStyle">@style/nowPlayingActionDark.Next</item>
+        <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
+        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
+        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
     </style>
 
     <!-- end base dialog themes -->
@@ -149,6 +161,18 @@
     </style>
 
     <!-- end profile themes -->
+
+    <!-- -->
+
+    <style name="Theme.Dialog.NoActionBar" parent="Theme.AppCompat.Dialog">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
+    </style>
+
+    <!-- -->
 
     <!--Toolbar Styles -->
 
