@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.profile.adapter;
+package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -80,7 +80,6 @@ public class GridAdapter extends ArrayAdapter<Object> {
                 default:
                     v = inflater.inflate(R.layout.gallery_grid_item_artwork, parent, false);
                     break;
-
             }
             vh = new ViewHolder(v);
             v.setTag(vh);
@@ -180,6 +179,9 @@ public class GridAdapter extends ArrayAdapter<Object> {
 
     @Override
     public int getItemViewType(int position) {
+        if (position < 0 || position == getCount()) {
+            return -1;
+        }
         Object obj = getItem(position);
         if (obj instanceof LocalAlbum) {
             return 0;

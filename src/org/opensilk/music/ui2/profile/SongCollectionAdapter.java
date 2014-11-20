@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.profile.adapter;
+package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -34,12 +31,10 @@ import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
-import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.util.CursorHelpers;
 
 import javax.inject.Inject;
 

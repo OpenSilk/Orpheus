@@ -86,14 +86,20 @@ public class TransitionScreenSwitcher extends ScreenSwitcher {
                     contextFactory.tearDownContext(oldChild.getContext());
                     from.setViewState(ViewUtils.saveState(oldChild));
                     int[] transitions = getTransitions(to, WithTransitions.FORWARD);
-                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
-                    newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            callback.onComplete();
-                        }
-                    });
+                    if (transitions.length == 2) {
+                        oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
+                        newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
+                        newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                callback.onComplete();
+                            }
+                        });
+                    } else {
+                        oldChild.setAnimation(null);
+                        newChild.setAnimation(null);
+                        callback.onComplete();
+                    }
                     container.removeView(oldChild);
                     container.addView(newChild);
                 } else {
@@ -121,14 +127,20 @@ public class TransitionScreenSwitcher extends ScreenSwitcher {
                 if (from != null && oldChild != null) {
                     contextFactory.tearDownContext(oldChild.getContext());
                     int[] transitions = getTransitions(from, WithTransitions.BACKWARD);
-                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
-                    newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            callback.onComplete();
-                        }
-                    });
+                    if (transitions.length == 2) {
+                        oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
+                        newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
+                        newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                callback.onComplete();
+                            }
+                        });
+                    } else {
+                        oldChild.setAnimation(null);
+                        newChild.setAnimation(null);
+                        callback.onComplete();
+                    }
                     container.removeView(oldChild);
                     container.addView(newChild);
                 } else {
@@ -156,14 +168,20 @@ public class TransitionScreenSwitcher extends ScreenSwitcher {
                 if (oldChild != null) {
                     contextFactory.tearDownContext(oldChild.getContext());
                     int[] transitions = getTransitions(to, WithTransitions.REPLACE);
-                    oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
-                    newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
-                    newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            callback.onComplete();
-                        }
-                    });
+                    if (transitions.length == 2) {
+                        oldChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[0]));
+                        newChild.setAnimation(AnimationUtils.loadAnimation(container.getContext(), transitions[1]));
+                        newChild.getAnimation().setAnimationListener(new SimpleAnimationListener() {
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                callback.onComplete();
+                            }
+                        });
+                    } else {
+                        oldChild.setAnimation(null);
+                        newChild.setAnimation(null);
+                        callback.onComplete();
+                    }
                     container.removeAllViews();
                     container.addView(newChild);
                 } else {
@@ -197,8 +215,11 @@ public class TransitionScreenSwitcher extends ScreenSwitcher {
             transitions = holder.transitions;
         } else {
             WithTransitions withTransitions = screenType.getAnnotation(WithTransitions.class);
-            checkNotNull(withTransitions, "@%s annotation not found on class %s",
-                    WithTransitions.class.getSimpleName(), screenType.getName());
+            if (withTransitions == null) {
+                Timber.w("@%s annotation not found on class %s",
+                        WithTransitions.class.getSimpleName(), screenType.getName());
+                return new int[0];
+            }
             transitions = new int[4][];
             transitions[0] = withTransitions.single();
             transitions[1] = withTransitions.forward();

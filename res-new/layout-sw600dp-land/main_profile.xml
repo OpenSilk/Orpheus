@@ -16,31 +16,35 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.profile.ProfileView
+<org.opensilk.music.ui2.main.MainView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@id/profile_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <include
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            layout="@layout/profile_sticky_header"/>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/main_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            style="?toolbarTheme"/>
 
-        <org.opensilk.music.ui2.profile.PlaylistDragSortView
-            android:id="@android:id/list"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            style="@style/DragSortList"/>
+        <org.opensilk.common.mortarflow.FrameScreenSwitcherView
+            android:id="@+id/main"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <include layout="@layout/footer"/>
 
     </LinearLayout>
 
-</org.opensilk.music.ui2.profile.ProfileView>
+    <!--Fabs-->
+    <include layout="@layout/floating_action_buttons_profile"/>
+
+</org.opensilk.music.ui2.main.MainView>

@@ -25,17 +25,17 @@ import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
-import org.opensilk.music.ui.profile.loader.AlbumSongLoader;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.loader.LocalAlbumSongLoader;
 
 import java.util.List;
 
@@ -62,6 +62,11 @@ public class AlbumScreen extends Screen {
         this.album = album;
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + album.name;
+    }
+
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = {
@@ -77,17 +82,17 @@ public class AlbumScreen extends Screen {
             this.album = screen.album;
         }
 
-        @Provides @Singleton @Named("album")
+        @Provides @Named("album")
         public long provideAlbumId() {
             return album.albumId;
         }
 
-        @Provides @Singleton
+        @Provides
         public LocalAlbum provideAlbum() {
             return album;
         }
 
-        @Provides @Singleton
+        @Provides
         public BasePresenter profileFrameViewBasePresenter(Presenter p) {
             return p;
         }
@@ -104,7 +109,7 @@ public class AlbumScreen extends Screen {
         public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.LocalAlbums albumsOverflowHandler,
-                         AlbumSongLoader loader,
+                         LocalAlbumSongLoader loader,
                          LocalAlbum album) {
             super(actionBarOwner, requestor);
             this.albumsOverflowHandler = albumsOverflowHandler;

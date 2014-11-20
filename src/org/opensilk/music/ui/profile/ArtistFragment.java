@@ -33,7 +33,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.GridAdapter;
+import org.opensilk.music.ui2.profile.GridAdapter;
 import org.opensilk.music.ui.profile.loader.ArtistGridLoader;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;

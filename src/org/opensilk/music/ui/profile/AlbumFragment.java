@@ -32,16 +32,11 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
-import org.opensilk.music.ui.profile.loader.AlbumSongLoader;
+import org.opensilk.music.ui2.loader.LocalAlbumSongLoader;
+import org.opensilk.music.ui2.profile.SongCollectionAdapter;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.SortOrder;
-import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.DaggerInjector;
 
 import java.util.List;
@@ -82,7 +77,7 @@ public class AlbumFragment extends ListStickyParallaxHeaderFragment {
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
     @Inject OverflowHandlers.LocalAlbums mAlbumsOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
-    @Inject AlbumSongLoader mLoader;
+    @Inject LocalAlbumSongLoader mLoader;
 
     LocalAlbum mAlbum;
 

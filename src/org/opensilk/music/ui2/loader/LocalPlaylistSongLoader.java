@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.profile.loader;
+package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -38,10 +38,10 @@ import javax.inject.Named;
 /**
  * Created by drew on 2/24/14.
  */
-public class PlaylistSongLoader extends RxCursorLoader<LocalSong> {
+public class LocalPlaylistSongLoader extends RxCursorLoader<LocalSong> {
 
     @Inject
-    public PlaylistSongLoader(@ForApplication Context context, @Named("playlist") long playlistId) {
+    public LocalPlaylistSongLoader(@ForApplication Context context, @Named("playlist") long playlistId) {
         super(context);
         if (isLastAdded(playlistId)) {
             setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);

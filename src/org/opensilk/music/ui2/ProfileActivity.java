@@ -105,7 +105,30 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
 
     @Override
     public Screen getDefaultScreen() {
-        return new FakeScreen();
+        Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
+        Screen s = null;
+        String action = getIntent().getAction();
+        switch (action) {
+            case ACTION_ARTIST:
+                s = new ArtistScreen(b.<LocalArtist>getParcelable(Config.EXTRA_DATA));
+                break;
+            case ACTION_ALBUM:
+                s = new AlbumScreen(b.<LocalAlbum>getParcelable(Config.EXTRA_DATA));
+                break;
+            case ACTION_PLAYLIST:
+                s = new PlaylistScreen(b.<Playlist>getParcelable(Config.EXTRA_DATA));
+                break;
+            case ACTION_GENRE:
+                s = new GenreScreen(b.<Genre>getParcelable(Config.EXTRA_DATA));
+                break;
+            case ACTION_SONG_GROUP:
+                s = new SongGroupScreen(b.<LocalSongGroup>getParcelable(Config.EXTRA_DATA));
+                break;
+            default:
+                finish();
+                break;
+        }
+        return s;
     }
 
     @Override
@@ -120,58 +143,8 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
         setUpButtonEnabled(true);
         getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 
-        Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
-        Screen s;
+        AppFlow.loadInitialScreen(this);
 
-        String action = getIntent().getAction();
-        if (ACTION_ARTIST.equals(action)) {
-            s = new ArtistScreen(b.<LocalArtist>getParcelable(Config.EXTRA_DATA));
-        } else if (ACTION_ALBUM.equals(action)) {
-            s = new AlbumScreen(b.<LocalAlbum>getParcelable(Config.EXTRA_DATA));
-        } else if (ACTION_PLAYLIST.equals(action)) {
-            s = new PlaylistScreen(b.<Playlist>getParcelable(Config.EXTRA_DATA));
-        } else if (ACTION_GENRE.equals(action)) {
-            s = new GenreScreen(b.<Genre>getParcelable(Config.EXTRA_DATA));
-        } else if (ACTION_SONG_GROUP.equals(action)) {
-            s = new SongGroupScreen(b.<LocalSongGroup>getParcelable(Config.EXTRA_DATA));
-        } else {
-            finish();
-            return;
-        }
-        MortarContextFactory cf = new MortarContextFactory();
-        View v = Layouts.createView(cf.setUpContext(s, this), s);
-        ButterKnife.<ViewGroup>findById(this, R.id.main).addView(v);
-
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (!AppFlow.get(this).goBack()) {
-            finish();
-        }
-    }
-
-    @Override
-    public void showScreen(Screen screen, Flow.Direction direction, Flow.Callback callback) {
-        switch (direction) {
-            case FORWARD:
-                if (screen instanceof QueueScreen) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main, new QueueWrapperFragment())
-                            .addToBackStack("queue")
-                            .commit();
-                }
-                break;
-            case BACKWARD:
-                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                    getSupportFragmentManager().popBackStack();
-                }
-                break;
-            case REPLACE:
-                //no replace operations here
-                break;
-        }
-        callback.onComplete();
     }
 
     /*
@@ -186,30 +159,6 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
     @Override
     public ObjectGraph getObjectGraph() {
         return Mortar.getScope(this).getObjectGraph();
-    }
-
-    // Dummy screen for initial backstack
-    public static class FakeScreen extends Screen {
-
-    }
-
-    // wrapper fragment for queue until profiles are moved to mortar
-    public static class QueueWrapperFragment extends Fragment {
-
-        MortarContextFactory contextFactory = new MortarContextFactory();
-        View v;
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            v = ViewUtils.createView(contextFactory.setUpContext(new QueueScreen(), getActivity()), QueueScreen.class, null);
-            return v;
-        }
-
-        @Override
-        public void onDestroyView() {
-            super.onDestroyView();
-            contextFactory.tearDownContext(v.getContext());
-        }
     }
 
 }

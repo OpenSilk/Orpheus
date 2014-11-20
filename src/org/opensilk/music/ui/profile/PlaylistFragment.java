@@ -20,8 +20,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,17 +36,12 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
-import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
+import org.opensilk.music.ui2.loader.LocalPlaylistSongLoader;
+import org.opensilk.music.ui2.profile.PlaylistAdapter;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.SortOrder;
-import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.DaggerInjector;
 
 import java.util.List;
@@ -91,7 +84,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
     @Inject OverflowHandlers.Playlists mPlaylistOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
-    @Inject PlaylistSongLoader mLoader;
+    @Inject LocalPlaylistSongLoader mLoader;
 
     Playlist mPlaylist;
 

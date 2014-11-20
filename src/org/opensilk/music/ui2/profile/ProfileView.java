@@ -23,7 +23,6 @@ import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.graphics.Palette;
@@ -33,9 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.HeaderViewListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -47,8 +44,6 @@ import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
-
-import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -120,12 +115,7 @@ public class ProfileView extends FrameLayout {
             }
             // for parallax
             mList.setOnScrollListener(mScrollListener);
-            if (mHeaderDummy != null) {
-                //setup the dummy header background with the same color as the stickyheader
-                final ClipDrawable dummyBackground = new ClipDrawable(mStickyHeader.getBackground(), Gravity.BOTTOM, ClipDrawable.VERTICAL);
-                dummyBackground.setLevel(mIsStuck ? 10000 : 0);
-                mHeaderDummy.setBackgroundDrawable(dummyBackground);
-            }
+            setupDummyHeader();
         } else {
             //landscape mode header is inserted into sticky container (which isnt actually sticky)
             mStickyHeader.addView(mListHeader, 0);
@@ -156,6 +146,7 @@ public class ProfileView extends FrameLayout {
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         mIsStuck = ss.wasStuck;
+        setupDummyHeader();
     }
 
     @Override
@@ -164,6 +155,15 @@ public class ProfileView extends FrameLayout {
         SavedState ss = new SavedState(superstate);
         ss.wasStuck = mIsStuck;
         return ss;
+    }
+
+    void setupDummyHeader() {
+        if (mHeaderDummy != null) {
+            //setup the dummy header background with the same color as the stickyheader
+            final ClipDrawable dummyBackground = new ClipDrawable(mStickyHeader.getBackground(), Gravity.BOTTOM, ClipDrawable.VERTICAL);
+            dummyBackground.setLevel(mIsStuck ? 10000 : 0);
+            mHeaderDummy.setBackgroundDrawable(dummyBackground);
+        }
     }
 
     private ValueAnimator makeSlideAnimator(int start, int end, final ClipDrawable drawable) {

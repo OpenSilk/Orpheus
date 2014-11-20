@@ -16,10 +16,7 @@
 
 package org.opensilk.music.ui.profile;
 
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,16 +31,11 @@ import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
-import org.opensilk.music.ui.profile.loader.SongGroupLoader;
+import org.opensilk.music.ui2.loader.LocalSongGroupLoader;
+import org.opensilk.music.ui2.profile.SongCollectionAdapter;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.SelectionArgs;
-import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.SortOrder;
-import org.opensilk.music.util.Uris;
 import org.opensilk.common.dagger.DaggerInjector;
 
 import java.util.List;
@@ -84,7 +76,7 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment {
     @Inject OverflowHandlers.LocalSongs mAdapterOverflowHandler;
     @Inject OverflowHandlers.LocalSongGroups mSongGroupOverflowHandler;
     @Inject ArtworkRequestManager mRequestor;
-    @Inject SongGroupLoader mLoader;
+    @Inject LocalSongGroupLoader mLoader;
 
     int numHeros;
     LocalSongGroup mSongGroup;

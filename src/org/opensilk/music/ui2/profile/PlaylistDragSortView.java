@@ -25,8 +25,6 @@ import android.util.AttributeSet;
 import com.andrew.apollo.model.LocalSong;
 import com.mobeta.android.dslv.DragSortListView;
 
-import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
-
 import javax.inject.Inject;
 
 import mortar.Mortar;

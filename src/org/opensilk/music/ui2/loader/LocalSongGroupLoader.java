@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui.profile.loader;
+package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
 import com.andrew.apollo.model.LocalSong;
@@ -29,23 +28,25 @@ import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
+import org.opensilk.music.util.Uris;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
- * Created by drew on 2/21/14.
+ * Created by drew on 7/16/14.
  */
-public class AlbumSongLoader extends RxCursorLoader<LocalSong> {
+public class LocalSongGroupLoader extends RxCursorLoader<LocalSong> {
 
     @Inject
-    public AlbumSongLoader(@ForApplication Context context, @Named("album") long albumId) {
+    public LocalSongGroupLoader(@ForApplication Context context, @Named("songgroup") long[] songIds) {
         super(context);
-        setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+        setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);
         setProjection(Projections.LOCAL_SONG);
-        setSelection(Selections.LOCAL_ALBUM_SONGS);
-        setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(albumId));
-        setSortOrder(Selections.LOCAL_ALBUM_SONGS);
+        setSelection(Selections.SONG_GROUP(songIds));
+        setSelectionArgs(SelectionArgs.SONG_GROUP);
+        setSortOrder(SortOrder.SONG_GROUP);
     }
 
     @Override

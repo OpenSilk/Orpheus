@@ -29,12 +29,11 @@ import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.SongCollectionAdapter;
-import org.opensilk.music.ui.profile.loader.SongGroupLoader;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.loader.LocalSongGroupLoader;
 
 import java.util.List;
 
@@ -58,6 +57,11 @@ public class SongGroupScreen extends Screen {
 
     public SongGroupScreen(LocalSongGroup songGroup) {
         this.songGroup = songGroup;
+    }
+
+    @Override
+    public String getName() {
+        return super.getName() + songGroup.name;
     }
 
     @dagger.Module (
@@ -102,7 +106,7 @@ public class SongGroupScreen extends Screen {
                          ArtworkRequestManager requestor,
                          OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
                          LocalSongGroup songGroup,
-                         SongGroupLoader loader) {
+                         LocalSongGroupLoader loader) {
             super(actionBarOwner, requestor);
             this.songGroupOverflowHandler = songGroupOverflowHandler;
             this.songGroup = songGroup;

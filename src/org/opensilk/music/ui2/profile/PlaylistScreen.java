@@ -27,16 +27,14 @@ import com.andrew.apollo.utils.MusicUtils;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.PlaylistAdapter;
-import org.opensilk.music.ui.profile.loader.PlaylistSongLoader;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.loader.LocalPlaylistSongLoader;
 
 import java.util.List;
 
@@ -44,13 +42,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import butterknife.ButterKnife;
 import dagger.Provides;
 import flow.Layout;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Subscription;
-import rx.functions.Action1;
 import rx.functions.Func1;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
@@ -66,6 +62,11 @@ public class PlaylistScreen extends Screen {
 
     public PlaylistScreen(Playlist playlist) {
         this.playlist = playlist;
+    }
+
+    @Override
+    public String getName() {
+        return super.getName() + playlist.mPlaylistName;
     }
 
     @dagger.Module (
@@ -212,7 +213,7 @@ public class PlaylistScreen extends Screen {
 
         @Inject
         public PresenterDslv(Playlist playlist,
-                             PlaylistSongLoader loader) {
+                             LocalPlaylistSongLoader loader) {
             this.playlist = playlist;
             this.loader = loader.getListObservable().cache();
         }

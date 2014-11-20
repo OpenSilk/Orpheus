@@ -30,7 +30,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
@@ -60,6 +59,11 @@ public class ArtistScreen extends Screen {
         this.artist = artist;
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + artist.name;
+    }
+
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = {
@@ -74,12 +78,12 @@ public class ArtistScreen extends Screen {
             this.screen = screen;
         }
 
-        @Provides @Singleton
+        @Provides
         public LocalArtist provideArtist() {
             return screen.artist;
         }
 
-        @Provides @Singleton
+        @Provides
         public BasePresenter profileFrameViewBasePresenter(Presenter p) {
             return p;
         }

@@ -29,12 +29,10 @@ import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui.profile.adapter.GridAdapter;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.gallery.GenresScreen;
 import org.opensilk.music.ui2.loader.LocalGenresProfileLoader;
 
 import java.util.List;
@@ -60,6 +58,11 @@ public class GenreScreen extends Screen {
         this.genre = genre;
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + genre.mGenreName;
+    }
+
     @dagger.Module(
             addsTo = ProfileActivity.Module.class,
             injects = {
@@ -74,12 +77,12 @@ public class GenreScreen extends Screen {
             this.screen = screen;
         }
 
-        @Provides @Singleton
+        @Provides
         public Genre provideGenre() {
             return screen.genre;
         }
 
-        @Provides @Singleton
+        @Provides
         public BasePresenter profileFrameViewBasePresenter(Presenter p) {
             return p;
         }

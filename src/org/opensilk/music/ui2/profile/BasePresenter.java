@@ -18,9 +18,7 @@
 package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
-import android.view.View;
 
-import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
