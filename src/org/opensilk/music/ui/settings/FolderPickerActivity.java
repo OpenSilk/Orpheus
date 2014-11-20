@@ -25,6 +25,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -108,6 +109,11 @@ public class FolderPickerActivity extends BaseActivity {
                     .commit();
         }
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true; //dont want mediarouter
     }
 
     @Override

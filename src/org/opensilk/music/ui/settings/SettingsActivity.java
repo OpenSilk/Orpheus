@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import org.opensilk.music.AppPreferences;
@@ -61,6 +62,11 @@ public class SettingsActivity extends BaseActivity implements DaggerInjector {
     protected void onDestroy() {
         super.onDestroy();
         mGraph = null;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;//dont want mediarouter
     }
 
     @Override
