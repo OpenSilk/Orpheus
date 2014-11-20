@@ -79,10 +79,7 @@ public class ArtistFragment extends ListStickyParallaxHeaderFragment implements 
         super.onCreate(savedInstanceState);
         ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module()).inject(this);
         mArtist = getArguments().getParcelable(Config.EXTRA_DATA);
-        mAdapter = new GridAdapter(getActivity(),
-                mRequestor,
-                mAdapterAlbumOverflowHandler,
-                mAdapterSongGroupOverflowHandler);
+        mAdapter = new GridAdapter(getActivity());
         // start the loader
         getLoaderManager().initLoader(0, null, this);
         setHasOptionsMenu(true);

@@ -41,9 +41,12 @@ import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.widgets.GridTileDescription;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
+import mortar.Mortar;
 import rx.subscriptions.CompositeSubscription;
 
 /**
@@ -51,17 +54,13 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class GridAdapter extends ArrayAdapter<Object> {
 
-    final ArtworkRequestManager artworkRequestor;
-    final OverflowHandlers.LocalAlbums albumsOverflowHandler;
-    final OverflowHandlers.LocalSongGroups songGroupOverflowHandler;
+    @Inject ArtworkRequestManager artworkRequestor;
+    @Inject OverflowHandlers.LocalAlbums albumsOverflowHandler;
+    @Inject OverflowHandlers.LocalSongGroups songGroupOverflowHandler;
 
-    public GridAdapter(Context context, ArtworkRequestManager requestor,
-                       OverflowHandlers.LocalAlbums albumsOverflowHandler,
-                       OverflowHandlers.LocalSongGroups songGroupOverflowHandler) {
+    public GridAdapter(Context context) {
         super(context, -1);
-        this.artworkRequestor = requestor;
-        this.albumsOverflowHandler = albumsOverflowHandler;
-        this.songGroupOverflowHandler = songGroupOverflowHandler;
+        Mortar.inject(getContext(), this);
     }
 
     @Override

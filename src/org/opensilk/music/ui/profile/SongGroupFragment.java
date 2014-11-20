@@ -104,7 +104,7 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment {
         mSongGroup = getArguments().getParcelable(Config.EXTRA_DATA);
         ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module(mSongGroup)).inject(this);
 
-        mAdapter = new SongCollectionAdapter(getActivity(), mAdapterOverflowHandler, mRequestor, false);
+        mAdapter = new SongCollectionAdapter(getActivity(), false);
         // start the loader
         mLoaderSubscription = mLoader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
             @Override

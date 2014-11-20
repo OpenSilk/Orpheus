@@ -110,7 +110,7 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
         mPlaylist = getArguments().getParcelable(Config.EXTRA_DATA);
         ((DaggerInjector) getActivity()).getObjectGraph().plus(new Module(mPlaylist)).inject(this);
 
-        mAdapter = new PlaylistAdapter(getActivity(), mAdapterOverflowHandler, mRequestor, mPlaylist.mPlaylistId);
+        mAdapter = new PlaylistAdapter(getActivity(), mPlaylist.mPlaylistId);
         // start the loader
         mLoaderSubscription = mLoader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
             @Override

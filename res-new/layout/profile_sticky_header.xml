@@ -18,6 +18,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sticky_header_container"
     android:orientation="vertical"
     android:layout_height="wrap_content"
@@ -33,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:orientation="vertical"
-        android:gravity="center_vertical"
+        android:gravity="center"
         style="?gridTileDescriptionStyle">
 
         <!-- Album title / artist -->
@@ -42,17 +43,15 @@
             android:id="@+id/info_title"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:textAppearance="?android:textAppearanceMedium"/>
+            android:textAppearance="?android:textAppearanceMedium"
+            tools:text="Title"/>
 
         <TextView
             android:id="@+id/info_subtitle"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:textAppearance="?android:textAppearance"/>
+            android:textAppearance="?android:textAppearance"
+            tools:text="Subtitle"/>
 
     </LinearLayout>
 

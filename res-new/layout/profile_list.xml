@@ -16,12 +16,22 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<resources>
+<org.opensilk.music.ui2.profile.ProfileView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <!--Increase dialog height from 60%-->
-    <item name="dialog_fixed_height_major" type="dimen">80%</item>
-    <item name="dialog_fixed_height_minor" type="dimen">90%</item>
-    <!--Increase dialog width from 60%-->
-    <item name="dialog_fixed_width_major" type="dimen">60%</item>
-    <item name="dialog_fixed_width_minor" type="dimen">90%</item>
-</resources>
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <include
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        layout="@layout/profile_sticky_header"/>
+
+</org.opensilk.music.ui2.profile.ProfileView>

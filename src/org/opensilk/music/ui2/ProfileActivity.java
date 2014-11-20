@@ -26,6 +26,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrew.apollo.Config;
+import com.andrew.apollo.model.Genre;
+import com.andrew.apollo.model.LocalAlbum;
+import com.andrew.apollo.model.LocalArtist;
+import com.andrew.apollo.model.LocalSongGroup;
+import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -34,16 +39,22 @@ import org.opensilk.common.util.ViewUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui.profile.AlbumFragment;
-import org.opensilk.music.ui.profile.ArtistFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
 import org.opensilk.music.ui.profile.PlaylistFragment;
 import org.opensilk.music.ui.profile.SongGroupFragment;
 import org.opensilk.music.ui2.main.Main;
 import org.opensilk.music.ui2.main.QueueScreen;
 import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.ui2.profile.AlbumScreen;
+import org.opensilk.music.ui2.profile.ArtistScreen;
+import org.opensilk.music.ui2.profile.GenreScreen;
+import org.opensilk.music.ui2.profile.PlaylistScreen;
+import org.opensilk.music.ui2.profile.SongGroupScreen;
 
+import butterknife.ButterKnife;
 import dagger.ObjectGraph;
 import flow.Flow;
+import flow.Layouts;
 import mortar.Mortar;
 
 /**
@@ -110,28 +121,26 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
         getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 
         Bundle b = getIntent().getBundleExtra(Config.EXTRA_DATA);
-        Fragment f = null;
+        Screen s;
 
         String action = getIntent().getAction();
         if (ACTION_ARTIST.equals(action)) {
-            f = ArtistFragment.newInstance(b);
+            s = new ArtistScreen(b.<LocalArtist>getParcelable(Config.EXTRA_DATA));
         } else if (ACTION_ALBUM.equals(action)) {
-            f = AlbumFragment.newInstance(b);
+            s = new AlbumScreen(b.<LocalAlbum>getParcelable(Config.EXTRA_DATA));
         } else if (ACTION_PLAYLIST.equals(action)) {
-            f = PlaylistFragment.newInstance(b);
+            s = new PlaylistScreen(b.<Playlist>getParcelable(Config.EXTRA_DATA));
         } else if (ACTION_GENRE.equals(action)) {
-            f = GenreFragment.newInstance(b);
+            s = new GenreScreen(b.<Genre>getParcelable(Config.EXTRA_DATA));
         } else if (ACTION_SONG_GROUP.equals(action)) {
-            f = SongGroupFragment.newInstance(b);
+            s = new SongGroupScreen(b.<LocalSongGroup>getParcelable(Config.EXTRA_DATA));
         } else {
             finish();
+            return;
         }
-
-        if (savedInstanceState == null && f != null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main, f)
-                    .commit();
-        }
+        MortarContextFactory cf = new MortarContextFactory();
+        View v = Layouts.createView(cf.setUpContext(s, this), s);
+        ButterKnife.<ViewGroup>findById(this, R.id.main).addView(v);
 
     }
 

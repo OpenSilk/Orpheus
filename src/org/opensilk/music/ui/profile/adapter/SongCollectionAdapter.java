@@ -41,9 +41,12 @@ import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.util.CursorHelpers;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
+import mortar.Mortar;
 import rx.subscriptions.CompositeSubscription;
 
 /**
@@ -53,17 +56,14 @@ public class SongCollectionAdapter extends ArrayAdapter<LocalSong> {
 
     protected final boolean useSimpleLayout;
 
-    final OverflowHandlers.LocalSongs overflowHandler;
-    final ArtworkRequestManager requestor;
+    @Inject OverflowHandlers.LocalSongs overflowHandler;
+    @Inject ArtworkRequestManager requestor;
 
     public SongCollectionAdapter(Context context,
-                                 OverflowHandlers.LocalSongs overflowHandler,
-                                 ArtworkRequestManager requestor,
                                  boolean useSimpleLayout) {
         super(context, 0);
-        this.overflowHandler = overflowHandler;
-        this.requestor = requestor;
         this.useSimpleLayout = useSimpleLayout;
+        Mortar.inject(context, this);
     }
 
     @Override

@@ -38,10 +38,8 @@ public class PlaylistAdapter extends SongCollectionAdapter {
     private final long playlistId;
 
     public PlaylistAdapter(Context context,
-                           OverflowHandlers.LocalSongs overflowHandler,
-                           ArtworkRequestManager requestor,
                            long playlistId) {
-        super(context, overflowHandler, requestor, false);
+        super(context, false);
         this.playlistId = playlistId;
     }
 

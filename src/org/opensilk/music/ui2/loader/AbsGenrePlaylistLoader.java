@@ -134,32 +134,23 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
     public Observable<T> performSomeMagick(Observable<LocalSong> observable,
                                            final long itemId,
                                            final String itemName) {
+        Observable<LocalSong> o = observable.subscribeOn(Schedulers.io()).share();
         //songs
-        Observable<List<Long>> songs = observable.subscribeOn(Schedulers.io()).map(new Func1<LocalSong, Long>() {
+        Observable<List<Long>> songs = o.map(new Func1<LocalSong, Long>() {
             @Override
             public Long call(LocalSong localSong) {
                 return localSong.songId;
             }
             // collect output into list
-        }).collect(new ArrayList<Long>(), new Action2<List<Long>, Long>() {
-            @Override
-            public void call(List<Long> longs, Long aLong) {
-                longs.add(aLong);
-            }
-        });
+        }).toList();
         //albums
-        Observable<List<Long>> albums = observable.subscribeOn(Schedulers.io()).map(new Func1<LocalSong, Long>() {
+        Observable<List<Long>> albums = o.map(new Func1<LocalSong, Long>() {
             @Override
             public Long call(LocalSong localSong) {
                 return localSong.albumId;
             }
             //only want unique albums, //collect output into list
-        }).distinct().collect(new ArrayList<Long>(), new Action2<List<Long>, Long>() {
-            @Override
-            public void call(List<Long> longs, Long aLong) {
-                longs.add(aLong);
-            }
-        });
+        }).distinct().toList();
         // zip the songs and albums into a playlist
         return Observable.zip(songs, albums,
                 new Func2<List<Long>, List<Long>, T>() {
