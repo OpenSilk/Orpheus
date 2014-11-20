@@ -24,6 +24,7 @@ import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 import com.andrew.apollo.model.Genre;
@@ -31,9 +32,14 @@ import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.utils.MusicUtils;
+import com.google.gson.Gson;
 
 import org.opensilk.common.flow.AppFlow;
+import org.opensilk.common.flow.GsonParcer;
 import org.opensilk.common.flow.Screen;
+import org.opensilk.common.mortarflow.AppFlowPresenter;
+import org.opensilk.common.mortarflow.FrameScreenSwitcherView;
 import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.util.ViewUtils;
 import org.opensilk.music.R;
@@ -42,6 +48,8 @@ import org.opensilk.music.ui.profile.AlbumFragment;
 import org.opensilk.music.ui.profile.GenreFragment;
 import org.opensilk.music.ui.profile.PlaylistFragment;
 import org.opensilk.music.ui.profile.SongGroupFragment;
+import org.opensilk.music.ui2.event.MakeToast;
+import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.ui2.main.Main;
 import org.opensilk.music.ui2.main.QueueScreen;
 import org.opensilk.common.dagger.DaggerInjector;
@@ -51,16 +59,23 @@ import org.opensilk.music.ui2.profile.GenreScreen;
 import org.opensilk.music.ui2.profile.PlaylistScreen;
 import org.opensilk.music.ui2.profile.SongGroupScreen;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import dagger.ObjectGraph;
+import dagger.Provides;
 import flow.Flow;
 import flow.Layouts;
+import flow.Parcer;
 import mortar.Mortar;
 
 /**
  * Created by drew on 11/8/14.
  */
-public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjector {
+public class ProfileActivity extends BaseSwitcherActivity implements
+        DaggerInjector {
 
     public static class Blueprint extends BaseMortarActivity.Blueprint {
 
@@ -139,12 +154,7 @@ public class ProfileActivity extends BaseSwitcherActivity implements DaggerInjec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setUpButtonEnabled(true);
-        getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
-
         AppFlow.loadInitialScreen(this);
-
     }
 
     /*

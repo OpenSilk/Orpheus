@@ -112,33 +112,7 @@ public class GenreScreen extends Screen {
             super.onLoad(savedInstanceState);
             setupActionBar();
 
-            final int num = Math.min(getNumArtwork(), 4);
-            switch (num) {
-                case 4:
-                    if (getView().mArtwork4 != null) {
-                        requestor.newAlbumRequest(getView().mArtwork4, null, genre.mAlbumIds[3], ArtworkType.LARGE);
-                    }
-                    //fall
-                case 3:
-                    if (getView().mArtwork3 != null) {
-                        requestor.newAlbumRequest(getView().mArtwork3, null, genre.mAlbumIds[2], ArtworkType.LARGE);
-                    }
-                    //fall
-                case 2:
-                    if (getView().mArtwork2 != null) {
-                        requestor.newAlbumRequest(getView().mArtwork2, null, genre.mAlbumIds[1], ArtworkType.LARGE);
-                    }
-                    //fall
-                case 1:
-                    if (getView().mArtwork != null) {
-                        requestor.newAlbumRequest(getView().mArtwork, null, genre.mAlbumIds[0], ArtworkType.LARGE);
-                    }
-                    break;
-                default:
-                    if (getView().mArtwork != null) {
-                        getView().mArtwork.setDefaultImage();
-                    }
-            }
+            loadMultiArtwork(genre.mAlbumIds);
 
             final GridAdapter adapter = new GridAdapter(getView().getContext());
             getView().mList.setAdapter(adapter);

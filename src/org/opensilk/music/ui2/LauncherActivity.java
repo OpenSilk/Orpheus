@@ -59,7 +59,7 @@ import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 
-public class LauncherActivity extends BaseSwitcherActivity implements
+public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         DrawerOwner.Activity {
 
     public static class Blueprint extends BaseMortarActivity.Blueprint {
@@ -77,7 +77,7 @@ public class LauncherActivity extends BaseSwitcherActivity implements
 
     @dagger.Module (
             includes = {
-                    BaseSwitcherActivity.Module.class,
+                    BaseSwitcherToolbarActivity.Module.class,
                     Main.Module.class,
                     Nav.Module.class
             },

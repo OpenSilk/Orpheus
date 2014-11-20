@@ -57,13 +57,12 @@ import mortar.Blueprint;
  * Created by drew on 11/7/14.
  */
 public class BaseSwitcherActivity extends BaseMortarActivity implements
-        AppFlowPresenter.Activity,
-        ActionBarOwner.Activity {
+        AppFlowPresenter.Activity {
 
     @dagger.Module(
             includes = {
                     BaseMortarActivity.Module.class,
-                    ActionBarOwner.Module.class,
+                    ActionBarOwner.Module.class, //Some classes need this even if there isnt an actionbar
                     LoaderModule.class,
             }, library = true
     )
@@ -78,14 +77,9 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
         }
     }
 
-    @Inject @Named("activity") protected EventBus mBus;
-    @Inject protected ActionBarOwner mActionBarOwner;
     @Inject AppFlowPresenter<BaseSwitcherActivity> mAppFlowPresenter;
 
     @InjectView(R.id.main) protected FrameScreenSwitcherView mContainer;
-    @InjectView(R.id.main_toolbar) protected Toolbar mToolbar;
-
-    protected ActionBarOwner.MenuConfig mMenuConfig;
 
     @Override
     public Screen getDefaultScreen() {
@@ -100,64 +94,32 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBus.register(this);
-
         mAppFlowPresenter.takeView(this);
-
         setupView();
         ButterKnife.inject(this);
-
-        setSupportActionBar(mToolbar);
-        mActionBarOwner.takeView(this);
-
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (mBus != null) mBus.unregister(this);
-
         if (mAppFlowPresenter != null) mAppFlowPresenter.dropView(this);
-        if (mActionBarOwner != null) mActionBarOwner.dropView(this);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (mMenuConfig != null) {
-            for (int item : mMenuConfig.menus) {
-                getMenuInflater().inflate(item, menu);
-            }
-            for (CustomMenuItem item : mMenuConfig.customMenus) {
-                menu.add(item.groupId, item.itemId, item.order, item.title)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                if (item.iconRes >= 0) {
-                    menu.findItem(item.itemId)
-                            .setIcon(item.iconRes)
-                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                }
-            }
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (mMenuConfig != null
-                && mMenuConfig.actionHandler != null
-                && mMenuConfig.actionHandler.call(item.getItemId())) {
-            return true;
-        }
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                return mContainer.onUpPressed();
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
         if (!mContainer.onBackPressed()) {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                return mContainer.onUpPressed() || super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -197,38 +159,4 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
         mContainer.showScreen(screen, direction, callback);
     }
 
-    /*
-     * ActionBarOwner.Activity
-     */
-
-    @Override
-    public void setUpButtonEnabled(boolean enabled) {
-        getSupportActionBar().setDisplayHomeAsUpEnabled(enabled);
-    }
-
-    @Override
-    public void setTitle(int titleId) {
-        getSupportActionBar().setTitle(titleId);
-    }
-
-    @Override
-    public void setTitle(CharSequence title) {
-        getSupportActionBar().setTitle(title);
-    }
-
-    @Override
-    public void setSubtitle(int subTitleRes) {
-        getSupportActionBar().setSubtitle(subTitleRes);
-    }
-
-    @Override
-    public void setSubtitle(CharSequence title) {
-        getSupportActionBar().setSubtitle(title);
-    }
-
-    @Override
-    public void setMenu(ActionBarOwner.MenuConfig menuConfig) {
-        mMenuConfig = menuConfig;
-        supportInvalidateOptionsMenu();
-    }
 }

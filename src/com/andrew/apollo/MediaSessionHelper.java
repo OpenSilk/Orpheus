@@ -322,7 +322,8 @@ public class MediaSessionHelper {
                     .putString(MediaMetadata.METADATA_KEY_ALBUM, mService.getAlbumName())
                     .putString(MediaMetadata.METADATA_KEY_TITLE, mService.getTrackName())
                     .putLong(MediaMetadata.METADATA_KEY_DURATION, mService.duration())
-                    .putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI, mService.getArtworkUri().toString())
+                    .putString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
+                            mService.getArtworkUri() != null ? mService.getArtworkUri().toString() : null)
                     .build();
         }
 

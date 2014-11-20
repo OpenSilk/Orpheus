@@ -179,10 +179,10 @@ public class SongGroupFragment extends ListStickyParallaxHeaderFragment {
     protected int getHeaderLayout() {
         if (mSongGroup.albumIds.length >= 4) {
             numHeros = 4;
-            return R.layout.profile_hero_quad_header;
+            return R.layout.profile_hero4;
         } else if (mSongGroup.albumIds.length >= 2) {
             numHeros = 2;
-            return R.layout.profile_hero_dual_header;
+            return R.layout.profile_hero2;
         } else {
             numHeros = 0;
             return super.getHeaderLayout();

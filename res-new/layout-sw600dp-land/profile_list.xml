@@ -26,11 +26,11 @@
 
     <LinearLayout android:orientation="horizontal"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent">
+                  android:layout_height="match_parent"
+                  android:baselineAligned="false">
 
         <include
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             layout="@layout/profile_sticky_header"/>
 
@@ -38,7 +38,8 @@
             android:id="@android:id/list"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:minWidth="300dp"/>
 
     </LinearLayout>
 

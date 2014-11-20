@@ -20,6 +20,7 @@ package org.opensilk.music.ui2.profile;
 import android.content.Context;
 
 import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
 import mortar.ViewPresenter;
@@ -55,5 +56,46 @@ public abstract class BasePresenter extends ViewPresenter<ProfileView> {
     abstract String getTitle(Context context);
     abstract String getSubtitle(Context context);
     abstract int getNumArtwork();
+
+    void loadMultiArtwork(long[] albumIds) {
+        final int num = getNumArtwork();
+        if (getView().mArtwork != null) {
+            if (num >= 1) {
+                requestor.newAlbumRequest(getView().mArtwork, null, albumIds[0], ArtworkType.LARGE);
+            } else {
+                getView().mArtwork.setDefaultImage();
+            }
+        }
+        if (getView().mArtwork2 != null) {
+            if (num >= 2) {
+                requestor.newAlbumRequest(getView().mArtwork2, null, albumIds[1], ArtworkType.LARGE);
+            } else {
+                // never get here
+                getView().mArtwork2.setDefaultImage();
+            }
+        }
+        if (getView().mArtwork3 != null) {
+            if (num >= 3) {
+                requestor.newAlbumRequest(getView().mArtwork3, null, albumIds[2], ArtworkType.LARGE);
+            } else if (num >= 2) {
+                //put the second image here, first image will be put in 4th spot to crisscross
+                requestor.newAlbumRequest(getView().mArtwork3, null, albumIds[1], ArtworkType.LARGE);
+            } else {
+                // never get here
+                getView().mArtwork3.setDefaultImage();
+            }
+        }
+        if (getView().mArtwork4 != null) {
+            if (num >= 4) {
+                requestor.newAlbumRequest(getView().mArtwork4, null, albumIds[3], ArtworkType.LARGE);
+            } else if (num >= 2) {
+                //3 -> loopback, 2 -> put the first image here for crisscross
+                requestor.newAlbumRequest(getView().mArtwork4, null, albumIds[0], ArtworkType.LARGE);
+            } else {
+                //never get here
+                getView().mArtwork4.setDefaultImage();
+            }
+        }
+    }
 
 }

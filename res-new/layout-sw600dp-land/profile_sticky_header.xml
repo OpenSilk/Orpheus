@@ -16,34 +16,58 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@id/sticky_header"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:gravity="top"
+    android:id="@id/sticky_header"
+    style="?gridTileDescriptionStyle"
+    >
 
-    <!-- Album title / artist -->
-
-    <TextView
-        android:id="@id/info_title"
-        android:layout_height="wrap_content"
+    <org.opensilk.music.widgets.SquareFrameLayout
+        android:id="@+id/hero_holder"
+        android:layout_height="match_parent"
         android:layout_width="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:textAppearance="?android:textAppearanceLarge"
-        tools:text="Title"/>
+        android:layout_marginBottom="?actionBarSize"/>
 
-    <TextView
-        android:id="@id/info_subtitle"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:textAppearance="?android:textAppearanceMedium"
-        tools:text="Subtitle"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="bottom"
+        >
 
-</LinearLayout>
+        <!-- Album title / artist -->
+
+        <TextView
+            android:id="@id/info_title"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:textAppearance="?android:textAppearanceLarge"
+            tools:text="Title"/>
+
+        <TextView
+            android:id="@id/info_subtitle"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:textAppearance="?android:textAppearanceMedium"
+            tools:text="Subtitle"/>
+
+    </LinearLayout>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@id/profile_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_gravity="top"
+        style="?toolbarTheme"/>
+
+</FrameLayout>

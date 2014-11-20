@@ -91,6 +91,7 @@ public class BaseActivity extends ActionBarActivity {
 
     @Inject protected AppPreferences mSettings;
     @Inject protected MusicServiceConnection mMusicService;
+    @Inject @Named("activity") protected EventBus mBus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

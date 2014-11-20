@@ -121,7 +121,7 @@ public class ListStickyParallaxHeaderFragment extends Fragment {
     }
 
     protected int getHeaderLayout() {
-        return R.layout.profile_hero_header;
+        return R.layout.profile_hero;
     }
 
     protected int getListLayout() {

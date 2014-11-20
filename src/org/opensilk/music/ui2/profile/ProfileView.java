@@ -19,13 +19,17 @@ package org.opensilk.music.ui2.profile;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.graphics.Palette;
+import android.support.v7.internal.widget.TintManager;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,6 +40,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.andrew.apollo.utils.ThemeHelper;
 import com.etsy.android.grid.StaggeredGridView;
 
 import org.opensilk.common.util.ThemeUtils;
@@ -65,6 +70,7 @@ public class ProfileView extends FrameLayout {
     @InjectView(R.id.dummy) @Optional View mHeaderDummy;
     @InjectView(R.id.info_title) TextView mTitle;
     @InjectView(R.id.info_subtitle) TextView mSubtitle;
+    @InjectView(R.id.profile_toolbar) Toolbar mToolbar;
     View mListHeader;
     FrameLayout mHeroContainer;
     AnimatedImageView mArtwork;
@@ -88,21 +94,17 @@ public class ProfileView extends FrameLayout {
         int numArtwork = presenter.getNumArtwork();
         int headerlayout;
         if (numArtwork >= 4) {
-            headerlayout = R.layout.profile_hero_quad_header;
+            headerlayout = R.layout.profile_hero4;
         } else if (numArtwork >= 2) {
-            headerlayout = R.layout.profile_hero_dual_header;
+            headerlayout = R.layout.profile_hero2;
         } else {
-            headerlayout = R.layout.profile_hero_header;
+            headerlayout = R.layout.profile_hero;
         }
         mListHeader = LayoutInflater.from(getContext()).inflate(headerlayout, null);
         mHeroContainer = ButterKnife.findById(mListHeader, R.id.hero_container);
-        if (numArtwork >= 4) {
-            mArtwork4 = ButterKnife.findById(mHeroContainer, R.id.hero_image4);
-            mArtwork3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
-        }
-        if (numArtwork >= 2) {
-            mArtwork2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
-        }
+        mArtwork4 = ButterKnife.findById(mHeroContainer, R.id.hero_image4);
+        mArtwork3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
+        mArtwork2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
         mArtwork = ButterKnife.findById(mHeroContainer, R.id.hero_image);
         if (mStickyHeaderContainer != null) {
             // portrait mode header gets added to list
@@ -117,12 +119,19 @@ public class ProfileView extends FrameLayout {
             mList.setOnScrollListener(mScrollListener);
             setupDummyHeader();
         } else {
-            //landscape mode header is inserted into sticky container (which isnt actually sticky)
-            mStickyHeader.addView(mListHeader, 0);
+            //landscape mode header is added to the placeholder view
+            ButterKnife.<ViewGroup>findById(this, R.id.hero_holder).addView(mListHeader);
         }
         mTitle.setText(presenter.getTitle(getContext()));
         mSubtitle.setText(presenter.getSubtitle(getContext()));
-        presenter.takeView(this);
+        TintManager tm = new TintManager(mToolbar.getContext());
+        mToolbar.setNavigationIcon(tm.getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha));
+        mToolbar.setNavigationOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                findActivity(getContext()).onSupportNavigateUp();
+            }
+        });
     }
 
     @Override
@@ -181,6 +190,15 @@ public class ProfileView extends FrameLayout {
         return animator;
     }
 
+    static ActionBarActivity findActivity(Context context) {
+        if (context instanceof ActionBarActivity) {
+            return (ActionBarActivity) context;
+        } else if (context instanceof ContextWrapper) {
+            return findActivity(((ContextWrapper) context).getBaseContext());
+        }
+        throw new IllegalArgumentException("Unknown context type: " + context.getClass());
+    }
+
     protected final PaletteObserver mPaletteObserver = new PaletteObserver() {
         @Override
         public void onNext(PaletteResponse paletteResponse) {
@@ -188,21 +206,23 @@ public class ProfileView extends FrameLayout {
             Palette.Swatch swatch = mLightTheme ? palette.getLightMutedSwatch() : palette.getDarkMutedSwatch();
             if (swatch == null) swatch = palette.getMutedSwatch();
             if (swatch != null) {
+                //int color = ThemeHelper.setColorAlpha(swatch.getRgb(), 0x99);//60%
+                int color = swatch.getRgb();
                 if (mHeaderDummy != null) {
                     final ClipDrawable dummyBackground =
-                            new ClipDrawable(new ColorDrawable(swatch.getRgb()), Gravity.BOTTOM, ClipDrawable.VERTICAL);
+                            new ClipDrawable(new ColorDrawable(color), Gravity.BOTTOM, ClipDrawable.VERTICAL);
                     dummyBackground.setLevel(mIsStuck ? 10000 : 0);
                     mHeaderDummy.setBackgroundDrawable(dummyBackground);
                 }
                 if (paletteResponse.shouldAnimate) {
                     final Drawable d = mStickyHeader.getBackground();
-                    final Drawable d2 = new ColorDrawable(swatch.getRgb());
+                    final Drawable d2 = new ColorDrawable(color);
                     TransitionDrawable td = new TransitionDrawable(new Drawable[]{d,d2});
                     td.setCrossFadeEnabled(true);
                     mStickyHeader.setBackgroundDrawable(td);
                     td.startTransition(SquareImageView.TRANSITION_DURATION);
                 } else {
-                    mStickyHeader.setBackgroundColor(swatch.getRgb());
+                    mStickyHeader.setBackgroundColor(color);
                 }
             }
         }

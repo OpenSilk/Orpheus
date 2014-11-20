@@ -118,33 +118,7 @@ public class SongGroupScreen extends Screen {
             super.onLoad(savedInstanceState);
             setupActionBar();
 
-            final int num = Math.min(getNumArtwork(), 4);
-            switch (num) {
-                case 4:
-                    if (getView().mArtwork4 != null) {
-                        requestor.newAlbumRequest(getView().mArtwork4, null, songGroup.albumIds[3], ArtworkType.LARGE);
-                    }
-                    //fall
-                case 3:
-                    if (getView().mArtwork3 != null) {
-                        requestor.newAlbumRequest(getView().mArtwork3, null, songGroup.albumIds[2], ArtworkType.LARGE);
-                    }
-                    //fall
-                case 2:
-                    if (getView().mArtwork2 != null) {
-                        requestor.newAlbumRequest(getView().mArtwork2, null, songGroup.albumIds[1], ArtworkType.LARGE);
-                    }
-                    //fall
-                case 1:
-                    if (getView().mArtwork != null) {
-                        requestor.newAlbumRequest(getView().mArtwork, null, songGroup.albumIds[0], ArtworkType.LARGE);
-                    }
-                    break;
-                default:
-                    if (getView().mArtwork != null) {
-                        getView().mArtwork.setDefaultImage();
-                    }
-            }
+            loadMultiArtwork(songGroup.albumIds);
 
             final SongCollectionAdapter adapter = new SongCollectionAdapter(getView().getContext(), false);
             getView().mList.setAdapter(adapter);

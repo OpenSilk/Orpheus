@@ -199,9 +199,9 @@ public class PlaylistFragment extends ListStickyParallaxHeaderFragment implement
     @Override
     protected int getHeaderLayout() {
         if (mPlaylist.mAlbumIds.length >= 4) {
-            return R.layout.profile_hero_quad_header;
+            return R.layout.profile_hero4;
         } else if (mPlaylist.mAlbumIds.length >= 2) {
-            return R.layout.profile_hero_dual_header;
+            return R.layout.profile_hero2;
         } else {
             return super.getHeaderLayout();
         }

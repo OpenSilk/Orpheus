@@ -50,7 +50,7 @@ import static android.app.SearchManager.QUERY;
 /**
  * Created by drew on 11/9/14.
  */
-public class SearchActivity extends BaseSwitcherActivity implements SearchView.OnQueryTextListener {
+public class SearchActivity extends BaseSwitcherToolbarActivity implements SearchView.OnQueryTextListener {
 
     public static class Blueprint extends BaseMortarActivity.Blueprint {
 
@@ -67,7 +67,7 @@ public class SearchActivity extends BaseSwitcherActivity implements SearchView.O
 
     @dagger.Module (
             includes = {
-                    BaseSwitcherActivity.Module.class,
+                    BaseSwitcherToolbarActivity.Module.class,
                     Main.Module.class,
             },
             injects = SearchActivity.class

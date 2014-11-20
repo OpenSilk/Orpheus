@@ -19,6 +19,8 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSong;
@@ -154,27 +156,20 @@ public class AlbumScreen extends Screen {
         }
 
         void setupActionBar() {
-            actionBarOwner.setConfig(
-                new ActionBarOwner.Config.Builder()
-                    .upButtonEnabled(true)
-                    .withMenuConfig(
-                            new ActionBarOwner.MenuConfig.Builder()
-                                    .withMenus(OverflowHandlers.LocalAlbums.MENUS)
-                                    .setActionHandler(new Func1<Integer, Boolean>() {
-                                        @Override
-                                        public Boolean call(Integer integer) {
-                                            try {
-                                                return albumsOverflowHandler.handleClick(
-                                                        OverflowAction.valueOf(integer), album);
-                                            } catch (IllegalArgumentException e) {
-                                                return false;
-                                            }
-                                        }
-                                    })
-                                    .build()
-                    )
-                    .build()
-            );
+            for (int m : OverflowHandlers.LocalAlbums.MENUS) {
+                getView().mToolbar.inflateMenu(m);
+            }
+            getView().mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    try {
+                        return albumsOverflowHandler.handleClick(
+                                OverflowAction.valueOf(menuItem.getItemId()), album);
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+                }
+            });
         }
     }
 

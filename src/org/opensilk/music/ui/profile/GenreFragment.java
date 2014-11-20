@@ -141,9 +141,9 @@ public class GenreFragment extends ListStickyParallaxHeaderFragment implements L
     @Override
     protected int getHeaderLayout() {
         if (mGenre.mAlbumIds.length >= 4) {
-            return R.layout.profile_hero_quad_header;
+            return R.layout.profile_hero4;
         } else if (mGenre.mAlbumIds.length >= 2) {
-            return R.layout.profile_hero_dual_header;
+            return R.layout.profile_hero2;
         } else {
             return super.getHeaderLayout();
         }
