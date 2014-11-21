@@ -29,7 +29,6 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
@@ -72,7 +71,7 @@ public class PlaylistScreen extends Screen {
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = {
-                    ProfileView.class,
+                    ProfilePortraitView.class,
                     PlaylistDragSortView.class,
                     PlaylistAdapter.class,
             }
@@ -95,13 +94,13 @@ public class PlaylistScreen extends Screen {
         }
 
         @Provides @Singleton
-        public BasePresenter profileFrameViewBasePresenter(Presenter p) {
+        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
             return p;
         }
     }
 
     @Singleton
-    public static class Presenter extends BasePresenter {
+    public static class Presenter extends BasePresenter<ProfilePortraitView> {
 
         final OverflowHandlers.Playlists playlistOverflowHandler;
         final Playlist playlist;
@@ -121,7 +120,13 @@ public class PlaylistScreen extends Screen {
             super.onLoad(savedInstanceState);
             setupActionBar();
 
-            loadMultiArtwork(playlist.mAlbumIds);
+            loadMultiArtwork(requestor,
+                    playlist.mAlbumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
         }
 
         @Override
@@ -137,6 +142,16 @@ public class PlaylistScreen extends Screen {
         @Override
         int getNumArtwork() {
             return playlist.mAlbumIds.length;
+        }
+
+        @Override
+        ProfileAdapter makeAdapter(Context context) {
+            return new ProfileAdapter(context, true, isLastAdded());
+        }
+
+        @Override
+        boolean isGrid() {
+            return false;
         }
 
         void setupActionBar() {

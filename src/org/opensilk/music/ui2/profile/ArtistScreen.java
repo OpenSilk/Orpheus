@@ -43,6 +43,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Layout;
+import mortar.MortarScope;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -67,8 +68,9 @@ public class ArtistScreen extends Screen {
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = {
-                    ProfileView.class,
+                    ProfilePortraitView.class,
                     GridAdapter.class,
+                    ProfileAdapter.class
             }
     )
     public static class Module {
@@ -84,13 +86,13 @@ public class ArtistScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter profileFrameViewBasePresenter(Presenter p) {
+        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
             return p;
         }
     }
 
     @Singleton
-    public static class Presenter extends BasePresenter {
+    public static class Presenter extends BasePresenter<ProfilePortraitView> {
 
         final OverflowHandlers.LocalArtists artistsOverflowHandler;
         final LocalArtist artist;
@@ -116,13 +118,11 @@ public class ArtistScreen extends Screen {
             requestor.newArtistRequest(getView().mArtwork, getView().mPaletteObserver,
                     new ArtInfo(artist.name, null, null), ArtworkType.LARGE);
 
-            final GridAdapter adapter = new GridAdapter(getView().getContext());
-            getView().mList.setAdapter(adapter);
             loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
                 @Override
                 public void onNext(List<Object> objects) {
                     if (getView() != null) {
-                        adapter.addAll(objects);
+                        getView().mAdapter.addAll(objects);
                     }
                 }
             });
@@ -142,6 +142,16 @@ public class ArtistScreen extends Screen {
         @Override
         int getNumArtwork() {
             return 1;
+        }
+
+        @Override
+        ProfileAdapter makeAdapter(Context context) {
+            return new ProfileAdapter(context);
+        }
+
+        @Override
+        boolean isGrid() {
+            return true;
         }
 
         void setupActionbar() {

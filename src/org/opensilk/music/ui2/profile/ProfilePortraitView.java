@@ -29,12 +29,17 @@ import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.internal.widget.TintManager;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -55,19 +60,20 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
+import hugo.weaving.DebugLog;
 import mortar.Mortar;
 
 /**
  * Created by drew on 11/18/14.
  */
-public class ProfileView extends FrameLayout {
+public class ProfilePortraitView extends FrameLayout {
 
-    @Inject BasePresenter presenter;
+    @Inject BasePresenter<ProfilePortraitView> presenter;
 
-    @InjectView(android.R.id.list) AbsListView mList;
-    @InjectView(R.id.sticky_header_container) @Optional View mStickyHeaderContainer;
+    @InjectView(android.R.id.list) RecyclerView mList;
+    @InjectView(R.id.sticky_header_container) View mStickyHeaderContainer;
     @InjectView(R.id.sticky_header) ViewGroup mStickyHeader;
-    @InjectView(R.id.dummy) @Optional View mHeaderDummy;
+    @InjectView(R.id.dummy) View mHeaderDummy;
     @InjectView(R.id.info_title) TextView mTitle;
     @InjectView(R.id.info_subtitle) TextView mSubtitle;
     View mListHeader;
@@ -80,7 +86,9 @@ public class ProfileView extends FrameLayout {
     boolean mLightTheme;
     boolean mIsStuck;
 
-    public ProfileView(Context context, AttributeSet attrs) {
+    ProfileAdapter mAdapter;
+
+    public ProfilePortraitView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) Mortar.inject(getContext(), this);
         mLightTheme = ThemeUtils.isLightTheme(getContext());
@@ -105,24 +113,31 @@ public class ProfileView extends FrameLayout {
         mArtwork3 = ButterKnife.findById(mHeroContainer, R.id.hero_image3);
         mArtwork2 = ButterKnife.findById(mHeroContainer, R.id.hero_image2);
         mArtwork = ButterKnife.findById(mHeroContainer, R.id.hero_image);
-        if (mStickyHeaderContainer != null) {
-            // portrait mode header gets added to list
-            if (mList instanceof ListView) {
-                ((ListView) mList).addHeaderView(mListHeader);
-            } else if (mList instanceof StaggeredGridView) {
-                ((StaggeredGridView) mList).addHeaderView(mListHeader);
-            } else {
-                throw new RuntimeException("List must extend ListView or StaggeredGridView");
-            }
-            // for parallax
-            mList.setOnScrollListener(mScrollListener);
-            setupDummyHeader();
-        } else {
-            //landscape mode header is added to the placeholder view
-            ButterKnife.<ViewGroup>findById(this, R.id.hero_holder).addView(mListHeader);
-        }
+
+        mAdapter = presenter.makeAdapter(getContext());
+        mAdapter.addHeader(mListHeader);
+
+        mList.setAdapter(mAdapter);
+        mList.setLayoutManager(getLayoutManager(getContext()));
+
+        // for parallax
+        mList.setOnScrollListener(mScrollListener2);
+
+        // sticky header
         mTitle.setText(presenter.getTitle(getContext()));
         mSubtitle.setText(presenter.getSubtitle(getContext()));
+        setupDummyHeader();
+        mList.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                ViewTreeObserver o = mList.getViewTreeObserver();
+                if (o.isAlive()) {
+                    o.removeOnPreDrawListener(this);
+                }
+                positionStickyHeader();
+                return true;
+            }
+        });
     }
 
     @Override
@@ -157,12 +172,54 @@ public class ProfileView extends FrameLayout {
         return ss;
     }
 
+    RecyclerView.LayoutManager getLayoutManager(Context context) {
+        if (presenter.isGrid()) {
+            return makeGridLayoutManager(context);
+        } else {
+            return makeListLayoutManager(context);
+        }
+    }
+
+    RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
+        final int numCols = context.getResources().getInteger(R.integer.profile_grid_cols_vertical);
+        GridLayoutManager glm = new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
+        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return (position == 0) ? numCols : 1;
+            }
+        });
+        return glm;
+    }
+
+    RecyclerView.LayoutManager makeListLayoutManager(Context context) {
+        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+    }
+
     void setupDummyHeader() {
         if (mHeaderDummy != null) {
             //setup the dummy header background with the same color as the stickyheader
             final ClipDrawable dummyBackground = new ClipDrawable(mStickyHeader.getBackground(), Gravity.BOTTOM, ClipDrawable.VERTICAL);
             dummyBackground.setLevel(mIsStuck ? 10000 : 0);
             mHeaderDummy.setBackgroundDrawable(dummyBackground);
+        }
+    }
+
+    void positionStickyHeader() {
+        // sticky header
+        final int top = mListHeader.getTop();
+        final int stickyHeight = mStickyHeaderContainer.getMeasuredHeight();
+        final int headerHeight = mListHeader.getMeasuredHeight();
+        final int delta = headerHeight - stickyHeight;
+        final int pos = delta + top;
+        // reposition header
+        mStickyHeaderContainer.setTranslationY(Math.max(pos,0));
+        if (pos < 0 && !mIsStuck) {
+            mIsStuck = true;
+            makeSlideAnimator(0, 10000, (ClipDrawable)mHeaderDummy.getBackground()).start();
+        } else if (pos > 0 && mIsStuck) {
+            mIsStuck = false;
+            makeSlideAnimator(10000, 0, (ClipDrawable)mHeaderDummy.getBackground()).start();
         }
     }
 
@@ -207,6 +264,27 @@ public class ProfileView extends FrameLayout {
                     mStickyHeader.setBackgroundColor(color);
                 }
             }
+        }
+    };
+
+    final RecyclerView.OnScrollListener mScrollListener2 = new RecyclerView.OnScrollListener() {
+        @Override
+        @DebugLog
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+        }
+
+        @Override
+        @DebugLog
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            // logic here derived from http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/
+            if (mList.getChildCount() == 0) return;
+//            if (mList.getChildViewHolder(mList.getChildAt(0)).itemView == mListHeader
+//                    && mList.getChildCount() > 1) {
+//                // parallax
+//                mHeroContainer.setTranslationY(-mList.getChildAt(1).getTop() / 2);
+//            }
+            positionStickyHeader();
         }
     };
 

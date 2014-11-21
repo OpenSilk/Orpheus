@@ -19,15 +19,12 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
-import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -72,8 +69,10 @@ public class AlbumScreen extends Screen {
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = {
-                    ProfileView.class,
-                    SongCollectionAdapter.class
+                    ProfilePortraitView.class,
+
+                    SongCollectionAdapter.class,
+                    ProfileAdapter.class
             },
             library = true
     )
@@ -95,13 +94,13 @@ public class AlbumScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter profileFrameViewBasePresenter(Presenter p) {
+        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
             return p;
         }
     }
 
     @Singleton
-    public static class Presenter extends BasePresenter {
+    public static class Presenter extends BasePresenter<ProfilePortraitView> {
 
         final OverflowHandlers.LocalAlbums albumsOverflowHandler;
         final Observable<List<LocalSong>> loader;
@@ -128,13 +127,11 @@ public class AlbumScreen extends Screen {
             requestor.newAlbumRequest(getView().mArtwork, getView().mPaletteObserver,
                     new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
 
-            final SongCollectionAdapter adapter = new SongCollectionAdapter(getView().getContext(), true);
-            getView().mList.setAdapter(adapter);
             loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
                 @Override
                 public void onNext(List<LocalSong> localSongs) {
                     if (getView() != null) {
-                        adapter.addAll(localSongs);
+                        getView().mAdapter.addAll(localSongs);
                     }
                 }
             });
@@ -153,6 +150,16 @@ public class AlbumScreen extends Screen {
         @Override
         int getNumArtwork() {
             return 1;
+        }
+
+        @Override
+        ProfileAdapter makeAdapter(Context context) {
+            return new ProfileAdapter(context, true);
+        }
+
+        @Override
+        boolean isGrid() {
+            return false;
         }
 
         void setupActionBar() {

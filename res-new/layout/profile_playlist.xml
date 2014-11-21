@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.profile.ProfileView
+<org.opensilk.music.ui2.profile.ProfilePortraitView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -35,4 +35,4 @@
         android:layout_width="match_parent"
         layout="@layout/profile_sticky_header"/>
 
-</org.opensilk.music.ui2.profile.ProfileView>
+</org.opensilk.music.ui2.profile.ProfilePortraitView>

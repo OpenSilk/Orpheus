@@ -28,7 +28,6 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
@@ -66,8 +65,9 @@ public class GenreScreen extends Screen {
     @dagger.Module(
             addsTo = ProfileActivity.Module.class,
             injects = {
-                    ProfileView.class,
-                    GridAdapter.class
+                    ProfilePortraitView.class,
+                    GridAdapter.class,
+                    ProfileAdapter.class
             }
     )
     public static class Module {
@@ -83,13 +83,13 @@ public class GenreScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter profileFrameViewBasePresenter(Presenter p) {
+        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
             return p;
         }
     }
 
     @Singleton
-    public static class Presenter extends BasePresenter {
+    public static class Presenter extends BasePresenter<ProfilePortraitView> {
 
         final OverflowHandlers.Genres genreOverflowHandler;
         final Genre genre;
@@ -112,15 +112,19 @@ public class GenreScreen extends Screen {
             super.onLoad(savedInstanceState);
             setupActionBar();
 
-            loadMultiArtwork(genre.mAlbumIds);
+            loadMultiArtwork(requestor,
+                    genre.mAlbumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
 
-            final GridAdapter adapter = new GridAdapter(getView().getContext());
-            getView().mList.setAdapter(adapter);
             loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
                 @Override
                 public void onNext(List<Object> objects) {
                     if (getView() != null) {
-                        adapter.addAll(objects);
+                        getView().mAdapter.addAll(objects);
                     }
                 }
             });
@@ -140,6 +144,16 @@ public class GenreScreen extends Screen {
         @Override
         int getNumArtwork() {
             return genre.mAlbumIds.length;
+        }
+
+        @Override
+        ProfileAdapter makeAdapter(Context context) {
+            return new ProfileAdapter(context);
+        }
+
+        @Override
+        boolean isGrid() {
+            return true;
         }
 
         void setupActionBar() {

@@ -18,20 +18,23 @@
 package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
+import android.view.View;
 
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
 import mortar.ViewPresenter;
 import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 11/18/14.
  */
-public abstract class BasePresenter extends ViewPresenter<ProfileView> {
+public abstract class BasePresenter<V extends View> extends ViewPresenter<V> {
 
     final ActionBarOwner actionBarOwner;
     final ArtworkRequestManager requestor;
@@ -56,46 +59,71 @@ public abstract class BasePresenter extends ViewPresenter<ProfileView> {
     abstract String getTitle(Context context);
     abstract String getSubtitle(Context context);
     abstract int getNumArtwork();
+    abstract ProfileAdapter makeAdapter(Context context);
+    abstract boolean isGrid();
 
-    void loadMultiArtwork(long[] albumIds) {
-        final int num = getNumArtwork();
-        if (getView().mArtwork != null) {
+    static CompositeSubscription loadMultiArtwork(ArtworkRequestManager requestor,
+                                 long[] albumIds,
+                                 AnimatedImageView artwork,
+                                 AnimatedImageView artwork2,
+                                 AnimatedImageView artwork3,
+                                 AnimatedImageView artwork4) {
+        return loadMultiArtwork(requestor,
+                new CompositeSubscription(),
+                albumIds,
+                artwork,
+                artwork2,
+                artwork3,
+                artwork4
+        );
+    }
+
+    static CompositeSubscription loadMultiArtwork(ArtworkRequestManager requestor,
+                                 CompositeSubscription cs,
+                                 long[] albumIds,
+                                 AnimatedImageView artwork,
+                                 AnimatedImageView artwork2,
+                                 AnimatedImageView artwork3,
+                                 AnimatedImageView artwork4) {
+        final int num = albumIds.length;
+        if (artwork != null) {
             if (num >= 1) {
-                requestor.newAlbumRequest(getView().mArtwork, null, albumIds[0], ArtworkType.LARGE);
+                cs.add(requestor.newAlbumRequest(artwork, null, albumIds[0], ArtworkType.LARGE));
             } else {
-                getView().mArtwork.setDefaultImage();
+                artwork.setDefaultImage();
             }
         }
-        if (getView().mArtwork2 != null) {
+        if (artwork2 != null) {
             if (num >= 2) {
-                requestor.newAlbumRequest(getView().mArtwork2, null, albumIds[1], ArtworkType.LARGE);
+                cs.add(requestor.newAlbumRequest(artwork2, null, albumIds[1], ArtworkType.LARGE));
             } else {
                 // never get here
-                getView().mArtwork2.setDefaultImage();
+                artwork2.setDefaultImage();
             }
         }
-        if (getView().mArtwork3 != null) {
+        if (artwork3 != null) {
             if (num >= 3) {
-                requestor.newAlbumRequest(getView().mArtwork3, null, albumIds[2], ArtworkType.LARGE);
+                cs.add(requestor.newAlbumRequest(artwork3, null, albumIds[2], ArtworkType.LARGE));
             } else if (num >= 2) {
                 //put the second image here, first image will be put in 4th spot to crisscross
-                requestor.newAlbumRequest(getView().mArtwork3, null, albumIds[1], ArtworkType.LARGE);
+                cs.add(requestor.newAlbumRequest(artwork3, null, albumIds[1], ArtworkType.LARGE));
             } else {
                 // never get here
-                getView().mArtwork3.setDefaultImage();
+                artwork3.setDefaultImage();
             }
         }
-        if (getView().mArtwork4 != null) {
+        if (artwork4 != null) {
             if (num >= 4) {
-                requestor.newAlbumRequest(getView().mArtwork4, null, albumIds[3], ArtworkType.LARGE);
+                cs.add(requestor.newAlbumRequest(artwork4, null, albumIds[3], ArtworkType.LARGE));
             } else if (num >= 2) {
                 //3 -> loopback, 2 -> put the first image here for crisscross
-                requestor.newAlbumRequest(getView().mArtwork4, null, albumIds[0], ArtworkType.LARGE);
+                cs.add(requestor.newAlbumRequest(artwork4, null, albumIds[0], ArtworkType.LARGE));
             } else {
                 //never get here
-                getView().mArtwork4.setDefaultImage();
+                artwork4.setDefaultImage();
             }
         }
+        return cs;
     }
 
 }

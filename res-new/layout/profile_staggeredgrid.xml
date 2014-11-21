@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.profile.ProfileView
+<org.opensilk.music.ui2.profile.ProfilePortraitView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -24,14 +24,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.etsy.android.grid.StaggeredGridView
-        xmlns:card="http://schemas.android.com/apk/res-auto"
+    <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        card:item_margin="2dp"
-        card:column_count_portrait="@integer/profile_grid_cols_vertical"
-        card:column_count_landscape="@integer/profile_grid_cols_horizontal"
         />
 
     <include
@@ -39,4 +35,4 @@
         android:layout_width="match_parent"
         layout="@layout/profile_sticky_header"/>
 
-</org.opensilk.music.ui2.profile.ProfileView>
+</org.opensilk.music.ui2.profile.ProfilePortraitView>
