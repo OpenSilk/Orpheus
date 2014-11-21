@@ -156,20 +156,27 @@ public class AlbumScreen extends Screen {
         }
 
         void setupActionBar() {
-            for (int m : OverflowHandlers.LocalAlbums.MENUS) {
-                getView().mToolbar.inflateMenu(m);
-            }
-            getView().mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    try {
-                        return albumsOverflowHandler.handleClick(
-                                OverflowAction.valueOf(menuItem.getItemId()), album);
-                    } catch (IllegalArgumentException e) {
-                        return false;
-                    }
-                }
-            });
+            actionBarOwner.setConfig(
+                    new ActionBarOwner.Config.Builder()
+                            .upButtonEnabled(true)
+                            .withMenuConfig(
+                                    new ActionBarOwner.MenuConfig.Builder()
+                                            .withMenus(OverflowHandlers.LocalAlbums.MENUS)
+                                            .setActionHandler(new Func1<Integer, Boolean>() {
+                                                @Override
+                                                public Boolean call(Integer integer) {
+                                                    try {
+                                                        return albumsOverflowHandler.handleClick(
+                                                                OverflowAction.valueOf(integer), album);
+                                                    } catch (IllegalArgumentException e) {
+                                                        return false;
+                                                    }
+                                                }
+                                            })
+                                            .build()
+                            )
+                            .build()
+            );
         }
     }
 

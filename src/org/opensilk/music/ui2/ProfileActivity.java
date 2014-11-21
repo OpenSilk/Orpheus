@@ -74,7 +74,7 @@ import mortar.Mortar;
 /**
  * Created by drew on 11/8/14.
  */
-public class ProfileActivity extends BaseSwitcherActivity implements
+public class ProfileActivity extends BaseSwitcherToolbarActivity implements
         DaggerInjector {
 
     public static class Blueprint extends BaseMortarActivity.Blueprint {
@@ -92,7 +92,7 @@ public class ProfileActivity extends BaseSwitcherActivity implements
 
     @dagger.Module (
             includes = {
-                    BaseSwitcherActivity.Module.class,
+                    BaseSwitcherToolbarActivity.Module.class,
                     Main.Module.class,
             },
             injects = ProfileActivity.class
@@ -115,7 +115,7 @@ public class ProfileActivity extends BaseSwitcherActivity implements
     @Override
     protected void setupTheme() {
         OrpheusTheme orpheusTheme = mSettings.getTheme();
-        setTheme(mSettings.isDarkTheme() ? orpheusTheme.profileDark : orpheusTheme.profileLight);
+        setTheme(mSettings.isDarkTheme() ? orpheusTheme.dark : orpheusTheme.light);
     }
 
     @Override

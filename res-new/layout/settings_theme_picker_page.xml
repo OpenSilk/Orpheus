@@ -41,7 +41,7 @@
 
     <include layout="@layout/footer"
              android:layout_width="match_parent"
-             android:layout_height="64dp"
+             android:layout_height="@dimen/footer_height"
              android:layout_alignParentBottom="true"/>
 
     <!--Fabs-->

@@ -20,25 +20,115 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentTop="true"
+        style="?toolbarTheme"/>
 
-        <org.opensilk.common.mortarflow.FrameScreenSwitcherView
-            android:id="@+id/main"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_below="@id/main_toolbar"
+        android:background="?colorPrimary"/>
 
-        <include layout="@layout/footer"/>
+    <org.opensilk.common.mortarflow.FrameScreenSwitcherView
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/main_toolbar"/>
 
-    </LinearLayout>
+    <!--<android.support.v7.widget.CardView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_below="@id/main_toolbar"-->
+        <!--android:layout_marginStart="104dp"-->
+        <!--android:layout_marginLeft="104dp"-->
+        <!--android:layout_marginEnd="104dp"-->
+        <!--android:layout_marginRight="104dp"-->
+        <!--app:cardBackgroundColor="?android:colorBackground">-->
+
+
+
+        <!--<RelativeLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
+
+            <!--<include layout="@layout/footer"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="@dimen/footer_height"-->
+                <!--android:layout_alignParentBottom="true"/>-->
+
+            <!--<org.opensilk.common.mortarflow.FrameScreenSwitcherView-->
+                <!--android:id="@+id/main"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_above="@id/footer_view"/>-->
+
+        <!--</RelativeLayout>-->
+
+    <!--</android.support.v7.widget.CardView>-->
 
     <!--Fabs-->
-    <include layout="@layout/floating_action_buttons_profile"/>
+    <include layout="@layout/floating_action_buttons"/>
 
 </org.opensilk.music.ui2.main.MainView>
+
+    <!--
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentTop="true"
+        style="?toolbarTheme"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_below="@id/main_toolbar"
+        android:background="?colorPrimary"/>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="?actionBarSize">
+
+        <org.opensilk.music.ui2.main.MainView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <org.opensilk.common.mortarflow.FrameScreenSwitcherView
+                    android:id="@+id/main"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+
+                <include layout="@layout/footer"/>
+
+            </LinearLayout>
+
+            <include layout="@layout/floating_action_buttons_profile"/>
+
+        </org.opensilk.music.ui2.main.MainView>
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
+    -->

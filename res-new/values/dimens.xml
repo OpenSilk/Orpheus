@@ -33,4 +33,7 @@
 
     <!--Fab-->
     <dimen name="fab_margin_end">32dp</dimen>
+
+    <!--footer dont change this without updating fab margins-->
+    <dimen name="footer_height">64dp</dimen>
 </resources>

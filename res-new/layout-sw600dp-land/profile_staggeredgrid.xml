@@ -41,8 +41,7 @@
             android:layout_weight="1"
             android:layout_height="match_parent"
             card:item_margin="2dp"
-            card:column_count="@integer/profile_grid_cols_horizontal"
-            android:minWidth="300dp"/>
+            card:column_count="@integer/profile_grid_cols_horizontal"/>
 
     </LinearLayout>
 

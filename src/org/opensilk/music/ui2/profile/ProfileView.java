@@ -70,7 +70,6 @@ public class ProfileView extends FrameLayout {
     @InjectView(R.id.dummy) @Optional View mHeaderDummy;
     @InjectView(R.id.info_title) TextView mTitle;
     @InjectView(R.id.info_subtitle) TextView mSubtitle;
-    @InjectView(R.id.profile_toolbar) Toolbar mToolbar;
     View mListHeader;
     FrameLayout mHeroContainer;
     AnimatedImageView mArtwork;
@@ -124,14 +123,6 @@ public class ProfileView extends FrameLayout {
         }
         mTitle.setText(presenter.getTitle(getContext()));
         mSubtitle.setText(presenter.getSubtitle(getContext()));
-        TintManager tm = new TintManager(mToolbar.getContext());
-        mToolbar.setNavigationIcon(tm.getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha));
-        mToolbar.setNavigationOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                findActivity(getContext()).onSupportNavigateUp();
-            }
-        });
     }
 
     @Override
@@ -188,15 +179,6 @@ public class ProfileView extends FrameLayout {
             }
         });
         return animator;
-    }
-
-    static ActionBarActivity findActivity(Context context) {
-        if (context instanceof ActionBarActivity) {
-            return (ActionBarActivity) context;
-        } else if (context instanceof ContextWrapper) {
-            return findActivity(((ContextWrapper) context).getBaseContext());
-        }
-        throw new IllegalArgumentException("Unknown context type: " + context.getClass());
     }
 
     protected final PaletteObserver mPaletteObserver = new PaletteObserver() {
