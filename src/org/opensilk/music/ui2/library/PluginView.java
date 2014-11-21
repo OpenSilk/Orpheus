@@ -57,16 +57,13 @@ public class PluginView extends RelativeLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        if (!isInEditMode()) {
-            ButterKnife.inject(this);
-            presenter.takeView(this);
-        }
+        ButterKnife.inject(this);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-
+        if (!isInEditMode()) presenter.takeView(this);
     }
 
     @Override

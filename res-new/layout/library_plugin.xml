@@ -21,7 +21,8 @@
     android:id="@+id/library_plugin"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground">
 
     <Button
         android:id="@+id/btn_chooselibrary"

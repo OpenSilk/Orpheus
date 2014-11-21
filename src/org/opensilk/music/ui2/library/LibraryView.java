@@ -72,7 +72,12 @@ public class LibraryView extends FrameLayout {
         mList.setAdapter(adapter);
         mList.setHasFixedSize(true);
         mList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        presenter.takeView(this);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (!isInEditMode()) presenter.takeView(this);
     }
 
     @Override

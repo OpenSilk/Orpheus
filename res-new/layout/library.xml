@@ -21,7 +21,8 @@
     android:id="@+id/library_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:background="?android:colorBackground">
 
     <include layout="@layout/list_recycler_base"/>
 

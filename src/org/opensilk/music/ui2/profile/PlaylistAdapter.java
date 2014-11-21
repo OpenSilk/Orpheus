@@ -41,9 +41,13 @@ public class PlaylistAdapter extends SongCollectionAdapter {
 
     @Override
     public View newView(Context context, ViewGroup parent) {
-        View v = LayoutInflater.from(context).inflate(R.layout.gallery_list_item_dragsort, parent, false);
-        v.setTag(new ViewHolder(v));
-        if (playlistId == -2) ButterKnife.findById(v, R.id.drag_handle).setVisibility(View.GONE);
+        View v;
+        if (playlistId != -2) {
+            v = LayoutInflater.from(context).inflate(R.layout.gallery_list_item_dragsort, parent, false);
+            v.setTag(new ViewHolder(v));
+        } else {
+            v = super.newView(context, parent);
+        }
         return v;
     }
 

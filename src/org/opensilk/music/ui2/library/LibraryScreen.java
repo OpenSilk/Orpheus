@@ -303,7 +303,10 @@ public class LibraryScreen extends Screen {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder()
                             .setTitle(pluginInfo.title)
-                            .setSubtitle(libraryInfo.libraryName)
+                            .setSubtitle(
+                                    !TextUtils.isEmpty(libraryInfo.folderName)
+                                            ? libraryInfo.folderName : libraryInfo.libraryName
+                            )
                             .withMenuConfig(createMenuConfig())
                             .build()
             );
