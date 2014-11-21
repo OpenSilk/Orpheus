@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -43,14 +44,15 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Layout;
-import mortar.MortarScope;
 import rx.Observable;
 import rx.functions.Func1;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 11/19/14.
  */
-@Layout(R.layout.profile_staggeredgrid)
+@Layout(R.layout.profile_recycler)
 @WithModule(ArtistScreen.Module.class)
 public class ArtistScreen extends Screen {
 
@@ -69,7 +71,7 @@ public class ArtistScreen extends Screen {
             addsTo = ProfileActivity.Module.class,
             injects = {
                     ProfilePortraitView.class,
-                    GridAdapter.class,
+                    ProfileLandscapeView.class,
                     ProfileAdapter.class
             }
     )
@@ -86,20 +88,22 @@ public class ArtistScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
+        public BasePresenter<ProfilePortraitView> providePortraitPresenter(PresenterPortrait p) {
+            return p;
+        }
+
+        @Provides
+        public BasePresenter<ProfileLandscapeView> provideLandscapePresenter(PresenterLandscape p) {
             return p;
         }
     }
 
-    @Singleton
-    public static class Presenter extends BasePresenter<ProfilePortraitView> {
-
+    static abstract class ArtistPresenter<V extends View> extends BasePresenter<V> {
         final OverflowHandlers.LocalArtists artistsOverflowHandler;
         final LocalArtist artist;
         final Observable<List<Object>> loader;
 
-        @Inject
-        public Presenter(ActionBarOwner actionBarOwner,
+        public ArtistPresenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.LocalArtists artistsOverflowHandler,
                          LocalArtist artist,
@@ -114,18 +118,6 @@ public class ArtistScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionbar();
-
-            requestor.newArtistRequest(getView().mArtwork, getView().mPaletteObserver,
-                    new ArtInfo(artist.name, null, null), ArtworkType.LARGE);
-
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
-                @Override
-                public void onNext(List<Object> objects) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(objects);
-                    }
-                }
-            });
         }
 
         @Override
@@ -156,27 +148,93 @@ public class ArtistScreen extends Screen {
 
         void setupActionbar() {
             actionBarOwner.setConfig(
-                new ActionBarOwner.Config.Builder()
-                    .upButtonEnabled(true)
-                    .withMenuConfig(
-                            new ActionBarOwner.MenuConfig.Builder()
-                                    .withMenus(OverflowHandlers.LocalArtists.MENUS)
-                                    .setActionHandler(new Func1<Integer, Boolean>() {
-                                        @Override
-                                        public Boolean call(Integer integer) {
-                                            try {
-                                                return artistsOverflowHandler.handleClick(
-                                                        OverflowAction.valueOf(integer), artist);
-                                            } catch (IllegalArgumentException e) {
-                                                return false;
-                                            }
-                                        }
-                                    })
-                                    .build()
-                    )
-                    .build()
+                    new ActionBarOwner.Config.Builder()
+                            .upButtonEnabled(true)
+                            .withMenuConfig(
+                                    new ActionBarOwner.MenuConfig.Builder()
+                                            .withMenus(OverflowHandlers.LocalArtists.MENUS)
+                                            .setActionHandler(new Func1<Integer, Boolean>() {
+                                                @Override
+                                                public Boolean call(Integer integer) {
+                                                    try {
+                                                        return artistsOverflowHandler.handleClick(
+                                                                OverflowAction.valueOf(integer), artist);
+                                                    } catch (IllegalArgumentException e) {
+                                                        return false;
+                                                    }
+                                                }
+                                            })
+                                            .build()
+                            )
+                            .build()
             );
         }
+    }
+
+    @Singleton
+    public static class PresenterPortrait extends ArtistPresenter<ProfilePortraitView> {
+
+        @Inject
+        public PresenterPortrait(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.LocalArtists artistsOverflowHandler,
+                         LocalArtist artist,
+                         LocalArtistProfileLoader loader) {
+            super(actionBarOwner, requestor, artistsOverflowHandler, artist, loader);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            requestor.newArtistRequest(getView().mArtwork, getView().mPaletteObserver,
+                    new ArtInfo(artist.name, null, null), ArtworkType.LARGE);
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
+                @Override
+                public void onNext(List<Object> objects) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(objects);
+                    }
+                }
+            });
+        }
+
+
+    }
+
+    @Singleton
+    public static class PresenterLandscape extends ArtistPresenter<ProfileLandscapeView> {
+
+        @Inject
+        public PresenterLandscape(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.LocalArtists artistsOverflowHandler,
+                         LocalArtist artist,
+                         LocalArtistProfileLoader loader) {
+            super(actionBarOwner, requestor, artistsOverflowHandler, artist, loader);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            requestor.newArtistRequest(getView().mArtwork, getView().mPaletteObserver,
+                    new ArtInfo(artist.name, null, null), ArtworkType.LARGE);
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
+                @Override
+                public void onNext(List<Object> objects) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(objects);
+                    }
+                }
+            });
+        }
+
+
     }
 
 }

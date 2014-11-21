@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
@@ -71,7 +72,8 @@ public class PlaylistScreen extends Screen {
     @dagger.Module (
             addsTo = ProfileActivity.Module.class,
             injects = {
-                    ProfilePortraitView.class,
+                    PlaylistPortraitView.class,
+                    PlaylistLandscapeView.class,
                     PlaylistDragSortView.class,
                     PlaylistAdapter.class,
             }
@@ -93,20 +95,13 @@ public class PlaylistScreen extends Screen {
             return screen.playlist;
         }
 
-        @Provides @Singleton
-        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
-            return p;
-        }
     }
 
-    @Singleton
-    public static class Presenter extends BasePresenter<ProfilePortraitView> {
-
+    static abstract class PlaylistPresenter<V extends View> extends BasePresenter<V> {
         final OverflowHandlers.Playlists playlistOverflowHandler;
         final Playlist playlist;
 
-        @Inject
-        public Presenter(ActionBarOwner actionBarOwner,
+        public PlaylistPresenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.Playlists playlistOverflowHandler,
                          Playlist playlist) {
@@ -119,14 +114,6 @@ public class PlaylistScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
-
-            loadMultiArtwork(requestor,
-                    playlist.mAlbumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
         }
 
         @Override
@@ -146,19 +133,23 @@ public class PlaylistScreen extends Screen {
 
         @Override
         ProfileAdapter makeAdapter(Context context) {
-            return new ProfileAdapter(context, true, isLastAdded());
+            return null;//not used
         }
 
         @Override
         boolean isGrid() {
-            return false;
+            return false;//not used
+        }
+
+        PlaylistAdapter makePlaylistAdapter(Context context) {
+            return new PlaylistAdapter(context, playlist.mPlaylistId);
         }
 
         void setupActionBar() {
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
-                    .upButtonEnabled(true)
-                    .withMenuConfig(makeMenuConfig())
-                    .build()
+                            .upButtonEnabled(true)
+                            .withMenuConfig(makeMenuConfig())
+                            .build()
             );
         }
 
@@ -190,6 +181,56 @@ public class PlaylistScreen extends Screen {
         boolean isLastAdded() {
             return playlist.mPlaylistId == -2;
         }
+    }
+
+    @Singleton
+    public static class PresenterPortrait extends PlaylistPresenter<PlaylistPortraitView> {
+
+        @Inject
+        public PresenterPortrait(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.Playlists playlistOverflowHandler,
+                         Playlist playlist) {
+            super(actionBarOwner, requestor, playlistOverflowHandler, playlist);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+            loadMultiArtwork(requestor,
+                    playlist.mAlbumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
+        }
+
+    }
+
+    @Singleton
+    public static class PresenterLandscape extends PlaylistPresenter<PlaylistLandscapeView> {
+
+        @Inject
+        public PresenterLandscape(ActionBarOwner actionBarOwner,
+                                 ArtworkRequestManager requestor,
+                                 OverflowHandlers.Playlists playlistOverflowHandler,
+                                 Playlist playlist) {
+            super(actionBarOwner, requestor, playlistOverflowHandler, playlist);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+            loadMultiArtwork(requestor,
+                    playlist.mAlbumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
+        }
+
     }
 
     @Singleton

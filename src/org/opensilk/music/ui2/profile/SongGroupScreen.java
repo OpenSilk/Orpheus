@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.LocalSongGroup;
@@ -45,10 +46,12 @@ import flow.Layout;
 import rx.Observable;
 import rx.functions.Func1;
 
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+
 /**
  * Created by drew on 11/19/14.
  */
-@Layout(R.layout.profile_list)
+@Layout(R.layout.profile_recycler)
 @WithModule(SongGroupScreen.Module.class)
 public class SongGroupScreen extends Screen {
 
@@ -67,7 +70,8 @@ public class SongGroupScreen extends Screen {
             addsTo = ProfileActivity.Module.class,
             injects = {
                     ProfilePortraitView.class,
-                    SongCollectionAdapter.class
+                    ProfileLandscapeView.class,
+                    ProfileAdapter.class,
             }
     )
     public static class Module {
@@ -87,21 +91,23 @@ public class SongGroupScreen extends Screen {
             return screen.songGroup;
         }
 
-        @Provides @Singleton
-        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
+        @Provides
+        public BasePresenter<ProfilePortraitView> providePortraitPresenter(PresenterPortrait p) {
+            return p;
+        }
+
+        @Provides
+        public BasePresenter<ProfileLandscapeView> provideLandscapePresenter(PresenterLandscape p) {
             return p;
         }
     }
 
-    @Singleton
-    public static class Presenter extends BasePresenter<ProfilePortraitView> {
-
+    static abstract class SongGroupPresenter<V extends View> extends BasePresenter<V> {
         final OverflowHandlers.LocalSongGroups songGroupOverflowHandler;
         final LocalSongGroup songGroup;
         final Observable<List<LocalSong>> loader;
 
-        @Inject
-        public Presenter(ActionBarOwner actionBarOwner,
+        public SongGroupPresenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
                          LocalSongGroup songGroup,
@@ -116,23 +122,6 @@ public class SongGroupScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
-
-            loadMultiArtwork(requestor,
-                    songGroup.albumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(localSongs);
-                    }
-                }
-            });
         }
 
         @Override
@@ -162,26 +151,100 @@ public class SongGroupScreen extends Screen {
 
         void setupActionBar() {
             actionBarOwner.setConfig(
-                new ActionBarOwner.Config.Builder()
-                    .upButtonEnabled(true)
-                    .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                        .withMenus(OverflowHandlers.LocalSongGroups.MENUS)
-                        .setActionHandler(new Func1<Integer, Boolean>() {
-                            @Override
-                            public Boolean call(Integer integer) {
-                                try {
-                                    return songGroupOverflowHandler.handleClick(
-                                            OverflowAction.valueOf(integer), songGroup);
-                                } catch (IllegalArgumentException e) {
-                                    return false;
-                                }
-                            }
-                        })
-                        .build()
-                    )
-                    .build()
+                    new ActionBarOwner.Config.Builder()
+                            .upButtonEnabled(true)
+                            .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
+                                            .withMenus(OverflowHandlers.LocalSongGroups.MENUS)
+                                            .setActionHandler(new Func1<Integer, Boolean>() {
+                                                @Override
+                                                public Boolean call(Integer integer) {
+                                                    try {
+                                                        return songGroupOverflowHandler.handleClick(
+                                                                OverflowAction.valueOf(integer), songGroup);
+                                                    } catch (IllegalArgumentException e) {
+                                                        return false;
+                                                    }
+                                                }
+                                            })
+                                            .build()
+                            )
+                            .build()
             );
         }
+    }
+
+    @Singleton
+    public static class PresenterPortrait extends SongGroupPresenter<ProfilePortraitView> {
+
+        @Inject
+        public PresenterPortrait(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
+                         LocalSongGroup songGroup,
+                         LocalSongGroupLoader loader) {
+            super(actionBarOwner, requestor, songGroupOverflowHandler, songGroup, loader);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            loadMultiArtwork(requestor,
+                    songGroup.albumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(localSongs);
+                    }
+                }
+            });
+        }
+
+    }
+
+    @Singleton
+    public static class PresenterLandscape extends SongGroupPresenter<ProfileLandscapeView> {
+
+        @Inject
+        public PresenterLandscape(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
+                         LocalSongGroup songGroup,
+                         LocalSongGroupLoader loader) {
+            super(actionBarOwner, requestor, songGroupOverflowHandler, songGroup, loader);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            loadMultiArtwork(requestor,
+                    songGroup.albumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(localSongs);
+                    }
+                }
+            });
+        }
+
     }
 
 }

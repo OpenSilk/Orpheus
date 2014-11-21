@@ -22,13 +22,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,11 +47,11 @@ import mortar.Mortar;
 /**
  * Created by drew on 11/21/14.
  */
-public class ProfileLandscapeView extends LinearLayout {
+public class PlaylistLandscapeView extends LinearLayout {
 
-    @Inject BasePresenter<ProfileLandscapeView> presenter;
+    @Inject PlaylistScreen.PresenterLandscape presenter;
 
-    @InjectView(android.R.id.list) RecyclerView mList;
+    @InjectView(android.R.id.list) AbsListView mList;
     @InjectView(R.id.sticky_header) ViewGroup mStickyHeader;
     @InjectView(R.id.info_title) TextView mTitle;
     @InjectView(R.id.info_subtitle) TextView mSubtitle;
@@ -66,9 +64,7 @@ public class ProfileLandscapeView extends LinearLayout {
 
     boolean mLightTheme;
 
-    ProfileAdapter mAdapter;
-
-    public ProfileLandscapeView(Context context, AttributeSet attrs) {
+    public PlaylistLandscapeView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) Mortar.inject(getContext(), this);
         mLightTheme = ThemeUtils.isLightTheme(getContext());
@@ -94,11 +90,6 @@ public class ProfileLandscapeView extends LinearLayout {
 
         ButterKnife.<ViewGroup>findById(this, R.id.hero_holder).addView(mListHeader);
 
-        mAdapter = presenter.makeAdapter(getContext());
-
-        mList.setAdapter(mAdapter);
-        mList.setLayoutManager(getLayoutManager(getContext()));
-
         mTitle.setText(presenter.getTitle(getContext()));
         mSubtitle.setText(presenter.getSubtitle(getContext()));
     }
@@ -113,23 +104,6 @@ public class ProfileLandscapeView extends LinearLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         presenter.takeView(this);
-    }
-
-    RecyclerView.LayoutManager getLayoutManager(Context context) {
-        if (presenter.isGrid()) {
-            return makeGridLayoutManager(context);
-        } else {
-            return makeListLayoutManager(context);
-        }
-    }
-
-    RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
-        final int numCols = context.getResources().getInteger(R.integer.profile_grid_cols_horizontal);
-        return new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
-    }
-
-    RecyclerView.LayoutManager makeListLayoutManager(Context context) {
-        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
     }
 
     protected final PaletteObserver mPaletteObserver = new PaletteObserver() {

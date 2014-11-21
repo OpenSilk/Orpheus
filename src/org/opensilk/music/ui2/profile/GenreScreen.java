@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
@@ -44,10 +45,12 @@ import flow.Layout;
 import rx.Observable;
 import rx.functions.Func1;
 
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+
 /**
  * Created by drew on 11/19/14.
  */
-@Layout(R.layout.profile_staggeredgrid)
+@Layout(R.layout.profile_recycler)
 @WithModule(GenreScreen.Module.class)
 public class GenreScreen extends Screen {
 
@@ -66,7 +69,7 @@ public class GenreScreen extends Screen {
             addsTo = ProfileActivity.Module.class,
             injects = {
                     ProfilePortraitView.class,
-                    GridAdapter.class,
+                    ProfileLandscapeView.class,
                     ProfileAdapter.class
             }
     )
@@ -83,20 +86,22 @@ public class GenreScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
+        public BasePresenter<ProfilePortraitView> providePortraitPresenter(PresenterPortrait p) {
+            return p;
+        }
+
+        @Provides
+        public BasePresenter<ProfileLandscapeView> provideLandscapePresenter(PresenterLandscape p) {
             return p;
         }
     }
 
-    @Singleton
-    public static class Presenter extends BasePresenter<ProfilePortraitView> {
-
+    static abstract class GenrePresenter<V extends View> extends BasePresenter<V> {
         final OverflowHandlers.Genres genreOverflowHandler;
         final Genre genre;
         final Observable<List<Object>> loader;
 
-        @Inject
-        public Presenter(ActionBarOwner actionBarOwner,
+        public GenrePresenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.Genres genreOverflowHandler,
                          Genre genre,
@@ -111,23 +116,6 @@ public class GenreScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
-
-            loadMultiArtwork(requestor,
-                    genre.mAlbumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
-                @Override
-                public void onNext(List<Object> objects) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(objects);
-                    }
-                }
-            });
         }
 
         @Override
@@ -179,5 +167,79 @@ public class GenreScreen extends Screen {
                             .build()
             );
         }
+    }
+
+    @Singleton
+    public static class PresenterPortrait extends GenrePresenter<ProfilePortraitView> {
+
+        @Inject
+        public PresenterPortrait(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.Genres genreOverflowHandler,
+                         Genre genre,
+                         LocalGenresProfileLoader loader) {
+            super(actionBarOwner, requestor, genreOverflowHandler, genre, loader);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            loadMultiArtwork(requestor,
+                    genre.mAlbumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
+                @Override
+                public void onNext(List<Object> objects) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(objects);
+                    }
+                }
+            });
+        }
+
+    }
+
+    @Singleton
+    public static class PresenterLandscape extends GenrePresenter<ProfileLandscapeView> {
+
+        @Inject
+        public PresenterLandscape(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.Genres genreOverflowHandler,
+                         Genre genre,
+                         LocalGenresProfileLoader loader) {
+            super(actionBarOwner, requestor, genreOverflowHandler, genre, loader);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            loadMultiArtwork(requestor,
+                    genre.mAlbumIds,
+                    getView().mArtwork,
+                    getView().mArtwork2,
+                    getView().mArtwork3,
+                    getView().mArtwork4
+            );
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
+                @Override
+                public void onNext(List<Object> objects) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(objects);
+                    }
+                }
+            });
+        }
+
     }
 }

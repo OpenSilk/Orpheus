@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSong;
@@ -44,14 +45,15 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Layout;
-import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.functions.Func1;
+
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 11/18/14.
  */
-@Layout(R.layout.profile_list)
+@Layout(R.layout.profile_recycler)
 @WithModule(AlbumScreen.Module.class)
 public class AlbumScreen extends Screen {
 
@@ -70,8 +72,7 @@ public class AlbumScreen extends Screen {
             addsTo = ProfileActivity.Module.class,
             injects = {
                     ProfilePortraitView.class,
-
-                    SongCollectionAdapter.class,
+                    ProfileLandscapeView.class,
                     ProfileAdapter.class
             },
             library = true
@@ -94,20 +95,23 @@ public class AlbumScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter<ProfilePortraitView> profileFrameViewBasePresenter(Presenter p) {
+        public BasePresenter<ProfilePortraitView> providePortraitPresenter(PresenterPortrait p) {
+            return p;
+        }
+
+        @Provides
+        public BasePresenter<ProfileLandscapeView> provideLandscapePresenter(PresenterLandscape p) {
             return p;
         }
     }
 
-    @Singleton
-    public static class Presenter extends BasePresenter<ProfilePortraitView> {
+    static abstract class AlbumPresenter<V extends View> extends BasePresenter<V> {
 
         final OverflowHandlers.LocalAlbums albumsOverflowHandler;
         final Observable<List<LocalSong>> loader;
         final LocalAlbum album;
 
-        @Inject
-        public Presenter(ActionBarOwner actionBarOwner,
+        public AlbumPresenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.LocalAlbums albumsOverflowHandler,
                          LocalAlbumSongLoader loader,
@@ -119,22 +123,9 @@ public class AlbumScreen extends Screen {
         }
 
         @Override
-        @DebugLog
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
-
-            requestor.newAlbumRequest(getView().mArtwork, getView().mPaletteObserver,
-                    new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
-
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(localSongs);
-                    }
-                }
-            });
         }
 
         @Override
@@ -185,6 +176,71 @@ public class AlbumScreen extends Screen {
                             .build()
             );
         }
+
+    }
+
+    @Singleton
+    public static class PresenterPortrait extends AlbumPresenter<ProfilePortraitView> {
+
+        @Inject
+        public PresenterPortrait(ActionBarOwner actionBarOwner,
+                         ArtworkRequestManager requestor,
+                         OverflowHandlers.LocalAlbums albumsOverflowHandler,
+                         LocalAlbumSongLoader loader,
+                         LocalAlbum album) {
+            super(actionBarOwner, requestor, albumsOverflowHandler, loader, album);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            requestor.newAlbumRequest(getView().mArtwork, getView().mPaletteObserver,
+                    new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(localSongs);
+                    }
+                }
+            });
+        }
+
+    }
+
+    @Singleton
+    public static class PresenterLandscape extends AlbumPresenter<ProfileLandscapeView> {
+
+        @Inject
+        public PresenterLandscape(ActionBarOwner actionBarOwner,
+                                ArtworkRequestManager requestor,
+                                OverflowHandlers.LocalAlbums albumsOverflowHandler,
+                                LocalAlbumSongLoader loader,
+                                LocalAlbum album) {
+            super(actionBarOwner, requestor, albumsOverflowHandler, loader, album);
+        }
+
+        @Override
+        protected void onLoad(Bundle savedInstanceState) {
+            super.onLoad(savedInstanceState);
+
+            requestor.newAlbumRequest(getView().mArtwork, getView().mPaletteObserver,
+                    new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().mAdapter.addAll(localSongs);
+                    }
+                }
+            });
+        }
+
     }
 
 }

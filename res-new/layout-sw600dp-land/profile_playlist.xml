@@ -16,31 +16,26 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.profile.ProfilePortraitView
+<org.opensilk.music.ui2.profile.PlaylistLandscapeView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@id/profile_view"
+    android:id="@+id/profile_view"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:baselineAligned="false">
 
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:baselineAligned="false">
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        layout="@layout/profile_sticky_header"/>
 
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            layout="@layout/profile_sticky_header"/>
+    <org.opensilk.music.ui2.profile.PlaylistDragSortView
+        android:id="@android:id/list"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        style="@style/DragSortList"/>
 
-        <org.opensilk.music.ui2.profile.PlaylistDragSortView
-            android:id="@android:id/list"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            style="@style/DragSortList"/>
-
-    </LinearLayout>
-
-</org.opensilk.music.ui2.profile.ProfilePortraitView>
+</org.opensilk.music.ui2.profile.PlaylistLandscapeView>

@@ -16,34 +16,25 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.profile.ProfilePortraitView
+<org.opensilk.music.ui2.profile.ProfileLandscapeView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@id/profile_view"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:baselineAligned="false">
 
-    <LinearLayout android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:baselineAligned="false">
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        layout="@layout/profile_sticky_header"/>
 
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            layout="@layout/profile_sticky_header"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@android:id/list"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"/>
 
-        <com.etsy.android.grid.StaggeredGridView
-            xmlns:card="http://schemas.android.com/apk/res-auto"
-            android:id="@android:id/list"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            card:item_margin="2dp"
-            card:column_count="@integer/profile_grid_cols_horizontal"/>
-
-    </LinearLayout>
-
-</org.opensilk.music.ui2.profile.ProfilePortraitView>
-
+</org.opensilk.music.ui2.profile.ProfileLandscapeView>

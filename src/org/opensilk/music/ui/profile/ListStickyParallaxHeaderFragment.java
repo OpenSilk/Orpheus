@@ -125,7 +125,7 @@ public class ListStickyParallaxHeaderFragment extends Fragment {
     }
 
     protected int getListLayout() {
-        return R.layout.profile_staggeredgrid_frame;
+        return -1; // R.layout.profile_staggeredgrid_frame;
     }
 
     private ValueAnimator makeSlideAnimator(int start, int end, final ClipDrawable drawable) {

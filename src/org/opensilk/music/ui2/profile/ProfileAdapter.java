@@ -50,7 +50,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
 import mortar.Mortar;
-import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
 /**
