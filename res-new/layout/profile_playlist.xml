@@ -30,4 +30,9 @@
         android:layout_height="match_parent"
         style="@style/DragSortList"/>
 
+    <include
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        layout="@layout/profile_sticky_header"/>
+
 </org.opensilk.music.ui2.profile.PlaylistPortraitView>

@@ -117,6 +117,11 @@ public class ProfileLandscapeView extends LinearLayout implements ProfileView {
         return mAdapter;
     }
 
+    @Override
+    public boolean isLandscape() {
+        return true;
+    }
+
     RecyclerView.LayoutManager getLayoutManager(Context context) {
         if (presenter.isGrid()) {
             return makeGridLayoutManager(context);

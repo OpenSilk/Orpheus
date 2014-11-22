@@ -128,4 +128,8 @@ public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
         supportInvalidateOptionsMenu();
     }
 
+    @Override
+    public void setTransparentActionbar(boolean yes) {
+        mToolbar.getBackground().setAlpha(yes ? 0 : 255);
+    }
 }

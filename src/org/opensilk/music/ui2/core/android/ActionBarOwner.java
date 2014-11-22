@@ -56,6 +56,8 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         void setSubtitle(CharSequence title);
 
         void setMenu(MenuConfig menuConfig);
+
+        void setTransparentActionbar(boolean yes);
     }
 
     public static class Config {
@@ -66,34 +68,12 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         public final int subtitleRes;
         public final CharSequence subtitle;
         public final MenuConfig menuConfig;
-
-        @Deprecated
-        public Config(boolean showHomeEnabled, boolean upButtonEnabled,
-                      int titleRes, MenuConfig menuConfig) {
-            this.showHomeEnabled = showHomeEnabled;
-            this.upButtonEnabled = upButtonEnabled;
-            this.titleRes = titleRes;
-            this.menuConfig = menuConfig;
-            this.title = null;
-            this.subtitleRes = -1;
-            this.subtitle = null;
-        }
-
-        @Deprecated
-        public Config(boolean showHomeEnabled, boolean upButtonEnabled,
-                      CharSequence title, MenuConfig menuConfig) {
-            this.showHomeEnabled = showHomeEnabled;
-            this.upButtonEnabled = upButtonEnabled;
-            this.title = title;
-            this.menuConfig = menuConfig;
-            this.titleRes = -1;
-            this.subtitleRes = -1;
-            this.subtitle = null;
-        }
+        public final boolean transparentBackground;
 
         private Config(boolean showHomeEnabled, boolean upButtonEnabled,
                       int titleRes, CharSequence title, int subtitleRes,
-                      CharSequence subtitle, MenuConfig menuConfig) {
+                      CharSequence subtitle, MenuConfig menuConfig,
+                      boolean transparentBackground) {
             this.showHomeEnabled = showHomeEnabled;
             this.upButtonEnabled = upButtonEnabled;
             this.titleRes = titleRes;
@@ -101,6 +81,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
             this.subtitleRes = subtitleRes;
             this.subtitle = subtitle;
             this.menuConfig = menuConfig;
+            this.transparentBackground = transparentBackground;
         }
 
         public Builder buildUpon() {
@@ -108,14 +89,18 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         }
 
         public static class Builder {
-            public boolean setHomeEnabled = true;
-            public boolean setUpButtonEnabled = false;
-            public int titleRes = -1;
-            public CharSequence title = null;
-            public int subtitleRes = -1;
-            public CharSequence subtitle = null;
-            public MenuConfig menuConfig = null;
-            public Builder() {}
+            private boolean setHomeEnabled = true;
+            private boolean setUpButtonEnabled = false;
+            private int titleRes = -1;
+            private CharSequence title = null;
+            private int subtitleRes = -1;
+            private CharSequence subtitle = null;
+            private MenuConfig menuConfig = null;
+            private boolean trasparentBackground = false;
+
+            public Builder() {
+            }
+
             public Builder(Config config) {
                 setHomeEnabled = config.showHomeEnabled;
                 setUpButtonEnabled = config.upButtonEnabled;
@@ -124,6 +109,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
                 subtitleRes = config.subtitleRes;
                 subtitle = config.subtitle;
                 menuConfig = config.menuConfig;
+                trasparentBackground = config.transparentBackground;
             }
             public Builder showHomeEnabled(boolean enabled) {
                 setHomeEnabled = enabled;
@@ -153,10 +139,14 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
                 this.menuConfig = menuConfig;
                 return this;
             }
+            public Builder setTransparentBackground(boolean yes) {
+                this.trasparentBackground = yes;
+                return this;
+            }
             public Config build() {
                 return new Config(setHomeEnabled, setUpButtonEnabled,
                         titleRes, title, subtitleRes, subtitle,
-                        menuConfig);
+                        menuConfig, trasparentBackground);
             }
         }
     }
@@ -264,5 +254,6 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
             view.setSubtitle(config.subtitle);
         }
         view.setMenu(config.menuConfig);
+        view.setTransparentActionbar(config.transparentBackground);
     }
 }

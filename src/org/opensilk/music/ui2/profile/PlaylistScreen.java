@@ -27,6 +27,7 @@ import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -59,6 +60,10 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
  */
 @Layout(R.layout.profile_playlist)
 @WithModule(PlaylistScreen.Module.class)
+@WithTransitions(
+        forward = { R.anim.shrink_fade_out, R.anim.slide_in_child_bottom },
+        backward = { R.anim.slide_out_child_bottom, R.anim.grow_fade_in }
+)
 public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
 
     final Playlist playlist;
@@ -163,10 +168,7 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
         }
 
         void setupActionBar() {
-            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
-                            .setTitle(getTitle(getView().getContext()))
-                            .setSubtitle(getSubtitle(getView().getContext()))
-                            .upButtonEnabled(true)
+            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder(getCommonConfig())
                             .withMenuConfig(makeMenuConfig())
                             .build()
             );

@@ -74,6 +74,15 @@ public abstract class BasePresenter extends mortar.Presenter<ProfileView> {
     abstract ProfileAdapter makeAdapter(Context context);
     abstract boolean isGrid();
 
+    protected ActionBarOwner.Config getCommonConfig() {
+        return new ActionBarOwner.Config.Builder()
+                .setTitle(getView().isLandscape() ? getTitle(getView().getContext()) : null)
+                .setSubtitle(getView().isLandscape() ? getSubtitle(getView().getContext()) : null)
+                .upButtonEnabled(true)
+                .setTransparentBackground(!getView().isLandscape())
+                .build();
+    }
+
     static CompositeSubscription loadMultiArtwork(ArtworkRequestManager requestor,
                                  long[] albumIds,
                                  AnimatedImageView artwork,

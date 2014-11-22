@@ -24,7 +24,7 @@
         android:id="@+id/hero_container"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:layout_margin="2dp">
+        android:layout_marginBottom="?actionBarSize">
 
         <org.opensilk.common.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image"

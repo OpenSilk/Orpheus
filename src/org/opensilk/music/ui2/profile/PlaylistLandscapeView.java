@@ -119,4 +119,8 @@ public class PlaylistLandscapeView extends LinearLayout implements ProfileView {
         return null;//unused
     }
 
+    @Override
+    public boolean isLandscape() {
+        return true;
+    }
 }

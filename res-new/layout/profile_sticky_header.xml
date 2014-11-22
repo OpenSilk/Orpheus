@@ -34,24 +34,29 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:orientation="vertical"
-        android:gravity="center"
-        style="?gridTileDescriptionStyle">
+        android:gravity="center">
 
         <!-- Album title / artist -->
 
         <TextView
             android:id="@+id/info_title"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center"
             android:textAppearance="?android:textAppearanceMedium"
-            tools:text="Title"/>
+            android:textColor="@color/white_text"
+            tools:text="Title"
+            style="@style/SingleLineTextView"/>
 
         <TextView
             android:id="@+id/info_subtitle"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center"
             android:textAppearance="?android:textAppearance"
-            tools:text="Subtitle"/>
+            android:textColor="@color/white_text_secondary"
+            tools:text="Subtitle"
+            style="@style/SingleLineTextView"/>
 
     </LinearLayout>
 

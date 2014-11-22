@@ -60,6 +60,11 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
     @Inject PlaylistScreen.Presenter presenter;
 
     @InjectView(android.R.id.list) PlaylistDragSortView mList;
+    @InjectView(R.id.sticky_header_container) View mStickyHeaderContainer;
+    @InjectView(R.id.sticky_header) ViewGroup mStickyHeader;
+    @InjectView(R.id.dummy) View mHeaderDummy;
+    @InjectView(R.id.info_title) TextView mTitle;
+    @InjectView(R.id.info_subtitle) TextView mSubtitle;
     View mListHeader;
     FrameLayout mHeroContainer;
     AnimatedImageView mArtwork;
@@ -68,6 +73,7 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
     AnimatedImageView mArtwork4;
 
     boolean mLightTheme;
+    boolean mIsStuck;
 
     public PlaylistPortraitView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -88,7 +94,12 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
         mArtwork = ButterKnife.findById(mHeroContainer, R.id.hero_image);
 
         mList.addHeaderView(mListHeader);
+        // for parallax
+        mList.setOnScrollListener(mScrollListener);
 
+        setupDummyHeader();
+        mTitle.setText(presenter.getTitle(getContext()));
+        mSubtitle.setText(presenter.getSubtitle(getContext()));
     }
 
     @Override
@@ -101,6 +112,26 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         presenter.takeView(this);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mIsStuck = ss.wasStuck;
+        setupDummyHeader();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superstate = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superstate);
+        ss.wasStuck = mIsStuck;
+        return ss;
     }
 
     @Override
@@ -130,7 +161,127 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
 
     @Override
     public ProfileAdapter getAdapter() {
-        return null;//unused
+        return null;//ignored
     }
 
+    @Override
+    public boolean isLandscape() {
+        return false;
+    }
+
+    void setupDummyHeader() {
+        if (mHeaderDummy != null) {
+            //setup the dummy header background with the same color as the stickyheader
+            final ClipDrawable dummyBackground = new ClipDrawable(mStickyHeader.getBackground(), Gravity.BOTTOM, ClipDrawable.VERTICAL);
+            dummyBackground.setLevel(mIsStuck ? 10000 : 0);
+            mHeaderDummy.setBackgroundDrawable(dummyBackground);
+        }
+    }
+
+    private ValueAnimator makeSlideAnimator(int start, int end, final ClipDrawable drawable) {
+        final ValueAnimator animator = ValueAnimator.ofInt(start, end);
+        animator.setDuration(100);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                final int value = (Integer) animation.getAnimatedValue();
+                if (drawable != null) {
+                    drawable.setLevel(value);
+                }
+            }
+        });
+        return animator;
+    }
+
+    protected final PaletteObserver mPaletteObserver = new PaletteObserver() {
+        @Override
+        public void onNext(PaletteResponse paletteResponse) {
+            Palette palette = paletteResponse.palette;
+            Palette.Swatch swatch = mLightTheme ? palette.getLightMutedSwatch() : palette.getDarkMutedSwatch();
+            if (swatch == null) swatch = palette.getMutedSwatch();
+            if (swatch != null) {
+                //int color = ThemeHelper.setColorAlpha(swatch.getRgb(), 0x99);//60%
+                int color = swatch.getRgb();
+                if (mHeaderDummy != null) {
+                    final ClipDrawable dummyBackground =
+                            new ClipDrawable(new ColorDrawable(color), Gravity.BOTTOM, ClipDrawable.VERTICAL);
+                    dummyBackground.setLevel(mIsStuck ? 10000 : 0);
+                    mHeaderDummy.setBackgroundDrawable(dummyBackground);
+                }
+                if (paletteResponse.shouldAnimate) {
+                    final Drawable d = mStickyHeader.getBackground();
+                    final Drawable d2 = new ColorDrawable(color);
+                    TransitionDrawable td = new TransitionDrawable(new Drawable[]{d,d2});
+                    td.setCrossFadeEnabled(true);
+                    mStickyHeader.setBackgroundDrawable(td);
+                    td.startTransition(SquareImageView.TRANSITION_DURATION);
+                } else {
+                    mStickyHeader.setBackgroundColor(color);
+                }
+            }
+        }
+    };
+
+    private final AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            // logic here derived from http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/
+            if (visibleItemCount == 0) return;
+            if (firstVisibleItem == 0 && mList.getChildCount() > 0) {
+                // parallax
+                mHeroContainer.setTranslationY(-mList.getChildAt(0).getTop() / 2);
+            }
+            // sticky header
+            final int top = mListHeader.getTop();
+            final int stickyHeight = mStickyHeaderContainer.getMeasuredHeight();
+            final int headerHeight = mListHeader.getMeasuredHeight();
+            final int delta = headerHeight - stickyHeight;
+            final int pos = delta + top;
+            // reposition header
+            mStickyHeaderContainer.setTranslationY(Math.max(pos,0));
+            if (pos < 0 && !mIsStuck) {
+                mIsStuck = true;
+                makeSlideAnimator(0, 10000, (ClipDrawable)mHeaderDummy.getBackground()).start();
+            } else if (pos > 0 && mIsStuck) {
+                mIsStuck = false;
+                makeSlideAnimator(10000, 0, (ClipDrawable)mHeaderDummy.getBackground()).start();
+            }
+        }
+    };
+
+    public static class SavedState extends BaseSavedState {
+        boolean wasStuck;
+
+        public SavedState(Parcel source) {
+            super(source);
+            wasStuck = source.readInt() == 1;
+        }
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(wasStuck ? 1 : 0);
+        }
+
+        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel source) {
+                return new SavedState(source);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
 }

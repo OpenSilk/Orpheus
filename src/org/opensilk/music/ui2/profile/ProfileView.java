@@ -32,4 +32,5 @@ public interface ProfileView extends HasScope {
     AnimatedImageView getHero4();
     ProfileAdapter getAdapter();
     Context getContext();
+    boolean isLandscape();
 }
