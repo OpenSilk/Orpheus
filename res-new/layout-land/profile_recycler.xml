@@ -16,26 +16,29 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.profile.PlaylistLandscapeView
+<org.opensilk.music.ui2.profile.ProfileLandscapeView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/profile_view"
+    android:id="@+id/profile_land_view"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false">
 
-    <include
+    <org.opensilk.music.widgets.SquareFrameLayout
+        android:id="@+id/hero_holder"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        layout="@layout/profile_sticky_header"/>
+        android:layout_marginTop="@dimen/hero_margin_top"
+        android:layout_marginBottom="@dimen/hero_margin_top"
+        android:layout_marginLeft="@dimen/hero_margin_side"
+        android:layout_marginRight="@dimen/hero_margin_side"/>
 
-    <org.opensilk.music.ui2.profile.PlaylistDragSortView
+    <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="match_parent"
-        style="@style/DragSortList"/>
+        android:layout_height="match_parent"/>
 
-</org.opensilk.music.ui2.profile.PlaylistLandscapeView>
+</org.opensilk.music.ui2.profile.ProfileLandscapeView>

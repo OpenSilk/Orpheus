@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
 
 import org.opensilk.common.widget.AnimatedImageView;
@@ -25,6 +26,7 @@ import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
+import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
@@ -34,7 +36,7 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
 /**
  * Created by drew on 11/18/14.
  */
-public abstract class BasePresenter<V extends View> extends ViewPresenter<V> {
+public abstract class BasePresenter extends mortar.Presenter<ProfileView> {
 
     final ActionBarOwner actionBarOwner;
     final ArtworkRequestManager requestor;
@@ -48,12 +50,22 @@ public abstract class BasePresenter<V extends View> extends ViewPresenter<V> {
     }
 
     @Override
+    protected void onLoad(Bundle savedInstanceState) {
+        super.onLoad(savedInstanceState);
+    }
+
+    @Override
     protected void onExitScope() {
         super.onExitScope();
         if (isSubscribed(loaderSubscription)) {
             loaderSubscription.unsubscribe();
             loaderSubscription = null;
         }
+    }
+
+    @Override
+    protected MortarScope extractScope(ProfileView view) {
+        return view.getScope();
     }
 
     abstract String getTitle(Context context);

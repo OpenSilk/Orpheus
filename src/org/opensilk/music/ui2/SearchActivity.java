@@ -106,7 +106,7 @@ public class SearchActivity extends BaseSwitcherToolbarActivity implements Searc
 
     @Override
     protected void setupView() {
-        setContentView(R.layout.main_profile);
+        setContentView(R.layout.main);
     }
 
 

@@ -36,4 +36,8 @@
 
     <!--footer dont change this without updating fab margins-->
     <dimen name="footer_height">64dp</dimen>
+
+    <!--profile-->
+    <dimen name="hero_margin_top">0dp</dimen>
+    <dimen name="hero_margin_side">0dp</dimen>
 </resources>

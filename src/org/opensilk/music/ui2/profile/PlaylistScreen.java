@@ -97,11 +97,13 @@ public class PlaylistScreen extends Screen {
 
     }
 
-    static abstract class PlaylistPresenter<V extends View> extends BasePresenter<V> {
+    @Singleton
+    public static class Presenter extends BasePresenter {
         final OverflowHandlers.Playlists playlistOverflowHandler;
         final Playlist playlist;
 
-        public PlaylistPresenter(ActionBarOwner actionBarOwner,
+        @Inject
+        public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.Playlists playlistOverflowHandler,
                          Playlist playlist) {
@@ -114,6 +116,13 @@ public class PlaylistScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
+            loadMultiArtwork(requestor,
+                    playlist.mAlbumIds,
+                    getView().getHero(),
+                    getView().getHero2(),
+                    getView().getHero3(),
+                    getView().getHero4()
+            );
         }
 
         @Override
@@ -147,6 +156,8 @@ public class PlaylistScreen extends Screen {
 
         void setupActionBar() {
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
+                            .setTitle(getTitle(getView().getContext()))
+                            .setSubtitle(getSubtitle(getView().getContext()))
                             .upButtonEnabled(true)
                             .withMenuConfig(makeMenuConfig())
                             .build()
@@ -181,56 +192,6 @@ public class PlaylistScreen extends Screen {
         boolean isLastAdded() {
             return playlist.mPlaylistId == -2;
         }
-    }
-
-    @Singleton
-    public static class PresenterPortrait extends PlaylistPresenter<PlaylistPortraitView> {
-
-        @Inject
-        public PresenterPortrait(ActionBarOwner actionBarOwner,
-                         ArtworkRequestManager requestor,
-                         OverflowHandlers.Playlists playlistOverflowHandler,
-                         Playlist playlist) {
-            super(actionBarOwner, requestor, playlistOverflowHandler, playlist);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-            loadMultiArtwork(requestor,
-                    playlist.mAlbumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-        }
-
-    }
-
-    @Singleton
-    public static class PresenterLandscape extends PlaylistPresenter<PlaylistLandscapeView> {
-
-        @Inject
-        public PresenterLandscape(ActionBarOwner actionBarOwner,
-                                 ArtworkRequestManager requestor,
-                                 OverflowHandlers.Playlists playlistOverflowHandler,
-                                 Playlist playlist) {
-            super(actionBarOwner, requestor, playlistOverflowHandler, playlist);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-            loadMultiArtwork(requestor,
-                    playlist.mAlbumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-        }
-
     }
 
     @Singleton

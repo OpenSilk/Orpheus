@@ -86,22 +86,19 @@ public class GenreScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter<ProfilePortraitView> providePortraitPresenter(PresenterPortrait p) {
-            return p;
-        }
-
-        @Provides
-        public BasePresenter<ProfileLandscapeView> provideLandscapePresenter(PresenterLandscape p) {
+        public BasePresenter providePresenter(Presenter p) {
             return p;
         }
     }
 
-    static abstract class GenrePresenter<V extends View> extends BasePresenter<V> {
+    @Singleton
+    public static class Presenter extends BasePresenter {
         final OverflowHandlers.Genres genreOverflowHandler;
         final Genre genre;
         final Observable<List<Object>> loader;
 
-        public GenrePresenter(ActionBarOwner actionBarOwner,
+        @Inject
+        public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.Genres genreOverflowHandler,
                          Genre genre,
@@ -116,6 +113,25 @@ public class GenreScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
+
+            loadMultiArtwork(requestor,
+                    genre.mAlbumIds,
+                    getView().getHero(),
+                    getView().getHero2(),
+                    getView().getHero3(),
+                    getView().getHero4()
+            );
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
+                @Override
+                public void onNext(List<Object> objects) {
+                    if (getView() != null) {
+                        getView().getAdapter().addAll(objects);
+                    }
+                }
+            });
+
         }
 
         @Override
@@ -147,6 +163,8 @@ public class GenreScreen extends Screen {
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder()
+                            .setTitle(getTitle(getView().getContext()))
+                            .setSubtitle(getSubtitle(getView().getContext()))
                             .upButtonEnabled(true)
                             .withMenuConfig(
                                     new ActionBarOwner.MenuConfig.Builder()
@@ -169,77 +187,4 @@ public class GenreScreen extends Screen {
         }
     }
 
-    @Singleton
-    public static class PresenterPortrait extends GenrePresenter<ProfilePortraitView> {
-
-        @Inject
-        public PresenterPortrait(ActionBarOwner actionBarOwner,
-                         ArtworkRequestManager requestor,
-                         OverflowHandlers.Genres genreOverflowHandler,
-                         Genre genre,
-                         LocalGenresProfileLoader loader) {
-            super(actionBarOwner, requestor, genreOverflowHandler, genre, loader);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-
-            loadMultiArtwork(requestor,
-                    genre.mAlbumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
-                @Override
-                public void onNext(List<Object> objects) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(objects);
-                    }
-                }
-            });
-        }
-
-    }
-
-    @Singleton
-    public static class PresenterLandscape extends GenrePresenter<ProfileLandscapeView> {
-
-        @Inject
-        public PresenterLandscape(ActionBarOwner actionBarOwner,
-                         ArtworkRequestManager requestor,
-                         OverflowHandlers.Genres genreOverflowHandler,
-                         Genre genre,
-                         LocalGenresProfileLoader loader) {
-            super(actionBarOwner, requestor, genreOverflowHandler, genre, loader);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-
-            loadMultiArtwork(requestor,
-                    genre.mAlbumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
-                @Override
-                public void onNext(List<Object> objects) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(objects);
-                    }
-                }
-            });
-        }
-
-    }
 }

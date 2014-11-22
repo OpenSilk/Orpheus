@@ -17,6 +17,6 @@
 
 <resources>
     <integer name="profile_grid_cols_vertical">5</integer>
-    <integer name="profile_grid_cols_horizontal">4</integer>
+    <integer name="profile_grid_cols_horizontal">3</integer>
     <integer name="grid_columns">5</integer>
 </resources>

@@ -118,7 +118,7 @@ public class ProfileActivity extends BaseSwitcherToolbarActivity implements
 
     @Override
     protected void setupView() {
-        setContentView(R.layout.main_profile);
+        setContentView(R.layout.main);
     }
 
     @Override

@@ -16,8 +16,6 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<merge>
+<resources>
 
-    <include layout="@layout/floating_action_buttons"/>
-
-</merge>
+</resources>

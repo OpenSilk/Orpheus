@@ -16,32 +16,26 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.main.MainView
+<org.opensilk.music.ui2.profile.PlaylistLandscapeView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_land_view"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:baselineAligned="false">
 
-    <include layout="@layout/footer"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/footer_height"
-        android:layout_alignParentBottom="true"/>
+    <org.opensilk.music.widgets.SquareFrameLayout
+        android:id="@+id/hero_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"/>
 
-    <org.opensilk.common.mortarflow.FrameScreenSwitcherView
-        android:id="@+id/main"
-        android:layout_width="match_parent"
+    <org.opensilk.music.ui2.profile.PlaylistDragSortView
+        android:id="@android:id/list"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="match_parent"
-        android:layout_above="@id/footer_view"/>
+        style="@style/DragSortList"/>
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/main_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_alignParentTop="true"
-        style="?toolbarTheme"/>
-
-    <!--Fabs-->
-    <include layout="@layout/floating_action_buttons_profile"/>
-
-</org.opensilk.music.ui2.main.MainView>
+</org.opensilk.music.ui2.profile.PlaylistLandscapeView>

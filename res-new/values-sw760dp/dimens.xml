@@ -17,5 +17,7 @@
   -->
 
 <resources>
-
+    <!--profile-->
+    <dimen name="hero_margin_top">32dp</dimen>
+    <dimen name="hero_margin_side">16dp</dimen>
 </resources>

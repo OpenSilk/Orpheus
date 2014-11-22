@@ -92,22 +92,19 @@ public class SongGroupScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter<ProfilePortraitView> providePortraitPresenter(PresenterPortrait p) {
-            return p;
-        }
-
-        @Provides
-        public BasePresenter<ProfileLandscapeView> provideLandscapePresenter(PresenterLandscape p) {
+        public BasePresenter providePresenter(Presenter p) {
             return p;
         }
     }
 
-    static abstract class SongGroupPresenter<V extends View> extends BasePresenter<V> {
+    @Singleton
+    public static class Presenter extends BasePresenter {
         final OverflowHandlers.LocalSongGroups songGroupOverflowHandler;
         final LocalSongGroup songGroup;
         final Observable<List<LocalSong>> loader;
 
-        public SongGroupPresenter(ActionBarOwner actionBarOwner,
+        @Inject
+        public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
                          LocalSongGroup songGroup,
@@ -122,6 +119,23 @@ public class SongGroupScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
+            loadMultiArtwork(requestor,
+                    songGroup.albumIds,
+                    getView().getHero(),
+                    getView().getHero2(),
+                    getView().getHero3(),
+                    getView().getHero4()
+            );
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().getAdapter().addAll(localSongs);
+                    }
+                }
+            });
         }
 
         @Override
@@ -152,6 +166,8 @@ public class SongGroupScreen extends Screen {
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder()
+                            .setTitle(getTitle(getView().getContext()))
+                            .setSubtitle(getSubtitle(getView().getContext()))
                             .upButtonEnabled(true)
                             .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
                                             .withMenus(OverflowHandlers.LocalSongGroups.MENUS)
@@ -171,80 +187,6 @@ public class SongGroupScreen extends Screen {
                             .build()
             );
         }
-    }
-
-    @Singleton
-    public static class PresenterPortrait extends SongGroupPresenter<ProfilePortraitView> {
-
-        @Inject
-        public PresenterPortrait(ActionBarOwner actionBarOwner,
-                         ArtworkRequestManager requestor,
-                         OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
-                         LocalSongGroup songGroup,
-                         LocalSongGroupLoader loader) {
-            super(actionBarOwner, requestor, songGroupOverflowHandler, songGroup, loader);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-
-            loadMultiArtwork(requestor,
-                    songGroup.albumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(localSongs);
-                    }
-                }
-            });
-        }
-
-    }
-
-    @Singleton
-    public static class PresenterLandscape extends SongGroupPresenter<ProfileLandscapeView> {
-
-        @Inject
-        public PresenterLandscape(ActionBarOwner actionBarOwner,
-                         ArtworkRequestManager requestor,
-                         OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
-                         LocalSongGroup songGroup,
-                         LocalSongGroupLoader loader) {
-            super(actionBarOwner, requestor, songGroupOverflowHandler, songGroup, loader);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-
-            loadMultiArtwork(requestor,
-                    songGroup.albumIds,
-                    getView().mArtwork,
-                    getView().mArtwork2,
-                    getView().mArtwork3,
-                    getView().mArtwork4
-            );
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(localSongs);
-                    }
-                }
-            });
-        }
-
     }
 
 }

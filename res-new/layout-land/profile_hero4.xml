@@ -16,11 +16,8 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.widgets.SquareFrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@id/hero_container"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <org.opensilk.common.widget.HalfSizeSquareImageView
         android:id="@id/hero_image"
@@ -54,4 +51,4 @@
         android:layout_marginTop="1dp"
         android:layout_marginLeft="1dp"/>
 
-</org.opensilk.music.widgets.SquareFrameLayout>
+</merge>

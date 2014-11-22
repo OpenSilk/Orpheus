@@ -95,23 +95,20 @@ public class AlbumScreen extends Screen {
         }
 
         @Provides
-        public BasePresenter<ProfilePortraitView> providePortraitPresenter(PresenterPortrait p) {
-            return p;
-        }
-
-        @Provides
-        public BasePresenter<ProfileLandscapeView> provideLandscapePresenter(PresenterLandscape p) {
+        public BasePresenter providePresenter(Presenter p) {
             return p;
         }
     }
 
-    static abstract class AlbumPresenter<V extends View> extends BasePresenter<V> {
+    @Singleton
+    public static class Presenter extends BasePresenter {
 
         final OverflowHandlers.LocalAlbums albumsOverflowHandler;
         final Observable<List<LocalSong>> loader;
         final LocalAlbum album;
 
-        public AlbumPresenter(ActionBarOwner actionBarOwner,
+        @Inject
+        public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
                          OverflowHandlers.LocalAlbums albumsOverflowHandler,
                          LocalAlbumSongLoader loader,
@@ -126,6 +123,18 @@ public class AlbumScreen extends Screen {
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
             setupActionBar();
+            requestor.newAlbumRequest(getView().getHero(), null,
+                    new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
+
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().getAdapter().addAll(localSongs);
+                    }
+                }
+            });
         }
 
         @Override
@@ -156,6 +165,8 @@ public class AlbumScreen extends Screen {
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder()
+                            .setTitle(getTitle(getView().getContext()))
+                            .setSubtitle(getSubtitle(getView().getContext()))
                             .upButtonEnabled(true)
                             .withMenuConfig(
                                     new ActionBarOwner.MenuConfig.Builder()
@@ -175,70 +186,6 @@ public class AlbumScreen extends Screen {
                             )
                             .build()
             );
-        }
-
-    }
-
-    @Singleton
-    public static class PresenterPortrait extends AlbumPresenter<ProfilePortraitView> {
-
-        @Inject
-        public PresenterPortrait(ActionBarOwner actionBarOwner,
-                         ArtworkRequestManager requestor,
-                         OverflowHandlers.LocalAlbums albumsOverflowHandler,
-                         LocalAlbumSongLoader loader,
-                         LocalAlbum album) {
-            super(actionBarOwner, requestor, albumsOverflowHandler, loader, album);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-
-            requestor.newAlbumRequest(getView().mArtwork, getView().mPaletteObserver,
-                    new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(localSongs);
-                    }
-                }
-            });
-        }
-
-    }
-
-    @Singleton
-    public static class PresenterLandscape extends AlbumPresenter<ProfileLandscapeView> {
-
-        @Inject
-        public PresenterLandscape(ActionBarOwner actionBarOwner,
-                                ArtworkRequestManager requestor,
-                                OverflowHandlers.LocalAlbums albumsOverflowHandler,
-                                LocalAlbumSongLoader loader,
-                                LocalAlbum album) {
-            super(actionBarOwner, requestor, albumsOverflowHandler, loader, album);
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-
-            requestor.newAlbumRequest(getView().mArtwork, getView().mPaletteObserver,
-                    new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().mAdapter.addAll(localSongs);
-                    }
-                }
-            });
         }
 
     }

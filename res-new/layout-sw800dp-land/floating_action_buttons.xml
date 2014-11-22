@@ -18,8 +18,7 @@
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
        xmlns:app="http://schemas.android.com/apk/res-auto"
-       xmlns:tools="http://schemas.android.com/tools"
-       tools:ignore="InconsistentLayout">
+       xmlns:tools="http://schemas.android.com/tools">
 
     <org.opensilk.common.widget.FloatingActionButtonCheckable
         android:id="@id/floating_action_button"
@@ -27,8 +26,8 @@
         android:layout_height="@dimen/fab_size_normal"
         android:layout_marginEnd="@dimen/fab_margin_end"
         android:layout_marginRight="@dimen/fab_margin_end"
-        android:layout_marginBottom="36dp"
-        android:layout_alignParentBottom="true"
+        android:layout_marginTop="116dp"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         style="?fabPlayStyle"/>
@@ -37,48 +36,49 @@
         android:id="@id/floating_action_next"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
-        android:layout_marginBottom="36dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_toStartOf="@id/floating_action_button"
-        android:layout_toLeftOf="@id/floating_action_button"
-        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_button"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         style="?fabNextStyle"/>
 
     <org.opensilk.common.widget.FloatingActionButton
         android:id="@id/floating_action_prev"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
-        android:layout_marginBottom="36dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_toStartOf="@id/floating_action_next"
-        android:layout_toLeftOf="@id/floating_action_next"
-        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_next"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         style="?fabPrevStyle"/>
 
     <org.opensilk.common.widget.FloatingActionButton
         android:id="@id/floating_action_shuffle"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
-        android:layout_marginBottom="36dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_toStartOf="@id/floating_action_prev"
-        android:layout_toLeftOf="@id/floating_action_prev"
-        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_prev"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         style="?fabShuffleStyle"/>
 
     <org.opensilk.common.widget.FloatingActionButton
         android:id="@id/floating_action_repeat"
         android:layout_width="@dimen/fab_size_normal"
         android:layout_height="@dimen/fab_size_normal"
-        android:layout_marginBottom="36dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_toStartOf="@id/floating_action_shuffle"
-        android:layout_toLeftOf="@id/floating_action_shuffle"
-        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_shuffle"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         style="?fabRepeatStyle"/>
+
 
 </merge>

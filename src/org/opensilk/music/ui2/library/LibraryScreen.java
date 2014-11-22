@@ -425,6 +425,9 @@ public class LibraryScreen extends Screen {
                 Timber.e(e, "ResultObserver.OnError()");
                 if (retryCount++ >= RETRY_LIMIT) {
                     bus.post(new MakeToast(R.string.err_retrieving_items));
+                    if (getView() != null) {
+                        getView().setListEmpty(true, true);
+                    }
                     return;
                 }
                 Bundle token = lastResult != null ? lastResult.token : null;

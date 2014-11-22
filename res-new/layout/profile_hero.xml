@@ -24,8 +24,7 @@
     <org.opensilk.music.widgets.SquareFrameLayout
         android:id="@+id/hero_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="?actionBarSize">
+        android:layout_height="match_parent">
 
         <org.opensilk.common.widget.SquareImageView
             android:id="@+id/hero_image"
@@ -35,7 +34,5 @@
             android:gravity="center" />
 
     </org.opensilk.music.widgets.SquareFrameLayout>
-
-
 
 </FrameLayout>
