@@ -19,5 +19,7 @@
     <!-- Daydream -->
     <dimen name="dream_art_size">200dp</dimen>
 
+    <integer name="grid_columns">4</integer>
+
     <dimen name="action_bar_double_height">96dp</dimen>
 </resources>

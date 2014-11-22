@@ -34,6 +34,7 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.content.RecyclerListAdapter;
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -125,7 +126,7 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
             vh.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    NavUtils.openAlbumProfile(context, la);
+                    AppFlow.get(context).goTo(new AlbumScreen(la));
                 }
             });
         } else if (obj instanceof LocalSongGroup) {
@@ -134,7 +135,7 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
             String l2 = MusicUtils.makeLabel(context, R.plurals.Nalbums, lsg.albumIds.length)
                     + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, lsg.songIds.length);
             vh.subtitle.setText(l2);
-            BasePresenter.loadMultiArtwork(
+            loadMultiArtwork(
                     requestor,
                     vh.subscriptions,
                     lsg.albumIds,
@@ -164,7 +165,7 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
             vh.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    NavUtils.openSongGroupProfile(context, lsg);
+                    AppFlow.get(context).goTo(new SongGroupScreen(lsg));
                 }
             });
         } else if (obj instanceof LocalSong) {
@@ -249,6 +250,54 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
 
     public void addHeader(View header) {
         addItem(0, header);
+    }
+
+    static CompositeSubscription loadMultiArtwork(ArtworkRequestManager requestor,
+                                                  CompositeSubscription cs,
+                                                  long[] albumIds,
+                                                  AnimatedImageView artwork,
+                                                  AnimatedImageView artwork2,
+                                                  AnimatedImageView artwork3,
+                                                  AnimatedImageView artwork4) {
+        final int num = albumIds.length;
+        if (artwork != null) {
+            if (num >= 1) {
+                cs.add(requestor.newAlbumRequest(artwork, null, albumIds[0], ArtworkType.THUMBNAIL));
+            } else {
+                artwork.setDefaultImage();
+            }
+        }
+        if (artwork2 != null) {
+            if (num >= 2) {
+                cs.add(requestor.newAlbumRequest(artwork2, null, albumIds[1], ArtworkType.THUMBNAIL));
+            } else {
+                // never get here
+                artwork2.setDefaultImage();
+            }
+        }
+        if (artwork3 != null) {
+            if (num >= 3) {
+                cs.add(requestor.newAlbumRequest(artwork3, null, albumIds[2], ArtworkType.THUMBNAIL));
+            } else if (num >= 2) {
+                //put the second image here, first image will be put in 4th spot to crisscross
+                cs.add(requestor.newAlbumRequest(artwork3, null, albumIds[1], ArtworkType.THUMBNAIL));
+            } else {
+                // never get here
+                artwork3.setDefaultImage();
+            }
+        }
+        if (artwork4 != null) {
+            if (num >= 4) {
+                cs.add(requestor.newAlbumRequest(artwork4, null, albumIds[3], ArtworkType.THUMBNAIL));
+            } else if (num >= 2) {
+                //3 -> loopback, 2 -> put the first image here for crisscross
+                cs.add(requestor.newAlbumRequest(artwork4, null, albumIds[0], ArtworkType.THUMBNAIL));
+            } else {
+                //never get here
+                artwork4.setDefaultImage();
+            }
+        }
+        return cs;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

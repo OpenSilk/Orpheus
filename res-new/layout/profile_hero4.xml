@@ -23,7 +23,8 @@
     <org.opensilk.music.widgets.SquareFrameLayout
         android:id="@+id/hero_container"
         android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_margin="2dp">
 
         <org.opensilk.common.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image"

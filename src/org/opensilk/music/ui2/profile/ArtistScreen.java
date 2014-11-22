@@ -31,10 +31,12 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.loader.LocalArtistProfileLoader;
 
 import java.util.List;
@@ -43,6 +45,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import flow.HasParent;
 import flow.Layout;
 import rx.Observable;
 import rx.functions.Func1;
@@ -54,7 +57,7 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
  */
 @Layout(R.layout.profile_recycler)
 @WithModule(ArtistScreen.Module.class)
-public class ArtistScreen extends Screen {
+public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
 
     final LocalArtist artist;
 
@@ -67,8 +70,13 @@ public class ArtistScreen extends Screen {
         return super.getName() + artist.name;
     }
 
+    @Override
+    public GalleryScreen getParent() {
+        return new GalleryScreen();
+    }
+
     @dagger.Module (
-            addsTo = ProfileActivity.Module.class,
+            addsTo = LauncherActivity.Module.class,
             injects = {
                     ProfilePortraitView.class,
                     ProfileLandscapeView.class,

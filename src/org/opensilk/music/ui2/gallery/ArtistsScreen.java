@@ -24,8 +24,10 @@ import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 import com.andrew.apollo.utils.SortOrder;
 
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -36,6 +38,7 @@ import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
+import org.opensilk.music.ui2.profile.ArtistScreen;
 
 import java.util.List;
 
@@ -83,22 +86,16 @@ public class ArtistsScreen extends Screen {
         @Override
         protected void load() {
             loader.setSortOrder(preferences.getString(AppPreferences.ARTIST_SORT_ORDER, SortOrder.ArtistSortOrder.ARTIST_A_Z));
-            subscription = loader.getListObservable().subscribe(new Action1<List<LocalArtist>>() {
+            subscription = loader.getListObservable().subscribe(new SimpleObserver<List<LocalArtist>>() {
                 @Override
-                public void call(List<LocalArtist> localArtists) {
+                public void onNext(List<LocalArtist> localArtists) {
                     if (viewNotNull()) {
                         getAdapter().addAll(localArtists);
                         showRecyclerView();
                     }
                 }
-            }, new Action1<Throwable>() {
                 @Override
-                public void call(Throwable throwable) {
-
-                }
-            }, new Action0() {
-                @Override
-                public void call() {
+                public void onCompleted() {
                     if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });
@@ -106,7 +103,7 @@ public class ArtistsScreen extends Screen {
 
         @Override
         protected void onItemClicked(BaseAdapter.ViewHolder holder, LocalArtist item) {
-            NavUtils.openArtistProfile(holder.itemView.getContext(), item);
+            AppFlow.get(holder.itemView.getContext()).goTo(new ArtistScreen(item));
         }
 
         @Override
@@ -132,36 +129,38 @@ public class ArtistsScreen extends Screen {
 
         void ensureMenu() {
             if (actionBarMenu == null) {
-                Func1<Integer, Boolean> actionHandler = new Func1<Integer, Boolean>() {
-                    @Override
-                    public Boolean call(Integer integer) {
-                        switch (integer) {
-                            case R.id.menu_sort_by_az:
-                                setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_A_Z);
-                                return true;
-                            case R.id.menu_sort_by_za:
-                                setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_Z_A);
-                                return true;
-                            case R.id.menu_sort_by_number_of_songs:
-                                setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_SONGS);
-                                return true;
-                            case R.id.menu_sort_by_number_of_albums:
-                                setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_ALBUMS);
-                                return true;
-                            case R.id.menu_view_as_simple:
-                                preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.SIMPLE);
-                                resetRecyclerView();
-                                return true;
-                            case R.id.menu_view_as_grid:
-                                preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.GRID);
-                                resetRecyclerView();
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                };
-                actionBarMenu = new ActionBarOwner.MenuConfig(actionHandler, R.menu.artist_sort_by, R.menu.view_as);
+                actionBarMenu = new ActionBarOwner.MenuConfig.Builder()
+                        .withMenus(R.menu.artist_sort_by, R.menu.view_as)
+                        .setActionHandler(new Func1<Integer, Boolean>() {
+                              @Override
+                              public Boolean call(Integer integer) {
+                                  switch (integer) {
+                                      case R.id.menu_sort_by_az:
+                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_A_Z);
+                                          return true;
+                                      case R.id.menu_sort_by_za:
+                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_Z_A);
+                                          return true;
+                                      case R.id.menu_sort_by_number_of_songs:
+                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_SONGS);
+                                          return true;
+                                      case R.id.menu_sort_by_number_of_albums:
+                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_ALBUMS);
+                                          return true;
+                                      case R.id.menu_view_as_simple:
+                                          preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.SIMPLE);
+                                          resetRecyclerView();
+                                          return true;
+                                      case R.id.menu_view_as_grid:
+                                          preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.GRID);
+                                          resetRecyclerView();
+                                          return true;
+                                      default:
+                                          return false;
+                                  }
+                              }
+                        })
+                        .build();
             }
         }
     }

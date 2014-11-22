@@ -16,7 +16,7 @@
   -->
 
 <resources>
-    <!--profile-->
-    <dimen name="hero_margin_top">2dp</dimen>
-    <dimen name="hero_margin_side">2dp</dimen>
+    <integer name="profile_grid_cols_vertical">5</integer>
+    <integer name="profile_grid_cols_horizontal">3</integer>
+    <integer name="grid_columns">5</integer>
 </resources>

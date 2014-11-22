@@ -29,7 +29,11 @@
     <org.opensilk.music.widgets.SquareFrameLayout
         android:id="@+id/hero_holder"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/hero_margin_top"
+        android:layout_marginBottom="@dimen/hero_margin_bottom"
+        android:layout_marginLeft="@dimen/hero_margin_left"
+        android:layout_marginRight="@dimen/hero_margin_right"/>
 
     <org.opensilk.music.ui2.profile.PlaylistDragSortView
         android:id="@android:id/list"

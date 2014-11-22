@@ -23,19 +23,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import org.opensilk.common.content.RecyclerListAdapter;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.artwork.PaletteObserver;
+import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.widgets.GridTileDescription;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -46,9 +45,8 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 10/18/14.
  */
-public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.ViewHolder> {
+public abstract class BaseAdapter<T> extends RecyclerListAdapter<T, BaseAdapter.ViewHolder> {
 
-    protected final List<T> items;
     protected final BasePresenter<T> presenter;
     protected final ArtworkRequestManager artworkRequestor;
 
@@ -56,14 +54,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     protected boolean mGridStyle = true;
 
     public BaseAdapter(BasePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
-        this.items = new ArrayList<>();
-        this.presenter = presenter;
-        this.artworkRequestor = artworkRequestor;
-        setHasStableIds(true);
+        this(new ArrayList<T>(), presenter, artworkRequestor);
     }
 
     public BaseAdapter(List<T> items, BasePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
-        this.items = new ArrayList<>(items); //copy probably not needed
+        super(items);
         this.presenter = presenter;
         this.artworkRequestor = artworkRequestor;
         setHasStableIds(true);
@@ -118,53 +113,16 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
     }
 
     @Override
-    public int getItemCount() {
-        return items.size();
-    }
-
-    @Override
     public long getItemId(int position) {
         return getItem(position).hashCode();
-    }
-
-    public List<T> getItems() {
-        return items;
-    }
-
-    public T getItem(int position) {
-        return items.get(position);
-    }
-
-    public void addAll(Collection<T> items) {
-        this.items.addAll(items);
-        notifyDataSetChanged();
-    }
-
-    public void add(T item) {
-        items.add(item);
-//        notifyItemInserted(items.indexOf(item));
-        // bug in StaggeredGrid tries to arrayCopy items.size() + 1 and barfs
-        notifyItemRangeInserted(items.indexOf(item), 0);
-    }
-
-    public void clear() {
-        this.items.clear();
-        notifyDataSetChanged();
-    }
-
-    public boolean isEmpty() {
-        return items.isEmpty();
     }
 
     @Override
     public int getItemViewType(int position) {
         if (!mGridStyle) {
             return R.layout.gallery_list_item_artwork;
-        }
-        if (quadArtwork(position)) {
+        } else if (multiArtwork(position)) {
             return R.layout.gallery_grid_item_artwork4;
-        } else if (dualArtwork(position)) {
-            return R.layout.gallery_grid_item_artwork2;
         } else {
             return R.layout.gallery_grid_item_artwork;
         }
@@ -174,12 +132,56 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         mGridStyle = gridStyle;
     }
 
-    protected boolean dualArtwork(int position) {
+    protected boolean multiArtwork(int position) {
         return false;
     }
 
-    protected boolean quadArtwork(int position) {
-        return false;
+    static CompositeSubscription loadMultiArtwork(ArtworkRequestManager requestor,
+                                                  CompositeSubscription cs,
+                                                  long[] albumIds,
+                                                  AnimatedImageView artwork,
+                                                  AnimatedImageView artwork2,
+                                                  AnimatedImageView artwork3,
+                                                  AnimatedImageView artwork4) {
+        final int num = albumIds.length;
+        if (artwork != null) {
+            if (num >= 1) {
+                cs.add(requestor.newAlbumRequest(artwork, null, albumIds[0], ArtworkType.THUMBNAIL));
+            } else {
+                artwork.setDefaultImage();
+            }
+        }
+        if (artwork2 != null) {
+            if (num >= 2) {
+                cs.add(requestor.newAlbumRequest(artwork2, null, albumIds[1], ArtworkType.THUMBNAIL));
+            } else {
+                // never get here
+                artwork2.setDefaultImage();
+            }
+        }
+        if (artwork3 != null) {
+            if (num >= 3) {
+                cs.add(requestor.newAlbumRequest(artwork3, null, albumIds[2], ArtworkType.THUMBNAIL));
+            } else if (num >= 2) {
+                //put the second image here, first image will be put in 4th spot to crisscross
+                cs.add(requestor.newAlbumRequest(artwork3, null, albumIds[1], ArtworkType.THUMBNAIL));
+            } else {
+                // never get here
+                artwork3.setDefaultImage();
+            }
+        }
+        if (artwork4 != null) {
+            if (num >= 4) {
+                cs.add(requestor.newAlbumRequest(artwork4, null, albumIds[3], ArtworkType.THUMBNAIL));
+            } else if (num >= 2) {
+                //3 -> loopback, 2 -> put the first image here for crisscross
+                cs.add(requestor.newAlbumRequest(artwork4, null, albumIds[0], ArtworkType.THUMBNAIL));
+            } else {
+                //never get here
+                artwork4.setDefaultImage();
+            }
+        }
+        return cs;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -193,19 +195,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter.Vi
         @InjectView(R.id.tile_overflow) ImageButton overflow;
 
         final CompositeSubscription subscriptions;
-        final int artNumber;
 
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.inject(this, itemView);
             subscriptions = new CompositeSubscription();
-            if (artwork4 != null) {
-                artNumber = 4;
-            } else if (artwork2 != null) {
-                artNumber = 2;
-            } else {
-                artNumber = 1;
-            }
 //            Drawable d = ContextCompat.getDrawable(itemView.getContext(), R.drawable.ic_menu_moreoverflow_mtrl_alpha);
 //            overflow.setImageDrawable(new TintDrawableWrapper(d, Themer.getDefaultColorStateList(itemView.getContext())));
         }

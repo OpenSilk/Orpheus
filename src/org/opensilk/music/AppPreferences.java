@@ -59,6 +59,8 @@ public class AppPreferences {
     //Gallery list styles
     public static final String ARTIST_LAYOUT = "artist_layout";
     public static final String ALBUM_LAYOUT = "album_layout";
+    public static final String GENRE_LAYOUT = "genre_layout";
+    public static final String PLAYLIST_LAYOUT = "playlist_layout";
     // values for list styles
     public static final String SIMPLE = "simple";
     public static final String GRID = "grid";

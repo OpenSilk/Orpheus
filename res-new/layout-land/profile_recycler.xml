@@ -31,9 +31,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/hero_margin_top"
-        android:layout_marginBottom="@dimen/hero_margin_top"
-        android:layout_marginLeft="@dimen/hero_margin_side"
-        android:layout_marginRight="@dimen/hero_margin_side"/>
+        android:layout_marginBottom="@dimen/hero_margin_bottom"
+        android:layout_marginLeft="@dimen/hero_margin_left"
+        android:layout_marginRight="@dimen/hero_margin_right"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"

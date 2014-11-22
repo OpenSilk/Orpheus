@@ -16,5 +16,5 @@
   -->
 
 <resources>
-    <dimen name="main_content_width">680dp</dimen>
+    <integer name="grid_columns">6</integer>
 </resources>

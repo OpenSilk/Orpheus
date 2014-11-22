@@ -23,9 +23,12 @@ import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.widget.LetterTileDrawable;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -33,6 +36,7 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
+import org.opensilk.music.ui2.profile.PlaylistScreen;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,6 +46,7 @@ import flow.Layout;
 import mortar.ViewPresenter;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.
@@ -74,22 +79,16 @@ public class PlaylistsScreen extends Screen {
 
         @Override
         protected void load() {
-            subscription = loader.getObservable().subscribe(new Action1<Playlist>() {
+            subscription = loader.getObservable().subscribe(new SimpleObserver<Playlist>() {
                 @Override
-                public void call(Playlist playlist) {
+                public void onNext(Playlist playlist) {
                     if (viewNotNull()) {
-                        getAdapter().add(playlist);
+                        getAdapter().addItem(playlist);
                         showRecyclerView();
                     }
                 }
-            }, new Action1<Throwable>() {
                 @Override
-                public void call(Throwable throwable) {
-
-                }
-            }, new Action0() {
-                @Override
-                public void call() {
+                public void onCompleted() {
                     if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });
@@ -97,7 +96,7 @@ public class PlaylistsScreen extends Screen {
 
         @Override
         protected void onItemClicked(BaseAdapter.ViewHolder holder, Playlist item) {
-            NavUtils.openPlaylistProfile(holder.itemView.getContext(), item);
+            AppFlow.get(holder.itemView.getContext()).goTo(new PlaylistScreen(item));
         }
 
         @Override
@@ -106,13 +105,32 @@ public class PlaylistsScreen extends Screen {
         }
 
         @Override
-        protected boolean isStaggered() {
-            return true;
+        protected boolean isGrid() {
+            return preferences.getString(AppPreferences.PLAYLIST_LAYOUT, AppPreferences.GRID).equals(AppPreferences.GRID);
         }
 
         @Override
         public ActionBarOwner.MenuConfig getMenuConfig() {
-            return null;
+            return new ActionBarOwner.MenuConfig.Builder()
+                    .withMenus(R.menu.view_as)
+                    .setActionHandler(new Func1<Integer, Boolean>() {
+                        @Override
+                        public Boolean call(Integer integer) {
+                            switch (integer) {
+                                case R.id.menu_view_as_simple:
+                                    preferences.putString(AppPreferences.PLAYLIST_LAYOUT, AppPreferences.SIMPLE);
+                                    resetRecyclerView();
+                                    return true;
+                                case R.id.menu_view_as_grid:
+                                    preferences.putString(AppPreferences.PLAYLIST_LAYOUT, AppPreferences.GRID);
+                                    resetRecyclerView();
+                                    return true;
+                                default:
+                                    return false;
+                            }
+                        }
+                    })
+                    .build();
         }
 
     }
@@ -127,38 +145,24 @@ public class PlaylistsScreen extends Screen {
         public void onBindViewHolder(ViewHolder holder, Playlist playlist) {
             holder.title.setText(playlist.mPlaylistName);
             holder.subtitle.setText(MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, playlist.mSongNumber));
-            switch (holder.artNumber) {
-                case 4:
-                    if (playlist.mAlbumIds.length >= 4) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork4,
-                                null, playlist.mAlbumIds[3], ArtworkType.THUMBNAIL));
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork3,
-                                null, playlist.mAlbumIds[2], ArtworkType.THUMBNAIL));
-                    }
-                    //fall
-                case 2:
-                    if (playlist.mAlbumIds.length >= 2) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork2,
-                                null, playlist.mAlbumIds[1], ArtworkType.THUMBNAIL));
-                    }
-                    //fall
-                case 1:
-                    if (playlist.mAlbumIds.length >= 1) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
-                                null, playlist.mAlbumIds[0], ArtworkType.THUMBNAIL));
-                    } else {
-                        holder.artwork.setDefaultImage();
-                    }
+            if (mGridStyle) {
+                loadMultiArtwork(artworkRequestor,
+                        holder.subscriptions,
+                        playlist.mAlbumIds,
+                        holder.artwork,
+                        holder.artwork2,
+                        holder.artwork3,
+                        holder.artwork4
+                );
+            } else {
+                LetterTileDrawable drawable = new LetterTileDrawable(holder.itemView.getResources());
+                drawable.setText(playlist.mPlaylistName);
+                holder.artwork.setImageDrawable(drawable);
             }
         }
 
         @Override
-        protected boolean quadArtwork(int position) {
-            return getItem(position).mAlbumIds.length >= 4;
-        }
-
-        @Override
-        protected boolean dualArtwork(int position) {
+        protected boolean multiArtwork(int position) {
             return getItem(position).mAlbumIds.length >= 2;
         }
     }

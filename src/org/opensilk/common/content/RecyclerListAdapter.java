@@ -90,4 +90,13 @@ public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder>
         return item;
     }
 
+    public void clear() {
+        this.items.clear();
+        notifyDataSetChanged();
+    }
+
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
 }

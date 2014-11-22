@@ -29,6 +29,7 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
@@ -66,7 +67,7 @@ public class GenreScreen extends Screen {
     }
 
     @dagger.Module(
-            addsTo = ProfileActivity.Module.class,
+            addsTo = LauncherActivity.Module.class,
             injects = {
                     ProfilePortraitView.class,
                     ProfileLandscapeView.class,

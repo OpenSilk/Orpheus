@@ -92,10 +92,10 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected void setupRecyclerView(boolean clear) {
         if (!viewNotNull()) return;
         BaseAdapter<T> adapter = newAdapter();
-        adapter.setGridStyle(isGrid() || isStaggered());
-        if (clear && loader.hasCache()) adapter.getItems().addAll(loader.getCache());
+        adapter.setGridStyle(isGrid());
+        if (clear && loader.hasCache()) adapter.addAll(loader.getCache());
         RecyclerView v = getView().getListView();
-        v.setHasFixedSize(!isStaggered());
+        v.setHasFixedSize(true);
         v.setLayoutManager(getLayoutManager(v.getContext()));
         v.swapAdapter(adapter, clear);
     }
@@ -156,23 +156,12 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         return false;
     }
 
-    protected boolean isStaggered() {
-        return false;
-    }
-
     protected RecyclerView.LayoutManager getLayoutManager(Context context) {
-        if (isStaggered()) {
-            return makeStaggerdLayoutManager(context);
-        } else if (isGrid()) {
+        if (isGrid()) {
             return makeGridLayoutManager(context);
         } else {
             return makeListLayoutManager(context);
         }
-    }
-
-    protected RecyclerView.LayoutManager makeStaggerdLayoutManager(Context context) {
-        int numCols = context.getResources().getInteger(R.integer.grid_columns);
-        return new StaggeredGridLayoutManager(numCols, StaggeredGridLayoutManager.VERTICAL);
     }
 
     protected RecyclerView.LayoutManager makeGridLayoutManager(Context context) {

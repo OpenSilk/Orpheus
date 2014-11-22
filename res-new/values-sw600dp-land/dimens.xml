@@ -16,5 +16,8 @@
   -->
 
 <resources>
+    <integer name="grid_columns">5</integer>
+
+    <!--Fab-->
     <dimen name="fab_margin_end">24dp</dimen>
 </resources>

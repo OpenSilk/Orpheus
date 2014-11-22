@@ -30,10 +30,12 @@ import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.loader.LocalPlaylistSongLoader;
 
 import java.util.List;
@@ -43,6 +45,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import flow.HasParent;
 import flow.Layout;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -56,7 +59,7 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
  */
 @Layout(R.layout.profile_playlist)
 @WithModule(PlaylistScreen.Module.class)
-public class PlaylistScreen extends Screen {
+public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
 
     final Playlist playlist;
 
@@ -69,8 +72,13 @@ public class PlaylistScreen extends Screen {
         return super.getName() + playlist.mPlaylistName;
     }
 
+    @Override
+    public GalleryScreen getParent() {
+        return new GalleryScreen();
+    }
+
     @dagger.Module (
-            addsTo = ProfileActivity.Module.class,
+            addsTo = LauncherActivity.Module.class,
             injects = {
                     PlaylistPortraitView.class,
                     PlaylistLandscapeView.class,

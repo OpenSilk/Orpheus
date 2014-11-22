@@ -24,9 +24,12 @@ import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.widget.LetterTileDrawable;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -34,6 +37,7 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
+import org.opensilk.music.ui2.profile.GenreScreen;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -43,6 +47,7 @@ import flow.Layout;
 import mortar.ViewPresenter;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.
@@ -75,22 +80,16 @@ public class GenresScreen extends Screen {
 
         @Override
         protected void load() {
-            subscription = loader.getObservable().subscribe(new Action1<Genre>() {
+            subscription = loader.getObservable().subscribe(new SimpleObserver<Genre>() {
                 @Override
-                public void call(Genre genre) {
+                public void onNext(Genre genre) {
                     if (viewNotNull()) {
-                        getAdapter().add(genre);
+                        getAdapter().addItem(genre);
                         showRecyclerView();
                     }
                 }
-            }, new Action1<Throwable>() {
                 @Override
-                public void call(Throwable throwable) {
-
-                }
-            }, new Action0() {
-                @Override
-                public void call() {
+                public void onCompleted() {
                     if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });
@@ -98,7 +97,7 @@ public class GenresScreen extends Screen {
 
         @Override
         protected void onItemClicked(BaseAdapter.ViewHolder holder, Genre item) {
-            NavUtils.openGenreProfile(holder.itemView.getContext(), item);
+            AppFlow.get(holder.itemView.getContext()).goTo(new GenreScreen(item));
         }
 
         @Override
@@ -107,13 +106,32 @@ public class GenresScreen extends Screen {
         }
 
         @Override
-        protected boolean isStaggered() {
-            return true;
+        protected boolean isGrid() {
+            return preferences.getString(AppPreferences.GENRE_LAYOUT, AppPreferences.GRID).equals(AppPreferences.GRID);
         }
 
         @Override
         public ActionBarOwner.MenuConfig getMenuConfig() {
-            return null;
+            return new ActionBarOwner.MenuConfig.Builder()
+                    .withMenus(R.menu.view_as)
+                    .setActionHandler(new Func1<Integer, Boolean>() {
+                        @Override
+                        public Boolean call(Integer integer) {
+                            switch (integer) {
+                                case R.id.menu_view_as_simple:
+                                    preferences.putString(AppPreferences.GENRE_LAYOUT, AppPreferences.SIMPLE);
+                                    resetRecyclerView();
+                                    return true;
+                                case R.id.menu_view_as_grid:
+                                    preferences.putString(AppPreferences.GENRE_LAYOUT, AppPreferences.GRID);
+                                    resetRecyclerView();
+                                    return true;
+                                default:
+                                    return false;
+                            }
+                        }
+                    })
+                    .build();
         }
 
     }
@@ -131,38 +149,24 @@ public class GenresScreen extends Screen {
             String l2 = MusicUtils.makeLabel(context, R.plurals.Nalbums, genre.mAlbumNumber)
                     + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, genre.mSongNumber);
             holder.subtitle.setText(l2);
-            switch (holder.artNumber) {
-                case 4:
-                    if (genre.mAlbumIds.length >= 4) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork4,
-                                null, genre.mAlbumIds[3], ArtworkType.THUMBNAIL));
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork3,
-                                null, genre.mAlbumIds[2], ArtworkType.THUMBNAIL));
-                    }
-                    //fall
-                case 2:
-                    if (genre.mAlbumIds.length >= 2) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork2,
-                                null, genre.mAlbumIds[1], ArtworkType.THUMBNAIL));
-                    }
-                    //fall
-                case 1:
-                    if (genre.mAlbumIds.length >= 1) {
-                        holder.subscriptions.add(artworkRequestor.newAlbumRequest(holder.artwork,
-                                null, genre.mAlbumIds[0], ArtworkType.THUMBNAIL));
-                    } else {
-                        holder.artwork.setDefaultImage();
-                    }
+            if (mGridStyle) {
+                loadMultiArtwork(artworkRequestor,
+                        holder.subscriptions,
+                        genre.mAlbumIds,
+                        holder.artwork,
+                        holder.artwork2,
+                        holder.artwork3,
+                        holder.artwork4
+                );
+            } else {
+                LetterTileDrawable drawable = new LetterTileDrawable(holder.itemView.getResources());
+                drawable.setText(genre.mGenreName);
+                holder.artwork.setImageDrawable(drawable);
             }
         }
 
         @Override
-        protected boolean quadArtwork(int position) {
-            return getItem(position).mAlbumIds.length >= 4;
-        }
-
-        @Override
-        protected boolean dualArtwork(int position) {
+        protected boolean multiArtwork(int position) {
             return getItem(position).mAlbumIds.length >= 2;
         }
 
