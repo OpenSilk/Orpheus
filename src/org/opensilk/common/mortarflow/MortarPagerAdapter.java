@@ -45,12 +45,12 @@ import static org.opensilk.common.util.Preconditions.checkNotNull;
  *
  * Created by drew on 11/16/14.
  */
-public class MortarPagerAdapter<T extends Screen, V extends View> extends PagerAdapter {
+public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerAdapter {
 
-    public static class Page<V extends View> {
-        public final Screen screen;
+    protected final class Page {
+        public final S screen;
         public final V view;
-        Page(Screen screen, V view) {
+        Page(S screen, V view) {
             this.screen = screen;
             this.view = view;
         }
@@ -62,32 +62,32 @@ public class MortarPagerAdapter<T extends Screen, V extends View> extends PagerA
     protected Bundle savedState = new Bundle();
 
     protected final Context context;
-    protected final List<T> screens;
+    protected final List<S> screens;
 
-    public MortarPagerAdapter(Context context, T[] screens) {
+    public MortarPagerAdapter(Context context, S[] screens) {
         this (context, Arrays.asList(screens));
     }
 
-    public MortarPagerAdapter(Context context, List<T> screens) {
+    public MortarPagerAdapter(Context context, List<S> screens) {
         this.context = context;
         this.screens = screens;
     }
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        T screen = screens.get(position);
+        S screen = screens.get(position);
         Context newChildContext = decorateContext(contextFactory.setUpContext(screen, context), position);
         V newChild = ViewUtils.inflate(newChildContext, getLayout(position), container, false);
         ViewUtils.restoreState(newChild, savedState, screen.getName());
         container.addView(newChild);
-        Page newPage = new Page<>(screen, newChild);
+        Page newPage = new Page(screen, newChild);
         activePages.put(position, newPage);
         return newPage;
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        Page oldPage = (Page) object;
+    public void destroyItem(ViewGroup container, int position, Object o) {
+        Page oldPage = (Page) o;
         activePages.remove(position);
         ViewUtils.saveState(oldPage.view, savedState, oldPage.screen.getName());
         contextFactory.tearDownContext(oldPage.view.getContext());
@@ -126,8 +126,8 @@ public class MortarPagerAdapter<T extends Screen, V extends View> extends PagerA
     }
 
     protected int getLayout(int position) {
-        T screen = screens.get(position);
-        Class<T> screenType = ObjectUtils.getClass(screen);
+        S screen = screens.get(position);
+        Class<? extends S> screenType = ObjectUtils.getClass(screen);
         Integer layoutResId = screenLayoutCache.get(screenType);
         if (layoutResId == null) {
             Layout layout = screenType.getAnnotation(Layout.class);
