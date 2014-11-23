@@ -17,6 +17,16 @@
 
 <changelog bulletedList="true">
 
+    <changelogversion versionName="next">
+        <changelogtext>Massive rewrite</changelogtext>
+        <changelogtext>More materialization (Material Design)</changelogtext>
+        <changelogtext>Performance improvements. (Moto E approved)</changelogtext>
+        <changelogtext>Much better folder browser. Dual storage phones can now browse primary and secondary storage (experimental and requires Kitkat+). Folders is now a plugin that can be disabled if not needed.</changelogtext>
+        <changelogtext>New artwork fetching backend. If your circles are ovals or cropped weird, clear the artwork cache, the new fetcher will clip images appropriately.</changelogtext>
+        <changelogtext>Old Holo themes have been thrown out. Added new themes with Material Design colors, and a new theme picker</changelogtext>
+        <changelogtext>Note: Alternate dream probably wont work anymore on Lollipop</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="0.5.+">
         <changelogtext>Address some crashes</changelogtext>
         <changelogtext>Update tablet layout</changelogtext>
