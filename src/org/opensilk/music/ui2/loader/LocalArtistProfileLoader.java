@@ -89,7 +89,8 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
             );
             cachedObservable = songGroupLoader
                     .concatWith(createObservable().subscribeOn(Schedulers.io()))
-                    .observeOn(AndroidSchedulers.mainThread());
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .cache();
         }
         return cachedObservable;
     }
