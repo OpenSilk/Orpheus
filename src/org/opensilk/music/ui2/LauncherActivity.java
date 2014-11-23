@@ -29,19 +29,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.util.ThemeUtils;
-import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.R;
-
-import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.bus.events.IABQueryResult;
-import org.opensilk.music.dialogs.SleepTimerDialog;
+import com.andrew.apollo.menu.SleepTimerDialog;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui2.event.ActivityResult;

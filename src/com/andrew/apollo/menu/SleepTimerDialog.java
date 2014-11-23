@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.dialogs;
+package com.andrew.apollo.menu;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -64,12 +64,9 @@ public class SleepTimerDialog extends DialogFragment {
 
         public static final String PREF_PREVIOUS_TIMER_VALUE = "last_sleep_timer_value";
 
-        @InjectView(R.id.timer_set)
-        SeekArc mTimerSet;
-        @InjectView(R.id.timer_display)
-        TextView mTimerDisplay;
-        @InjectView(R.id.timer_button_bar)
-        ViewGroup mTimerButtonBar;
+        @InjectView(R.id.timer_set) SeekArc mTimerSet;
+        @InjectView(R.id.timer_display) TextView mTimerDisplay;
+        @InjectView(R.id.timer_button_bar) ViewGroup mTimerButtonBar;
 
         AppPreferences mSettings;
 
