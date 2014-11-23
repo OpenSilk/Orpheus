@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSong;
@@ -28,17 +27,18 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.LauncherActivity;
-import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.loader.LocalAlbumSongLoader;
+import org.opensilk.music.util.SortOrder;
 
 import java.util.List;
 
@@ -117,18 +117,19 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
     public static class Presenter extends BasePresenter {
 
         final OverflowHandlers.LocalAlbums albumsOverflowHandler;
-        final Observable<List<LocalSong>> loader;
+        final LocalAlbumSongLoader loader;
         final LocalAlbum album;
 
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
+                         AppPreferences settings,
                          OverflowHandlers.LocalAlbums albumsOverflowHandler,
                          LocalAlbumSongLoader loader,
                          LocalAlbum album) {
-            super(actionBarOwner, requestor);
+            super(actionBarOwner, requestor, settings);
             this.albumsOverflowHandler = albumsOverflowHandler;
-            this.loader = loader.getListObservable().cache();
+            this.loader = loader;
             this.album = album;
         }
 
@@ -139,15 +140,7 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
             requestor.newAlbumRequest(getView().getHero(), null,
                     new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
 
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().getAdapter().addAll(localSongs);
-                    }
-                }
-            });
+            load();
         }
 
         @Override
@@ -175,20 +168,64 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
             return false;
         }
 
+        void load() {
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loader.setSortOrder(settings.getString(AppPreferences.ALBUM_SONG_SORT_ORDER, SortOrder.AlbumSongSortOrder.SONG_TRACK_LIST));
+            loaderSubscription = loader.getListObservable().subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().getAdapter().addAll(localSongs);
+                    }
+                }
+            });
+        }
+
+        void setNewSortOrder(String sortOrder) {
+            settings.putString(AppPreferences.ALBUM_SONG_SORT_ORDER, sortOrder);
+            loader.reset();
+            if (getView() != null) {
+                getView().getAdapter().clear();
+                getView().prepareRefresh();
+            }
+            load();
+        }
+
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder(getCommonConfig())
                             .withMenuConfig(
                                     new ActionBarOwner.MenuConfig.Builder()
-                                            .withMenus(OverflowHandlers.LocalAlbums.MENUS)
+                                            .withMenus(getMenus())
                                             .setActionHandler(new Func1<Integer, Boolean>() {
                                                 @Override
                                                 public Boolean call(Integer integer) {
-                                                    try {
-                                                        return albumsOverflowHandler.handleClick(
-                                                                OverflowAction.valueOf(integer), album);
-                                                    } catch (IllegalArgumentException e) {
-                                                        return false;
+                                                    switch (integer) {
+                                                        case R.id.menu_sort_by_track_list:
+                                                            setNewSortOrder(SortOrder.AlbumSongSortOrder.SONG_TRACK_LIST);
+                                                            return true;
+                                                        case R.id.menu_sort_by_az:
+                                                            setNewSortOrder(SortOrder.AlbumSongSortOrder.SONG_A_Z);
+                                                            return true;
+                                                        case R.id.menu_sort_by_za:
+                                                            setNewSortOrder(SortOrder.AlbumSongSortOrder.SONG_Z_A);
+                                                            return true;
+                                                        case R.id.menu_sort_by_duration:
+                                                            setNewSortOrder(SortOrder.AlbumSongSortOrder.SONG_DURATION);
+                                                            return true;
+                                                        case R.id.menu_sort_by_filename:
+                                                            setNewSortOrder(SortOrder.AlbumSongSortOrder.SONG_FILENAME);
+                                                            return true;
+                                                        case R.id.menu_sort_by_artist:
+                                                            setNewSortOrder(SortOrder.AlbumSongSortOrder.SONG_ARTIST);
+                                                            return true;
+                                                        default:
+                                                            try {
+                                                                return albumsOverflowHandler.handleClick(
+                                                                        OverflowAction.valueOf(integer), album);
+                                                            } catch (IllegalArgumentException e) {
+                                                                return false;
+                                                            }
                                                     }
                                                 }
                                             })
@@ -196,6 +233,14 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
                             )
                             .build()
             );
+        }
+
+        int[] getMenus() {
+            int m[] = new int[] {
+                    R.menu.album_song_sort_by,
+            };
+            int m2[] = OverflowHandlers.LocalAlbums.MENUS;
+            return concatArrays(m, m2);
         }
 
     }

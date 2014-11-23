@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -40,13 +41,16 @@ public abstract class BasePresenter extends mortar.Presenter<ProfileView> {
 
     final ActionBarOwner actionBarOwner;
     final ArtworkRequestManager requestor;
+    final AppPreferences settings;
 
     Subscription loaderSubscription;
 
     protected BasePresenter(ActionBarOwner actionBarOwner,
-                            ArtworkRequestManager requestor) {
+                            ArtworkRequestManager requestor,
+                            AppPreferences settings) {
         this.actionBarOwner = actionBarOwner;
         this.requestor = requestor;
+        this.settings = settings;
     }
 
     @Override
@@ -145,6 +149,13 @@ public abstract class BasePresenter extends mortar.Presenter<ProfileView> {
             }
         }
         return cs;
+    }
+
+    protected static int[] concatArrays(int[] a1, int[] a2) {
+        int a3[] = new int[a1.length + a2.length];
+        System.arraycopy(a1, 0, a3, 0, a1.length);
+        System.arraycopy(a2, 0, a3, a1.length, a2.length);
+        return a3;
     }
 
 }

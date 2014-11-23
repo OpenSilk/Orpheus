@@ -28,6 +28,7 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -116,10 +117,11 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
+                         AppPreferences settings,
                          OverflowHandlers.LocalArtists artistsOverflowHandler,
                          LocalArtist artist,
                          LocalArtistProfileLoader loader) {
-            super(actionBarOwner, requestor);
+            super(actionBarOwner, requestor, settings);
             this.artistsOverflowHandler = artistsOverflowHandler;
             this.artist = artist;
             this.loader = loader.getListObservable().cache();

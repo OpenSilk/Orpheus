@@ -28,6 +28,7 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.LauncherActivity;
@@ -119,10 +120,11 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
+                         AppPreferences settings,
                          OverflowHandlers.LocalSongGroups songGroupOverflowHandler,
                          LocalSongGroup songGroup,
                          LocalSongGroupLoader loader) {
-            super(actionBarOwner, requestor);
+            super(actionBarOwner, requestor, settings);
             this.songGroupOverflowHandler = songGroupOverflowHandler;
             this.songGroup = songGroup;
             this.loader = loader.getListObservable().share().cache();

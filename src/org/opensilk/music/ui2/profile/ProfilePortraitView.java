@@ -107,18 +107,8 @@ public class ProfilePortraitView extends FrameLayout implements ProfileView {
         setupStickyHeader();
         mTitle.setText(presenter.getTitle(getContext()));
         mSubtitle.setText(presenter.getSubtitle(getContext()));
-        //position stickyheader once recycler knows header bounds
-        mList.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                ViewTreeObserver o = mList.getViewTreeObserver();
-                if (o.isAlive()) {
-                    o.removeOnPreDrawListener(this);
-                }
-                positionStickyHeader();
-                return true;
-            }
-        });
+
+        prepareRefresh();
     }
 
     @Override
@@ -186,6 +176,25 @@ public class ProfilePortraitView extends FrameLayout implements ProfileView {
     @Override
     public boolean isLandscape() {
         return false;
+    }
+
+    @Override
+    public void prepareRefresh() {
+        mList.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                ViewTreeObserver o = mList.getViewTreeObserver();
+                if (o.isAlive()) {
+                    o.removeOnPreDrawListener(this);
+                }
+                //when refreshing adapter need to reset parallax offset
+                //does nothing on first load
+                mHeroContainer.setTranslationY(0);
+                //position stickyheader once recycler knows header bounds
+                positionStickyHeader();
+                return true;
+            }
+        });
     }
 
     RecyclerView.LayoutManager getLayoutManager(Context context) {

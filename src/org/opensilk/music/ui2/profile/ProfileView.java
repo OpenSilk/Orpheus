@@ -33,4 +33,5 @@ public interface ProfileView extends HasScope {
     ProfileAdapter getAdapter();
     Context getContext();
     boolean isLandscape();
+    void prepareRefresh();
 }

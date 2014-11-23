@@ -29,6 +29,7 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.LauncherActivity;
@@ -118,9 +119,10 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
+                         AppPreferences settings,
                          OverflowHandlers.Playlists playlistOverflowHandler,
                          Playlist playlist) {
-            super(actionBarOwner, requestor);
+            super(actionBarOwner, requestor, settings);
             this.playlistOverflowHandler = playlistOverflowHandler;
             this.playlist = playlist;
         }
@@ -181,10 +183,7 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
             if (isLastAdded()) {
                 b.withMenus(c);
             } else {
-                int[] m = new int[c.length+u.length];
-                System.arraycopy(c, 0, m, 0, c.length);
-                System.arraycopy(u, 0, m, c.length, u.length);
-                b.withMenus(m);
+                b.withMenus(concatArrays(c, u));
             }
             b.setActionHandler(new Func1<Integer, Boolean>() {
                 @Override

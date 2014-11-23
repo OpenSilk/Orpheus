@@ -28,6 +28,7 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.LauncherActivity;
@@ -106,10 +107,11 @@ public class GenreScreen extends Screen {
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
                          ArtworkRequestManager requestor,
+                         AppPreferences settings,
                          OverflowHandlers.Genres genreOverflowHandler,
                          Genre genre,
                          LocalGenresProfileLoader loader) {
-            super(actionBarOwner, requestor);
+            super(actionBarOwner, requestor, settings);
             this.genreOverflowHandler = genreOverflowHandler;
             this.genre = genre;
             this.loader = loader.getListObservable().cache();

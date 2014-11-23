@@ -165,6 +165,11 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
         return false;
     }
 
+    @Override
+    public void prepareRefresh() {
+
+    }
+
     void setupStickyHeader() {
         ClipDrawable d = new ClipDrawable(
                 new ColorDrawable(ThemeUtils.getColorPrimary(getContext())),

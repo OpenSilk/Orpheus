@@ -83,6 +83,7 @@ public class SortOrder {
         String SONG_TRACK_LIST = MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
         String SONG_DURATION = SongSortOrder.SONG_DURATION;
         String SONG_FILENAME = SongSortOrder.SONG_FILENAME;
+        String SONG_ARTIST = SongSortOrder.SONG_ARTIST;
     }
 
     public static interface ArtistSongSortOrder {
