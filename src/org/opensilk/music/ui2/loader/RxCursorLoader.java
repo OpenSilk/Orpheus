@@ -139,13 +139,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                         emmitError(new NullPointerException("Context and Uri must not be null"), subscriber);
                         return;
                     }
-                    c = context.getContentResolver().query(
-                            uri,
-                            projection,
-                            selection,
-                            selectionArgs,
-                            sortOrder
-                    );
+                    c = getCursor();
                     if (c == null) {
                         emmitError(new NullPointerException("Unable to obtain cursor"), subscriber);
                         return;
@@ -169,6 +163,16 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                 }
             }
         });
+    }
+
+    protected Cursor getCursor() {
+        return context.getContentResolver().query(
+                uri,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder
+        );
     }
 
     public void addContentChangedListener(ContentChangedListener l) {

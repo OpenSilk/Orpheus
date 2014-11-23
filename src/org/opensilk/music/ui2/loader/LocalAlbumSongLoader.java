@@ -29,6 +29,7 @@ import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 
 import javax.inject.Inject;
@@ -46,7 +47,7 @@ public class LocalAlbumSongLoader extends RxCursorLoader<LocalSong> {
         setProjection(Projections.LOCAL_SONG);
         setSelection(Selections.LOCAL_ALBUM_SONGS);
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(albumId));
-        setSortOrder(Selections.LOCAL_ALBUM_SONGS);
+        setSortOrder(SortOrder.LOCAL_ALBUM_SONGS);
     }
 
     @Override
