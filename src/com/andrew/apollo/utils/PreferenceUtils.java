@@ -212,10 +212,10 @@ public final class PreferenceUtils {
      * @return The sort order used for the artist song list in
      *         {@link ArtistSongFragment}
      */
-    public final String getArtistSongSortOrder() {
-        return mPreferences.getString(ARTIST_SONG_SORT_ORDER,
-                SortOrder.ArtistSongSortOrder.SONG_A_Z);
-    }
+//    public final String getArtistSongSortOrder() {
+//        return mPreferences.getString(ARTIST_SONG_SORT_ORDER,
+//                SortOrder.ArtistSongSortOrder.SONG_A_Z);
+//    }
 
     /**
      * Sets the sort order for the artist album list.
@@ -230,10 +230,10 @@ public final class PreferenceUtils {
      * @return The sort order used for the artist album list in
      *         {@link ArtistAlbumFragment}
      */
-    public final String getArtistAlbumSortOrder() {
-        return mPreferences.getString(ARTIST_ALBUM_SORT_ORDER,
-                SortOrder.ArtistAlbumSortOrder.ALBUM_A_Z);
-    }
+//    public final String getArtistAlbumSortOrder() {
+//        return mPreferences.getString(ARTIST_ALBUM_SORT_ORDER,
+//                SortOrder.ArtistAlbumSortOrder.ALBUM_A_Z);
+//    }
 
     /**
      * Sets the sort order for the album song list.
@@ -248,10 +248,10 @@ public final class PreferenceUtils {
      * @return The sort order used for the album song in
      *         {@link AlbumSongFragment}
      */
-    public final String getAlbumSongSortOrder() {
-        return mPreferences.getString(ALBUM_SONG_SORT_ORDER,
-                SortOrder.AlbumSongSortOrder.SONG_TRACK_LIST);
-    }
+//    public final String getAlbumSongSortOrder() {
+//        return mPreferences.getString(ALBUM_SONG_SORT_ORDER,
+//                SortOrder.AlbumSongSortOrder.SONG_TRACK_LIST);
+//    }
 
     /**
      * Saves the layout type for a list

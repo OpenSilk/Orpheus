@@ -55,7 +55,7 @@ public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
         setProjection(Projections.GENRE);
         setSelection(Selections.GENRE);
         setSelectionArgs(SelectionArgs.GENRE);
-        setSortOrder(SortOrder.GENRES);
+        // need set sortorder
 
         setProjection2(Projections.GENRE_SONGS);
         setSelection2(Selections.GENRE_SONGS);
@@ -98,7 +98,7 @@ public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
                     .doOnError(new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            cachedObservable = null;
+                            reset();
                             dump(throwable);
                         }
                     })

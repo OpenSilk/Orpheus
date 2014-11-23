@@ -54,7 +54,7 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
         @Override
         @DebugLog
         public void onChange(boolean selfChange) {
-            cachedObservable = null;
+            reset();
             for (ContentChangedListener l : contentChangedListeners) {
                 l.reload();
             }
@@ -157,6 +157,10 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
                         return createItem(itemId, itemName, songs.size(), albums.size(), toArray(songs), toArray(albums));
                     }
                 });
+    }
+
+    public void reset() {
+        cachedObservable = null;
     }
 
     @DebugLog

@@ -33,4 +33,5 @@ public interface RxLoader<T> {
     void addContentChangedListener(ContentChangedListener l);
     void removeContentChangedListener(ContentChangedListener l);
     void setSortOrder(String sortOrder);
+    void reset();
 }

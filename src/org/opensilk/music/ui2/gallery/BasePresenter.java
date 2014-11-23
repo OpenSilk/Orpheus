@@ -88,6 +88,12 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         loader.removeContentChangedListener(this);
     }
 
+    @Override
+    public ActionBarOwner.MenuConfig getMenuConfig() {
+        ensureMenu();
+        return actionBarMenu;
+    }
+
     // Init the recyclerview
     protected void setupRecyclerView(boolean clear) {
         if (!viewNotNull()) return;
@@ -135,12 +141,15 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected abstract BaseAdapter<T> newAdapter();
     // start the loader
     protected abstract void load();
+    // init overflow menu
+    protected abstract void ensureMenu();
 
     // cancels any ongoing load and starts a new one
     @DebugLog
     public void reload() {
         if (isSubscribed(subscription)) subscription.unsubscribe();
         if (viewNotNull()) getAdapter().clear();
+        loader.reset();
         load();
     }
 

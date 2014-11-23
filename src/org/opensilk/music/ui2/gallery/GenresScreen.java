@@ -38,6 +38,7 @@ import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 import org.opensilk.music.ui2.profile.GenreScreen;
+import org.opensilk.music.util.SortOrder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -81,6 +82,7 @@ public class GenresScreen extends Screen {
 
         @Override
         protected void load() {
+            loader.setSortOrder(preferences.getString(AppPreferences.GENRE_SORT_ORDER, SortOrder.GenreSortOrder.GENRE_A_Z));
             subscription = loader.getObservable().subscribe(new SimpleObserver<Genre>() {
                 @Override
                 public void onNext(Genre genre) {
@@ -111,28 +113,41 @@ public class GenresScreen extends Screen {
             return preferences.getString(AppPreferences.GENRE_LAYOUT, AppPreferences.GRID).equals(AppPreferences.GRID);
         }
 
+        void setNewSortOrder(String sortOrder) {
+            preferences.putString(AppPreferences.GENRE_SORT_ORDER, sortOrder);
+            reload();
+        }
+
         @Override
-        public ActionBarOwner.MenuConfig getMenuConfig() {
-            return new ActionBarOwner.MenuConfig.Builder()
-                    .withMenus(R.menu.view_as)
-                    .setActionHandler(new Func1<Integer, Boolean>() {
-                        @Override
-                        public Boolean call(Integer integer) {
-                            switch (integer) {
-                                case R.id.menu_view_as_simple:
-                                    preferences.putString(AppPreferences.GENRE_LAYOUT, AppPreferences.SIMPLE);
-                                    resetRecyclerView();
-                                    return true;
-                                case R.id.menu_view_as_grid:
-                                    preferences.putString(AppPreferences.GENRE_LAYOUT, AppPreferences.GRID);
-                                    resetRecyclerView();
-                                    return true;
-                                default:
-                                    return false;
+        protected void ensureMenu() {
+            if (actionBarMenu == null) {
+                actionBarMenu = new ActionBarOwner.MenuConfig.Builder()
+                        .withMenus(R.menu.genre_sort_by, R.menu.view_as)
+                        .setActionHandler(new Func1<Integer, Boolean>() {
+                            @Override
+                            public Boolean call(Integer integer) {
+                                switch (integer) {
+                                    case R.id.menu_sort_by_az:
+                                        setNewSortOrder(SortOrder.GenreSortOrder.GENRE_A_Z);
+                                        return true;
+                                    case R.id.menu_sort_by_za:
+                                        setNewSortOrder(SortOrder.GenreSortOrder.GENRE_Z_A);
+                                        return true;
+                                    case R.id.menu_view_as_simple:
+                                        preferences.putString(AppPreferences.GENRE_LAYOUT, AppPreferences.SIMPLE);
+                                        resetRecyclerView();
+                                        return true;
+                                    case R.id.menu_view_as_grid:
+                                        preferences.putString(AppPreferences.GENRE_LAYOUT, AppPreferences.GRID);
+                                        resetRecyclerView();
+                                        return true;
+                                    default:
+                                        return false;
+                                }
                             }
-                        }
-                    })
-                    .build();
+                        })
+                        .build();
+            }
         }
 
     }

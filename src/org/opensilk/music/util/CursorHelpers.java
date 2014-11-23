@@ -244,7 +244,7 @@ public class CursorHelpers {
     public static Cursor makeSongCursor(final Context context) {
         AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
         final String sortOrder = settings.getString(AppPreferences.SONG_SORT_ORDER,
-                com.andrew.apollo.utils.SortOrder.SongSortOrder.SONG_A_Z);
+                org.opensilk.music.util.SortOrder.SongSortOrder.SONG_A_Z);
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,

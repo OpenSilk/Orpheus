@@ -21,7 +21,7 @@ import android.view.View;
 
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.SortOrder;
+import org.opensilk.music.util.SortOrder;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -119,21 +119,16 @@ public class AlbumsScreen extends Screen {
             return preferences.getString(AppPreferences.ALBUM_LAYOUT, AppPreferences.GRID).equals(AppPreferences.GRID);
         }
 
-        @Override
-        public ActionBarOwner.MenuConfig getMenuConfig() {
-            ensureMenu();
-            return actionBarMenu;
-        }
-
         void setNewSortOrder(String sortOrder) {
             preferences.putString(AppPreferences.ALBUM_SORT_ORDER, sortOrder);
             reload();
         }
 
-        void ensureMenu() {
+        @Override
+        protected void ensureMenu() {
             if (actionBarMenu == null) {
                 actionBarMenu = new ActionBarOwner.MenuConfig.Builder()
-                        .withMenus(R.menu.artist_sort_by, R.menu.view_as)
+                        .withMenus(R.menu.album_sort_by, R.menu.view_as)
                         .setActionHandler(new Func1<Integer, Boolean>() {
                             @Override
                             public Boolean call(Integer integer) {

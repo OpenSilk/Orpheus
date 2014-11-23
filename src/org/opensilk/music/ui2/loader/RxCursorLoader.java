@@ -49,7 +49,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
         }
         @Override
         public void onChange(boolean selfChange) {
-            cachedObservable = null;
+            reset();
             for (ContentChangedListener l : contentChangedListeners) {
                 l.reload();
             }
@@ -109,7 +109,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                     .doOnError(new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            cachedObservable = null;
+                            reset();
                             dump(throwable);
                         }
                     })
@@ -160,6 +160,10 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                 }
             }
         });
+    }
+
+    public void reset() {
+        cachedObservable = null;
     }
 
     protected Cursor getCursor() {

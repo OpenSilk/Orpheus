@@ -22,7 +22,7 @@ import android.view.View;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.SortOrder;
+import org.opensilk.music.util.SortOrder;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -117,18 +117,13 @@ public class ArtistsScreen extends Screen {
             return preferences.getString(AppPreferences.ARTIST_LAYOUT, AppPreferences.GRID).equals(AppPreferences.GRID);
         }
 
-        @Override
-        public ActionBarOwner.MenuConfig getMenuConfig() {
-            ensureMenu();
-            return actionBarMenu;
-        }
-
         void setNewSortOrder(String sortOrder) {
             preferences.putString(AppPreferences.ARTIST_SORT_ORDER, sortOrder);
             reload();
         }
 
-        void ensureMenu() {
+        @Override
+        protected void ensureMenu() {
             if (actionBarMenu == null) {
                 actionBarMenu = new ActionBarOwner.MenuConfig.Builder()
                         .withMenus(R.menu.artist_sort_by, R.menu.view_as)

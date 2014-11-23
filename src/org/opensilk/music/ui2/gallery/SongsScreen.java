@@ -20,7 +20,7 @@ package org.opensilk.music.ui2.gallery;
 import android.view.View;
 
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.utils.SortOrder;
+import org.opensilk.music.util.SortOrder;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
@@ -109,50 +109,50 @@ public class SongsScreen extends Screen {
             return new Adapter(this, artworkRequestor);
         }
 
-        @Override
-        public ActionBarOwner.MenuConfig getMenuConfig() {
-            ensureMenu();
-            return actionBarMenu;
-        }
-
         void setNewSortOrder(String sortOrder) {
             preferences.putString(AppPreferences.SONG_SORT_ORDER, sortOrder);
             reload();
         }
 
-        void ensureMenu() {
+        @Override
+        protected void ensureMenu() {
             if (actionBarMenu == null) {
-                Func1<Integer, Boolean> actionHandler = new Func1<Integer, Boolean>() {
-                    @Override
-                    public Boolean call(Integer integer) {
-                        switch (integer) {
-                            case R.id.menu_sort_by_az:
-                                setNewSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
-                                return true;
-                            case R.id.menu_sort_by_za:
-                                setNewSortOrder(SortOrder.SongSortOrder.SONG_Z_A);
-                                return true;
-                            case R.id.menu_sort_by_artist:
-                                setNewSortOrder(SortOrder.SongSortOrder.SONG_ARTIST);
-                                return true;
-                            case R.id.menu_sort_by_album:
-                                setNewSortOrder(SortOrder.SongSortOrder.SONG_ALBUM);
-                                return true;
-                            case R.id.menu_sort_by_year:
-                                setNewSortOrder(SortOrder.SongSortOrder.SONG_YEAR);
-                                return true;
-                            case R.id.menu_sort_by_duration:
-                                setNewSortOrder(SortOrder.SongSortOrder.SONG_DURATION);
-                                return true;
-                            case R.id.menu_sort_by_filename:
-                                setNewSortOrder(SortOrder.SongSortOrder.SONG_FILENAME);
-                                return true;
-                            default:
-                                return false;
-                        }
-                    }
-                };
-                actionBarMenu = new ActionBarOwner.MenuConfig(actionHandler, R.menu.song_sort_by);
+                actionBarMenu = new ActionBarOwner.MenuConfig.Builder()
+                        .withMenus(R.menu.song_sort_by)
+                        .setActionHandler(new Func1<Integer, Boolean>() {
+                            @Override
+                            public Boolean call(Integer integer) {
+                                switch (integer) {
+                                    case R.id.menu_sort_by_az:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
+                                        return true;
+                                    case R.id.menu_sort_by_za:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_Z_A);
+                                        return true;
+                                    case R.id.menu_sort_by_artist:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_ARTIST);
+                                        return true;
+                                    case R.id.menu_sort_by_album:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_ALBUM);
+                                        return true;
+                                    case R.id.menu_sort_by_year:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_YEAR);
+                                        return true;
+                                    case R.id.menu_sort_by_duration:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_DURATION);
+                                        return true;
+                                    case R.id.menu_sort_by_filename:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_FILENAME);
+                                        return true;
+                                    case R.id.menu_sort_by_date_added:
+                                        setNewSortOrder(SortOrder.SongSortOrder.SONG_DATE);
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+                            }
+                        })
+                        .build();
             }
         }
     }

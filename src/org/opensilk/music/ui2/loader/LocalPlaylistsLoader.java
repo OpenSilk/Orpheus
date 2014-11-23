@@ -57,7 +57,7 @@ public class LocalPlaylistsLoader extends AbsGenrePlaylistLoader<Playlist> {
         setProjection(Projections.PLAYLIST);
         setSelection(Selections.PLAYLIST);
         setSelectionArgs(SelectionArgs.PLAYLIST);
-        setSortOrder(SortOrder.PLAYLISTS);
+        // need set sortorder
 
         setProjection2(Projections.PLAYLIST_SONGS);
         setSelection2(Selections.PLAYLIST_SONGS);
@@ -112,7 +112,7 @@ public class LocalPlaylistsLoader extends AbsGenrePlaylistLoader<Playlist> {
                     .doOnError(new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            cachedObservable = null;
+                            reset();
                             dump(throwable);
                         }
                     })
