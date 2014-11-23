@@ -82,11 +82,11 @@ public class ListStickyParallaxHeaderFragment extends Fragment {
         // gridview
         mList = ButterKnife.findById(frame, android.R.id.list);
         // stickyheader container
-        mStickyHeaderContainer = ButterKnife.findById(frame, R.id.sticky_header_container);
+        mStickyHeaderContainer = null;// ButterKnife.findById(frame, R.id.sticky_header_container);
         // stickyheader
         mStickyHeader = ButterKnife.findById(mStickyHeaderContainer, R.id.sticky_header);
         // dummy view inside header to prevent real header from scrolling under the actionbar
-        mHeaderDummy = ButterKnife.findById(mStickyHeaderContainer, R.id.dummy);
+        mHeaderDummy = null;// ButterKnife.findById(mStickyHeaderContainer, R.id.dummy);
         // grid header container
         mListHeader = inflater.inflate(getHeaderLayout(), null/*null or listview explodes*/, false);
         // hero container containing images

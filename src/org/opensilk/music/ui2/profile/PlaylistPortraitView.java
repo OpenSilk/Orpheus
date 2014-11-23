@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui2.profile;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.ClipDrawable;
@@ -33,10 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
-import android.widget.ListView;
 import android.widget.TextView;
-
-import com.etsy.android.grid.StaggeredGridView;
 
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.AnimatedImageView;
@@ -60,9 +58,7 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
     @Inject PlaylistScreen.Presenter presenter;
 
     @InjectView(android.R.id.list) PlaylistDragSortView mList;
-    @InjectView(R.id.sticky_header_container) View mStickyHeaderContainer;
     @InjectView(R.id.sticky_header) ViewGroup mStickyHeader;
-    @InjectView(R.id.dummy) View mHeaderDummy;
     @InjectView(R.id.info_title) TextView mTitle;
     @InjectView(R.id.info_subtitle) TextView mSubtitle;
     View mListHeader;
@@ -97,7 +93,7 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
         // for parallax
         mList.setOnScrollListener(mScrollListener);
 
-        setupDummyHeader();
+        setupStickyHeader();
         mTitle.setText(presenter.getTitle(getContext()));
         mSubtitle.setText(presenter.getSubtitle(getContext()));
     }
@@ -123,7 +119,7 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         mIsStuck = ss.wasStuck;
-        setupDummyHeader();
+        setupStickyHeader();
     }
 
     @Override
@@ -169,13 +165,13 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
         return false;
     }
 
-    void setupDummyHeader() {
-        if (mHeaderDummy != null) {
-            //setup the dummy header background with the same color as the stickyheader
-            final ClipDrawable dummyBackground = new ClipDrawable(mStickyHeader.getBackground(), Gravity.BOTTOM, ClipDrawable.VERTICAL);
-            dummyBackground.setLevel(mIsStuck ? 10000 : 0);
-            mHeaderDummy.setBackgroundDrawable(dummyBackground);
-        }
+    void setupStickyHeader() {
+        ClipDrawable d = new ClipDrawable(
+                new ColorDrawable(ThemeUtils.getColorPrimary(getContext())),
+                Gravity.BOTTOM, ClipDrawable.VERTICAL
+        );
+        d.setLevel(mIsStuck ? 10000 : 5000);
+        mStickyHeader.setBackgroundDrawable(d);
     }
 
     private ValueAnimator makeSlideAnimator(int start, int end, final ClipDrawable drawable) {
@@ -201,20 +197,29 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
             if (swatch == null) swatch = palette.getMutedSwatch();
             if (swatch != null) {
                 //int color = ThemeHelper.setColorAlpha(swatch.getRgb(), 0x99);//60%
-                int color = swatch.getRgb();
-                if (mHeaderDummy != null) {
-                    final ClipDrawable dummyBackground =
-                            new ClipDrawable(new ColorDrawable(color), Gravity.BOTTOM, ClipDrawable.VERTICAL);
-                    dummyBackground.setLevel(mIsStuck ? 10000 : 0);
-                    mHeaderDummy.setBackgroundDrawable(dummyBackground);
-                }
+                final int color = swatch.getRgb();
                 if (paletteResponse.shouldAnimate) {
-                    final Drawable d = mStickyHeader.getBackground();
-                    final Drawable d2 = new ColorDrawable(color);
-                    TransitionDrawable td = new TransitionDrawable(new Drawable[]{d,d2});
-                    td.setCrossFadeEnabled(true);
-                    mStickyHeader.setBackgroundDrawable(td);
-                    td.startTransition(SquareImageView.TRANSITION_DURATION);
+                    mStickyHeader.animate().alpha(0f).setListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                        }
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            final ClipDrawable d = new ClipDrawable(
+                                    new ColorDrawable(color),
+                                    Gravity.BOTTOM, ClipDrawable.VERTICAL
+                            );
+                            d.setLevel(mIsStuck ? 10000 : 5000);
+                            mStickyHeader.setBackgroundDrawable(d);
+                            mStickyHeader.animate().alpha(1f).start();
+                        }
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+                        }
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+                        }
+                    }).start();
                 } else {
                     mStickyHeader.setBackgroundColor(color);
                 }
@@ -225,9 +230,7 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
     private final AbsListView.OnScrollListener mScrollListener = new AbsListView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
-
         }
-
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             // logic here derived from http://antoine-merle.com/blog/2013/10/04/making-that-google-plus-profile-screen/
@@ -238,18 +241,18 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
             }
             // sticky header
             final int top = mListHeader.getTop();
-            final int stickyHeight = mStickyHeaderContainer.getMeasuredHeight();
+            final int stickyHeight = mStickyHeader.getMeasuredHeight();
             final int headerHeight = mListHeader.getMeasuredHeight();
             final int delta = headerHeight - stickyHeight;
             final int pos = delta + top;
             // reposition header
-            mStickyHeaderContainer.setTranslationY(Math.max(pos,0));
+            mStickyHeader.setTranslationY(Math.max(pos,0));
             if (pos < 0 && !mIsStuck) {
                 mIsStuck = true;
-                makeSlideAnimator(0, 10000, (ClipDrawable)mHeaderDummy.getBackground()).start();
+                makeSlideAnimator(5000, 10000, (ClipDrawable)mStickyHeader.getBackground()).start();
             } else if (pos > 0 && mIsStuck) {
                 mIsStuck = false;
-                makeSlideAnimator(10000, 0, (ClipDrawable)mHeaderDummy.getBackground()).start();
+                makeSlideAnimator(10000,5000, (ClipDrawable)mStickyHeader.getBackground()).start();
             }
         }
     };
