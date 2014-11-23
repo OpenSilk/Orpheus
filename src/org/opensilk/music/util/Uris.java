@@ -30,7 +30,6 @@ public class Uris {
     public static Uri EXTERNAL_MEDIASTORE_ARTISTS_ALBUMS(long artistId) {
         return MediaStore.Audio.Artists.Albums.getContentUri("external", artistId);
     }
-    public static final Uri LOCAL_ALBUM_SONGS = EXTERNAL_MEDIASTORE_MEDIA;
     public static Uri PLAYLIST(long playlistId) {
         return  MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
     }

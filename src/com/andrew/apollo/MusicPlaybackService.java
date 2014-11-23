@@ -1126,16 +1126,12 @@ public class MusicPlaybackService extends Service {
         }
     }
 
-    private boolean ensureCursor() {
+    private void ensureCursor() {
         if (mCursor == null || mCursor.isClosed()) {
             if (getAudioId() >= 0) {
                 updateCursor(getAudioId());
-                return true;
-            } else {
-                return false;
             }
         }
-        return true;
     }
 
     /**
@@ -1155,7 +1151,7 @@ public class MusicPlaybackService extends Service {
             Cursor c = openCursorAndGoToFirst(uri, Projections.LOCAL_SONG, selection, selectionArgs);
             if (c != null) {
                 try {
-                    long id = MusicProviderUtil.insertSong(this, CursorHelpers.makeLocalSongFromCursor(this, c));
+                    long id = MusicProviderUtil.insertSong(this, CursorHelpers.makeLocalSongFromCursor(c));
                     updateCursor(id);
                 } finally {
                      c.close();
@@ -1910,7 +1906,7 @@ public class MusicPlaybackService extends Service {
      */
     public Uri getDataUri() {
         synchronized (this) {
-            if (!ensureCursor()) return null;
+            ensureCursor();
             final String uri = CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.DATA_URI);
             if (TextUtils.isEmpty(uri)) {
                 return null;
@@ -1927,7 +1923,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getAlbumName() {
         synchronized (this) {
-            if (!ensureCursor()) return null;
+            ensureCursor();
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ALBUM_NAME);
         }
     }
@@ -1939,7 +1935,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getTrackName() {
         synchronized (this) {
-            if (!ensureCursor()) return null;
+            ensureCursor();
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.NAME);
         }
     }
@@ -1951,7 +1947,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getArtistName() {
         synchronized (this) {
-            if (!ensureCursor()) return null;
+            ensureCursor();
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ARTIST_NAME);
         }
     }
@@ -1963,7 +1959,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getAlbumArtistName() {
         synchronized (this) {
-            if (!ensureCursor()) return null;
+            ensureCursor();
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ALBUM_ARTIST_NAME);
         }
     }
@@ -1975,7 +1971,7 @@ public class MusicPlaybackService extends Service {
      */
     public long getAlbumId() {
         synchronized (this) {
-            if (!ensureCursor()) return -1;
+            ensureCursor();
             return CursorHelpers.getLongOrZero(mCursor, MusicStore.Cols.ALBUM_IDENTITY);
         }
     }
@@ -2001,7 +1997,7 @@ public class MusicPlaybackService extends Service {
      */
     public String getMimeType() {
         synchronized (this) {
-            if (!ensureCursor()) return null;
+            ensureCursor();
             return CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.MIME_TYPE);
         }
     }
@@ -2012,7 +2008,7 @@ public class MusicPlaybackService extends Service {
      */
     public Uri getArtworkUri() {
         synchronized (this) {
-            if (!ensureCursor()) return null;
+            ensureCursor();
             final String uri = CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.ARTWORK_URI);
             if (TextUtils.isEmpty(uri)) {
                 return null;
@@ -2039,7 +2035,7 @@ public class MusicPlaybackService extends Service {
      */
     public boolean isFromSDCard() {
         synchronized (this) {
-            if (!ensureCursor()) return false;
+            ensureCursor();
             return CursorHelpers.getIntOrZero(mCursor, MusicStore.Cols.ISLOCAL) == 1;
         }
     }

@@ -431,7 +431,7 @@ public class CursorHelpers {
 
     public static LocalSong[] getLocalSongListForAlbum(final Context context, final long id) {
         Cursor cursor = context.getContentResolver().query(
-                Uris.LOCAL_ALBUM_SONGS,
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_ALBUM_SONGS,
                 SelectionArgs.LOCAL_ALBUM_SONGS(id),
@@ -535,7 +535,7 @@ public class CursorHelpers {
     public static String getStringOrEmpty(Cursor c, String col) {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException|NullPointerException e) {
 //            Timber.e(e, "getStringOrEmpty("+col+")");
             return sEmptyString;
         }
@@ -544,7 +544,7 @@ public class CursorHelpers {
     public static String getStringOrNull(Cursor c, String col) {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException|NullPointerException e) {
 //            Timber.e(e, "getStringOrNull("+col+")");
             return null;
         }
@@ -553,7 +553,7 @@ public class CursorHelpers {
     public static long getLongOrZero(Cursor c, String col) {
         try {
             return c.getLong(c.getColumnIndexOrThrow(col));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException|NullPointerException e) {
 //            Timber.e(e, "getLongOrZero("+col+")");
             return 0;
         }
@@ -562,7 +562,7 @@ public class CursorHelpers {
     public static int getIntOrZero(Cursor c, String col) {
         try {
             return c.getInt(c.getColumnIndexOrThrow(col));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException|NullPointerException e) {
 //            Timber.e(e, "getIntOrZero("+col+")");
             return 0;
         }

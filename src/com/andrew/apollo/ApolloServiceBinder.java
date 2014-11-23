@@ -21,7 +21,7 @@ public final class ApolloServiceBinder extends IApolloService.Stub {
         if (s != null) {
             return s;
         }
-        throw new RemoteException();
+        throw new NullPointerException("No service");
     }
 
     @Override

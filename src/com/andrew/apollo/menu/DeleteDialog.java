@@ -25,7 +25,9 @@ import android.widget.Toast;
 import com.andrew.apollo.Config;
 
 import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.BaseActivity;
 import org.opensilk.music.ui2.BaseMortarActivity;
 import org.opensilk.music.ui2.event.MakeToast;
 
@@ -64,7 +66,7 @@ public class DeleteDialog extends DialogFragment {
     }
 
     @dagger.Module(
-            addsTo = BaseMortarActivity.Module.class,
+            addsTo = BaseActivity.Module.class,
             injects = DeleteDialog.class
     )
     public static class Module {
@@ -77,6 +79,7 @@ public class DeleteDialog extends DialogFragment {
     private long[] mItemList;
 
     @Inject @Named("activity") EventBus mBus;
+    @Inject MusicServiceConnection musicService;
 
     /**
      * @param title The title of the artist, album, or song to delete
@@ -120,7 +123,7 @@ public class DeleteDialog extends DialogFragment {
                         Observable.create(new Observable.OnSubscribe<Integer>() {
                             @Override
                             public void call(Subscriber<? super Integer> subscriber) {
-                                int numdel = MusicUtils.deleteTracks(appContext, mItemList);
+                                int numdel = MusicUtils.deleteTracks(appContext, musicService, mItemList);
                                 subscriber.onNext(numdel);
                                 subscriber.onCompleted();
                             }

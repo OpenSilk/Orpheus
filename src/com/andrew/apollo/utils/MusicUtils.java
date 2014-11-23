@@ -40,6 +40,8 @@ import android.widget.Toast;
 
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
+
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.util.MarkedForRemoval;
@@ -1356,7 +1358,7 @@ public final class MusicUtils {
      * @param context The {@link Context} to use.
      * @param list The item(s) to delete.
      */
-    public static int deleteTracks(final Context context, final long[] list) {
+    public static int deleteTracks(final Context context, MusicServiceConnection musicService, final long[] list) {
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
             throw new RuntimeException("Stop calling from main thread");
         }
@@ -1376,16 +1378,13 @@ public final class MusicUtils {
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection.toString(),
                 null, null);
         if (c != null) {
-            // Step 1: Remove selected tracks from the current playlist, as well
-            // as from the album art cache
+            // Step 1: Remove selected tracks from the current playlist
             if (c.moveToFirst()) {
                 do {
                     long id = MusicProviderUtil.getRecentId(context, c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID)));
                     if (id >= 0) {
                         // Remove from current playlist
-                        removeQueueItem(id);
-                        // Remove from the favorites playlist
-//                FavoritesStore.getInstance(context).removeItem(id);
+                        musicService.removeTrack(id);
                         // Remove any items in the recents database
                         MusicProviderUtil.removeFromRecents(context, id);
                     }
