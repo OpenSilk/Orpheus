@@ -139,7 +139,6 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
             setupActionBar();
             requestor.newAlbumRequest(getView().getHero(), null,
                     new ArtInfo(album.artistName, album.name, album.artworkUri), ArtworkType.LARGE);
-
             load();
         }
 

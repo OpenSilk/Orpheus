@@ -40,6 +40,7 @@ import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.loader.LocalArtistProfileLoader;
+import org.opensilk.music.util.SortOrder;
 
 import java.util.List;
 
@@ -112,7 +113,7 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
     public static class Presenter extends BasePresenter {
         final OverflowHandlers.LocalArtists artistsOverflowHandler;
         final LocalArtist artist;
-        final Observable<List<Object>> loader;
+        final LocalArtistProfileLoader loader;
 
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
@@ -124,7 +125,7 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
             super(actionBarOwner, requestor, settings);
             this.artistsOverflowHandler = artistsOverflowHandler;
             this.artist = artist;
-            this.loader = loader.getListObservable().cache();
+            this.loader = loader;
         }
 
         @Override
@@ -133,16 +134,7 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
             setupActionbar();
             requestor.newArtistRequest(getView().getHero(), null,
                     new ArtInfo(artist.name, null, null), ArtworkType.LARGE);
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
-                @Override
-                public void onNext(List<Object> objects) {
-                    if (getView() != null) {
-                        getView().getAdapter().addAll(objects);
-                    }
-                }
-            });
+            load();
         }
 
         @Override
@@ -171,20 +163,58 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
             return true;
         }
 
+        void load() {
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loader.setSortOrder(settings.getString(AppPreferences.ARTIST_ALBUM_SORT_ORDER, SortOrder.ArtistAlbumSortOrder.ALBUM_A_Z));
+            loaderSubscription = loader.getListObservable().subscribe(new SimpleObserver<List<Object>>() {
+                @Override
+                public void onNext(List<Object> objects) {
+                    if (getView() != null) {
+                        getView().getAdapter().addAll(objects);
+                    }
+                }
+            });
+        }
+
+        void setNewSortOrder(String sortOrder) {
+            settings.putString(AppPreferences.ARTIST_ALBUM_SORT_ORDER, sortOrder);
+            loader.reset();
+            if (getView() != null) {
+                getView().getAdapter().clear();
+                getView().prepareRefresh();
+            }
+            load();
+        }
+
         void setupActionbar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder(getCommonConfig())
                             .withMenuConfig(
                                     new ActionBarOwner.MenuConfig.Builder()
-                                            .withMenus(OverflowHandlers.LocalArtists.MENUS)
+                                            .withMenus(getMenus())
                                             .setActionHandler(new Func1<Integer, Boolean>() {
                                                 @Override
                                                 public Boolean call(Integer integer) {
-                                                    try {
-                                                        return artistsOverflowHandler.handleClick(
-                                                                OverflowAction.valueOf(integer), artist);
-                                                    } catch (IllegalArgumentException e) {
-                                                        return false;
+                                                    switch (integer) {
+                                                        case R.id.menu_sort_by_az:
+                                                            setNewSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_A_Z);
+                                                            return true;
+                                                        case R.id.menu_sort_by_za:
+                                                            setNewSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_Z_A);
+                                                            return true;
+                                                        case R.id.menu_sort_by_year:
+                                                            setNewSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_YEAR);
+                                                            return true;
+                                                        case R.id.menu_sort_by_number_of_songs:
+                                                            setNewSortOrder(SortOrder.ArtistAlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                                                            return true;
+                                                        default:
+                                                            try {
+                                                                return artistsOverflowHandler.handleClick(
+                                                                        OverflowAction.valueOf(integer), artist);
+                                                            } catch (IllegalArgumentException e) {
+                                                                return false;
+                                                            }
                                                     }
                                                 }
                                             })
@@ -192,6 +222,14 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
                             )
                             .build()
             );
+        }
+
+        int[] getMenus() {
+            int m[] = new int[] {
+                    R.menu.artist_album_sort_by,
+            };
+            int m2[] = OverflowHandlers.LocalArtists.MENUS;
+            return concatArrays(m, m2);
         }
     }
 
