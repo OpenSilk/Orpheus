@@ -54,8 +54,7 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
         @Override
         @DebugLog
         public void onChange(boolean selfChange) {
-            cachePopulated = false;
-            cache.clear();
+            cachedObservable = null;
             for (ContentChangedListener l : contentChangedListeners) {
                 l.reload();
             }
@@ -67,12 +66,6 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
     }
 
     protected final List<ContentChangedListener> contentChangedListeners;
-    // NOTE not using Observable.cache because i want to be able
-    // to pull the cache synchronously so we can immediatly populate
-    // the adapter and restore the viewstate, I might revisit this later.
-    // ie to use api21 persistent bundle to always restore viewstate
-    // even when doing a fresh load.
-    protected final List<T> cache;
     protected final Context context;
 
     Uri uri;
@@ -87,11 +80,11 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
     String sortOrder2;
 
     private UriObserver uriObserver;
-    protected volatile boolean cachePopulated = false;
+
+    protected Observable<T> cachedObservable;
 
     public AbsGenrePlaylistLoader(Context context) {
         contentChangedListeners = new ArrayList<>();
-        cache = new CopyOnWriteArrayList<>();
         this.context = context;
     }
 
@@ -102,6 +95,10 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
 
     //@DebugLog
     public Observable<T> getObservable() {
+        if (uriObserver == null) {
+            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
+            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
+        }
         RxCursorLoader<T> collectionLoader = new RxCursorLoader<T>(context,
                 uri,
                 projection,
@@ -162,30 +159,14 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
                 });
     }
 
-    public boolean hasCache() {
-        return !cache.isEmpty() && cachePopulated;
-    }
-
-    public List<T> getCache() {
-        return cache;
-    }
-
     @DebugLog
     public void addContentChangedListener(ContentChangedListener l) {
         contentChangedListeners.add(l);
-        if (uriObserver == null) {
-            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
-            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
-        }
     }
 
     @DebugLog
     public void removeContentChangedListener(ContentChangedListener l) {
         contentChangedListeners.remove(l);
-        if (contentChangedListeners.isEmpty()) {
-            context.getContentResolver().unregisterContentObserver(uriObserver);
-            uriObserver = null;
-        }
     }
 
     public void setUri(Uri uri) {
@@ -237,8 +218,10 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
 
     protected void dump(Throwable throwable) {
         Timber.e(throwable, "AbsGenrePlaylistLoader(uri=%s\nprojection=%s\nselection=%s\n" +
-                        "selectionArgs=%s\nsortOrder=%s",
-                uri, projection, selection, selectionArgs, sortOrder);
+                        "selectionArgs=%s\nsortOrder=%s\nprojection2=%s\nselection2=%s\n" +
+                        "selectionArgs2=%s\nsortOrder2=%s",
+                uri, projection, selection, selectionArgs, sortOrder,
+                projection2, selection2, selectionArgs2, sortOrder2);
     }
 
 }

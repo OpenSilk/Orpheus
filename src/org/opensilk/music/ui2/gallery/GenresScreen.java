@@ -54,6 +54,7 @@ import rx.functions.Func1;
  */
 @Layout(R.layout.gallery_page)
 @WithModule(GenresScreen.Module.class)
+@GalleryPageTitle(R.string.page_genres)
 public class GenresScreen extends Screen {
 
     @dagger.Module(

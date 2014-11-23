@@ -200,8 +200,6 @@ public abstract class BaseAdapter<T> extends RecyclerListAdapter<T, BaseAdapter.
             super(itemView);
             ButterKnife.inject(this, itemView);
             subscriptions = new CompositeSubscription();
-//            Drawable d = ContextCompat.getDrawable(itemView.getContext(), R.drawable.ic_menu_moreoverflow_mtrl_alpha);
-//            overflow.setImageDrawable(new TintDrawableWrapper(d, Themer.getDefaultColorStateList(itemView.getContext())));
         }
 
         public void reset() {

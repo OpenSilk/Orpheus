@@ -25,6 +25,7 @@ import com.mobeta.android.dslv.DragSortListView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.GraphHolder;
 import org.opensilk.music.ui2.gallery.GalleryPage;
+import org.opensilk.music.ui2.gallery.GalleryView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,7 +101,8 @@ public class DragSortSwipeListPreference extends DialogPreference implements
                 for (GalleryPage item : GalleryPage.values()) {
                     if (!mCurrentClassList.contains(item)) {
                         pages.add(item);
-                        popupMenu.getMenu().add(Menu.NONE, pages.size()-1, Menu.NONE, item.titleResource);
+                        popupMenu.getMenu().add(Menu.NONE, pages.size()-1, Menu.NONE,
+                                GalleryView.getGalleryPageTitleResource(item.screen));
                     }
                 }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -169,7 +171,8 @@ public class DragSortSwipeListPreference extends DialogPreference implements
                 holder.handle.setImageResource(ThemeHelper.isLightTheme(getContext())
                         ? R.drawable.ic_action_drag_light : R.drawable.ic_action_drag_dark);
 
-                holder.text.setText(getContext().getString(getItem(position).titleResource));
+                holder.text.setText(getContext().getString(
+                        GalleryView.getGalleryPageTitleResource(getItem(position).screen)));
             }
             return row;
         }

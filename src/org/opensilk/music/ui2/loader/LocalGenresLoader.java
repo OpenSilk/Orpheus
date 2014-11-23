@@ -39,16 +39,15 @@ import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/24/14.
  */
 @Singleton
 public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
+
     @Inject
     public LocalGenresLoader(@ForApplication Context context) {
         super(context);
@@ -56,12 +55,12 @@ public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
         setProjection(Projections.GENRE);
         setSelection(Selections.GENRE);
         setSelectionArgs(SelectionArgs.GENRE);
-        setSortOrder(MediaStore.Audio.Genres.DEFAULT_SORT_ORDER);
+        setSortOrder(SortOrder.GENRES);
 
         setProjection2(Projections.GENRE_SONGS);
         setSelection2(Selections.GENRE_SONGS);
         setSelectionArgs2(SelectionArgs.GENRE_SONGS);
-        setSortOrder2(SortOrder.GENRE_SONGS);
+        setSortOrder2(SortOrder.GENRE_MEMBERS);
     }
 
     @Override
@@ -86,33 +85,28 @@ public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
 
     @Override
     public Observable<Genre> getObservable() {
-        cache.clear();
-        cachePopulated = false;
-        return super.getObservable().filter(new Func1<Genre, Boolean>() {
-            @Override
-            public Boolean call(Genre genre) {
-                // mediastore doesnt cleanup old genres so
-                // we have to make sure not to add any that are empty
-                return genre.mSongNumber > 0;
-            }
-        }).doOnNext(new Action1<Genre>() {
-            @Override
-            public void call(Genre genre) {
-                cache.add(genre);
-            }
-        }).doOnCompleted(new Action0() {
-            @Override
-            public void call() {
-                cachePopulated = true;
-            }
-        }).doOnError(new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                cache.clear();
-                cachePopulated = false;
-                Timber.e(throwable, "Couldn't get geners");
-            }
-        }).onErrorResumeNext(Observable.<Genre>empty()).observeOn(AndroidSchedulers.mainThread());
+        if (cachedObservable == null) {
+            cachedObservable = super.getObservable()
+                    .filter(new Func1<Genre, Boolean>() {
+                        @Override
+                        public Boolean call(Genre genre) {
+                            // mediastore doesnt cleanup old genres so
+                            // we have to make sure not to add any that are empty
+                            return genre.mSongNumber > 0;
+                        }
+                    })
+                    .doOnError(new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            cachedObservable = null;
+                            dump(throwable);
+                        }
+                    })
+                    .onErrorResumeNext(Observable.<Genre>empty())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .cache();
+        }
+        return cachedObservable;
     }
 
     @Override

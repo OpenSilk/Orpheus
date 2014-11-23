@@ -50,6 +50,7 @@ import rx.functions.Func1;
  */
 @Layout(R.layout.gallery_page)
 @WithModule(SongsScreen.Module.class)
+@GalleryPageTitle(R.string.page_songs)
 public class SongsScreen extends Screen {
 
     @dagger.Module(

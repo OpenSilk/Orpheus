@@ -17,23 +17,15 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import org.opensilk.common.flow.Screen;
-import org.opensilk.music.R;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Created by drew on 10/3/14.
+ * Created by drew on 11/22/14.
  */
-public enum GalleryPage {
-    PLAYLIST(new PlaylistsScreen()),
-    //    RECENT(R.string.page_recent),
-    ARTIST(new ArtistsScreen()),
-    ALBUM(new AlbumsScreen()),
-    SONG(new SongsScreen()),
-    GENRE(new GenresScreen());
-
-    public final Screen screen;
-
-    private GalleryPage(Screen screen) {
-        this.screen = screen;
-    }
+@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+public @interface GalleryPageTitle {
+    int value();
 }

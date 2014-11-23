@@ -53,6 +53,7 @@ import rx.functions.Func1;
  */
 @Layout(R.layout.gallery_page)
 @WithModule(PlaylistsScreen.Module.class)
+@GalleryPageTitle(R.string.page_playlists)
 public class PlaylistsScreen extends Screen {
 
     @dagger.Module(

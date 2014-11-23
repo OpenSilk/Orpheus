@@ -58,6 +58,7 @@ import timber.log.Timber;
  */
 @Layout(R.layout.gallery_page)
 @WithModule(ArtistsScreen.Module.class)
+@GalleryPageTitle(R.string.page_artists)
 public class ArtistsScreen extends Screen {
 
     @dagger.Module(

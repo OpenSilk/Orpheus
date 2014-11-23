@@ -40,6 +40,9 @@ import mortar.ViewPresenter;
 import rx.Subscription;
 import timber.log.Timber;
 
+import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.rx.RxUtils.notSubscribed;
+
 /**
  * Created by drew on 10/19/14.
  */
@@ -68,14 +71,11 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     }
 
     @Override
+    @DebugLog
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         setupRecyclerView(false);
-        if (loader.hasCache()) {
-            Timber.d("Cache hit %s", getClass());
-            getAdapter().addAll(loader.getCache());
-            getView().setListShown(true, false);
-        } else if (subscription == null || subscription.isUnsubscribed()) {
+        if (notSubscribed(subscription)) {
             getView().setLoading(true);
             load();
         }
@@ -93,11 +93,11 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         if (!viewNotNull()) return;
         BaseAdapter<T> adapter = newAdapter();
         adapter.setGridStyle(isGrid());
-        if (clear && loader.hasCache()) adapter.addAll(loader.getCache());
         RecyclerView v = getView().getListView();
         v.setHasFixedSize(true);
         v.setLayoutManager(getLayoutManager(v.getContext()));
         v.swapAdapter(adapter, clear);
+        if (clear) load();
     }
 
     // reset the recyclerview for eg layoutmanager change
@@ -139,7 +139,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     // cancels any ongoing load and starts a new one
     @DebugLog
     public void reload() {
-        if (subscription != null) subscription.unsubscribe();
+        if (isSubscribed(subscription)) subscription.unsubscribe();
         if (viewNotNull()) getAdapter().clear();
         load();
     }

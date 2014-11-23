@@ -19,9 +19,6 @@ package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
-import android.provider.BaseColumns;
-import android.provider.MediaStore;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
@@ -36,16 +33,13 @@ import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action2;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
@@ -67,7 +61,7 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
         setProjection(Projections.LOCAL_ALBUM);
         setSelection(Selections.LOCAL_ALBUM);
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM);
-        setSortOrder(MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+        setSortOrder(SortOrder.LOCAL_ALBUMS);
     }
 
     @Override
@@ -77,28 +71,27 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
 
     @Override
     public Observable<Object> getObservable() {
-        Observable<Object> songGroupLoader = performSomeMagick(
-                new RxCursorLoader<LocalSong>(
-                    context,
-                    Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                    Projections.LOCAL_SONG,
-                    Selections.LOCAL_ARTIST_SONGS,
-                    SelectionArgs.LOCAL_ARTIST_SONGS(artist.artistId),
-                    SortOrder.LOCAL_ARTIST_SONGS
-                ) {
-                    @Override
-                    protected LocalSong makeFromCursor(Cursor c) {
-                        return CursorHelpers.makeLocalSongFromCursor(c);
-                    }
-                }.createObservable()
-        );
-        return songGroupLoader.concatWith(createObservable().subscribeOn(Schedulers.io()))
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    @Override
-    public boolean hasCache() {
-        return false; // ignores cache
+        if (cachedObservable == null) {
+            Observable<Object> songGroupLoader = performSomeMagick(
+                    new RxCursorLoader<LocalSong>(
+                            context,
+                            Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                            Projections.LOCAL_SONG,
+                            Selections.LOCAL_ARTIST_SONGS,
+                            SelectionArgs.LOCAL_ARTIST_SONGS(artist.artistId),
+                            SortOrder.LOCAL_ARTIST_SONGS
+                    ) {
+                        @Override
+                        protected LocalSong makeFromCursor(Cursor c) {
+                            return CursorHelpers.makeLocalSongFromCursor(c);
+                        }
+                    }.createObservable()
+            );
+            cachedObservable = songGroupLoader
+                    .concatWith(createObservable().subscribeOn(Schedulers.io()))
+                    .observeOn(AndroidSchedulers.mainThread());
+        }
+        return cachedObservable;
     }
 
     public Observable<Object> performSomeMagick(Observable<LocalSong> observable) {

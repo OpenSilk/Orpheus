@@ -19,8 +19,6 @@ package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
-import android.provider.MediaStore;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalSongGroup;
@@ -31,6 +29,7 @@ import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 
 import javax.inject.Inject;
@@ -52,7 +51,7 @@ public class LocalGenresProfileLoader extends RxCursorLoader<Object> {
         setProjection(Projections.LOCAL_ALBUM);
         setSelection(Selections.LOCAL_ALBUM + " AND " + Selections.LOCAL_ALBUMS(genre.mAlbumIds));
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM);
-        setSortOrder(MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+        setSortOrder(SortOrder.LOCAL_ALBUMS);
     }
 
     @Override

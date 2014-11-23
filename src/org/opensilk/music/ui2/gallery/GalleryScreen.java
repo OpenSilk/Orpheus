@@ -80,19 +80,19 @@ public class GalleryScreen extends Screen {
 
         @Override
         protected void onEnterScope(MortarScope scope) {
-            Timber.v("onEnterScope()");
+//            Timber.v("onEnterScope()");
             super.onEnterScope(scope);
         }
 
         @Override
         protected void onExitScope() {
-            Timber.v("onExitScope()");
+//            Timber.v("onExitScope()");
             super.onExitScope();
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
-            Timber.v("onLoad(%s)", savedInstanceState);
+//            Timber.v("onLoad(%s)", savedInstanceState);
             super.onLoad(savedInstanceState);
             // init acitonbar
             updateActionBarWithChildMenuConfig(null);
@@ -104,7 +104,7 @@ public class GalleryScreen extends Screen {
 
         @Override
         protected void onSave(Bundle outState) {
-            Timber.v("onSave(%s)", outState);
+//            Timber.v("onSave(%s)", outState);
             super.onSave(outState);
             if (getView() != null) {
                 preferences.putInt(AppPreferences.START_PAGE, getView().viewPager.getCurrentItem());

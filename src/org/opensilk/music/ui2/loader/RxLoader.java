@@ -25,13 +25,11 @@ import rx.Observable;
  * Created by drew on 10/24/14.
  */
 public interface RxLoader<T> {
-    public interface ContentChangedListener {
+    interface ContentChangedListener {
         void reload();
     }
     Observable<T> getObservable();
     Observable<List<T>> getListObservable();
-    boolean hasCache();
-    List<T> getCache();
     void addContentChangedListener(ContentChangedListener l);
     void removeContentChangedListener(ContentChangedListener l);
     void setSortOrder(String sortOrder);

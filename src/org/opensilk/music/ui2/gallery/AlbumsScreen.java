@@ -46,6 +46,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import flow.Layout;
+import hugo.weaving.DebugLog;
 import mortar.ViewPresenter;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -57,6 +58,7 @@ import timber.log.Timber;
  */
 @Layout(R.layout.gallery_page)
 @WithModule(AlbumsScreen.Module.class)
+@GalleryPageTitle(R.string.page_albums)
 public class AlbumsScreen extends Screen {
 
     @dagger.Module (
@@ -83,17 +85,18 @@ public class AlbumsScreen extends Screen {
         }
 
         @Override
+        @DebugLog
         protected void load() {
             loader.setSortOrder(preferences.getString(AppPreferences.ALBUM_SORT_ORDER, SortOrder.AlbumSortOrder.ALBUM_A_Z));
             subscription = loader.getListObservable().subscribe(new SimpleObserver<List<LocalAlbum>>() {
                 @Override
+                @DebugLog
                 public void onNext(List<LocalAlbum> localAlbums) {
                     if (viewNotNull()) {
                         getAdapter().addAll(localAlbums);
                         showRecyclerView();
                     }
                 }
-
                 @Override
                 public void onCompleted() {
                     if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();

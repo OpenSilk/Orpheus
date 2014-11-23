@@ -29,6 +29,7 @@ import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
+import org.opensilk.music.util.Uris;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,7 +42,7 @@ public class LocalAlbumSongLoader extends RxCursorLoader<LocalSong> {
     @Inject
     public LocalAlbumSongLoader(@ForApplication Context context, @Named("album") long albumId) {
         super(context);
-        setUri(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+        setUri(Uris.EXTERNAL_MEDIASTORE_MEDIA);
         setProjection(Projections.LOCAL_SONG);
         setSelection(Selections.LOCAL_ALBUM_SONGS);
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(albumId));
@@ -52,4 +53,5 @@ public class LocalAlbumSongLoader extends RxCursorLoader<LocalSong> {
     protected LocalSong makeFromCursor(Cursor c) {
         return CursorHelpers.makeLocalSongFromCursor(c);
     }
+
 }

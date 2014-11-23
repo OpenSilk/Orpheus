@@ -52,8 +52,7 @@ public class GalleryPageView extends FrameLayout {
     boolean mListShown;
     boolean mEmptyShown;
 
-    @Inject
-    ViewPresenter<GalleryPageView> presenter;
+    @Inject ViewPresenter<GalleryPageView> presenter;
 
     public GalleryPageView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,33 +62,35 @@ public class GalleryPageView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        Timber.v("onFinishInflate()");
+//        Timber.v("onFinishInflate()");
         ButterKnife.inject(this);
+        //note dont remove, needs to be called here for adapter savedstate
         presenter.takeView(this);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Timber.v("onAttachedToWindow()");
+//        Timber.v("onAttachedToWindow()");
+        presenter.takeView(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Timber.v("onDetachedFromWindow");
+//        Timber.v("onDetachedFromWindow");
         presenter.dropView(this);
     }
 
     @Override
     protected Parcelable onSaveInstanceState() {
-        Timber.v("onSaveInstanceState");
+//        Timber.v("onSaveInstanceState");
         return super.onSaveInstanceState();
     }
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
-        Timber.v("onRestoreInstanceState");
+//        Timber.v("onRestoreInstanceState");
         super.onRestoreInstanceState(state);
     }
 

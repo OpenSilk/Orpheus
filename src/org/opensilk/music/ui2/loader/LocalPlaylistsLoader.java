@@ -42,9 +42,7 @@ import javax.inject.Singleton;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/24/14.
@@ -59,12 +57,12 @@ public class LocalPlaylistsLoader extends AbsGenrePlaylistLoader<Playlist> {
         setProjection(Projections.PLAYLIST);
         setSelection(Selections.PLAYLIST);
         setSelectionArgs(SelectionArgs.PLAYLIST);
-        setSortOrder(MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
+        setSortOrder(SortOrder.PLAYLISTS);
 
         setProjection2(Projections.PLAYLIST_SONGS);
         setSelection2(Selections.PLAYLIST_SONGS);
         setSelectionArgs2(SelectionArgs.PLAYLIST_SONGS);
-        setSortOrder2(SortOrder.PLAYLIST_SONGS);
+        setSortOrder2(SortOrder.PLAYLIST_MEMBERS);
     }
 
     @Override
@@ -89,49 +87,40 @@ public class LocalPlaylistsLoader extends AbsGenrePlaylistLoader<Playlist> {
 
     @Override
     public Observable<Playlist> getObservable() {
-        cache.clear();
-        cachePopulated = false;
-        RxCursorLoader<LocalSong> lastAddedLoader = new RxCursorLoader<LocalSong>(context,
-                Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                Projections.LOCAL_SONG,
-                Selections.LAST_ADDED,
-                SelectionArgs.LAST_ADDED(),
-                SortOrder.LAST_ADDED) {
-            @Override
-            protected LocalSong makeFromCursor(Cursor c) {
-                return CursorHelpers.makeLocalSongFromCursor(c);
-            }
-        };
+        if (cachedObservable == null) {
+            RxCursorLoader<LocalSong> lastAddedLoader = new RxCursorLoader<LocalSong>(context,
+                    Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                    Projections.LOCAL_SONG,
+                    Selections.LAST_ADDED,
+                    SelectionArgs.LAST_ADDED(),
+                    SortOrder.LAST_ADDED) {
+                @Override
+                protected LocalSong makeFromCursor(Cursor c) {
+                    return CursorHelpers.makeLocalSongFromCursor(c);
+                }
+            };
 
-        Observable<Playlist> lastAddedObservable = performSomeMagick(
-                // performSomeMagick subscribes us on io so we dont need to do that here
-                lastAddedLoader.createObservable(),
-                -2, context.getResources().getString(R.string.playlist_last_added));
+            Observable<Playlist> lastAddedObservable = performSomeMagick(
+                    // performSomeMagick subscribes us on io so we dont need to do that here
+                    lastAddedLoader.createObservable(),
+                    -2,
+                    context.getResources().getString(R.string.playlist_last_added)
+            );
 
-        // we want last added first so concat them together
-        return Observable.concat(lastAddedObservable, super.getObservable())
-                .doOnNext(new Action1<Playlist>() {
-                    @Override
-                    public void call(Playlist playlist) {
-                        cache.add(playlist);
-                    }
-                })
-                .doOnCompleted(new Action0() {
-                    @Override
-                    public void call() {
-                        cachePopulated = true;
-                    }
-                })
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        cache.clear();
-                        cachePopulated = false;
-                        Timber.e(throwable, "Unable to obtain playlists");
-                    }
-                })
-                .onErrorResumeNext(Observable.<Playlist>empty())
-                .observeOn(AndroidSchedulers.mainThread());
+            // we want last added first so concat them together
+            cachedObservable = Observable.concat(lastAddedObservable, super.getObservable())
+                    .doOnError(new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            cachedObservable = null;
+                            dump(throwable);
+                        }
+                    })
+                    .onErrorResumeNext(Observable.<Playlist>empty())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .cache();
+        }
+        return cachedObservable;
     }
 
     @Override

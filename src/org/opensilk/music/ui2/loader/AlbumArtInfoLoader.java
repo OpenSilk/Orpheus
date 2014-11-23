@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
 import org.opensilk.music.api.meta.ArtInfo;
@@ -45,28 +46,11 @@ public class AlbumArtInfoLoader extends RxCursorLoader<ArtInfo> {
         setProjection(Projections.LOCAL_ALBUM);
         setAlbumIds(albumIds);
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM);
-        setSortOrder(MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+        setSortOrder(BaseColumns._ID);
     }
 
     public void setAlbumIds(long[] albumIds) {
         setSelection(Selections.LOCAL_ALBUM + " AND " + Selections.LOCAL_ALBUMS(albumIds));
-    }
-
-    public Observable<ArtInfo> getDistinctObservable() {
-        return createObservable()
-                .distinct()
-                        // Im not really concered with errors right now
-                        // just log it, and return an empty list
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Timber.e(throwable, "RxCursorLoader(uri=%s :: projection=%s :: selection=%s " +
-                                "selectionArgs=%s :: sortOrder=%s", uri, projection, selection, selectionArgs, sortOrder);
-                    }
-                })
-                .onExceptionResumeNext(Observable.<ArtInfo>empty())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override

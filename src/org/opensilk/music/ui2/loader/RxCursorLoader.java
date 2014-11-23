@@ -49,8 +49,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
         }
         @Override
         public void onChange(boolean selfChange) {
-            cachePopulated = false;
-            cache.clear();
+            cachedObservable = null;
             for (ContentChangedListener l : contentChangedListeners) {
                 l.reload();
             }
@@ -62,7 +61,6 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
     }
 
     protected final List<ContentChangedListener> contentChangedListeners;
-    protected final List<T> cache;
     protected final Context context;
 
     protected Uri uri;
@@ -72,11 +70,10 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
     protected String sortOrder;
 
     private UriObserver uriObserver;
-    protected volatile boolean cachePopulated = false;
+    protected Observable<T> cachedObservable;
 
     public RxCursorLoader(Context context) {
         contentChangedListeners = new ArrayList<>();
-        cache = new CopyOnWriteArrayList<>();
         this.context = context;
     }
 
@@ -84,7 +81,6 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                           Uri uri, String[] projection, String selection,
                           String[] selectionArgs, String sortOrder) {
         contentChangedListeners = new ArrayList<>();
-        cache = new CopyOnWriteArrayList<>();
         this.context = context;
         this.uri = uri;
         this.projection = projection;
@@ -107,32 +103,25 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
      * @return Observable subscribed on IO and observes on main.
      */
     public Observable<T> getObservable() {
-        cache.clear();
-        cachePopulated = false;
-        return createObservable()
-                .doOnNext(new Action1<T>() {
-                    @Override
-                    public void call(T t) {
-                        cache.add(t);
-                    }
-                })
-                .doOnCompleted(new Action0() {
-                    @Override
-                    public void call() {
-                        cachePopulated = true;
-                    }
-                })
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        cache.clear();
-                        cachePopulated = false;
-                        dump(throwable);
-                    }
-                })
-                .onErrorResumeNext(Observable.<T>empty())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        if (uriObserver == null) {
+            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
+            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
+        }
+        if (cachedObservable == null) {
+            cachedObservable = createObservable()
+                    .doOnError(new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            cachedObservable = null;
+                            dump(throwable);
+                        }
+                    })
+                    .onErrorResumeNext(Observable.<T>empty())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .cache();
+        }
+        return cachedObservable;
     }
 
     /**
@@ -182,33 +171,12 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
         });
     }
 
-    public boolean hasCache() {
-        return !cache.isEmpty() && cachePopulated;
-    }
-
-    public List<T> getCache() {
-        return cache;
-    }
-
     public void addContentChangedListener(ContentChangedListener l) {
         contentChangedListeners.add(l);
-        if (uriObserver == null) {
-            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
-            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
-        }
     }
 
     public void removeContentChangedListener(ContentChangedListener l) {
         contentChangedListeners.remove(l);
-        if (contentChangedListeners.isEmpty()) {
-            context.getContentResolver().unregisterContentObserver(uriObserver);
-            uriObserver = null;
-        }
-    }
-
-    protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
-        if (subscriber.isUnsubscribed()) return;
-        subscriber.onError(t);
     }
 
     public void setUri(Uri uri) {
@@ -229,6 +197,11 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
 
     public void setSortOrder(String sortOrder) {
         this.sortOrder = sortOrder;
+    }
+
+    protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
+        if (subscriber.isUnsubscribed()) return;
+        subscriber.onError(t);
     }
 
     protected void dump(Throwable throwable) {

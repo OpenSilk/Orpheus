@@ -166,7 +166,7 @@ public class CursorHelpers {
                 Projections.PLAYLIST_MEMBER,
                 Selections.PLAYLIST_MEMBER,
                 SelectionArgs.PLAYLIST_MEMBER,
-                SortOrder.PLAYLIST_SONGS);
+                SortOrder.PLAYLIST_MEMBERS);
     }
 
     public static Cursor makeLastAddedCursor(final Context context) {
@@ -202,7 +202,7 @@ public class CursorHelpers {
                 Projections.ID_ONLY,
                 Selections.GENRE_SONGS,
                 SelectionArgs.GENRE_SONGS,
-                SortOrder.GENRE_SONGS);
+                SortOrder.GENRE_MEMBERS);
         if (cursor != null) {
             try {
                 return getSongIdsForCursor(cursor);
@@ -222,7 +222,7 @@ public class CursorHelpers {
 //                MediaStore.Audio.AudioColumns.ALBUM_KEY + ", "
 //                    + MediaStore.Audio.AudioColumns.TRACK + ", "
 //                    + MediaStore.Audio.Media.DEFAULT_SORT_ORDER
-                SortOrder.GENRE_SONGS);
+                SortOrder.GENRE_MEMBERS);
         if (cursor != null) {
             try {
                 LocalSong[] songs = new LocalSong[cursor.getCount()];
@@ -459,7 +459,7 @@ public class CursorHelpers {
                 Projections.PLAYLIST_SONGS,
                 Selections.PLAYLIST_SONGS,
                 SelectionArgs.PLAYLIST_SONGS,
-                SortOrder.PLAYLIST_SONGS);
+                SortOrder.PLAYLIST_MEMBERS);
         if (cursor != null) {
             try {
                 final LocalSong[] list = new LocalSong[cursor.getCount()];

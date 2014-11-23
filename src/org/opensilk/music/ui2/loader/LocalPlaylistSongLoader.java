@@ -18,13 +18,10 @@ package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.support.v4.content.CursorLoader;
 
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.model.Playlist;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
@@ -54,7 +51,7 @@ public class LocalPlaylistSongLoader extends RxCursorLoader<LocalSong> {
             setProjection(Projections.PLAYLIST_SONGS);
             setSelection(Selections.PLAYLIST_SONGS);
             setSelectionArgs(SelectionArgs.PLAYLIST_SONGS);
-            setSortOrder(SortOrder.PLAYLIST_SONGS);
+            setSortOrder(SortOrder.PLAYLIST_MEMBERS);
         }
     }
 

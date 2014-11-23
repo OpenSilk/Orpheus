@@ -39,10 +39,11 @@ import timber.log.Timber;
  */
 @Singleton
 public class LocalAlbumsLoader extends RxCursorLoader<LocalAlbum> {
+
     @Inject
     public LocalAlbumsLoader(@ForApplication Context context) {
         super(context);
-        Timber.v("new Albums.Loader()");
+//        Timber.v("new Albums.Loader()");
         setUri(Uris.EXTERNAL_MEDIASTORE_ALBUMS);
         setProjection(Projections.LOCAL_ALBUM);
         setSelection(Selections.LOCAL_ALBUM);
@@ -54,4 +55,5 @@ public class LocalAlbumsLoader extends RxCursorLoader<LocalAlbum> {
     protected LocalAlbum makeFromCursor(Cursor c) {
         return CursorHelpers.makeLocalAlbumFromCursor(c);
     }
+
 }
