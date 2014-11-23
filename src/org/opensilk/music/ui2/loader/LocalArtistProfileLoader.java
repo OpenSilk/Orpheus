@@ -71,6 +71,7 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
 
     @Override
     public Observable<Object> getObservable() {
+        registerContentObserver();
         if (cachedObservable == null) {
             Observable<Object> songGroupLoader = performSomeMagick(
                     new RxCursorLoader<LocalSong>(

@@ -35,6 +35,7 @@ import javax.inject.Inject;
  * Created by drew on 10/24/14.
  */
 public class LocalSongsLoader extends RxCursorLoader<LocalSong> {
+
     @Inject
     public LocalSongsLoader(@ForApplication Context context) {
         super(context);
@@ -47,6 +48,7 @@ public class LocalSongsLoader extends RxCursorLoader<LocalSong> {
 
     @Override
     protected LocalSong makeFromCursor(Cursor c) {
-        return CursorHelpers.makeLocalSongFromCursor(null, c);
+        return CursorHelpers.makeLocalSongFromCursor(c);
     }
+
 }

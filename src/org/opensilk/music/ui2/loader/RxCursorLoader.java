@@ -103,10 +103,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
      * @return Observable subscribed on IO and observes on main.
      */
     public Observable<T> getObservable() {
-        if (uriObserver == null) {
-            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
-            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
-        }
+        registerContentObserver();
         if (cachedObservable == null) {
             cachedObservable = createObservable()
                     .doOnError(new Action1<Throwable>() {
@@ -173,6 +170,13 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                 selectionArgs,
                 sortOrder
         );
+    }
+
+    protected void registerContentObserver() {
+        if (uriObserver == null) {
+            uriObserver = new UriObserver(new Handler(Looper.getMainLooper()));
+            context.getContentResolver().registerContentObserver(uri, true, uriObserver);
+        }
     }
 
     public void addContentChangedListener(ContentChangedListener l) {
