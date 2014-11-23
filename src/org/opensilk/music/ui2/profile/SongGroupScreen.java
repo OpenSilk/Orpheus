@@ -38,6 +38,7 @@ import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.loader.LocalSongGroupLoader;
+import org.opensilk.music.util.SortOrder;
 
 import java.util.List;
 
@@ -115,7 +116,7 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
     public static class Presenter extends BasePresenter {
         final OverflowHandlers.LocalSongGroups songGroupOverflowHandler;
         final LocalSongGroup songGroup;
-        final Observable<List<LocalSong>> loader;
+        final LocalSongGroupLoader loader;
 
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
@@ -127,7 +128,7 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
             super(actionBarOwner, requestor, settings);
             this.songGroupOverflowHandler = songGroupOverflowHandler;
             this.songGroup = songGroup;
-            this.loader = loader.getListObservable().share().cache();
+            this.loader = loader;
         }
 
         @Override
@@ -141,16 +142,7 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
                     getView().getHero3(),
                     getView().getHero4()
             );
-
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
-                @Override
-                public void onNext(List<LocalSong> localSongs) {
-                    if (getView() != null) {
-                        getView().getAdapter().addAll(localSongs);
-                    }
-                }
-            });
+            load();
         }
 
         @Override
@@ -178,19 +170,69 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
             return false;
         }
 
+        void load() {
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loader.setSortOrder(settings.getString(AppPreferences.SONG_COLLECTION_SORT_ORDER, SortOrder.SongSortOrder.SONG_ALBUM));
+            loaderSubscription = loader.getListObservable().subscribe(new SimpleObserver<List<LocalSong>>() {
+                @Override
+                public void onNext(List<LocalSong> localSongs) {
+                    if (getView() != null) {
+                        getView().getAdapter().addAll(localSongs);
+                    }
+                }
+            });
+        }
+
+        void setNewSortOrder(String sortOrder) {
+            settings.putString(AppPreferences.SONG_COLLECTION_SORT_ORDER, sortOrder);
+            loader.reset();
+            if (getView() != null) {
+                getView().getAdapter().clear();
+                getView().prepareRefresh();
+            }
+            load();
+        }
+
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder(getCommonConfig())
                             .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                                            .withMenus(OverflowHandlers.LocalSongGroups.MENUS)
+                                            .withMenus(getMenus())
                                             .setActionHandler(new Func1<Integer, Boolean>() {
                                                 @Override
                                                 public Boolean call(Integer integer) {
-                                                    try {
-                                                        return songGroupOverflowHandler.handleClick(
-                                                                OverflowAction.valueOf(integer), songGroup);
-                                                    } catch (IllegalArgumentException e) {
-                                                        return false;
+                                                    switch (integer) {
+                                                        case R.id.menu_sort_by_az:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_A_Z);
+                                                            return true;
+                                                        case R.id.menu_sort_by_za:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_Z_A);
+                                                            return true;
+                                                        case R.id.menu_sort_by_artist:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_ARTIST);
+                                                            return true;
+                                                        case R.id.menu_sort_by_album:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_ALBUM);
+                                                            return true;
+                                                        case R.id.menu_sort_by_year:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_YEAR);
+                                                            return true;
+                                                        case R.id.menu_sort_by_duration:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_DURATION);
+                                                            return true;
+                                                        case R.id.menu_sort_by_filename:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_FILENAME);
+                                                            return true;
+                                                        case R.id.menu_sort_by_date_added:
+                                                            setNewSortOrder(SortOrder.SongSortOrder.SONG_DATE);
+                                                            return true;
+                                                        default:
+                                                            try {
+                                                                return songGroupOverflowHandler.handleClick(
+                                                                        OverflowAction.valueOf(integer), songGroup);
+                                                            } catch (IllegalArgumentException e) {
+                                                                return false;
+                                                            }
                                                     }
                                                 }
                                             })
@@ -198,6 +240,14 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
                             )
                             .build()
             );
+        }
+
+        int[] getMenus() {
+            int m[] = new int[] {
+                    R.menu.song_sort_by,
+            };
+            int m2[] = OverflowHandlers.LocalSongGroups.MENUS;
+            return concatArrays(m, m2);
         }
     }
 

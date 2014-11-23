@@ -59,7 +59,9 @@ public class SortOrder {
         String SONG_A_Z = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
         String SONG_Z_A = SONG_A_Z + " DESC";
         String SONG_ARTIST = MediaStore.Audio.Media.ARTIST;
-        String SONG_ALBUM = MediaStore.Audio.Media.ALBUM;
+        String SONG_ALBUM = MediaStore.Audio.Media.ALBUM_KEY
+                + ", " + MediaStore.Audio.Media.TRACK + ", "
+                + MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
         String SONG_YEAR = MediaStore.Audio.Media.YEAR + " DESC";
         String SONG_DURATION = MediaStore.Audio.Media.DURATION + " DESC";
         String SONG_DATE = MediaStore.Audio.Media.DATE_ADDED + " DESC";

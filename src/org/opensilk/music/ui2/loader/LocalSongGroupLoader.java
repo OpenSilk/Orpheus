@@ -46,7 +46,7 @@ public class LocalSongGroupLoader extends RxCursorLoader<LocalSong> {
         setProjection(Projections.LOCAL_SONG);
         setSelection(Selections.SONG_GROUP(songIds));
         setSelectionArgs(SelectionArgs.SONG_GROUP);
-        setSortOrder(SortOrder.SONG_GROUP);
+        // need set sortorder
     }
 
     @Override
