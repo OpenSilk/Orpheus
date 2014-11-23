@@ -37,6 +37,7 @@ import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.LocalGenresProfileLoader;
+import org.opensilk.music.util.SortOrder;
 
 import java.util.List;
 
@@ -102,7 +103,7 @@ public class GenreScreen extends Screen {
     public static class Presenter extends BasePresenter {
         final OverflowHandlers.Genres genreOverflowHandler;
         final Genre genre;
-        final Observable<List<Object>> loader;
+        final LocalGenresProfileLoader loader;
 
         @Inject
         public Presenter(ActionBarOwner actionBarOwner,
@@ -114,7 +115,7 @@ public class GenreScreen extends Screen {
             super(actionBarOwner, requestor, settings);
             this.genreOverflowHandler = genreOverflowHandler;
             this.genre = genre;
-            this.loader = loader.getListObservable().cache();
+            this.loader = loader;
         }
 
         @Override
@@ -130,16 +131,7 @@ public class GenreScreen extends Screen {
                     getView().getHero4()
             );
 
-            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<Object>>() {
-                @Override
-                public void onNext(List<Object> objects) {
-                    if (getView() != null) {
-                        getView().getAdapter().addAll(objects);
-                    }
-                }
-            });
-
+            load();
         }
 
         @Override
@@ -168,27 +160,74 @@ public class GenreScreen extends Screen {
             return true;
         }
 
+        void load() {
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loader.setSortOrder(settings.getString(AppPreferences.GENRE_ALBUM_SORT_ORDER, SortOrder.GenreAlbumSortOrder.ALBUM_A_Z));
+            loaderSubscription = loader.getListObservable().subscribe(new SimpleObserver<List<Object>>() {
+                @Override
+                public void onNext(List<Object> objects) {
+                    if (getView() != null) {
+                        getView().getAdapter().addAll(objects);
+                    }
+                }
+            });
+        }
+
+        void setNewSortOrder(String sortOrder) {
+            settings.putString(AppPreferences.GENRE_ALBUM_SORT_ORDER, sortOrder);
+            loader.reset();
+            if (getView() != null) {
+                getView().getAdapter().clear();
+                getView().prepareRefresh();
+            }
+            load();
+        }
+
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder(getCommonConfig())
                             .withMenuConfig(
                                     new ActionBarOwner.MenuConfig.Builder()
-                                            .withMenus(OverflowHandlers.Genres.MENUS)
+                                            .withMenus(getMenus())
                                             .setActionHandler(new Func1<Integer, Boolean>() {
                                                 @Override
                                                 public Boolean call(Integer integer) {
-                                                    try {
-                                                        return genreOverflowHandler.handleClick(
-                                                                OverflowAction.valueOf(integer), genre);
-                                                    } catch (IllegalArgumentException e) {
-                                                        return false;
+                                                    switch (integer) {
+                                                        case R.id.menu_sort_by_az:
+                                                            setNewSortOrder(SortOrder.GenreAlbumSortOrder.ALBUM_A_Z);
+                                                            return true;
+                                                        case R.id.menu_sort_by_za:
+                                                            setNewSortOrder(SortOrder.GenreAlbumSortOrder.ALBUM_Z_A);
+                                                            return true;
+                                                        case R.id.menu_sort_by_year:
+                                                            setNewSortOrder(SortOrder.GenreAlbumSortOrder.ALBUM_YEAR);
+                                                            return true;
+                                                        case R.id.menu_sort_by_number_of_songs:
+                                                            setNewSortOrder(SortOrder.GenreAlbumSortOrder.ALBUM_NUMBER_OF_SONGS);
+                                                            return true;
+                                                        default:
+                                                            try {
+                                                                return genreOverflowHandler.handleClick(
+                                                                        OverflowAction.valueOf(integer), genre);
+                                                            } catch (IllegalArgumentException e) {
+                                                                return false;
+                                                            }
                                                     }
+
                                                 }
                                             })
                                             .build()
                             )
                             .build()
             );
+        }
+
+        int[] getMenus() {
+            int m[] = new int[] {
+                    R.menu.genre_album_sort_by,
+            };
+            int m2[] = OverflowHandlers.Genres.MENUS;
+            return concatArrays(m, m2);
         }
     }
 

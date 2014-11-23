@@ -51,7 +51,7 @@ public class LocalGenresProfileLoader extends RxCursorLoader<Object> {
         setProjection(Projections.LOCAL_ALBUM);
         setSelection(Selections.LOCAL_ALBUM + " AND " + Selections.LOCAL_ALBUMS(genre.mAlbumIds));
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM);
-        setSortOrder(SortOrder.LOCAL_ALBUMS);
+        //must set sort order
     }
 
     @Override

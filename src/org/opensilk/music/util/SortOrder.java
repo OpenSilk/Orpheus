@@ -86,7 +86,7 @@ public class SortOrder {
         String SONG_ARTIST = SongSortOrder.SONG_ARTIST;
     }
 
-    public static interface ArtistSongSortOrder {
+    public interface ArtistSongSortOrder {
         String SONG_A_Z = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
         String SONG_Z_A = SONG_A_Z + " DESC";
         String SONG_ALBUM = MediaStore.Audio.Media.ALBUM;
@@ -96,10 +96,17 @@ public class SortOrder {
         String SONG_FILENAME = SongSortOrder.SONG_FILENAME;
     }
 
-    public static interface ArtistAlbumSortOrder {
+    public interface ArtistAlbumSortOrder {
         String ALBUM_A_Z = AlbumSortOrder.ALBUM_A_Z;
         String ALBUM_Z_A = AlbumSortOrder.ALBUM_Z_A;
         String ALBUM_NUMBER_OF_SONGS = MediaStore.Audio.Artists.Albums.NUMBER_OF_SONGS + " DESC";
+        String ALBUM_YEAR = AlbumSortOrder.ALBUM_YEAR;
+    }
+
+    public interface GenreAlbumSortOrder {
+        String ALBUM_A_Z = AlbumSortOrder.ALBUM_A_Z;
+        String ALBUM_Z_A = AlbumSortOrder.ALBUM_Z_A;
+        String ALBUM_NUMBER_OF_SONGS = AlbumSortOrder.ALBUM_NUMBER_OF_SONGS;
         String ALBUM_YEAR = AlbumSortOrder.ALBUM_YEAR;
     }
 

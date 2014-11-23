@@ -62,7 +62,7 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
         setProjection(Projections.LOCAL_ALBUM);
         setSelection(Selections.LOCAL_ALBUM);
         setSelectionArgs(SelectionArgs.LOCAL_ALBUM);
-        setSortOrder(SortOrder.LOCAL_ALBUMS);
+        //must set sort order
     }
 
     @Override
@@ -106,7 +106,7 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
     }
 
     public Observable<Object> performSomeMagick(Observable<LocalSong> observable) {
-        Observable<LocalSong> o = observable.subscribeOn(Schedulers.io()).share();
+        Observable<LocalSong> o = observable.subscribeOn(Schedulers.io()).replay().refCount();
         //songs
         Observable<List<Long>> songs = o.map(new Func1<LocalSong, Long>() {
             @Override

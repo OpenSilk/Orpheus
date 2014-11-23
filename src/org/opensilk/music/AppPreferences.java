@@ -59,9 +59,10 @@ public class AppPreferences {
     public static final String PLAYLIST_SORT_ORDER = "playlist_sort_order";
 
     //profile sort orders
-    public static final String ARTIST_SONG_SORT_ORDER = "artist_song_sort_order";
     public static final String ARTIST_ALBUM_SORT_ORDER = "artist_album_sort_order";
     public static final String ALBUM_SONG_SORT_ORDER = "album_song_sort_order";
+    public static final String GENRE_ALBUM_SORT_ORDER = "genre_album_sort_order";
+    public static final String SONG_COLLECTION_SORT_ORDER = "song_collection_sort_order";
 
     //Gallery list styles
     public static final String ARTIST_LAYOUT = "artist_layout";

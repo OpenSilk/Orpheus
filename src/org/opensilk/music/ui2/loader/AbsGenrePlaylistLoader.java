@@ -131,7 +131,7 @@ public abstract class AbsGenrePlaylistLoader<T> implements RxLoader<T> {
     public Observable<T> performSomeMagick(Observable<LocalSong> observable,
                                            final long itemId,
                                            final String itemName) {
-        Observable<LocalSong> o = observable.subscribeOn(Schedulers.io()).share();
+        Observable<LocalSong> o = observable.subscribeOn(Schedulers.io()).replay().refCount();
         //songs
         Observable<List<Long>> songs = o.map(new Func1<LocalSong, Long>() {
             @Override
