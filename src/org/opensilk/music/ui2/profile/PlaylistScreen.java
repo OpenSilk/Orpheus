@@ -207,7 +207,7 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
     public static class PresenterDslv extends ViewPresenter<PlaylistDragSortView> {
 
         final Playlist playlist;
-        final Observable<List<LocalSong>> loader;
+        final LocalPlaylistSongLoader loader;
 
         Subscription loaderSubscription;
 
@@ -215,13 +215,14 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
         public PresenterDslv(Playlist playlist,
                              LocalPlaylistSongLoader loader) {
             this.playlist = playlist;
-            this.loader = loader.getListObservable().cache();
+            this.loader = loader;
         }
 
         @Override
         protected void onLoad(Bundle savedInstanceState) {
             super.onLoad(savedInstanceState);
-            loaderSubscription = loader.subscribe(new SimpleObserver<List<LocalSong>>() {
+            if (isSubscribed(loaderSubscription)) loaderSubscription.unsubscribe();
+            loaderSubscription = loader.getListObservable().subscribe(new SimpleObserver<List<LocalSong>>() {
                 @Override
                 public void onNext(List<LocalSong> localSongs) {
                     if (getView() != null) {
