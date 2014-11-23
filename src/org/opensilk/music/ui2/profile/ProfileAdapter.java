@@ -90,8 +90,7 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        return (i == -1) ? new ViewHolder((View) getItem(0))
-                : new ViewHolder(inflater.inflate(i, viewGroup, false));
+        return new ViewHolder(inflater.inflate(i, viewGroup, false));
     }
 
     @Override
@@ -212,8 +211,6 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
                     songOverflowHandler.playAll(songs, pos);
                 }
             });
-        } else if (obj instanceof View) {
-            //header
         }
     }
 
@@ -223,11 +220,9 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
     }
 
     @Override
-    public int getItemViewType(int position) {
-        Object o = getItem(position);
-        if (o instanceof View) {
-            return -1;
-        } else if (o instanceof LocalAlbum) {
+    public int getItemViewType(int i) {
+        Object o = getItem(i);
+        if (o instanceof LocalAlbum) {
             return R.layout.gallery_grid_item_artwork;
         } else if (o instanceof LocalSongGroup) {
             LocalSongGroup lsg = (LocalSongGroup)o;
@@ -246,10 +241,6 @@ public class ProfileAdapter extends RecyclerListAdapter<Object, ProfileAdapter.V
             }
         }
         throw new IllegalArgumentException("Unknown class " + o.getClass());
-    }
-
-    public void addHeader(View header) {
-        addItem(0, header);
     }
 
     static CompositeSubscription loadMultiArtwork(ArtworkRequestManager requestor,
