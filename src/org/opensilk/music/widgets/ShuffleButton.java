@@ -27,10 +27,11 @@ import android.view.View.OnLongClickListener;
 import android.widget.ImageButton;
 
 import com.andrew.apollo.MusicPlaybackService;
+
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * @author Andrew Neal (andrewdneal@gmail.com)
@@ -50,7 +51,7 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
 
     public ShuffleButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        final boolean isLightTheme = ThemeUtils.isLightTheme(getContext());
         if (isLightTheme) {
             mShuffleDrawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_black);
         } else {
@@ -58,9 +59,9 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
         }
         setOnClickListener(this);
         setOnLongClickListener(this);
-        mShuffleActiveDrawable = ThemeHelper.themeDrawable(getContext(),
+        mShuffleActiveDrawable = ThemeUtils.colorizeBitmapDrawableCopy(getContext(),
                 R.drawable.ic_action_playback_shuffle_white,
-                ThemeHelper.getAccentColor(getContext()));
+                ThemeUtils.getColorAccent(getContext()));
     }
 
     /**

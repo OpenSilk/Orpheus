@@ -22,8 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.widget.ImageButton;
 
-import com.andrew.apollo.utils.ThemeHelper;
-
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.R;
 
@@ -49,7 +48,7 @@ public class PlaybackDrawableTint {
         // dont know why this doesnt work
 //        Drawable d1 = getResources().getDrawable(R.drawable.ic_shuffle_black_36dp);
 //        d1.mutate().setColorFilter(Themer.getColorAccent(getContext()), PorterDuff.Mode.MULTIPLY);
-        Drawable d1 = ThemeHelper.themeDrawable(v.getContext(), active, getColorAccent(v.getContext()));
+        Drawable d1 = ThemeUtils.colorizeBitmapDrawableCopy(v.getContext(), active, getColorAccent(v.getContext()));
         d.addLevel(1, 2, d1);
     }
 
@@ -66,9 +65,9 @@ public class PlaybackDrawableTint {
         int one = is24 ? R.drawable.ic_repeat_one_white_24dp : R.drawable.ic_repeat_one_white_36dp;
         int all = is24 ? R.drawable.ic_repeat_white_24dp : R.drawable.ic_repeat_white_36dp;
         LevelListDrawable d = (LevelListDrawable) v.getDrawable();
-        Drawable d1 = ThemeHelper.themeDrawable(v.getContext(), one, getColorAccent(v.getContext()));
+        Drawable d1 = ThemeUtils.colorizeBitmapDrawableCopy(v.getContext(), one, getColorAccent(v.getContext()));
         d.addLevel(1, 1, d1);
-        Drawable d2 = ThemeHelper.themeDrawable(v.getContext(), all, getColorAccent(v.getContext()));
+        Drawable d2 = ThemeUtils.colorizeBitmapDrawableCopy(v.getContext(), all, getColorAccent(v.getContext()));
         d.addLevel(2, 2, d2);
     }
 

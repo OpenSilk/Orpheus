@@ -20,8 +20,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * Created by drew on 3/16/14.
@@ -41,7 +41,7 @@ public class HeaderOverflowButton extends ImageView {
     public HeaderOverflowButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        boolean isLightTheme = ThemeUtils.isLightTheme(getContext());
         if (isLightTheme) {
             mOverflowDrawable = R.drawable.ic_menu_moreoverflow_normal_holo_light;
         } else {

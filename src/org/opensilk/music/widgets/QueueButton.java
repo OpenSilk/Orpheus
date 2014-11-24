@@ -21,8 +21,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * Created by drew on 3/16/14.
@@ -43,15 +43,18 @@ public class QueueButton extends ImageView {
     public QueueButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        final boolean isLightTheme = ThemeUtils.isLightTheme(getContext());
         if (isLightTheme) {
             mQueueButton = R.drawable.ic_action_queue_holo_light;
         } else {
             mQueueButton = R.drawable.ic_action_queue_holo_dark;
         }
-        mQueueButtonActiveDrawable = ThemeHelper.themeDrawable(getContext(),
-                R.drawable.ic_action_queue_holo_dark,
-                ThemeHelper.getAccentColor(getContext()));
+        mQueueButtonActiveDrawable = ThemeUtils.colorizeBitmapDrawableCopy(
+                    getContext(),
+                    R.drawable.ic_action_queue_holo_dark,
+                    ThemeUtils.getColorAccent(getContext()
+                )
+        );
     }
 
     public void setQueueShowing(boolean showing) {

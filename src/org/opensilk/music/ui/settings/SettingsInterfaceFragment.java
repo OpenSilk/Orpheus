@@ -16,10 +16,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.theme.OrpheusTheme;
 
-import com.andrew.apollo.utils.PreferenceUtils;
-import com.andrew.apollo.utils.ThemeHelper;
-import com.andrew.apollo.utils.ThemeStyle;
-
 import java.util.Locale;
 
 import javax.inject.Inject;

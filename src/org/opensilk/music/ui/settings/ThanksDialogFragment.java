@@ -31,8 +31,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +72,8 @@ public class ThanksDialogFragment extends DialogFragment {
             setContentView(R.layout.settings_thanks_listview);
             setTitle(R.string.settings_special_thanks);
             List<Thankee> thankees = new ArrayList<Thankee>(3);
-            int lastFmRes = ThemeHelper.isLightTheme(getContext()) ? R.drawable.lastfm_logo_light
-                    : R.drawable.lastfm_logo_dark;
+            int lastFmRes = ThemeUtils.isLightTheme(getContext())
+                    ? R.drawable.lastfm_logo_light : R.drawable.lastfm_logo_dark;
             thankees.add(new Thankee(null, getResources().getDrawable(lastFmRes),
                     getString(R.string.settings_thanks_dialog_lfm_desc),
                     getString(R.string.settings_thanks_dialog_lfm_url)));

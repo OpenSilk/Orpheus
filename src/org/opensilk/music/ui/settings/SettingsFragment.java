@@ -7,7 +7,6 @@ import android.preference.PreferenceScreen;
 import android.support.v7.app.ActionBarActivity;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * Created by andrew on 3/1/14.

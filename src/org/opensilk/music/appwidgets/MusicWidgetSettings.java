@@ -33,7 +33,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * Created by andrew on 4/3/14.

@@ -20,8 +20,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * Created by drew on 3/16/14.
@@ -39,7 +39,7 @@ public class PanelFooterLayout extends LinearLayout {
     public PanelFooterLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        final boolean isLightTheme = ThemeUtils.isLightTheme(getContext());
         if (isLightTheme) {
             setBackgroundColor(getResources().getColor(R.color.app_background_light_transparent));
         } else {
@@ -48,7 +48,7 @@ public class PanelFooterLayout extends LinearLayout {
     }
 
     public void updateBackground(int color) {
-        setBackgroundColor(ThemeHelper.setColorAlpha(color, 0xB3)); //70%
+        setBackgroundColor(ThemeUtils.setColorAlpha(color, 0xB3)); //70%
     }
 
 }

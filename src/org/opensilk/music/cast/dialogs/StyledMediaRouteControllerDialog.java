@@ -32,7 +32,6 @@ import org.opensilk.music.AppModule;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.common.dagger.DaggerInjector;
@@ -82,15 +81,15 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
 //        super(context, theme);
         super(context);
         mIsRemotePlayback = true;// MusicUtils.isRemotePlayback();
-        if (ThemeHelper.isLightTheme(context)) {
-            mPauseDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
-            mPlayDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_play_black);
-        } else {
-            mPauseDrawable = ThemeHelper.themeDrawable(context, R.drawable.ic_action_playback_pause_black,
-                    getContext().getResources().getColor(android.R.color.white));
-            mPlayDrawable = ThemeHelper.themeDrawable(context, R.drawable.ic_action_playback_play_black,
-                    getContext().getResources().getColor(android.R.color.white));
-        }
+//        if (ThemeHelper.isLightTheme(context)) {
+//            mPauseDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
+//            mPlayDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_play_black);
+//        } else {
+//            mPauseDrawable = ThemeHelper.themeDrawable(context, R.drawable.ic_action_playback_pause_black,
+//                    getContext().getResources().getColor(android.R.color.white));
+//            mPlayDrawable = ThemeHelper.themeDrawable(context, R.drawable.ic_action_playback_play_black,
+//                    getContext().getResources().getColor(android.R.color.white));
+//        }
 
     }
 

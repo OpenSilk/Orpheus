@@ -28,8 +28,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import butterknife.ButterKnife;
 
@@ -57,7 +57,7 @@ public class PanelHeaderLayout extends FrameLayout {
     public PanelHeaderLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        final boolean isLightTheme = ThemeUtils.isLightTheme(getContext());
         if (isLightTheme) {
             mBackgroundAlpha = LIGHT_BG_ALHPA;
             setBackgroundColor(getResources().getColor(R.color.app_background_light));

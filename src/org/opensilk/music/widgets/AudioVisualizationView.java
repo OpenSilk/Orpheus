@@ -24,7 +24,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.andrew.apollo.utils.ThemeHelper;
+import org.opensilk.common.util.ThemeUtils;
 
 /**
  * Created by andrew on 3/8/14.
@@ -54,7 +54,7 @@ public class AudioVisualizationView extends View {
         mBytes = null;
 
         mForePaint.setAntiAlias(true);
-        final int accentColor = ThemeHelper.getAccentColor(getContext());
+        final int accentColor = ThemeUtils.getColorAccent(getContext());
         mForePaint.setColor(accentColor);
         mForePaint.setAlpha(150);
     }

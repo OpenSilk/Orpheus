@@ -25,8 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.andrew.apollo.utils.ThemeHelper;
-
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 
 /**
@@ -101,9 +100,13 @@ public class ChooserFragment extends Fragment implements
     }
 
     protected void setCheckSelected() {
-        mCheckMark.setImageDrawable(ThemeHelper.themeDrawable(getActivity(),
-                R.drawable.ic_action_tick_white,
-                getResources().getColor(android.R.color.holo_blue_light)));
+        mCheckMark.setImageDrawable(
+                ThemeUtils.colorizeBitmapDrawableCopy(
+                        getActivity(),
+                        R.drawable.ic_action_tick_white,
+                        getResources().getColor(android.R.color.holo_blue_light)
+                )
+        );
     }
 
     protected void setCheckUnSelected() {

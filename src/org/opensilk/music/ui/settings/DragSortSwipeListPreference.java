@@ -17,9 +17,9 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.Lists;
-import com.andrew.apollo.utils.ThemeHelper;
 import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.music.AppPreferences;
@@ -90,8 +90,9 @@ public class DragSortSwipeListPreference extends DialogPreference implements
         listView.setRemoveListener(this);
 
         final Button addButton = (Button) view.findViewById(R.id.add_item);
-        Drawable icon = getContext().getResources().getDrawable(ThemeHelper.isLightTheme(getContext()) ?
-                R.drawable.ic_action_add_light : R.drawable.ic_action_add_dark);
+        Drawable icon = getContext().getResources().getDrawable(
+                ThemeUtils.isLightTheme(getContext()) ? R.drawable.ic_action_add_light : R.drawable.ic_action_add_dark
+        );
         addButton.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,7 +169,7 @@ public class DragSortSwipeListPreference extends DialogPreference implements
 
             ViewHolder holder = (ViewHolder) row.getTag();
             if (holder != null) {
-                holder.handle.setImageResource(ThemeHelper.isLightTheme(getContext())
+                holder.handle.setImageResource(ThemeUtils.isLightTheme(getContext())
                         ? R.drawable.ic_action_drag_light : R.drawable.ic_action_drag_dark);
 
                 holder.text.setText(getContext().getString(

@@ -27,10 +27,11 @@ import android.view.View.OnLongClickListener;
 import android.widget.ImageButton;
 
 import com.andrew.apollo.MusicPlaybackService;
+
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * A custom {@link ImageButton} that represents the "repeat" button.
@@ -53,16 +54,16 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
 
     public RepeatButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        final boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        final boolean isLightTheme = ThemeUtils.isLightTheme(getContext());
         if (isLightTheme) {
             mRepeatDrawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_black);
         } else {
             mRepeatDrawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_white);
         }
-        final int accentColor = ThemeHelper.getAccentColor(getContext());
-        mRepeatAllDrawable = ThemeHelper.themeDrawable(getContext(),
+        final int accentColor = ThemeUtils.getColorAccent(getContext());
+        mRepeatAllDrawable = ThemeUtils.colorizeBitmapDrawableCopy(getContext(),
                 R.drawable.ic_action_playback_repeat_white, accentColor);
-        mRepeatOneDrawable = ThemeHelper.themeDrawable(getContext(),
+        mRepeatOneDrawable = ThemeUtils.colorizeBitmapDrawableCopy(getContext(),
                 R.drawable.ic_action_playback_repeat_1_black, accentColor);
         setOnClickListener(this);
         setOnLongClickListener(this);

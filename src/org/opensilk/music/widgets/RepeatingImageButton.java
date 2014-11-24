@@ -27,10 +27,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * A {@link ImageButton} that will repeatedly call a 'listener' method as long
@@ -57,7 +57,7 @@ public class RepeatingImageButton extends ImageButton implements OnClickListener
 
     public RepeatingImageButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        boolean isLightTheme = ThemeHelper.isLightTheme(getContext());
+        boolean isLightTheme = ThemeUtils.isLightTheme(getContext());
         if (isLightTheme) {
             mNextDrawable = getResources().getDrawable(R.drawable.ic_action_playback_next_black);
             mPrevDrawable = getResources().getDrawable(R.drawable.ic_action_playback_prev_black);

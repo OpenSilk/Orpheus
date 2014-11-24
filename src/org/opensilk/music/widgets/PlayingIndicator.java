@@ -31,8 +31,8 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
 import android.widget.ImageView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 /**
  * ImageView with spinning drawable
@@ -72,7 +72,7 @@ public class PlayingIndicator extends ImageView {
     }
 
     protected void init() {
-        if (ThemeHelper.isLightTheme(getContext())) {
+        if (ThemeUtils.isLightTheme(getContext())) {
             setImageResource(R.drawable.playing_indicator_light);
         } else {
             setImageResource(R.drawable.playing_indicator_dark);

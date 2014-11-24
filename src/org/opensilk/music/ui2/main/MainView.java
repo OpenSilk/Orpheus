@@ -30,8 +30,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
-import com.andrew.apollo.utils.ThemeHelper;
-
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.util.VersionUtils;
 import org.opensilk.common.widget.FloatingActionButtonCheckable;

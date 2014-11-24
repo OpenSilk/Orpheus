@@ -15,8 +15,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,7 +127,7 @@ public class SettingsMainFragment extends Fragment {
             View v = view;
             ImageView icon;
             TextView title;
-            boolean light = ThemeHelper.isLightTheme(mContext);
+            boolean light = ThemeUtils.isLightTheme(mContext);
             if (v == null) {
                 v = mInflater.inflate(R.layout.settings_grid_item, parent, false);
 //                v.setBackgroundColor(light ? Color.WHITE : Color.BLACK);
