@@ -26,7 +26,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.WindowManager;
 
-import com.bugsense.trace.BugSenseHandler;
+import com.splunk.mint.Mint;
 
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
@@ -37,6 +37,8 @@ import org.opensilk.common.dagger.DaggerInjector;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.inject.Inject;
 
 import dagger.ObjectGraph;
 import mortar.Mortar;
@@ -71,19 +73,16 @@ public class MusicApp extends Application implements DaggerInjector {
 
     protected MortarScope mRootScope;
 
+    @Inject AppPreferences mSettings;
+
     @Override
     //@DebugLog
     public void onCreate() {
         super.onCreate();
 
-        if (DEBUG) {
-//            BugSenseHandler.initAndStartSession(this, "751fd228");
-        } else {
-            BugSenseHandler.initAndStartSession(this, "7c67fe46");
-        }
-
         setupDagger();
         setupMortar();
+        inject(this);
 
         if (DEBUG) {
             // Plant the forest
@@ -111,6 +110,14 @@ public class MusicApp extends Application implements DaggerInjector {
          */
         // Enable strict mode logging
         enableStrictMode();
+
+
+        if (DEBUG) {
+//            BugSenseHandler.initAndStartSession(this, "751fd228");
+        } else if (mSettings.getBoolean(AppPreferences.SEND_CRASH_REPORTS, true)) {
+            Mint.initAndStartSession(this, "7c67fe46");
+        }
+
     }
 
     protected void setupDagger() {
@@ -209,7 +216,7 @@ public class MusicApp extends Application implements DaggerInjector {
 
         private static void sendException(Throwable t, String message, Object... args) {
             try {
-                BugSenseHandler.sendExceptionMessage(createTag(), formatString(message, args), new Exception(t));
+                Mint.logException(new Exception(createTag() + ": " + formatString(message, args), t));
             } catch (Exception ignored) {/*safety*/}
         }
 

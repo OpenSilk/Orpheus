@@ -24,6 +24,12 @@
             </intent>
         </Preference>
 
+        <CheckBoxPreference
+            android:key="send_crash_reports"
+            android:title="@string/settings_send_crash_reports"
+            android:summary="@string/settings_send_crash_reports_summary"
+            android:defaultValue="true"/>
+
         <Preference
             android:key="pref_version"
             android:title="@string/settings_version_title" />

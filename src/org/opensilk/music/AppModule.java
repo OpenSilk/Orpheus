@@ -28,7 +28,8 @@ import dagger.Provides;
  */
 @Module (
         library = true,
-        addsTo = GlobalModule.class
+        addsTo = GlobalModule.class,
+        injects = MusicApp.class
 )
 public class AppModule {
 
