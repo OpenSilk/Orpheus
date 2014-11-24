@@ -12,7 +12,6 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.ui.activities.ActivityModule;
 import org.opensilk.music.ui2.BaseActivity;
 import org.opensilk.common.dagger.DaggerInjector;
 

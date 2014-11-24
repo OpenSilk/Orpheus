@@ -230,33 +230,35 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
 
     void handleIntent() {
         Intent intent = getIntent();
-        Uri uri = intent.getData();
-        String mimeType = intent.getType();
-        boolean handled = false;
-        if (uri != null && uri.toString().length() > 0) {
-            mMusicService.playFile(uri);
-            handled = true;
-        } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
-            long id = intent.getLongExtra("playlistId", -1);
-            if (id < 0) {
-                String idString = intent.getStringExtra("playlist");
-                if (idString != null) {
-                    try {
-                        id = Long.parseLong(idString);
-                    } catch (NumberFormatException ignored) { }
+        final String action = intent.getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            final Uri uri = intent.getData();
+            final String mimeType = intent.getType();
+            Timber.i("action=%s, mimeType=%s, uri=%s", action, uri != null ? uri : "null", mimeType);
+            boolean handled = false;
+            if (uri != null && uri.toString().length() > 0) {
+                mMusicService.playFile(uri);
+                handled = true;
+            } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
+                long id = intent.getLongExtra("playlistId", -1);
+                if (id < 0) {
+                    String idString = intent.getStringExtra("playlist");
+                    if (idString != null) {
+                        try {
+                            id = Long.parseLong(idString);
+                        } catch (NumberFormatException ignored) { }
+                    }
+                }
+                if (id >= 0) {
+                    mMusicService.playPlaylist(getApplicationContext(), id, false);
+                    handled = true;
                 }
             }
-            if (id >= 0) {
-                mMusicService.playPlaylist(getApplicationContext(), id, false);
-                handled = true;
+            if (!handled) {
+                mBus.post(new MakeToast(R.string.err_generic));
             }
         }
-        if (handled) {
-            getIntent().setData(null);
-            getIntent().setType(null);
-        } else {
-            mBus.post(new MakeToast(R.string.err_generic));
-        }
+        intent.setAction(null);
     }
 
     /*
