@@ -210,7 +210,7 @@ public class PluginScreen extends Screen {
             PluginView v = getView();
             if (v == null) return;
             LibraryScreen screen = new LibraryScreen(pluginInfo, pluginConfig, libraryInfo);
-            AppFlow.get(v.getContext()).goTo(screen);
+            AppFlow.get(v.getContext()).replaceTo(screen);
         }
 
         void setupActionBar() {
