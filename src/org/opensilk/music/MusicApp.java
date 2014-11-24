@@ -20,14 +20,12 @@ package org.opensilk.music;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.StrictMode;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.WindowManager;
 
-import org.opensilk.music.BuildConfig;
-import com.andrew.apollo.utils.MusicUtils;
 import com.bugsense.trace.BugSenseHandler;
 
 import org.opensilk.cast.manager.MediaCastManager;
@@ -51,24 +49,15 @@ import timber.log.Timber;
 public class MusicApp extends Application implements DaggerInjector {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
-    /**
-     * Maximum size for artwork, this will be smallest screen width
-     */
+    /** Largest size of artwork */
+    public static final int MAX_ARTWORK_SIZE_DP = 720;
+    /** Largest size of any thumbnail displayed */
+    public static final int DEFAULT_THUMBNAIL_SIZE_DP = 200;
+    /** Maximum size for artwork, this will be smallest screen width */
     public static int sDefaultMaxImageWidthPx;
-
-    /**
-     * Largest size of any thumbnail displayed
-     */
-    public static int DEFAULT_THUMBNAIL_SIZE_DP = 200;
-
-    /**
-     * Largest size a thumbnail will be
-     */
+    /** Largest size a thumbnail will be */
     public static int sDefaultThumbnailWidthPx;
-
-    /**
-     * Disable some features depending on device type
-     */
+    /** Disable some features depending on device type */
     public static boolean sIsLowEndHardware;
 
     /**
@@ -106,7 +95,10 @@ public class MusicApp extends Application implements DaggerInjector {
         /*
          * Init global static variables
          */
-        sDefaultMaxImageWidthPx = getMinDisplayWidth(getApplicationContext());
+        sDefaultMaxImageWidthPx = Math.min(
+                getMinDisplayWidth(getApplicationContext()),
+                convertDpToPx(getApplicationContext(), MAX_ARTWORK_SIZE_DP)
+        );
         sDefaultThumbnailWidthPx = convertDpToPx(getApplicationContext(), DEFAULT_THUMBNAIL_SIZE_DP);
         sIsLowEndHardware = isLowEndHardware(getApplicationContext());
 
@@ -170,24 +162,15 @@ public class MusicApp extends Application implements DaggerInjector {
         }
     }
 
-    /**
-     * Converts given dp value to density specific pixel value
-     * @param context
-     * @param dp
-     * @return
-     */
+    /** Converts given dp value to density specific pixel value */
     public static int convertDpToPx(Context context, float dp) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics metrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(metrics);
-        return Math.round(dp * (metrics.densityDpi / 160f));
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
     }
 
-    /**
-     * Returns smallest screen dimension
-     * @param context
-     * @return
-     */
+    /** Returns smallest screen dimension */
     public static int getMinDisplayWidth(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 //        Point size = new Point();
