@@ -30,6 +30,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.IBinder;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.RemoteViews;
@@ -233,13 +234,11 @@ public class MusicWidgetService extends Service {
                 }
         }
 
-        // create a new theme to extract the primary color
-        Resources.Theme theme = getResources().newTheme();
         OrpheusTheme orpheusTheme = mSettings.getTheme();
-        final int themeRes =
-                mSettings.getBoolean(AppPreferences.WANT_DARK_THEME, false) ? orpheusTheme.dark : orpheusTheme.light;
-        theme.applyStyle(themeRes, true);
-        final int themeColor = ThemeUtils.getThemeAttrColor(theme, R.attr.colorPrimary);
+        final int themeRes = mSettings.getBoolean(AppPreferences.WANT_DARK_THEME, false)
+                ? orpheusTheme.dark : orpheusTheme.light;
+        Context themedContext = new ContextThemeWrapper(this, themeRes);
+        final int themeColor = ThemeUtils.getThemeAttrColor(themedContext, R.attr.colorPrimary);
 
         RemoteViews views = new RemoteViews(getPackageName(), layoutId);
 

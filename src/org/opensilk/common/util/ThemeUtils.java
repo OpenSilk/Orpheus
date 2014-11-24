@@ -100,17 +100,13 @@ public class ThemeUtils {
      */
 
     public static int getThemeAttrColor(Context context, int attr) {
-        return getThemeAttrColor(context.getTheme(), attr);
-    }
-
-    public static int getThemeAttrColor(Resources.Theme theme, int attr) {
         synchronized (sTypedValue) {
-            if (theme.resolveAttribute(attr, sTypedValue, true)) {
+            if (context.getTheme().resolveAttribute(attr, sTypedValue, true)) {
                 if (sTypedValue.type >= TypedValue.TYPE_FIRST_INT
                         && sTypedValue.type <= TypedValue.TYPE_LAST_INT) {
                     return sTypedValue.data;
                 } else if (sTypedValue.type == TypedValue.TYPE_STRING) {
-                    return theme.getResources().getColor(sTypedValue.resourceId);
+                    return context.getResources().getColor(sTypedValue.resourceId);
                 }
             }
         }
