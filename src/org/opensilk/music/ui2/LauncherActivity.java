@@ -36,7 +36,7 @@ import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.bus.events.IABQueryResult;
+import org.opensilk.music.iab.event.IABQueryResult;
 import com.andrew.apollo.menu.SleepTimerDialog;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.theme.OrpheusTheme;

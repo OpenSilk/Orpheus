@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.bus.events;
+package org.opensilk.music.iab.event;
 
 /**
  * Created by drew on 4/26/14.

@@ -10,7 +10,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.PreferenceUtils;
 
-import org.opensilk.music.bus.events.IABQueryResult;
+import org.opensilk.music.iab.event.IABQueryResult;
 import org.opensilk.music.ui.settings.SettingsActivity;
 
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public class IabUtil {
 
     /**
      * Checks if user has purchases
-     * posts a {@link org.opensilk.music.bus.events.IABQueryResult}
+     * posts a {@link org.opensilk.music.iab.event.IABQueryResult}
      * to the global event bus with purchase status
      */
     public static void queryDonateAsync(Context context, final EventBus bus) {
