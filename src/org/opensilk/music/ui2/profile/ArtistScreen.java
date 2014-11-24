@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
@@ -34,7 +33,6 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.LauncherActivity;
-import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -50,7 +48,6 @@ import javax.inject.Singleton;
 import dagger.Provides;
 import flow.HasParent;
 import flow.Layout;
-import rx.Observable;
 import rx.functions.Func1;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
@@ -189,9 +186,10 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
         void setupActionbar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder(getCommonConfig())
-                            .withMenuConfig(
+                            .setMenuConfig(
                                     new ActionBarOwner.MenuConfig.Builder()
-                                            .withMenus(getMenus())
+                                            .withMenus(R.menu.artist_album_sort_by)
+                                            .withMenus(OverflowHandlers.LocalArtists.MENUS)
                                             .setActionHandler(new Func1<Integer, Boolean>() {
                                                 @Override
                                                 public Boolean call(Integer integer) {
@@ -224,13 +222,6 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
             );
         }
 
-        int[] getMenus() {
-            int m[] = new int[] {
-                    R.menu.artist_album_sort_by,
-            };
-            int m2[] = OverflowHandlers.LocalArtists.MENUS;
-            return concatArrays(m, m2);
-        }
     }
 
 }

@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
@@ -33,7 +32,6 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.LauncherActivity;
-import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -50,7 +48,6 @@ import dagger.Provides;
 import flow.HasParent;
 import flow.Layout;
 import mortar.ViewPresenter;
-import rx.Observable;
 import rx.Subscription;
 import rx.functions.Func1;
 
@@ -171,19 +168,16 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
 
         void setupActionBar() {
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder(getCommonConfig())
-                            .withMenuConfig(makeMenuConfig())
+                            .setMenuConfig(makeMenuConfig())
                             .build()
             );
         }
 
         ActionBarOwner.MenuConfig makeMenuConfig() {
             ActionBarOwner.MenuConfig.Builder b = new ActionBarOwner.MenuConfig.Builder();
-            int[] c = OverflowHandlers.Playlists.MENUS_COMMON;
-            int[] u = OverflowHandlers.Playlists.MENUS_USER;
-            if (isLastAdded()) {
-                b.withMenus(c);
-            } else {
-                b.withMenus(concatArrays(c, u));
+            b.withMenus(OverflowHandlers.Playlists.MENUS_COMMON);
+            if (!isLastAdded()) {
+                b.withMenus(OverflowHandlers.Playlists.MENUS_USER);
             }
             b.setActionHandler(new Func1<Integer, Boolean>() {
                 @Override

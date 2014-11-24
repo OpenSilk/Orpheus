@@ -17,17 +17,14 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.view.View;
-
 import com.andrew.apollo.model.LocalAlbum;
-import com.andrew.apollo.utils.NavUtils;
+
 import org.opensilk.music.util.SortOrder;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -48,8 +45,6 @@ import dagger.Provides;
 import flow.Layout;
 import hugo.weaving.DebugLog;
 import mortar.ViewPresenter;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;
 

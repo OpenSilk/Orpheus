@@ -17,14 +17,11 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.view.View;
-
 import com.andrew.apollo.model.LocalSong;
 import org.opensilk.music.util.SortOrder;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
-import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -161,7 +158,6 @@ public class SongsScreen extends Screen {
 
         Adapter(BasePresenter<LocalSong> presenter, ArtworkRequestManager artworkRequestor) {
             super(presenter, artworkRequestor);
-            setGridStyle(true);
         }
 
         @Override

@@ -115,22 +115,23 @@ public class GalleryScreen extends Screen {
             if (delegateActionHandler == null) {
                 delegateActionHandler = new DelegateActionHandler();
             }
-            int[] menus;
+            ActionBarOwner.MenuConfig.Builder builder = new ActionBarOwner.MenuConfig.Builder();
+
+            builder.setActionHandler(delegateActionHandler);
+            builder.withMenus(R.menu.shuffle, R.menu.search);
+
             if (menuConfig != null) {
                 delegateActionHandler.setDelegate(menuConfig.actionHandler);
-                menus = new int[menuConfig.menus.length+2];
-                menus[0] = R.menu.shuffle;
-                menus[1] = R.menu.search;
-                System.arraycopy(menuConfig.menus, 0, menus, 2, menuConfig.menus.length);
+                if (menuConfig.menus.length > 0) {
+                    builder.withMenus(menuConfig.menus);
+                }
             } else {
                 delegateActionHandler.setDelegate(null);
-                menus = new int[] { R.menu.shuffle, R.menu.search};
             }
+
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
                 .setTitle(R.string.my_library)
-                .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                    .withMenus(menus)
-                    .setActionHandler(delegateActionHandler).build())
+                .setMenuConfig(builder.build())
                 .build());
         }
 

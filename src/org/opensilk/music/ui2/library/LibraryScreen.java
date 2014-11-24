@@ -47,9 +47,6 @@ import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -307,57 +304,44 @@ public class LibraryScreen extends Screen {
                                     !TextUtils.isEmpty(libraryInfo.folderName)
                                             ? libraryInfo.folderName : libraryInfo.libraryName
                             )
-                            .withMenuConfig(createMenuConfig())
+                            .setMenuConfig(createMenuConfig())
                             .build()
             );
         }
 
         ActionBarOwner.MenuConfig createMenuConfig() {
-            List<Integer> menus = new ArrayList<>();
-            List<ActionBarOwner.CustomMenuItem> customMenus = new ArrayList<>();
+            ActionBarOwner.MenuConfig.Builder builder = new ActionBarOwner.MenuConfig.Builder();
 
             // Common items
-            for (int ii : LibraryOverflowHandlers.Bundleables.MENUS_COLLECTION) {
-                menus.add(ii);
-            }
+            builder.withMenus(LibraryOverflowHandlers.Bundleables.MENUS_COLLECTION);
 
             // search
             if (pluginConfig.hasAbility(PluginConfig.SEARCHABLE)) {
-                menus.add(R.menu.search);
+                builder.withMenus(R.menu.search);
             }
 
             // device selection
             String selectName = pluginConfig.getMeta(PluginConfig.META_MENU_NAME_PICKER);
             if (!TextUtils.isEmpty(selectName)) {
-                customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_change_source, selectName));
+                builder.withMenus(new ActionBarOwner.CustomMenuItem(R.id.menu_change_source, selectName));
             } else {
-                menus.add(R.menu.library_change_source);
+                builder.withMenus(R.menu.library_change_source);
             }
 
             // library settings
             if (pluginConfig.hasAbility(PluginConfig.SETTINGS)) {
                 String settingsName = pluginConfig.getMeta(PluginConfig.META_MENU_NAME_SETTINGS);
                 if (!TextUtils.isEmpty(settingsName)) {
-                    customMenus.add(new ActionBarOwner.CustomMenuItem(R.id.menu_library_settings, settingsName));
+                    builder.withMenus(new ActionBarOwner.CustomMenuItem(R.id.menu_library_settings, settingsName));
                 } else {
-                    menus.add(R.menu.library_settings);
+                    builder.withMenus(R.menu.library_settings);
                 }
             }
 
-            int[] menusArray;
-            if (!menus.isEmpty()) {
-                menusArray = toArray(menus);
-            } else {
-                menusArray = new int[0];
-            }
-            ActionBarOwner.CustomMenuItem[] customMenuArray;
-            if (!customMenus.isEmpty()) {
-                customMenuArray = customMenus.toArray(new ActionBarOwner.CustomMenuItem[customMenus.size()]);
-            } else {
-                customMenuArray = new ActionBarOwner.CustomMenuItem[0];
-            }
+            //set handler
+            builder.setActionHandler(createMenuActionHandler());
 
-            return new ActionBarOwner.MenuConfig(createMenuActionHandler(), menusArray, customMenuArray);
+            return builder.build();
         }
 
         Func1<Integer, Boolean> createMenuActionHandler() {
@@ -397,16 +381,6 @@ public class LibraryScreen extends Screen {
                     }
                 }
             };
-        }
-
-        static int[] toArray(Collection<Integer> collection) {
-            Object[] boxedArray = collection.toArray();
-            int len = boxedArray.length;
-            int[] array = new int[len];
-            for (int i = 0; i < len; i++) {
-                array[i] = ((Integer) boxedArray[i]).intValue();
-            }
-            return array;
         }
 
         class ResultObserver implements Observer<LibraryConnection.Result> {

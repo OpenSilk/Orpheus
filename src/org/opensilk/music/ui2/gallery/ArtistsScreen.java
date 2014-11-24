@@ -17,18 +17,15 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.view.View;
-
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
+
 import org.opensilk.music.util.SortOrder;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -48,8 +45,6 @@ import javax.inject.Singleton;
 import dagger.Provides;
 import flow.Layout;
 import mortar.ViewPresenter;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;
 
@@ -128,33 +123,33 @@ public class ArtistsScreen extends Screen {
                 actionBarMenu = new ActionBarOwner.MenuConfig.Builder()
                         .withMenus(R.menu.artist_sort_by, R.menu.view_as)
                         .setActionHandler(new Func1<Integer, Boolean>() {
-                              @Override
-                              public Boolean call(Integer integer) {
-                                  switch (integer) {
-                                      case R.id.menu_sort_by_az:
-                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_A_Z);
-                                          return true;
-                                      case R.id.menu_sort_by_za:
-                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_Z_A);
-                                          return true;
-                                      case R.id.menu_sort_by_number_of_songs:
-                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_SONGS);
-                                          return true;
-                                      case R.id.menu_sort_by_number_of_albums:
-                                          setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_ALBUMS);
-                                          return true;
-                                      case R.id.menu_view_as_simple:
-                                          preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.SIMPLE);
-                                          resetRecyclerView();
-                                          return true;
-                                      case R.id.menu_view_as_grid:
-                                          preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.GRID);
-                                          resetRecyclerView();
-                                          return true;
-                                      default:
-                                          return false;
-                                  }
-                              }
+                            @Override
+                            public Boolean call(Integer integer) {
+                                switch (integer) {
+                                    case R.id.menu_sort_by_az:
+                                        setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_A_Z);
+                                        return true;
+                                    case R.id.menu_sort_by_za:
+                                        setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_Z_A);
+                                        return true;
+                                    case R.id.menu_sort_by_number_of_songs:
+                                        setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_SONGS);
+                                        return true;
+                                    case R.id.menu_sort_by_number_of_albums:
+                                        setNewSortOrder(SortOrder.ArtistSortOrder.ARTIST_NUMBER_OF_ALBUMS);
+                                        return true;
+                                    case R.id.menu_view_as_simple:
+                                        preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.SIMPLE);
+                                        resetRecyclerView();
+                                        return true;
+                                    case R.id.menu_view_as_grid:
+                                        preferences.putString(AppPreferences.ARTIST_LAYOUT, AppPreferences.GRID);
+                                        resetRecyclerView();
+                                        return true;
+                                    default:
+                                        return false;
+                                }
+                            }
                         })
                         .build();
             }

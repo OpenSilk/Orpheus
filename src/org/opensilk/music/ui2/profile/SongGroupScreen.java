@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.LocalSongGroup;
@@ -32,7 +31,6 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.LauncherActivity;
-import org.opensilk.music.ui2.ProfileActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -49,7 +47,6 @@ import javax.inject.Singleton;
 import dagger.Provides;
 import flow.HasParent;
 import flow.Layout;
-import rx.Observable;
 import rx.functions.Func1;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
@@ -196,8 +193,9 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder(getCommonConfig())
-                            .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                                            .withMenus(getMenus())
+                            .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
+                                            .withMenus(R.menu.song_sort_by)
+                                            .withMenus(OverflowHandlers.LocalSongGroups.MENUS)
                                             .setActionHandler(new Func1<Integer, Boolean>() {
                                                 @Override
                                                 public Boolean call(Integer integer) {
@@ -242,13 +240,6 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
             );
         }
 
-        int[] getMenus() {
-            int m[] = new int[] {
-                    R.menu.song_sort_by,
-            };
-            int m2[] = OverflowHandlers.LocalSongGroups.MENUS;
-            return concatArrays(m, m2);
-        }
     }
 
 }

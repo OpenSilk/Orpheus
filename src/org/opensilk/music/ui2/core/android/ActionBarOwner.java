@@ -17,15 +17,11 @@
 
 package org.opensilk.music.ui2.core.android;
 
-import android.app.Notification;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.Menu;
-import android.view.MenuItem;
 
 import org.opensilk.common.mortar.HasScope;
-
-import java.util.HashMap;
+import org.opensilk.common.util.Preconditions;
 
 import javax.inject.Singleton;
 
@@ -37,16 +33,12 @@ import rx.functions.Func1;
 /** Allows shared configuration of the Android ActionBar. */
 public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
 
-    @dagger.Module(
-        library = true
-    )
+    @dagger.Module(library = true)
     public static class Module {
         @Provides @Singleton ActionBarOwner provideActionBarOwner() { return new ActionBarOwner(); }
     }
 
     public interface Activity extends HasScope {
-//        void setShowHomeEnabled(boolean enabled);
-
         void setUpButtonEnabled(boolean enabled);
 
         void setTitle(int titleRes);
@@ -61,7 +53,6 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
     }
 
     public static class Config {
-        public final boolean showHomeEnabled;
         public final boolean upButtonEnabled;
         public final int titleRes;
         public final CharSequence title;
@@ -70,11 +61,13 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         public final MenuConfig menuConfig;
         public final boolean transparentBackground;
 
-        private Config(boolean showHomeEnabled, boolean upButtonEnabled,
-                      int titleRes, CharSequence title, int subtitleRes,
-                      CharSequence subtitle, MenuConfig menuConfig,
+        private Config(boolean upButtonEnabled,
+                      int titleRes,
+                      CharSequence title,
+                      int subtitleRes,
+                      CharSequence subtitle,
+                      MenuConfig menuConfig,
                       boolean transparentBackground) {
-            this.showHomeEnabled = showHomeEnabled;
             this.upButtonEnabled = upButtonEnabled;
             this.titleRes = titleRes;
             this.title = title;
@@ -89,7 +82,6 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         }
 
         public static class Builder {
-            private boolean setHomeEnabled = true;
             private boolean setUpButtonEnabled = false;
             private int titleRes = -1;
             private CharSequence title = null;
@@ -102,7 +94,6 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
             }
 
             public Builder(Config config) {
-                setHomeEnabled = config.showHomeEnabled;
                 setUpButtonEnabled = config.upButtonEnabled;
                 titleRes = config.titleRes;
                 title = config.title;
@@ -111,11 +102,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
                 menuConfig = config.menuConfig;
                 trasparentBackground = config.transparentBackground;
             }
-            public Builder showHomeEnabled(boolean enabled) {
-                setHomeEnabled = enabled;
-                return this;
-            }
-            public Builder upButtonEnabled(boolean enabled) {
+            public Builder setUpButtonEnabled(boolean enabled) {
                 setUpButtonEnabled = enabled;
                 return this;
             }
@@ -135,7 +122,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
                 this.subtitle = subtitle;
                 return this;
             }
-            public Builder withMenuConfig(MenuConfig menuConfig) {
+            public Builder setMenuConfig(MenuConfig menuConfig) {
                 this.menuConfig = menuConfig;
                 return this;
             }
@@ -144,9 +131,8 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
                 return this;
             }
             public Config build() {
-                return new Config(setHomeEnabled, setUpButtonEnabled,
-                        titleRes, title, subtitleRes, subtitle,
-                        menuConfig, trasparentBackground);
+                return new Config(setUpButtonEnabled,titleRes, title,
+                        subtitleRes, subtitle, menuConfig, trasparentBackground);
             }
         }
     }
@@ -156,13 +142,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         public final int[] menus;
         public final CustomMenuItem[] customMenus;
 
-        public MenuConfig(Func1<Integer, Boolean> actionHandler, int... menus) {
-            this.actionHandler = actionHandler;
-            this.menus = menus;
-            customMenus = new CustomMenuItem[0];
-        }
-
-        public MenuConfig(Func1<Integer, Boolean> actionHandler,
+        private MenuConfig(Func1<Integer, Boolean> actionHandler,
                           int[] menus, CustomMenuItem[] customMenus) {
             this.actionHandler = actionHandler;
             this.menus = menus;
@@ -179,14 +159,15 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
                 return this;
             }
             public Builder withMenus(int... menus) {
-                this.menus = menus;
+                this.menus = concatArrays(this.menus, menus);
                 return this;
             }
-            public Builder withCustomMenus(CustomMenuItem... customMenus) {
-                this.customMenus = customMenus;
+            public Builder withMenus(CustomMenuItem... customMenus) {
+                this.customMenus = concatArrays(this.customMenus, customMenus);
                 return this;
             }
             public MenuConfig build() {
+                Preconditions.checkNotNull(actionHandler, "Must set actionHandler");
                 return new MenuConfig(actionHandler, menus, customMenus);
             }
         }
@@ -221,6 +202,10 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
     ActionBarOwner() {
     }
 
+    @Override protected MortarScope extractScope(Activity view) {
+        return view.getScope();
+    }
+
     @Override public void onLoad(Bundle savedInstanceState) {
         if (config != null) update();
     }
@@ -234,14 +219,9 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         return config;
     }
 
-    @Override protected MortarScope extractScope(Activity view) {
-        return view.getScope();
-    }
-
     private void update() {
         Activity view = getView();
         if (view == null) return;
-//        view.setShowHomeEnabled(config.showHomeEnabled);
         view.setUpButtonEnabled(config.upButtonEnabled);
         if (config.titleRes >= 0) {
             view.setTitle(config.titleRes);
@@ -255,5 +235,23 @@ public class ActionBarOwner extends Presenter<ActionBarOwner.Activity> {
         }
         view.setMenu(config.menuConfig);
         view.setTransparentActionbar(config.transparentBackground);
+    }
+
+    protected static int[] concatArrays(int[] a1, int[] a2) {
+        if (a1.length == 0) return a2;
+        if (a2.length == 0) return a1;
+        int a3[] = new int[a1.length + a2.length];
+        System.arraycopy(a1, 0, a3, 0, a1.length);
+        System.arraycopy(a2, 0, a3, a1.length, a2.length);
+        return a3;
+    }
+
+    protected static CustomMenuItem[] concatArrays(CustomMenuItem[] a1, CustomMenuItem[] a2) {
+        if (a1.length == 0) return a2;
+        if (a2.length == 0) return a1;
+        CustomMenuItem a3[] = new CustomMenuItem[a1.length + a2.length];
+        System.arraycopy(a1, 0, a3, 0, a1.length);
+        System.arraycopy(a2, 0, a3, a1.length, a2.length);
+        return a3;
     }
 }

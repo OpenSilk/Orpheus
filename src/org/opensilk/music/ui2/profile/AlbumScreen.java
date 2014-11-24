@@ -49,7 +49,6 @@ import javax.inject.Singleton;
 import dagger.Provides;
 import flow.HasParent;
 import flow.Layout;
-import rx.Observable;
 import rx.functions.Func1;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
@@ -193,9 +192,10 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder(getCommonConfig())
-                            .withMenuConfig(
+                            .setMenuConfig(
                                     new ActionBarOwner.MenuConfig.Builder()
-                                            .withMenus(getMenus())
+                                            .withMenus(R.menu.album_song_sort_by)
+                                            .withMenus(OverflowHandlers.LocalAlbums.MENUS)
                                             .setActionHandler(new Func1<Integer, Boolean>() {
                                                 @Override
                                                 public Boolean call(Integer integer) {
@@ -232,14 +232,6 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
                             )
                             .build()
             );
-        }
-
-        int[] getMenus() {
-            int m[] = new int[] {
-                    R.menu.album_song_sort_by,
-            };
-            int m2[] = OverflowHandlers.LocalAlbums.MENUS;
-            return concatArrays(m, m2);
         }
 
     }

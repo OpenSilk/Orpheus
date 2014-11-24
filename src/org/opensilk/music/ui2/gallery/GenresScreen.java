@@ -18,22 +18,18 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
-import android.view.View;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.common.widget.LetterTileDrawable;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
@@ -46,8 +42,6 @@ import javax.inject.Singleton;
 import dagger.Provides;
 import flow.Layout;
 import mortar.ViewPresenter;
-import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 
 /**

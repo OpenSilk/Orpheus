@@ -276,8 +276,8 @@ public class QueueScreen extends Screen {
         void setupActionBar() {
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
                     .setTitle(R.string.title_queue)
-                    .upButtonEnabled(true)
-                    .withMenuConfig(new ActionBarOwner.MenuConfig.Builder()
+                    .setUpButtonEnabled(true)
+                    .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
                             .withMenus(R.menu.panel_save_queue, R.menu.panel_clear_queue)
                             .setActionHandler(new Func1<Integer, Boolean>() {
                                 @Override
@@ -300,7 +300,8 @@ public class QueueScreen extends Screen {
                                             return true;
                                         case R.id.panel_menu_clear_queue:
                                             musicService.clearQueue();
-                                            if (getView() != null) AppFlow.get(getView().getContext()).goBack();
+                                            if (getView() != null)
+                                                AppFlow.get(getView().getContext()).goBack();
                                             return true;
                                         default:
                                             return false;
