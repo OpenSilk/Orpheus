@@ -73,24 +73,12 @@ import java.util.WeakHashMap;
  */
 public final class MusicUtils {
 
-    public static IApolloService sService = null;
-
     private static int sForegroundActivities = 0;
-
-    private static final long[] sEmptyList;
-    private static final Song[] sEmptySongList;
-    private static final LocalSong[] sEmptyLocalSongList;
 
     private static ContentValues[] mContentValuesCache = null;
 
-    static {
-        sEmptyList = new long[0];
-        sEmptySongList = new Song[0];
-        sEmptyLocalSongList = new LocalSong[0];
-    }
-
     /* This class is never initiated */
-    public MusicUtils() {
+    private MusicUtils() {
     }
 
     /**
@@ -103,7 +91,7 @@ public final class MusicUtils {
      * @return A {@link String} used as a label for the number of artists,
      *         albums, songs, genres, and playlists.
      */
-    public static final String makeLabel(final Context context, final int pluralInt,
+    public static String makeLabel(final Context context, final int pluralInt,
             final int number) {
         return context.getResources().getQuantityString(pluralInt, number, number);
     }
@@ -115,7 +103,7 @@ public final class MusicUtils {
      * @param secs The track in seconds.
      * @return Duration of a track that's properly formatted.
      */
-    public static final String makeTimeString(final Context context, long secs) {
+    public static String makeTimeString(final Context context, long secs) {
         long hours, mins;
 
         hours = secs / 3600;
@@ -129,26 +117,14 @@ public final class MusicUtils {
     }
 
     /**
-     * Changes to the next track
-     */
-    public static void next() {
-        try {
-            if (sService != null) {
-                sService.next();
-            }
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    /**
      * Changes to the previous track.
      *
      * @NOTE The AIDL isn't used here in order to properly use the previous
      *       action. When the user is shuffling, because {@link
-     *       MusicPlaybackService.#openCurrentAndNext()} is used, the user won't
+     *       MusicPlaybackService#openCurrentAndNext()} is used, the user won't
      *       be able to travel to the previously skipped track. To remedy this,
-     *       {@link MusicPlaybackService.#openCurrent()} is called in {@link
-     *       MusicPlaybackService.#prev()}. {@code #startService(Intent intent)}
+     *       {@link MusicPlaybackService#openCurrent()} is called in {@link
+     *       MusicPlaybackService#prev()}. {@code #startService(Intent intent)}
      *       is called here to specifically invoke the onStartCommand used by
      *       {@link MusicPlaybackService}, which states if the current position
      *       less than 2000 ms, start the track over, otherwise move to the
@@ -161,683 +137,13 @@ public final class MusicUtils {
     }
 
     /**
-     * Plays or pauses the music.
-     */
-    public static void playOrPause() {
-        try {
-            if (sService != null) {
-                if (sService.isPlaying()) {
-                    sService.pause();
-                } else {
-                    sService.play();
-                }
-            }
-        } catch (final Exception ignored) {
-        }
-    }
-
-    /**
-     * Cycles through the repeat options.
-     */
-    public static void cycleRepeat() {
-        try {
-            if (sService != null) {
-                switch (sService.getRepeatMode()) {
-                    case MusicPlaybackService.REPEAT_NONE:
-                        sService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
-                        break;
-                    case MusicPlaybackService.REPEAT_ALL:
-                        sService.setRepeatMode(MusicPlaybackService.REPEAT_CURRENT);
-                        if (sService.getShuffleMode() != MusicPlaybackService.SHUFFLE_NONE) {
-                            sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
-                        }
-                        break;
-                    default:
-                        sService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
-                        break;
-                }
-            }
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    /**
-     * Cycles through the shuffle options.
-     */
-    public static void cycleShuffle() {
-        try {
-            if (sService != null) {
-                switch (sService.getShuffleMode()) {
-                    case MusicPlaybackService.SHUFFLE_NONE:
-                        sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-                        if (sService.getRepeatMode() == MusicPlaybackService.REPEAT_CURRENT) {
-                            sService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
-                        }
-                        break;
-                    case MusicPlaybackService.SHUFFLE_NORMAL:
-                        sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
-                        break;
-                    case MusicPlaybackService.SHUFFLE_AUTO:
-                        sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    /**
-     * @return True if we're playing music, false otherwise.
-     */
-    public static final boolean isPlaying() {
-        if (sService != null) {
-            try {
-                return sService.isPlaying();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @return The current shuffle mode.
-     */
-    public static final int getShuffleMode() {
-        if (sService != null) {
-            try {
-                return sService.getShuffleMode();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * @return The current repeat mode.
-     */
-    public static final int getRepeatMode() {
-        if (sService != null) {
-            try {
-                return sService.getRepeatMode();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * @return The current track name.
-     */
-    public static final String getTrackName() {
-        if (sService != null) {
-            try {
-                return sService.getTrackName();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @return The current artist name.
-     */
-    public static final String getArtistName() {
-        if (sService != null) {
-            try {
-                return sService.getArtistName();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @return The current album name.
-     */
-    public static final String getAlbumName() {
-        if (sService != null) {
-            try {
-                return sService.getAlbumName();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @return Name of artist associated with album of currently playing song
-     */
-    public static String getAlbumArtistName() {
-        if (sService != null) {
-            try {
-                return sService.getAlbumArtistName();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @return The current album Id.
-     */
-    public static final long getCurrentAlbumId() {
-        if (sService != null) {
-            try {
-                return sService.getAlbumId();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * @return The current song Id.
-     */
-    public static final long getCurrentAudioId() {
-        if (sService != null) {
-            try {
-                return sService.getAudioId();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * @return The audio session Id.
-     */
-    public static final int getAudioSessionId() {
-        if (sService != null) {
-            try {
-                return sService.getAudioSessionId();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return AudioEffect.ERROR_BAD_VALUE;
-    }
-
-    /**
-     * @param context
-     * @return the currently playing album
-     */
-    public static Album getCurrentAlbum(final Context context) {
-        long albumId = getCurrentAlbumId();
-        return makeLocalAlbum(context, albumId);
-    }
-
-    public static ArtInfo getCurrentArtInfo() {
-        if (sService != null) {
-            try {
-                return sService.getCurrentArtInfo();
-            } catch (RemoteException ignored) {}
-        }
-        return null;
-    }
-
-    /**
-     * @param context The {@link Context} to use.
-     * @param id The ID of the album.
-     * @return new album.
-     */
-    public static LocalAlbum makeLocalAlbum(final Context context, long albumId) {
-        LocalAlbum album = null;
-        Cursor c = context.getContentResolver().query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                Projections.LOCAL_ALBUM,
-                BaseColumns._ID +"=?",
-                new String[]{String.valueOf(albumId)},
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-        if (c != null && c.moveToFirst()) {
-            album = CursorHelpers.makeLocalAlbumFromCursor(c);
-        }
-        if (c != null) {
-            c.close();
-        }
-        return album;
-    }
-
-    /**
-     * Creates artist object from their name;
-     * @param context
-     * @param artistName
-     * @return
-     */
-    public static LocalArtist makeArtist(final Context context, final String artistName) {
-        LocalArtist artist = null;
-        final String selection = MediaStore.Audio.ArtistColumns.ARTIST  + "=?";
-        final String[] selectionArgs = new String[] { artistName };
-        final Cursor c = context.getContentResolver().query(MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
-                Projections.LOCAL_ARTIST,
-                selection,
-                selectionArgs,
-                null);
-        if (c != null && c.moveToFirst()) {
-            artist = CursorHelpers.makeLocalArtistFromCursor(c);
-        }
-        if (c != null) {
-            c.close();
-        }
-        return artist;
-    }
-
-    /**
-     * @return true if currently casting
-     */
-    public static boolean isRemotePlayback() {
-        if (sService != null) {
-            try {
-                return sService.isRemotePlayback();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @return The queue.
-     */
-    @Deprecated @MarkedForRemoval
-    public static final long[] getQueue() {
-        try {
-            if (sService != null) {
-                return sService.getQueue();
-            } else {
-            }
-        } catch (final RemoteException ignored) {
-        }
-        return sEmptyList;
-    }
-
-    /**
-     * @param id The ID of the track to remove.
-     * @return removes track from a playlist or the queue.
-     */
-    @MarkedForRemoval
-    public static final int removeTrackOLD(final long id) {
-        try {
-            if (sService != null) {
-                return sService.removeTrack(id);
-            }
-        } catch (final RemoteException ingored) {
-        }
-        return 0;
-    }
-
-    public static int removeQueueItem(long id) {
-        try {
-            if (sService != null) {
-                return sService.removeTrack(id);
-            }
-        } catch (final RemoteException ingored) {
-        }
-        return 0;
-    }
-
-    public static int removeSong(Context context, Song song) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            throw new RuntimeException("Stop calling from main thread");
-        }
-        long id = MusicProviderUtil.getIdForSong(context, song);
-        if (id >= 0) {
-            return removeQueueItem(id);
-        }
-        return 0;
-    }
-
-    /**
-     * @return The position of the current track in the queue.
-     */
-    public static final int getQueuePosition() {
-        try {
-            if (sService != null) {
-                return sService.getQueuePosition();
-            }
-        } catch (final RemoteException ignored) {
-        }
-        return 0;
-    }
-
-    /**
-     * @param cursor The {@link Cursor} used to perform our query.
-     * @return The song list for a MIME type.
-     */
-    public static final long[] getSongListForCursor(Cursor cursor) {
-        if (cursor == null) {
-            return sEmptyList;
-        }
-        final int len = cursor.getCount();
-        final long[] list = new long[len];
-        cursor.moveToFirst();
-        int columnIndex = -1;
-        try {
-            columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-        } catch (final IllegalArgumentException notaplaylist) {
-            columnIndex = cursor.getColumnIndexOrThrow(BaseColumns._ID);
-        }
-        for (int i = 0; i < len; i++) {
-            list[i] = cursor.getLong(columnIndex);
-            cursor.moveToNext();
-        }
-        cursor.close();
-        cursor = null;
-        return list;
-    }
-
-    /**
-     * @param context The {@link Context} to use.
-     * @param id The ID of the artist.
-     * @return The song list for an artist.
-     */
-    @Deprecated
-    @MarkedForRemoval
-    public static final long[] getSongListForArtist(final Context context, final long id) {
-        final String[] projection = new String[] {
-            BaseColumns._ID
-        };
-        final String selection = AudioColumns.ARTIST_ID + "=" + id + " AND "
-                + AudioColumns.IS_MUSIC + "=1";
-                Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null,
-                AudioColumns.ALBUM_KEY + "," + AudioColumns.TRACK);
-        if (cursor != null) {
-            final long[] mList = getSongListForCursor(cursor);
-            cursor.close();
-            cursor = null;
-            return mList;
-        }
-        return sEmptyList;
-    }
-
-    /**
-     * @param context The {@link Context} to use.
-     * @param id The ID of the artist.
-     * @return The song list for an artist.
-     */
-    @MarkedForRemoval
-    public static LocalSong[] getLocalSongListForArtist(final Context context, final long id) {
-        Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                Projections.LOCAL_SONG,
-                Selections.LOCAL_ARTIST_SONGS,
-                SelectionArgs.LOCAL_ARTIST_SONGS(id),
-                AudioColumns.ALBUM_KEY + ", " + AudioColumns.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if (cursor != null) {
-            LocalSong[] songs = new LocalSong[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                int ii= 0;
-                do {
-                    songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-            return songs;
-        }
-        return sEmptyLocalSongList;
-    }
-
-    /**
-     * @param context The {@link Context} to use.
-     * @param id The ID of the genre.
-     * @return The song list for an genre.
-     */
-    public static final long[] getSongListForGenre(final Context context, final long id) {
-        final String[] projection = new String[] {
-            BaseColumns._ID
-        };
-        final StringBuilder selection = new StringBuilder();
-        selection.append(AudioColumns.IS_MUSIC + "=1");
-        selection.append(" AND " + MediaColumns.TITLE + "!=''");
-        final Uri uri = MediaStore.Audio.Genres.Members.getContentUri("external", Long.valueOf(id));
-        Cursor cursor = context.getContentResolver().query(uri, projection, selection.toString(),
-                null, null);
-        if (cursor != null) {
-            final long[] mList = getSongListForCursor(cursor);
-            cursor.close();
-            cursor = null;
-            return mList;
-        }
-        return sEmptyList;
-    }
-
-    @MarkedForRemoval
-    public static LocalSong[] getLocalSongListForGenre(final Context context, final long id) {
-        Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Genres.Members.getContentUri("external", id),
-                Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG,
-                SelectionArgs.LOCAL_SONG,
-                AudioColumns.ALBUM_KEY + ", " + AudioColumns.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-        if (cursor != null) {
-            LocalSong[] songs = new LocalSong[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                int ii=0;
-                do {
-                    songs[ii++] = CursorHelpers.makeLocalSongFromCursor(context, cursor);
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-            return songs;
-        }
-        return sEmptyLocalSongList;
-    }
-
-    @MarkedForRemoval
-    @Deprecated
-    public static LocalSong[] getLocalSongList(Context context, long[] ids) {
-        if (ids == null || ids.length == 0) {
-            return sEmptyLocalSongList;
-        }
-        Cursor c = new OrderPreservingCursor(context, ids);
-        LocalSong[] songs = new LocalSong[c.getCount()];
-        if (c.getCount() > 0 && c.moveToFirst()) {
-            int ii=0;
-            do {
-                final LocalSong s = CursorHelpers.makeLocalSongFromCursor(context, c);
-                songs[ii++] = s;
-            } while (c.moveToNext());
-        }
-        c.close();
-
-//        int ii;
-//        for (ii=0;ii<ids.length;ii++) {
-//            Timber.d(ids[ii] + " :: "+ songs[ii].songId);
-//        }
-
-        return songs;
-
-    }
-
-    /**
-     * @param context The {@link Context} to use
-     * @param uri The source of the file
-     */
-    public static void playFile(final Context context, final Uri uri) {
-        if (uri == null || sService == null) {
-            return;
-        }
-
-        // If this is a file:// URI, just use the path directly instead
-        // of going through the open-from-filedescriptor codepath.
-        String filename;
-        String scheme = uri.getScheme();
-        if ("file".equals(scheme)) {
-            filename = uri.getPath();
-        } else {
-            filename = uri.toString();
-        }
-
-        try {
-            sService.stop();
-            sService.openFile(filename);
-            sService.play();
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-
-    @Deprecated
-    public static void playAll(final Context context, final long[] list, int position,
-            final boolean forceShuffle) {
-        try {
-            playAll(sService, list, position, forceShuffle);
-        } catch (Exception ignored) { }
-    }
-
-    /**
-     * @param list The list of songs to play. (ids must be from musicprovider (recent id)
-     * @param position Specify where to start.
-     * @param forceShuffle True to force a shuffle, false otherwise.
-     */
-    public static void playAll(IApolloService service, long[] list, int position, boolean forceShuffle) throws RemoteException {
-        if (list.length == 0 || service == null) {
-            return;
-        }
-        if (forceShuffle) {
-            service.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-        } else {
-            service.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
-        }
-        final long currentId = service.getAudioId();
-        final int currentQueuePosition = getQueuePosition();
-        if (position != -1 && currentQueuePosition == position && currentId == list[position]) {
-            final long[] playlist = getQueue();
-            if (Arrays.equals(list, playlist)) {
-                service.play();
-                return;
-            }
-        }
-        if (position < 0) {
-            position = 0;
-        }
-        service.open(list, forceShuffle ? -1 : position);
-        service.play();
-    }
-
-    @Deprecated
-    public static void playAllSongs(Context context, Song[] list, int position, boolean forceShuffle) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            throw new RuntimeException("Stop calling from main thread");
-        }
-        if (list.length == 0 || sService == null) {
-            return;
-        }
-        long[] ids = new long[list.length];
-        for (int ii=0; ii<list.length; ii++) {
-            //TODO bulk insert?
-             ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
-        }
-        playAll(context, ids, position, forceShuffle);
-    }
-
-    /**
-     *
-     * @param context
-     * @param list long[] containing ids of songs from mediastore
-     * @param position
-     * @param forceShuffle
-     */
-    public static void playAllfromMediaStore(Context context, long[] list, int position, boolean forceShuffle) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            throw new RuntimeException("Stop calling from main thread");
-        }
-        if (list == null || list.length == 0 || sService == null) {
-            return;
-        }
-        long[] ids = new long[list.length];
-        for (int ii=0; ii<list.length; ii++) {
-            ids[ii] = MusicProviderUtil.insertFromMediaStore(context, list[ii]);
-        }
-        playAll(context, ids, position, forceShuffle);
-    }
-
-    /**
-     * @param list The list to enqueue.
-     */
-    @MarkedForRemoval @Deprecated
-    public static void playNext(long[] recentslist) {
-        if (sService == null) {
-            return;
-        }
-        try {
-            sService.enqueue(recentslist, MusicPlaybackService.NEXT);
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    @MarkedForRemoval @Deprecated
-    public static void playNext(Context context, Song[] list) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            throw new RuntimeException("Stop calling from main thread");
-        }
-        if (list.length == 0 || sService == null) {
-            return;
-        }
-        long[] ids = new long[list.length];
-        for (int ii=0; ii<list.length; ii++) {
-            //TODO bulk insert?
-            ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
-        }
-        playNext(ids);
-    }
-
-    /**
-     * @param context The {@link Context} to use.
-     */
-    public static void shuffleAll(final Context context) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            throw new RuntimeException("Stop calling from main thread");
-        }
-        Cursor cursor = CursorHelpers.makeSongCursor(context);
-        final long[] mTrackList = getSongListForCursor(cursor);
-        final int position = 0;
-        if (mTrackList.length == 0 || sService == null) {
-            return;
-        }
-        try {
-            final long[] realTrackList = new long[mTrackList.length];
-            for (int ii=0; ii<mTrackList.length; ii++) {
-                realTrackList[ii] = MusicProviderUtil.insertFromMediaStore(context, mTrackList[ii]);
-            }
-            sService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-            final long mCurrentId = sService.getAudioId();
-            final int mCurrentQueuePosition = getQueuePosition();
-            if (mCurrentQueuePosition == position
-                    && mCurrentId == realTrackList[position]) {
-                final long[] mPlaylist = getQueue();
-                if (Arrays.equals(realTrackList, mPlaylist)) {
-                    sService.play();
-                    return;
-                }
-            }
-            sService.open(realTrackList, -1);
-            sService.play();
-            cursor.close();
-            cursor = null;
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    /**
-     * Starts auto shuffle mode
-     */
-    @Deprecated @MarkedForRemoval
-    public static void startPartyShuffle() {
-        if (sService != null) {
-            try {
-                sService.setShuffleMode(MusicPlaybackService.SHUFFLE_AUTO);
-            } catch (RemoteException ignored) { }
-        }
-    }
-
-    /**
      * Returns The ID for a playlist.
      *
      * @param context The {@link Context} to use.
      * @param name The name of the playlist.
      * @return The ID for a playlist.
      */
-    public static final long getIdForPlaylist(final Context context, final String name) {
+    public static long getIdForPlaylist(final Context context, final String name) {
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, new String[] {
                     BaseColumns._ID
@@ -863,7 +169,7 @@ public final class MusicUtils {
      * @param name The name of the artist.
      * @return The ID for an artist.
      */
-    public static final long getIdForArtist(final Context context, final String name) {
+    public static long getIdForArtist(final Context context, final String name) {
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI, new String[] {
                     BaseColumns._ID
@@ -890,8 +196,7 @@ public final class MusicUtils {
      * @param artistName The name of the artist
      * @return The ID for an album.
      */
-    public static final long getIdForAlbum(final Context context, final String albumName,
-            final String artistName) {
+    public static long getIdForAlbum(final Context context, final String albumName, final String artistName) {
         Cursor cursor = context.getContentResolver().query(
                 MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, new String[] {
                     BaseColumns._ID
@@ -933,7 +238,7 @@ public final class MusicUtils {
      * @param name The name of the new playlist.
      * @return A new playlist ID.
      */
-    public static final long createPlaylist(final Context context, final String name) {
+    public static long createPlaylist(final Context context, final String name) {
         if (name != null && name.length() > 0) {
             final ContentResolver resolver = context.getContentResolver();
             final String[] projection = new String[] {
@@ -974,7 +279,7 @@ public final class MusicUtils {
      * @param ids The id of the song(s) to add.
      * @param playlistid The id of the playlist being added to.
      */
-    public static void addToPlaylist(final Context context, final long[] ids, final long playlistid) {
+    public static void addToPlaylist(final Activity context, final long[] ids, final long playlistid) {
         final int size = ids.length;
         final ContentResolver resolver = context.getContentResolver();
         final String[] projection = new String[] {
@@ -1003,7 +308,7 @@ public final class MusicUtils {
      * @param id The id of the song to remove.
      * @param playlistId The id of the playlist being removed from.
      */
-    public static void removeFromPlaylist(final Context context, final long id,
+    public static void removeFromPlaylist(final Activity context, final long id,
             final long playlistId) {
         final Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
         final ContentResolver resolver = context.getContentResolver();
@@ -1014,62 +319,6 @@ public final class MusicUtils {
                 R.plurals.NNNtracksfromplaylist, 1, 1);
         Toast.makeText((Activity)context, message, Toast.LENGTH_LONG).show();
         context.getContentResolver().notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
-    }
-
-    /**
-     * @param context The {@link Context} to use.
-     * @param list The list to enqueue.
-     */
-    public static void addToQueue(final Context context, final long[] list) {
-        if (sService == null) {
-            return;
-        }
-        try {
-            sService.enqueue(list, MusicPlaybackService.LAST);
-            final String message = makeLabel(context, R.plurals.NNNtrackstoqueue, list.length);
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    public static CharSequence addToQueueSilent(final Context context, final long[] list) {
-        if (sService == null) {
-            return null;
-        }
-        try {
-           sService.enqueue(list, MusicPlaybackService.LAST);
-            return makeLabel(context, R.plurals.NNNtrackstoqueue, list.length);
-        } catch (final RemoteException ignored) {
-        }
-        return null;
-    }
-
-    public static void addSongsToQueue(Context context, Song[] list) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            throw new RuntimeException("Stop calling from main thread");
-        }
-        if (list.length == 0 || sService == null) {
-            return;
-        }
-        long[] ids = new long[list.length];
-        for (int ii=0; ii<list.length; ii++) {
-            ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
-        }
-        addToQueue(context, ids);
-    }
-
-    public static CharSequence addSongsToQueueSilent(Context context, Song[] list) {
-        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
-            throw new RuntimeException("Stop calling from main thread");
-        }
-        if (list.length == 0 || sService == null) {
-            return null;
-        }
-        long[] ids = new long[list.length];
-        for (int ii=0; ii<list.length; ii++) {
-            ids[ii] = MusicProviderUtil.insertSong(context, list[ii]);
-        }
-        return addToQueueSilent(context, ids);
     }
 
     /**
@@ -1111,223 +360,11 @@ public final class MusicUtils {
     }
 
     /**
-     * @param context The {@link Context} to use.
-     * @param id The id of the album.
-     * @return The song count for an album.
-     */
-    public static final int getSongCountForAlbum(final Context context, final long id) {
-        if (id == -1) {
-            return 0;
-        }
-        Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, id);
-        Cursor cursor = context.getContentResolver().query(uri, new String[] {
-                    AlbumColumns.NUMBER_OF_SONGS
-                }, null, null, null);
-        int songCount = 0;
-        if (cursor != null) {
-            cursor.moveToFirst();
-            if (!cursor.isAfterLast()) {
-                songCount = cursor.getInt(0);
-            }
-            cursor.close();
-            cursor = null;
-        }
-        return songCount;
-    }
-
-    /**
-     * @param context The {@link Context} to use.
-     * @param id The id of the album.
-     * @return The release date for an album.
-     */
-    public static final String getReleaseDateForAlbum(final Context context, final long id) {
-        if (id == -1) {
-            return null;
-        }
-        Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, id);
-        Cursor cursor = context.getContentResolver().query(uri, new String[] {
-                    AlbumColumns.FIRST_YEAR
-                }, null, null, null);
-        String releaseDate = null;
-        if (cursor != null) {
-            cursor.moveToFirst();
-            if (!cursor.isAfterLast()) {
-                releaseDate = cursor.getString(0);
-            }
-            cursor.close();
-            cursor = null;
-        }
-        return releaseDate;
-    }
-
-    /**
-     * @return The path to the currently playing file as {@link String}
-     */
-    public static Uri getFileUri() {
-        try {
-            if (sService != null) {
-                return sService.getDataUri();
-            }
-        } catch (final RemoteException ignored) {
-        }
-        return null;
-    }
-
-    public static Uri getArtworkUri() {
-        try {
-            if (sService != null) {
-                return sService.getArtworkUri();
-            }
-        } catch (final RemoteException ignored) {
-        }
-        return null;
-    }
-
-    /**
-     * @param from The index the item is currently at.
-     * @param to The index the item is moving to.
-     */
-    @Deprecated @MarkedForRemoval
-    public static void moveQueueItem(final int from, final int to) {
-        try {
-            if (sService != null) {
-                sService.moveQueueItem(from, to);
-            } else {
-            }
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    /**
-     * Toggles the current song as a favorite.
-     */
-    public static void toggleFavorite() {
-        try {
-            if (sService != null) {
-                sService.toggleFavorite();
-            }
-        } catch (final RemoteException ignored) {
-        }
-    }
-
-    /**
-     * @return True if the current song is a favorite, false otherwise.
-     */
-    public static final boolean isFavorite() {
-        try {
-            if (sService != null) {
-                return sService.isFavorite();
-            }
-        } catch (final RemoteException ignored) {
-        }
-        return false;
-    }
-
-    public static boolean isFromSDCard() {
-        try {
-            if (sService != null) {
-                return sService.isFromSDCard();
-            }
-        } catch (final RemoteException ignored) {
-        }
-        return false;
-    }
-
-    /**
-     * Plays a user created playlist.
-     *
-     * @param context The {@link Context} to use.
-     * @param playlistId The playlist Id.
-     */
-    @MarkedForRemoval
-    public static void playPlaylist(final Context context, final long playlistId, final boolean forceShuffle) {
-        playAllSongs(context, CursorHelpers.getSongsForPlaylist(context, playlistId), 0, forceShuffle);
-    }
-
-    /**
-     * Plays the last added songs from the past two weeks.
-     *
-     * @param context The {@link Context} to use
-     */
-    @MarkedForRemoval
-    public static void playLastAdded(final Context context, final boolean forceShuffle) {
-        playAllSongs(context, CursorHelpers.getSongsForLastAdded(context), 0, forceShuffle);
-    }
-
-    /**
      * Called when one of the lists should refresh or requery.
      */
+    @MarkedForRemoval @Deprecated
     public static void refresh() {
-        try {
-            if (sService != null) {
-                sService.refresh();
-            }
-        } catch (final RemoteException ignored) {
-        }
-    }
 
-    /**
-     * Seeks the current track to a desired position
-     *
-     * @param position The position to seek to
-     */
-    public static void seek(final long position) {
-        if (sService != null) {
-            try {
-                sService.seek(position);
-            } catch (final RemoteException ignored) {
-            }
-        }
-    }
-
-    /**
-     * @return The current position time of the track
-     */
-    public static final long position() {
-        if (sService != null) {
-            try {
-                return sService.position();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * @return The total length of the current track
-     */
-    public static final long duration() {
-        if (sService != null) {
-            try {
-                return sService.duration();
-            } catch (final RemoteException ignored) {
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * @param position The position to move the queue to
-     */
-    @Deprecated @MarkedForRemoval
-    public static void setQueuePosition(final int position) {
-        if (sService != null) {
-            try {
-                sService.setQueuePosition(position);
-            } catch (final RemoteException ignored) {
-            }
-        }
-    }
-
-    /**
-     * Clears the qeueue
-     */
-    @Deprecated @MarkedForRemoval
-    public static void clearQueue() {
-        try {
-            sService.removeTracks(0, Integer.MAX_VALUE);
-        } catch (final RemoteException ignored) {
-        }
     }
 
     /**

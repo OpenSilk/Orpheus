@@ -69,7 +69,7 @@ public class PlayPauseButton extends ImageButton implements OnClickListener, OnL
      */
     @Override
     public void onClick(final View v) {
-        MusicUtils.playOrPause();
+//        MusicUtils.playOrPause();
         updateState();
     }
 
@@ -90,13 +90,13 @@ public class PlayPauseButton extends ImageButton implements OnClickListener, OnL
      * Sets the correct drawable for playback.
      */
     public void updateState() {
-        if (MusicUtils.isPlaying()) {
-            setContentDescription(getResources().getString(R.string.accessibility_pause));
-            setImageDrawable(mPauseButton);
-        } else {
-            setContentDescription(getResources().getString(R.string.accessibility_play));
-            setImageDrawable(mPlayButton);
-        }
+//        if (MusicUtils.isPlaying()) {
+//            setContentDescription(getResources().getString(R.string.accessibility_pause));
+//            setImageDrawable(mPauseButton);
+//        } else {
+//            setContentDescription(getResources().getString(R.string.accessibility_play));
+//            setImageDrawable(mPlayButton);
+//        }
     }
 
 }

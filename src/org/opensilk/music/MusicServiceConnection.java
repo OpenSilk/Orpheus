@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -38,6 +39,7 @@ import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -162,7 +164,7 @@ public class MusicServiceConnection {
     //long duration();
     //long position();
     long seek(long pos);
-    //long getAudioId();
+    //long getTrackId();
     long getAlbumId();
     //String getArtistName();
     //String getTrackName();
@@ -424,6 +426,20 @@ public class MusicServiceConnection {
         removeTracks(0, Integer.MAX_VALUE);
     }
 
+    public Observable<long[]> getQueue() {
+        return getObservable().map(new Func1<IApolloService, long[]>() {
+            @Override
+            public long[] call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.getQueue();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
     public void startPartyShuffle() {
         getObservable().subscribe(new Action1<IApolloService>() {
             @Override
@@ -444,20 +460,6 @@ public class MusicServiceConnection {
             public Boolean call(IApolloService iApolloService) {
                 try {
                     return iApolloService.isPlaying();
-                } catch (RemoteException e) {
-                    onRemoteException(e);
-                    throw rethrow(e);
-                }
-            }
-        });
-    }
-
-    public Observable<long[]> getQueue() {
-        return getObservable().map(new Func1<IApolloService, long[]>() {
-            @Override
-            public long[] call(IApolloService iApolloService) {
-                try {
-                    return iApolloService.getQueue();
                 } catch (RemoteException e) {
                     onRemoteException(e);
                     throw rethrow(e);
@@ -508,13 +510,40 @@ public class MusicServiceConnection {
         });
     }
 
-    public Observable<Long> getAudioId() {
+    public Observable<Long> getTrackId() {
         return getObservable().map(new Func1<IApolloService, Long>() {
             @Override
             public Long call(IApolloService iApolloService) {
-                Timber.v("getAudioId %s", Thread.currentThread().getName());
                 try {
                     return iApolloService.getAudioId();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Uri> getTrackUri() {
+        return getObservable().map(new Func1<IApolloService, Uri>() {
+            @Override
+            public Uri call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.getDataUri();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
+    public Observable<Uri> getCurrentArtworkUri() {
+        return getObservable().map(new Func1<IApolloService, Uri>() {
+            @Override
+            public Uri call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.getArtworkUri();
                 } catch (RemoteException e) {
                     onRemoteException(e);
                     throw rethrow(e);
@@ -543,6 +572,20 @@ public class MusicServiceConnection {
             public String call(IApolloService iApolloService) {
                 try {
                     return iApolloService.getArtistName();
+                } catch (RemoteException e) {
+                    onRemoteException(e);
+                    throw rethrow(e);
+                }
+            }
+        });
+    }
+
+    public Observable<String> getAlbumArtistName() {
+        return getObservable().map(new Func1<IApolloService, String>() {
+            @Override
+            public String call(IApolloService iApolloService) {
+                try {
+                    return iApolloService.getAlbumArtistName();
                 } catch (RemoteException e) {
                     onRemoteException(e);
                     throw rethrow(e);
@@ -654,12 +697,74 @@ public class MusicServiceConnection {
                 try {
                     Song[] songs = func.call();
                     long[] providerids = addSongsToMusicProvider(songs);
-                    MusicUtils.playAll(iApolloService, providerids, startPos, shuffle);
+                    if (providerids.length == 0) {
+                        eventBus.post(new MakeToast(R.string.err_addtoqueue));
+                        return;
+                    }
+                    if (shuffle) {
+                        iApolloService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+                    } else {
+                        iApolloService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+                    }
+                    final long currentId = iApolloService.getAudioId();
+                    final int currentQueuePosition = iApolloService.getQueuePosition();
+                    final int pos = startPos < 0 ? 0 : startPos;
+                    if (currentQueuePosition == pos && currentId == providerids[pos]) {
+                        final long[] queue = iApolloService.getQueue();
+                        if (Arrays.equals(providerids, queue)) {
+                            iApolloService.play();
+                            return;
+                        }
+                    }
+                    iApolloService.open(providerids, shuffle ? -1 : pos);
+                    iApolloService.play();
                 } catch (Exception e) {
+                    if (e instanceof RemoteException) {
+                        onRemoteException((RemoteException)e);
+                    }
                     eventBus.post(new MakeToast(R.string.err_addtoqueue));
                 }
             }
         });
+    }
+
+    public void playFile(final Uri uri) {
+        getObservable().subscribe(new Action1<IApolloService>() {
+            @Override
+            public void call(IApolloService iApolloService) {
+                try {
+                    if (uri == null || uri.equals(Uri.EMPTY)) {
+                        eventBus.post(new MakeToast(R.string.err_generic));
+                        return;
+                    }
+                    // If this is a file:// URI, just use the path directly instead
+                    // of going through the open-from-filedescriptor codepath.
+                    String filename;
+                    String scheme = uri.getScheme();
+                    if ("file".equals(scheme)) {
+                        filename = uri.getPath();
+                    } else {
+                        filename = uri.toString();
+                    }
+                    iApolloService.stop();
+                    iApolloService.openFile(filename);
+                    iApolloService.play();
+                } catch (Exception e) {
+                    if (e instanceof RemoteException) {
+                        onRemoteException((RemoteException) e);
+                    }
+                }
+            }
+        });
+    }
+
+    public void playPlaylist(final Context context, final long playlistId, final boolean forceShuffle) {
+        playAllSongs(new Func0<Song[]>() {
+            @Override
+            public Song[] call() {
+                return CursorHelpers.getSongsForPlaylist(context, playlistId);
+            }
+        }, 0, forceShuffle);
     }
 
     /**

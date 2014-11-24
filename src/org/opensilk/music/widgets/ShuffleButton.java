@@ -68,7 +68,7 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
      */
     @Override
     public void onClick(final View v) {
-        MusicUtils.cycleShuffle();
+//        MusicUtils.cycleShuffle();
         updateShuffleState();
     }
 
@@ -89,22 +89,22 @@ public class ShuffleButton extends ImageButton implements OnClickListener, OnLon
      * Sets the correct drawable for the shuffle state.
      */
     public void updateShuffleState() {
-        switch (MusicUtils.getShuffleMode()) {
-            case MusicPlaybackService.SHUFFLE_NORMAL:
-                setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
-                setImageDrawable(mShuffleActiveDrawable);
-                break;
-            case MusicPlaybackService.SHUFFLE_AUTO:
-                setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
-                setImageDrawable(mShuffleActiveDrawable);
-                break;
-            case MusicPlaybackService.SHUFFLE_NONE:
-                setContentDescription(getResources().getString(R.string.accessibility_shuffle));
-                setImageDrawable(mShuffleDrawable);
-                break;
-            default:
-                break;
-        }
+//        switch (MusicUtils.getShuffleMode()) {
+//            case MusicPlaybackService.SHUFFLE_NORMAL:
+//                setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
+//                setImageDrawable(mShuffleActiveDrawable);
+//                break;
+//            case MusicPlaybackService.SHUFFLE_AUTO:
+//                setContentDescription(getResources().getString(R.string.accessibility_shuffle_all));
+//                setImageDrawable(mShuffleActiveDrawable);
+//                break;
+//            case MusicPlaybackService.SHUFFLE_NONE:
+//                setContentDescription(getResources().getString(R.string.accessibility_shuffle));
+//                setImageDrawable(mShuffleDrawable);
+//                break;
+//            default:
+//                break;
+//        }
     }
 
 }

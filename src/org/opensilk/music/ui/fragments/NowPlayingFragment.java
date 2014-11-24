@@ -68,7 +68,6 @@ import javax.inject.Inject;
 import de.greenrobot.event.EventBus;
 
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
-import static com.andrew.apollo.utils.MusicUtils.sService;
 
 /**
  * Created by drew on 4/10/14.
@@ -224,24 +223,24 @@ public class NowPlayingFragment extends Fragment implements
 
     @Override
     public void onProgressChanged(final SeekBar bar, final int progress, final boolean fromuser) {
-        if (!fromuser || sService == null) {
-            return;
-        }
-        final long now = SystemClock.elapsedRealtime();
-        if (now - mLastSeekEventTime > 250) {
-            mLastSeekEventTime = now;
-            mLastShortSeekEventTime = now;
-            mPosOverride = MusicUtils.duration() * progress / 1000;
-            MusicUtils.seek(mPosOverride);
-            if (!mFromTouch) {
-                // refreshCurrentTime();
-                mPosOverride = -1;
-            }
-        } else if (now - mLastShortSeekEventTime > 5) {
-            mLastShortSeekEventTime = now;
-            mPosOverride = MusicUtils.duration() * progress / 1000;
-            refreshCurrentTimeText(mPosOverride);
-        }
+//        if (!fromuser || sService == null) {
+//            return;
+//        }
+//        final long now = SystemClock.elapsedRealtime();
+//        if (now - mLastSeekEventTime > 250) {
+//            mLastSeekEventTime = now;
+//            mLastShortSeekEventTime = now;
+//            mPosOverride = MusicUtils.duration() * progress / 1000;
+//            MusicUtils.seek(mPosOverride);
+//            if (!mFromTouch) {
+//                // refreshCurrentTime();
+//                mPosOverride = -1;
+//            }
+//        } else if (now - mLastShortSeekEventTime > 5) {
+//            mLastShortSeekEventTime = now;
+//            mPosOverride = MusicUtils.duration() * progress / 1000;
+//            refreshCurrentTimeText(mPosOverride);
+//        }
     }
 
     @Override
@@ -255,11 +254,11 @@ public class NowPlayingFragment extends Fragment implements
 
     @Override
     public void onStopTrackingTouch(final SeekBar bar) {
-        if (mPosOverride != -1) {
-            MusicUtils.seek(mPosOverride);
-        }
-        mPosOverride = -1;
-        mFromTouch = false;
+//        if (mPosOverride != -1) {
+//            MusicUtils.seek(mPosOverride);
+//        }
+//        mPosOverride = -1;
+//        mFromTouch = false;
     }
 
     /**
@@ -305,10 +304,10 @@ public class NowPlayingFragment extends Fragment implements
                     popupMenu.inflate(R.menu.panel_clear_queue);
                 } else {
                     popupMenu.inflate(R.menu.panel_share);
-                    if (MusicUtils.isFromSDCard()) {
-                        popupMenu.inflate(R.menu.panel_set_ringtone);
-                        popupMenu.inflate(R.menu.panel_delete);
-                    }
+//                    if (MusicUtils.isFromSDCard()) {
+//                        popupMenu.inflate(R.menu.panel_set_ringtone);
+//                        popupMenu.inflate(R.menu.panel_delete);
+//                    }
                 }
                 popupMenu.setOnMenuItemClickListener(mPanelOverflowMenuClickListener);
                 popupMenu.show();
@@ -390,11 +389,11 @@ public class NowPlayingFragment extends Fragment implements
      */
     private void updateNowPlayingInfo() {
         // Set the track name
-        mHeaderTrackName.setText(MusicUtils.getTrackName());
-        // Set the artist name
-        mHeaderArtistName.setText(MusicUtils.getArtistName());
-        // Set the total time
-        mFooterTotalTime.setText(MusicUtils.makeTimeString(mActivity, MusicUtils.duration() / 1000));
+//        mHeaderTrackName.setText(MusicUtils.getTrackName());
+//        // Set the artist name
+//        mHeaderArtistName.setText(MusicUtils.getArtistName());
+//        // Set the total time
+//        mFooterTotalTime.setText(MusicUtils.makeTimeString(mActivity, MusicUtils.duration() / 1000));
         // Set the album art
 //        ArtworkManager.loadCurrentArtwork(mArtBackground);
         // Update the current time
@@ -421,35 +420,35 @@ public class NowPlayingFragment extends Fragment implements
      */
     public boolean startPlayback(Intent intent) {
 
-        if (intent == null || sService == null) {
+//        if (intent == null || sService == null) {
             return false;
-        }
-
-        Uri uri = intent.getData();
-        String mimeType = intent.getType();
-        boolean handled = false;
-
-        if (uri != null && uri.toString().length() > 0) {
-            MusicUtils.playFile(mActivity, uri);
-            handled = true;
-        } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
-            long id = intent.getLongExtra("playlistId", -1);
-            if (id < 0) {
-                String idString = intent.getStringExtra("playlist");
-                if (idString != null) {
-                    try {
-                        id = Long.parseLong(idString);
-                    } catch (NumberFormatException e) {
-                        // ignore
-                    }
-                }
-            }
-            if (id >= 0) {
-                MusicUtils.playPlaylist(mActivity, id, false);
-                handled = true;
-            }
-        }
-        return handled;
+//        }
+//
+//        Uri uri = intent.getData();
+//        String mimeType = intent.getType();
+//        boolean handled = false;
+//
+//        if (uri != null && uri.toString().length() > 0) {
+//            MusicUtils.playFile(mActivity, uri);
+//            handled = true;
+//        } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
+//            long id = intent.getLongExtra("playlistId", -1);
+//            if (id < 0) {
+//                String idString = intent.getStringExtra("playlist");
+//                if (idString != null) {
+//                    try {
+//                        id = Long.parseLong(idString);
+//                    } catch (NumberFormatException e) {
+//                        // ignore
+//                    }
+//                }
+//            }
+//            if (id >= 0) {
+//                MusicUtils.playPlaylist(mActivity, id, false);
+//                handled = true;
+//            }
+//        }
+//        return handled;
     }
 
     /**
@@ -459,39 +458,39 @@ public class NowPlayingFragment extends Fragment implements
      * @param delta The long press duration
      */
     private void scanBackward(final int repcnt, long delta) {
-        if (sService == null) {
-            return;
-        }
-        if (repcnt == 0) {
-            mStartSeekPos = MusicUtils.position();
-            mLastSeekEventTime = 0;
-        } else {
-            if (delta < 5000) {
-                // seek at 10x speed for the first 5 seconds
-                delta = delta * 10;
-            } else {
-                // seek at 40x after that
-                delta = 50000 + (delta - 5000) * 40;
-            }
-            long newpos = mStartSeekPos - delta;
-            if (newpos < 0) {
-                // move to previous track
-                MusicUtils.previous(mActivity);
-                final long duration = MusicUtils.duration();
-                mStartSeekPos += duration;
-                newpos += duration;
-            }
-            if (delta - mLastSeekEventTime > 250 || repcnt < 0) {
-                MusicUtils.seek(newpos);
-                mLastSeekEventTime = delta;
-            }
-            if (repcnt >= 0) {
-                mPosOverride = newpos;
-            } else {
-                mPosOverride = -1;
-            }
-            refreshCurrentTime();
-        }
+//        if (sService == null) {
+//            return;
+//        }
+//        if (repcnt == 0) {
+//            mStartSeekPos = MusicUtils.position();
+//            mLastSeekEventTime = 0;
+//        } else {
+//            if (delta < 5000) {
+//                // seek at 10x speed for the first 5 seconds
+//                delta = delta * 10;
+//            } else {
+//                // seek at 40x after that
+//                delta = 50000 + (delta - 5000) * 40;
+//            }
+//            long newpos = mStartSeekPos - delta;
+//            if (newpos < 0) {
+//                // move to previous track
+//                MusicUtils.previous(mActivity);
+//                final long duration = MusicUtils.duration();
+//                mStartSeekPos += duration;
+//                newpos += duration;
+//            }
+//            if (delta - mLastSeekEventTime > 250 || repcnt < 0) {
+//                MusicUtils.seek(newpos);
+//                mLastSeekEventTime = delta;
+//            }
+//            if (repcnt >= 0) {
+//                mPosOverride = newpos;
+//            } else {
+//                mPosOverride = -1;
+//            }
+//            refreshCurrentTime();
+//        }
     }
 
     /**
@@ -501,39 +500,39 @@ public class NowPlayingFragment extends Fragment implements
      * @param delta The long press duration
      */
     private void scanForward(final int repcnt, long delta) {
-        if (sService == null) {
-            return;
-        }
-        if (repcnt == 0) {
-            mStartSeekPos = MusicUtils.position();
-            mLastSeekEventTime = 0;
-        } else {
-            if (delta < 5000) {
-                // seek at 10x speed for the first 5 seconds
-                delta = delta * 10;
-            } else {
-                // seek at 40x after that
-                delta = 50000 + (delta - 5000) * 40;
-            }
-            long newpos = mStartSeekPos + delta;
-            final long duration = MusicUtils.duration();
-            if (newpos >= duration) {
-                // move to next track
-                MusicUtils.next();
-                mStartSeekPos -= duration; // is OK to go negative
-                newpos -= duration;
-            }
-            if (delta - mLastSeekEventTime > 250 || repcnt < 0) {
-                MusicUtils.seek(newpos);
-                mLastSeekEventTime = delta;
-            }
-            if (repcnt >= 0) {
-                mPosOverride = newpos;
-            } else {
-                mPosOverride = -1;
-            }
-            refreshCurrentTime();
-        }
+//        if (sService == null) {
+//            return;
+//        }
+//        if (repcnt == 0) {
+//            mStartSeekPos = MusicUtils.position();
+//            mLastSeekEventTime = 0;
+//        } else {
+//            if (delta < 5000) {
+//                // seek at 10x speed for the first 5 seconds
+//                delta = delta * 10;
+//            } else {
+//                // seek at 40x after that
+//                delta = 50000 + (delta - 5000) * 40;
+//            }
+//            long newpos = mStartSeekPos + delta;
+//            final long duration = MusicUtils.duration();
+//            if (newpos >= duration) {
+//                // move to next track
+//                MusicUtils.next();
+//                mStartSeekPos -= duration; // is OK to go negative
+//                newpos -= duration;
+//            }
+//            if (delta - mLastSeekEventTime > 250 || repcnt < 0) {
+//                MusicUtils.seek(newpos);
+//                mLastSeekEventTime = delta;
+//            }
+//            if (repcnt >= 0) {
+//                mPosOverride = newpos;
+//            } else {
+//                mPosOverride = -1;
+//            }
+//            refreshCurrentTime();
+//        }
     }
 
     /**
@@ -553,56 +552,56 @@ public class NowPlayingFragment extends Fragment implements
 
     /* Used to update the current time string */
     private long refreshCurrentTime() {
-        if (sService == null) {
-            return 500;
-        }
-        try {
-            final long pos = mPosOverride < 0 ? MusicUtils.position() : mPosOverride;
-            if (pos >= 0 && MusicUtils.duration() > 0) {
-                refreshCurrentTimeText(pos);
-                final int progress = (int)(1000 * pos / MusicUtils.duration());
-                mFooterProgress.setProgress(progress);
-
-                if (mFromTouch) {
-                    return 500;
-                } else if (MusicUtils.isPlaying()) {
-                    if (!mQueueShowing) {
-                        mFooterCurrentTime.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    if (!mQueueShowing) {
-                        // blink the counter
-                        final int vis = mFooterCurrentTime.getVisibility();
-                        mFooterCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE
-                                : View.INVISIBLE);
-                        return 500;
-                    }
-                }
-            } else {
-                mFooterCurrentTime.setText("--:--");
-                mFooterProgress.setProgress(1000);
-            }
-            // calculate the number of milliseconds until the next full second,
-            // so
-            // the counter can be updated at just the right time
-            final long remaining = 1000 - pos % 1000;
-            // approximate how often we would need to refresh the slider to
-            // move it smoothly
-            int width = mFooterProgress.getWidth();
-            if (width == 0) {
-                width = 320;
-            }
-            final long smoothrefreshtime = MusicUtils.duration() / width;
-            if (smoothrefreshtime > remaining) {
-                return remaining;
-            }
-            if (smoothrefreshtime < 20) {
-                return 20;
-            }
-            return smoothrefreshtime;
-        } catch (final Exception ignored) {
-
-        }
+//        if (sService == null) {
+//            return 500;
+//        }
+//        try {
+//            final long pos = mPosOverride < 0 ? MusicUtils.position() : mPosOverride;
+//            if (pos >= 0 && MusicUtils.duration() > 0) {
+//                refreshCurrentTimeText(pos);
+//                final int progress = (int)(1000 * pos / MusicUtils.duration());
+//                mFooterProgress.setProgress(progress);
+//
+//                if (mFromTouch) {
+//                    return 500;
+//                } else if (MusicUtils.isPlaying()) {
+//                    if (!mQueueShowing) {
+//                        mFooterCurrentTime.setVisibility(View.VISIBLE);
+//                    }
+//                } else {
+//                    if (!mQueueShowing) {
+//                        // blink the counter
+//                        final int vis = mFooterCurrentTime.getVisibility();
+//                        mFooterCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE
+//                                : View.INVISIBLE);
+//                        return 500;
+//                    }
+//                }
+//            } else {
+//                mFooterCurrentTime.setText("--:--");
+//                mFooterProgress.setProgress(1000);
+//            }
+//            // calculate the number of milliseconds until the next full second,
+//            // so
+//            // the counter can be updated at just the right time
+//            final long remaining = 1000 - pos % 1000;
+//            // approximate how often we would need to refresh the slider to
+//            // move it smoothly
+//            int width = mFooterProgress.getWidth();
+//            if (width == 0) {
+//                width = 320;
+//            }
+//            final long smoothrefreshtime = MusicUtils.duration() / width;
+//            if (smoothrefreshtime > remaining) {
+//                return remaining;
+//            }
+//            if (smoothrefreshtime < 20) {
+//                return 20;
+//            }
+//            return smoothrefreshtime;
+//        } catch (final Exception ignored) {
+//
+//        }
         return 500;
     }
 
@@ -651,73 +650,73 @@ public class NowPlayingFragment extends Fragment implements
             switch (item.getItemId()) {
                 case R.id.panel_menu_share:
                     // Share the current meta data
-                    String trackname = MusicUtils.getTrackName();
-                    String artistname = MusicUtils.getArtistName();
-                    if (trackname != null && artistname != null) {
-                        final Intent shareIntent = new Intent();
-                        final String shareMessage = getString(R.string.now_listening_to, trackname, artistname);
-                        shareIntent.setAction(Intent.ACTION_SEND);
-                        shareIntent.setType("text/plain");
-                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
-                        String albumartist = MusicUtils.getAlbumArtistName();
-                        if (TextUtils.isEmpty(albumartist)) {
-                            albumartist = artistname;
-                        }
-                        String albumname = MusicUtils.getAlbumName();
-                        if (!TextUtils.isEmpty(albumartist) && !TextUtils.isEmpty(albumname)) {
-                            shareIntent.putExtra(Intent.EXTRA_STREAM,
-                                    ArtworkProvider.createArtworkUri(albumartist, albumname));
-                        }
-                        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
-                    } else {
-                        //TODO toast
-                    }
+//                    String trackname = MusicUtils.getTrackName();
+//                    String artistname = MusicUtils.getArtistName();
+//                    if (trackname != null && artistname != null) {
+//                        final Intent shareIntent = new Intent();
+//                        final String shareMessage = getString(R.string.now_listening_to, trackname, artistname);
+//                        shareIntent.setAction(Intent.ACTION_SEND);
+//                        shareIntent.setType("text/plain");
+//                        shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+//                        String albumartist = MusicUtils.getAlbumArtistName();
+//                        if (TextUtils.isEmpty(albumartist)) {
+//                            albumartist = artistname;
+//                        }
+//                        String albumname = MusicUtils.getAlbumName();
+//                        if (!TextUtils.isEmpty(albumartist) && !TextUtils.isEmpty(albumname)) {
+//                            shareIntent.putExtra(Intent.EXTRA_STREAM,
+//                                    ArtworkProvider.createArtworkUri(albumartist, albumname));
+//                        }
+//                        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_track_using)));
+//                    } else {
+//                        //TODO toast
+//                    }
                     return true;
                 case R.id.panel_menu_use_ringtone:
                     // Set the current track as a ringtone
-                    if (MusicUtils.isFromSDCard()) {
-                        long id = MusicUtils.getCurrentAudioId();
-                        long realid = -1;
-                        if (id >= 0) {
-                            realid = MusicProviderUtil.getRealId(mActivity, id);
-                        }
-                        if (realid >= 0) {
-                            MusicUtils.setRingtone(mActivity, realid);
-                        } else {
-                            //TODo toast
-                        }
-                    } // else unsupported
+//                    if (MusicUtils.isFromSDCard()) {
+//                        long id = MusicUtils.getCurrentAudioId();
+//                        long realid = -1;
+//                        if (id >= 0) {
+//                            realid = MusicProviderUtil.getRealId(mActivity, id);
+//                        }
+//                        if (realid >= 0) {
+//                            MusicUtils.setRingtone(mActivity, realid);
+//                        } else {
+//                            //TODo toast
+//                        }
+//                    } // else unsupported
                     return true;
                 case R.id.panel_menu_delete:
                     // Delete current song
-                    if (MusicUtils.isFromSDCard()) {
-                        long id = MusicUtils.getCurrentAudioId();
-                        long realid = -1;
-                        if (id >= 0) {
-                            realid = MusicProviderUtil.getRealId(mActivity, id);
-                        }
-                        if (realid >= 0) {
-//                            DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid})
-//                                    .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
-                        } else {
-                            //TODo toast
-                        }
-                    } // else unsupported
+//                    if (MusicUtils.isFromSDCard()) {
+//                        long id = MusicUtils.getCurrentAudioId();
+//                        long realid = -1;
+//                        if (id >= 0) {
+//                            realid = MusicProviderUtil.getRealId(mActivity, id);
+//                        }
+//                        if (realid >= 0) {
+////                            DeleteDialog.newInstance(MusicUtils.getTrackName(), new long[]{realid})
+////                                    .show(mActivity.getSupportFragmentManager(), "DeleteDialog");
+//                        } else {
+//                            //TODo toast
+//                        }
+//                    } // else unsupported
                     return true;
                 case R.id.panel_menu_save_queue:
-                    long[] queue = MusicUtils.getQueue();
-                    if (queue != null && queue.length > 0) {
-                        long[] playlist = MusicProviderUtil.transformListToRealIds(mActivity, queue);
-                        if (playlist.length > 0) {
-//                            CreateNewPlaylist.getInstance(playlist)
-//                                    .show(mActivity.getSupportFragmentManager(), "CreatePlaylist");
-                        } else {
-                            // TODO toast
-                        }
-                    }
+//                    long[] queue = MusicUtils.getQueue();
+//                    if (queue != null && queue.length > 0) {
+//                        long[] playlist = MusicProviderUtil.transformListToRealIds(mActivity, queue);
+//                        if (playlist.length > 0) {
+////                            CreateNewPlaylist.getInstance(playlist)
+////                                    .show(mActivity.getSupportFragmentManager(), "CreatePlaylist");
+//                        } else {
+//                            // TODO toast
+//                        }
+//                    }
                     return true;
                 case R.id.panel_menu_clear_queue:
-                    MusicUtils.clearQueue();
+//                    MusicUtils.clearQueue();
 //                    mActivity.maybeClosePanel();
                     return true;
                 default:

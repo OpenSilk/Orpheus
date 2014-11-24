@@ -174,16 +174,6 @@ public class ThemeUtils {
     }
 
     /**
-     * Used to tell if the action bar's backgrond color is dark or light and
-     * depending on which the proper overflow icon is set from a style.
-     * 
-     * @return True if the action bar color is dark, false if light.
-     */
-    public boolean isActionBarDark() {
-        return ApolloUtils.isColorDark(getColor("action_bar"));
-    }
-
-    /**
      * This is used to set the color of a {@link MenuItem}. For instance, when
      * the current song is a favorite, the favorite icon will use the current
      * theme color.
@@ -216,47 +206,6 @@ public class ThemeUtils {
 
         final BitmapDrawable outDrawable = new BitmapDrawable(mResources, outBitmap);
         menuItem.setIcon(outDrawable);
-    }
-
-    /**
-     * Sets the {@link MenuItem} icon for the favorites action.
-     * 
-     * @param context The {@link Context} to use.
-     * @param favorite The favorites action.
-     */
-    public void setFavoriteIcon(final Menu favorite) {
-        final MenuItem favoriteAction = null;// favorite.findItem(R.id.menu_favorite);
-        final String favoriteIconId = "ic_action_favorite";
-        if (MusicUtils.isFavorite()) {
-            setMenuItemColor(favoriteAction, "favorite_selected", favoriteIconId);
-        } else {
-            setMenuItemColor(favoriteAction, "favorite_normal", favoriteIconId);
-        }
-    }
-
-    /**
-     * Sets the {@link MenuItem} icon for the search action.
-     * 
-     * @param context The {@link Context} to use.
-     * @param search The Menu used to find the "menu_search" action.
-     */
-    public void setSearchIcon(final Menu search) {
-        final MenuItem searchAction = search.findItem(R.id.menu_search);
-        final String searchIconId = "ic_action_search";
-        setMenuItemColor(searchAction, "search_action", searchIconId);
-    }
-
-    /**
-     * Used to search the Play Store for "Apollo Themes".
-     *
-     * @param context The {@link Context} to use.
-     */
-    public void shopFor(final Context context) {
-        final Intent shopIntent = new Intent(Intent.ACTION_VIEW);
-        shopIntent.setData(Uri.parse(String.format(SEARCH_URI, Uri.encode(sApolloSearch))));
-        shopIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        shopIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        context.startActivity(shopIntent);
     }
 
     /**

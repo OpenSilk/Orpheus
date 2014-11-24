@@ -74,7 +74,7 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
      */
     @Override
     public void onClick(final View v) {
-        MusicUtils.cycleRepeat();
+//        MusicUtils.cycleRepeat();
         updateRepeatState();
     }
 
@@ -95,21 +95,21 @@ public class RepeatButton extends ImageButton implements OnClickListener, OnLong
      * Sets the correct drawable for the repeat state.
      */
     public void updateRepeatState() {
-        switch (MusicUtils.getRepeatMode()) {
-            case MusicPlaybackService.REPEAT_ALL:
-                setContentDescription(getResources().getString(R.string.accessibility_repeat_all));
-                setImageDrawable(mRepeatAllDrawable);
-                break;
-            case MusicPlaybackService.REPEAT_CURRENT:
-                setContentDescription(getResources().getString(R.string.accessibility_repeat_one));
-                setImageDrawable(mRepeatOneDrawable);
-                break;
-            case MusicPlaybackService.REPEAT_NONE:
-                setContentDescription(getResources().getString(R.string.accessibility_repeat));
-                setImageDrawable(mRepeatDrawable);
-                break;
-            default:
-                break;
-        }
+//        switch (MusicUtils.getRepeatMode()) {
+//            case MusicPlaybackService.REPEAT_ALL:
+//                setContentDescription(getResources().getString(R.string.accessibility_repeat_all));
+//                setImageDrawable(mRepeatAllDrawable);
+//                break;
+//            case MusicPlaybackService.REPEAT_CURRENT:
+//                setContentDescription(getResources().getString(R.string.accessibility_repeat_one));
+//                setImageDrawable(mRepeatOneDrawable);
+//                break;
+//            case MusicPlaybackService.REPEAT_NONE:
+//                setContentDescription(getResources().getString(R.string.accessibility_repeat));
+//                setImageDrawable(mRepeatDrawable);
+//                break;
+//            default:
+//                break;
+//        }
     }
 }

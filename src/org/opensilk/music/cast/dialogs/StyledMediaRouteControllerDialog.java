@@ -27,15 +27,20 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.AppModule;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.ui2.BaseActivity;
 
 import javax.inject.Inject;
+
+import mortar.Mortar;
 
 /**
  * A custom {@link MediaRouteControllerDialog} that provides an album art, a play/pause button and
@@ -43,7 +48,7 @@ import javax.inject.Inject;
  */
 public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog {
 
-    @dagger.Module(addsTo = AppModule.class, injects = StyledMediaRouteControllerDialog.class)
+    @dagger.Module(addsTo = BaseActivity.Module.class, injects = StyledMediaRouteControllerDialog.class)
     public static class Module {
 
     }
@@ -63,18 +68,20 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     private boolean mIsRemotePlayback;
 
     @Inject ArtworkRequestManager mRequestor;
+    @Inject MusicServiceConnection mMusicService;
 
     public StyledMediaRouteControllerDialog(Context context) {
-        this(context, ThemeHelper.isLightTheme(context) ? R.style.CastDialogLight : R.style.CastDialogDark);
-        ((DaggerInjector) context.getApplicationContext()).getObjectGraph().plus(new Module()).inject(this);
+        this(context, ThemeUtils.isLightTheme(context) ? R.style.CastDialogLight : R.style.CastDialogDark);
+        Mortar.getScope(context).getObjectGraph().plus(new Module()).inject(this);
     }
 
     /**
      * Creates a new VideoMediaRouteControllerDialog in the given context.
      */
     public StyledMediaRouteControllerDialog(Context context, int theme) {
-        super(context, theme);
-        mIsRemotePlayback = MusicUtils.isRemotePlayback();
+//        super(context, theme);
+        super(context);
+        mIsRemotePlayback = true;// MusicUtils.isRemotePlayback();
         if (ThemeHelper.isLightTheme(context)) {
             mPauseDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_pause_black);
             mPlayDrawable = context.getResources().getDrawable(R.drawable.ic_action_playback_play_black);
@@ -102,20 +109,20 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
     }
 
     private void updateMetadata() {
-        mTitle.setText(MusicUtils.getTrackName());
-        mSubTitle.setText(MusicUtils.getArtistName());
+//        mTitle.setText(MusicUtils.getTrackName());
+//        mSubTitle.setText(MusicUtils.getArtistName());
 //        ArtworkManager.loadCurrentArtwork(mIcon);
     }
 
     private void updatePlayPauseState() {
         if (null != mPausePlay) {
-            if (MusicUtils.isPlaying()) {
-                mPausePlay.setVisibility(View.VISIBLE);
-                mPausePlay.setImageDrawable(mPauseDrawable);
-            } else {
-                mPausePlay.setVisibility(View.VISIBLE);
-                mPausePlay.setImageDrawable(mPlayDrawable);
-            }
+//            if (MusicUtils.isPlaying()) {
+//                mPausePlay.setVisibility(View.VISIBLE);
+//                mPausePlay.setImageDrawable(mPauseDrawable);
+//            } else {
+//                mPausePlay.setVisibility(View.VISIBLE);
+//                mPausePlay.setImageDrawable(mPlayDrawable);
+//            }
         }
     }
 
@@ -129,7 +136,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
      */
     @Override
     public View onCreateMediaControlView(Bundle savedInstanceState) {
-        mIsRemotePlayback = MusicUtils.isRemotePlayback();
+        mIsRemotePlayback = true;// MusicUtils.isRemotePlayback();
         if (mIsRemotePlayback) {
             LayoutInflater inflater = getLayoutInflater();
             View controls = inflater.inflate(R.layout.cast_mediarouter_controller_controls, null);
@@ -148,7 +155,7 @@ public class StyledMediaRouteControllerDialog extends MediaRouteControllerDialog
 
             @Override
             public void onClick(View v) {
-                MusicUtils.playOrPause();
+//                MusicUtils.playOrPause();
                 updatePlayPauseState();
             }
         });

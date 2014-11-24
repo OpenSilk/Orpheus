@@ -151,6 +151,23 @@ public class CursorHelpers {
         return new LocalArtist(id, artistName, albumCount, songCount);
     }
 
+    public static LocalArtist makeLocalArtistFromName(final Context context, final String artistName) {
+        LocalArtist artist = null;
+        final Cursor c = context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_ARTISTS,
+                Projections.LOCAL_ARTIST,
+                MediaStore.Audio.ArtistColumns.ARTIST  + "=?",
+                new String[] { artistName },
+                null);
+        if (c != null && c.moveToFirst()) {
+            artist = makeLocalArtistFromCursor(c);
+        }
+        if (c != null) {
+            c.close();
+        }
+        return artist;
+    }
+
     public static Cursor makePlaylistCursor(Context context) {
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_PLAYLISTS,

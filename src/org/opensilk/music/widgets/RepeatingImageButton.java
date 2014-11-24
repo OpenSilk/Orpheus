@@ -83,7 +83,7 @@ public class RepeatingImageButton extends ImageButton implements OnClickListener
                 break;
             case R.id.header_action_button_next:
             case R.id.footer_action_button_next:
-                MusicUtils.next();
+//                MusicUtils.next();
             default:
                 break;
         }

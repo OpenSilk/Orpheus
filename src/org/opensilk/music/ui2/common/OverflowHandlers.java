@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.common;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.widget.PopupMenu;
 
 import com.andrew.apollo.menu.AddToPlaylistDialog;
@@ -36,10 +37,12 @@ import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.music.R;
 import org.opensilk.music.api.model.Song;
+import org.opensilk.music.ui2.event.GoToScreen;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.ui2.profile.ArtistScreen;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
@@ -118,8 +121,14 @@ public class OverflowHandlers {
                     bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(plist)));
                     return true;
                 case MORE_BY_ARTIST:
-                    bus.post(new StartActivityForResult(NavUtils.makeArtistProfileIntent(context,
-                            MusicUtils.makeArtist(context, album.artistName)), 0));
+                    if (!TextUtils.isEmpty(album.artistName)) {
+                        LocalArtist artist = CursorHelpers.makeLocalArtistFromName(context, album.artistName);
+                        if (artist != null) {
+                            bus.post(new GoToScreen(new ArtistScreen(artist)));
+                            return true;
+                        }
+                    }
+                    bus.post(new MakeToast(R.string.err_generic));
                     return true;
                 case DELETE:
                     long[] dlist = CursorHelpers.getSongIdsForAlbum(context, albumId);
@@ -428,8 +437,14 @@ public class OverflowHandlers {
                     bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(new long[]{song.songId})));
                     return true;
                 case MORE_BY_ARTIST:
-                    bus.post(new StartActivityForResult(NavUtils.makeArtistProfileIntent(context,
-                            MusicUtils.makeArtist(context, song.artistName)), 0));
+                    if (!TextUtils.isEmpty(song.artistName)) {
+                        LocalArtist artist = CursorHelpers.makeLocalArtistFromName(context, song.artistName);
+                        if (artist != null) {
+                            bus.post(new GoToScreen(new ArtistScreen(artist)));
+                            return true;
+                        }
+                    }
+                    bus.post(new MakeToast(R.string.err_generic));
                     return true;
                 case SET_RINGTONE:
                     MakeToast mt = MusicUtils.setRingtone(context, song.songId);
@@ -562,8 +577,14 @@ public class OverflowHandlers {
                     return true;
                 case MORE_BY_ARTIST:
                     if (song.isLocal) {
-                        bus.post(new StartActivityForResult(NavUtils.makeArtistProfileIntent(context,
-                                MusicUtils.makeArtist(context, song.artistName)), 0));
+                        if (!TextUtils.isEmpty(song.artistName)) {
+                            LocalArtist artist = CursorHelpers.makeLocalArtistFromName(context, song.artistName);
+                            if (artist != null) {
+                                bus.post(new GoToScreen(new ArtistScreen(artist)));
+                                return true;
+                            }
+                        }
+                        bus.post(new MakeToast(R.string.err_generic));
                     } // else TODO
                     return true;
                 case SET_RINGTONE:
