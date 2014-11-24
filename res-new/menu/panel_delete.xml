@@ -16,7 +16,9 @@
   ~ limitations under the License.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/panel_menu_delete"
-        android:title="@string/context_menu_delete"/>
+        android:title="@string/context_menu_delete"
+        app:showAsAction="never"/>
 </menu>
