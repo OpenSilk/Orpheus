@@ -18,8 +18,6 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.widget.TextView;
 
-import com.andrew.apollo.utils.PreferenceUtils;
-
 /**
  * Highlights the text in a text field.
  */

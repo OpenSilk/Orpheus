@@ -45,7 +45,6 @@ import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.artwork.ArtworkProvider;

@@ -8,7 +8,6 @@ import android.util.Log;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import com.andrew.apollo.utils.PreferenceUtils;
 
 import org.opensilk.music.iab.event.IABQueryResult;
 import org.opensilk.music.ui.settings.SettingsActivity;
@@ -59,22 +58,21 @@ public class IabUtil {
         settings.putInt(PREF_APP_LAUNCHES, ++prevCount);
     }
 
-    public static void maybeShowDonateDialog(Context context) {
+    public static void maybeShowDonateDialog(AppPreferences settings, Context context) {
         if (T) {
             showDonateDialog(context);
             return;
         }
-        PreferenceUtils p = PreferenceUtils.getInstance(context);
         // feeble attempt to not annoy early adopters with the popup,
         // pref is only present in versions <= 0.4.3
-        if (p.getBoolean("old_cache_removed", false)) {
+        if (settings.getBoolean("old_cache_removed", false)) {
             return;
         }
-        long nextBother = p.getLong(PREF_NEXT_BOTHER, 0);
-        int openCount = p.getInt(PREF_APP_LAUNCHES, 0);
+        long nextBother = settings.getLong(PREF_NEXT_BOTHER, 0);
+        int openCount = settings.getInt(PREF_APP_LAUNCHES, 0);
         if (openCount >= MIN_LAUNCHES_FOR_BOTHER && nextBother <= System.currentTimeMillis()) {
-            p.putInt(PREF_APP_LAUNCHES, 0);
-            p.putLong(PREF_NEXT_BOTHER, System.currentTimeMillis() + MIN_INTERVAL_FOR_BOTHER);
+            settings.putInt(PREF_APP_LAUNCHES, 0);
+            settings.putLong(PREF_NEXT_BOTHER, System.currentTimeMillis() + MIN_INTERVAL_FOR_BOTHER);
             showDonateDialog(context);
         }
     }

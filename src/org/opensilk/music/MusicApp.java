@@ -28,7 +28,6 @@ import android.view.WindowManager;
 
 import org.opensilk.music.BuildConfig;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.bugsense.trace.BugSenseHandler;
 
 import org.opensilk.cast.manager.MediaCastManager;
@@ -162,7 +161,6 @@ public class MusicApp extends Application implements DaggerInjector {
                     .detectAll()
                     .penaltyLog()
                     .setClassInstanceLimit(MusicUtils.class, 1)
-                    .setClassInstanceLimit(PreferenceUtils.class, 1)
                     .setClassInstanceLimit(MediaCastManager.class, 1)
                     .setClassInstanceLimit(BitmapDiskLruCache.class, 1)
                     .setClassInstanceLimit(BitmapDiskLruCache.class, 1)

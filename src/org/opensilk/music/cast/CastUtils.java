@@ -25,7 +25,6 @@ import android.support.v7.media.MediaRouter;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicStore;
-import com.andrew.apollo.utils.PreferenceUtils;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.common.images.WebImage;
@@ -187,13 +186,13 @@ public class CastUtils {
                 } catch (UnknownHostException ignored) {}
             } else {
                 String artUrl = null;
-                if (song.artworkUri == null || PreferenceUtils.getInstance(context).preferDownloadArtwork()) {
-                    try {
-                        String ipaddr = getWifiIpAddress(context);
-                        artUrl = buildArtUrl(ipaddr, song);
-                    } catch (UnknownHostException ignored) { }
-                } else {
-                    artUrl = song.artworkUri.toString();
+                try {
+                    String ipaddr = getWifiIpAddress(context);
+                    artUrl = buildArtUrl(ipaddr, song);
+                } catch (UnknownHostException e) {
+                    if (song.artworkUri != null) {
+                        artUrl = song.artworkUri.toString();
+                    }
                 }
                 return buildMediaInfo(song.name, song.albumName, song.artistName, song.mimeType,
                         song.dataUri.toString(), artUrl, null);

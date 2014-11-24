@@ -229,7 +229,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     public void onEventMainThread(IABQueryResult r) {
         if (r.error == IABQueryResult.Error.NO_ERROR) {
             if (!r.isApproved) {
-                IabUtil.maybeShowDonateDialog(this);
+                IabUtil.maybeShowDonateDialog(mSettings, this);
             }
         }
         //TODO handle faliurs
