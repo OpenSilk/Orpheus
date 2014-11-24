@@ -20,7 +20,8 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/popup_shuffle_all"
-        app:showAsAction="ifRoom"
+        android:title="@string/menu_shuffle"
         android:icon="@drawable/ic_menu_shuffle_white"
-        android:title="@string/menu_shuffle"/>
+        android:orderInCategory="50"
+        app:showAsAction="ifRoom"/>
 </menu>

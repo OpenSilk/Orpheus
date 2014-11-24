@@ -20,7 +20,8 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/popup_add_to_queue"
-        app:showAsAction="ifRoom"
+        android:title="@string/add_to_queue"
         android:icon="@drawable/ic_menu_add_queue_white"
-        android:title="@string/add_to_queue"/>
+        android:orderInCategory="50"
+        app:showAsAction="ifRoom"/>
 </menu>

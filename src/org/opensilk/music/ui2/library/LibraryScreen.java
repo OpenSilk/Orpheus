@@ -323,7 +323,9 @@ public class LibraryScreen extends Screen {
             // device selection
             String selectName = pluginConfig.getMeta(PluginConfig.META_MENU_NAME_PICKER);
             if (!TextUtils.isEmpty(selectName)) {
-                builder.withMenus(new ActionBarOwner.CustomMenuItem(R.id.menu_change_source, selectName));
+                builder.withMenus(new ActionBarOwner.CustomMenuItem(
+                        0, R.id.menu_change_source, 99, selectName, -1
+                ));
             } else {
                 builder.withMenus(R.menu.library_change_source);
             }
@@ -332,7 +334,9 @@ public class LibraryScreen extends Screen {
             if (pluginConfig.hasAbility(PluginConfig.SETTINGS)) {
                 String settingsName = pluginConfig.getMeta(PluginConfig.META_MENU_NAME_SETTINGS);
                 if (!TextUtils.isEmpty(settingsName)) {
-                    builder.withMenus(new ActionBarOwner.CustomMenuItem(R.id.menu_library_settings, settingsName));
+                    builder.withMenus(new ActionBarOwner.CustomMenuItem(
+                            0, R.id.menu_library_settings, 100, settingsName, -1
+                    ));
                 } else {
                     builder.withMenus(R.menu.library_settings);
                 }

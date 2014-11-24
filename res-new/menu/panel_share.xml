@@ -20,5 +20,6 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/panel_menu_share"
         android:title="@string/menu_share"
+        android:orderInCategory="50"
         app:showAsAction="never"/>
 </menu>

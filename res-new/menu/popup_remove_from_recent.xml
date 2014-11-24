@@ -21,5 +21,6 @@
     <item
         android:id="@+id/popup_remove_from_recent"
         android:title="@string/context_menu_remove_from_recent"
+        android:orderInCategory="50"
         app:showAsAction="never"/>
 </menu>

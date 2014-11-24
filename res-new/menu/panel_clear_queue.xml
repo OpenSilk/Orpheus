@@ -20,5 +20,6 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/panel_menu_clear_queue"
         android:title="@string/menu_clear_queue"
+        android:orderInCategory="50"
         app:showAsAction="never"/>
 </menu>
