@@ -18,8 +18,11 @@
 <resources>
 
     <!--Common styles for light theme-->
+    <style name="Theme.LightConfig" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="mainContentTopMargin">?actionBarSize</item>
+    </style>
 
-    <style name="Theme.LightBase" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.LightBase" parent="Theme.LightConfig">
         <!--TODO cant have both light toolbar style and dark
             toolbarstyle, need to fix tinting action icons
             so it only tints if the actionbar is light
@@ -51,8 +54,11 @@
     </style>
 
     <!--Common styles for dark theme-->
+    <style name="Theme.DarkConfig" parent="Theme.AppCompat.NoActionBar">
+        <item name="mainContentTopMargin">?actionBarSize</item>
+    </style>
 
-    <style name="Theme.DarkBase" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.DarkBase" parent="Theme.DarkConfig">
         <item name="toolbarTheme">@style/Toolbar.Dark</item>
 
         <item name="fabPlayStyle">@style/fabDark.Play</item>

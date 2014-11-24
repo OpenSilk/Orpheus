@@ -24,7 +24,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="@dimen/main_top_margin"
+    android:layout_marginTop="?mainContentTopMargin"
     android:baselineAligned="false">
 
     <org.opensilk.music.widgets.SquareFrameLayout
