@@ -414,43 +414,6 @@ public class NowPlayingFragment extends Fragment implements
     }
 
     /**
-     * Checks whether the passed intent contains a playback request,
-     * and starts playback if that's the case
-     */
-    public boolean startPlayback(Intent intent) {
-
-//        if (intent == null || sService == null) {
-            return false;
-//        }
-//
-//        Uri uri = intent.getData();
-//        String mimeType = intent.getType();
-//        boolean handled = false;
-//
-//        if (uri != null && uri.toString().length() > 0) {
-//            MusicUtils.playFile(mActivity, uri);
-//            handled = true;
-//        } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
-//            long id = intent.getLongExtra("playlistId", -1);
-//            if (id < 0) {
-//                String idString = intent.getStringExtra("playlist");
-//                if (idString != null) {
-//                    try {
-//                        id = Long.parseLong(idString);
-//                    } catch (NumberFormatException e) {
-//                        // ignore
-//                    }
-//                }
-//            }
-//            if (id >= 0) {
-//                MusicUtils.playPlaylist(mActivity, id, false);
-//                handled = true;
-//            }
-//        }
-//        return handled;
-    }
-
-    /**
      * Used to scan backwards in time through the curren track
      *
      * @param repcnt The repeat count

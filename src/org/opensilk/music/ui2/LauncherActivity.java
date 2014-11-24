@@ -21,7 +21,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -41,6 +43,7 @@ import com.andrew.apollo.menu.SleepTimerDialog;
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui2.event.ActivityResult;
+import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
@@ -125,6 +128,8 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         IabUtil.incrementAppLaunchCount(mSettings);
         // check for donations
         IabUtil.queryDonateAsync(getApplicationContext(), mBus);
+
+        handleIntent();
     }
 
     @Override
@@ -147,6 +152,13 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     protected void onStop() {
         super.onStop();
         mPluginConnectionManager.onPause();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (intent == null) return;
+        setIntent(intent);
+        handleIntent();
     }
 
     @Override
@@ -213,6 +225,37 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    void handleIntent() {
+        Intent intent = getIntent();
+        Uri uri = intent.getData();
+        String mimeType = intent.getType();
+        boolean handled = false;
+        if (uri != null && uri.toString().length() > 0) {
+            mMusicService.playFile(uri);
+            handled = true;
+        } else if (MediaStore.Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
+            long id = intent.getLongExtra("playlistId", -1);
+            if (id < 0) {
+                String idString = intent.getStringExtra("playlist");
+                if (idString != null) {
+                    try {
+                        id = Long.parseLong(idString);
+                    } catch (NumberFormatException ignored) { }
+                }
+            }
+            if (id >= 0) {
+                mMusicService.playPlaylist(getApplicationContext(), id, false);
+                handled = true;
+            }
+        }
+        if (handled) {
+            getIntent().setData(null);
+            getIntent().setType(null);
+        } else {
+            mBus.post(new MakeToast(R.string.err_generic));
         }
     }
 
@@ -308,14 +351,6 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
                 mDrawerToggle.syncState();
             }
         });
-    }
-
-    /*
-     * Theme stuff
-     */
-
-    protected void initThemeables() {
-//        Themer.themeToolbar(mToolbar);
     }
 
 }

@@ -750,6 +750,7 @@ public class MusicServiceConnection {
                     iApolloService.openFile(filename);
                     iApolloService.play();
                 } catch (Exception e) {
+                    Timber.e(e, "playFile(%s)", uri != null ? uri.toString() : "null");
                     if (e instanceof RemoteException) {
                         onRemoteException((RemoteException) e);
                     }
