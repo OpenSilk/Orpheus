@@ -27,6 +27,7 @@ import org.opensilk.music.R;
 
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.Lists;
+import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.music.util.CursorHelpers;
 
@@ -86,7 +87,8 @@ public class AddToPlaylistDialog extends DialogFragment implements DialogInterfa
                 CreateNewPlaylist.getInstance(mSongIds).show(getFragmentManager(), "CreatePlaylist");
                 break;
             default:
-
+                MusicUtils.addToPlaylist(getActivity(), mSongIds, mUserPlaylists.get(which-1).mPlaylistId);
+                break;
         }
         dialog.dismiss();
     }
