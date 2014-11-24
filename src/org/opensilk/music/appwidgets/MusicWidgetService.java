@@ -22,19 +22,14 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Process;
-import android.text.TextUtils;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.RemoteViews;
@@ -42,18 +37,17 @@ import android.widget.RemoteViews;
 import com.andrew.apollo.MusicPlaybackService;
 
 import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.AppModule;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 
 import com.andrew.apollo.utils.NavUtils;
-import com.andrew.apollo.utils.ThemeHelper;
 
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProviderUtil;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
+import org.opensilk.music.theme.OrpheusTheme;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -97,12 +91,12 @@ public class MusicWidgetService extends Service {
     public static final int STYLE_LARGE_TWO = 1;
 
     @Inject MusicServiceConnection mMusicService;
+    @Inject AppPreferences mSettings;
 
     private Scheduler.Worker mUpdateWorker;
 
     private AppWidgetManager mAppWidgetManager;
     private ArtworkProviderUtil mArtworkProvider;
-    private ThemeHelper mThemeHelper;
 
     private int mAllocUpperBound;
 
@@ -120,7 +114,6 @@ public class MusicWidgetService extends Service {
         mMusicService.bind();
         mAppWidgetManager = AppWidgetManager.getInstance(this);
         mArtworkProvider = new ArtworkProviderUtil(this);
-        mThemeHelper = ThemeHelper.getInstance(this);
         mUpdateWorker = Schedulers.newThread().createWorker();
         mAllocUpperBound = computeMaximumWidgetBitmapMemory();
     }
@@ -240,6 +233,14 @@ public class MusicWidgetService extends Service {
                 }
         }
 
+        // create a new theme to extract the primary color
+        Resources.Theme theme = getResources().newTheme();
+        OrpheusTheme orpheusTheme = mSettings.getTheme();
+        final int themeRes =
+                mSettings.getBoolean(AppPreferences.WANT_DARK_THEME, false) ? orpheusTheme.dark : orpheusTheme.light;
+        theme.applyStyle(themeRes, true);
+        final int themeColor = ThemeUtils.getThemeAttrColor(theme, R.attr.colorPrimary);
+
         RemoteViews views = new RemoteViews(getPackageName(), layoutId);
 
         /* Album artwork -- set for all widgets */
@@ -256,7 +257,7 @@ public class MusicWidgetService extends Service {
 
         /* Pause / Play -- set for all widgets */
         views.setImageViewResource(R.id.widget_play, meta.isplaying ?
-                R.drawable.ic_action_playback_pause_white : R.drawable.ic_action_playback_play_white);
+                R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
         views.setOnClickPendingIntent(R.id.widget_play, buildPendingIntent(MusicPlaybackService.TOGGLEPAUSE_ACTION));
 
         /* Next / Prev */
@@ -277,35 +278,34 @@ public class MusicWidgetService extends Service {
             views.setOnClickPendingIntent(R.id.widget_repeat, buildPendingIntent(MusicPlaybackService.REPEAT_ACTION));
 
             Drawable drawable;
-
             switch (meta.shuffleMode) {
-                case MusicPlaybackService.SHUFFLE_NONE:
-                    drawable = getResources().getDrawable(R.drawable.ic_action_playback_shuffle_white);
-                    break;
                 case MusicPlaybackService.SHUFFLE_AUTO:
+                case MusicPlaybackService.SHUFFLE_NORMAL:
+                    drawable = ThemeUtils.colorizeBitmapDrawableCopy(this, R.drawable.ic_shuffle_white_36dp, themeColor);
+                    break;
+                case MusicPlaybackService.SHUFFLE_NONE:
                 default:
-                    drawable = mThemeHelper.getPrimaryColorShuffleButtonDrawable();
+                    drawable = getResources().getDrawable(R.drawable.ic_shuffle_white_36dp);
                     break;
             }
             if (drawable != null && drawable instanceof BitmapDrawable) {
                 views.setImageViewBitmap(R.id.widget_shuffle, ((BitmapDrawable) drawable).getBitmap());
-                drawable = null;
             }
 
+            Drawable drawable2;
             switch (meta.repeatMode) {
                 case MusicPlaybackService.REPEAT_ALL:
-                    drawable = mThemeHelper.getPrimaryColorRepeatButtonDrawable();
+                    drawable2 = ThemeUtils.colorizeBitmapDrawableCopy(this, R.drawable.ic_repeat_white_36dp, themeColor);
                     break;
                 case MusicPlaybackService.REPEAT_CURRENT:
-                    drawable = mThemeHelper.getPrimaryColorRepeatOneButtonDrawable();
+                    drawable2 = ThemeUtils.colorizeBitmapDrawableCopy(this, R.drawable.ic_repeat_one_white_36dp, themeColor);
                     break;
                 default:
-                    drawable = getResources().getDrawable(R.drawable.ic_action_playback_repeat_white);
+                    drawable2 = getResources().getDrawable(R.drawable.ic_repeat_white_36dp);
                     break;
             }
-            if (drawable != null && drawable instanceof BitmapDrawable) {
-                views.setImageViewBitmap(R.id.widget_repeat, ((BitmapDrawable) drawable).getBitmap());
-                drawable = null;
+            if (drawable2 != null && drawable2 instanceof BitmapDrawable) {
+                views.setImageViewBitmap(R.id.widget_repeat, ((BitmapDrawable) drawable2).getBitmap());
             }
         }
 

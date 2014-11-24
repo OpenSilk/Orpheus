@@ -18,8 +18,14 @@ package org.opensilk.common.util;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.v7.widget.Toolbar;
@@ -94,13 +100,17 @@ public class ThemeUtils {
      */
 
     public static int getThemeAttrColor(Context context, int attr) {
+        return getThemeAttrColor(context.getTheme(), attr);
+    }
+
+    public static int getThemeAttrColor(Resources.Theme theme, int attr) {
         synchronized (sTypedValue) {
-            if (context.getTheme().resolveAttribute(attr, sTypedValue, true)) {
+            if (theme.resolveAttribute(attr, sTypedValue, true)) {
                 if (sTypedValue.type >= TypedValue.TYPE_FIRST_INT
                         && sTypedValue.type <= TypedValue.TYPE_LAST_INT) {
                     return sTypedValue.data;
                 } else if (sTypedValue.type == TypedValue.TYPE_STRING) {
-                    return context.getResources().getColor(sTypedValue.resourceId);
+                    return theme.getResources().getColor(sTypedValue.resourceId);
                 }
             }
         }
@@ -192,6 +202,29 @@ public class ThemeUtils {
     public static void themeProgressBar(ProgressBar progressBar, int colorAttr) {
         int color = getThemeAttrColor(progressBar.getContext(), colorAttr);
         progressBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
+    }
+
+    public static Drawable colorizeBitmapDrawableCopy(Context context, int resId, int newColor) {
+        final Drawable maskDrawable = context.getResources().getDrawable(resId);
+        if (!(maskDrawable instanceof BitmapDrawable)) {
+            return null;
+        }
+
+        final Bitmap maskBitmap = ((BitmapDrawable) maskDrawable).getBitmap();
+        final int width = maskBitmap.getWidth();
+        final int height = maskBitmap.getHeight();
+
+        final Bitmap outBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(outBitmap);
+        canvas.drawBitmap(maskBitmap, 0, 0, null);
+
+        final Paint maskedPaint = new Paint();
+        maskedPaint.setColor(newColor);
+        maskedPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+
+        canvas.drawRect(0, 0, width, height, maskedPaint);
+
+        return new BitmapDrawable(context.getResources(), outBitmap);
     }
 
 }
