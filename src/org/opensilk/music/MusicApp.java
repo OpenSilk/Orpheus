@@ -32,6 +32,7 @@ import com.bugsense.trace.BugSenseHandler;
 
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
+import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.common.dagger.DaggerInjector;
@@ -160,10 +161,9 @@ public class MusicApp extends Application implements DaggerInjector {
                     = new StrictMode.VmPolicy.Builder()
                     .detectAll()
                     .penaltyLog()
-                    .setClassInstanceLimit(MusicUtils.class, 1)
                     .setClassInstanceLimit(MediaCastManager.class, 1)
                     .setClassInstanceLimit(BitmapDiskLruCache.class, 1)
-                    .setClassInstanceLimit(BitmapDiskLruCache.class, 1)
+                    .setClassInstanceLimit(ArtworkLruCache.class, 1)
                     .setClassInstanceLimit(LauncherActivity.class, 1)
                     .setClassInstanceLimit(ArtworkRequestManagerImpl.class, 1);
             StrictMode.setVmPolicy(vmPolicyBuilder.build());
