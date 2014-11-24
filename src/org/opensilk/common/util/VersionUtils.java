@@ -28,8 +28,20 @@ public class VersionUtils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     }
 
+    public static boolean hasIceCreamSandwichMR1() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1;
+    }
+
     public static boolean hasJellyBean() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
+
+    public static boolean hasJellyBeanMR1() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+    }
+
+    public static boolean hasJellyBeanMR2() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
     }
 
     public static boolean hasKitkat() {
@@ -40,8 +52,12 @@ public class VersionUtils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 
+    public static boolean hasApi14() {
+        return hasIceCreamSandwich();
+    }
+
     public static boolean hasApi15() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1;
+        return hasIceCreamSandwichMR1();
     }
 
     public static boolean hasApi16() {
@@ -49,11 +65,11 @@ public class VersionUtils {
     }
 
     public static boolean hasApi17() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
+        return hasJellyBeanMR1();
     }
 
     public static boolean hasApi18() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
+        return hasJellyBeanMR2();
     }
 
     public static boolean hasApi19() {

@@ -29,6 +29,7 @@ import android.widget.RemoteViews;
 import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.R;
 
 import timber.log.Timber;
@@ -90,7 +91,7 @@ public class NotificationHelper {
             final String trackName, final Bitmap albumArt,
             final boolean isPlaying, MediaSession.Token mediaToken) {
 
-        if (ApolloUtils.hasLollipop()) {
+        if (VersionUtils.hasLollipop()) {
             Timber.d("mediaToken=%s", mediaToken);
             mNotification = new Notification.Builder(mService)
                     .setSmallIcon(R.drawable.stat_notify_music)
@@ -126,7 +127,7 @@ public class NotificationHelper {
                     .build();
             // Control playback from the notification
             initPlaybackActions(isPlaying);
-            if (ApolloUtils.hasJellyBean()) {
+            if (VersionUtils.hasJellyBean()) {
                 // Expanded notifiction style
                 mExpandedView = new RemoteViews(mService.getPackageName(),
                         R.layout.notification_template_expanded_base);
@@ -159,7 +160,7 @@ public class NotificationHelper {
             return;
         }
 
-        if (ApolloUtils.hasLollipop()) {
+        if (VersionUtils.hasLollipop()) {
             mNotification.actions[1] = getPlayPauseAction(isPlaying);
         } else {
             if (mNotificationTemplate != null) {
@@ -167,7 +168,7 @@ public class NotificationHelper {
                         isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
             }
 
-            if (ApolloUtils.hasJellyBean() && mExpandedView != null) {
+            if (VersionUtils.hasJellyBean() && mExpandedView != null) {
                 mExpandedView.setImageViewResource(R.id.notification_expanded_base_play,
                         isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
             }

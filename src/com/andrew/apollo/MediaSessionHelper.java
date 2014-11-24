@@ -39,6 +39,8 @@ import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.MusicUtils;
 import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.common.util.VersionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,9 +57,9 @@ public class MediaSessionHelper {
     private final Impl IMPL;
 
     public MediaSessionHelper(MusicPlaybackService service) {
-        if (ApolloUtils.hasLollipop()) {
+        if (VersionUtils.hasLollipop()) {
             IMPL = new LollipopImpl(service);
-        } else if (ApolloUtils.hasJellyBeanMR2()) {
+        } else if (VersionUtils.hasJellyBeanMR2()) {
             IMPL = new JellybeanMR2Impl(service);
         } else {
             IMPL = new IceCreamSandwichImpl(service);
@@ -150,7 +152,7 @@ public class MediaSessionHelper {
                 setPlaybackState(playState);
             } else if (what.equals(META_CHANGED) || what.equals(QUEUE_CHANGED)) {
                 Bitmap albumArt;
-                if (ApolloUtils.hasKitkat()) {
+                if (VersionUtils.hasKitkat()) {
                     //Kitkat has fullscreen artwork
                     albumArt = mService.getAlbumArt();
                 } else {
