@@ -16,6 +16,6 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
+<!--note this is not reversed with add_playlist-->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_shuffle_white_24dp"
-    android:tint="?android:attr/colorControlNormal"/>
+        android:src="@drawable/ic_playlist_add_white_24dp"/>

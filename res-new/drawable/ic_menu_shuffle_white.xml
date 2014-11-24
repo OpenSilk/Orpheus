@@ -16,14 +16,5 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <item
-        android:id="@+id/menu_sleep_timer"
-        android:title="@string/menu_sleep_timer"
-        android:orderInCategory="90"
-        android:icon="@drawable/ic_menu_av_timer_white"
-        app:showAsAction="ifRoom" />
-
-</menu>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+        android:src="@drawable/ic_shuffle_white_24dp"/>

@@ -16,8 +16,11 @@
   ~ limitations under the License.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/popup_shuffle_all"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_menu_shuffle_white"
         android:title="@string/menu_shuffle"/>
 </menu>

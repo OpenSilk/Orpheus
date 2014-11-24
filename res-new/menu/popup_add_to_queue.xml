@@ -16,8 +16,11 @@
   ~ limitations under the License.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/popup_add_to_queue"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_menu_add_queue_white"
         android:title="@string/add_to_queue"/>
 </menu>
