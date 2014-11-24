@@ -1,5 +1,5 @@
 
-package com.andrew.apollo.loaders;
+package org.opensilk.common.content;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
