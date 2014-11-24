@@ -318,7 +318,7 @@ public class CursorHelpers {
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_ARTIST_SONGS,
                 SelectionArgs.LOCAL_ARTIST_SONGS(artistId),
-                SortOrder.LOCAL_ARTIST_SONGS);
+                SortOrder.SongSortOrder.SONG_ALBUM);
     }
 
     public static long[] getSongIdsForArtist(Context context, long artistId) {
@@ -327,7 +327,7 @@ public class CursorHelpers {
                 Projections.ID_ONLY,
                 Selections.LOCAL_ARTIST_SONGS,
                 SelectionArgs.LOCAL_ARTIST_SONGS(artistId),
-                SortOrder.LOCAL_ARTIST_SONGS);
+                SortOrder.SongSortOrder.SONG_ALBUM);
         if (cursor != null) {
             try {
                 return getSongIdsForCursor(cursor);
@@ -435,7 +435,7 @@ public class CursorHelpers {
                 Projections.ID_ONLY,
                 Selections.LOCAL_ALBUM_SONGS,
                 SelectionArgs.LOCAL_ALBUM_SONGS(albumid),
-                SortOrder.LOCAL_ALBUM_SONGS);
+                SortOrder.AlbumSongSortOrder.SONG_TRACK_LIST);
         if (cursor != null) {
             try {
                 return getSongIdsForCursor(cursor);
@@ -452,7 +452,7 @@ public class CursorHelpers {
                 Projections.LOCAL_SONG,
                 Selections.LOCAL_ALBUM_SONGS,
                 SelectionArgs.LOCAL_ALBUM_SONGS(id),
-                SortOrder.LOCAL_ALBUM_SONGS);
+                SortOrder.AlbumSongSortOrder.SONG_TRACK_LIST);
         if (cursor != null) {
             try {
                 LocalSong[] songs = new LocalSong[cursor.getCount()];

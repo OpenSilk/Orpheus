@@ -21,24 +21,11 @@ import android.provider.MediaStore;
 /**
  * Created by drew on 7/16/14.
  */
-public class SortOrder {
-    public static final String LOCAL_ALBUM_SONGS;
-    public static final String SONG_GROUP;
-    public static final String LAST_ADDED;
-    public static final String PLAYLIST_MEMBERS;
-    public static final String LOCAL_ARTIST_SONGS;
-    public static final String GENRE_MEMBERS;
-    public static final String LOCAL_ALBUMS;
+public interface SortOrder {
 
-    static {
-        LOCAL_ALBUM_SONGS = MediaStore.Audio.Media.TRACK + ", " + MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
-        SONG_GROUP = MediaStore.Audio.AudioColumns.ALBUM_KEY + ", " + LOCAL_ALBUM_SONGS;
-        LAST_ADDED = MediaStore.Audio.AudioColumns.DATE_ADDED + " DESC";
-        PLAYLIST_MEMBERS = MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER;
-        LOCAL_ARTIST_SONGS = MediaStore.Audio.AudioColumns.ALBUM_KEY + ", " + LOCAL_ALBUM_SONGS;
-        GENRE_MEMBERS = MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER;
-        LOCAL_ALBUMS = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER;
-    }
+    String LAST_ADDED = MediaStore.Audio.AudioColumns.DATE_ADDED + " DESC";
+    String PLAYLIST_MEMBERS = MediaStore.Audio.Playlists.Members.DEFAULT_SORT_ORDER;
+    String GENRE_MEMBERS = MediaStore.Audio.Genres.Members.DEFAULT_SORT_ORDER;
 
     public interface ArtistSortOrder {
         String ARTIST_A_Z = MediaStore.Audio.Artists.DEFAULT_SORT_ORDER;

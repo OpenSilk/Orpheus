@@ -81,7 +81,7 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
                             Projections.LOCAL_SONG,
                             Selections.LOCAL_ARTIST_SONGS,
                             SelectionArgs.LOCAL_ARTIST_SONGS(artist.artistId),
-                            SortOrder.LOCAL_ARTIST_SONGS
+                            SortOrder.SongSortOrder.SONG_ALBUM
                     ) {
                         @Override
                         protected LocalSong makeFromCursor(Cursor c) {
