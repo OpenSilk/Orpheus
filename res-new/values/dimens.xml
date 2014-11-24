@@ -46,4 +46,7 @@
     <dimen name="hero_margin_bottom">2dp</dimen>
     <dimen name="hero_margin_right">2dp</dimen>
     <dimen name="hero_margin_left">2dp</dimen>
+
+    <!--main-->
+    <dimen name="main_top_margin">?actionBarSize</dimen>
 </resources>

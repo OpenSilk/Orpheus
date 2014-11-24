@@ -17,4 +17,7 @@
 
 <resources>
     <integer name="grid_columns">6</integer>
+
+    <!--main-->
+    <dimen name="main_top_margin">0dp</dimen>
 </resources>

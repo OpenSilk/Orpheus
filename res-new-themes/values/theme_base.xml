@@ -91,7 +91,7 @@
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
     </style>
 
-    <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.DialogWhenLarge">
         <!--NoActionBar-->
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
