@@ -129,7 +129,9 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         // check for donations
         IabUtil.queryDonateAsync(getApplicationContext(), mBus);
 
-        handleIntent();
+        if (savedInstanceState == null) {
+            handleIntent();
+        }
     }
 
     @Override
@@ -164,6 +166,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.sleep_timer, menu);
+        getMenuInflater().inflate(R.menu.search, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -175,6 +178,9 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         switch (item.getItemId()) {
             case R.id.menu_sleep_timer:
                 new SleepTimerDialog().show(getSupportFragmentManager(), "SleepTimer");
+                return true;
+            case R.id.menu_search:
+                mBus.post(new StartActivityForResult(new Intent(this, SearchActivity.class), 0));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -258,7 +264,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
                 mBus.post(new MakeToast(R.string.err_generic));
             }
         }
-        intent.setAction(null);
+//        intent.setAction(null);
     }
 
     /*

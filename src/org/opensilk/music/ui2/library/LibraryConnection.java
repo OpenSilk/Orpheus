@@ -48,8 +48,8 @@ import static org.opensilk.common.util.UncheckedThrow.rethrow;
 public class LibraryConnection {
 
     public static class Result {
-        final List<Bundleable> items;
-        final Bundle token;
+        public final List<Bundleable> items;
+        public final Bundle token;
 
         public Result(List<Bundleable> items, Bundle token) {
             this.items = items;
@@ -184,6 +184,31 @@ public class LibraryConnection {
                                     remoteLibrary.listSongsInFolder(libraryInfo.libraryId,
                                             libraryInfo.folderId, STEP, previousBundle,
                                             new Callback(libraryInfo, subscriber, false));
+                                } catch (RemoteException e) {
+                                    connectionManager.onException(pluginInfo.componentName);
+                                    if (!subscriber.isUnsubscribed()) subscriber.onError(e);
+                                }
+                            }
+                        });
+                    }
+                });
+    }
+
+    public Observable<Result> search(final PluginInfo pluginInfo, final LibraryInfo libraryInfo, final String query) {
+        return getObservable(pluginInfo)
+                .flatMap(new Func1<RemoteLibrary, Observable<Result>>() {
+                    @Override
+                    public Observable<Result> call(final RemoteLibrary remoteLibrary) {
+                        return Observable.create(new Observable.OnSubscribe<Result>() {
+                            @Override
+                            public void call(Subscriber<? super Result> subscriber) {
+                                try {
+                                    remoteLibrary.search(libraryInfo.libraryId,
+                                            query,
+                                            100,
+                                            null,
+                                            new Callback(libraryInfo, subscriber, false)
+                                    );
                                 } catch (RemoteException e) {
                                     connectionManager.onException(pluginInfo.componentName);
                                     if (!subscriber.isUnsubscribed()) subscriber.onError(e);

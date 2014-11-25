@@ -16,14 +16,17 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui2.search.SearchListView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="?mainContentTopMargin">
-
-    <include layout="@layout/list_recycler_base"/>
-
-</org.opensilk.music.ui2.search.SearchListView>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="@android:id/text1"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textAppearance="?android:attr/textAppearance"
+          android:textColor="?android:attr/textColorSecondary"
+          android:textStyle="bold"
+          android:gravity="center_vertical"
+          android:paddingLeft="16dp"
+          android:paddingRight="16dp"
+          android:minHeight="?android:attr/listPreferredItemHeightSmall"
+          android:ellipsize="end"
+          android:singleLine="true"
+          android:textAllCaps="true"/>

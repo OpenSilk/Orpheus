@@ -17,40 +17,38 @@
 
 package org.opensilk.music.ui2;
 
-import android.app.SearchManager;
-import android.app.SearchableInfo;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.provider.MediaStore;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.SearchView;
-import android.text.TextUtils;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.inputmethod.InputMethodManager;
 
-import com.andrew.apollo.model.LocalAlbum;
-import com.andrew.apollo.model.LocalArtist;
-import com.andrew.apollo.model.LocalSong;
-
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.R;
+import org.opensilk.music.theme.OrpheusTheme;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.main.Main;
+import org.opensilk.music.ui2.search.SearchScreen;
+import org.opensilk.music.ui2.search.SearchViewOwner;
 
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Provides;
 
 import static android.app.SearchManager.QUERY;
 
 /**
  * Created by drew on 11/9/14.
  */
-public class SearchActivity extends BaseSwitcherToolbarActivity implements SearchView.OnQueryTextListener {
+public class SearchActivity extends BaseSwitcherToolbarActivity {
 
     public static class Blueprint extends BaseMortarActivity.Blueprint {
 
@@ -73,25 +71,14 @@ public class SearchActivity extends BaseSwitcherToolbarActivity implements Searc
             injects = SearchActivity.class
     )
     public static class Module {
-
+        @Provides @Singleton
+        public SearchViewOwner provideSearchviewOwner() {
+            return new SearchViewOwner();
+        }
     }
 
-    SearchView mSearchView;
-    String mFilterString;
-
-    // From MediaProvider data1 and data2 only have values for artists
-    // apparently, this is kind of annoying, we might look into
-    // basic search in the future but its projection is beyond me.
-    private String[] mSearchColsFancy = new String[] {
-            android.provider.BaseColumns._ID,
-            MediaStore.Audio.Media.MIME_TYPE,
-            MediaStore.Audio.Artists.ARTIST,
-            MediaStore.Audio.Albums.ALBUM,
-            MediaStore.Audio.Media.TITLE,
-            "data1",
-            "data2",
-    };
-
+    @Inject SearchViewOwner mSearchViewOwner;
+    @Inject PluginConnectionManager mPluginConnectionManager;
 
     @Override
     protected mortar.Blueprint getBlueprint(String scopeName) {
@@ -99,9 +86,14 @@ public class SearchActivity extends BaseSwitcherToolbarActivity implements Searc
     }
 
     @Override
+    protected void setupTheme() {
+        OrpheusTheme orpheusTheme = mSettings.getTheme();
+        setTheme(mSettings.isDarkTheme() ? orpheusTheme.dark : orpheusTheme.light);
+    }
+
+    @Override
     public Screen getDefaultScreen() {
-        return new Screen() {
-        };
+        return new SearchScreen();
     }
 
     @Override
@@ -109,153 +101,89 @@ public class SearchActivity extends BaseSwitcherToolbarActivity implements Searc
         setContentView(R.layout.main);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setUpButtonEnabled(true);
-        getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+//        setUpButtonEnabled(true);
+//        getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
 
-        if (savedInstanceState != null) {
-            mFilterString = savedInstanceState.getString("query");
-        } else {
+        AppFlow.loadInitialScreen(this);
+
+        if (savedInstanceState == null) {
             onNewIntent(getIntent());
         }
     }
 
     @Override
-    public void onNewIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            mFilterString = intent.getStringExtra(QUERY);
-            if (!TextUtils.isEmpty(mFilterString)) {
-                if (mSearchView != null) {
-                    mSearchView.setQuery(mFilterString, false);
-                }
-                restartLoaders();
-                hideKeyboard();
-            }
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!mConfigurationChangeIncoming) {
+            // Release service connection
+            mPluginConnectionManager.onDestroy();
         }
-//        setIntent(intent);
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString("query", mFilterString);
+    protected void onStart() {
+        super.onStart();
+        mPluginConnectionManager.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mPluginConnectionManager.onPause();
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        if (intent == null) return;
+//        setIntent(intent);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            mSearchViewOwner.notifyNewQuery(intent.getStringExtra(QUERY));
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Search view
-        getMenuInflater().inflate(R.menu.searchview, menu);
-        MenuItem searchItem = menu.findItem(R.id.menu_searchview);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        mSearchView.setOnQueryTextListener(this);
-        mSearchView.setIconified(false);
-        if (!TextUtils.isEmpty(mFilterString)) {
-            mSearchView.setQuery(mFilterString, false);
-        }
-        // Add voice search
-        final SearchManager searchManager = (SearchManager)getSystemService(Context.SEARCH_SERVICE);
-        final SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
-        mSearchView.setSearchableInfo(searchableInfo);
-        return true;
-    }
-
-    void restartLoaders() {
-//        final Uri uri = Uri.parse("content://media/external/audio/search/fancy/"
-//                + Uri.encode(mFilterString));
-//        return new CursorLoader(getActivity(), uri, mSearchColsFancy, null, null, null);
-    }
-
-    private void hideKeyboard() {
-        // When the search is "committed" by the user, then hide the keyboard so
-        // the user can more easily browse the list of results.
-        if (mSearchView != null) {
-            final InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+        if (mMenuConfig != null) {
+            for (int item : mMenuConfig.menus) {
+                getMenuInflater().inflate(item, menu);
             }
-            mSearchView.clearFocus();
+            for (ActionBarOwner.CustomMenuItem item : mMenuConfig.customMenus) {
+                menu.add(item.groupId, item.itemId, item.order, item.title)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                if (item.iconRes >= 0) {
+                    menu.findItem(item.itemId)
+                            .setIcon(item.iconRes)
+                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                }
+            }
         }
-    }
-
-    /*
-     * implement QueryTextListener
-     */
-
-    @Override
-    public boolean onQueryTextSubmit(final String query) {
-        if (TextUtils.isEmpty(query)) return false;
-        hideKeyboard();
+        // Search view
+        MenuItem searchItem = menu.findItem(R.id.menu_searchview);
+        if (searchItem != null) {
+            mSearchViewOwner.notifySearchViewCreated(
+                    (SearchView) MenuItemCompat.getActionView(searchItem)
+            );
+        }
         return true;
     }
 
     @Override
-    public boolean onQueryTextChange(final String newText) {
-        if (TextUtils.isEmpty(newText)) return false;
-        // Called when the action bar search text has changed. Update
-        // the search filter, and restart the loader to do a new query
-        // with this filter.
-        mFilterString = newText;
-        restartLoaders();
-        return true;
-    }
-
-    protected Object getCardFromCursor(Cursor cursor) {
-        // Get the MIME type
-        final String mimetype = cursor.getString(cursor
-                .getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
-    /*
-        if (mimetype.equals("artist")) {
-            // get id
-            final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-            // Get the artist name
-            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
-            // Get the album count
-            final int albumCount = cursor.getInt(cursor.getColumnIndexOrThrow("data1"));
-            // Get the song count
-            final int songCount = cursor.getInt(cursor.getColumnIndexOrThrow("data2"));
-            // Build artist
-            final LocalArtist artist = new LocalArtist(id, name, songCount, albumCount);
-            final ArtistCard card = new ArtistCard(getContext(), artist);
-            card.useListLayout();
-            mInjector.inject(card);
-            return card;
-        } else if (mimetype.equals("album")) {
-            // Get the Id of the album
-            final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-            // Get the album name
-            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
-            // Get the artist nam
-            final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
-            // generate artwork uri
-            final Uri artworkUri = CursorHelpers.generateArtworkUri(id);
-            // Build the album as best we can
-            final LocalAlbum album = new LocalAlbum(id, name, artist, 0, null, artworkUri);
-            final AlbumCard card = new AlbumCard(getContext(), album);
-            card.useListLayout();
-            mInjector.inject(card);
-            return card;
-        } else { // audio
-            // get id
-            final long id = cursor.getLong(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-            // Get the track name
-            final String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-            // Get the album name
-            final String album = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
-            // get artist name
-            final String artist = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-            // build the song as best we can
-            final LocalSong song = new LocalSong(id, name, album, artist, null, 0, 0, CursorHelpers.generateDataUri(id), null, mimetype);
-            final SongCard card = new SongCard(getContext(), song);
-            card.useSimpleLayout();
-//            mInjector.inject(card);
-            return card;
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mMenuConfig != null
+                && mMenuConfig.actionHandler != null
+                && mMenuConfig.actionHandler.call(item.getItemId())) {
+            return true;
         }
-        */
-        return null;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                return onSupportNavigateUp();
+            default:
+                return false;
+        }
     }
 
 }

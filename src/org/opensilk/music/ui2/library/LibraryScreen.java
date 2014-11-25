@@ -315,11 +315,6 @@ public class LibraryScreen extends Screen {
             // Common items
             builder.withMenus(LibraryOverflowHandlers.Bundleables.MENUS_COLLECTION);
 
-            // search
-            if (pluginConfig.hasAbility(PluginConfig.SEARCHABLE)) {
-                builder.withMenus(R.menu.search);
-            }
-
             // device selection
             String selectName = pluginConfig.getMeta(PluginConfig.META_MENU_NAME_PICKER);
             if (!TextUtils.isEmpty(selectName)) {
@@ -353,10 +348,6 @@ public class LibraryScreen extends Screen {
                 @Override
                 public Boolean call(final Integer integer) {
                     switch (integer) {
-                        case R.id.menu_search:
-                            bus.post(new MakeToast(R.string.err_unimplemented));
-                            //TODO
-                            return true;
                         case R.id.menu_change_source:
                             settings.removeDefaultLibraryInfo(pluginInfo);
                             if (getView() != null) {

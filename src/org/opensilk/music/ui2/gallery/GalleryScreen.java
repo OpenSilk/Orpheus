@@ -118,7 +118,7 @@ public class GalleryScreen extends Screen {
             ActionBarOwner.MenuConfig.Builder builder = new ActionBarOwner.MenuConfig.Builder();
 
             builder.setActionHandler(delegateActionHandler);
-            builder.withMenus(R.menu.shuffle, R.menu.search);
+            builder.withMenus(R.menu.shuffle);
 
             if (menuConfig != null) {
                 delegateActionHandler.setDelegate(menuConfig.actionHandler);
@@ -146,9 +146,6 @@ public class GalleryScreen extends Screen {
             @Override
             public Boolean call(Integer integer) {
                 switch (integer) {
-                    case R.id.menu_search:
-                        //TODO
-                        return true;
                     case R.id.menu_shuffle:
                         musicService.startPartyShuffle();
                         return true;

@@ -19,38 +19,20 @@ package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
 import android.os.Parcelable;
-import android.support.v4.widget.ContentLoadingProgressBar;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
-import org.opensilk.music.R;
+import org.opensilk.music.widgets.RecyclerListFrame;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import mortar.Mortar;
 import mortar.ViewPresenter;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/21/14.
  */
-public class GalleryPageView extends FrameLayout {
-
-    @InjectView(R.id.list_container) View mListContainer;
-    @InjectView(R.id.recyclerview) RecyclerView mList;
-    @InjectView(R.id.empty_view) View mEmptyView;
-    @InjectView(R.id.empty_text) TextView mEmptyText;
-    @InjectView(R.id.loading_progress) ContentLoadingProgressBar mProgressContainer;
-
-    boolean mLoadingShown;
-    boolean mListShown;
-    boolean mEmptyShown;
+public class GalleryPageView extends RecyclerListFrame {
 
     @Inject ViewPresenter<GalleryPageView> presenter;
 
@@ -96,88 +78,6 @@ public class GalleryPageView extends FrameLayout {
 
     public ViewPresenter<GalleryPageView> getPresenter() {
         return presenter;
-    }
-
-    public RecyclerView getListView() {
-        return mList;
-    }
-
-    public void setEmptyText(int stringRes) {
-        mEmptyText.setText(getContext().getString(stringRes));
-    }
-
-    public void setLoading(boolean shown) {
-        if (mLoadingShown == shown) {
-            return;
-        }
-        mLoadingShown = shown;
-        // this is on a delay so we always animate
-        mProgressContainer.setAnimation(AnimationUtils.loadAnimation(
-                getContext(), shown ? android.R.anim.fade_in : android.R.anim.fade_out));
-        if (shown) {
-            mProgressContainer.show();
-        } else {
-            mProgressContainer.hide();
-        }
-    }
-
-    public void setListShown(boolean shown, boolean animate) {
-        if (mListShown == shown) {
-            return;
-        }
-        mListShown = shown;
-        if (animate) {
-            mListContainer.startAnimation(AnimationUtils.loadAnimation(
-                    getContext(), shown ? android.R.anim.fade_in : android.R.anim.fade_out));
-        } else {
-            mListContainer.clearAnimation();
-        }
-        setLoading(!shown);
-        if (shown) {
-            mListContainer.setVisibility(View.VISIBLE);
-        } else {
-            mListContainer.setVisibility(View.GONE);
-        }
-    }
-
-    public void setListEmpty(boolean shown, boolean animate) {
-        if (mEmptyShown == shown) {
-            return;
-        }
-        mEmptyShown = shown;
-        if (shown) {
-            if (mListShown) {
-                if (animate) {
-                    mList.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
-                    mEmptyView.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
-                } else {
-                    mList.clearAnimation();
-                    mEmptyView.clearAnimation();
-                }
-                mList.setVisibility(GONE);
-                mEmptyView.setVisibility(VISIBLE);
-            } else {
-                mList.setVisibility(GONE);
-                mEmptyView.setVisibility(VISIBLE);
-                setListShown(true, animate);
-            }
-        } else {
-            if (mListShown) {
-                if (animate) {
-                    mEmptyView.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
-                    mList.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
-                } else {
-                    mEmptyView.clearAnimation();
-                    mList.clearAnimation();
-                }
-                mEmptyView.setVisibility(GONE);
-                mList.setVisibility(VISIBLE);
-            } else {
-                mEmptyView.setVisibility(GONE);
-                mList.setVisibility(VISIBLE);
-                setListShown(true, animate);
-            }
-        }
     }
 
 }
