@@ -66,31 +66,15 @@ public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (mMenuConfig != null) {
-            for (int item : mMenuConfig.menus) {
-                getMenuInflater().inflate(item, menu);
-            }
-            for (ActionBarOwner.CustomMenuItem item : mMenuConfig.customMenus) {
-                menu.add(item.groupId, item.itemId, item.order, item.title)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                if (item.iconRes >= 0) {
-                    menu.findItem(item.itemId)
-                            .setIcon(item.iconRes)
-                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                }
-            }
-        }
-        return super.onCreateOptionsMenu(menu);
+        super.onCreateOptionsMenu(menu);
+        populateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mMenuConfig != null
-                && mMenuConfig.actionHandler != null
-                && mMenuConfig.actionHandler.call(item.getItemId())) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return handleOptionItemSelected(item)
+                || super.onOptionsItemSelected(item);
     }
 
     /*
@@ -131,5 +115,29 @@ public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
     @Override
     public void setTransparentActionbar(boolean yes) {
         mToolbar.getBackground().setAlpha(yes ? 0 : 255);
+    }
+
+    protected void populateOptionsMenu(Menu menu) {
+        if (mMenuConfig != null) {
+            for (int item : mMenuConfig.menus) {
+                getMenuInflater().inflate(item, menu);
+            }
+            for (ActionBarOwner.CustomMenuItem item : mMenuConfig.customMenus) {
+                menu.add(item.groupId, item.itemId, item.order, item.title)
+                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                if (item.iconRes >= 0) {
+                    menu.findItem(item.itemId)
+                            .setIcon(item.iconRes)
+                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                }
+            }
+        }
+    }
+
+
+    protected boolean handleOptionItemSelected(MenuItem item) {
+        return mMenuConfig != null
+                && mMenuConfig.actionHandler != null
+                && mMenuConfig.actionHandler.call(item.getItemId());
     }
 }

@@ -75,6 +75,10 @@ public class LetterTileDrawable extends Drawable {
         }
     }
 
+    public static LetterTileDrawable fromText(Resources res, String identifier) {
+        return new LetterTileDrawable(res).setText(identifier);
+    }
+
     @Override
     public void draw(final Canvas canvas) {
         final Rect bounds = getBounds();
@@ -208,8 +212,9 @@ public class LetterTileDrawable extends Drawable {
         mOffset = offset;
     }
 
-    public void setText(final String identifier) {
+    public LetterTileDrawable setText(final String identifier) {
         mIdentifier = identifier;
+        return this;
     }
 
     public void setIsCircular(boolean isCircle) {

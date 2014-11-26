@@ -141,13 +141,13 @@
         </activity>
 
         <activity android:name="org.opensilk.music.ui2.NowPlayingActivity"
-                  android:theme="@style/Theme.Profile.Light">
+                  android:theme="@style/Theme.Dark">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <activity android:name="org.opensilk.music.ui2.SearchActivity"
-            android:theme="@style/Theme.Profile.Light"
+            android:theme="@style/Theme.Dark"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -165,19 +165,19 @@
         <activity
             android:name="org.opensilk.music.ui.settings.SettingsActivity"
             android:label="@string/menu_settings"
-            android:theme="@style/Theme.Settings.Light">
+            android:theme="@style/Theme.Settings.Dark">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
         <activity android:name="org.opensilk.music.ui.settings.FolderPickerActivity"
-            android:theme="@style/Theme.Settings.Light">
+            android:theme="@style/Theme.Settings.Dark">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.opensilk.music.ui.settings.SettingsActivity"/>
         </activity>
 
         <activity android:name="org.opensilk.music.ui.settings.ThemePickerActivity"
-                  android:theme="@style/Theme.Settings.Light">
+                  android:theme="@style/Theme.Settings.Dark">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value="org.opensilk.music.ui.settings.SettingsActivity"/>
         </activity>
@@ -188,7 +188,7 @@
             android:taskAffinity=""
             android:excludeFromRecents="true"
             android:exported="true"
-            android:theme="@android:style/Theme.Holo">
+            android:theme="@android:style/Theme.DeviceDefault">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
             </intent-filter>

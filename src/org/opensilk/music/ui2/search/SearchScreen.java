@@ -33,13 +33,12 @@ import org.opensilk.music.ui2.SearchActivity;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.library.LibraryConnection;
 import org.opensilk.music.ui2.loader.PluginLoader;
+import org.opensilk.music.ui2.loader.SearchLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -68,7 +67,10 @@ public class SearchScreen extends Screen {
 
     @dagger.Module(
         addsTo = SearchActivity.Module.class,
-        injects = SearchListView.class
+        injects = {
+                SearchListView.class,
+                SearchAdapter.class
+        }
     )
     public static class Module {
 
@@ -168,6 +170,12 @@ public class SearchScreen extends Screen {
                                                 getView().getContext().getString(R.string.my_library)
                                         ));
                                         getView().adapter.addAll(objects);
+                                    }
+                                }
+
+                                @Override
+                                public void onCompleted() {
+                                    if (getView() != null) {
                                         getView().setListShown(true, true);
                                     }
                                 }
@@ -196,6 +204,12 @@ public class SearchScreen extends Screen {
                                             holder.pluginInfo.title.toString()
                                     ));
                                     getView().adapter.addAll(list);
+                                }
+                            }
+
+                            @Override
+                            public void onCompleted() {
+                                if (getView() != null) {
                                     getView().setListShown(true, true);
                                 }
                             }

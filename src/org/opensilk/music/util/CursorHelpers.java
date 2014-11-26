@@ -30,12 +30,15 @@ import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicStore;
 
+import org.opensilk.music.BuildConfig;
 import org.opensilk.music.GraphHolder;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.ui2.loader.OrderPreservingCursor;
 
 import java.util.Collection;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 2/22/14.
@@ -270,12 +273,12 @@ public class CursorHelpers {
                 sortOrder);
     }
 
-    public static Cursor makeSingleLocalSongCursor(final Context context, long id) {
+    public static Cursor getSingleLocalSongCursor(Context context, long id) {
         return context.getContentResolver().query(
                 Uris.EXTERNAL_MEDIASTORE_MEDIA,
                 Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG + " AND " + BaseColumns._ID + "=" + String.valueOf(id),
-                SelectionArgs.LOCAL_SONG,
+                BaseColumns._ID + "=?",
+                new String[]{String.valueOf(id)},
                 null);
     }
 
@@ -371,6 +374,15 @@ public class CursorHelpers {
                 Selections.LOCAL_ALBUM,
                 SelectionArgs.LOCAL_ALBUM,
                 MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+    }
+
+    public static Cursor getSingleLocalAlbumCursor(Context context, long id) {
+        return context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_ALBUMS,
+                Projections.LOCAL_ALBUM,
+                BaseColumns._ID + "=?",
+                new String[]{String.valueOf(id)},
+                null);
     }
 
     public static LocalSong[] makeLocalSongList(Context context, Uri uri, String[] projection,
@@ -553,7 +565,7 @@ public class CursorHelpers {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-//            Timber.e(e, "getStringOrEmpty("+col+")");
+            if (BuildConfig.DEBUG) Timber.e(e, "getStringOrEmpty(" + col + ")");
             return sEmptyString;
         }
     }
@@ -562,7 +574,7 @@ public class CursorHelpers {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-//            Timber.e(e, "getStringOrNull("+col+")");
+            if (BuildConfig.DEBUG) Timber.e(e, "getStringOrNull("+col+")");
             return null;
         }
     }
@@ -571,7 +583,7 @@ public class CursorHelpers {
         try {
             return c.getLong(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-//            Timber.e(e, "getLongOrZero("+col+")");
+            if (BuildConfig.DEBUG) Timber.e(e, "getLongOrZero("+col+")");
             return 0;
         }
     }
@@ -580,7 +592,7 @@ public class CursorHelpers {
         try {
             return c.getInt(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-//            Timber.e(e, "getIntOrZero("+col+")");
+            if (BuildConfig.DEBUG) Timber.e(e, "getIntOrZero("+col+")");
             return 0;
         }
     }

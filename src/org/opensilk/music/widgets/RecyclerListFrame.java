@@ -80,6 +80,7 @@ public class RecyclerListFrame extends FrameLayout {
     }
 
     public void setListShown(boolean shown, boolean animate) {
+        setLoading(!shown);
         if (mListShown == shown) {
             return;
         }
@@ -90,7 +91,6 @@ public class RecyclerListFrame extends FrameLayout {
         } else {
             mListContainer.clearAnimation();
         }
-        setLoading(!shown);
         if (shown) {
             mListContainer.setVisibility(View.VISIBLE);
         } else {

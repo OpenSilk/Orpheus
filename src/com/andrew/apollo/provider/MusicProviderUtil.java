@@ -33,7 +33,6 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui2.loader.OrderPreservingCursor;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
-import org.opensilk.music.util.Selections;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +75,7 @@ public class MusicProviderUtil {
     }
 
     public static long insertFromMediaStore(Context context, long mediaStoreId) {
-        Cursor c = CursorHelpers.makeSingleLocalSongCursor(context, mediaStoreId);
+        Cursor c = CursorHelpers.getSingleLocalSongCursor(context, mediaStoreId);
         if (c != null) {
             try {
                 if (c.moveToFirst()) {

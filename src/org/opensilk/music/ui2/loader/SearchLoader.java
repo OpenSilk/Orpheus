@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui2.search;
+package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -28,40 +28,26 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 
 import javax.inject.Inject;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 11/24/14.
  */
 public class SearchLoader extends RxCursorLoader<Object> {
 
-    // From MediaProvider data1 and data2 only have values for artists
-    // apparently, this is kind of annoying, we might look into
-    // basic search in the future but its projection is beyond me.
-    static final String[] SEARCH_COLS_FANCY = new String[] {
-            android.provider.BaseColumns._ID,
-            MediaStore.Audio.Media.MIME_TYPE,
-            MediaStore.Audio.Artists.ARTIST,
-            MediaStore.Audio.Albums.ALBUM,
-            MediaStore.Audio.Media.TITLE,
-            "data1",
-            "data2",
-    };
-
     @Inject
     public SearchLoader(@ForApplication Context context) {
         super(context);
-        setProjection(SEARCH_COLS_FANCY);
     }
 
     @Override
     protected Object makeFromCursor(Cursor c) {
         // Get the MIME type
-        final String mimetype =
-                c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+        final String mimetype = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
         if (mimetype.equals("artist")) {
             // get id
             final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
@@ -79,26 +65,47 @@ public class SearchLoader extends RxCursorLoader<Object> {
             // Get the album name
             final String name = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
             // Get the artist nam
-            final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST));
+            final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
             // generate artwork uri
             final Uri artworkUri = CursorHelpers.generateArtworkUri(id);
-            // Build the album as best we can
-            return new LocalAlbum(id, name, artist, 0, null, artworkUri);
+            Cursor c2 = CursorHelpers.getSingleLocalAlbumCursor(context, id);
+            try {
+                if (c2 != null && c2.moveToFirst()) {
+                    return CursorHelpers.makeLocalAlbumFromCursor(c2);
+                } else {
+                    Timber.w("Unable to query for album %d", id);
+                    // Build the album as best we can
+                    return new LocalAlbum(id, name, artist, 0, null, artworkUri);
+                }
+            } finally {
+                if (c2 != null) c2.close();
+            }
         } else { // audio
             // get id
             final long id = c.getLong(c.getColumnIndexOrThrow(BaseColumns._ID));
             // Get the track name
             final String name = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
             // Get the album name
-            final String album = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM));
+            final String album = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
             // get artist name
-            final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST));
-            // build the song as best we can
-            return new LocalSong(id, name, album, artist, null, 0, 0, CursorHelpers.generateDataUri(id), null, mimetype);
+            final String artist = c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
+            Cursor c2 = CursorHelpers.getSingleLocalSongCursor(context, id);
+            try {
+                if (c2 != null && c2.moveToFirst()) {
+                    return CursorHelpers.makeLocalSongFromCursor(c2);
+                } else {
+                    Timber.w("Unable to query for song %d", id);
+                    // build the song as best we can
+                    return new LocalSong(id, name, album, artist, null, 0, 0, CursorHelpers.generateDataUri(id), null, mimetype);
+                }
+            } finally {
+                if (c2 != null) c2.close();
+            }
         }
     }
 
     public SearchLoader setFilter(String filter) {
+//        final Uri uri = Uri.parse("content://media/external/audio/search/search_suggest_query/" + Uri.encode(filter));
         final Uri uri = Uri.parse("content://media/external/audio/search/fancy/" + Uri.encode(filter));
         setUri(uri);
         reset();

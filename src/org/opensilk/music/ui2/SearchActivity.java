@@ -116,6 +116,15 @@ public class SearchActivity extends BaseSwitcherToolbarActivity {
     }
 
     @Override
+    public void onNewIntent(Intent intent) {
+        if (intent == null) return;
+//        setIntent(intent);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            mSearchViewOwner.notifyNewQuery(intent.getStringExtra(QUERY));
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (!mConfigurationChangeIncoming) {
@@ -137,30 +146,8 @@ public class SearchActivity extends BaseSwitcherToolbarActivity {
     }
 
     @Override
-    public void onNewIntent(Intent intent) {
-        if (intent == null) return;
-//        setIntent(intent);
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            mSearchViewOwner.notifyNewQuery(intent.getStringExtra(QUERY));
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (mMenuConfig != null) {
-            for (int item : mMenuConfig.menus) {
-                getMenuInflater().inflate(item, menu);
-            }
-            for (ActionBarOwner.CustomMenuItem item : mMenuConfig.customMenus) {
-                menu.add(item.groupId, item.itemId, item.order, item.title)
-                        .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                if (item.iconRes >= 0) {
-                    menu.findItem(item.itemId)
-                            .setIcon(item.iconRes)
-                            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-                }
-            }
-        }
+        populateOptionsMenu(menu);
         // Search view
         MenuItem searchItem = menu.findItem(R.id.menu_searchview);
         if (searchItem != null) {
@@ -173,16 +160,11 @@ public class SearchActivity extends BaseSwitcherToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mMenuConfig != null
-                && mMenuConfig.actionHandler != null
-                && mMenuConfig.actionHandler.call(item.getItemId())) {
-            return true;
-        }
         switch (item.getItemId()) {
             case android.R.id.home:
                 return onSupportNavigateUp();
             default:
-                return false;
+                return handleOptionItemSelected(item);
         }
     }
 

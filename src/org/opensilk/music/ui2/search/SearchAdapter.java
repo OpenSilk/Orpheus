@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.search;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,31 +32,53 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
+import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.content.RecyclerListAdapter;
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.widget.LetterTileDrawable;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
+import org.opensilk.music.api.PluginConfig;
+import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.api.model.Album;
 import org.opensilk.music.api.model.Artist;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
+import org.opensilk.music.artwork.ArtworkRequestManager;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.ui2.common.OverflowHandlers;
+import org.opensilk.music.ui2.library.LibraryScreen;
 import org.opensilk.music.ui2.profile.AlbumScreen;
+import org.opensilk.music.ui2.profile.ArtistScreen;
+import org.opensilk.music.ui2.profile.GenreScreen;
+import org.opensilk.music.ui2.profile.PlaylistScreen;
 import org.opensilk.music.widgets.GridTileDescription;
+
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
+import hugo.weaving.DebugLog;
 import mortar.Mortar;
 import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Func0;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 11/24/14.
  */
 public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.ViewHolder> {
+
+    @Inject ArtworkRequestManager requestor;
+    @Inject MusicServiceConnection musicService;
 
     final LayoutInflater inflater;
     final Context context;
@@ -64,7 +87,7 @@ public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.Vie
         super();
         this.context = context;
         this.inflater = LayoutInflater.from(context);
-//        Mortar.inject(context, this);
+        Mortar.inject(context, this);
     }
 
     @Override
@@ -88,68 +111,159 @@ public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.Vie
         } else if (o instanceof LocalSong) {
             bindLocalSong(vh, (LocalSong)o);
         } else if (o instanceof BundleableHolder) {
-            Bundleable o2 = ((BundleableHolder)o).bundleable;
-            if (o2 instanceof Album) {
-                bindAlbum(vh, (Album)o2);
-            } else if (o2 instanceof Artist) {
-                bindArtist(vh, (Artist)o2);
-            } else if (o2 instanceof Folder) {
-                bindFolder(vh, (Folder)o2);
-            } else if (o2 instanceof Song) {
-                bindSong(vh, (Song)o2);
-            }
+            bindBundleable(vh, (BundleableHolder)o);
         }
     }
 
-    protected void bindLocalAlbum(ViewHolder vh, final LocalAlbum album) {
-        vh.title.setText(album.name);
-        vh.subtitle.setText(album.artistName);
+    protected void bindLocalAlbum(ViewHolder vh, final LocalAlbum a) {
+        vh.title.setText(a.name);
+        vh.subtitle.setText(a.artistName);
+        vh.subscriptions.add(requestor.newAlbumRequest(vh.artwork,
+                null, new ArtInfo(a.artistName, a.name, a.artworkUri), ArtworkType.THUMBNAIL));
         vh.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AppFlow.get(context).goTo(new AlbumScreen(album));
+                AppFlow.get(context).goTo(new AlbumScreen(a));
             }
         });
     }
 
-    protected void bindLocalArtist(ViewHolder vh, final LocalArtist artist) {
-        vh.title.setText(artist.name);
-        vh.subtitle.setText(null);
+    protected void bindLocalArtist(ViewHolder vh, final LocalArtist a) {
+        vh.title.setText(a.name);
+        vh.subtitle.setText(
+                MusicUtils.makeLabel(context, R.plurals.Nalbums, a.albumCount)
+                        + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, a.songCount)
+        );
+        vh.subscriptions.add(requestor.newArtistRequest(vh.artwork,
+                null, new ArtInfo(a.name, null, null), ArtworkType.THUMBNAIL));
+        vh.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppFlow.get(context).goTo(new ArtistScreen(a));
+            }
+        });
     }
 
-    protected void bindGenre(ViewHolder vh, final Genre genre) {
-        vh.title.setText(genre.mGenreName);
-        vh.subtitle.setText(null);
+    protected void bindGenre(ViewHolder vh, final Genre g) {
+        vh.title.setText(g.mGenreName);
+        vh.subtitle.setText(
+                MusicUtils.makeLabel(context, R.plurals.Nalbums, g.mAlbumNumber)
+                        + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, g.mSongNumber)
+        );
+        vh.artwork.setImageDrawable(LetterTileDrawable.fromText(context.getResources(), g.mGenreName));
+        vh.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppFlow.get(context).goTo(new GenreScreen(g));
+            }
+        });
     }
 
     protected void bindPlaylist(ViewHolder vh, final Playlist p) {
         vh.title.setText(p.mPlaylistName);
-        vh.subtitle.setText(null);
+        vh.subtitle.setText(MusicUtils.makeLabel(context, R.plurals.Nsongs, p.mSongNumber));
+        vh.artwork.setImageDrawable(LetterTileDrawable.fromText(context.getResources(), p.mPlaylistName));
+        vh.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppFlow.get(context).goTo(new PlaylistScreen(p));
+            }
+        });
     }
 
     protected void bindLocalSong(ViewHolder vh, final LocalSong s) {
         vh.title.setText(s.name);
         vh.subtitle.setText(s.artistName);
+        if (s.duration > 0) {
+            vh.extraInfo.setText(MusicUtils.makeTimeString(context, s.duration));
+            vh.extraInfo.setVisibility(View.VISIBLE);
+        }
+        vh.subscriptions.add(requestor.newAlbumRequest(vh.artwork,
+                null, s.albumId, ArtworkType.THUMBNAIL));
+        vh.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                musicService.enqueueNext(new Func0<Song[]>() {
+                    @Override
+                    public Song[] call() {
+                        return new Song[] {s};
+                    }
+                });
+            }
+        });
     }
 
-    protected void bindAlbum(ViewHolder vh, final Album album) {
-        vh.title.setText(album.name);
-        vh.subtitle.setText(album.artistName);
+    protected void bindBundleable(ViewHolder vh, final BundleableHolder bh) {
+        Bundleable o2 = bh.bundleable;
+        if (o2 instanceof Album) {
+            bindAlbum(vh, (Album)o2);
+        } else if (o2 instanceof Artist) {
+            bindArtist(vh, (Artist)o2);
+        } else if (o2 instanceof Folder) {
+            bindFolder(vh, (Folder)o2);
+        } else if (o2 instanceof Song) {
+            bindSong(vh, (Song)o2);
+            return;
+        }
+        final PluginInfo pluginInfo = bh.pluginHolder.pluginInfo;
+        final PluginConfig pluginConfig = bh.pluginHolder.pluginConfig;
+        final LibraryInfo libraryInfo = bh.pluginHolder.libraryInfo.buildUpon(o2.getIdentity(), o2.getName());
+        vh.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppFlow.get(context).goTo(new LibraryScreen(pluginInfo, pluginConfig, libraryInfo));
+            }
+        });
     }
 
-    protected void bindArtist(ViewHolder vh, final Artist artist) {
-        vh.title.setText(artist.name);
-        vh.subtitle.setText(null);
+    protected void bindAlbum(ViewHolder vh, final Album a) {
+        vh.title.setText(a.name);
+        vh.subtitle.setText(a.artistName);
+        vh.subscriptions.add(requestor.newAlbumRequest(vh.artwork,
+                null, new ArtInfo(a.artistName, a.name, a.artworkUri), ArtworkType.THUMBNAIL));
     }
 
-    protected void bindFolder(ViewHolder vh, final Folder folder) {
-        vh.title.setText(folder.name);
-        vh.subtitle.setText(null);
+    protected void bindArtist(ViewHolder vh, final Artist a) {
+        vh.title.setText(a.name);
+        vh.subtitle.setText(MusicUtils.makeLabel(context, R.plurals.Nalbums, a.albumCount)
+                + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, a.songCount)
+        );
+        vh.subscriptions.add(requestor.newArtistRequest(vh.artwork,
+                null, new ArtInfo(a.name, null, null), ArtworkType.THUMBNAIL));
     }
 
-    protected void bindSong(ViewHolder vh, final Song song) {
-        vh.title.setText(song.name);
-        vh.subtitle.setText(song.artistName);
+    protected void bindFolder(ViewHolder vh, final Folder f) {
+        vh.title.setText(f.name);
+        vh.subtitle.setText(
+                f.childCount > 0 ? MusicUtils.makeLabel(context, R.plurals.Nitems, f.childCount) : " "
+        );
+        if (!TextUtils.isEmpty(f.date)) {
+            vh.extraInfo.setText(f.date);
+            vh.extraInfo.setVisibility(View.VISIBLE);
+        }
+        vh.artwork.setImageDrawable(LetterTileDrawable.fromText(context.getResources(), f.name));
+    }
+
+    protected void bindSong(ViewHolder vh, final Song s) {
+        vh.title.setText(s.name);
+        vh.subtitle.setText(s.artistName);
+        if (s.duration > 0) {
+            vh.extraInfo.setText(MusicUtils.makeTimeString(context, s.duration));
+            vh.extraInfo.setVisibility(View.VISIBLE);
+        }
+        vh.subscriptions.add(requestor.newAlbumRequest(vh.artwork,
+                null, new ArtInfo(s.albumArtistName, s.name, s.artworkUri), ArtworkType.THUMBNAIL));
+        vh.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                musicService.enqueueNext(new Func0<Song[]>() {
+                    @Override
+                    public Song[] call() {
+                        return new Song[] {s};
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -177,6 +291,7 @@ public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.Vie
         @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
+        @InjectView(R.id.tile_info) TextView extraInfo;
         @InjectView(R.id.tile_overflow) ImageButton overflow;
 
         final CompositeSubscription subscriptions;
@@ -194,6 +309,9 @@ public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.Vie
         public void reset() {
 //            Timber.v("Reset title=%s", title.getText());
             if (artwork != null) artwork.setImageBitmap(null);
+            if (extraInfo != null
+                    && extraInfo.getVisibility() != View.GONE)
+                extraInfo.setVisibility(View.GONE);
             subscriptions.clear();
         }
 

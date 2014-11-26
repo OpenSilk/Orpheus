@@ -299,6 +299,7 @@ public class LibraryScreen extends Screen {
         void setupActionBar() {
             actionBarOwner.setConfig(
                     new ActionBarOwner.Config.Builder()
+                            .setUpButtonEnabled(true)
                             .setTitle(pluginInfo.title)
                             .setSubtitle(
                                     !TextUtils.isEmpty(libraryInfo.folderName)
