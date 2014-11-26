@@ -61,9 +61,9 @@
         <item name="android:scaleType">centerInside</item>
     </style>
 
-    <style name="TextAppearancePlayTime" parent="@android:style/TextAppearance.Holo.Small.Inverse">
-        <item name="android:textColor">@color/app_background_light_transparent</item>
-        <item name="android:shadowColor">@color/black</item>
+    <style name="TextAppearancePlayTime">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:shadowColor">@android:color/black</item>
         <!--<item name="android:shadowDx">2</item>-->
         <!--<item name="android:shadowDy">2</item>-->
         <item name="android:shadowRadius">3.8</item>

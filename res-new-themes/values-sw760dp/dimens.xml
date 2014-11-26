@@ -17,8 +17,8 @@
   -->
 
 <resources>
-    <item name="dialog_fixed_height_major" type="dimen">85%</item><!--vert--> <!--60-->
-    <item name="dialog_fixed_width_minor" type="dimen">90%</item><!--vert--><!--90-->
-    <item name="dialog_fixed_height_minor" type="dimen">90%</item><!--hor--><!--90-->
-    <item name="dialog_fixed_width_major" type="dimen">80%</item><!--hor--><!--60-->
+    <item name="dialog_fixed_height_major" type="dimen">80%</item><!--vert--> <!--60-->
+    <item name="dialog_fixed_width_minor" type="dimen">70%</item><!--vert--><!--70-->
+    <item name="dialog_fixed_height_minor" type="dimen">80%</item><!--hor--><!--90-->
+    <item name="dialog_fixed_width_major" type="dimen">80%</item><!--hor--><!--50-->
 </resources>

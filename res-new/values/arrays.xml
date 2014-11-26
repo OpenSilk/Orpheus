@@ -25,4 +25,20 @@
         <item>@drawable/widget_preview_large_two</item>
     </string-array>
 
+    <string-array name="now_playing_palette" translatable="false">
+        <item>@string/settings_now_playing_vibrant_ab_muted_bdy</item>
+        <item>@string/settings_now_playing_vibrant</item>
+        <item>@string/settings_now_playing_muted</item>
+        <item>@string/settings_now_playing_vibrant_fallback</item>
+        <item>@string/settings_now_playing_muted_fallback</item>
+    </string-array>
+
+    <string-array name="now_playing_palette_values" translatable="false">
+        <item>vibrant_ab_muted_bdy</item>
+        <item>vibrant</item>
+        <item>muted</item>
+        <item>vibrant_fallback</item>
+        <item>muted_fallback</item>
+    </string-array>
+
 </resources>

@@ -141,7 +141,7 @@
         </activity>
 
         <activity android:name="org.opensilk.music.ui2.NowPlayingActivity"
-                  android:theme="@style/Theme.Dark">
+                  android:theme="@style/Theme.NowPlaying">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                        android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>

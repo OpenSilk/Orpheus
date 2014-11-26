@@ -85,6 +85,16 @@ public class AppPreferences {
     public static final String WANT_DARK_THEME = "pref_dark_theme";
     public static final String ORPHEUS_THEME = "orpheus_theme";
 
+    //Now Playing
+    public static final String NOW_PLAYING_COLORIZE = "now_playing_colorize";
+    public static final String NOW_PLAYING_PALETTE = "now_playing_palette";
+    //values must mirror array
+    public static final String NOW_PLAYING_PALETTE_VIBRANT = "vibrant";
+    public static final String NOW_PLAYING_PALETTE_MUTED = "muted";
+    public static final String NOW_PLAYING_PALETTE_VIBRANT_FALLBACK = "vibrant_fallback";
+    public static final String NOW_PLAYING_PALETTE_MUTED_FALLBACK = "muted_fallback";
+    public static final String NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY = "vibrant_ab_muted_bdy";
+
     //Misc
     public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
     public static final String SEND_CRASH_REPORTS = "send_crash_reports";

@@ -17,9 +17,13 @@
 
 package org.opensilk.music.theme;
 
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.LevelListDrawable;
+import android.os.Build;
 import android.widget.ImageButton;
 
 import org.opensilk.common.util.ThemeUtils;
@@ -34,41 +38,70 @@ import static org.opensilk.common.util.ThemeUtils.getColorAccent;
 public class PlaybackDrawableTint {
 
     public static void shuffleDrawable24(ImageButton v) {
-        doShuffleDrawable(v, true);
+        if (VersionUtils.hasLollipop()) return;
+        doShuffleDrawable(v, true, getColorAccent(v.getContext()));
     }
 
     public static void shuffleDrawable36(ImageButton v) {
-        doShuffleDrawable(v, false);
+        if (VersionUtils.hasLollipop()) return;
+        doShuffleDrawable(v, false, getColorAccent(v.getContext()));
     }
 
-    static void doShuffleDrawable(ImageButton v, boolean is24) {
-        if (VersionUtils.hasLollipop()) return;
-        int active = is24 ? R.drawable.ic_shuffle_white_24dp : R.drawable.ic_shuffle_white_36dp;
-        LevelListDrawable d = (LevelListDrawable) v.getDrawable();
-        // dont know why this doesnt work
-//        Drawable d1 = getResources().getDrawable(R.drawable.ic_shuffle_black_36dp);
-//        d1.mutate().setColorFilter(Themer.getColorAccent(getContext()), PorterDuff.Mode.MULTIPLY);
-        Drawable d1 = ThemeUtils.colorizeBitmapDrawableCopy(v.getContext(), active, getColorAccent(v.getContext()));
-        d.addLevel(1, 2, d1);
+    public static LevelListDrawable getShuffleDrawable36(Context context, int color) {
+        final int res = R.drawable.ic_shuffle_white_36dp;
+        final LevelListDrawable d = new LevelListDrawable();
+        d.addLevel(0,0, context.getResources().getDrawable(res));
+        d.addLevel(1, 2, tintDrawable(context, res, color));
+        return d;
     }
 
     public static void repeatDrawable24(ImageButton v) {
-        doRepeatDrawable(v, true);
+        if (VersionUtils.hasLollipop()) return;
+        doRepeatDrawable(v, true, getColorAccent(v.getContext()));
     }
 
     public static void repeatDrawable36(ImageButton v) {
-        doRepeatDrawable(v, false);
+        if (VersionUtils.hasLollipop()) return;
+        doRepeatDrawable(v, false, getColorAccent(v.getContext()));
     }
 
-    static void doRepeatDrawable(ImageButton v, boolean is24) {
-        if (VersionUtils.hasLollipop()) return;
+    public static LevelListDrawable getRepeatDrawable36(Context context, int color) {
+        final int one = R.drawable.ic_repeat_one_white_36dp;
+        final int all = R.drawable.ic_repeat_white_36dp;
+        final LevelListDrawable d = new LevelListDrawable();
+        d.addLevel(0, 0, context.getResources().getDrawable(all));
+        d.addLevel(1, 1, tintDrawable(context, one, color));
+        d.addLevel(2, 2, tintDrawable(context, all, color));
+        return d;
+    }
+
+    static void doShuffleDrawable(ImageButton v, boolean is24, int color) {
+        int active = is24 ? R.drawable.ic_shuffle_white_24dp : R.drawable.ic_shuffle_white_36dp;
+        LevelListDrawable d = (LevelListDrawable) v.getDrawable();
+        d.addLevel(1, 2, tintDrawable(v.getContext(), active, color));
+    }
+
+    static void doRepeatDrawable(ImageButton v, boolean is24, int color) {
         int one = is24 ? R.drawable.ic_repeat_one_white_24dp : R.drawable.ic_repeat_one_white_36dp;
         int all = is24 ? R.drawable.ic_repeat_white_24dp : R.drawable.ic_repeat_white_36dp;
         LevelListDrawable d = (LevelListDrawable) v.getDrawable();
-        Drawable d1 = ThemeUtils.colorizeBitmapDrawableCopy(v.getContext(), one, getColorAccent(v.getContext()));
-        d.addLevel(1, 1, d1);
-        Drawable d2 = ThemeUtils.colorizeBitmapDrawableCopy(v.getContext(), all, getColorAccent(v.getContext()));
-        d.addLevel(2, 2, d2);
+        d.addLevel(1, 1, tintDrawable(v.getContext(), one, color));
+        d.addLevel(2, 2, tintDrawable(v.getContext(), all, color));
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    static Drawable tintDrawable(Context context, int res, int color) {
+        if (VersionUtils.hasLollipop()) {
+            final Drawable d = context.getDrawable(res);
+            d.mutate().setTint(color);
+            return d;
+        } else {
+            // dont know why this isnt working
+//            Drawable d = context.getResources().getDrawable(res);
+//            d.mutate().setColorFilter(getColorAccent(context), PorterDuff.Mode.SRC_IN);
+//            return d;
+            return ThemeUtils.colorizeBitmapDrawableCopy(context, res, color);
+        }
     }
 
 }

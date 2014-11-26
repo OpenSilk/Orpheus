@@ -18,7 +18,9 @@
 package org.opensilk.music.ui2;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
+import com.andrew.apollo.utils.MusicUtils;
 import com.google.gson.Gson;
 
 import org.opensilk.common.flow.GsonParcer;
@@ -27,6 +29,8 @@ import org.opensilk.common.mortar.PauseAndResumeModule;
 import org.opensilk.common.mortar.PauseAndResumePresenter;
 import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.AppModule;
+import org.opensilk.music.ui2.event.MakeToast;
+import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.ui2.loader.LoaderModule;
 
 import java.util.UUID;
@@ -173,4 +177,24 @@ public class BaseMortarActivity extends BaseActivity implements PauseAndResumeAc
         }
         return mScopeName;
     }
+
+    /*
+     * Events
+     */
+
+    public void onEventMainThread(MakeToast e) {
+        if (e.type == MakeToast.Type.PLURALS) {
+            Toast.makeText(this, MusicUtils.makeLabel(this, e.resId, e.arg), Toast.LENGTH_SHORT).show();
+        } else if (e.params.length > 0) {
+            Toast.makeText(this, getString(e.resId, e.params), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, e.resId, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //TODO stop using fragments
+    public void onEventMainThread(OpenDialog e) {
+        e.dialog.show(getSupportFragmentManager(), "Dialog");
+    }
+
 }

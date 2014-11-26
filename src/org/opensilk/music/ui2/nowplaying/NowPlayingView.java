@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.nowplaying;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
@@ -29,7 +30,10 @@ import android.widget.TextView;
 
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.widget.ImageButtonCheckable;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.theme.PlaybackDrawableTint;
 
 import javax.inject.Inject;
 
@@ -57,11 +61,13 @@ public class NowPlayingView extends RelativeLayout {
     @InjectView(R.id.now_playing_total_time) TextView totalTime;
     @InjectView(R.id.now_playing_shuffle) ImageButton shuffle;
     @InjectView(R.id.now_playing_previous) ImageButton prev;
-    @InjectView(R.id.now_playing_play) ImageButton play;
+    @InjectView(R.id.now_playing_play) ImageButtonCheckable play;
     @InjectView(R.id.now_playing_next) ImageButton next;
     @InjectView(R.id.now_playing_repeat) ImageButton repeat;
 
     CompositeSubscription clicks;
+    Drawable origRepeat;
+    Drawable origShuffle;
 
     public NowPlayingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -73,23 +79,27 @@ public class NowPlayingView extends RelativeLayout {
         super.onFinishInflate();
         ButterKnife.inject(this);
         ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
+        PlaybackDrawableTint.repeatDrawable36(repeat);
+        origRepeat = repeat.getDrawable();
+        PlaybackDrawableTint.shuffleDrawable36(shuffle);
+        origShuffle = shuffle.getDrawable();
         if (!isInEditMode()) presenter.takeView(this);
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        subscribeClicks();
         seekBar.setOnSeekBarChangeListener(presenter);
         if (!isInEditMode()) presenter.takeView(this);
+        subscribeClicks();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         unsubscribeClicks();
-        seekBar.setOnSeekBarChangeListener(null);
         presenter.dropView(this);
+        seekBar.setOnSeekBarChangeListener(null);
     }
 
     void subscribeClicks() {
@@ -140,24 +150,123 @@ public class NowPlayingView extends RelativeLayout {
     }
 
     void colorize(Palette p) {
-        boolean light = ThemeUtils.isLightTheme(getContext());
-        Palette.Swatch s = light ? p.getLightVibrantSwatch() : p.getDarkVibrantSwatch();
-        if (s == null) s = p.getVibrantSwatch();
-        Palette.Swatch s2 = light ? p.getLightMutedSwatch() : p.getDarkMutedSwatch();
-        if (s2 == null) s2 = p.getMutedSwatch();
-        if (s != null) {
-            setBackgroundColor(s.getRgb());
-//            toolbar.setTitleTextColor(s.getTitleTextColor());
-//            toolbar.setSubtitleTextColor(s.getTitleTextColor());
-        } else {
-            setBackgroundColor(ThemeUtils.getThemeAttrColor(getContext(), R.attr.colorPrimary));
-//            toolbar.setTitleTextColor(Color.WHITE);
-//            toolbar.setSubtitleTextColor(Color.WHITE);
+        if (!presenter.settings.getBoolean(AppPreferences.NOW_PLAYING_COLORIZE, true)) return;
+        final String option = presenter.settings.getString(AppPreferences.NOW_PLAYING_PALETTE,
+                AppPreferences.NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY);
+        Palette.Swatch s;
+        Palette.Swatch s2;
+        int btnColor;
+        switch (option) {
+            case AppPreferences.NOW_PLAYING_PALETTE_MUTED:
+                s = p.getDarkMutedSwatch();
+                s2 = p.getMutedSwatch();
+                btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
+                break;
+            case AppPreferences.NOW_PLAYING_PALETTE_MUTED_FALLBACK:
+                s = p.getDarkMutedSwatch();
+                s2 = p.getMutedSwatch();
+                btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
+                if (s == null || s2 == null) {
+                    s = p.getDarkVibrantSwatch();
+                    s2 = p.getVibrantSwatch();
+                    btnColor = s2 != null ? getComplimentary(s2.getHsl()) : 0;
+                }
+                break;
+            case AppPreferences.NOW_PLAYING_PALETTE_VIBRANT:
+                s = p.getDarkVibrantSwatch();
+                s2 = p.getVibrantSwatch();
+                btnColor = s2 != null ? getComplimentary(s2.getHsl()) : 0;
+                break;
+            case AppPreferences.NOW_PLAYING_PALETTE_VIBRANT_FALLBACK:
+                s = p.getDarkVibrantSwatch();
+                s2 = p.getVibrantSwatch();
+                btnColor = s2 != null ? getComplimentary(s2.getHsl()) : 0;
+                if (s == null || s2 == null) {
+                    s = p.getDarkMutedSwatch();
+                    s2 = p.getMutedSwatch();
+                    btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
+                }
+                break;
+            case AppPreferences.NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY:
+            default:
+                s = p.getVibrantSwatch();
+                s2 = p.getMutedSwatch();
+                btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
         }
-        if (s2 != null) {
-            ThemeUtils.themeSeekBar2(seekBar, s2.getRgb());
+        if (s != null && s2 != null) {
+            toolbar.setBackgroundColor(s.getRgb());
+            setBackgroundColor(s2.getRgb());
+            ThemeUtils.themeSeekBar2(seekBar, btnColor);
+            repeat.setImageDrawable(PlaybackDrawableTint.getRepeatDrawable36(getContext(), btnColor));
+            shuffle.setImageDrawable(PlaybackDrawableTint.getShuffleDrawable36(getContext(), btnColor));
         } else {
+            toolbar.setBackgroundColor(ThemeUtils.getColorPrimary(getContext()));
+            setBackgroundColor(ThemeUtils.getThemeAttrColor(getContext(), android.R.attr.colorBackground));
             ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
+            repeat.setImageDrawable(origRepeat);
+            shuffle.setImageDrawable(origShuffle);
         }
+    }
+
+    /*
+     * HSLColor
+     */
+    static int getComplimentary(float[] hsl)
+    {
+        float hue = (hsl[0] + 180.0f) % 360.0f;
+        return HSLtoRGB(hue, hsl[1], hsl[2]);
+    }
+
+    /*
+     * AOSP Palette#ColorUtils
+     */
+    static int HSLtoRGB (final float h, final float s, final float l) {
+        final float c = (1f - Math.abs(2 * l - 1f)) * s;
+        final float m = l - 0.5f * c;
+        final float x = c * (1f - Math.abs((h / 60f % 2f) - 1f));
+
+        final int hueSegment = (int) h / 60;
+
+        int r = 0, g = 0, b = 0;
+
+        switch (hueSegment) {
+            case 0:
+                r = Math.round(255 * (c + m));
+                g = Math.round(255 * (x + m));
+                b = Math.round(255 * m);
+                break;
+            case 1:
+                r = Math.round(255 * (x + m));
+                g = Math.round(255 * (c + m));
+                b = Math.round(255 * m);
+                break;
+            case 2:
+                r = Math.round(255 * m);
+                g = Math.round(255 * (c + m));
+                b = Math.round(255 * (x + m));
+                break;
+            case 3:
+                r = Math.round(255 * m);
+                g = Math.round(255 * (x + m));
+                b = Math.round(255 * (c + m));
+                break;
+            case 4:
+                r = Math.round(255 * (x + m));
+                g = Math.round(255 * m);
+                b = Math.round(255 * (c + m));
+                break;
+            case 5:
+            case 6:
+                r = Math.round(255 * (c + m));
+                g = Math.round(255 * m);
+                b = Math.round(255 * (x + m));
+                break;
+        }
+
+        r = Math.max(0, Math.min(255, r));
+        g = Math.max(0, Math.min(255, g));
+        b = Math.max(0, Math.min(255, b));
+
+        return Color.rgb(r, g, b);
     }
 }

@@ -65,6 +65,14 @@
     <string name="settings_home_category">Home</string>
     <string name="settings_pick_home_pages">Select home pages</string>
     <string name="settings_pick_home_pages_summary">Sort &amp; manage home pages</string>
+    <!-- interface now playing -->
+    <string name="settings_now_playing_colorize">Colorize now playing screen</string>
+    <string name="settings_now_playing_palette">Palette colors</string>
+    <string name="settings_now_playing_vibrant_ab_muted_bdy">Vibrant actonbar, muted body</string>
+    <string name="settings_now_playing_vibrant">Vibrant</string>
+    <string name="settings_now_playing_muted">Muted</string>
+    <string name="settings_now_playing_vibrant_fallback">Try vibrant then muted</string>
+    <string name="settings_now_playing_muted_fallback">Try muted then vibrant</string>
     <!-- data NOTE Some strings in res/-->
     <!-- data download -->
     <string name="settings_download_category">Download</string>
@@ -161,6 +169,8 @@
     <string name="title_all_songs">All songs</string>
     <!-- queue title -->
     <string name="title_queue">Queue</string>
+    <!-- now playing -->
+    <string name="now_playing">Now playing</string>
 
     <!-- ### MENUS ### -->
 

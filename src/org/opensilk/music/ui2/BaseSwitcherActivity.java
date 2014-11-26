@@ -63,7 +63,6 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     @dagger.Module(
             includes = {
                     BaseMortarActivity.Module.class,
-                    ActionBarOwner.Module.class, //Some classes need this even if there isnt an actionbar
                     LoaderModule.class,
             }, library = true
     )
@@ -135,21 +134,6 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     /*
      * Events
      */
-
-    public void onEventMainThread(MakeToast e) {
-        if (e.type == MakeToast.Type.PLURALS) {
-            Toast.makeText(this, MusicUtils.makeLabel(this, e.resId, e.arg), Toast.LENGTH_SHORT).show();
-        } else if (e.params.length > 0) {
-            Toast.makeText(this, getString(e.resId, e.params), Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, e.resId, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    //TODO stop using fragments
-    public void onEventMainThread(OpenDialog e) {
-        e.dialog.show(getSupportFragmentManager(), "Dialog");
-    }
 
     public void onEventMainThread(GoToScreen e) {
         AppFlow.get(this).goTo(e.screen);

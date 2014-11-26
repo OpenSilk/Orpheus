@@ -168,6 +168,21 @@
 
     <!-- end profile themes -->
 
+    <!-- now playing themes -->
+
+    <style name="Theme.NowPlaying" parent="Theme.Dialog.DarkBase">
+        <!--DarkActionBar-->
+        <item name="toolbarTheme">@style/Toolbar.Dark</item>
+
+        <item name="nowPlayingPlayStyle">@style/nowPlayingActionDark.Play</item>
+        <item name="nowPlayingNextStyle">@style/nowPlayingActionDark.Next</item>
+        <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
+        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
+        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
+    </style>
+
+    <!-- end now playing themes -->
+
     <!-- -->
 
     <style name="Theme.Dialog.NoActionBar" parent="Theme.AppCompat.Dialog">

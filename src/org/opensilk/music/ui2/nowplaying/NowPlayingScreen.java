@@ -25,6 +25,8 @@ import android.support.v7.graphics.Palette;
 import android.view.View;
 import android.widget.SeekBar;
 
+import com.andrew.apollo.menu.DeleteDialog;
+import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
@@ -32,7 +34,9 @@ import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -41,20 +45,28 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.ui2.core.BroadcastObservables;
+import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.event.MakeToast;
+import org.opensilk.music.ui2.event.OpenDialog;
 
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+import de.greenrobot.event.EventBus;
 import flow.Layout;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Observable;
 import rx.Scheduler;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -86,6 +98,9 @@ public class NowPlayingScreen extends Screen {
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
         final MusicServiceConnection musicService;
         final ArtworkRequestManager requestor;
+        final ActionBarOwner actionBarOwner;
+        final EventBus eventBus;
+        final AppPreferences settings;
 
         CompositeSubscription broadcastSubscription;
         Scheduler.Worker timeWorker;
@@ -101,11 +116,17 @@ public class NowPlayingScreen extends Screen {
         public Presenter(@ForApplication Context appContext,
                          PauseAndResumeRegistrar pauseAndResumeRegistrar,
                          MusicServiceConnection musicService,
-                         ArtworkRequestManager requestor) {
+                         ArtworkRequestManager requestor,
+                         ActionBarOwner actionBarOwner,
+                         @Named("activity") EventBus eventBus,
+                         AppPreferences settings) {
             this.appContext = appContext;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
             this.musicService = musicService;
             this.requestor = requestor;
+            this.actionBarOwner = actionBarOwner;
+            this.eventBus = eventBus;
+            this.settings = settings;
         }
 
         @Override
@@ -129,6 +150,7 @@ public class NowPlayingScreen extends Screen {
             if (pauseAndResumeRegistrar.isRunning()) {
                 setup();
             }
+            setupActionBar();
         }
 
         @Override
@@ -163,6 +185,8 @@ public class NowPlayingScreen extends Screen {
                         @Override
                         public void call(Boolean playing) {
                             mIsPlaying = playing;
+                            if (getView() == null) return;
+                            getView().play.setChecked(playing);
                         }
                     }),
                     BroadcastObservables.trackChanged(appContext).subscribe(new Action1<String>() {
@@ -180,13 +204,31 @@ public class NowPlayingScreen extends Screen {
                             getView().toolbar.setSubtitle(s);
                         }
                     }),
-                    observeOnMain(BroadcastObservables.artworkChanged(appContext, musicService)).subscribe(new Action1<ArtInfo>() {
-                        @Override
-                        public void call(ArtInfo artInfo) {
-                            if (getView() == null) return;
-                            requestor.newAlbumRequest(getView().artwork, paletteObserver, artInfo, ArtworkType.LARGE);
-                        }
-                    })
+                    observeOnMain(BroadcastObservables.artworkChanged(appContext, musicService))
+                            .subscribe(new Action1<ArtInfo>() {
+                                @Override
+                                public void call(ArtInfo artInfo) {
+                                    if (getView() == null) return;
+                                    requestor.newAlbumRequest(getView().artwork,
+                                            paletteObserver, artInfo, ArtworkType.LARGE);
+                                }
+                            }),
+                    observeOnMain(BroadcastObservables.shuffleModeChanged(appContext, musicService))
+                            .subscribe(new Action1<Integer>() {
+                                @Override
+                                public void call(Integer integer) {
+                                    if (getView() == null) return;
+                                    getView().shuffle.setImageLevel(integer);
+                                }
+                            }),
+                    observeOnMain(BroadcastObservables.repeatModeChanged(appContext, musicService))
+                            .subscribe(new Action1<Integer>() {
+                                @Override
+                                public void call(Integer integer) {
+                                    if (getView() == null) return;
+                                    getView().repeat.setImageLevel(integer);
+                                }
+                            })
             );
         }
 
@@ -250,18 +292,17 @@ public class NowPlayingScreen extends Screen {
 
         void refreshTotalTimeText() {
             observeOnMain(musicService.getDuration()).subscribe(
-                    new Action1<Long>() {
+                    new SimpleObserver<Long>() {
                         @Override
-                        public void call(Long duration) {
+                        public void onNext(Long duration) {
                             if (getView() == null) return;
                             getView().totalTime.setText(
                                     MusicUtils.makeTimeString(getView().getContext(), duration / 1000)
                             );
                         }
-                    }, new Action1<Throwable>() {
                         @Override
-                        public void call(Throwable throwable) {
-
+                        public void onError(Throwable e) {
+                            super.onError(e);
                         }
                     }
             );
@@ -348,6 +389,77 @@ public class NowPlayingScreen extends Screen {
         void stopMonitorProgress() {
             timeWorker.unsubscribe();
             timeWorker = null;
+        }
+
+        void setupActionBar() {
+            actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
+                .setUpButtonEnabled(true)
+                .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
+                    .withMenus(R.menu.popup_share,
+                            R.menu.popup_set_ringtone,
+                            R.menu.popup_delete
+                    )
+                    .setActionHandler(new Func1<Integer, Boolean>() {
+                        @Override
+                        public Boolean call(Integer integer) {
+                            switch (integer) {
+                                case R.id.popup_menu_share:
+                                    //TODO
+                                    eventBus.post(new MakeToast(R.string.err_generic));
+                                    return true;
+                                case R.id.popup_set_ringtone:
+                                    musicService.getTrackId().map(new Func1<Long, Long>() {
+                                            @Override
+                                            public Long call(Long id) {
+                                                return MusicProviderUtil.getRealId(appContext, id);
+                                            }
+                                        })
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(new SimpleObserver<Long>() {
+                                            @Override
+                                            public void onNext(Long id) {
+                                                MusicUtils.setRingtone(appContext, id);
+                                            }
+                                            @Override
+                                            public void onError(Throwable e) {
+                                                super.onError(e);
+                                                eventBus.post(new MakeToast(R.string.err_generic));
+                                            }
+                                        });
+                                    return true;
+                                case R.id.popup_delete:
+                                    Observable.zip(
+                                        musicService.getTrackName(),
+                                        musicService.getTrackId().map(new Func1<Long, Long>() {
+                                            @Override
+                                            public Long call(Long id) {
+                                                return MusicProviderUtil.getRealId(appContext, id);
+                                            }
+                                        }), new Func2<String, Long, OpenDialog>() {
+                                            @Override
+                                            public OpenDialog call(String s, Long id) {
+                                                return new OpenDialog(DeleteDialog.newInstance(s, new long[]{id}));
+                                            }
+                                        })
+                                        .subscribe(new SimpleObserver<OpenDialog>() {
+                                            @Override
+                                            public void onNext(OpenDialog openDialog) {
+                                                eventBus.post(openDialog);
+                                            }
+                                            @Override
+                                            public void onError(Throwable e) {
+                                                super.onError(e);
+                                                eventBus.post(new MakeToast(R.string.err_generic));
+                                            }
+                                        });
+                                    return true;
+                                default:
+                                    return false;
+                            }
+                        }
+                    }).build()
+                ).build()
+            );
         }
 
         final PaletteObserver paletteObserver = new PaletteObserver() {

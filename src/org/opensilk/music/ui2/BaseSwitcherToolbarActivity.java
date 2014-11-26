@@ -38,7 +38,8 @@ public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
 
     @dagger.Module(
             includes = {
-                    BaseSwitcherActivity.Module.class
+                    BaseSwitcherActivity.Module.class,
+                    ActionBarOwner.Module.class,
             }
     )
     public static class Module {

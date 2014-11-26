@@ -35,6 +35,7 @@ import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.ui2.BaseSwitcherActivity;
+import org.opensilk.music.ui2.BaseSwitcherToolbarActivity;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -80,7 +81,7 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 public class QueueScreen extends Screen {
 
     @dagger.Module(
-            addsTo = BaseSwitcherActivity.Module.class,
+            addsTo = BaseSwitcherToolbarActivity.Module.class,
             injects = QueueView.class
     )
     public static class Module {

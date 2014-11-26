@@ -23,160 +23,118 @@
     android:layout_height="wrap_content"
     >
 
-    <RelativeLayout
-        android:id="@+id/now_playing_actions"
-        android:layout_width="156dp"
-        android:layout_height="156dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true">
-
-        <ImageButton
-            android:id="@+id/now_playing_play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:padding="4dp"
-            tools:src="@drawable/ic_play_arrow_black_36dp"
-            style="?nowPlayingPlayStyle"/>
-
-        <ImageButton
-            android:id="@+id/now_playing_previous"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/now_playing_play"
-            android:layout_toLeftOf="@id/now_playing_play"
-            android:padding="4dp"
-            tools:src="@drawable/ic_skip_previous_black_36dp"
-            style="?nowPlayingPrevStyle"/>
-
-        <ImageButton
-            android:id="@+id/now_playing_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/now_playing_play"
-            android:layout_toRightOf="@id/now_playing_play"
-            android:padding="4dp"
-            tools:src="@drawable/ic_skip_next_black_36dp"
-            style="?nowPlayingNextStyle"/>
-
-        <ImageButton
-            android:id="@+id/now_playing_repeat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/now_playing_play"
-            android:layout_toLeftOf="@id/now_playing_play"
-            android:padding="4dp"
-            tools:src="@drawable/ic_repeat_black_36dp"
-            style="?nowPlayingRepeatStyle"/>
-
-        <ImageButton
-            android:id="@+id/now_playing_shuffle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/now_playing_play"
-            android:layout_toRightOf="@id/now_playing_play"
-            android:padding="4dp"
-            tools:src="@drawable/ic_shuffle_black_36dp"
-            style="?nowPlayingShuffleStyle"/>
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/now_playing_meta"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_toLeftOf="@id/now_playing_actions"
-        android:layout_alignParentBottom="true"
-        android:layout_alignTop="@id/now_playing_actions"
-        android:orientation="vertical"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/now_playing_track"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textAppearance="?android:textAppearanceLarge"
-            style="@style/SingleLineTextView"
-            tools:text="Track"/>
-
-        <TextView
-            android:id="@+id/now_playing_artist"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            style="@style/SingleLineTextView"
-            android:gravity="center"
-            tools:text="Artist"/>
-
-        <TextView
-            android:id="@+id/now_playing_album"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
-            style="@style/SingleLineTextView"
-            android:gravity="center"
-            tools:text="Album"/>
-
-    </LinearLayout>
-
-    <org.opensilk.common.widget.SquareImageView
-        android:id="@+id/now_playing_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/now_playing_meta"
-        tools:src="@drawable/default_artwork"/>
-
     <android.support.v7.widget.Toolbar
         android:id="@+id/now_playing_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:layout_alignParentTop="true"
-        android:background="@android:color/transparent"
         style="?toolbarTheme"/>
 
+    <RelativeLayout
+        android:id="@+id/now_playing_ticker"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentBottom="true">
+
+        <!-- current playtime -->
+        <TextView
+            android:id="@+id/now_playing_current_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:gravity="start"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:textAppearance="?android:textAppearanceSmall"
+            tools:text="0:00"/>
+
+        <!-- total playtime -->
+        <TextView
+            android:id="@+id/now_playing_total_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:gravity="end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:textAppearance="?android:textAppearanceSmall"
+            tools:text="0:00"/>
+
+    </RelativeLayout>
+
+    <org.opensilk.common.widget.SquareImageView
+        android:id="@+id/now_playing_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/now_playing_toolbar"
+        android:gravity="bottom"
+        tools:src="@drawable/default_artwork"/>
+
+    <LinearLayout
+        android:id="@+id/now_playing_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/now_playing_image"
+        android:layout_above="@id/now_playing_ticker"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/now_playing_repeat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            tools:src="@drawable/ic_repeat_white_36dp"
+            style="?nowPlayingRepeatStyle"/>
+
+        <ImageButton
+            android:id="@+id/now_playing_previous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            tools:src="@drawable/ic_skip_previous_white_36dp"
+            style="?nowPlayingPrevStyle"/>
+
+        <org.opensilk.common.widget.ImageButtonCheckable
+            android:id="@+id/now_playing_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            tools:src="@drawable/ic_play_arrow_white_36dp"
+            style="?nowPlayingPlayStyle"/>
+
+        <ImageButton
+            android:id="@+id/now_playing_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            tools:src="@drawable/ic_skip_next_white_36dp"
+            style="?nowPlayingNextStyle"/>
+
+        <ImageButton
+            android:id="@+id/now_playing_shuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            tools:src="@drawable/ic_shuffle_white_36dp"
+            style="?nowPlayingShuffleStyle"/>
+
+    </LinearLayout>
+
     <!-- Our scrubber height is 32dp making the seekbar view
-        32dp so as a hack to get the bar to sit on the edge
-        of the footer we set a negative bottom margin -->
+    32dp so as a hack to get the bar to sit on the edge
+    of the footer we set a negative bottom margin -->
     <org.opensilk.common.widget.CompatSeekBar
         android:id="@+id/now_playing_seekprogress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:layout_above="@id/now_playing_meta"
+        android:layout_above="@id/now_playing_ticker"
         android:layout_marginBottom="-16dp"
         android:padding="0dp"
         android:max="1000"
         tools:progress="200"/>
-
-    <!-- current playtime -->
-    <TextView
-        android:id="@+id/now_playing_current_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/now_playing_seekprogress"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:gravity="start"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginBottom="24dp"
-        android:textAppearance="@style/TextAppearancePlayTime"
-        tools:text="0:00"/>
-
-    <!-- total playtime -->
-    <TextView
-        android:id="@+id/now_playing_total_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/now_playing_seekprogress"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:gravity="end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="24dp"
-        android:textAppearance="@style/TextAppearancePlayTime"
-        tools:text="0:00"/>
 
 </org.opensilk.music.ui2.nowplaying.NowPlayingView>

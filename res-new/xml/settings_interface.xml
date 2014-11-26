@@ -3,16 +3,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/settings_home_category">
-
-        <org.opensilk.music.ui.settings.DragSortSwipeListPreference
-            android:key="pref_home_pages"
-            android:title="@string/settings_pick_home_pages"
-            android:summary="@string/settings_pick_home_pages_summary" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="@string/settings_theme_category">
 
         <CheckBoxPreference
@@ -23,6 +13,34 @@
         <Preference
             android:key="theme_picker"
             android:title="@string/settings_pick_theme"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_home_category">
+
+        <org.opensilk.music.ui.settings.DragSortSwipeListPreference
+            android:key="pref_home_pages"
+            android:title="@string/settings_pick_home_pages"
+            android:summary="@string/settings_pick_home_pages_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/now_playing">
+
+        <CheckBoxPreference
+            android:key="now_playing_colorize"
+            android:title="@string/settings_now_playing_colorize"
+            android:defaultValue="true"/>
+
+        <ListPreference
+            android:key="now_playing_palette"
+            android:title="@string/settings_now_playing_palette"
+            android:dependency="now_playing_colorize"
+            android:entries="@array/now_playing_palette"
+            android:entryValues="@array/now_playing_palette_values"
+            android:defaultValue="vibrant_ab_muted_bdy"/>
 
     </PreferenceCategory>
 
