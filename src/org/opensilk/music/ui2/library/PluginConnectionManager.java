@@ -85,12 +85,17 @@ public class PluginConnectionManager {
             return connections.get(componentName).subject.asObservable();
         } else {
             Timber.v("Binding %s", componentName);
-            AsyncSubject<RemoteLibrary> subject = AsyncSubject.create();
-            Token token = new Token(subject);
-            connections.put(componentName, token);
-            context.startService(new Intent().setComponent(componentName));
-            context.bindService(new Intent().setComponent(componentName), token, 0);
-            return subject.asObservable();
+            final AsyncSubject<RemoteLibrary> subject = AsyncSubject.create();
+            final Token token = new Token(subject);
+            try {
+//                context.startService(new Intent().setComponent(componentName));
+                context.bindService(new Intent().setComponent(componentName), token, Context.BIND_AUTO_CREATE);
+                connections.put(componentName, token);
+                return subject.asObservable();
+            } catch (SecurityException e) {
+                Timber.e(e, "Can't bind plugin service");
+                return Observable.error(e);
+            }
         }
     }
 
@@ -103,7 +108,7 @@ public class PluginConnectionManager {
                     try {
                         remoteLibrary.pause();
                     } catch (RemoteException e) {
-                        Timber.e("pause(%s) failed", entry.getKey());
+                        Timber.e(e, "pause(%s) failed", entry.getKey());
                         onException(entry.getKey());
                     }
                 }
@@ -120,7 +125,7 @@ public class PluginConnectionManager {
                     try {
                         remoteLibrary.resume();
                     } catch (RemoteException e) {
-                        Timber.e("resume(%s) failed", entry.getKey());
+                        Timber.e(e, "resume(%s) failed", entry.getKey());
                         onException(entry.getKey());
                     }
                 }
