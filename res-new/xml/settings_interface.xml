@@ -26,6 +26,7 @@
 
     </PreferenceCategory>
 
+    <!--
     <PreferenceCategory
         android:title="@string/now_playing">
 
@@ -43,5 +44,6 @@
             android:defaultValue="vibrant_ab_muted_bdy"/>
 
     </PreferenceCategory>
+    -->
 
 </PreferenceScreen>

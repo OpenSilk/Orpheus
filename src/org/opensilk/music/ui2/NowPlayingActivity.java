@@ -72,9 +72,8 @@ public class NowPlayingActivity extends BaseMortarActivity
 
     @Override
     protected void setupTheme() {
-//        OrpheusTheme orpheusTheme = mSettings.getTheme();
-//        setTheme(mSettings.isDarkTheme() ? orpheusTheme.dark : orpheusTheme.light);
-        setTheme(R.style.Theme_NowPlaying);
+        OrpheusTheme orpheusTheme = mSettings.getTheme();
+        setTheme(mSettings.isDarkTheme() ? orpheusTheme.dark : orpheusTheme.light);
     }
 
     @Override

@@ -150,6 +150,7 @@ public class NowPlayingView extends RelativeLayout {
     }
 
     void colorize(Palette p) {
+        if (true) return; //XXX STUBBED
         if (!presenter.settings.getBoolean(AppPreferences.NOW_PLAYING_COLORIZE, true)) return;
         final String option = presenter.settings.getString(AppPreferences.NOW_PLAYING_PALETTE,
                 AppPreferences.NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY);

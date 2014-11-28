@@ -43,6 +43,12 @@
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
 
+        <item name="nowPlayingPlayStyle">@style/nowPlayingActionLight.Play</item>
+        <item name="nowPlayingNextStyle">@style/nowPlayingActionLight.Next</item>
+        <item name="nowPlayingPrevStyle">@style/nowPlayingActionLight.Prev</item>
+        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionLight.Shuffle</item>
+        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
+
     </style>
 
     <style name="Theme.Light" parent="Theme.LightBase">
@@ -70,6 +76,13 @@
         <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
         <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
         <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Dark</item>
+
+        <item name="nowPlayingPlayStyle">@style/nowPlayingActionDark.Play</item>
+        <item name="nowPlayingNextStyle">@style/nowPlayingActionDark.Next</item>
+        <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
+        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
+        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
+
     </style>
 
     <style name="Theme.Dark" parent="Theme.DarkBase">
