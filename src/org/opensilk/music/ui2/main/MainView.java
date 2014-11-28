@@ -141,6 +141,13 @@ public class MainView extends FlingyFabLayout {
         return false;
     }
 
+    @Override
+    protected void onFabFling(View child, Direction direction) {
+        if (child.getId() == fabPlay.getId()) {
+            presenter.handlePrimaryFling();
+        }
+    }
+
     CompositeSubscription fabClicksSubscription;
 
     void subscribeFabClicks() {
@@ -149,7 +156,7 @@ public class MainView extends FlingyFabLayout {
                 ViewObservable.clicks(fabPlay).subscribe(new Action1<OnClickEvent>() {
                     @Override
                     public void call(OnClickEvent onClickEvent) {
-                        presenter.musicService.playOrPause();
+                        presenter.handlePrimaryClick();
                     }
                 }),
                 ViewObservable.clicks(fabNext).subscribe(new Action1<OnClickEvent>() {
@@ -185,18 +192,17 @@ public class MainView extends FlingyFabLayout {
         fabClicksSubscription = null;
     }
 
-
     void setupActionButton() {
         fabPlay.setOnDoubleClickListener(new FloatingActionButton.OnDoubleClickListener() {
             @Override
             public void onDoubleClick(View view) {
-                toggleSecondaryFabs();
+                presenter.handlePrimaryDoubleClick();
             }
         });
         fabPlay.setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                toggleSecondaryFabs();
+                presenter.handlePrimaryLongClick();
                 return true;
             }
         });

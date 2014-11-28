@@ -109,13 +109,6 @@ public class FooterView extends RelativeLayout {
                     }
                 })
         );
-        this.setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                getContext().startActivity(new Intent(getContext(), NowPlayingActivity.class));
-                return true;
-            }
-        });
     }
 
     void unsubscribeClicks() {

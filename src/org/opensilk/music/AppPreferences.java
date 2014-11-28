@@ -95,6 +95,16 @@ public class AppPreferences {
     public static final String NOW_PLAYING_PALETTE_MUTED_FALLBACK = "muted_fallback";
     public static final String NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY = "vibrant_ab_muted_bdy";
 
+    // action button
+    public static final String FAB_CLICK = "fab_click";
+    public static final String FAB_DOUBLE_CLICK = "fab_double_click";
+    public static final String FAB_LONG_CLICK = "fab_long_click";
+    public static final String FAB_FLING = "fab_fling";
+    public static final String FAB_ACTION_PLAYPAUSE = "play_pause";
+    public static final String FAB_ACTION_QUICK_CONTROLS = "quick_controls";
+    public static final String FAB_ACTION_OPEN_NOW_PLAYING = "open_now_playing";
+    public static final String FAB_ACTION_NONE = "none";
+
     //Misc
     public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
     public static final String SEND_CRASH_REPORTS = "send_crash_reports";

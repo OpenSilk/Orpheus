@@ -17,6 +17,7 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.andrew.apollo.MusicPlaybackService;
@@ -24,12 +25,17 @@ import com.andrew.apollo.MusicPlaybackService;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
+import org.opensilk.music.ui2.NowPlayingActivity;
 import org.opensilk.music.ui2.core.BroadcastObservables;
+import org.opensilk.music.ui2.event.StartActivityForResult;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+import de.greenrobot.event.EventBus;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -66,15 +72,21 @@ public class Main {
         final Context appContext;
         final MusicServiceConnection musicService;
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
+        final EventBus eventBus;
+        final AppPreferences settings;
 
         @Inject
         protected Presenter(@ForApplication Context context,
                             MusicServiceConnection musicService,
-                            PauseAndResumeRegistrar pauseAndResumeRegistrar) {
+                            PauseAndResumeRegistrar pauseAndResumeRegistrar,
+                            @Named("activity") EventBus eventBus,
+                            AppPreferences settings) {
             Timber.v("new MainViewBlueprint.Presenter()");
             this.appContext = context;
             this.musicService = musicService;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
+            this.eventBus = eventBus;
+            this.settings = settings;
         }
 
         @Override
@@ -151,6 +163,41 @@ public class Main {
                     v.fabRepeat.setImageLevel(2);
                     break;
             }
+        }
+
+        void handlePrimaryAction(String event, String def) {
+            String pref = settings.getString(event, def);
+            switch (pref) {
+                case AppPreferences.FAB_ACTION_PLAYPAUSE:
+                    musicService.playOrPause();
+                    break;
+                case AppPreferences.FAB_ACTION_QUICK_CONTROLS:
+                    if (getView() != null) {
+                        getView().toggleSecondaryFabs();
+                    }
+                    break;
+                case AppPreferences.FAB_ACTION_OPEN_NOW_PLAYING:
+                    if (getView() != null) {
+                        eventBus.post(new StartActivityForResult(new Intent(getView().getContext(), NowPlayingActivity.class), 0));
+                    }
+                    break;
+            }
+        }
+
+        void handlePrimaryClick() {
+            handlePrimaryAction(AppPreferences.FAB_CLICK, AppPreferences.FAB_ACTION_PLAYPAUSE);
+        }
+
+        void handlePrimaryDoubleClick() {
+            handlePrimaryAction(AppPreferences.FAB_DOUBLE_CLICK, AppPreferences.FAB_ACTION_QUICK_CONTROLS);
+        }
+
+        void handlePrimaryLongClick() {
+            handlePrimaryAction(AppPreferences.FAB_LONG_CLICK, AppPreferences.FAB_ACTION_QUICK_CONTROLS);
+        }
+
+        void handlePrimaryFling() {
+            handlePrimaryAction(AppPreferences.FAB_FLING, AppPreferences.FAB_ACTION_OPEN_NOW_PLAYING);
         }
 
         Observable<Boolean> playStateObservable;

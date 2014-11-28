@@ -46,4 +46,37 @@
     </PreferenceCategory>
     -->
 
+    <PreferenceCategory
+        android:title="@string/settings_fab">
+
+        <ListPreference
+            android:key="fab_click"
+            android:title="@string/settings_fab_click"
+            android:entries="@array/fab_actions"
+            android:entryValues="@array/fab_actions_values"
+            android:defaultValue="play_pause"/>
+
+        <ListPreference
+            android:key="fab_double_click"
+            android:title="@string/settings_fab_double_click"
+            android:entries="@array/fab_actions"
+            android:entryValues="@array/fab_actions_values"
+            android:defaultValue="quick_controls"/>
+
+        <ListPreference
+            android:key="fab_long_click"
+            android:title="@string/settings_fab_long_click_action"
+            android:entries="@array/fab_actions"
+            android:entryValues="@array/fab_actions_values"
+            android:defaultValue="quick_controls"/>
+
+        <ListPreference
+            android:key="fab_fling"
+            android:title="@string/settings_fab_fling_action"
+            android:entries="@array/fab_actions"
+            android:entryValues="@array/fab_actions_values"
+            android:defaultValue="open_now_playing"/>
+
+     </PreferenceCategory>
+
 </PreferenceScreen>
