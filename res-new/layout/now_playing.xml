@@ -69,7 +69,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/now_playing_toolbar"
-        android:gravity="bottom"
+        android:layout_marginBottom="@dimen/now_playing_image_margin_bottom"
+        android:layout_marginTop="@dimen/now_playing_image_margin_top"
+        android:layout_marginLeft="@dimen/now_playing_image_margin_left"
+        android:layout_marginRight="@dimen/now_playing_image_margin_right"
         tools:src="@drawable/default_artwork"/>
 
     <LinearLayout
