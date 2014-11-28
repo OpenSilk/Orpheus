@@ -82,29 +82,29 @@ public class SettingsMainFragment extends Fragment {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFragments.add(new Holder(SettingsInterfaceFragment.class.getName(),
                     mContext.getString(R.string.settings_ui_category),
-                    R.drawable.ic_settings_interface_light,
-                    R.drawable.ic_settings_interface_dark));
+                    R.drawable.ic_phone_android_grey600_48dp,
+                    R.drawable.ic_phone_android_grey600_48dp));
             mFragments.add(new Holder(SettingsDataFragment.class.getName(),
                     mContext.getString(R.string.settings_data_category),
-                    R.drawable.ic_settings_data_light,
-                    R.drawable.ic_settings_data_dark));
+                    R.drawable.ic_data_usage_grey600_48dp,
+                    R.drawable.ic_data_usage_grey600_48dp));
             mFragments.add(new Holder(SettingsAudioFragment.class.getName(),
                     mContext.getString(R.string.settings_audio_category),
-                    R.drawable.ic_settings_audio_light,
-                    R.drawable.ic_settings_audio_dark));
+                    R.drawable.ic_tune_grey600_48dp,
+                    R.drawable.ic_tune_grey600_48dp));
             mFragments.add(new Holder(SettingsPluginFragment.class.getName(),
                     mContext.getString(R.string.settings_plugin_category),
-                    R.drawable.ic_action_puzzle_black,
-                    R.drawable.ic_action_puzzle_white));
+                    R.drawable.ic_extension_grey600_24dp,
+                    R.drawable.ic_extension_grey600_24dp));
             // Must be last, add new items above this one.
             mFragments.add(new Holder(SettingsDonateFragment.class.getName(),
                     mContext.getString(R.string.settings_donate_category),
-                    R.drawable.ic_settings_donate_light,
-                    R.drawable.ic_settings_donate_dark));
+                    R.drawable.ic_attach_money_grey600_48dp,
+                    R.drawable.ic_attach_money_grey600_48dp));
             mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
                     mContext.getString(R.string.settings_about_category),
-                    R.drawable.ic_settings_about_light,
-                    R.drawable.ic_settings_about_dark));
+                    R.drawable.ic_info_outline_grey600_48dp,
+                    R.drawable.ic_info_outline_grey600_48dp));
         }
 
         @Override
