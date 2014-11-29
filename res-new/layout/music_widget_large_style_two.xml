@@ -18,14 +18,13 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/drop_shadow_dark">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY" />
+        android:scaleType="centerCrop" />
 
     <LinearLayout
         android:orientation="vertical"
@@ -45,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:ellipsize="marquee"
-                android:textAppearance="@android:style/TextAppearance.Holo"/>
+                android:textAppearance="?android:textAppearance"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -58,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:ellipsize="marquee"
-                android:textAppearance="@android:style/TextAppearance.Holo.Small"/>
+                android:textAppearance="?android:textAppearanceSmall"/>
 
         </LinearLayout>
 
@@ -76,7 +75,7 @@
                 android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_shuffle"
-                android:src="@drawable/ic_action_playback_shuffle_white" />
+                android:src="@drawable/ic_shuffle_white_36dp" />
 
             <!-- TODO: Configure button (Needs to move to the right) -->
             <ImageButton
@@ -94,7 +93,7 @@
                 android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_repeat"
-                android:src="@drawable/ic_action_playback_repeat_white" />
+                android:src="@drawable/ic_repeat_white_36dp" />
 
         </LinearLayout>
 
@@ -111,7 +110,7 @@
                 android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_prev"
-                android:src="@drawable/ic_action_playback_prev_white" />
+                android:src="@drawable/ic_skip_previous_white_36dp" />
 
             <ImageButton
                 android:id="@+id/widget_play"
@@ -121,7 +120,7 @@
                 android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_play"
-                android:src="@drawable/ic_action_playback_play_white" />
+                android:src="@drawable/ic_play_arrow_white_36dp" />
 
             <ImageButton
                 android:id="@+id/widget_next"
@@ -131,7 +130,7 @@
                 android:background="?android:selectableItemBackground"
                 android:focusable="true"
                 android:contentDescription="@string/accessibility_next"
-                android:src="@drawable/ic_action_playback_next_white" />
+                android:src="@drawable/ic_skip_next_white_36dp" />
 
         </LinearLayout>
     </LinearLayout>

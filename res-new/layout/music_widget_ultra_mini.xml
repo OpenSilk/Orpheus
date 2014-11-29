@@ -18,14 +18,13 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/drop_shadow_dark">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"/>
+        android:scaleType="centerCrop"/>
 
     <ImageButton
         android:id="@+id/widget_play"
@@ -33,6 +32,6 @@
         android:layout_height="match_parent"
         android:contentDescription="@string/accessibility_play"
         android:background="?android:selectableItemBackground"
-        android:src="@drawable/ic_action_playback_play_white" />
+        android:src="@drawable/ic_play_arrow_white_36dp" />
 
 </FrameLayout>

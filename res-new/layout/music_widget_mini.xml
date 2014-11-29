@@ -18,14 +18,13 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/drop_shadow_dark">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/widget_album_art"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitXY"/>
+        android:scaleType="centerCrop"/>
 
     <LinearLayout
         android:layout_height="@dimen/music_widget_mini_button_bar_height"
@@ -42,7 +41,7 @@
             android:background="?android:selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_prev"
-            android:src="@drawable/ic_action_playback_prev_white" />
+            android:src="@drawable/ic_skip_previous_white_36dp" />
 
         <ImageButton
             android:id="@+id/widget_play"
@@ -52,7 +51,7 @@
             android:background="?android:selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_play"
-            android:src="@drawable/ic_action_playback_play_white" />
+            android:src="@drawable/ic_play_arrow_white_36dp" />
 
         <ImageButton
             android:id="@+id/widget_next"
@@ -62,7 +61,7 @@
             android:background="?android:selectableItemBackground"
             android:focusable="true"
             android:contentDescription="@string/accessibility_next"
-            android:src="@drawable/ic_action_playback_next_white" />
+            android:src="@drawable/ic_skip_next_white_36dp" />
 
     </LinearLayout>
 

@@ -34,7 +34,6 @@ import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.ui2.BaseSwitcherActivity;
 import org.opensilk.music.ui2.BaseSwitcherToolbarActivity;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.BroadcastObservables;
@@ -279,12 +278,12 @@ public class QueueScreen extends Screen {
                     .setTitle(R.string.title_queue)
                     .setUpButtonEnabled(true)
                     .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                            .withMenus(R.menu.panel_save_queue, R.menu.panel_clear_queue)
+                            .withMenus(R.menu.popup_save_queue, R.menu.popup_clear_queue)
                             .setActionHandler(new Func1<Integer, Boolean>() {
                                 @Override
                                 public Boolean call(Integer integer) {
                                     switch (integer) {
-                                        case R.id.panel_menu_save_queue:
+                                        case R.id.popup_menu_save_queue:
                                             musicService.getQueue().subscribe(new Action1<long[]>() {
                                                 @Override
                                                 public void call(long[] queue) {
@@ -299,7 +298,7 @@ public class QueueScreen extends Screen {
                                                 }
                                             });
                                             return true;
-                                        case R.id.panel_menu_clear_queue:
+                                        case R.id.popup_menu_clear_queue:
                                             musicService.clearQueue();
                                             if (getView() != null)
                                                 AppFlow.get(getView().getContext()).goBack();
