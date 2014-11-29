@@ -19,25 +19,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:seekarc="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content">
 
         <com.triggertrap.seekarc.SeekArc
             android:id="@+id/timer_set"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="30dp"
             seekarc:rotation="180"
             seekarc:startAngle="30"
             seekarc:sweepAngle="300"
             seekarc:clockwise="false"
-            seekarc:max="120"/>
+            android:max="120"
+            style="@style/SeekArcSleepTimer"/>
 
         <TextView
             android:id="@+id/timer_display"

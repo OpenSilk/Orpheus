@@ -69,6 +69,11 @@
         <item name="android:shadowRadius">3.8</item>
     </style>
 
+    <style name="SeekArcSleepTimer" parent="SeekArcLight">
+        <item name="android:layout_height">300dp</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
     <!--SETTINGS-->
     <style name="SettingsGridBase">
         <item name="android:numColumns">2</item>

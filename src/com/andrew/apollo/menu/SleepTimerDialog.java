@@ -30,6 +30,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -102,19 +103,19 @@ public class SleepTimerDialog extends DialogFragment {
             ButterKnife.inject(this);
             final int prevMin = mSettings.getInt(PREF_PREVIOUS_TIMER_VALUE, 30);
             mTimerSet.setProgress(prevMin);
-            mTimerSet.setOnSeekArcChangeListener(new SeekArc.OnSeekArcChangeListener() {
+            mTimerSet.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
-                public void onProgressChanged(SeekArc seekArc, int i, boolean b) {
+                public void onProgressChanged(SeekBar seekArc, int i, boolean b) {
                     mTimerDisplay.setText(String.valueOf(i)+" min");
                 }
 
                 @Override
-                public void onStartTrackingTouch(SeekArc seekArc) {
+                public void onStartTrackingTouch(SeekBar seekArc) {
 
                 }
 
                 @Override
-                public void onStopTrackingTouch(SeekArc seekArc) {
+                public void onStopTrackingTouch(SeekBar seekArc) {
 
                 }
             });
