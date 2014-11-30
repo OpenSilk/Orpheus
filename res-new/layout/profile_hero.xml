@@ -21,7 +21,7 @@
     android:layout_height="wrap_content">
 
     <!-- Need nested frame so image doesnt bleed into grid on parallax -->
-    <org.opensilk.music.widgets.SquareFrameLayout
+    <org.opensilk.common.widget.SquareFrameLayout
         android:id="@+id/hero_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -34,6 +34,6 @@
             android:layout_gravity="center"
             android:gravity="center" />
 
-    </org.opensilk.music.widgets.SquareFrameLayout>
+    </org.opensilk.common.widget.SquareFrameLayout>
 
 </FrameLayout>

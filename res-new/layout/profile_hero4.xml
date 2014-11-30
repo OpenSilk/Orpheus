@@ -20,7 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <org.opensilk.music.widgets.SquareFrameLayout
+    <org.opensilk.common.widget.SquareFrameLayout
         android:id="@+id/hero_container"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -58,6 +58,6 @@
             android:layout_marginTop="1dp"
             android:layout_marginLeft="1dp"/>
 
-    </org.opensilk.music.widgets.SquareFrameLayout>
+    </org.opensilk.common.widget.SquareFrameLayout>
 
 </FrameLayout>

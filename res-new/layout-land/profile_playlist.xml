@@ -27,7 +27,7 @@
     android:layout_marginTop="?mainContentTopMargin"
     android:baselineAligned="false">
 
-    <org.opensilk.music.widgets.SquareFrameLayout
+    <org.opensilk.common.widget.SquareFrameLayout
         android:id="@+id/hero_holder"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
