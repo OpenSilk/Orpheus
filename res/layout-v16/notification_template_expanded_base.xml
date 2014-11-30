@@ -28,8 +28,16 @@
         android:layout_height="@dimen/notification_expanded_height"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:background="@drawable/default_artwork"
+        tools:src="@drawable/default_artwork"
         android:scaleType="fitXY" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:layout_above="@+id/notification_expanded_buttons"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/notification_expanded_base_image"
+        android:background="?android:dividerHorizontal" />
 
     <LinearLayout
         android:id="@+id/notification_expanded_buttons"
