@@ -28,7 +28,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -189,23 +188,6 @@ public class BaseActivity extends ActionBarActivity {
             mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
         }
         return true;
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (mMusicService.isRemotePlayback().toBlocking().first()) {
-            double increment = 0;
-            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-                increment = 0.05;
-            } else if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-                increment = -0.05;
-            }
-            if (increment != 0) {
-                CastUtils.changeRemoteVolume(increment);
-                return true;
-            }
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     public boolean checkCastingEnabled() {
