@@ -23,4 +23,14 @@
         <item name="android:tint">?attr/colorControlNormal</item>
     </style>
 
+    <style name="nowPlayingActionDark">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">?android:selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="nowPlayingActionLight">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">?android:selectableItemBackgroundBorderless</item>
+    </style>
+
 </resources>

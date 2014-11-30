@@ -16,6 +16,7 @@
 
 package org.opensilk.common.util;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -182,12 +183,15 @@ public class ThemeUtils {
     }
 
     public static void themeSeekBar(SeekBar seekBar, int colorAttr) {
+        if (VersionUtils.hasLollipop()) return;
         themeSeekBar2(seekBar, getThemeAttrColor(seekBar.getContext(), colorAttr));
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static void themeSeekBar2(SeekBar seekBar, int color) {
+        if (VersionUtils.hasLollipop()) return; //TODO
         seekBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (VersionUtils.hasJellyBean()) {
             seekBar.getThumb().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
         } else if (seekBar instanceof CompatSeekBar) {
             Drawable thumb = ((CompatSeekBar) seekBar).getThumb();
@@ -196,6 +200,7 @@ public class ThemeUtils {
     }
 
     public static void themeProgressBar(ProgressBar progressBar, int colorAttr) {
+        if (VersionUtils.hasLollipop()) return;
         int color = getThemeAttrColor(progressBar.getContext(), colorAttr);
         progressBar.getProgressDrawable().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
     }

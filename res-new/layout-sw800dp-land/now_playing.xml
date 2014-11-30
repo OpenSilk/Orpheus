@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<org.opensilk.music.ui2.nowplaying.NowPlayingView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
+
+    <android.support.v7.widget.Toolbar
+        android:id="@id/now_playing_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentTop="true"
+        style="?toolbarTheme"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_below="@id/now_playing_toolbar"
+        android:background="?colorPrimary"/>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/now_playing_toolbar"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="64dp"
+        android:layout_marginRight="64dp"
+        android:layout_marginBottom="32dp"
+        app:contentPadding="1dp"
+        app:cardBackgroundColor="?android:colorBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="1dp"
+            >
+
+            <org.opensilk.common.widget.SquareImageView
+                android:id="@id/now_playing_image"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:src="@drawable/default_artwork"/>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <com.triggertrap.seekarc.SeekArc
+                    android:id="@id/now_playing_seekprogress"
+                    android:layout_centerInParent="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="48dp"
+                    android:padding="36dp"
+                    app:rotation="180"
+                    app:startAngle="40"
+                    app:sweepAngle="280"
+                    android:max="1000"
+                    app:progressColor="?colorAccent"
+                    style="@style/SeekArcLight"
+                    />
+
+                <RelativeLayout
+                    android:id="@+id/now_playing_actions"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:layout_centerInParent="true">
+
+                    <org.opensilk.common.widget.ImageButtonCheckable
+                        android:id="@id/now_playing_play"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:padding="8dp"
+                        tools:src="@drawable/ic_play_arrow_black_36dp"
+                        style="?nowPlayingPlayStyle"/>
+
+                    <ImageButton
+                        android:id="@id/now_playing_previous"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/now_playing_play"
+                        android:layout_toLeftOf="@id/now_playing_play"
+                        android:padding="8dp"
+                        tools:src="@drawable/ic_skip_previous_black_36dp"
+                        style="?nowPlayingPrevStyle"/>
+
+                    <ImageButton
+                        android:id="@id/now_playing_next"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@id/now_playing_play"
+                        android:layout_toRightOf="@id/now_playing_play"
+                        android:padding="8dp"
+                        tools:src="@drawable/ic_skip_next_black_36dp"
+                        style="?nowPlayingNextStyle"/>
+
+                    <ImageButton
+                        android:id="@id/now_playing_repeat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_above="@id/now_playing_play"
+                        android:layout_toLeftOf="@id/now_playing_play"
+                        android:padding="8dp"
+                        tools:src="@drawable/ic_repeat_black_36dp"
+                        style="?nowPlayingRepeatStyle"/>
+
+                    <ImageButton
+                        android:id="@id/now_playing_shuffle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/now_playing_play"
+                        android:layout_toRightOf="@id/now_playing_play"
+                        android:padding="8dp"
+                        tools:src="@drawable/ic_shuffle_black_36dp"
+                        style="?nowPlayingShuffleStyle"/>
+
+                </RelativeLayout>
+
+                <!-- current playtime -->
+                <TextView
+                    android:id="@id/now_playing_current_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentBottom="true"
+                    android:gravity="start"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginBottom="24dp"
+                    android:textAppearance="?android:textAppearanceSmall"
+                    tools:text="0:00"/>
+
+                <!-- total playtime -->
+                <TextView
+                    android:id="@id/now_playing_total_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:gravity="end"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="24dp"
+                    android:textAppearance="?android:textAppearanceSmall"
+                    tools:text="0:00"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</org.opensilk.music.ui2.nowplaying.NowPlayingView>

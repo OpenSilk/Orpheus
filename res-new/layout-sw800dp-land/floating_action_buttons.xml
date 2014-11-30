@@ -26,7 +26,7 @@
         android:layout_height="@dimen/fab_size_normal"
         android:layout_marginEnd="@dimen/fab_margin_end"
         android:layout_marginRight="@dimen/fab_margin_end"
-        android:layout_marginTop="116dp"
+        android:layout_marginTop="156dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"

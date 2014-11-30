@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.nowplaying;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +29,10 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.triggertrap.seekarc.SeekArc;
+
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.util.VersionUtils;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.common.widget.ImageButtonCheckable;
 import org.opensilk.music.AppPreferences;
@@ -78,7 +82,13 @@ public class NowPlayingView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
+        if (!(seekBar instanceof SeekArc)) {
+            ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
+        } else if (!VersionUtils.hasLollipop()) {
+            ((SeekArc)seekBar).getThumb().mutate().setColorFilter(
+                    ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
+            );
+        }
         PlaybackDrawableTint.repeatDrawable36(repeat);
         origRepeat = repeat.getDrawable();
         PlaybackDrawableTint.shuffleDrawable36(shuffle);
@@ -197,13 +207,25 @@ public class NowPlayingView extends RelativeLayout {
         if (s != null && s2 != null) {
             toolbar.setBackgroundColor(s.getRgb());
             setBackgroundColor(s2.getRgb());
-            ThemeUtils.themeSeekBar2(seekBar, btnColor);
+            if (!(seekBar instanceof SeekArc)) {
+                ThemeUtils.themeSeekBar2(seekBar, btnColor);
+            } else if (!VersionUtils.hasLollipop()) {
+                ((SeekArc)seekBar).getThumb().mutate().setColorFilter(
+                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
+                );
+            }
             repeat.setImageDrawable(PlaybackDrawableTint.getRepeatDrawable36(getContext(), btnColor));
             shuffle.setImageDrawable(PlaybackDrawableTint.getShuffleDrawable36(getContext(), btnColor));
         } else {
             toolbar.setBackgroundColor(ThemeUtils.getColorPrimary(getContext()));
             setBackgroundColor(ThemeUtils.getThemeAttrColor(getContext(), android.R.attr.colorBackground));
-            ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
+            if (!(seekBar instanceof SeekArc)) {
+                ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
+            } else if (!VersionUtils.hasLollipop()) {
+                ((SeekArc)seekBar).getThumb().mutate().setColorFilter(
+                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
+                );
+            }
             repeat.setImageDrawable(origRepeat);
             shuffle.setImageDrawable(origShuffle);
         }
