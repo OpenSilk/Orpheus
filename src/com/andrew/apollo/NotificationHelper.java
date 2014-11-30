@@ -19,14 +19,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.media.session.MediaSession;
-import android.os.Build;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.andrew.apollo.utils.ApolloUtils;
 import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.util.VersionUtils;
@@ -139,6 +135,7 @@ public class NotificationHelper {
             }
         }
 
+        mNotification.flags |= Notification.FLAG_ONGOING_EVENT;
         mService.startForeground(APOLLO_MUSIC_SERVICE, mNotification);
     }
 
