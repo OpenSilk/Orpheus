@@ -279,13 +279,13 @@ public class MediaSessionHelper {
                 case POSITION_CHANGED:
                     PlaybackState state = new PlaybackState.Builder()
                             .setActions(
-                                    PlaybackState.ACTION_PLAY|
-                                    PlaybackState.ACTION_PAUSE|
-                                    PlaybackState.ACTION_SEEK_TO|
-                                    PlaybackState.ACTION_SKIP_TO_NEXT|
-                                    PlaybackState.ACTION_SKIP_TO_PREVIOUS|
-                                    PlaybackState.ACTION_STOP|
-                                    PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM
+                                    PlaybackState.ACTION_PLAY
+                                    |PlaybackState.ACTION_PAUSE
+                                    |PlaybackState.ACTION_SEEK_TO
+                                    |PlaybackState.ACTION_SKIP_TO_NEXT
+                                    |PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                                    |PlaybackState.ACTION_STOP
+//                                    |PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM
                             )
                             .setActiveQueueItemId(mService.getAudioId())
                             .setState(
@@ -297,7 +297,7 @@ public class MediaSessionHelper {
                     mMediaSession.setPlaybackState(state);
                     break;
                 case QUEUE_CHANGED:
-                    mMediaSession.setQueue(MusicProviderUtil.buildQueueList(mService, mService.getQueue()));
+                    //mMediaSession.setQueue(MusicProviderUtil.buildQueueList(mService, mService.getQueue()));
                     break;
                 case META_CHANGED:
                     mMediaSession.setMetadata(buildMeta());
