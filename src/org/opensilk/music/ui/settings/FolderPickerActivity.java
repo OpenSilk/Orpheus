@@ -146,13 +146,13 @@ public class FolderPickerActivity extends BaseActivity {
     }
 
     static List<Folder> doListing(File rootDir) {
-        if (!rootDir.exists() || !rootDir.isDirectory()) {
+        if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
             return Collections.emptyList();
         }
         File[] dirList = rootDir.listFiles();
         List<Folder> folders = new ArrayList<>(dirList.length);
         for (File f : dirList) {
-            if (f.isDirectory()) {
+            if (f.isDirectory() && f.canRead()) {
                 folders.add(makeFolder(f));
             }
         }
