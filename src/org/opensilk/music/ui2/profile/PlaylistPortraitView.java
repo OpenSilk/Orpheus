@@ -90,6 +90,7 @@ public class PlaylistPortraitView extends FrameLayout implements ProfileView {
         mArtwork = ButterKnife.findById(mHeroContainer, R.id.hero_image);
 
         mList.addHeaderView(mListHeader);
+        mList.setupAdapter();
         // for parallax
         mList.setOnScrollListener(mScrollListener);
 

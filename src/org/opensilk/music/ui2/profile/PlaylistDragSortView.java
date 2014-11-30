@@ -58,7 +58,6 @@ public class PlaylistDragSortView extends DragSortListView implements
             // Set the swipe to remove listener
             setRemoveListener(this);
         }
-        setAdapter(mAdapter);
         presenter.takeView(this);
     }
 
@@ -93,5 +92,10 @@ public class PlaylistDragSortView extends DragSortListView implements
         LocalSong song = mAdapter.getItem(from);
         mAdapter.remove(song);
         mAdapter.insert(song, to);
+    }
+
+    //Separated to ensure header is added first
+    void setupAdapter() {
+        setAdapter(mAdapter);
     }
 }

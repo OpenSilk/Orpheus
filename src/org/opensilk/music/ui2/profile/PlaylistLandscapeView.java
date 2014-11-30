@@ -53,6 +53,7 @@ public class PlaylistLandscapeView extends LinearLayout implements ProfileView {
 
     @Inject PlaylistScreen.Presenter presenter;
 
+    @InjectView(android.R.id.list) PlaylistDragSortView mList;
     @InjectView(R.id.hero_image) AnimatedImageView mArtwork;
     @InjectView(R.id.hero_image2) @Optional AnimatedImageView mArtwork2;
     @InjectView(R.id.hero_image3) @Optional AnimatedImageView mArtwork3;
@@ -75,6 +76,7 @@ public class PlaylistLandscapeView extends LinearLayout implements ProfileView {
                 true
         );
         ButterKnife.inject(this);
+        mList.setupAdapter();
     }
 
     @Override
