@@ -51,7 +51,7 @@
     </style>
 
     <style name="NotificationAction.Collapse" parent="@style/NotificationAction">
-        <item name="android:src">@drawable/btn_notification_collapse</item>
+        <item name="android:src">@drawable/ic_clear_grey600_18dp</item>
     </style>
 
 </resources>
