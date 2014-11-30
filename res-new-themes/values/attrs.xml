@@ -26,7 +26,6 @@
         <attr name="gridTileDescriptionStyle" format="reference"/>
         <attr name="gridTileDescriptionTitleStyle" format="reference"/>
         <attr name="gridTileDescriptionSubTitleStyle" format="reference"/>
-        <attr name="settingsCardBackgroundColor" format="color"/>
         <attr name="nowPlayingPlayStyle" format="reference"/>
         <attr name="nowPlayingNextStyle" format="reference"/>
         <attr name="nowPlayingPrevStyle" format="reference"/>

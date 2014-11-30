@@ -30,12 +30,4 @@
         <item name="colorAccent">@color/orange_A400</item>
     </style>
 
-    <style name="Theme.Profile.Light.PurpleOrange" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/orange_A200</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.PurpleOrange" parent="Theme.Profile.DarkBase">
-        <item name="colorAccent">@color/orange_A400</item>
-    </style>
-
 </resources>

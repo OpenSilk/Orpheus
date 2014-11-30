@@ -30,14 +30,6 @@
         <item name="colorAccent">@color/orange_A400</item>
     </style>
 
-    <style name="Theme.Profile.Light.TealOrange" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/orange_A200</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.TealOrange" parent="Theme.Profile.DarkBase">
-        <item name="colorAccent">@color/orange_A400</item>
-    </style>
-
     <style name="Theme.Light.TealPurple" parent="Theme.LightBase">
         <item name="colorPrimary">@color/teal_500</item>
         <item name="colorPrimaryDark">@color/teal_700</item>
@@ -47,14 +39,6 @@
     <style name="Theme.Dark.TealPurple" parent="Theme.DarkBase">
         <item name="colorPrimary">@color/teal_500</item>
         <item name="colorPrimaryDark">@color/teal_700</item>
-        <item name="colorAccent">@color/purple_A400</item>
-    </style>
-
-    <style name="Theme.Profile.Light.TealPurple" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/purple_A200</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.TealPurple" parent="Theme.Profile.DarkBase">
         <item name="colorAccent">@color/purple_A400</item>
     </style>
 

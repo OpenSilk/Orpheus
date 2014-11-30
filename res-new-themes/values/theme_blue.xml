@@ -30,14 +30,6 @@
         <item name="colorAccent">@color/yellow_A400</item>
     </style>
 
-    <style name="Theme.Profile.Light.BlueYellow" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/yellow_A200</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.BlueYellow" parent="Theme.Profile.DarkBase">
-        <item name="colorAccent">@color/yellow_A400</item>
-    </style>
-
     <style name="Theme.Light.BlueOrange" parent="Theme.LightBase">
         <item name="colorPrimary">@color/blue_500</item>
         <item name="colorPrimaryDark">@color/blue_700</item>
@@ -50,14 +42,6 @@
         <item name="colorAccent">@color/orange_A400</item>
     </style>
 
-    <style name="Theme.Profile.Light.BlueOrange" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/orange_A200</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.BlueOrange" parent="Theme.Profile.DarkBase">
-        <item name="colorAccent">@color/orange_A400</item>
-    </style>
-
     <style name="Theme.Light.BlueRed" parent="Theme.LightBase">
         <item name="colorPrimary">@color/blue_500</item>
         <item name="colorPrimaryDark">@color/blue_700</item>
@@ -67,14 +51,6 @@
     <style name="Theme.Dark.BlueRed" parent="Theme.DarkBase">
         <item name="colorPrimary">@color/blue_500</item>
         <item name="colorPrimaryDark">@color/blue_700</item>
-        <item name="colorAccent">@color/red_A400</item>
-    </style>
-
-    <style name="Theme.Profile.Light.BlueRed" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/red_A200</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.BlueRed" parent="Theme.Profile.DarkBase">
         <item name="colorAccent">@color/red_A400</item>
     </style>
 

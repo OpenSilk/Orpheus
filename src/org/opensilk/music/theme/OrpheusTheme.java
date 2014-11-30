@@ -25,92 +25,62 @@ import org.opensilk.music.R;
 public enum OrpheusTheme {
     DEFAULT(
             R.style.Theme_Light,
-            R.style.Theme_Dark,
-            R.style.Theme_Profile_Light,
-            R.style.Theme_Profile_Dark
+            R.style.Theme_Dark
     ),
     RED_YELLOW(
             R.style.Theme_Light_RedYellow,
-            R.style.Theme_Dark_RedYellow,
-            R.style.Theme_Profile_Light_RedYellow,
-            R.style.Theme_Profile_Dark_RedYellow
+            R.style.Theme_Dark_RedYellow
     ),
     RED_BLUE(
             R.style.Theme_Light_RedBlue,
-            R.style.Theme_Dark_RedBlue,
-            R.style.Theme_Profile_Light_RedBlue,
-            R.style.Theme_Profile_Dark_RedBlue
+            R.style.Theme_Dark_RedBlue
     ),
     PURPLE_ORANGE(
             R.style.Theme_Light_PurpleOrange,
-            R.style.Theme_Dark_PurpleOrange,
-            R.style.Theme_Profile_Light_PurpleOrange,
-            R.style.Theme_Profile_Dark_PurpleOrange
+            R.style.Theme_Dark_PurpleOrange
     ),
     INDIGO_YELLOW(
             R.style.Theme_Light_IndigoYellow,
-            R.style.Theme_Dark_IndigoYellow,
-            R.style.Theme_Profile_Light_IndigoYellow,
-            R.style.Theme_Profile_Dark_IndigoYellow
+            R.style.Theme_Dark_IndigoYellow
     ),
     INDIGO_RED(
             R.style.Theme_Light_IndigoRed,
-            R.style.Theme_Dark_IndigoRed,
-            R.style.Theme_Profile_Light_IndigoRed,
-            R.style.Theme_Profile_Dark_IndigoRed
+            R.style.Theme_Dark_IndigoRed
     ),
     PINK_YELLOW(
             R.style.Theme_Light_PinkYellow,
-            R.style.Theme_Dark_PinkYellow,
-            R.style.Theme_Profile_Light_PinkYellow,
-            R.style.Theme_Profile_Dark_PinkYellow
+            R.style.Theme_Dark_PinkYellow
     ),
     PINK_BLUE(
             R.style.Theme_Light_PinkBlue,
-            R.style.Theme_Dark_PinkBlue,
-            R.style.Theme_Profile_Light_PinkBlue,
-            R.style.Theme_Profile_Dark_PinkBlue
+            R.style.Theme_Dark_PinkBlue
     ),
     BLUE_YELLOW(
             R.style.Theme_Light_BlueYellow,
-            R.style.Theme_Dark_BlueYellow,
-            R.style.Theme_Profile_Light_BlueYellow,
-            R.style.Theme_Profile_Dark_BlueYellow
+            R.style.Theme_Dark_BlueYellow
     ),
     BLUE_ORANGE(
             R.style.Theme_Light_BlueOrange,
-            R.style.Theme_Dark_BlueOrange,
-            R.style.Theme_Profile_Light_BlueOrange,
-            R.style.Theme_Profile_Dark_BlueOrange
+            R.style.Theme_Dark_BlueOrange
     ),
     BLUE_RED(
             R.style.Theme_Light_BlueRed,
-            R.style.Theme_Dark_BlueRed,
-            R.style.Theme_Profile_Light_BlueRed,
-            R.style.Theme_Profile_Dark_BlueRed
+            R.style.Theme_Dark_BlueRed
     ),
     TEAL_ORANGE(
             R.style.Theme_Light_TealOrange,
-            R.style.Theme_Dark_TealOrange,
-            R.style.Theme_Profile_Light_TealOrange,
-            R.style.Theme_Profile_Dark_TealOrange
+            R.style.Theme_Dark_TealOrange
     ),
     TEAL_PURPLE(
             R.style.Theme_Light_TealPurple,
-            R.style.Theme_Dark_TealPurple,
-            R.style.Theme_Profile_Light_TealPurple,
-            R.style.Theme_Profile_Dark_TealPurple
+            R.style.Theme_Dark_TealPurple
     );
 
     public final int light;
     public final int dark;
-    public final int profileLight;
-    public final int profileDark;
 
-    OrpheusTheme(int light, int dark, int profileLight, int profileDark) {
+    OrpheusTheme(int light, int dark) {
         this.light = light;
         this.dark = dark;
-        this.profileLight = profileLight;
-        this.profileDark = profileDark;
     }
 }

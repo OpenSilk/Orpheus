@@ -30,14 +30,6 @@
         <item name="colorAccent">@color/amber_A400</item>
     </style>
 
-    <style name="Theme.Profile.Light.RedYellow" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/amber_A200</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.RedYellow" parent="Theme.Profile.DarkBase">
-        <item name="colorAccent">@color/amber_A400</item>
-    </style>
-
     <style name="Theme.Light.RedBlue" parent="Theme.LightBase">
         <item name="colorPrimary">@color/red2_500</item>
         <item name="colorPrimaryDark">@color/red2_700</item>
@@ -47,14 +39,6 @@
     <style name="Theme.Dark.RedBlue" parent="Theme.DarkBase">
         <item name="colorPrimary">@color/red2_500</item>
         <item name="colorPrimaryDark">@color/red2_700</item>
-        <item name="colorAccent">@color/blue_A400</item>
-    </style>
-
-    <style name="Theme.Profile.Light.RedBlue" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/blue_A400</item>
-    </style>
-
-    <style name="Theme.Profile.Dark.RedBlue" parent="Theme.Profile.DarkBase">
         <item name="colorAccent">@color/blue_A400</item>
     </style>
 

@@ -16,20 +16,5 @@
   -->
 
 <resources>
-    <!--main colors are holo or slight variations of them
-    complements were generated with paletton.com-->
-    <color name="app_color_orpheus">#fff97f22</color>
-    <color name="app_color_orpheus_complement">#ff15998f</color>
-    <color name="app_color_blupheus">#ff0099cc</color>
-    <color name="app_color_blupheus_complement">#ffff8300</color>
-    <color name="app_color_repheus">#ffcc0000</color>
-    <color name="app_color_repheus_complement">#ff00a300</color>
-    <color name="app_color_grepheus">#ff669900</color>
-    <color name="app_color_grepheus_complement">#ff83004a</color>
-    <color name="app_color_purpheus">#ff9833cc</color>
-    <color name="app_color_purpheus_complement">#fffcff35</color>
-    <color name="app_background_light">#ffffffff</color>
-    <color name="app_background_light_transparent">#ccffffff</color>
-    <color name="app_background_dark">#ff000000</color>
-    <color name="app_background_dark_transparent">#99000000</color>
+
 </resources>

@@ -102,12 +102,6 @@
         <!--Light dark actionbar-->
         <item name="colorPrimary">@color/primary_material_dark</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
-
-        <item name="nowPlayingPlayStyle">@style/nowPlayingActionLight.Play</item>
-        <item name="nowPlayingNextStyle">@style/nowPlayingActionLight.Next</item>
-        <item name="nowPlayingPrevStyle">@style/nowPlayingActionLight.Prev</item>
-        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionLight.Shuffle</item>
-        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
     </style>
 
     <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.DialogWhenLarge">
@@ -116,12 +110,6 @@
         <item name="android:windowNoTitle">true</item>
         <!--DarkActionBar-->
         <item name="toolbarTheme">@style/Toolbar.Dark</item>
-
-        <item name="nowPlayingPlayStyle">@style/nowPlayingActionDark.Play</item>
-        <item name="nowPlayingNextStyle">@style/nowPlayingActionDark.Next</item>
-        <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
-        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
-        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
     </style>
 
     <!-- end base dialog themes -->
@@ -129,84 +117,14 @@
     <!-- Settings themes -->
 
     <style name="Theme.Settings.Light" parent="Theme.Dialog.LightBase">
-        <item name="settingsCardBackgroundColor">@android:color/white</item>
+
     </style>
 
     <style name="Theme.Settings.Dark" parent="Theme.Dialog.DarkBase">
-        <item name="settingsCardBackgroundColor">?colorPrimary</item>
+
     </style>
 
     <!-- end settings themes -->
-
-    <!-- Profile themes -->
-
-    <style name="Theme.Profile.LightBase" parent="Theme.Dialog.LightBase">
-
-        <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow.Transparent</item>
-
-        <item name="fabPlayStyle">@style/fabLight.Play</item>
-        <item name="fabNextStyle">@style/fabLight.Next</item>
-        <item name="fabPrevStyle">@style/fabLight.Prev</item>
-        <item name="fabShuffleStyle">@style/fabLight.Shuffle</item>
-        <item name="fabRepeatStyle">@style/fabLight.Repeat</item>
-
-        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
-        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
-        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
-
-    </style>
-
-    <style name="Theme.Profile.Light" parent="Theme.Profile.LightBase">
-        <item name="colorAccent">@color/amber_A400</item>
-    </style>
-
-    <style name="Theme.Profile.DarkBase" parent="Theme.Dialog.DarkBase">
-
-        <item name="toolbarTheme">@style/Toolbar.Dark.Transparent</item>
-
-        <item name="fabPlayStyle">@style/fabDark.Play</item>
-        <item name="fabNextStyle">@style/fabDark.Next</item>
-        <item name="fabPrevStyle">@style/fabDark.Prev</item>
-        <item name="fabShuffleStyle">@style/fabDark.Shuffle</item>
-        <item name="fabRepeatStyle">@style/fabDark.Repeat</item>
-
-        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
-        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
-        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Dark</item>
-    </style>
-
-    <style name="Theme.Profile.Dark" parent="Theme.Profile.DarkBase">
-
-    </style>
-
-    <!-- end profile themes -->
-
-    <!-- now playing themes -->
-
-    <style name="Theme.NowPlaying" parent="Theme.Dialog.DarkBase">
-        <!--DarkActionBar-->
-        <item name="toolbarTheme">@style/Toolbar.Dark</item>
-
-        <item name="nowPlayingPlayStyle">@style/nowPlayingActionDark.Play</item>
-        <item name="nowPlayingNextStyle">@style/nowPlayingActionDark.Next</item>
-        <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
-        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
-        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
-    </style>
-
-    <!-- end now playing themes -->
-
-    <!-- -->
-
-    <style name="Theme.Dialog.NoActionBar" parent="Theme.AppCompat.Dialog">
-        <!--NoActionBar-->
-        <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <!--DarkActionBar-->
-        <item name="toolbarTheme">@style/Toolbar.Dark.WhiteOverflow</item>
-    </style>
-
-    <!-- -->
 
     <!--Toolbar Styles -->
 
