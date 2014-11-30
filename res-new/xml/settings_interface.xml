@@ -19,7 +19,7 @@
     <PreferenceCategory
         android:title="@string/settings_home_category">
 
-        <org.opensilk.music.ui.settings.DragSortSwipeListPreference
+        <org.opensilk.music.ui.settings.HomePagesPreference
             android:key="pref_home_pages"
             android:title="@string/settings_pick_home_pages"
             android:summary="@string/settings_pick_home_pages_summary" />

@@ -2,6 +2,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -10,11 +11,9 @@
         android:id="@+id/add_item"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_gravity="left"
+        android:layout_gravity="right"
         android:text="@string/add"
-        android:textSize="18sp"
-        android:paddingLeft="4dp"
-        android:paddingRight="8dp"
+        android:textAppearance="?android:textAppearance"
         style="?android:attr/borderlessButtonStyle" />
 
     <View
@@ -26,6 +25,11 @@
         android:id="@android:id/list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/DragSortSwipeListPreference" />
+        app:use_default_controller="true"
+        app:drag_handle_id="@+id/item_handle"
+        app:remove_enabled="true"
+        app:remove_mode="flingRemove"
+        app:drag_start_mode="onMove"
+        app:float_background_color="@android:color/transparent"/>
 
 </LinearLayout>

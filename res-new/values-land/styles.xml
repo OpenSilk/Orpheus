@@ -21,8 +21,8 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
-    <!--SETTINGS-->
+    <!-- Settings -->
     <style name="SettingsGridBase">
-        <item name="android:numColumns">3</item>
+        <item name="android:numColumns">2</item>
     </style>
 </resources>

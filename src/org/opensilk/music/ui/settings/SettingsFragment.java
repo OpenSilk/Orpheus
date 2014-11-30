@@ -14,7 +14,6 @@ import org.opensilk.music.R;
 public abstract class SettingsFragment extends PreferenceFragment {
 
     protected String mTitle;
-    protected int mIconRes;
 
     protected PreferenceScreen mPrefSet;
 
@@ -23,7 +22,6 @@ public abstract class SettingsFragment extends PreferenceFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mTitle = getArguments().getString("title");
-            mIconRes = getArguments().getInt("dark_icon");
         }
     }
 
@@ -31,12 +29,9 @@ public abstract class SettingsFragment extends PreferenceFragment {
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (mTitle != null) {
-            ActionBarActivity activity = (ActionBarActivity) getActivity();
-            activity.setTitle(mTitle);
+            getActivity().setTitle(mTitle);
         }
     }
 
     protected String getTitle() { return mTitle; }
-    protected int getIconRes() { return mIconRes; }
-
 }

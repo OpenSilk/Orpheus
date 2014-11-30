@@ -93,36 +93,6 @@ public final class ApolloUtils {
     }
 
     /**
-     * @param context The {@link Context} to use.
-     * @return An {@link AlertDialog} used to show the open source licenses used
-     *         in Apollo.
-     */
-    public static final AlertDialog createOpenSourceDialog(final Context context) {
-        final WebView webView = new WebView(context);
-        webView.loadUrl("file:///android_asset/licenses.html");
-        return new AlertDialog.Builder(context)
-                .setTitle(R.string.settings_open_source_licenses)
-                .setView(webView)
-                .setPositiveButton(android.R.string.ok, null)
-                .create();
-    }
-
-    /**
-     * Shows changelog
-     * @param context
-     * @return
-     */
-    public static AlertDialog createChangesDialog(final Context context) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.changes_dialog, null);
-        return new AlertDialog.Builder(context)
-                .setTitle(R.string.settings_changes_dialog_title)
-                .setView(v)
-                .setPositiveButton(android.R.string.ok, null)
-                .create();
-    }
-
-    /**
      * Calculate whether a color is light or dark, based on a commonly known
      * brightness formula.
      * 

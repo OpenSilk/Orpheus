@@ -2,10 +2,8 @@ package org.opensilk.music.ui.settings;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
@@ -13,10 +11,7 @@ import android.preference.Preference;
 import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.theme.OrpheusTheme;
-
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -40,7 +35,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
 
     private CheckBoxPreference mDarkTheme;
     private Preference mThemePicker;
-    private DragSortSwipeListPreference mHomePages;
+    private HomePagesPreference mHomePages;
 
     @Override
     public void onAttach(Activity activity) {
@@ -60,7 +55,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
         mThemePicker = mPrefSet.findPreference(PREF_THEME_PICKER);
         mThemePicker.setOnPreferenceClickListener(this);
 
-        mHomePages = (DragSortSwipeListPreference) mPrefSet.findPreference(PREF_HOME_PAGES);
+        mHomePages = (HomePagesPreference) mPrefSet.findPreference(PREF_HOME_PAGES);
         mHomePages.setOnPreferenceChangeListener(this);
 
     }

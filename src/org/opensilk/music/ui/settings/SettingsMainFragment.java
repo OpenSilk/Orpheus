@@ -29,8 +29,7 @@ public class SettingsMainFragment extends Fragment {
     GridView mGridView;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mGridView = (GridView) inflater.inflate(R.layout.settings_gridview, container, false);
         final SettingsAdapter adapter = new SettingsAdapter(getActivity());
 
@@ -82,28 +81,22 @@ public class SettingsMainFragment extends Fragment {
             mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mFragments.add(new Holder(SettingsInterfaceFragment.class.getName(),
                     mContext.getString(R.string.settings_ui_category),
-                    R.drawable.ic_phone_android_grey600_48dp,
                     R.drawable.ic_phone_android_grey600_48dp));
             mFragments.add(new Holder(SettingsDataFragment.class.getName(),
                     mContext.getString(R.string.settings_data_category),
-                    R.drawable.ic_data_usage_grey600_48dp,
                     R.drawable.ic_data_usage_grey600_48dp));
             mFragments.add(new Holder(SettingsAudioFragment.class.getName(),
                     mContext.getString(R.string.settings_audio_category),
-                    R.drawable.ic_tune_grey600_48dp,
                     R.drawable.ic_tune_grey600_48dp));
             mFragments.add(new Holder(SettingsPluginFragment.class.getName(),
                     mContext.getString(R.string.settings_plugin_category),
-                    R.drawable.ic_extension_grey600_24dp,
-                    R.drawable.ic_extension_grey600_24dp));
-            // Must be last, add new items above this one.
+                    R.drawable.ic_extension_grey600_48dp));
+            // XXX add new items above this one.
             mFragments.add(new Holder(SettingsDonateFragment.class.getName(),
                     mContext.getString(R.string.settings_donate_category),
-                    R.drawable.ic_attach_money_grey600_48dp,
                     R.drawable.ic_attach_money_grey600_48dp));
             mFragments.add(new Holder(SettingsAboutFragment.class.getName(),
                     mContext.getString(R.string.settings_about_category),
-                    R.drawable.ic_info_outline_grey600_48dp,
                     R.drawable.ic_info_outline_grey600_48dp));
         }
 
@@ -125,44 +118,33 @@ public class SettingsMainFragment extends Fragment {
         @Override
         public View getView(int pos, View view, ViewGroup parent) {
             View v = view;
-            ImageView icon;
             TextView title;
-            boolean light = ThemeUtils.isLightTheme(mContext);
             if (v == null) {
                 v = mInflater.inflate(R.layout.settings_grid_item, parent, false);
-//                v.setBackgroundColor(light ? Color.WHITE : Color.BLACK);
-                v.setTag(R.id.grid_item_icon, v.findViewById(R.id.grid_item_icon));
                 v.setTag(R.id.grid_item_text, v.findViewById(R.id.grid_item_text));
             }
-
-            icon = (ImageView) v.getTag(R.id.grid_item_icon);
             title = (TextView) v.getTag(R.id.grid_item_text);
-
-            int iconRes = light ? mFragments.get(pos).lightIconRes :
-                    mFragments.get(pos).darkIconRes;
-            icon.setImageResource(iconRes);
             title.setText(mFragments.get(pos).title);
+            int iconRes = mFragments.get(pos).iconRes;
+            title.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0, 0, 0);
             return v;
         }
 
         private static class Holder {
             String className;
             String title;
-            int lightIconRes;
-            int darkIconRes;
+            int iconRes;
 
-            Holder(String className, String title, int lightIconRes, int darkIconRes) {
+            Holder(String className, String title, int iconRes) {
                 this.className = className;
                 this.title = title;
-                this.lightIconRes = lightIconRes;
-                this.darkIconRes = darkIconRes;
+                this.iconRes = iconRes;
             }
 
             Bundle getArguments() {
                 Bundle b = new Bundle();
                 b.putString("title", title);
-                b.putInt("light_icon", lightIconRes);
-                b.putInt("dark_icon", darkIconRes);
+                b.putInt("icon", iconRes);
                 return b;
             }
         }

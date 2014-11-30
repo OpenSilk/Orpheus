@@ -3,7 +3,6 @@ package org.opensilk.music.ui.settings;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -17,13 +16,13 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 import com.andrew.apollo.utils.Lists;
 import com.mobeta.android.dslv.DragSortListView;
 
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.GraphHolder;
 import org.opensilk.music.ui2.gallery.GalleryPage;
 import org.opensilk.music.ui2.gallery.GalleryView;
 
@@ -31,25 +30,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 /**
  * Created by andrew on 4/13/14.
  */
-public class DragSortSwipeListPreference extends DialogPreference implements
+public class HomePagesPreference extends DialogPreference implements
         DragSortListView.DropListener, DragSortListView.RemoveListener {
+
+    @dagger.Module(addsTo = SettingsActivity.Module.class, injects = HomePagesPreference.class)
+    public static class Module {
+
+    }
+
+    @Inject AppPreferences mSettings;
 
     private DragSortSwipeListAdapter mAdapter;
     private ArrayList<GalleryPage> mCurrentClassList;
-    private AppPreferences mSettings;
 
-    public DragSortSwipeListPreference(Context context) {
+    public HomePagesPreference(Context context) {
         this(context, null);
     }
 
-    public DragSortSwipeListPreference(Context context, AttributeSet attrs) {
+    public HomePagesPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setDialogLayoutResource(R.layout.drag_sort_swipe_list_preference);
-        // TODO real inject
-        mSettings = GraphHolder.get(context).getObj(AppPreferences.class);
+        setDialogLayoutResource(R.layout.settings_homepages_preference);
+    }
+
+    @Override
+    protected void onAttachedToActivity() {
+        super.onAttachedToActivity();
+        ((DaggerInjector) getContext()).getObjectGraph().plus(new Module()).inject(this);
     }
 
     @Override
@@ -90,14 +101,12 @@ public class DragSortSwipeListPreference extends DialogPreference implements
         listView.setRemoveListener(this);
 
         final Button addButton = (Button) view.findViewById(R.id.add_item);
-        Drawable icon = getContext().getResources().getDrawable(
-                ThemeUtils.isLightTheme(getContext()) ? R.drawable.ic_action_add_light : R.drawable.ic_action_add_dark
-        );
-        addButton.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+        final int icon = ThemeUtils.isLightTheme(getContext()) ? R.drawable.ic_action_add_light : R.drawable.ic_action_add_dark;
+        addButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, icon, 0);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(getContext(), addButton);
+                PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
                 final List<GalleryPage> pages = Lists.newArrayList();
                 for (GalleryPage item : GalleryPage.values()) {
                     if (!mCurrentClassList.contains(item)) {
@@ -161,7 +170,7 @@ public class DragSortSwipeListPreference extends DialogPreference implements
             View row = convertView;
 
             if (row == null) {
-                row = mInflater.inflate(R.layout.drag_sort_swipe_list_item, parent, false);
+                row = mInflater.inflate(R.layout.settings_homepages_preference_item, parent, false);
                 ImageView handle = (ImageView) row.findViewById(R.id.item_handle);
                 TextView text = (TextView) row.findViewById(R.id.item_text);
                 row.setTag(new ViewHolder(handle, text));

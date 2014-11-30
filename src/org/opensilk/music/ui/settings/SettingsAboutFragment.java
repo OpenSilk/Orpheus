@@ -1,7 +1,12 @@
 package org.opensilk.music.ui.settings;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.webkit.WebView;
 
 import org.opensilk.music.BuildConfig;
 import org.opensilk.music.R;
@@ -43,16 +48,35 @@ public class SettingsAboutFragment extends SettingsFragment implements Preferenc
     public boolean onPreferenceClick(Preference preference) {
 
         if (preference == mLicenses) {
-            ApolloUtils.createOpenSourceDialog(getActivity()).show();
+            createOpenSourceDialog().show();
             return true;
         } else if (preference == mVersion) {
-            ApolloUtils.createChangesDialog(getActivity()).show();
+            createChangesDialog().show();
             return true;
         } else if (preference == mThanks) {
             new ThanksDialogFragment().show(getActivity().getFragmentManager(), "thanksdialog");
             return true;
         }
-
         return false;
+    }
+
+    AlertDialog createOpenSourceDialog() {
+        final WebView webView = new WebView(getActivity());
+        webView.loadUrl("file:///android_asset/licenses.html");
+        return new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.settings_open_source_licenses)
+                .setView(webView)
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+    }
+
+    AlertDialog createChangesDialog() {
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View v = inflater.inflate(R.layout.changes_dialog, null);
+        return new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.settings_changes_dialog_title)
+                .setView(v)
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
     }
 }

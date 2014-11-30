@@ -34,15 +34,6 @@
         <item name="float_background_color">@android:color/transparent</item>
     </style>
 
-    <style name="DragSortSwipeListPreference">
-        <item name="use_default_controller">true</item>
-        <item name="drag_handle_id">@id/item_handle</item>
-        <item name="remove_enabled">true</item>
-        <item name="remove_mode">flingRemove</item>
-        <item name="drag_start_mode">onMove</item>
-        <item name="float_background_color">@android:color/transparent</item>
-    </style>
-
     <style name="Orpheus.Thumbnail">
         <item name="android:scaleType">centerCrop</item>
         <item name="android:layout_gravity">center</item>
@@ -67,9 +58,13 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
-    <!--SETTINGS-->
+    <style name="GalleryTabs">
+        <item name="invertedTabBar">false</item>
+    </style>
+
+    <!-- Settings -->
     <style name="SettingsGridBase">
-        <item name="android:numColumns">2</item>
+        <item name="android:numColumns">1</item>
     </style>
 
     <style name="SettingsGrid" parent="SettingsGridBase">
@@ -77,10 +72,6 @@
         <item name="android:verticalSpacing">8dp</item>
         <item name="android:horizontalSpacing">8dp</item>
         <item name="android:scrollbars">none</item>
-    </style>
-
-    <style name="GalleryTabs">
-        <item name="invertedTabBar">false</item>
     </style>
 
     <!-- Tiles -->
