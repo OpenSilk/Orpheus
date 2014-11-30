@@ -18,6 +18,7 @@
 package org.opensilk.common.widget;
 
 import android.animation.AnimatorInflater;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -177,6 +178,7 @@ public class FloatingActionButton extends ImageButton {
 
     @SuppressWarnings("NewApi")
     protected void maybeDoCircularReveal() {
+        if (true) return; //XXX STUBBED till i make it look better
         if (VersionUtils.hasLollipop()) {
             ViewAnimationUtils
                     .createCircularReveal(this, getWidth() / 2, getHeight() / 2, 0, getHeight() * 2)
@@ -184,9 +186,10 @@ public class FloatingActionButton extends ImageButton {
         }
     }
 
-    @SuppressWarnings("deprecation NewApi")
+    @SuppressLint("NewApi")
+    @SuppressWarnings("deprecation")
     protected void setBackgroundCompat(Drawable drawable) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        if (VersionUtils.hasJellyBean()) {
             setBackground(drawable);
         } else {
             setBackgroundDrawable(drawable);
