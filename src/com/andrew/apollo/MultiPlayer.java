@@ -18,8 +18,12 @@ import android.util.Log;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
-public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
-    private final static String TAG = "ApolloMultiPlayer";
+import timber.log.Timber;
+
+public class MultiPlayer implements
+        MediaPlayer.OnErrorListener,
+        MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnPreparedListener {
 
     private final WeakReference<MusicPlaybackService> mService;
     private CompatMediaPlayer mCurrentMediaPlayer = new CompatMediaPlayer();
@@ -27,9 +31,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
     private Handler mHandler;
     private boolean mIsInitialized = false;
 
-    /**
-     * Constructor of <code>MultiPlayer</code>
-     */
     public MultiPlayer(final MusicPlaybackService service) {
         mService = new WeakReference<>(service);
         mCurrentMediaPlayer.setWakeMode(service, PowerManager.PARTIAL_WAKE_LOCK);
@@ -68,7 +69,8 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
             }
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.prepare();
-        } catch (IOException |IllegalArgumentException|SecurityException|IllegalStateException todo) {
+        } catch (IOException|IllegalArgumentException|SecurityException|IllegalStateException e) {
+            Timber.e(e, "setDataSourceImpl");
             return false;
         }
         player.setOnCompletionListener(this);
@@ -82,8 +84,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
     }
 
     /**
-     * Set the MediaPlayer to start when this MediaPlayer finishes playback.
-     *
      * @param path The path of the file, or the http/rtsp URL of the stream
      *            you want to play
      */
@@ -96,9 +96,9 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
         try {
             mCurrentMediaPlayer.setNextMediaPlayer(null);
         } catch (IllegalArgumentException e) {
-            Log.i(TAG, "Next media player is current one, continuing");
+            Timber.i("Next media player is current one, continuing");
         } catch (IllegalStateException e) {
-            Log.e(TAG, "Media player not initialized!");
+            Timber.e(e, "Media player not initialized!");
             return;
         }
         if (mNextMediaPlayer != null) {
@@ -115,7 +115,7 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
             try {
                 mCurrentMediaPlayer.setNextMediaPlayer(mNextMediaPlayer);
             } catch (IllegalArgumentException|IllegalStateException e) {
-                Log.e(TAG, "" + e.getClass().getSimpleName() + " " + e.getMessage());
+                Timber.e(e, "setNextDataSource: setNextMediaPlayer()");
                 if (mNextMediaPlayer != null) {
                     mNextMediaPlayer.release();
                     mNextMediaPlayer = null;
@@ -134,8 +134,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
     }
 
     /**
-     * Sets the handler
-     *
      * @param handler The handler to use
      */
     public void setHandler(final Handler handler) {
@@ -190,8 +188,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
     }
 
     /**
-     * Gets the duration of the file.
-     *
      * @return The duration in milliseconds
      */
     public long duration() {
@@ -203,8 +199,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
     }
 
     /**
-     * Gets the current playback position.
-     *
      * @return The current position in milliseconds
      */
     public long position() {
@@ -216,8 +210,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
     }
 
     /**
-     * Gets the current playback position.
-     *
      * @param whereto The offset in milliseconds from the start to seek to
      * @return The offset in milliseconds from the start to seek to
      */
@@ -230,11 +222,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
         }
     }
 
-    /**
-     * Sets the volume on this player.
-     *
-     * @param vol Left and right volume scalar
-     */
     public boolean setVolume(final float vol) {
         try {
             mCurrentMediaPlayer.setVolume(vol, vol);
@@ -244,11 +231,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
         }
     }
 
-    /**
-     * Sets the audio session ID.
-     *
-     * @param sessionId The audio session ID
-     */
     public boolean setAudioSessionId(final int sessionId) {
         try {
             mCurrentMediaPlayer.setAudioSessionId(sessionId);
@@ -258,18 +240,10 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
         }
     }
 
-    /**
-     * Returns the audio session ID.
-     *
-     * @return The current audio session ID.
-     */
     public int getAudioSessionId() {
         return mCurrentMediaPlayer.getAudioSessionId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean onError(final MediaPlayer mp, final int what, final int extra) {
         MusicPlaybackService service = mService.get();
@@ -290,9 +264,6 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
         return false;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCompletion(final MediaPlayer mp) {
         MusicPlaybackService service = mService.get();
@@ -309,6 +280,11 @@ public class MultiPlayer implements MediaPlayer.OnErrorListener, MediaPlayer.OnC
             mHandler.sendEmptyMessage(MusicPlayerHandler.TRACK_ENDED);
             mHandler.sendEmptyMessage(MusicPlayerHandler.RELEASE_WAKELOCK);
         }
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+
     }
 
     private static final class CompatMediaPlayer extends MediaPlayer implements MediaPlayer.OnCompletionListener {
