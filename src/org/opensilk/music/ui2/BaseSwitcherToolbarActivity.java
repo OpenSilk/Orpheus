@@ -62,6 +62,7 @@ public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
     @Override
     protected void onDestroy() {
         if (mActionBarOwner != null) mActionBarOwner.dropView(this);
+        mMenuConfig = null;
         super.onDestroy();
     }
 
