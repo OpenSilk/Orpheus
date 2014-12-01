@@ -1090,6 +1090,8 @@ public class MusicPlaybackService extends Service {
                     }
                 }
                 notifyChange(META_CHANGED);
+            } else {
+                setNextTrack();
             }
             return last - first + 1;
         }
@@ -1500,9 +1502,6 @@ public class MusicPlaybackService extends Service {
             MusicProviderUtil.updatePlaycount(this, getAudioId());
         } else if (what.equals(QUEUE_CHANGED)) {
             saveQueue(true);
-            if (isPlaying()) {
-                setNextTrack();
-            }
         } else {
             saveQueue(false);
         }
@@ -2366,6 +2365,7 @@ public class MusicPlaybackService extends Service {
                 }
             }
             notifyChange(QUEUE_CHANGED);
+            setNextTrack();
         }
     }
 
