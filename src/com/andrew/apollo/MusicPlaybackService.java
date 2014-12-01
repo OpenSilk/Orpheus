@@ -348,7 +348,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Used to know if something should be playing or not
      */
-    private volatile boolean mIsSupposedToBePlaying = false;
+    private boolean mIsSupposedToBePlaying = false;
 
     /**
      * Used to indicate if the queue can be saved
@@ -358,7 +358,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Used to track what type of audio focus loss caused the playback to pause
      */
-    private volatile boolean mPausedByTransientLossOfFocus = false;
+    private boolean mPausedByTransientLossOfFocus = false;
 
     /**
      * Used to track whether any of Apollo's activities is in the foreground
@@ -767,19 +767,19 @@ public class MusicPlaybackService extends Service {
         } else if (CMDTOGGLEPAUSE.equals(command) || TOGGLEPAUSE_ACTION.equals(action)) {
             if (isPlaying()) {
                 pause();
-                mPausedByTransientLossOfFocus = false;
+                setPausedByTransientLossOfFocus(false);
             } else {
                 play();
             }
         } else if (CMDPAUSE.equals(command) || PAUSE_ACTION.equals(action)) {
             pause();
-            mPausedByTransientLossOfFocus = false;
+            setPausedByTransientLossOfFocus(false);
         } else if (CMDPLAY.equals(command)) {
             play();
         } else if (CMDSTOP.equals(command) || STOP_ACTION.equals(action)) {
             pause();
-            mPausedByTransientLossOfFocus = false;
             seek(0);
+            setPausedByTransientLossOfFocus(false);
             releaseServiceUiAndStop();
         } else if (REPEAT_ACTION.equals(action)) {
             cycleRepeat();
@@ -825,7 +825,9 @@ public class MusicPlaybackService extends Service {
      * @param yes
      */
     void setPausedByTransientLossOfFocus(boolean yes) {
-        mPausedByTransientLossOfFocus = yes;
+        synchronized (this) {
+            mPausedByTransientLossOfFocus = yes;
+        }
     }
 
     /**
@@ -1027,12 +1029,14 @@ public class MusicPlaybackService extends Service {
         if (player != null && player.isInitialized()) {
             player.stop(goToIdle);
         }
-        closeCursor();
-        if (goToIdle) {
-            scheduleDelayedShutdown();
-            mIsSupposedToBePlaying = false;
-        } else {
-            stopForeground(false);
+        synchronized (this) {
+            closeCursor();
+            if (goToIdle) {
+                scheduleDelayedShutdown();
+                mIsSupposedToBePlaying = false;
+            } else {
+                stopForeground(false);
+            }
         }
     }
 
@@ -2187,11 +2191,10 @@ public class MusicPlaybackService extends Service {
 
         mMediaSessionHelper.ping();
 
-        synchronized (this) {
-            final IMusicPlayer player = getPlayer();
-            if (player != null && player.isInitialized()) {
+        final IMusicPlayer player = getPlayer();
+        if (player != null && player.isInitialized()) {
 //                final long duration = duration();
-                // if not repeating and only 2 seconds left in current track goToNext
+            // if not repeating and only 2 seconds left in current track goToNext
 // TODO revisit (causing Stack Overflow: circumstances unknown)
 //                if (mRepeatMode != REPEAT_CURRENT && duration > 2000
 //                        && player.position() >= duration - 2000) {
@@ -2199,21 +2202,24 @@ public class MusicPlaybackService extends Service {
 //                    return;
 //                }
 
-                player.play();
-                mPlayerHandler.removeMessages(MusicPlayerHandler.FADEDOWN);
-                mPlayerHandler.sendEmptyMessage(MusicPlayerHandler.FADEUP);
+            player.play();
+            mPlayerHandler.removeMessages(MusicPlayerHandler.FADEDOWN);
+            mPlayerHandler.sendEmptyMessage(MusicPlayerHandler.FADEUP);
 
+            synchronized (this) {
                 if (!mIsSupposedToBePlaying) {
                     mIsSupposedToBePlaying = true;
                     notifyChange(PLAYSTATE_CHANGED);
                 }
-
                 cancelShutdown();
                 updateNotification();
-            } else if (mPlayListLen <= 0) {
-                setShuffleMode(SHUFFLE_AUTO);
-            } else {
-                Log.e(TAG, "play() Player not initialized and no playlist");
+            }
+
+        } else if (mPlayListLen <= 0) {
+            setShuffleMode(SHUFFLE_AUTO);
+        } else {
+            Log.e(TAG, "play() Player not initialized and no playlist");
+            synchronized (this) {
                 if (mIsSupposedToBePlaying) {
                     mIsSupposedToBePlaying = false;
                     notifyChange(PLAYSTATE_CHANGED);
@@ -2575,23 +2581,28 @@ public class MusicPlaybackService extends Service {
      */
     private Subscription createRemoteProgressHandler() {
         return Observable.timer(1000, 3000, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {
-                        synchronized (MusicPlaybackService.this) {
-                            try {
-                                if (isRemotePlayback()) {
-                                    try {
-                                        //Check first so we dont fill up the log with TransientDisconnects
-                                        mCastManager.checkConnectivity();
-                                        if (mCastPlayer != null) {
-                                            mLastKnowPosition = mCastPlayer.position();
+                        try {
+                            if (isRemotePlayback()) {
+                                try {
+                                    //Check first so we dont fill up the log with TransientDisconnects
+                                    mCastManager.checkConnectivity();
+                                    if (mCastPlayer != null) {
+                                        long pos = mCastPlayer.position();
+                                        synchronized (this) {
+                                            mLastKnowPosition = pos;
                                         }
-                                    } catch (TransientNetworkDisconnectionException|NoConnectionException ignored) { }
-                                } else {
-                                    mRemoteProgressSubscription.unsubscribe();
-                                }
-                            } catch (Exception ignored) {/*the old handler had frequent npe*/}
+                                    }
+                                } catch (TransientNetworkDisconnectionException|NoConnectionException ignored) { }
+                            } else {
+                                mRemoteProgressSubscription.unsubscribe();
+                            }
+                        } catch (Exception ignored) {
+                            if (mRemoteProgressSubscription != null)
+                                mRemoteProgressSubscription.unsubscribe();
                         }
                     }
                 });
