@@ -182,10 +182,10 @@ public class BaseActivity extends ActionBarActivity {
             getMenuInflater().inflate(R.menu.cast_mediarouter_button, menu);
             // init router button
             MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
-            MediaRouteActionProvider mediaRouteActionProvider = (MediaRouteActionProvider)
-                    MenuItemCompat.getActionProvider(mediaRouteMenuItem);
+            MediaRouteActionProvider mediaRouteActionProvider =
+                    (MediaRouteActionProvider) MenuItemCompat.getActionProvider(mediaRouteMenuItem);
             mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
-            mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
+//            mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
         }
         return true;
     }
