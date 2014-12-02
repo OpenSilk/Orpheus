@@ -147,7 +147,8 @@ public class PluginLoader {
     private PluginInfo readResolveInfo(PackageManager pm, List<ComponentName> disabledPlugins, ResolveInfo resolveInfo) {
         boolean hasPermission = false;
         final String permission = resolveInfo.serviceInfo.permission;
-        if (TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE)) {
+        if (TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE)
+                || TextUtils.equals(permission, "org.opensilk.music.debug.api.permission.BIND_LIBRARY_SERVICE")) {
             hasPermission = true;
         }
         final CharSequence title = resolveInfo.loadLabel(pm);

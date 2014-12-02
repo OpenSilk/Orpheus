@@ -45,9 +45,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <!-- permissions for librarys -->
-    <permission android:name="org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE"
+    <permission android:name="${applicationId}.api.permission.BIND_LIBRARY_SERVICE"
                 android:protectionLevel="signature"/>
-    <uses-permission android:name="org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE"/>
+    <uses-permission android:name="${applicationId}.api.permission.BIND_LIBRARY_SERVICE"/>
 
     <!-- Casting is currently only supported over wifi -->
     <uses-feature android:name="android.hardware.wifi"/>
