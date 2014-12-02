@@ -243,28 +243,35 @@ public class NowPlayingScreen extends Screen {
         public void onProgressChanged(final SeekBar bar, final int progress, final boolean fromuser) {
             if (!fromuser) return;
             final long now = SystemClock.elapsedRealtime();
-            if (now - mLastSeekEventTime > 250) {
-                mLastSeekEventTime = now;
-                mLastShortSeekEventTime = now;
-                try {
-                    mPosOverride = musicService.getDuration().toBlocking().first() * progress / 1000;
-                    musicService.seek(mPosOverride);
-                } catch (Exception e) {
+            musicService.getDuration()
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long duration) {
+                            if (now - mLastSeekEventTime > 250) {
+                                mLastSeekEventTime = now;
+                                mLastShortSeekEventTime = now;
+                                try {
+                                    mPosOverride = duration * progress / 1000;
+                                    musicService.seek(mPosOverride);
+                                } catch (Exception e) {
 
-                }
-                if (!mFromTouch) {
-                    // refreshCurrentTime();
-                    mPosOverride = -1;
-                }
-            } else if (now - mLastShortSeekEventTime > 5) {
-                mLastShortSeekEventTime = now;
-                try {
-                    mPosOverride = musicService.getDuration().toBlocking().first() * progress / 1000;
-                    refreshCurrentTimeText(mPosOverride);
-                } catch (Exception e) {
+                                }
+                                if (!mFromTouch) {
+                                    // refreshCurrentTime();
+                                    mPosOverride = -1;
+                                }
+                            } else if (now - mLastShortSeekEventTime > 5) {
+                                mLastShortSeekEventTime = now;
+                                try {
+                                    mPosOverride = duration * progress / 1000;
+                                    refreshCurrentTimeText(mPosOverride);
+                                } catch (Exception e) {
 
-                }
-            }
+                                }
+                            }
+                        }
+                    });
         }
 
         @Override

@@ -55,6 +55,7 @@ import javax.inject.Singleton;
 
 import dagger.Provides;
 import de.greenrobot.event.EventBus;
+import rx.functions.Action1;
 import timber.log.Timber;
 
 import static org.opensilk.cast.CastMessage.CAST_APPLICATION_CONNECTION_FAILED;
@@ -219,9 +220,7 @@ public class BaseActivity extends ActionBarActivity {
         public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo route) {
             //
             if (!mTransientNetworkDisconnection) {
-                if (mMusicService.isPlaying().toBlocking().first()) {
-                    mMusicService.playOrPause();
-                }
+                mMusicService.pause();
                 CastUtils.notifyRouteUnselected();
             }
         }

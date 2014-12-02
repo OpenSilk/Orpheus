@@ -27,6 +27,9 @@ import org.opensilk.common.dagger.DaggerInjector;
 
 import javax.inject.Inject;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+
 import static android.app.Activity.RESULT_OK;
 import static android.media.audiofx.AudioEffect.ERROR_BAD_VALUE;
 import static org.opensilk.music.ui2.event.ActivityResult.RESULT_RESTART_FULL;
@@ -89,23 +92,29 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mEqualizer) {
-            int sessionId = mMusicService.getAudioSessionId().toBlocking().first();
-            if (sessionId == ERROR_BAD_VALUE) {
-                new AlertDialog.Builder(getActivity())
-                        .setTitle(R.string.error)
-                        .setMessage(R.string.settings_err_no_audio_id)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
-            } else {
-                try {
-                    final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
-                    effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, sessionId);
-                    effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
-                    startActivityForResult(effects, 0);
-                } catch (final ActivityNotFoundException notFound) {
-                    Toast.makeText(getActivity(), getString(R.string.no_effects_for_you), Toast.LENGTH_LONG).show();
-                }
-            }
+            mMusicService.getAudioSessionId()
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Integer>() {
+                        @Override
+                        public void call(Integer sessionId) {
+                            if (sessionId == ERROR_BAD_VALUE) {
+                                new AlertDialog.Builder(getActivity())
+                                        .setTitle(R.string.error)
+                                        .setMessage(R.string.settings_err_no_audio_id)
+                                        .setNeutralButton(android.R.string.ok, null)
+                                        .show();
+                            } else {
+                                try {
+                                    final Intent effects = new Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL);
+                                    effects.putExtra(AudioEffect.EXTRA_AUDIO_SESSION, sessionId);
+                                    effects.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC);
+                                    startActivityForResult(effects, 0);
+                                } catch (final ActivityNotFoundException notFound) {
+                                    Toast.makeText(getActivity(), getString(R.string.no_effects_for_you), Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        }
+                    });
             return true;
         } else if (preference == mDefaultFolder) {
             Intent i = new Intent(getActivity(), FolderPickerActivity.class);
