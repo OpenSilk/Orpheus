@@ -17,6 +17,9 @@
 
 <lint>
     <issue id="MissingQuantity">
-        <ignore path="res/values*/plurals.xml"/>
+        <ignore path="**/values*/plurals.xml"/>
+    </issue>
+    <issue id="MissingTranslation">
+        <ignore path="**/values*/strings.xml"/>
     </issue>
 </lint>
