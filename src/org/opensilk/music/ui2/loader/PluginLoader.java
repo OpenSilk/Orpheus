@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -33,6 +34,7 @@ import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.PluginInfo;
+import org.opensilk.music.plugin.folders.FolderLibraryService;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -76,8 +78,6 @@ public class PluginLoader {
                     List<PluginInfo> list = getActivePlugins(true);
                     if (list == null) {
                         list = Collections.emptyList();
-                    } else {
-                        Collections.sort(list);
                     }
                     if (subscriber.isUnsubscribed()) return;
                     subscriber.onNext(list);
@@ -95,41 +95,33 @@ public class PluginLoader {
     }
 
     public List<PluginInfo> getPluginInfos(boolean wantIcon) {
-        List<ComponentName> disabledPlugins = readDisabledPlugins();
-        PackageManager pm = context.getPackageManager();
-        Intent dreamIntent = new Intent(API_PLUGIN_SERVICE);
-        List<ResolveInfo> resolveInfos = pm.queryIntentServices(dreamIntent, PackageManager.GET_META_DATA);
-        List<PluginInfo> pluginInfos = new ArrayList<PluginInfo>(resolveInfos.size());
-        for (ResolveInfo resolveInfo : resolveInfos) {
+        final List<ComponentName> disabledPlugins = readDisabledPlugins();
+        final PackageManager pm = context.getPackageManager();
+        final List<ResolveInfo> resolveInfos = pm.queryIntentServices(
+                new Intent(API_PLUGIN_SERVICE), PackageManager.GET_META_DATA
+        );
+        final List<PluginInfo> pluginInfos = new ArrayList<PluginInfo>(resolveInfos.size()+1);
+        for (final ResolveInfo resolveInfo : resolveInfos) {
             if (resolveInfo.serviceInfo == null)
                 continue;
-            boolean hasPermission = false;
-            String permission = resolveInfo.serviceInfo.permission;
-            if (TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE)
-                    || TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE_PROTECTED)) {
-                hasPermission = true;
+            final PluginInfo pi = readResolveInfo(pm, disabledPlugins, resolveInfo);
+            if (!wantIcon)
+                pi.icon = null;
+            pluginInfos.add(pi);
+        }
+        Collections.sort(pluginInfos);
+        // folders is special and is always first
+        List<ResolveInfo> folderResolveInfos = pm.queryIntentServices(
+                new Intent(context, FolderLibraryService.class), PackageManager.GET_META_DATA
+        );
+        if (folderResolveInfos != null && folderResolveInfos.size() > 0) {
+            final ResolveInfo resolveInfo = folderResolveInfos.get(0);
+            if (resolveInfo.serviceInfo != null) {
+                final PluginInfo pi = readResolveInfo(pm, disabledPlugins, resolveInfo);
+                if (!wantIcon)
+                    pi.icon = null;
+                pluginInfos.add(0, pi);
             }
-            CharSequence title = resolveInfo.loadLabel(pm);
-            ComponentName cn = getComponentName(resolveInfo);
-            Drawable icon = resolveInfo.loadIcon(pm);
-            CharSequence description;
-            try {
-                Context packageContext = context.createPackageContext(cn.getPackageName(), 0);
-                Resources packageRes = packageContext.getResources();
-                description = packageRes.getString(resolveInfo.serviceInfo.descriptionRes);
-            } catch (PackageManager.NameNotFoundException e) {
-                description = null;
-            }
-            PluginInfo pluginInfo = new PluginInfo(title, description, cn);
-            pluginInfo.hasPermission = hasPermission;
-            if (wantIcon) pluginInfo.icon = icon;
-            for (ComponentName c : disabledPlugins) {
-                if (c.equals(pluginInfo.componentName)) {
-                    pluginInfo.isActive = false;
-                    break;
-                }
-            }
-            pluginInfos.add(pluginInfo);
         }
         return pluginInfos;
     }
@@ -139,23 +131,47 @@ public class PluginLoader {
     }
 
     public List<PluginInfo> getActivePlugins(boolean wantIcon) {
-        List<PluginInfo> plugins = getPluginInfos(wantIcon);
-        List<ComponentName> disabledComponets = readDisabledPlugins();
+        final List<PluginInfo> plugins = getPluginInfos(wantIcon);
         if (plugins != null && !plugins.isEmpty()) {
-            if (disabledComponets != null && !disabledComponets.isEmpty()) {
-                Iterator<PluginInfo> ii = plugins.iterator();
-                while (ii.hasNext()) {
-                    PluginInfo p = ii.next();
-                    for (ComponentName c : disabledComponets) {
-                        if (c.equals(p.componentName)) {
-                            ii.remove();
-                            break;
-                        }
-                    }
+            final Iterator<PluginInfo> ii = plugins.iterator();
+            while (ii.hasNext()) {
+                final PluginInfo p = ii.next();
+                if (!p.isActive) {
+                    ii.remove();
                 }
             }
         }
         return plugins;
+    }
+
+    private PluginInfo readResolveInfo(PackageManager pm, List<ComponentName> disabledPlugins, ResolveInfo resolveInfo) {
+        boolean hasPermission = false;
+        final String permission = resolveInfo.serviceInfo.permission;
+        if (TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE)
+                || TextUtils.equals(permission, OrpheusApi.PERMISSION_BIND_LIBRARY_SERVICE_PROTECTED)) {
+            hasPermission = true;
+        }
+        final CharSequence title = resolveInfo.loadLabel(pm);
+        final ComponentName cn = getComponentName(resolveInfo);
+        final Drawable icon = resolveInfo.loadIcon(pm);
+        CharSequence description;
+        try {
+            Context packageContext = context.createPackageContext(cn.getPackageName(), 0);
+            Resources packageRes = packageContext.getResources();
+            description = packageRes.getString(resolveInfo.serviceInfo.descriptionRes);
+        } catch (PackageManager.NameNotFoundException e) {
+            description = null;
+        }
+        PluginInfo pluginInfo = new PluginInfo(title, description, cn);
+        pluginInfo.hasPermission = hasPermission;
+        pluginInfo.icon = icon;
+        for (ComponentName c : disabledPlugins) {
+            if (c.equals(pluginInfo.componentName)) {
+                pluginInfo.isActive = false;
+                break;
+            }
+        }
+        return pluginInfo;
     }
 
     private static ComponentName getComponentName(ResolveInfo resolveInfo) {
