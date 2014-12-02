@@ -33,13 +33,9 @@ public class OrpheusApi {
      */
     public static final String ACTION_LIBRARY_SERVICE = "org.opensilk.music.plugin.LIBRARY_SERVICE";
     /**
-     * Manifest permission declared by Orpheus.
-     */
-    public static final String PERMISSION_BIND_LIBRARY_SERVICE = "org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE";
-    /**
      * Manifest permission declared by Orpheus. (this permission is signature protected)
      */
-    public static final String PERMISSION_BIND_LIBRARY_SERVICE_PROTECTED = "org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE_PROTECTED";
+    public static final String PERMISSION_BIND_LIBRARY_SERVICE = "org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE";
     /**
      * Intent extra containing {@link String} library identity, used in multiple places
      */

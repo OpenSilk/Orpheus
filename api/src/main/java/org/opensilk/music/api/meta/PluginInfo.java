@@ -50,8 +50,7 @@ public class PluginInfo implements Parcelable, Comparable<PluginInfo> {
     public transient boolean isActive = true;
     /**
      * Whether or not this library is protected by one of
-     * {@link org.opensilk.music.api.OrpheusApi#PERMISSION_BIND_LIBRARY_SERVICE} or
-     * {@link org.opensilk.music.api.OrpheusApi#PERMISSION_BIND_LIBRARY_SERVICE_PROTECTED}
+     * {@link org.opensilk.music.api.OrpheusApi#PERMISSION_BIND_LIBRARY_SERVICE}
      * if not defined Orpheus will refuse to bind the service.
      */
     public boolean hasPermission = false;
