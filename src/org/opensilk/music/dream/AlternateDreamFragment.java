@@ -17,6 +17,7 @@
 package org.opensilk.music.dream;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,6 +38,9 @@ import org.opensilk.music.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import mortar.Mortar;
 import timber.log.Timber;
 
 /**
@@ -46,15 +50,23 @@ public class AlternateDreamFragment extends PreferenceFragment implements
         Preference.OnPreferenceChangeListener {
     private static final String TAG = AlternateDreamFragment.class.getSimpleName();
 
+    @Inject DreamPrefs dreamPrefs;
+
     ComponentName activeDream;
     List<DreamInfo> dreamInfos;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Mortar.inject(activity, this);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.blank_prefscreen);
         // Pull saved dream
-        activeDream = DreamPrefs.getAltDreamComponent(getActivity());
+        activeDream = dreamPrefs.getAltDreamComponent();
         // Pull list of available dreams
         dreamInfos = getDreamInfos();
         // Add all available dreams to preference screen
@@ -70,7 +82,7 @@ public class AlternateDreamFragment extends PreferenceFragment implements
     public void onStart() {
         super.onStart();
         if (VersionUtils.hasLollipop() && dreamInfos.isEmpty()) {
-            DreamPrefs.removeAltDreamComponent(getActivity());
+            dreamPrefs.removeAltDreamComponent();
             new AlertDialog.Builder(getActivity())
                     .setMessage(R.string.dream_settings_alt_dream_l_error)
                     .setPositiveButton(android.R.string.ok, null)
@@ -93,9 +105,9 @@ public class AlternateDreamFragment extends PreferenceFragment implements
                 dreamPreference.dreamInfo.isActive = isChecked;
                 // Store the new dream component
                 if (isChecked) {
-                    DreamPrefs.saveAltDreamComponent(getActivity(), dreamPreference.dreamInfo.componentName);
+                    dreamPrefs.saveAltDreamComponent(dreamPreference.dreamInfo.componentName);
                 } else {
-                    DreamPrefs.removeAltDreamComponent(getActivity());
+                    dreamPrefs.removeAltDreamComponent();
                 }
                 // update active dream
                 activeDream = dreamPreference.dreamInfo.componentName;

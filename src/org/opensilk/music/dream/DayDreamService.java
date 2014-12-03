@@ -72,24 +72,26 @@ public class DayDreamService extends DreamService {
             return new Module();
         }
 
-        @dagger.Module(
-                addsTo = AppModule.class,
-                injects = {
-                        DayDreamService.class,
-                        ArtOnly.class,
-                        ArtWithControls.class,
-                        ArtWithMeta.class,
-                }
-        )
-        public static class Module {
-            @Provides @Singleton @Named("activity")
-            public EventBus provideEventBus() {
-                return new EventBus();
+    }
+
+    @dagger.Module(
+            addsTo = AppModule.class,
+            injects = {
+                    DayDreamService.class,
+                    ArtOnly.class,
+                    ArtWithControls.class,
+                    ArtWithMeta.class,
             }
+    )
+    public static class Module {
+        @Provides @Singleton @Named("activity")
+        public EventBus provideEventBus() {
+            return new EventBus();
         }
     }
 
     @Inject MusicServiceConnection mServiceConnection;
+    @Inject DreamPrefs mDreamPrefs;
 
     final Handler mHandler;
     final ScreenSaverAnimation mMoveSaverRunnable;
@@ -200,11 +202,11 @@ public class DayDreamService extends DreamService {
         mSaverView.setAlpha(0);
         mContentView = (ViewGroup) mSaverView.getParent();
 
-        setScreenBright(!DreamPrefs.wantNightMode(this));
-        setFullscreen(DreamPrefs.wantFullscreen(this));
+        setScreenBright(!mDreamPrefs.wantNightMode());
+        setFullscreen(mDreamPrefs.wantFullscreen());
 
         LayoutInflater inflater = getWindow().getLayoutInflater();
-        int style = DreamPrefs.getDreamLayout(this);
+        int style = mDreamPrefs.getDreamLayout();
         switch (style) {
             case DreamPrefs.DreamLayout.ART_ONLY:
                 mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_only, mSaverView, false);
@@ -231,7 +233,7 @@ public class DayDreamService extends DreamService {
      */
     //@DebugLog
     private void bindAltDream() {
-        ComponentName altDream = DreamPrefs.getAltDreamComponent(this);
+        ComponentName altDream = mDreamPrefs.getAltDreamComponent();
         if (altDream != null) {
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE)
                     .setComponent(altDream)
@@ -240,7 +242,7 @@ public class DayDreamService extends DreamService {
                 bindService(intent, mAltDreamConnection, BIND_AUTO_CREATE);
             } catch (SecurityException e) {
                 Timber.w("Altdream: %s requires permission we can't obtain", altDream.flattenToString());
-                DreamPrefs.removeAltDreamComponent(this);
+                mDreamPrefs.removeAltDreamComponent();
                 switchToSaverView();
             }
         } else {

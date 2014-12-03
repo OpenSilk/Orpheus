@@ -16,6 +16,7 @@
 
 package org.opensilk.music.dream;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -28,6 +29,10 @@ import android.widget.ImageView;
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.R;
 
+import javax.inject.Inject;
+
+import mortar.Mortar;
+
 /**
  * Created by drew on 4/13/14.
  */
@@ -35,9 +40,17 @@ public class ChooserFragment extends Fragment implements
         View.OnClickListener,
         ViewPager.OnPageChangeListener {
 
+    @Inject DreamPrefs mDreamPrefs;
+
     protected ViewPager mViewPager;
     protected ChooserPagerAdapter mPagerAdapter;
     protected ImageView mCheckMark;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Mortar.inject(activity, this);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,7 +72,7 @@ public class ChooserFragment extends Fragment implements
     @Override
     public void onStart() {
         super.onStart();
-        mViewPager.setCurrentItem(DreamPrefs.getDreamLayout(getActivity()));
+        mViewPager.setCurrentItem(mDreamPrefs.getDreamLayout());
         // Work around for fist item selected
         onPageSelected(mViewPager.getCurrentItem());
     }
@@ -75,7 +88,7 @@ public class ChooserFragment extends Fragment implements
 
     @Override
     public void onPageSelected(int position) {
-        if (position == DreamPrefs.getDreamLayout(getActivity())) {
+        if (position == mDreamPrefs.getDreamLayout()) {
             setCheckSelected();
         } else {
             setCheckUnSelected();
@@ -94,7 +107,7 @@ public class ChooserFragment extends Fragment implements
     @Override
     public void onClick(View v) {
         if (v == mCheckMark) {
-            DreamPrefs.saveDreamLayout(getActivity(), mViewPager.getCurrentItem());
+            mDreamPrefs.saveDreamLayout(mViewPager.getCurrentItem());
             setCheckSelected();
         }
     }

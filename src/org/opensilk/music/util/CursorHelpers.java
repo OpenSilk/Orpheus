@@ -31,7 +31,6 @@ import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.provider.MusicStore;
 
 import org.opensilk.music.BuildConfig;
-import org.opensilk.music.GraphHolder;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.ui2.loader.OrderPreservingCursor;
@@ -258,19 +257,6 @@ public class CursorHelpers {
             }
         }
         return sEmptySongList;
-    }
-
-    @MarkedForRemoval @Deprecated
-    public static Cursor makeSongCursor(final Context context) {
-        AppPreferences settings = GraphHolder.get(context).getObj(AppPreferences.class);
-        final String sortOrder = settings.getString(AppPreferences.SONG_SORT_ORDER,
-                org.opensilk.music.util.SortOrder.SongSortOrder.SONG_A_Z);
-        return context.getContentResolver().query(
-                Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                Projections.LOCAL_SONG,
-                Selections.LOCAL_SONG,
-                SelectionArgs.LOCAL_SONG,
-                sortOrder);
     }
 
     public static Cursor getSingleLocalSongCursor(Context context, long id) {

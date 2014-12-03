@@ -17,15 +17,17 @@
 package org.opensilk.music.dream;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.text.TextUtils;
 
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.GraphHolder;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Created by drew on 4/13/14.
  */
+@Singleton
 public class DreamPrefs {
 
     /**
@@ -37,47 +39,42 @@ public class DreamPrefs {
         public static final int ART_CONTROLS = 2;
     }
 
-    private static AppPreferences getPrefs(Context context) {
-        return GraphHolder.get(context).getObjectGraph().get(AppPreferences.class);
+    final AppPreferences prefs;
+
+    @Inject
+    public DreamPrefs(AppPreferences settings) {
+        this.prefs = settings;
     }
 
     /**
      * Stores dream layout into shared prefs
-     * @param context
      * @param dreamLayout
      */
-    public static void saveDreamLayout(Context context, int dreamLayout) {
-        AppPreferences prefs = getPrefs(context);
+    public void saveDreamLayout(int dreamLayout) {
         prefs.putInt("daydream_layout_style", dreamLayout);
     }
 
     /**
      * Retrieves dream layout from shared prefs
-     * @param context
      * @return
      */
-    public static int getDreamLayout(Context context) {
-        AppPreferences prefs = getPrefs(context);
+    public int getDreamLayout() {
         return prefs.getInt("daydream_layout_style", DreamLayout.ART_CONTROLS);
     }
 
     /**
      * Stores alt dream component info in shared prefs
-     * @param context
      * @param componentName
      */
-    public static void saveAltDreamComponent(Context context, ComponentName componentName) {
-        AppPreferences prefs = getPrefs(context);
+    public void saveAltDreamComponent(ComponentName componentName) {
         prefs.putString("daydream_alt_dream_component", componentName.flattenToString());
     }
 
     /**
      * Gets alt dream compontent info from shared prefs
-     * @param context
      * @return
      */
-    public static ComponentName getAltDreamComponent(Context context) {
-        AppPreferences prefs = getPrefs(context);
+    public ComponentName getAltDreamComponent() {
         String altCmpnt = prefs.getString("daydream_alt_dream_component", null);
         if (!TextUtils.isEmpty(altCmpnt)) {
             return ComponentName.unflattenFromString(altCmpnt);
@@ -87,30 +84,24 @@ public class DreamPrefs {
 
     /**
      * Resets the alt dream shared pref
-     * @param context
      */
-    public static void removeAltDreamComponent(Context context) {
-        AppPreferences prefs = getPrefs(context);
+    public void removeAltDreamComponent() {
         prefs.remove("daydream_alt_dream_component");
     }
 
     /**
      * Used to set screenBright()
-     * @param context
      * @return true if user selected night mode
      */
-    public static boolean wantNightMode(Context context) {
-        AppPreferences prefs = getPrefs(context);
+    public boolean wantNightMode() {
         return prefs.getBoolean("daydream_nightmode", true);
     }
 
     /**
      * Used to set fullscreenMode()
-     * @param context
      * @return true if user selected fullscreen mode
      */
-    public static boolean wantFullscreen(Context context) {
-        AppPreferences prefs = getPrefs(context);
+    public boolean wantFullscreen() {
         return prefs.getBoolean("daydream_fullscreen", true);
     }
 

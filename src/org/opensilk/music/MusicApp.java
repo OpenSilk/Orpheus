@@ -68,13 +68,6 @@ public class MusicApp extends Application implements DaggerInjector {
     /** Disable some features depending on device type */
     public static boolean sIsLowEndHardware;
 
-    /**
-     * Contains the object graph, we use a singleton instance
-     * to obtain the graph so we can inject our countent providers
-     * which will be created before onCreate() is called.
-     */
-    private GraphHolder mGraphHolder;
-
     protected ObjectGraph mScopedGraphe;
 
     protected MortarScope mRootScope;
@@ -125,8 +118,12 @@ public class MusicApp extends Application implements DaggerInjector {
     }
 
     protected void setupDagger() {
-        mGraphHolder = GraphHolder.get(this);
-        mScopedGraphe = mGraphHolder.getObjectGraph().plus(new AppModule(this));
+        /*
+         * GraphHolder Contains the object graph, we use a singleton instance
+         * to obtain the graph so we can inject our countent providers
+         * which will be created before onCreate() is called.
+         */
+        mScopedGraphe = GraphHolder.get(this).getObjectGraph().plus(new AppModule(this));
     }
 
     protected void setupMortar() {
