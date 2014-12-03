@@ -22,12 +22,14 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.WindowManager;
 
 import com.splunk.mint.Mint;
 
+import org.apache.commons.io.FileUtils;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
@@ -35,12 +37,16 @@ import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.common.dagger.DaggerInjector;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import dagger.ObjectGraph;
+import hugo.weaving.DebugLog;
 import mortar.Mortar;
 import mortar.MortarScope;
 import timber.log.Timber;
@@ -76,24 +82,24 @@ public class MusicApp extends Application implements DaggerInjector {
     @Inject AppPreferences mSettings;
 
     @Override
-    //@DebugLog
+    @DebugLog
     public void onCreate() {
         super.onCreate();
 
-        setupDagger();
-        setupMortar();
-        inject(this);
+        //logs
+        Timber.plant(DEBUG ? new Timber.DebugTree() : new ReleaseTree());
 
-        if (DEBUG) {
-            // Plant the forest
-            Timber.plant(new Timber.DebugTree());
-        } else {
-            Timber.plant(new ReleaseTree());
+        //prevents allocating resources the service doesnt need
+        final boolean isMainProcess = !isServiceProcess();
+
+        if (isMainProcess) {
+            //graph setup
+            setupDagger();
+            setupMortar();
+            inject(this);
         }
 
-        /*
-         * Init global static variables
-         */
+        // Init global static variables
         sDefaultMaxImageWidthPx = Math.min(
                 getMinDisplayWidth(getApplicationContext()),
                 convertDpToPx(getApplicationContext(), MAX_ARTWORK_SIZE_DP)
@@ -102,19 +108,17 @@ public class MusicApp extends Application implements DaggerInjector {
         sIsLowEndHardware = isLowEndHardware(getApplicationContext());
 
         /*
-         * XXXX Note to future drew. DO NOT INIT SINGLETONS HERE. They will be created twice!
-         */
-
-        /*
          * Debugging
          */
+
         // Enable strict mode logging
         enableStrictMode();
 
-
+        // crash reports
         Mint.disableNetworkMonitoring();
-        if (BuildConfig.SPLUNK_MINT_KEY != null
-                && mSettings.getBoolean(AppPreferences.SEND_CRASH_REPORTS, true)) {
+        if (isMainProcess
+                    && !TextUtils.isEmpty(BuildConfig.SPLUNK_MINT_KEY)
+                    && mSettings.getBoolean(AppPreferences.SEND_CRASH_REPORTS, true)) {
                 Mint.initAndStartSession(getApplicationContext(), BuildConfig.SPLUNK_MINT_KEY);
         }
 
@@ -195,6 +199,22 @@ public class MusicApp extends Application implements DaggerInjector {
         } else {
             return Runtime.getRuntime().availableProcessors() == 1;
         }
+    }
+
+    @DebugLog
+    boolean isServiceProcess() {
+        try {
+            final File comm = new File("/proc/self/comm");
+            if (comm.exists() && comm.canRead()) {
+                final List<String> commLines = FileUtils.readLines(comm);
+                if (commLines.size() > 0) {
+                    final String procName = commLines.get(0).trim();
+                    Timber.i("%s >> %s ", comm.getAbsolutePath(), procName);
+                    return procName.endsWith(":service");
+                }
+            }
+        } catch (IOException ignored) { }
+        return false;
     }
 
     private static class ReleaseTree extends Timber.DebugTree {
