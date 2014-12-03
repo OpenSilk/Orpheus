@@ -2441,6 +2441,7 @@ public class MusicPlaybackService extends Service {
             if (action == NEXT && mPlayPos + 1 < mPlayListLen) {
                 addToPlayList(list, mPlayPos + 1);
                 notifyChange(QUEUE_CHANGED);
+                setNextTrack();
             } else {
                 addToPlayList(list, Integer.MAX_VALUE);
                 notifyChange(QUEUE_CHANGED);
