@@ -53,7 +53,7 @@ public class ArtworkModule {
     private static final String VOLLEY_CACHE_DIR = "volley/1";
     private static final int VOLLEY_POOL_SIZE = 4;
 
-    private static final float THUMB_MEM_CACHE_DIVIDER = 0.20f;
+    static final float THUMB_MEM_CACHE_DIVIDER = 0.16f;
     public static final String DISK_CACHE_DIRECTORY = "artworkcache";
 
     @Provides @Singleton

@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import org.opensilk.common.util.ObjectUtils;
 import org.opensilk.music.BuildConfig;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
@@ -41,34 +42,18 @@ import timber.log.Timber;
  * Created by drew on 3/23/14.
  */
 public class ArtworkProviderUtil {
-    private static final String TAG = ArtworkProviderUtil.class.getSimpleName();
-    private static final boolean D = BuildConfig.DEBUG;
+    private static final Object sDecodeLock = new Object();
 
-    /**
-     * Default memory cache size as a percent of device memory class
-     */
-    private static final float THUMB_MEM_CACHE_DIVIDER = 0.08f;
-
-    /**
-     * Context
-     */
-    private Context mContext;
-
-    /**
-     * Services private image cache
-     */
-    private BitmapLruCache mL1Cache;
+    private final Context mContext;
+    private final BitmapLruCache mL1Cache;
 
     public ArtworkProviderUtil(Context context) {
         mContext = context;
-        initCache();
-    }
-
-    private void initCache() {
         final ActivityManager activityManager = (ActivityManager)mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        final int memClass = activityManager.getMemoryClass();
-        final int lruThumbCacheSize = Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
-        if (D) Log.d(TAG, "thumbcache=" + ((float) lruThumbCacheSize / 1024 / 1024) + "MB");
+        final int lruThumbCacheSize = Math.round(
+                ArtworkModule.THUMB_MEM_CACHE_DIVIDER * activityManager.getMemoryClass() * 1024 * 1024
+        );
+        Timber.i("thumbcache=%.02fMB", ((float) lruThumbCacheSize / 1024 / 1024));
         mL1Cache = new BitmapLruCache(lruThumbCacheSize);
     }
 
@@ -133,8 +118,7 @@ public class ArtworkProviderUtil {
             try {
                 pfd = mContext.getContentResolver().openFileDescriptor(artworkUri, "r");
                 if (pfd != null) {
-                    //Synchronize on the disk cache lock to better prevent OOMs
-                    synchronized (BitmapDiskLruCache.sDecodeLock) {
+                    synchronized (sDecodeLock) {
                         try {
                             bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
                         } catch (OutOfMemoryError e) {
@@ -146,7 +130,7 @@ public class ArtworkProviderUtil {
                     }
                 }
             } catch (Exception e) {
-                Log.d(TAG, "" + e.getClass().getName() + " " + e.getMessage());
+                Timber.w(e, "queryArtworkProvider()");
                 bitmap = null;
             } finally {
                 if (pfd != null) {
