@@ -11,6 +11,8 @@
 
 package com.andrew.apollo;
 
+import org.opensilk.music.BuildConfig;
+
 /**
  * App-wide constants.
  * 
@@ -25,7 +27,7 @@ public final class Config {
     /**
      * My personal Last.fm API key, please use your own.
      */
-    public static final String LASTFM_API_KEY = "6a847926e75808c33b63b25a2d0e555d";
+    public static final String LASTFM_API_KEY = BuildConfig.LASTFM_KEY;
 
     /**
      * Used to distinguish album art from artist images

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--id for package org.opensilk.music-->
-    <string name="cast_id" translatable="false">FBF2F70D</string>
+
 </resources>

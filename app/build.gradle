@@ -62,38 +62,54 @@ android {
         }
     }
 
-    signingConfigs {
-        release {
-            def Properties keyProps = new Properties()
-            keyProps.load(new FileInputStream(file('../../KeyStore/release2.properties')))
-            storeFile file(keyProps["store"])
-            keyAlias keyProps["alias"]
-            storePassword keyProps["storePass"]
-            keyPassword keyProps["pass"]
-        }
-        debug {
-            def Properties keyProps = new Properties()
-            keyProps.load(new FileInputStream(file('../../KeyStore/debug2.properties')))
-            storeFile file(keyProps["store"])
-            keyAlias keyProps["alias"]
-            storePassword keyProps["storePass"]
-            keyPassword keyProps["pass"]
-        }
-    }
-
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
             versionNameSuffix "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
             buildConfigField "String", "MUSIC_AUTHORITY", "\"org.opensilk.music.debug.provider\""
             buildConfigField "String", "ARTWORK_AUTHORITY", "\"org.opensilk.music.debug.artwork.provider\""
-            signingConfig signingConfigs.debug
         }
         release {
             buildConfigField "String", "MUSIC_AUTHORITY", "\"org.opensilk.music.provider\""
             buildConfigField "String", "ARTWORK_AUTHORITY", "\"org.opensilk.music.artwork.provider\""
-            signingConfig signingConfigs.release
         }
+    }
+
+    if (file('../../KeyStore').exists()) {
+        signingConfigs {
+            release {
+                def Properties keyProps = new Properties()
+                keyProps.load(new FileInputStream(file('../../KeyStore/release2.properties')))
+                storeFile file(keyProps["store"])
+                keyAlias keyProps["alias"]
+                storePassword keyProps["storePass"]
+                keyPassword keyProps["pass"]
+            }
+        }
+        buildTypes.release.signingConfig signingConfigs.release
+        signingConfigs {
+            debug {
+                def Properties keyProps = new Properties()
+                keyProps.load(new FileInputStream(file('../../KeyStore/debug2.properties')))
+                storeFile file(keyProps["store"])
+                keyAlias keyProps["alias"]
+                storePassword keyProps["storePass"]
+                keyPassword keyProps["pass"]
+            }
+        }
+        buildTypes.debug.signingConfig signingConfigs.debug
+        def Properties otherProps = new Properties();
+        otherProps.load(new FileInputStream(file('../../KeyStore/orpheus.properties')))
+        defaultConfig.buildConfigField "String", "LASTFM_KEY", otherProps.lastfmKey
+        buildTypes.debug.resValue "string", "cast_id", otherProps.castDebugKey
+        buildTypes.release.resValue "string", "cast_id", otherProps.castKey
+        buildTypes.debug.buildConfigField "String", "SPLUNK_MINT_KEY", otherProps.splunkMintDebugKey
+        buildTypes.release.buildConfigField "String", "SPLUNK_MINT_KEY", otherProps.splunkMintKey
+    } else {
+        println "No KeyStore directory found! (You can ignore this warning if your name is not drew)"
+        defaultConfig.buildConfigField "String", "LASTFM_KEY", "null"
+        defaultConfig.resValue "string", "cast_id", "CC1AD845" //CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID
+        defaultConfig.buildConfigField "String", "SPLUNK_MINT_KEY", "null"
     }
 
 }

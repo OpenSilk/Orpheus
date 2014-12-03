@@ -113,10 +113,9 @@ public class MusicApp extends Application implements DaggerInjector {
 
 
         Mint.disableNetworkMonitoring();
-        if (DEBUG) {
-//            BugSenseHandler.initAndStartSession(this, "751fd228");
-        } else if (mSettings.getBoolean(AppPreferences.SEND_CRASH_REPORTS, true)) {
-            Mint.initAndStartSession(getApplicationContext(), "7c67fe46");
+        if (BuildConfig.SPLUNK_MINT_KEY != null
+                && mSettings.getBoolean(AppPreferences.SEND_CRASH_REPORTS, true)) {
+                Mint.initAndStartSession(getApplicationContext(), BuildConfig.SPLUNK_MINT_KEY);
         }
 
     }
