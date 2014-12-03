@@ -112,10 +112,11 @@ public class MusicApp extends Application implements DaggerInjector {
         enableStrictMode();
 
 
+        Mint.disableNetworkMonitoring();
         if (DEBUG) {
 //            BugSenseHandler.initAndStartSession(this, "751fd228");
         } else if (mSettings.getBoolean(AppPreferences.SEND_CRASH_REPORTS, true)) {
-            Mint.initAndStartSession(this, "7c67fe46");
+            Mint.initAndStartSession(getApplicationContext(), "7c67fe46");
         }
 
     }
@@ -197,32 +198,25 @@ public class MusicApp extends Application implements DaggerInjector {
         }
     }
 
-    private static class ReleaseTree extends Timber.HollowTree {
-        private static final Pattern ANONYMOUS_CLASS = Pattern.compile("\\$\\d+$");
+    private static class ReleaseTree extends Timber.DebugTree {
+        //Tree stumps
+        @Override public void v(String message, Object... args) {}
+        @Override public void v(Throwable t, String message, Object... args) {}
+        @Override public void d(String message, Object... args) {}
+        @Override public void d(Throwable t, String message, Object... args) {}
+        @Override public void i(String message, Object... args) {}
+        @Override public void i(Throwable t, String message, Object... args) {}
 
-        private static String createTag() {
-            String tag = new Throwable().getStackTrace()[5].getClassName();
-            Matcher m = ANONYMOUS_CLASS.matcher(tag);
-            if (m.find()) {
-                tag = m.replaceAll("");
-            }
-            return tag.substring(tag.lastIndexOf('.') + 1);
+        @Override public void e(Throwable t, String message, Object... args) {
+            super.e(t, message, args);
+            sendException(t);
         }
 
-        private static String formatString(String message, Object... args) {
-            // If no varargs are supplied, treat it as a request to log the string without formatting.
-            return args.length == 0 ? message : String.format(message, args);
-        }
-
-        private static void sendException(Throwable t, String message, Object... args) {
+        static void sendException(Throwable t) {
             try {
-                Mint.logException(new Exception(createTag() + ": " + formatString(message, args), t));
+                if (t instanceof Exception)
+                    Mint.logException((Exception)t);
             } catch (Exception ignored) {/*safety*/}
-        }
-
-        @Override
-        public void e(Throwable t, String message, Object... args) {
-            sendException(t, message, args);
         }
 
     }
