@@ -85,10 +85,7 @@ public class ArtistsScreen extends Screen {
             subscription = loader.getListObservable().subscribe(new SimpleObserver<List<LocalArtist>>() {
                 @Override
                 public void onNext(List<LocalArtist> localArtists) {
-                    if (viewNotNull()) {
-                        getAdapter().addAll(localArtists);
-                        showRecyclerView();
-                    }
+                    addAll(localArtists);
                 }
                 @Override
                 public void onCompleted() {

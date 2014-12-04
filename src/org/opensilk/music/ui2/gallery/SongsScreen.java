@@ -18,6 +18,8 @@
 package org.opensilk.music.ui2.gallery;
 
 import com.andrew.apollo.model.LocalSong;
+
+import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.util.SortOrder;
 
 import org.opensilk.common.flow.Screen;
@@ -75,22 +77,13 @@ public class SongsScreen extends Screen {
         @Override
         protected void load() {
             loader.setSortOrder(preferences.getString(AppPreferences.SONG_SORT_ORDER, SortOrder.SongSortOrder.SONG_A_Z));
-            subscription = loader.getListObservable().subscribe(new Action1<List<LocalSong>>() {
+            subscription = loader.getListObservable().subscribe(new SimpleObserver<List<LocalSong>>() {
                 @Override
-                public void call(List<LocalSong> localSongs) {
-                    if (viewNotNull()) {
-                        getAdapter().addAll(localSongs);
-                        showRecyclerView();
-                    }
+                public void onNext(List<LocalSong> localSongs) {
+                    addAll(localSongs);
                 }
-            }, new Action1<Throwable>() {
                 @Override
-                public void call(Throwable throwable) {
-
-                }
-            }, new Action0() {
-                @Override
-                public void call() {
+                public void onCompleted() {
                     if (viewNotNull() && getAdapter().isEmpty()) showEmptyView();
                 }
             });

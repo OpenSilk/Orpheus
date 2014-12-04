@@ -80,10 +80,7 @@ public class GenresScreen extends Screen {
             subscription = loader.getObservable().subscribe(new SimpleObserver<Genre>() {
                 @Override
                 public void onNext(Genre genre) {
-                    if (viewNotNull()) {
-                        getAdapter().addItem(genre);
-                        showRecyclerView();
-                    }
+                    addItem(genre);
                 }
                 @Override
                 public void onCompleted() {

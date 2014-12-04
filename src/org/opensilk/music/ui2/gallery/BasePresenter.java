@@ -34,6 +34,8 @@ import org.opensilk.music.ui2.common.OverflowHandler;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.loader.RxLoader;
 
+import java.util.Collection;
+
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -55,6 +57,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
 
     protected Subscription subscription;
     protected ActionBarOwner.MenuConfig actionBarMenu;
+    protected boolean adapterIsDirty = false;
 
     public BasePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
                          RxLoader<T> loader, OverflowHandler<T> popupHandler) {
@@ -148,9 +151,32 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     @DebugLog
     public void reload() {
         if (isSubscribed(subscription)) subscription.unsubscribe();
-        if (viewNotNull()) getAdapter().clear();
+        adapterIsDirty = true;
         loader.reset();
         load();
+    }
+
+    protected void addAll(Collection<T> collection) {
+        if (viewNotNull()) {
+            if (adapterIsDirty) {
+                adapterIsDirty = false;
+                getAdapter().replaceAll(collection);
+            } else {
+                getAdapter().addAll(collection);
+            }
+            showRecyclerView();
+        }
+    }
+
+    protected void addItem(T item) {
+        if (viewNotNull()) {
+            if (adapterIsDirty) {
+                adapterIsDirty = false;
+                getAdapter().clear();
+            }
+            getAdapter().addItem(item);
+            showRecyclerView();
+        }
     }
 
     protected void onCreateOverflowMenu(PopupMenu m, T item) {

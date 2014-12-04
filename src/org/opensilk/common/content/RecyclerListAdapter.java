@@ -28,7 +28,7 @@ import java.util.List;
  */
 public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 
-    private List<T> items;
+    private final List<T> items;
 
     public RecyclerListAdapter() {
         this(new ArrayList<T>(100));
@@ -55,6 +55,15 @@ public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder>
         int start = items.size();
         if (items.addAll(collection)) {
             notifyItemRangeInserted(start, collection.size());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean replaceAll(Collection<? extends T> collection) {
+        items.clear();
+        if (items.addAll(collection)) {
+            notifyDataSetChanged();
             return true;
         }
         return false;
@@ -91,7 +100,7 @@ public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder>
     }
 
     public void clear() {
-        this.items.clear();
+        items.clear();
         notifyDataSetChanged();
     }
 

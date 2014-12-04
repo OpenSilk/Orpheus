@@ -87,10 +87,7 @@ public class AlbumsScreen extends Screen {
                 @Override
                 @DebugLog
                 public void onNext(List<LocalAlbum> localAlbums) {
-                    if (viewNotNull()) {
-                        getAdapter().addAll(localAlbums);
-                        showRecyclerView();
-                    }
+                    addAll(localAlbums);
                 }
                 @Override
                 public void onCompleted() {

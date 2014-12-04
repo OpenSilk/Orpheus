@@ -78,10 +78,7 @@ public class PlaylistsScreen extends Screen {
             subscription = loader.getObservable().subscribe(new SimpleObserver<Playlist>() {
                 @Override
                 public void onNext(Playlist playlist) {
-                    if (viewNotNull()) {
-                        getAdapter().addItem(playlist);
-                        showRecyclerView();
-                    }
+                    addItem(playlist);
                 }
                 @Override
                 public void onCompleted() {
