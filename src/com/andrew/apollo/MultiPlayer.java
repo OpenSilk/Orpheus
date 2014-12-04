@@ -173,6 +173,9 @@ public class MultiPlayer implements
     public void release() {
         stop();
         mCurrentMediaPlayer.release();
+        if (mNextMediaPlayer != null) {
+            mNextMediaPlayer.release();
+        }
     }
 
     /**
