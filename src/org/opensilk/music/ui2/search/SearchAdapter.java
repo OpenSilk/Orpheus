@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.search;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -220,14 +221,20 @@ public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.Vie
         vh.title.setText(a.name);
         vh.subtitle.setText(a.artistName);
         vh.subscriptions.add(requestor.newAlbumRequest(vh.artwork,
-                null, new ArtInfo(a.artistName, a.name, a.artworkUri), ArtworkType.THUMBNAIL));
+                null, makeBestfitArtInfo(a.artistName, null, a.name, a.artworkUri), ArtworkType.THUMBNAIL));
     }
 
     protected void bindArtist(ViewHolder vh, final Artist a) {
         vh.title.setText(a.name);
-        vh.subtitle.setText(MusicUtils.makeLabel(context, R.plurals.Nalbums, a.albumCount)
-                + ", " + MusicUtils.makeLabel(context, R.plurals.Nsongs, a.songCount)
-        );
+        String subtitle = "";
+        if (a.albumCount > 0) {
+            subtitle += MusicUtils.makeLabel(context, R.plurals.Nalbums, a.albumCount);
+        }
+        if (a.songCount > 0) {
+            if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
+            subtitle += MusicUtils.makeLabel(context, R.plurals.Nsongs, a.songCount);
+        }
+        vh.subtitle.setText(subtitle);
         vh.subscriptions.add(requestor.newArtistRequest(vh.artwork,
                 null, new ArtInfo(a.name, null, null), ArtworkType.THUMBNAIL));
     }
@@ -252,7 +259,7 @@ public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.Vie
             vh.extraInfo.setVisibility(View.VISIBLE);
         }
         vh.subscriptions.add(requestor.newAlbumRequest(vh.artwork,
-                null, new ArtInfo(s.albumArtistName, s.name, s.artworkUri), ArtworkType.THUMBNAIL));
+                null, makeBestfitArtInfo(s.albumArtistName, s.artistName, s.albumName, s.artworkUri), ArtworkType.THUMBNAIL));
         vh.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -264,6 +271,30 @@ public class SearchAdapter extends RecyclerListAdapter<Object, SearchAdapter.Vie
                 });
             }
         });
+    }
+
+    static ArtInfo makeBestfitArtInfo(String artist, String altArtist, String album, Uri uri) {
+        if (uri != null) {
+            if (artist == null || album == null) {
+                // we need both to make a query but we have uri so just use that,
+                // note this will prevent cache from returning artist images when album is null
+                return new ArtInfo(null, null, uri);
+            } else {
+                return new ArtInfo(artist, album, uri);
+            }
+        } else {
+            if (artist == null && altArtist != null) {
+                // cant fallback to uri so best guess the artist
+                // note this is a problem because the song artist may not be the
+                // album artist but we have no choice here, also note the service
+                // does the same thing so at least it will be consistent
+                return new ArtInfo(altArtist, album, null);
+            } else {
+                // if everything is null the artworkmanager will set the default image
+                // so no further validation is needed here.
+                return new ArtInfo(artist, album, null);
+            }
+        }
     }
 
     @Override

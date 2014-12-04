@@ -17,7 +17,9 @@
 
 package org.opensilk.music.ui2.library;
 
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -137,7 +139,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
-        ArtInfo artInfo = new ArtInfo(album.artistName, album.name, album.artworkUri);
+        ArtInfo artInfo = makeBestfitArtInfo(album.artistName, null, album.name, album.artworkUri);
         holder.title.setText(album.name);
         holder.subtitle.setText(album.artistName);
         holder.subscriptions.add(presenter.requestor.newAlbumRequest(holder.artwork,
@@ -147,8 +149,14 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
     void bindArtist(ViewHolder holder, Artist artist) {
         ArtInfo artInfo = new ArtInfo(artist.name, null, null);
         holder.title.setText(artist.name);
-        String subtitle = MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount)
-                + ", " + MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
+        String subtitle = "";
+        if (artist.albumCount > 0) {
+            subtitle += MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nalbums, artist.albumCount);
+        }
+        if (artist.songCount > 0) {
+            if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
+            subtitle += MusicUtils.makeLabel(holder.itemView.getContext(), R.plurals.Nsongs, artist.songCount);
+        }
         holder.subtitle.setText(subtitle);
         holder.subscriptions.add(presenter.requestor.newArtistRequest(holder.artwork,
                 null, artInfo, ArtworkType.THUMBNAIL));
@@ -163,13 +171,11 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         }
         holder.extraInfo.setText(folder.date);
         holder.extraInfo.setVisibility(View.VISIBLE);
-        LetterTileDrawable drawable = new LetterTileDrawable(holder.itemView.getResources());
-        drawable.setText(folder.name);
-        holder.artwork.setImageDrawable(drawable);
+        holder.artwork.setImageDrawable(LetterTileDrawable.fromText(holder.itemView.getResources(), folder.name));
     }
 
     void bindSong(ViewHolder holder, Song song) {
-        ArtInfo artInfo = new ArtInfo(song.artistName, song.albumArtistName, song.artworkUri);
+        ArtInfo artInfo = makeBestfitArtInfo(song.albumArtistName, song.artistName, song.albumName, song.artworkUri);
         holder.title.setText(song.name);
         holder.subtitle.setText(song.artistName);
         if (song.duration > 0) {
@@ -178,6 +184,30 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         }
         holder.subscriptions.add(presenter.requestor.newAlbumRequest(holder.artwork,
                 null, artInfo, ArtworkType.THUMBNAIL));
+    }
+
+    static ArtInfo makeBestfitArtInfo(String artist, String altArtist, String album, Uri uri) {
+        if (uri != null) {
+            if (artist == null || album == null) {
+                // we need both to make a query but we have uri so just use that,
+                // note this will prevent cache from returning artist images when album is null
+                return new ArtInfo(null, null, uri);
+            } else {
+                return new ArtInfo(artist, album, uri);
+            }
+        } else {
+            if (artist == null && altArtist != null) {
+                // cant fallback to uri so best guess the artist
+                // note this is a problem because the song artist may not be the
+                // album artist but we have no choice here, also note the service
+                // does the same thing so at least it will be consistent
+                return new ArtInfo(altArtist, album, null);
+            } else {
+                // if everything is null the artworkmanager will set the default image
+                // so no further validation is needed here.
+                return new ArtInfo(artist, album, null);
+            }
+        }
     }
 
     LibraryConnection.Result lastResult;

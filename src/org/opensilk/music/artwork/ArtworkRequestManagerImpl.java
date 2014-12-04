@@ -148,20 +148,22 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void registerWithImageView() {
             AnimatedImageView imageView = imageViewWeakReference.get();
-            if (imageView != null && imageView instanceof HoldsSubscription) {
-                ((HoldsSubscription) imageView).addSubscription(this);
+            if (imageView != null) {
+                imageView.addSubscription(this);
             }
         }
 
         void unregisterWithImageView() {
             AnimatedImageView imageView = imageViewWeakReference.get();
-            if (imageView != null && imageView instanceof HoldsSubscription) {
-                ((HoldsSubscription) imageView).removeSubscription(this);
+            if (imageView != null) {
+                imageView.removeSubscription(this);
             }
         }
 
         void setDefaultImage() {
             addBreadcrumb("setDefaultImage");
+            if (unsubscribed) return;
+            unregisterWithImageView();
             AnimatedImageView imageView = imageViewWeakReference.get();
             if (imageView == null) return;
             imageView.setDefaultImage();
@@ -173,9 +175,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void setImageBitmap(final Bitmap bitmap, boolean fromCache, boolean shouldAnimate) {
             addBreadcrumb("setImageBitmap("+fromCache+")");
+            if (unsubscribed) return;
+            unregisterWithImageView();
             final AnimatedImageView imageView = imageViewWeakReference.get();
             if (imageView == null) return;
-            unregisterWithImageView();
             if (fromCache) {
                 imageView.setImageBitmap(bitmap, shouldAnimate);
             } else {
@@ -193,6 +196,11 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void tryForCache() {
             addBreadcrumb("tryForCache");
+            if (!validateArtInfo()) {
+                addBreadcrumb("malformedArtInfo");
+                setDefaultImage();
+                return;
+            }
             subscription = createCacheObservable(artInfo, artworkType)
                     .subscribe(new Action1<CacheResponse>() {
                         @Override
@@ -214,6 +222,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     });
         }
 
+        abstract boolean validateArtInfo();
         abstract void onCacheMiss();
 
         void addBreadcrumb(String crumb) {
@@ -231,10 +240,14 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         @Override
+        boolean validateArtInfo() {
+            return !TextUtils.isEmpty(artInfo.artistName);
+        }
+
+        @Override
         void onCacheMiss() {
             addBreadcrumb("onCacheMiss");
             setDefaultImage();
-            if (TextUtils.isEmpty(artInfo.artistName)) return;
             boolean isOnline = isOnline(mPreferences.getBoolean(AppPreferences.ONLY_ON_WIFI, true));
             boolean wantArtistImages = mPreferences.getBoolean(AppPreferences.DOWNLOAD_MISSING_ARTIST_IMAGES, true);
             if (isOnline && wantArtistImages) {
@@ -267,6 +280,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         AlbumArtworkRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
                             ArtInfo artInfo, ArtworkType artworkType) {
             super(imageView, paletteObserver, artInfo, artworkType);
+        }
+
+        @Override
+        boolean validateArtInfo() {
+            return (!TextUtils.isEmpty(artInfo.artistName) && !TextUtils.isEmpty(artInfo.albumName))
+                    || (artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY));
         }
 
         @Override
@@ -356,7 +375,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         void onNetworkMiss(final boolean tryFallback) {
             addBreadcrumb("onNetworkMiss");
             boolean isLocalArt = isLocalArtwork(artInfo.artworkUri);
-            if (tryFallback && !unsubscribed) {
+            if (tryFallback) {
                 if (isLocalArt) {
                     addBreadcrumb("goingForMediaStore(false)");
                     tryForMediaStore(false);
@@ -451,9 +470,13 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         @Override
+        boolean validateArtInfo() {
+            return true;
+        }
+
+        @Override
         void onCacheMiss() {
             addBreadcrumb("onCacheMiss");
-            if (unsubscribed) return;
             setDefaultImage();
         }
 
