@@ -285,7 +285,7 @@ public class BaseActivity extends ActionBarActivity {
                                 .setTitle(R.string.cast_error)
                                 .setMessage(String.format(Locale.getDefault(),
                                         activity.getString(R.string.cast_failed_to_connect), errorMsg))
-                                .setNeutralButton(android.R.string.ok, null)
+                                .setPositiveButton(android.R.string.ok, null)
                                 .show();
                     }
                     break;
@@ -310,7 +310,7 @@ public class BaseActivity extends ActionBarActivity {
                                 new AlertDialog.Builder(activity)
                                         .setTitle(R.string.cast_error)
                                         .setMessage(R.string.failed_load)
-                                        .setNeutralButton(android.R.string.ok, null)
+                                        .setPositiveButton(android.R.string.ok, null)
                                         .show();
                                 break;
                         }

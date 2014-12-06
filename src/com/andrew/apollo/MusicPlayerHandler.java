@@ -94,6 +94,8 @@ public final class MusicPlayerHandler extends Handler {
 
         switch (msg.what) {
             case FADEDOWN:
+                if (service.isRemotePlayback())
+                    break;
                 mCurrentVolume -= 0.1f;
                 if (mCurrentVolume > 0.2f) {
                     sendEmptyMessageDelayed(FADEDOWN, 10);
@@ -103,6 +105,8 @@ public final class MusicPlayerHandler extends Handler {
                 service.getPlayer().setVolume(mCurrentVolume);
                 break;
             case FADEUP:
+                if (service.isRemotePlayback())
+                    break;
                 mCurrentVolume += 0.01f;
                 if (mCurrentVolume < service.getPlayer().getMaxVolume()) {
                     sendEmptyMessageDelayed(FADEUP, 10);

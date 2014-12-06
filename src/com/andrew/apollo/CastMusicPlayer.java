@@ -228,8 +228,7 @@ public class CastMusicPlayer implements IMusicPlayer {
 
     @Override
     public float getMaxVolume() {
-        // TODO find reasonable way to cache this value
-        return CastPreferences.getFloat(mService, CastPreferences.KEY_REMOTE_VOLUME, 1.0f);
+        return 1.0f;// CastPreferences.getFloat(mService, CastPreferences.KEY_REMOTE_VOLUME, 1.0f);
     }
 
     public boolean isConnected() {

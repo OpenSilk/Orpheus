@@ -42,8 +42,8 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
     private static final String TAG = "MusicCastConsumer";
     private static final boolean D = true;
 
-    private MusicPlaybackService mService;
-    private MediaCastManager mCastManager;
+    private final MusicPlaybackService mService;
+    private final MediaCastManager mCastManager;
 
     public MusicCastConsumer(MusicPlaybackService service, MediaCastManager manager) {
         mService = service;
@@ -57,7 +57,7 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
      */
     private void restoreRemoteVolumeLevel() {
         try {
-            double curVol = mCastManager.getVolume();
+            float curVol = (float) mCastManager.getVolume();
             float oldVol = CastPreferences.getFloat(mService, CastPreferences.KEY_REMOTE_VOLUME, 1.0f);
             if (oldVol != curVol) {
                 mCastManager.setVolume(oldVol);
@@ -65,25 +65,6 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
         } catch (Exception ignored) {
         }
     }
-
-    /**
-     * Called when we disconnect or think we are disconnectetd from the cast device
-     */
-//    private void restoreLocalState() {
-//        if (mPlaybackLocation == PlaybackLocation.LOCAL) {
-//            return;//Connect failed
-//        }
-//        updatePlaybackLocation(PlaybackLocation.LOCAL);
-//        stopCastServer();
-//        //Local should already be paused
-//        //pause();
-//        synchronized (this) {
-//            //Do some stuff pause() does to notify the activity
-//            scheduleDelayedShutdown();
-//            mIsSupposedToBePlaying = false;
-//            notifyChange(PLAYSTATE_CHANGED);
-//        }
-//    }
 
     @Override
     //@DebugLog
@@ -158,7 +139,7 @@ public class MusicCastConsumer extends MediaCastConsumerImpl {
     @Override
     //@DebugLog
     public void onVolumeChanged(double value, boolean isMute) {
-
+        if (D) Log.d(TAG, "onVolumeChanged(" + value + ", isMute=" + isMute + ")");
     }
 
     @Override
