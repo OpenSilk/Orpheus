@@ -152,7 +152,6 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     public void reload() {
         if (isSubscribed(subscription)) subscription.unsubscribe();
         adapterIsDirty = true;
-        loader.reset();
         load();
     }
 
