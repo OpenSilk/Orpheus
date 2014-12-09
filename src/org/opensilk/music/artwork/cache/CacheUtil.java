@@ -40,7 +40,14 @@ public class CacheUtil {
         if (cachePath == null || !cachePath.canWrite()) {
             cachePath = context.getCacheDir();
         }
-        return new File(cachePath, uniqueName);
+        File cacheDir = new File(cachePath, uniqueName);
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs();
+        }
+        if (!cacheDir.canWrite()) {
+            cacheDir.setWritable(true);
+        }
+        return cacheDir;
     }
 
     /**
