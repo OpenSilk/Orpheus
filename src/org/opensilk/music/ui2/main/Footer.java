@@ -312,6 +312,7 @@ public class Footer {
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
+                            Timber.i("progressObserver(error) resubscribing");
                             unsubscribeProgress();
                             subscribeProgress();
                         }
