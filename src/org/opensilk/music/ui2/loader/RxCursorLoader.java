@@ -115,8 +115,8 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                     })
                     .onErrorResumeNext(Observable.<T>empty())
                     .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .cache();
+                    .cache()
+                    .observeOn(AndroidSchedulers.mainThread());
         }
         return cachedObservable;
     }

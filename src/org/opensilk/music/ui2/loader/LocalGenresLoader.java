@@ -103,8 +103,8 @@ public class LocalGenresLoader extends AbsGenrePlaylistLoader<Genre> {
                         }
                     })
                     .onErrorResumeNext(Observable.<Genre>empty())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .cache();
+                    .cache()
+                    .observeOn(AndroidSchedulers.mainThread());
         }
         return cachedObservable;
     }

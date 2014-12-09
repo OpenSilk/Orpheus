@@ -99,8 +99,8 @@ public class LocalArtistProfileLoader extends RxCursorLoader<Object> {
                         }
                     })
                     .onErrorResumeNext(Observable.empty())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .cache();
+                    .cache()
+                    .observeOn(AndroidSchedulers.mainThread());
         }
         return cachedObservable;
     }
