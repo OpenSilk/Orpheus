@@ -50,7 +50,11 @@ public abstract class Screen {
 
   public void restoreHierarchyState(View view) {
     if (getViewState() != null) {
-      view.restoreHierarchyState(getViewState());
+      Object state = getViewState().get(view.getId());
+      //this is weird but happens sometimes with gson
+      if (state != null && (state instanceof Parcelable)) {
+        view.restoreHierarchyState(getViewState());
+      }
     }
   }
 
