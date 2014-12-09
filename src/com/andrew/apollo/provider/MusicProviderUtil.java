@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 6/26/14.
@@ -45,20 +46,20 @@ import hugo.weaving.DebugLog;
 public class MusicProviderUtil {
 
     public static long insertSong(Context context, Song song) {
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        //TODO compare and update if needed
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ BaseColumns._ID },
                 // These are the only mandatory fields
                 MusicStore.Cols.IDENTITY  + "=? AND " + MusicStore.Cols.NAME + "=? AND " + MusicStore.Cols.DATA_URI + "=?",
                 new String[]{ song.identity, song.name, song.dataUri.toString() },
                 null);
         if (c != null) {
-            long ret = -1;
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                ret = c.getLong(0);
-            }
-            c.close();
-            if (ret >= 0) {
-                return ret;
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return c.getLong(0);
+                }
+            } finally {
+                c.close();
             }
         }
         ContentValues values = makeSongContentValues(song);
@@ -74,32 +75,21 @@ public class MusicProviderUtil {
         return -1;
     }
 
-    public static long insertFromMediaStore(Context context, long mediaStoreId) {
-        Cursor c = CursorHelpers.getSingleLocalSongCursor(context, mediaStoreId);
-        if (c != null) {
-            try {
-                if (c.moveToFirst()) {
-                    return insertSong(context, CursorHelpers.makeLocalSongFromCursor(context, c));
-                }
-            } finally {
-                c.close();
-            }
-        }
-        return -1;
-    }
-
     public static void updatePlaycount(Context context, long id) {
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ MusicStore.Cols.PLAYCOUNT },
                 BaseColumns._ID + "=?",
                 new String[]{ String.valueOf(id) },
                 null);
         if (c != null) {
             int playcount = 0;
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                playcount = c.getInt(0);
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    playcount = c.getInt(0);
+                }
+            } finally {
+                c.close();
             }
-            c.close();
             ContentValues values = new ContentValues();
             values.put(MusicStore.Cols.PLAYCOUNT, ++playcount);
             values.put(MusicStore.Cols.LAST_PLAYED, System.currentTimeMillis());
@@ -116,7 +106,7 @@ public class MusicProviderUtil {
     public static List<MediaSession.QueueItem> buildQueueList(Context context, long[] songs) {
         List<MediaSession.QueueItem> list = new ArrayList<>(15);
         if (songs.length == 0) return list;
-        OrderPreservingCursor c = new OrderPreservingCursor(context, songs,
+        final OrderPreservingCursor c = new OrderPreservingCursor(context, songs,
                 MusicProvider.RECENTS_URI, Projections.RECENT_SONGS, "", null);
         c.moveToFirst();
         int ii=0;
@@ -135,150 +125,179 @@ public class MusicProviderUtil {
     }
 
     public static long getIdForSong(Context context, Song song) {
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ BaseColumns._ID },
                 // These are the only mandatory fields
                 MusicStore.Cols.IDENTITY  + "=?" + MusicStore.Cols.NAME + "=?" + MusicStore.Cols.DATA_URI + "=?",
                 new String[]{ song.identity, song.name, song.dataUri.toString() },
                 null);
         if (c != null) {
-            long ret = -1;
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                ret = c.getLong(0);
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return c.getLong(0);
+                }
+            } finally {
+                c.close();
             }
-            c.close();
-            if (ret > 0) {
-                return ret;
+        }
+        return -1;
+    }
+
+    public static long getIdForPath(Context context, String path) {
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+                new String[] { BaseColumns._ID },
+                MusicStore.Cols.DATA_URI + "=?",
+                new String[] {path},
+                null
+        );
+        if (c != null) {
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return c.getLong(0);
+                }
+            } finally {
+                c.close();
             }
         }
         return -1;
     }
 
     public static RecentSong getRecentSong(Context context, long id) {
-        RecentSong s = null;
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 Projections.RECENT_SONGS,
                 BaseColumns._ID + "=?",
                 new String[]{String.valueOf(id)},
                 null);
         if (c != null) {
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                s = CursorHelpers.makeRecentSongFromRecentCursor(c);
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return CursorHelpers.makeRecentSongFromRecentCursor(c);
+                }
+            } finally {
+                c.close();
             }
-            c.close();
         }
-        return s;
+        return null;
     }
 
     public static long[] transformListToRealIds(Context context, long[] list) {
-        long[] newlist = new long[list.length];
-
-        final StringBuilder selection = new StringBuilder();
-        selection.append(BaseColumns._ID + " IN (");
-        for (int i = 0; i < list.length; i++) {
-            selection.append(list[i]);
-            if (i < list.length - 1) {
-                selection.append(",");
-            }
-        }
-        selection.append(")");
-
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final OrderPreservingCursor c = new OrderPreservingCursor(
+                context,
+                list,
+                MusicProvider.RECENTS_URI,
                 new String[]{
+                        BaseColumns._ID,
                         MusicStore.Cols.IDENTITY,
                         MusicStore.Cols.ISLOCAL,
-                }, selection.toString(), null, null);
-        if (c != null) {
+                },
+                null,
+                null
+        );
+        try {
+            long[] newlist = new long[list.length];
             if (c.getCount() > 0 && c.moveToFirst()) {
-                int ii=0;
+                int ii = 0;
                 do {
-                    boolean islocal = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.ISLOCAL)) == 1;
+                    final boolean islocal = c.getInt(c.getColumnIndexOrThrow(MusicStore.Cols.ISLOCAL)) == 1;
                     if (islocal) {
                         try {
-                            long id = Long.decode(c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.IDENTITY)));
+                            final long id = Long.decode(c.getString(c.getColumnIndexOrThrow(MusicStore.Cols.IDENTITY)));
                             newlist[ii++] = id;
                         } catch (NumberFormatException ex) {
-                            //pass
+                            //skip
                         }
                     }
                 } while (c.moveToNext());
+                if (ii != list.length) {
+                    Timber.i("transformListToRealIds() Resizing list %d -> %d", list.length, ii);
+                    long[] newlist2 = new long[ii];
+                    System.arraycopy(newlist, 0, newlist2, 0, ii);
+                    return newlist2;
+                } else {
+                    return newlist;
+                }
             }
+        } catch (IllegalArgumentException e) {
+            //pass
+        } finally {
             c.close();
         }
-        return newlist;
+        return new long[0];
     }
 
     public static long getRealId(Context context, long id) {
-        long realid = -1;
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ MusicStore.Cols.IDENTITY },
                 BaseColumns._ID + "=?",
                 new String[]{ String.valueOf(id) }, null);
         if (c != null) {
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                try {
-                    realid = Long.decode(c.getString(0));
-                } catch (NumberFormatException ex) {
-                    // pass
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return Long.decode(c.getString(0));
                 }
+            } catch (NumberFormatException e) {
+                //pass
+            } finally {
+                c.close();
             }
-            c.close();
         }
-        return realid;
+        return -1;
     }
 
     public static long getAlbumId(Context context, long songId) {
-        long albumid = -1;
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ MusicStore.Cols.ALBUM_IDENTITY },
                 BaseColumns._ID + "=?",
                 new String[]{ String.valueOf(songId) }, null);
         if (c != null) {
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                try {
-                    albumid = Long.decode(c.getString(0));
-                } catch (NumberFormatException ex) {
-                    // pass
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return Long.decode(c.getString(0));
                 }
+            } catch (NumberFormatException e) {
+                //pass
+            } finally {
+                c.close();
             }
-            c.close();
         }
-        return albumid;
+        return -1;
     }
 
     public static long getRecentId(Context context, long realSongId) {
-        long recentId = -1;
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ MusicStore.Cols._ID },
                 MusicStore.Cols.IDENTITY + "=? AND " + MusicStore.Cols.ISLOCAL + "=?",
                 new String[]{String.valueOf(realSongId), "1"}, null
                 );
         if (c != null) {
-            if (c.moveToFirst()) {
-                recentId = c.getLong(0);
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return c.getLong(0);
+                }
+            } finally {
+                c.close();
             }
-            c.close();
         }
-        return recentId;
+        return -1;
     }
 
     public static Uri getDataUri(Context context, long songId) {
-        Uri dataUri = null;
-        Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
+        final Cursor c = context.getContentResolver().query(MusicProvider.RECENTS_URI,
                 new String[]{ MusicStore.Cols.DATA_URI },
                 BaseColumns._ID + "=?",
                 new String[]{ String.valueOf(songId) }, null);
         if (c != null) {
-            if (c.getCount() > 0 && c.moveToFirst()) {
-                try {
-                    dataUri = Uri.parse(c.getString(0));
-                } catch (IllegalArgumentException ex) {
-                    // pass
+            try {
+                if (c.getCount() > 0 && c.moveToFirst()) {
+                    return Uri.parse(c.getString(0));
                 }
+            } catch (IllegalArgumentException e) {
+                //pass
+            } finally {
+                c.close();
             }
-            c.close();
         }
-        return dataUri;
+        return null;
     }
 
     public static void removeFromRecents(Context context, long recentsId) {
