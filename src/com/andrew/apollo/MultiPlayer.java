@@ -69,7 +69,7 @@ public class MultiPlayer implements
             }
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.prepare();
-        } catch (IOException|IllegalArgumentException|SecurityException|IllegalStateException e) {
+        } catch (Exception e) {
             Timber.w(e, "setDataSourceImpl");
             return false;
         }
