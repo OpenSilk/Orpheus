@@ -134,6 +134,10 @@ public class ThemePickerActivity extends BaseMortarActivity {
     }
 
     @OnClick(R.id.btn_positive) void onOk() {
+        if (mNewTheme == null) {
+            onCancel();
+            return;
+        }
         setResult(RESULT_OK,
                 new Intent().putExtra(EXTRA_PICKED_THEME, mNewTheme.toString())
         );
