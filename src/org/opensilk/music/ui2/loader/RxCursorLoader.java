@@ -214,6 +214,7 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
     protected void emmitError(Throwable t, Subscriber<? super T> subscriber) {
         if (subscriber.isUnsubscribed()) return;
         subscriber.onError(t);
+        dump(new Throwable(t));
     }
 
     protected void dump(Throwable throwable) {
