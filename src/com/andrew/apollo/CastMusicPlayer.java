@@ -180,7 +180,13 @@ public class CastMusicPlayer implements IMusicPlayer {
 
     @Override
     public void setDataSource(String path) {
-        mCurrentMediaInfo = null;
+        if (path != null && path.startsWith("http")) {
+            mCurrentMediaInfo = CastUtils.buildMediaInfo(null, null, null, "audio/*", path, null, null);
+            mMarkforLoad = true;
+        } else {
+            mCurrentMediaInfo = null;
+            mMarkforLoad = false;
+        }
     }
 
     public long seekAndPlay(long position) {
