@@ -285,7 +285,7 @@ public class DayDreamService extends DreamService {
                     attach.invoke(dreamService, token);
                 }
             } catch (Exception e) {
-                Timber.e(e, "Failed attaching to altDream");
+                Timber.w(e, "Failed attaching to altDream");
                 switchToSaverView();
             }
         }

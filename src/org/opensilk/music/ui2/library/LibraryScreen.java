@@ -391,7 +391,7 @@ public class LibraryScreen extends Screen {
 
             @Override
             public void onError(Throwable e) {
-                Timber.e(e, "ResultObserver.OnError()");
+                Timber.w(e, "ResultObserver.OnError()");
                 if (retryCount++ >= RETRY_LIMIT) {
                     bus.post(new MakeToast(R.string.err_retrieving_items));
                     if (getView() != null) {

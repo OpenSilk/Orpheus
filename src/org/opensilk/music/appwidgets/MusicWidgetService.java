@@ -196,7 +196,7 @@ public class MusicWidgetService extends Service {
             try {
                 mAppWidgetManager.updateAppWidget(appId, views);
             } catch (IllegalArgumentException e) {
-                Timber.e(e, "Failed to update widget %d", appId);
+                Timber.w(e, "Failed to update widget %d", appId);
             }
         }
         stopSelf(startId); //Will shut us down when last item is processed

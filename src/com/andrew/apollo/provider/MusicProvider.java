@@ -153,7 +153,7 @@ public class MusicProvider extends ContentProvider {
         try {
             db = mStore.getWritableDatabase();
         } catch (SQLiteException e) {
-            Timber.e(e, "Unable to get writable MusicStore database.");
+            Timber.w(e, "Unable to get writable MusicStore database.");
             db = null;
             if (tryReadonly) {
                 try {

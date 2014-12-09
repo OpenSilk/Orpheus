@@ -70,7 +70,7 @@ public class MultiPlayer implements
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
             player.prepare();
         } catch (IOException|IllegalArgumentException|SecurityException|IllegalStateException e) {
-            Timber.e(e, "setDataSourceImpl");
+            Timber.w(e, "setDataSourceImpl");
             return false;
         }
         player.setOnCompletionListener(this);
@@ -98,7 +98,7 @@ public class MultiPlayer implements
         } catch (IllegalArgumentException e) {
             Timber.i("Next media player is current one, continuing");
         } catch (IllegalStateException e) {
-            Timber.e(e, "Media player not initialized!");
+            Timber.w(e, "Media player not initialized!");
             return;
         }
         if (mNextMediaPlayer != null) {
@@ -115,7 +115,7 @@ public class MultiPlayer implements
             try {
                 mCurrentMediaPlayer.setNextMediaPlayer(mNextMediaPlayer);
             } catch (IllegalArgumentException|IllegalStateException e) {
-                Timber.e(e, "setNextDataSource: setNextMediaPlayer()");
+                Timber.w(e, "setNextDataSource: setNextMediaPlayer()");
                 if (mNextMediaPlayer != null) {
                     mNextMediaPlayer.release();
                     mNextMediaPlayer = null;

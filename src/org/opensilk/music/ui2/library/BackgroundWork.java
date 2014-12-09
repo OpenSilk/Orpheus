@@ -67,7 +67,7 @@ public class BackgroundWork {
 
             @Override
             public void onError(Throwable e) {
-                Timber.e(e, "onError(outer) %s ", Thread.currentThread().getName());
+                Timber.w(e, "onError(outer) %s ", Thread.currentThread().getName());
             }
 
             @Override
@@ -84,7 +84,7 @@ public class BackgroundWork {
                     @Override
                     public void onError(Throwable e) {
                         //TODO why does canceling cause this to be called?
-                        Timber.e(e, "onError(inner) %s", Thread.currentThread().getName());
+                        Timber.w(e, "onError(inner) %s", Thread.currentThread().getName());
                     }
 
                     @Override

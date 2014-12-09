@@ -31,7 +31,7 @@ public class SimpleObserver<T> implements Observer<T> {
 
     @Override
     public void onError(Throwable e) {
-        Timber.e(e, "Simple observer onError()");
+        Timber.w(e, "Simple observer onError()");
     }
 
     @Override

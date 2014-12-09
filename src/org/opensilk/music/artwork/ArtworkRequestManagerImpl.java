@@ -269,7 +269,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Throwable throwable) {
                             addBreadcrumb("tryForNetwork miss");
-//                            Timber.e(throwable, "Unable to obtain image for %s", artInfo);
+//                            Timber.w(throwable, "Unable to obtain image for %s", artInfo);
                         }
                     });
         }
@@ -425,7 +425,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Throwable throwable) {
                             addBreadcrumb("tryForUrl miss");
-//                            Timber.e(throwable, "tryForUrl %s", artInfo);
+//                            Timber.w(throwable, "tryForUrl %s", artInfo);
                         }
                     });
         }
@@ -497,7 +497,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Throwable throwable) {
                             addBreadcrumb("getArtInfo miss");
-//                            Timber.e(throwable, "Unable to obtain artinfo from mediastore for id=%d", id);
+//                            Timber.w(throwable, "Unable to obtain artinfo from mediastore for id=%d", id);
                             onCacheMiss();
                         }
                     });
@@ -701,7 +701,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                             subscriber.onNext(album);
                             subscriber.onCompleted();
                         } else {
-                            Timber.e("Api response does not contain mbid for %s", album.getName());
+                            Timber.w("Api response does not contain mbid for %s", album.getName());
                             onErrorResponse(new VolleyError("Unknown mbid"));
                         }
                     }
@@ -905,8 +905,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 out.close();
             }
         } catch (IOException e) {
-            Timber.e(""+e.getClass() + " " + e.getMessage());
-//            e.printStackTrace();
+            Timber.w(e, "pullSnapshot");
         }
         return null;
     }

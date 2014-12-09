@@ -124,12 +124,12 @@ public class MusicServiceConnection {
     }
 
     void onError(Exception e) {
-        Timber.e(e, "MusicServiceConnection");
+        Timber.w(e, "MusicServiceConnection");
         unbind();
     }
 
     void onRemoteException(RemoteException e) {
-        Timber.e(e, "MusicServiceConnection");
+        Timber.w(e, "MusicServiceConnection");
         unbind();
     }
 

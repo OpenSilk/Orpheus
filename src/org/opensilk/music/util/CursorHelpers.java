@@ -551,7 +551,7 @@ public class CursorHelpers {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-            if (BuildConfig.DEBUG) Timber.e(e, "getStringOrEmpty(" + col + ")");
+            Timber.w(e, "getStringOrEmpty(" + col + ")");
             return sEmptyString;
         }
     }
@@ -560,7 +560,7 @@ public class CursorHelpers {
         try {
             return c.getString(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-            if (BuildConfig.DEBUG) Timber.e(e, "getStringOrNull("+col+")");
+            Timber.w(e, "getStringOrNull("+col+")");
             return null;
         }
     }
@@ -569,7 +569,7 @@ public class CursorHelpers {
         try {
             return c.getLong(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-            if (BuildConfig.DEBUG) Timber.e(e, "getLongOrZero("+col+")");
+            Timber.w(e, "getLongOrZero("+col+")");
             return 0;
         }
     }
@@ -578,7 +578,7 @@ public class CursorHelpers {
         try {
             return c.getInt(c.getColumnIndexOrThrow(col));
         } catch (IllegalArgumentException|NullPointerException e) {
-            if (BuildConfig.DEBUG) Timber.e(e, "getIntOrZero("+col+")");
+            Timber.w(e, "getIntOrZero("+col+")");
             return 0;
         }
     }

@@ -93,7 +93,7 @@ public class PluginConnectionManager {
                 connections.put(componentName, token);
                 return subject.asObservable();
             } catch (SecurityException e) {
-                Timber.e(e, "Can't bind plugin service");
+                Timber.w(e, "Can't bind plugin service");
                 return Observable.error(e);
             }
         }
@@ -108,7 +108,7 @@ public class PluginConnectionManager {
                     try {
                         remoteLibrary.pause();
                     } catch (RemoteException e) {
-                        Timber.e(e, "pause(%s) failed", entry.getKey());
+                        Timber.w(e, "pause(%s) failed", entry.getKey());
                         onException(entry.getKey());
                     }
                 }
@@ -125,7 +125,7 @@ public class PluginConnectionManager {
                     try {
                         remoteLibrary.resume();
                     } catch (RemoteException e) {
-                        Timber.e(e, "resume(%s) failed", entry.getKey());
+                        Timber.w(e, "resume(%s) failed", entry.getKey());
                         onException(entry.getKey());
                     }
                 }
