@@ -51,8 +51,7 @@ import mortar.Mortar;
  */
 public class NavView extends ListView {
 
-    @Inject
-    Nav.Presenter presenter;
+    @Inject Nav.Presenter presenter;
 
     public NavView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -73,11 +72,12 @@ public class NavView extends ListView {
     }
 
     public void onLoad(Collection<PluginInfo> infos) {
-        setAdapter(new Adapter(getContext(), infos));
+        final Adapter adapter = new Adapter(getContext(), infos);
+        setAdapter(adapter);
         setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Item item = getAdapter().getItem(position);
+                Item item = adapter.getItem(position);
                 if (item.screen != null) {
                     setItemChecked(position, true);
                     presenter.go(getContext(), item.screen);
@@ -86,11 +86,6 @@ public class NavView extends ListView {
                 }
             }
         });
-    }
-
-    @Override
-    public Adapter getAdapter() {
-        return (Adapter) super.getAdapter();
     }
 
     public static class Item {
@@ -106,34 +101,59 @@ public class NavView extends ListView {
         public final Screen screen;
         public final Object event;
 
-        public Item(Type type, CharSequence title, Drawable icon, Screen screen) {
+        public Item(Type type, int titleRes, CharSequence title,
+                    int iconRes, Drawable icon, Screen screen, Object event) {
             this.type = type;
-            this.titleRes = -1;
+            this.titleRes = titleRes;
             this.title = title;
+            this.iconRes = iconRes;
             this.icon = icon;
-            this.iconRes = -1;
             this.screen = screen;
-            this.event = null;
-        }
-
-        public Item(Type type, int titleRes, int iconRes, Screen screen) {
-            this.type = type;
-            this.titleRes = titleRes;
-            this.title = null;
-            this.iconRes = iconRes;
-            this.icon = null;
-            this.screen = screen;
-            this.event = null;
-        }
-
-        public Item(Type type, int titleRes, int iconRes, Object event) {
-            this.type = type;
-            this.titleRes = titleRes;
-            this.title = null;
-            this.iconRes = iconRes;
-            this.icon = null;
-            this.screen = null;
             this.event = event;
+        }
+
+        static class Builder {
+            Type type = null;
+            int titleRes = -1;
+            CharSequence title = null;
+            int iconRes = -1;
+            Drawable icon = null;
+            Screen screen = null;
+            Object event = null;
+
+            Item build() {
+                return new Item(type, titleRes, title, iconRes, icon, screen, event);
+            }
+        }
+
+        public static class Factory {
+
+            public static Item newHeader(int titleRes, int iconRes, Object event) {
+                Builder b = new Builder();
+                b.type = Type.HEADER;
+                b.titleRes = titleRes;
+                b.iconRes = iconRes;
+                b.event = event;
+                return b.build();
+            }
+
+            public static Item newItem(CharSequence title, Drawable icon, Screen screen) {
+                Builder b = new Builder();
+                b.type = Type.ITEM;
+                b.title = title;
+                b.icon = icon;
+                b.screen = screen;
+                return b.build();
+            }
+
+            public static Item newItem(int titleRes, int iconRes, Screen screen) {
+                Builder b = new Builder();
+                b.type = Type.ITEM;
+                b.titleRes = titleRes;
+                b.iconRes = iconRes;
+                b.screen = screen;
+                return b.build();
+            }
         }
 
     }
@@ -180,7 +200,7 @@ public class NavView extends ListView {
         }
 
         public void loadPlugins(Collection<PluginInfo> infos) {
-            add(new Item(Item.Type.ITEM, R.string.my_library, R.drawable.ic_my_library_music_grey600_24dp, new GalleryScreen()));
+            add(Item.Factory.newItem(R.string.my_library, R.drawable.ic_my_library_music_grey600_24dp, new GalleryScreen()));
             for (final PluginInfo info : infos) {
                 Drawable d = info.icon;
                 info.icon = null; //free plugin reference
@@ -189,9 +209,9 @@ public class NavView extends ListView {
                 }
                 int bounds = (int) (24 * getContext().getResources().getDisplayMetrics().density);
                 d.setBounds(0,0, bounds, bounds);
-                add(new Item(Item.Type.ITEM, info.title, d, new PluginScreen(info)));
+                add(Item.Factory.newItem(info.title, d, new PluginScreen(info)));
             }
-            add(new Item(Item.Type.HEADER, R.string.menu_settings, R.drawable.ic_settings_grey600_24dp,
+            add(Item.Factory.newHeader(R.string.menu_settings, R.drawable.ic_settings_grey600_24dp,
                     new StartActivityForResult(new Intent(getContext(), SettingsActivity.class),
                             StartActivityForResult.APP_REQUEST_SETTINGS)));
         }
