@@ -164,6 +164,8 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3' //flow
     //greenrobot
     compile 'de.greenrobot:eventbus:2.4.0'
+    //https://github.com/amlcurran/ShowcaseView
+    compile 'com.github.amlcurran.showcaseview:library:5.0.0'
 
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'

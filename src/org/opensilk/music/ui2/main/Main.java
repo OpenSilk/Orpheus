@@ -181,6 +181,10 @@ public class Main {
                         eventBus.post(new StartActivityForResult(new Intent(getView().getContext(), NowPlayingActivity.class), 0));
                     }
                     break;
+                case AppPreferences.FAB_ACTION_NONE:
+                default:
+                    break;
+
             }
         }
 

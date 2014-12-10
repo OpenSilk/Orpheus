@@ -104,6 +104,7 @@ public class AppPreferences {
     public static final String FAB_ACTION_QUICK_CONTROLS = "quick_controls";
     public static final String FAB_ACTION_OPEN_NOW_PLAYING = "open_now_playing";
     public static final String FAB_ACTION_NONE = "none";
+    public static final String FAB_SHOWCASE = "was_shown_fab_showcase";
 
     //Misc
     public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
