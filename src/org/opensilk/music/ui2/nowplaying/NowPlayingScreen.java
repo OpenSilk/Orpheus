@@ -20,6 +20,7 @@ package org.opensilk.music.ui2.nowplaying;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.SystemClock;
 import android.support.v7.graphics.Palette;
 import android.view.View;
@@ -478,5 +479,19 @@ public class NowPlayingScreen extends Screen {
         };
 
     }
+
+    public static final Creator<NowPlayingScreen> CREATOR = new Creator<NowPlayingScreen>() {
+        @Override
+        public NowPlayingScreen createFromParcel(Parcel source) {
+            NowPlayingScreen s = new NowPlayingScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public NowPlayingScreen[] newArray(int size) {
+            return new NowPlayingScreen[size];
+        }
+    };
 
 }

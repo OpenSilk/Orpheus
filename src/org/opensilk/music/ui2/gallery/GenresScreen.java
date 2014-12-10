@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.content.Context;
+import android.os.Parcel;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
@@ -178,4 +179,18 @@ public class GenresScreen extends Screen {
         }
 
     }
+
+    public static final Creator<GenresScreen> CREATOR = new Creator<GenresScreen>() {
+        @Override
+        public GenresScreen createFromParcel(Parcel source) {
+            GenresScreen s = new GenresScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public GenresScreen[] newArray(int size) {
+            return new GenresScreen[size];
+        }
+    };
 }

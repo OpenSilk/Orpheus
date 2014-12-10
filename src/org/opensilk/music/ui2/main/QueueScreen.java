@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcel;
 
 import com.andrew.apollo.menu.AddToPlaylistDialog;
 import com.andrew.apollo.model.RecentSong;
@@ -312,5 +313,18 @@ public class QueueScreen extends Screen {
         }
     }
 
+    public static final Creator<QueueScreen> CREATOR = new Creator<QueueScreen>() {
+        @Override
+        public QueueScreen createFromParcel(Parcel source) {
+            QueueScreen s = new QueueScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public QueueScreen[] newArray(int size) {
+            return new QueueScreen[size];
+        }
+    };
 
 }

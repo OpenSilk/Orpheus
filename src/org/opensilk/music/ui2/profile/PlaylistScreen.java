@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
 
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
@@ -73,6 +74,12 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
     @Override
     public String getName() {
         return super.getName() + playlist.mPlaylistName;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(playlist, flags);
+        super.writeToParcel(dest, flags);
     }
 
     @Override
@@ -240,5 +247,21 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
         }
 
     }
+
+    public static final Creator<PlaylistScreen> CREATOR = new Creator<PlaylistScreen>() {
+        @Override
+        public PlaylistScreen createFromParcel(Parcel source) {
+            PlaylistScreen s = new PlaylistScreen(
+                    source.<Playlist>readParcelable(null)
+            );
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public PlaylistScreen[] newArray(int size) {
+            return new PlaylistScreen[size];
+        }
+    };
 
 }

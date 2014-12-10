@@ -17,6 +17,8 @@
 
 package org.opensilk.music.ui2.gallery;
 
+import android.os.Parcel;
+
 import com.andrew.apollo.model.LocalAlbum;
 
 import org.opensilk.music.util.SortOrder;
@@ -177,6 +179,18 @@ public class AlbumsScreen extends Screen {
 
     }
 
+    public static final Creator<AlbumsScreen> CREATOR = new Creator<AlbumsScreen>() {
+        @Override
+        public AlbumsScreen createFromParcel(Parcel source) {
+            AlbumsScreen s = new AlbumsScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
 
+        @Override
+        public AlbumsScreen[] newArray(int size) {
+            return new AlbumsScreen[size];
+        }
+    };
 
 }

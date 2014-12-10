@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -162,10 +163,30 @@ public class ThemePickerActivity extends BaseMortarActivity {
             return super.getName() + orpheusTheme.toString();
         }
 
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(orpheusTheme.toString());
+            super.writeToParcel(dest, flags);
+        }
+
         @dagger.Module(addsTo = ThemePickerActivity.Module.class, includes = Main.Module.class)
         public static class Module {
 
         }
+
+        public static final Creator<PageScreen> CREATOR = new Creator<PageScreen>() {
+            @Override
+            public PageScreen createFromParcel(Parcel source) {
+                PageScreen s = new PageScreen(OrpheusTheme.valueOf(source.readString()));
+                s.restoreFromParcel(source);
+                return s;
+            }
+
+            @Override
+            public PageScreen[] newArray(int size) {
+                return new PageScreen[size];
+            }
+        };
 
     }
 

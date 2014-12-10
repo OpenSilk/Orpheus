@@ -18,41 +18,25 @@
 package org.opensilk.music.ui2;
 
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import android.os.Parcelable;
 import android.view.MenuItem;
-import android.widget.Toast;
-
-import com.andrew.apollo.menu.AddToPlaylistDialog;
-import com.andrew.apollo.menu.DeleteDialog;
-import com.andrew.apollo.utils.MusicUtils;
-import com.google.gson.Gson;
 
 import org.opensilk.common.flow.AppFlow;
-import org.opensilk.common.flow.GsonParcer;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.AppFlowPresenter;
 import org.opensilk.common.mortarflow.FrameScreenSwitcherView;
-import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.core.android.ActionBarOwner.CustomMenuItem;
 import org.opensilk.music.ui2.event.GoToScreen;
-import org.opensilk.music.ui2.event.MakeToast;
-import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.ui2.loader.LoaderModule;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import dagger.Provides;
-import de.greenrobot.event.EventBus;
 import flow.Flow;
 import flow.Parcer;
-import mortar.Blueprint;
 
 /**
  * Created by drew on 11/7/14.
@@ -68,8 +52,17 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     )
     public static class Module {
         @Provides @Singleton
-        public Parcer<Object> provideParcer(Gson gson) {
-            return new GsonParcer<>(gson);
+        public Parcer<Object> provideParcer() {
+            return new Parcer<Object>() {
+                @Override
+                public Parcelable wrap(Object instance) {
+                    return (Parcelable) instance;
+                }
+                @Override
+                public Object unwrap(Parcelable parcelable) {
+                    return parcelable;
+                }
+            };
         }
         @Provides @Singleton
         public AppFlowPresenter<BaseSwitcherActivity> providePresenter(Parcer<Object> floParcer) {

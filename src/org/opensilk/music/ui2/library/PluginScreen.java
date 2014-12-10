@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.text.TextUtils;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
@@ -72,6 +73,12 @@ public class PluginScreen extends Screen {
     @Override
     public String getName() {
         return super.getName() + pluginInfo.componentName;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(pluginInfo, flags);
+        super.writeToParcel(dest, flags);
     }
 
     @dagger.Module (
@@ -259,5 +266,21 @@ public class PluginScreen extends Screen {
         }
 
     }
+
+    public static final Creator<PluginScreen> CREATOR = new Creator<PluginScreen>() {
+        @Override
+        public PluginScreen createFromParcel(Parcel source) {
+            PluginScreen s = new PluginScreen(
+                    source.<PluginInfo>readParcelable(null)
+            );
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public PluginScreen[] newArray(int size) {
+            return new PluginScreen[size];
+        }
+    };
 
 }

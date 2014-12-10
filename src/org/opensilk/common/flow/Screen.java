@@ -16,6 +16,7 @@
 
 package org.opensilk.common.flow;
 
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
 import android.view.View;
@@ -25,7 +26,7 @@ import org.opensilk.common.util.ObjectUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Screen {
+public abstract class Screen implements Parcelable {
   private SparseArray<Parcelable> viewState;
 
   @Override public boolean equals(Object o) {
@@ -50,11 +51,7 @@ public abstract class Screen {
 
   public void restoreHierarchyState(View view) {
     if (getViewState() != null) {
-      Object state = getViewState().get(view.getId());
-      //this is weird but happens sometimes with gson
-      if (state != null && (state instanceof Parcelable)) {
-        view.restoreHierarchyState(getViewState());
-      }
+      view.restoreHierarchyState(getViewState());
     }
   }
 
@@ -74,4 +71,38 @@ public abstract class Screen {
   private boolean isPathLeaf(List<Screen> path) {
     return !equals(path.get(path.size() - 1));
   }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (viewState == null) {
+            dest.writeInt(-1);
+        } else {
+            int N = viewState.size();
+            dest.writeInt(N);
+            for (int ii = 0; ii < N; ii++) {
+                dest.writeInt(viewState.keyAt(ii));
+                dest.writeParcelable(viewState.valueAt(ii), flags);
+            }
+        }
+    }
+
+    protected final void restoreFromParcel(Parcel in) {
+        int N = in.readInt();
+        if (N < 0) {
+            viewState = null;
+        } else {
+            viewState = new SparseArray<>(N);
+            while (N > 0) {
+                int key = in.readInt();
+                Parcelable value = in.readParcelable(null);
+                viewState.append(key, value);
+                N--;
+            }
+        }
+    }
 }

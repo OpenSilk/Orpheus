@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
 
 import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.utils.MusicUtils;
@@ -34,6 +35,7 @@ import org.opensilk.music.ui2.LauncherActivity;
 import org.opensilk.music.ui2.common.OverflowAction;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.gallery.GalleryScreen;
 import org.opensilk.music.ui2.loader.LocalGenresProfileLoader;
 import org.opensilk.music.util.SortOrder;
 
@@ -43,6 +45,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.Provides;
+import flow.HasParent;
 import flow.Layout;
 import rx.functions.Func1;
 
@@ -57,7 +60,7 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
         forward = { R.anim.shrink_fade_out, R.anim.slide_in_child_bottom },
         backward = { R.anim.slide_out_child_bottom, R.anim.grow_fade_in }
 )
-public class GenreScreen extends Screen {
+public class GenreScreen extends Screen implements HasParent<GalleryScreen> {
 
     final Genre genre;
 
@@ -68,6 +71,17 @@ public class GenreScreen extends Screen {
     @Override
     public String getName() {
         return super.getName() + genre.mGenreName;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(genre, flags);
+        super.writeToParcel(dest, flags);
+    }
+
+    @Override
+    public GalleryScreen getParent() {
+        return new GalleryScreen();
     }
 
     @dagger.Module(
@@ -221,5 +235,21 @@ public class GenreScreen extends Screen {
         }
 
     }
+
+    public static final Creator<GenreScreen> CREATOR = new Creator<GenreScreen>() {
+        @Override
+        public GenreScreen createFromParcel(Parcel source) {
+            GenreScreen s = new GenreScreen(
+                    source.<Genre>readParcelable(null)
+            );
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public GenreScreen[] newArray(int size) {
+            return new GenreScreen[size];
+        }
+    };
 
 }

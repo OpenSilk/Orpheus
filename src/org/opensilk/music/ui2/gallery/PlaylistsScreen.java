@@ -17,6 +17,8 @@
 
 package org.opensilk.music.ui2.gallery;
 
+import android.os.Parcel;
+
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.MusicUtils;
 
@@ -175,4 +177,18 @@ public class PlaylistsScreen extends Screen {
             return getItem(position).mAlbumIds.length >= 2;
         }
     }
+
+    public static final Creator<PlaylistsScreen> CREATOR = new Creator<PlaylistsScreen>() {
+        @Override
+        public PlaylistsScreen createFromParcel(Parcel source) {
+            PlaylistsScreen s = new PlaylistsScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public PlaylistsScreen[] newArray(int size) {
+            return new PlaylistsScreen[size];
+        }
+    };
 }

@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.gallery;
 
 import android.os.Bundle;
+import android.os.Parcel;
 
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortarflow.WithTransitions;
@@ -156,5 +157,19 @@ public class GalleryScreen extends Screen {
         }
 
     }
+
+    public static final Creator<GalleryScreen> CREATOR = new Creator<GalleryScreen>() {
+        @Override
+        public GalleryScreen createFromParcel(Parcel source) {
+            GalleryScreen s = new GalleryScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public GalleryScreen[] newArray(int size) {
+            return new GalleryScreen[size];
+        }
+    };
 
 }

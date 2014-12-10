@@ -17,6 +17,8 @@
 
 package org.opensilk.music.ui2.gallery;
 
+import android.os.Parcel;
+
 import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.rx.SimpleObserver;
@@ -161,4 +163,18 @@ public class SongsScreen extends Screen {
                     null, song.albumId, ArtworkType.THUMBNAIL));
         }
     }
+
+    public static final Creator<SongsScreen> CREATOR = new Creator<SongsScreen>() {
+        @Override
+        public SongsScreen createFromParcel(Parcel source) {
+            SongsScreen s = new SongsScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public SongsScreen[] newArray(int size) {
+            return new SongsScreen[size];
+        }
+    };
 }

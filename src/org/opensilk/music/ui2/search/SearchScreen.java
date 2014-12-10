@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.search;
 
 import android.os.Bundle;
+import android.os.Parcel;
 import android.text.TextUtils;
 
 import org.opensilk.common.flow.Screen;
@@ -254,4 +255,18 @@ public class SearchScreen extends Screen {
             );
         }
     }
+
+    public static final Creator<SearchScreen> CREATOR = new Creator<SearchScreen>() {
+        @Override
+        public SearchScreen createFromParcel(Parcel source) {
+            SearchScreen s = new SearchScreen();
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public SearchScreen[] newArray(int size) {
+            return new SearchScreen[size];
+        }
+    };
 }

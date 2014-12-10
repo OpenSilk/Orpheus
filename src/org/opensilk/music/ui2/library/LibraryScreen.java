@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -92,6 +93,14 @@ public class LibraryScreen extends Screen {
     @Override
     public String getName() {
         return super.getName() + libraryInfo.toString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(pluginInfo, flags);
+        dest.writeBundle(pluginConfig.dematerialize());
+        dest.writeParcelable(libraryInfo, flags);
+        super.writeToParcel(dest, flags);
     }
 
     @dagger.Module(
@@ -449,5 +458,23 @@ public class LibraryScreen extends Screen {
         }
 
     }
+
+    public static final Creator<LibraryScreen> CREATOR = new Creator<LibraryScreen>() {
+        @Override
+        public LibraryScreen createFromParcel(Parcel source) {
+            LibraryScreen s = new LibraryScreen(
+                    source.<PluginInfo>readParcelable(null),
+                    PluginConfig.materialize(source.readBundle()),
+                    source.<LibraryInfo>readParcelable(null)
+            );
+            s.restoreFromParcel(source);
+            return s;
+        }
+
+        @Override
+        public LibraryScreen[] newArray(int size) {
+            return new LibraryScreen[size];
+        }
+    };
 
 }
