@@ -271,7 +271,7 @@ public class PluginScreen extends Screen {
         @Override
         public PluginScreen createFromParcel(Parcel source) {
             PluginScreen s = new PluginScreen(
-                    source.<PluginInfo>readParcelable(null)
+                    source.<PluginInfo>readParcelable(PluginInfo.class.getClassLoader())
             );
             s.restoreFromParcel(source);
             return s;

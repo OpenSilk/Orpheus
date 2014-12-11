@@ -252,7 +252,7 @@ public class PlaylistScreen extends Screen implements HasParent<GalleryScreen> {
         @Override
         public PlaylistScreen createFromParcel(Parcel source) {
             PlaylistScreen s = new PlaylistScreen(
-                    source.<Playlist>readParcelable(null)
+                    source.<Playlist>readParcelable(Playlist.class.getClassLoader())
             );
             s.restoreFromParcel(source);
             return s;

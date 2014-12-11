@@ -240,7 +240,7 @@ public class GenreScreen extends Screen implements HasParent<GalleryScreen> {
         @Override
         public GenreScreen createFromParcel(Parcel source) {
             GenreScreen s = new GenreScreen(
-                    source.<Genre>readParcelable(null)
+                    source.<Genre>readParcelable(Genre.class.getClassLoader())
             );
             s.restoreFromParcel(source);
             return s;

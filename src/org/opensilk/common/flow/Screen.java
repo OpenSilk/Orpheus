@@ -99,7 +99,7 @@ public abstract class Screen implements Parcelable {
             viewState = new SparseArray<>(N);
             while (N > 0) {
                 int key = in.readInt();
-                Parcelable value = in.readParcelable(null);
+                Parcelable value = in.readParcelable(getClass().getClassLoader());
                 viewState.append(key, value);
                 N--;
             }

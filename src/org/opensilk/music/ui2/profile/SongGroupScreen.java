@@ -253,7 +253,7 @@ public class SongGroupScreen extends Screen implements HasParent<GalleryScreen> 
         @Override
         public SongGroupScreen createFromParcel(Parcel source) {
             SongGroupScreen s = new SongGroupScreen(
-                    source.<LocalSongGroup>readParcelable(null)
+                    source.<LocalSongGroup>readParcelable(LocalSongGroup.class.getClassLoader())
             );
             s.restoreFromParcel(source);
             return s;

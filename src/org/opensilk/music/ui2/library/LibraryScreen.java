@@ -463,9 +463,9 @@ public class LibraryScreen extends Screen {
         @Override
         public LibraryScreen createFromParcel(Parcel source) {
             LibraryScreen s = new LibraryScreen(
-                    source.<PluginInfo>readParcelable(null),
+                    source.<PluginInfo>readParcelable(PluginInfo.class.getClassLoader()),
                     PluginConfig.materialize(source.readBundle()),
-                    source.<LibraryInfo>readParcelable(null)
+                    source.<LibraryInfo>readParcelable(LibraryInfo.class.getClassLoader())
             );
             s.restoreFromParcel(source);
             return s;

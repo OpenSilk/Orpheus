@@ -247,7 +247,7 @@ public class AlbumScreen extends Screen implements HasParent<GalleryScreen> {
         @Override
         public AlbumScreen createFromParcel(Parcel source) {
             AlbumScreen s = new AlbumScreen(
-                    source.<LocalAlbum>readParcelable(null)
+                    source.<LocalAlbum>readParcelable(LocalAlbum.class.getClassLoader())
             );
             s.restoreFromParcel(source);
             return s;

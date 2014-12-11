@@ -235,7 +235,7 @@ public class ArtistScreen extends Screen implements HasParent<GalleryScreen> {
         @Override
         public ArtistScreen createFromParcel(Parcel source) {
             ArtistScreen s = new ArtistScreen(
-                    source.<LocalArtist>readParcelable(null)
+                    source.<LocalArtist>readParcelable(LocalArtist.class.getClassLoader())
             );
             s.restoreFromParcel(source);
             return s;
