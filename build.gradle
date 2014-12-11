@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0-rc4'
+        classpath 'com.android.tools.build:gradle:1.0.0'
         classpath 'com.jakewharton.hugo:hugo-plugin:1.1.0'
         classpath 'org.robolectric:robolectric-gradle-plugin:0.13.2'
     }
@@ -21,7 +21,7 @@ allprojects {
 
 // Build config
 ext.compileSdkVersion = 21
-ext.buildToolsVersion  = "21.1.1"
+ext.buildToolsVersion  = "21.1.2"
 
 // defaultConfig
 ext.targetSdkVersion = 21

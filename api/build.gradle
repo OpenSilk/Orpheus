@@ -60,7 +60,7 @@ tasks.whenTaskAdded { task ->
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:21.0.2'
+    compile 'com.android.support:support-annotations:21.0.3'
 
     androidTestCompile('junit:junit:4.11')
     androidTestCompile('org.robolectric:robolectric:2.4') {
