@@ -164,13 +164,12 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3' //flow
     //greenrobot
     compile 'de.greenrobot:eventbus:2.4.0'
-    //https://github.com/amlcurran/ShowcaseView
-    compile 'com.github.amlcurran.showcaseview:library:5.0.0'
 
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
     compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
     compile 'com.triggertrap:seekarc:1.0-SNAPSHOT@aar'
+    compile 'com.github.amlcurran:showcaseview:5.1.0-SNAPSHOT@aar'
 
     compile 'org.opensilk:silkcastservice:0.2.2-SNAPSHOT@aar'
     compile 'org.opensilk.music.plugin:folders:0.2.0-SNAPSHOT@aar'
