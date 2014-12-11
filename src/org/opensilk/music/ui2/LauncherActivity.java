@@ -370,10 +370,11 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     }
 
     void showShowCase() {
+        //mSettings.putBoolean(AppPreferences.FAB_SHOWCASE, false);
         if (!mSettings.getBoolean(AppPreferences.FAB_SHOWCASE, false)) {
             mSettings.putBoolean(AppPreferences.FAB_SHOWCASE, true);
             ViewTarget t = new ViewTarget(R.id.floating_action_button, this);
-            ShowcaseView sw = new ShowcaseView.Builder(this, true)
+            ShowcaseView sw = new ShowcaseView.Builder(this)
                     .setContentTitle(R.string.showcase_title)
                     .setContentText(R.string.showcase_text)
                     .setStyle(R.style.Orpheus_ShowCase)
