@@ -38,5 +38,6 @@ public interface ArtworkRequestManager {
 
     boolean clearCaches();
     void evictL1();
+    void onDeathImminent();
 
 }

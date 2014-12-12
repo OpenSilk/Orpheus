@@ -244,6 +244,7 @@
         <provider
             android:name="com.andrew.apollo.provider.MusicProvider"
             android:authorities="${applicationId}.provider"
+            android:process=":service"
             android:exported="false"/>
 
         <!-- Artwork provider -->

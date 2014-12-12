@@ -21,15 +21,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-import org.opensilk.common.dagger.qualifier.ForApplication;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * Created by drew on 6/26/14.
  */
-@Singleton
 public class MusicStore extends SQLiteOpenHelper {
 
     public static final int VERSION = 3;
@@ -37,8 +31,7 @@ public class MusicStore extends SQLiteOpenHelper {
 
     public static final String RECENT_TABLE = "recent";
 
-    @Inject
-    public MusicStore(@ForApplication Context context) {
+    public MusicStore(Context context) {
         super(context, FILENAME, null, VERSION);
     }
 

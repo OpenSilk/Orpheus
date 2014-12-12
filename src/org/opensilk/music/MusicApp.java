@@ -19,7 +19,9 @@ package org.opensilk.music;
 
 import android.app.ActivityManager;
 import android.app.Application;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.StrictMode;
 import android.text.TextUtils;
@@ -31,6 +33,7 @@ import com.splunk.mint.Mint;
 
 import org.apache.commons.io.FileUtils;
 import org.opensilk.cast.manager.MediaCastManager;
+import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
@@ -40,8 +43,6 @@ import org.opensilk.common.dagger.DaggerInjector;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -73,6 +74,7 @@ public class MusicApp extends Application implements DaggerInjector {
     protected MortarScope mRootScope;
 
     @Inject AppPreferences mSettings;
+    @Inject ArtworkRequestManager mArtworkRequestor;
 
     @Override
     @DebugLog
@@ -90,6 +92,7 @@ public class MusicApp extends Application implements DaggerInjector {
             setupDagger();
             setupMortar();
             inject(this);
+            registerComponentCallbacks(mMainComponentCallbacks);
         }
 
         // Init global static variables
@@ -214,6 +217,30 @@ public class MusicApp extends Application implements DaggerInjector {
         return false;
     }
 
+    final ComponentCallbacks2 mMainComponentCallbacks = new ComponentCallbacks2() {
+        @Override
+        @DebugLog
+        public void onTrimMemory(int level) {
+            if (level >= TRIM_MEMORY_COMPLETE) {
+                //mArtworkRequestor.onDeathImminent();
+            } else if (level >= 15 /*TRIM_MEMORY_RUNNING_CRITICAL*/) {
+                mArtworkRequestor.evictL1();
+                Runtime.getRuntime().gc();
+            }
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+
+        }
+
+        @Override
+        @DebugLog
+        public void onLowMemory() {
+
+        }
+    };
+
     private static class ReleaseTree extends Timber.DebugTree {
         //Tree stumps
         @Override public void v(String message, Object... args) {}
@@ -236,4 +263,5 @@ public class MusicApp extends Application implements DaggerInjector {
         }
 
     }
+
 }

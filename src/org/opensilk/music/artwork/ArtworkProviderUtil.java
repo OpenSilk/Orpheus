@@ -33,6 +33,7 @@ import org.opensilk.music.artwork.cache.BitmapLruCache;
 
 import java.io.IOException;
 
+import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
@@ -142,6 +143,12 @@ public class ArtworkProviderUtil {
             }
         }
         return bitmap;
+    }
+
+    @DebugLog
+    public void evict() {
+        mL1Cache.evictAll();
+        Runtime.getRuntime().gc();
     }
 
     /**

@@ -36,7 +36,6 @@ import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.common.dagger.qualifier.ForApplication;
-import org.opensilk.common.rx.HoldsSubscription;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.meta.ArtInfo;
@@ -63,6 +62,7 @@ import de.umass.lastfm.ImageSize;
 import de.umass.lastfm.MusicEntry;
 import de.umass.lastfm.opensilk.Fetch;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
@@ -79,7 +79,7 @@ import timber.log.Timber;
  */
 @Singleton
 public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
-    final static boolean DEBUG = false;
+    final static boolean DROP_CRUMBS = false;
 
     final Context mContext;
     final AppPreferences mPreferences;
@@ -226,7 +226,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         abstract void onCacheMiss();
 
         void addBreadcrumb(String crumb) {
-            if (!DEBUG) return;
+            if (!DROP_CRUMBS) return;
             breadcrumbs.append(" -> ").append(crumb);
             Timber.v(breadcrumbs.toString());
         }
@@ -547,11 +547,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     @Override
     public boolean clearCaches() {
         try {
-            mVolleyQueue.cancelAll(new RequestQueue.RequestFilter() {
-                @Override public boolean apply(Request<?> request) {
-                    return true;
-                }
-            });
+            clearVolleyQueue();
             mVolleyQueue.getCache().clear();
             mL1Cache.evictAll();
             mL2Cache.clearCache();
@@ -562,13 +558,35 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     }
 
     @Override
+    @DebugLog
     public void evictL1() {
         mL1Cache.evictAll();
+    }
+
+    @Override
+    @DebugLog
+    public void onDeathImminent() {
+        diskCacheQueue.clear();
+        if (diskCacheWorker != null) {
+            diskCacheWorker.unsubscribe();
+            diskCacheWorker = null;
+        }
+        clearVolleyQueue();
+        mVolleyQueue.stop();
+        mVolleyQueue.start();
     }
 
     /*
      * End IMPL
      */
+
+    void clearVolleyQueue() {
+        mVolleyQueue.cancelAll(new RequestQueue.RequestFilter() {
+            @Override public boolean apply(Request<?> request) {
+                return true;
+            }
+        });
+    }
 
     public Observable<CacheResponse> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
         final String cacheKey = getCacheKey(artInfo, artworkType);
@@ -856,7 +874,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             diskCacheWorker.schedule(new Action0() {
                 @Override
                 public void call() {
-                    while (true) {
+                    while (diskCacheWorker != null && !diskCacheWorker.isUnsubscribed()) {
                         try {
                             Map.Entry<String, Bitmap> entry = diskCacheQueue.pollFirst(60, TimeUnit.SECONDS);
                             if (entry != null) {

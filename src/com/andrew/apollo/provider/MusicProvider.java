@@ -26,10 +26,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 
 import org.opensilk.music.BuildConfig;
-import org.opensilk.music.GlobalModule;
-import org.opensilk.music.GraphHolder;
-
-import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -37,10 +33,6 @@ import timber.log.Timber;
  * Created by drew on 2/24/14.
  */
 public class MusicProvider extends ContentProvider {
-
-    @dagger.Module(addsTo = GlobalModule.class, injects = MusicProvider.class)
-    public static class Module {
-    }
 
     private static final String AUTHORITY = BuildConfig.MUSIC_AUTHORITY;
     private static final UriMatcher sUriMatcher;
@@ -55,11 +47,11 @@ public class MusicProvider extends ContentProvider {
         sUriMatcher.addURI(AUTHORITY, "recents", 1);
     }
 
-    @Inject MusicStore mStore;
+    MusicStore mStore;
 
     @Override
     public boolean onCreate() {
-        GraphHolder.get(getContext()).getObjectGraph().plus(new Module()).inject(this);
+        mStore = new MusicStore(getContext());
         return true;
     }
 
