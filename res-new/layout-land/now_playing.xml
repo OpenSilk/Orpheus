@@ -131,7 +131,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginBottom="24dp"
-                android:textAppearance="?android:textAppearanceSmall"
+                android:textAppearance="?android:textAppearance"
                 tools:text="0:00"/>
 
             <!-- total playtime -->
@@ -145,7 +145,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginBottom="24dp"
-                android:textAppearance="?android:textAppearanceSmall"
+                android:textAppearance="?android:textAppearance"
                 tools:text="0:00"/>
 
         </RelativeLayout>
