@@ -38,7 +38,6 @@
         <item>#689F38</item>
         <item>#EF6C00</item>
         <item>#FF5722</item>
-        <item>#757575</item>
     </array>
 
     <color name="letter_tile_default_color">#cccccc</color>
