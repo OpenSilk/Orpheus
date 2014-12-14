@@ -101,12 +101,14 @@ public class BaseMortarActivity extends BaseActivity implements PauseAndResumeAc
         setupTheme();
         super.onCreate(savedInstanceState);
 
+        mBus.register(this);
         mPauseResumePresenter.takeView(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mBus != null) mBus.unregister(this);
         if (mPauseResumePresenter != null) mPauseResumePresenter.dropView(this);
         if (!mConfigurationChangeIncoming) {
             // Destroy our scope

@@ -18,6 +18,7 @@
 package org.opensilk.music.ui2.nowplaying;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -41,6 +42,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
@@ -68,6 +70,8 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.functions.Func3;
+import rx.functions.Func4;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
@@ -400,72 +404,142 @@ public class NowPlayingScreen extends Screen {
         }
 
         void setupActionBar() {
+            final Func1<Integer, Boolean> handler = new Func1<Integer, Boolean>() {
+                @Override
+                public Boolean call(Integer integer) {
+                    switch (integer) {
+                        case R.id.popup_menu_share:
+                            Observable.zip(
+                                    musicService.getTrackName(),
+                                    musicService.getArtistName(),
+                                    musicService.getAlbumArtistName(),
+                                    musicService.getAlbumName(),
+                                    new Func4<String, String, String, String, String[]>() {
+                                        @Override
+                                        public String[] call(String s, String s2, String s3, String s4) {
+                                            return new String[]{s, s2, s3, s4};
+                                        }
+                                    })
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new SimpleObserver<String[]>() {
+                                        @Override
+                                        public void onNext(String[] strings) {
+                                            if (strings.length != 4
+                                                    || strings[0] == null
+                                                    || strings[1] == null
+                                                    || getView() == null) {
+                                                notifyError();
+                                            } else {
+                                                Intent si = new Intent();
+                                                String msg = getView().getContext().getString(
+                                                        R.string.now_listening_to, strings[0], strings[1]);
+                                                si.setAction(Intent.ACTION_SEND);
+                                                si.setType("text/plain");
+                                                si.putExtra(Intent.EXTRA_TEXT, msg);
+                                                String albumArtist = strings[1];
+                                                if (strings[2] != null) {
+                                                    albumArtist = strings[2];
+                                                }
+                                                String album = strings[3];
+                                                if (albumArtist != null && album != null) {
+                                                    si.putExtra(Intent.EXTRA_STREAM,
+                                                            ArtworkProvider.createArtworkUri(albumArtist, album));
+                                                }
+                                                getView().getContext().startActivity(
+                                                        Intent.createChooser(si,
+                                                                getView().getContext().getString(R.string.share_track_using))
+                                                );
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            super.onError(e);
+                                            notifyError();
+                                        }
+
+                                        void notifyError() {
+                                            eventBus.post(new MakeToast(R.string.err_generic));
+                                        }
+                                    });
+                            return true;
+                        case R.id.popup_set_ringtone:
+                            musicService.getTrackId()
+                                    .map(new Func1<Long, Long>() {
+                                        @Override
+                                        public Long call(Long id) {
+                                            long realId = MusicProviderUtil.getRealId(appContext, id);
+                                            if (realId < 0) {
+                                                throw new IllegalArgumentException("Song not in MediaStore");
+                                            }
+                                            return realId;
+                                        }
+                                    })
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new SimpleObserver<Long>() {
+                                        @Override
+                                        public void onNext(Long id) {
+                                            MakeToast mt = MusicUtils.setRingtone(appContext, id);
+                                            if (mt != null) {
+                                                eventBus.post(mt);
+                                            }
+                                        }
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            super.onError(e);
+                                            int msg = (e instanceof IllegalArgumentException)
+                                                    ? R.string.err_unsupported_for_library : R.string.err_generic;
+                                            eventBus.post(new MakeToast(msg));
+                                        }
+                                    });
+                            return true;
+                        case R.id.popup_delete:
+                            Observable.zip(
+                                    musicService.getTrackName(),
+                                    musicService.getTrackId().map(new Func1<Long, Long>() {
+                                        @Override
+                                        public Long call(Long id) {
+                                            long realId = MusicProviderUtil.getRealId(appContext, id);
+                                            if (realId < 0) {
+                                                throw new IllegalArgumentException("Song not in MediaStore");
+                                            }
+                                            return realId;
+                                        }
+                                    }), new Func2<String, Long, OpenDialog>() {
+                                        @Override
+                                        public OpenDialog call(String s, Long id) {
+                                            return new OpenDialog(DeleteDialog.newInstance(s, new long[]{id}));
+                                        }
+                                    })
+                                    .subscribe(new SimpleObserver<OpenDialog>() {
+                                        @Override
+                                        public void onNext(OpenDialog openDialog) {
+                                            eventBus.post(openDialog);
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            super.onError(e);
+                                            int msg = (e instanceof IllegalArgumentException)
+                                                    ? R.string.err_unsupported_for_library : R.string.err_generic;
+                                            eventBus.post(new MakeToast(msg));
+                                        }
+                                    });
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+            };
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
                 .setUpButtonEnabled(true)
                 .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                    .withMenus(R.menu.popup_share,
-                            R.menu.popup_set_ringtone,
-                            R.menu.popup_delete
-                    )
-                    .setActionHandler(new Func1<Integer, Boolean>() {
-                        @Override
-                        public Boolean call(Integer integer) {
-                            switch (integer) {
-                                case R.id.popup_menu_share:
-                                    //TODO
-                                    eventBus.post(new MakeToast(R.string.err_generic));
-                                    return true;
-                                case R.id.popup_set_ringtone:
-                                    musicService.getTrackId().map(new Func1<Long, Long>() {
-                                            @Override
-                                            public Long call(Long id) {
-                                                return MusicProviderUtil.getRealId(appContext, id);
-                                            }
-                                        })
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(new SimpleObserver<Long>() {
-                                            @Override
-                                            public void onNext(Long id) {
-                                                MusicUtils.setRingtone(appContext, id);
-                                            }
-                                            @Override
-                                            public void onError(Throwable e) {
-                                                super.onError(e);
-                                                eventBus.post(new MakeToast(R.string.err_generic));
-                                            }
-                                        });
-                                    return true;
-                                case R.id.popup_delete:
-                                    Observable.zip(
-                                        musicService.getTrackName(),
-                                        musicService.getTrackId().map(new Func1<Long, Long>() {
-                                            @Override
-                                            public Long call(Long id) {
-                                                return MusicProviderUtil.getRealId(appContext, id);
-                                            }
-                                        }), new Func2<String, Long, OpenDialog>() {
-                                            @Override
-                                            public OpenDialog call(String s, Long id) {
-                                                return new OpenDialog(DeleteDialog.newInstance(s, new long[]{id}));
-                                            }
-                                        })
-                                        .subscribe(new SimpleObserver<OpenDialog>() {
-                                            @Override
-                                            public void onNext(OpenDialog openDialog) {
-                                                eventBus.post(openDialog);
-                                            }
-                                            @Override
-                                            public void onError(Throwable e) {
-                                                super.onError(e);
-                                                eventBus.post(new MakeToast(R.string.err_generic));
-                                            }
-                                        });
-                                    return true;
-                                default:
-                                    return false;
-                            }
-                        }
-                    }).build()
+                                .withMenus(
+                                        R.menu.popup_share,
+                                        R.menu.popup_set_ringtone,
+                                        R.menu.popup_delete
+                                )
+                                .setActionHandler(handler).build()
                 ).build()
             );
         }

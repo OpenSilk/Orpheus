@@ -86,7 +86,6 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBus.register(this);
         mAppFlowPresenter.takeView(this);
         setupView();
         ButterKnife.inject(this);
@@ -94,7 +93,6 @@ public class BaseSwitcherActivity extends BaseMortarActivity implements
 
     @Override
     protected void onDestroy() {
-        if (mBus != null) mBus.unregister(this);
         if (mAppFlowPresenter != null) mAppFlowPresenter.dropView(this);
         super.onDestroy();
     }
