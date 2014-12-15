@@ -17,14 +17,12 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,6 +33,7 @@ import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.ui2.nowplaying.NowPlayingScreen;
+import org.opensilk.music.ui2.queue.QueueScreen;
 
 import javax.inject.Inject;
 

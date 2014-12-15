@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<org.opensilk.music.ui2.main.QueueView
+<org.opensilk.music.ui2.queue.QueueView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"

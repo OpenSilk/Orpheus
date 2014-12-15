@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.ui2.main;
+package org.opensilk.music.ui2.queue;
 
 import android.content.Context;
 import android.content.Intent;
