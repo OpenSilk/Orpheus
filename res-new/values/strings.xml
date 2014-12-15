@@ -61,17 +61,11 @@
     <string name="settings_visualizations">Enable visualizations</string>
     <string name="settings_visualizations_summary">Shows a visualization in the now playing header, or footer when collapsed</string>
     <!-- interface home -->
-    <string name="settings_home_category">Home</string>
-    <string name="settings_pick_home_pages">Select home pages</string>
-    <string name="settings_pick_home_pages_summary">Sort &amp; manage home pages</string>
+    <string name="settings_pick_home_pages">Manage pages</string>
     <!-- interface now playing -->
-    <string name="settings_now_playing_colorize">Colorize now playing screen</string>
-    <string name="settings_now_playing_palette">Palette colors</string>
-    <string name="settings_now_playing_vibrant_ab_muted_bdy">Vibrant actonbar, muted body</string>
-    <string name="settings_now_playing_vibrant">Vibrant</string>
-    <string name="settings_now_playing_muted">Muted</string>
-    <string name="settings_now_playing_vibrant_fallback">Try vibrant then muted</string>
-    <string name="settings_now_playing_muted_fallback">Try muted then vibrant</string>
+    <string name="settings_now_playing_start_screen">Start screen</string>
+    <string name="settings_now_playing_screen_artwork">Artwork</string>
+    <string name="settings_now_playing_screen_controls">Controls</string>
     <!-- interface fab -->
     <string name="settings_fab">Action button configuration</string>
     <string name="settings_fab_click">Click action</string>

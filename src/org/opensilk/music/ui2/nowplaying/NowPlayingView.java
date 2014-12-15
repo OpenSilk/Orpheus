@@ -40,6 +40,7 @@ import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.util.VersionUtils;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.common.widget.ImageButtonCheckable;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.theme.PlaybackDrawableTint;
 
@@ -55,6 +56,9 @@ import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_START_SCREEN;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_SCREEN_ARTWORK;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_SCREEN_CONTROLS;
 
 /**
  * Created by drew on 11/17/14.
@@ -89,9 +93,15 @@ public class NowPlayingView extends RelativeLayout {
         super.onFinishInflate();
         ButterKnife.inject(this);
         if (btnFlip != null) {
-            artwork.setVisibility(VISIBLE);
-            actionsContainer.setVisibility(GONE);
-        } else {
+            String startScreen = presenter.settings.getString(NOW_PLAYING_START_SCREEN, NOW_PLAYING_SCREEN_ARTWORK);
+            if (NOW_PLAYING_SCREEN_ARTWORK.equals(startScreen)) {
+                artwork.setVisibility(VISIBLE);
+                actionsContainer.setVisibility(GONE);
+            } else {
+                artwork.setVisibility(GONE);
+                actionsContainer.setVisibility(VISIBLE);
+            }
+        } else { //landscape
             artwork.setVisibility(VISIBLE);
             actionsContainer.setVisibility(VISIBLE);
         }
@@ -176,7 +186,7 @@ public class NowPlayingView extends RelativeLayout {
 
     private Interpolator accelerator = new AccelerateInterpolator();
     private Interpolator decelerator = new DecelerateInterpolator();
-    private static final int TRANSITION_DURATION = 180;
+    private static final int TRANSITION_DURATION = 160;
     void flip() {
         final View visibleLayout;
         final View invisibleLayout;

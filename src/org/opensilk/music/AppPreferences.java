@@ -86,14 +86,10 @@ public class AppPreferences {
     public static final String ORPHEUS_THEME = "orpheus_theme";
 
     //Now Playing
-    public static final String NOW_PLAYING_COLORIZE = "now_playing_colorize";
-    public static final String NOW_PLAYING_PALETTE = "now_playing_palette";
+    public static final String NOW_PLAYING_START_SCREEN = "now_playing_start_screen";
     //values must mirror array
-    public static final String NOW_PLAYING_PALETTE_VIBRANT = "vibrant";
-    public static final String NOW_PLAYING_PALETTE_MUTED = "muted";
-    public static final String NOW_PLAYING_PALETTE_VIBRANT_FALLBACK = "vibrant_fallback";
-    public static final String NOW_PLAYING_PALETTE_MUTED_FALLBACK = "muted_fallback";
-    public static final String NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY = "vibrant_ab_muted_bdy";
+    public static final String NOW_PLAYING_SCREEN_ARTWORK = "artwork";
+    public static final String NOW_PLAYING_SCREEN_CONTROLS = "controls";
 
     // action button
     public static final String FAB_CLICK = "fab_click";

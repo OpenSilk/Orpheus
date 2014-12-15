@@ -17,34 +17,25 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/settings_home_category">
+        android:title="@string/my_library">
 
         <org.opensilk.music.ui.settings.HomePagesPreference
             android:key="pref_home_pages"
-            android:title="@string/settings_pick_home_pages"
-            android:summary="@string/settings_pick_home_pages_summary" />
+            android:title="@string/settings_pick_home_pages"/>
 
     </PreferenceCategory>
 
-    <!--
     <PreferenceCategory
         android:title="@string/now_playing">
 
-        <CheckBoxPreference
-            android:key="now_playing_colorize"
-            android:title="@string/settings_now_playing_colorize"
-            android:defaultValue="true"/>
-
         <ListPreference
-            android:key="now_playing_palette"
-            android:title="@string/settings_now_playing_palette"
-            android:dependency="now_playing_colorize"
-            android:entries="@array/now_playing_palette"
-            android:entryValues="@array/now_playing_palette_values"
-            android:defaultValue="vibrant_ab_muted_bdy"/>
+            android:key="now_playing_start_screen"
+            android:title="@string/settings_now_playing_start_screen"
+            android:entries="@array/now_playing_start_screen"
+            android:entryValues="@array/now_playing_start_screen_values"
+            android:defaultValue="artwork"/>
 
     </PreferenceCategory>
-    -->
 
     <PreferenceCategory
         android:title="@string/settings_fab">
