@@ -45,6 +45,7 @@ import org.opensilk.music.ui2.loader.NowPlayingCursor;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +54,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
+import flow.Backstack;
 import flow.Flow;
 import flow.Layout;
 import mortar.MortarScope;
@@ -321,6 +323,13 @@ public class QueueScreen extends Screen {
         if (flow.getBackstack().current().getScreen() instanceof QueueScreen) {
             flow.goBack();
         } else {
+            Iterator<Backstack.Entry> ii = flow.getBackstack().reverseIterator();
+            while (ii.hasNext()) {
+                if (ii.next().getScreen() instanceof QueueScreen) {
+                    flow.resetTo(new QueueScreen());
+                    return;
+                }
+            }
             flow.goTo(new QueueScreen());
         }
     }

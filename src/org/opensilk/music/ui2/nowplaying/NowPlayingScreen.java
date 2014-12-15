@@ -56,6 +56,7 @@ import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenDialog;
 
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -63,6 +64,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
+import flow.Backstack;
 import flow.Flow;
 import flow.Layout;
 import hugo.weaving.DebugLog;
@@ -555,6 +557,13 @@ public class NowPlayingScreen extends Screen {
         if (flow.getBackstack().current().getScreen() instanceof NowPlayingScreen) {
             flow.goBack();
         } else {
+            Iterator<Backstack.Entry> ii = flow.getBackstack().reverseIterator();
+            while (ii.hasNext()) {
+                if (ii.next().getScreen() instanceof NowPlayingScreen) {
+                    flow.resetTo(new NowPlayingScreen());
+                    return;
+                }
+            }
             flow.goTo(new NowPlayingScreen());
         }
     }
