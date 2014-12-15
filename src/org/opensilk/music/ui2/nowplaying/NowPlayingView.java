@@ -65,7 +65,7 @@ public class NowPlayingView extends RelativeLayout {
 
     @InjectView(R.id.now_playing_image) AnimatedImageView artwork;
     @InjectView(R.id.now_playing_actions_container) ViewGroup actionsContainer;
-    @InjectView(R.id.now_playing_seekprogress) SeekBar seekBar;
+    @InjectView(R.id.now_playing_seekprogress) SeekArc seekBar;
     @InjectView(R.id.now_playing_current_time) TextView currentTime;
     @InjectView(R.id.now_playing_total_time) TextView totalTime;
     @InjectView(R.id.now_playing_shuffle) ImageButton shuffle;
@@ -95,10 +95,8 @@ public class NowPlayingView extends RelativeLayout {
             artwork.setVisibility(VISIBLE);
             actionsContainer.setVisibility(VISIBLE);
         }
-        if (!(seekBar instanceof SeekArc)) {
-            ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
-        } else if (!VersionUtils.hasLollipop()) {
-            ((SeekArc)seekBar).getThumb().mutate().setColorFilter(
+        if (!VersionUtils.hasLollipop()) {
+            seekBar.getThumb().mutate().setColorFilter(
                     ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
             );
         }
@@ -112,7 +110,7 @@ public class NowPlayingView extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        seekBar.setOnSeekBarChangeListener(presenter);
+        seekBar.setOnSeekArcChangeListener(presenter);
         if (!isInEditMode()) presenter.takeView(this);
         subscribeClicks();
     }
@@ -122,7 +120,7 @@ public class NowPlayingView extends RelativeLayout {
         super.onDetachedFromWindow();
         unsubscribeClicks();
         presenter.dropView(this);
-        seekBar.setOnSeekBarChangeListener(null);
+        seekBar.setOnSeekArcChangeListener(null);
     }
 
     void subscribeClicks() {

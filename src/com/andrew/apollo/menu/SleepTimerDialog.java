@@ -103,19 +103,19 @@ public class SleepTimerDialog extends DialogFragment {
             ButterKnife.inject(this);
             final int prevMin = mSettings.getInt(PREF_PREVIOUS_TIMER_VALUE, 30);
             mTimerSet.setProgress(prevMin);
-            mTimerSet.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            mTimerSet.setOnSeekArcChangeListener(new SeekArc.OnSeekArcChangeListener() {
                 @Override
-                public void onProgressChanged(SeekBar seekArc, int i, boolean b) {
+                public void onProgressChanged(SeekArc seekArc, int i, boolean b) {
                     mTimerDisplay.setText(String.valueOf(i)+" min");
                 }
 
                 @Override
-                public void onStartTrackingTouch(SeekBar seekArc) {
+                public void onStartTrackingTouch(SeekArc seekArc) {
 
                 }
 
                 @Override
-                public void onStopTrackingTouch(SeekBar seekArc) {
+                public void onStopTrackingTouch(SeekArc seekArc) {
 
                 }
             });

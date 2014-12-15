@@ -30,6 +30,7 @@ import android.widget.SeekBar;
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
+import com.triggertrap.seekarc.SeekArc;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.common.flow.AppFlow;
@@ -49,6 +50,7 @@ import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
+import org.opensilk.music.ui2.BaseSwitcherToolbarActivity;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
@@ -94,8 +96,8 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
 public class NowPlayingScreen extends Screen {
 
     @dagger.Module(
-            injects = NowPlayingView.class,
-            complete = false
+            addsTo = BaseSwitcherToolbarActivity.Module.class,
+            injects = NowPlayingView.class
     )
     public static class Module {
 
@@ -104,7 +106,7 @@ public class NowPlayingScreen extends Screen {
     @Singleton
     public static class Presenter extends ViewPresenter<NowPlayingView> implements
             PausesAndResumes,
-            SeekBar.OnSeekBarChangeListener {
+            SeekArc.OnSeekArcChangeListener {
 
         final Context appContext;
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
@@ -244,7 +246,7 @@ public class NowPlayingScreen extends Screen {
         }
 
         @Override
-        public void onProgressChanged(final SeekBar bar, final int progress, final boolean fromuser) {
+        public void onProgressChanged(final SeekArc bar, final int progress, final boolean fromuser) {
             if (!fromuser) return;
             final long now = SystemClock.elapsedRealtime();
             musicService.getDuration()
@@ -279,14 +281,14 @@ public class NowPlayingScreen extends Screen {
         }
 
         @Override
-        public void onStartTrackingTouch(final SeekBar bar) {
+        public void onStartTrackingTouch(final SeekArc bar) {
             mLastSeekEventTime = 0;
             mFromTouch = true;
             setCurrentTimeVisibile();
         }
 
         @Override
-        public void onStopTrackingTouch(final SeekBar bar) {
+        public void onStopTrackingTouch(final SeekArc bar) {
             if (mPosOverride != -1) {
                 try {
                     musicService.seek(mPosOverride).subscribe();
