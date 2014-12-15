@@ -17,13 +17,18 @@
 
 package org.opensilk.music.ui2.nowplaying;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.v7.graphics.Palette;
-import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -35,7 +40,6 @@ import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.util.VersionUtils;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.common.widget.ImageButtonCheckable;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.theme.PlaybackDrawableTint;
 
@@ -43,6 +47,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.Optional;
 import mortar.Mortar;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.ViewObservable;
@@ -58,8 +63,8 @@ public class NowPlayingView extends RelativeLayout {
 
     @Inject NowPlayingScreen.Presenter presenter;
 
-    @InjectView(R.id.now_playing_toolbar) Toolbar toolbar;
     @InjectView(R.id.now_playing_image) AnimatedImageView artwork;
+    @InjectView(R.id.now_playing_actions_container) ViewGroup actionsContainer;
     @InjectView(R.id.now_playing_seekprogress) SeekBar seekBar;
     @InjectView(R.id.now_playing_current_time) TextView currentTime;
     @InjectView(R.id.now_playing_total_time) TextView totalTime;
@@ -68,6 +73,7 @@ public class NowPlayingView extends RelativeLayout {
     @InjectView(R.id.now_playing_play) ImageButtonCheckable play;
     @InjectView(R.id.now_playing_next) ImageButton next;
     @InjectView(R.id.now_playing_repeat) ImageButton repeat;
+    @InjectView(R.id.now_playing_btn_flip) @Optional ImageButton btnFlip;
 
     CompositeSubscription clicks;
     Drawable origRepeat;
@@ -82,6 +88,13 @@ public class NowPlayingView extends RelativeLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
+        if (btnFlip != null) {
+            artwork.setVisibility(VISIBLE);
+            actionsContainer.setVisibility(GONE);
+        } else {
+            artwork.setVisibility(VISIBLE);
+            actionsContainer.setVisibility(VISIBLE);
+        }
         if (!(seekBar instanceof SeekArc)) {
             ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
         } else if (!VersionUtils.hasLollipop()) {
@@ -146,6 +159,14 @@ public class NowPlayingView extends RelativeLayout {
                     }
                 })
         );
+        if (btnFlip != null) {
+            clicks.add(ViewObservable.clicks(btnFlip).subscribe(new Action1<OnClickEvent>() {
+                @Override
+                public void call(OnClickEvent onClickEvent) {
+                    flip();
+                }
+            }));
+        }
     }
 
     void unsubscribeClicks() {
@@ -155,141 +176,33 @@ public class NowPlayingView extends RelativeLayout {
         }
     }
 
-    public Toolbar getToolbar() {
-        return toolbar;
-    }
-
-    void colorize(Palette p) {
-        if (true) return; //XXX STUBBED
-        if (!presenter.settings.getBoolean(AppPreferences.NOW_PLAYING_COLORIZE, true)) return;
-        final String option = presenter.settings.getString(AppPreferences.NOW_PLAYING_PALETTE,
-                AppPreferences.NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY);
-        Palette.Swatch s;
-        Palette.Swatch s2;
-        int btnColor;
-        switch (option) {
-            case AppPreferences.NOW_PLAYING_PALETTE_MUTED:
-                s = p.getDarkMutedSwatch();
-                s2 = p.getMutedSwatch();
-                btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
-                break;
-            case AppPreferences.NOW_PLAYING_PALETTE_MUTED_FALLBACK:
-                s = p.getDarkMutedSwatch();
-                s2 = p.getMutedSwatch();
-                btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
-                if (s == null || s2 == null) {
-                    s = p.getDarkVibrantSwatch();
-                    s2 = p.getVibrantSwatch();
-                    btnColor = s2 != null ? getComplimentary(s2.getHsl()) : 0;
-                }
-                break;
-            case AppPreferences.NOW_PLAYING_PALETTE_VIBRANT:
-                s = p.getDarkVibrantSwatch();
-                s2 = p.getVibrantSwatch();
-                btnColor = s2 != null ? getComplimentary(s2.getHsl()) : 0;
-                break;
-            case AppPreferences.NOW_PLAYING_PALETTE_VIBRANT_FALLBACK:
-                s = p.getDarkVibrantSwatch();
-                s2 = p.getVibrantSwatch();
-                btnColor = s2 != null ? getComplimentary(s2.getHsl()) : 0;
-                if (s == null || s2 == null) {
-                    s = p.getDarkMutedSwatch();
-                    s2 = p.getMutedSwatch();
-                    btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
-                }
-                break;
-            case AppPreferences.NOW_PLAYING_PALETTE_VIBRANT_AB_MUTED_BDY:
-            default:
-                s = p.getVibrantSwatch();
-                s2 = p.getMutedSwatch();
-                btnColor = p.getDarkVibrantColor(s2 != null ? getComplimentary(s2.getHsl()) : 0);
-        }
-        if (s != null && s2 != null) {
-            toolbar.setBackgroundColor(s.getRgb());
-            setBackgroundColor(s2.getRgb());
-            if (!(seekBar instanceof SeekArc)) {
-                ThemeUtils.themeSeekBar2(seekBar, btnColor);
-            } else if (!VersionUtils.hasLollipop()) {
-                ((SeekArc)seekBar).getThumb().mutate().setColorFilter(
-                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
-                );
-            }
-            repeat.setImageDrawable(PlaybackDrawableTint.getRepeatDrawable36(getContext(), btnColor));
-            shuffle.setImageDrawable(PlaybackDrawableTint.getShuffleDrawable36(getContext(), btnColor));
+    private Interpolator accelerator = new AccelerateInterpolator();
+    private Interpolator decelerator = new DecelerateInterpolator();
+    private static final int TRANSITION_DURATION = 180;
+    void flip() {
+        final View visibleLayout;
+        final View invisibleLayout;
+        if (artwork.getVisibility() == View.GONE) {
+            visibleLayout = actionsContainer;
+            invisibleLayout = artwork;
         } else {
-            toolbar.setBackgroundColor(ThemeUtils.getColorPrimary(getContext()));
-            setBackgroundColor(ThemeUtils.getThemeAttrColor(getContext(), android.R.attr.colorBackground));
-            if (!(seekBar instanceof SeekArc)) {
-                ThemeUtils.themeSeekBar(seekBar, R.attr.colorAccent);
-            } else if (!VersionUtils.hasLollipop()) {
-                ((SeekArc)seekBar).getThumb().mutate().setColorFilter(
-                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
-                );
+            visibleLayout = artwork;
+            invisibleLayout = actionsContainer;
+        }
+        ObjectAnimator visToInvis = ObjectAnimator.ofFloat(visibleLayout, "rotationY", 0f, 90f);
+        visToInvis.setDuration(TRANSITION_DURATION);
+        visToInvis.setInterpolator(accelerator);
+        final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(invisibleLayout, "rotationY", -90f, 0f);
+        invisToVis.setDuration(TRANSITION_DURATION);
+        invisToVis.setInterpolator(decelerator);
+        visToInvis.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator anim) {
+                visibleLayout.setVisibility(View.GONE);
+                invisToVis.start();
+                invisibleLayout.setVisibility(View.VISIBLE);
             }
-            repeat.setImageDrawable(origRepeat);
-            shuffle.setImageDrawable(origShuffle);
-        }
-    }
-
-    /*
-     * HSLColor
-     */
-    static int getComplimentary(float[] hsl)
-    {
-        float hue = (hsl[0] + 180.0f) % 360.0f;
-        return HSLtoRGB(hue, hsl[1], hsl[2]);
-    }
-
-    /*
-     * AOSP Palette#ColorUtils
-     */
-    static int HSLtoRGB (final float h, final float s, final float l) {
-        final float c = (1f - Math.abs(2 * l - 1f)) * s;
-        final float m = l - 0.5f * c;
-        final float x = c * (1f - Math.abs((h / 60f % 2f) - 1f));
-
-        final int hueSegment = (int) h / 60;
-
-        int r = 0, g = 0, b = 0;
-
-        switch (hueSegment) {
-            case 0:
-                r = Math.round(255 * (c + m));
-                g = Math.round(255 * (x + m));
-                b = Math.round(255 * m);
-                break;
-            case 1:
-                r = Math.round(255 * (x + m));
-                g = Math.round(255 * (c + m));
-                b = Math.round(255 * m);
-                break;
-            case 2:
-                r = Math.round(255 * m);
-                g = Math.round(255 * (c + m));
-                b = Math.round(255 * (x + m));
-                break;
-            case 3:
-                r = Math.round(255 * m);
-                g = Math.round(255 * (x + m));
-                b = Math.round(255 * (c + m));
-                break;
-            case 4:
-                r = Math.round(255 * (x + m));
-                g = Math.round(255 * m);
-                b = Math.round(255 * (c + m));
-                break;
-            case 5:
-            case 6:
-                r = Math.round(255 * (c + m));
-                g = Math.round(255 * m);
-                b = Math.round(255 * (x + m));
-                break;
-        }
-
-        r = Math.max(0, Math.min(255, r));
-        g = Math.max(0, Math.min(255, g));
-        b = Math.max(0, Math.min(255, b));
-
-        return Color.rgb(r, g, b);
+        });
+        visToInvis.start();
     }
 }

@@ -28,7 +28,8 @@
     <org.opensilk.common.widget.SquareImageView
         android:id="@+id/footer_thumbnail"
         android:layout_height="match_parent"
-        android:layout_width="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:background="?android:selectableItemBackground"/>
 
     <ProgressBar
         android:id="@+id/footer_progress"

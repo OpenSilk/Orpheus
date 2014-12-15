@@ -34,7 +34,7 @@ import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
 
 import org.opensilk.music.artwork.PaletteResponse;
-import org.opensilk.music.ui2.NowPlayingActivity;
+import org.opensilk.music.ui2.nowplaying.NowPlayingScreen;
 
 import javax.inject.Inject;
 
@@ -100,12 +100,13 @@ public class FooterView extends RelativeLayout {
                 ViewObservable.clicks(this).subscribe(new Action1<OnClickEvent>() {
                     @Override
                     public void call(OnClickEvent onClickEvent) {
-                        presenter.toggleQueue();
+                        QueueScreen.toggleQueue(getContext());
                     }
-                }, new Action1<Throwable>() {
+                }),
+                ViewObservable.clicks(artworkThumbnail).subscribe(new Action1<OnClickEvent>() {
                     @Override
-                    public void call(Throwable throwable) {
-                        //pass, Theme picker has no appflow
+                    public void call(OnClickEvent onClickEvent) {
+                        NowPlayingScreen.toggleNowPlaying(getContext());
                     }
                 })
         );

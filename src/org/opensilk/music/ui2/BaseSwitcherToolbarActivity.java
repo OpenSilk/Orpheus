@@ -22,12 +22,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.opensilk.common.flow.Screen;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 
 import javax.inject.Inject;
 
 import butterknife.InjectView;
+import flow.Flow;
 
 /**
  * Created by drew on 11/20/14.
@@ -77,6 +79,16 @@ public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         return handleOptionItemSelected(item)
                 || super.onOptionsItemSelected(item);
+    }
+
+    /*
+     * AppFlowPresenter.Activity
+     */
+
+    @Override
+    public void showScreen(Screen screen, Flow.Direction direction, Flow.Callback callback) {
+        mMenuConfig = null;
+        super.showScreen(screen, direction, callback);
     }
 
     /*

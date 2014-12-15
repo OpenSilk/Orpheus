@@ -53,6 +53,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
+import flow.Flow;
 import flow.Layout;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
@@ -310,6 +311,17 @@ public class QueueScreen extends Screen {
                                 }
                             }).build())
                     .build());
+        }
+    }
+
+    public static void toggleQueue(Context context) {
+        if (context == null) return;
+        Flow flow = AppFlow.get(context);
+        if (flow == null) return;
+        if (flow.getBackstack().current().getScreen() instanceof QueueScreen) {
+            flow.goBack();
+        } else {
+            flow.goTo(new QueueScreen());
         }
     }
 

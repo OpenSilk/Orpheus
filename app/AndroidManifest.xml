@@ -125,12 +125,6 @@
             <!--</intent-filter>-->
         </activity-alias>
 
-        <activity android:name="org.opensilk.music.ui2.NowPlayingActivity"
-                  android:theme="@style/Theme.Dark">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                       android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
-        </activity>
-
         <activity android:name="org.opensilk.music.ui2.SearchActivity"
             android:theme="@style/Theme.Dark"
             android:launchMode="singleTop"

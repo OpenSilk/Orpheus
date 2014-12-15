@@ -19,17 +19,20 @@ package org.opensilk.music.ui2.main;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import com.andrew.apollo.MusicPlaybackService;
 
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
-import org.opensilk.music.ui2.NowPlayingActivity;
+import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.event.StartActivityForResult;
+import org.opensilk.music.ui2.nowplaying.NowPlayingScreen;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -178,7 +181,7 @@ public class Main {
                     break;
                 case AppPreferences.FAB_ACTION_OPEN_NOW_PLAYING:
                     if (getView() != null) {
-                        eventBus.post(new StartActivityForResult(new Intent(getView().getContext(), NowPlayingActivity.class), 0));
+                        NowPlayingScreen.toggleNowPlaying(getView().getContext());
                     }
                     break;
                 case AppPreferences.FAB_ACTION_NONE:

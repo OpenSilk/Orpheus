@@ -22,19 +22,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="?mainContentTopMargin"
     >
-
-    <android.support.v7.widget.Toolbar
-        android:id="@id/now_playing_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_alignParentTop="true"
-        style="?toolbarTheme"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/now_playing_toolbar">
+        android:layout_height="match_parent">
 
         <org.opensilk.common.widget.SquareImageView
             android:id="@id/now_playing_image"
@@ -43,6 +36,7 @@
             tools:src="@drawable/default_artwork"/>
 
         <RelativeLayout
+            android:id="@id/now_playing_actions_container"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
@@ -128,9 +122,8 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentBottom="true"
                 android:gravity="start"
-                android:layout_marginStart="16dp"
                 android:layout_marginLeft="16dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="32dp"
                 android:textAppearance="?android:textAppearance"
                 tools:text="0:00"/>
 
@@ -142,9 +135,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:gravity="end"
-                android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="32dp"
                 android:textAppearance="?android:textAppearance"
                 tools:text="0:00"/>
 

@@ -42,6 +42,7 @@ public final class AppFlow {
 
   public static Flow get(Context context) {
     AppFlow appFlow =  (AppFlow) context.getSystemService(APP_FLOW_SERVICE);
+    if (appFlow == null) return null;
     return appFlow.flow;
   }
 

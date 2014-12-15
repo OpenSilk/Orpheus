@@ -194,17 +194,6 @@ public class Footer {
             v.updateBackground(paletteResponse);
         }
 
-        void toggleQueue() {
-            if (getView() == null) return;
-            Flow flow = AppFlow.get(getView().getContext());
-            if (flow.getBackstack().current().getScreen() instanceof QueueScreen) {
-                flow.goBack();
-            } else {
-                flow.goTo(new QueueScreen());
-            }
-
-        }
-
         void setupObserables() {
             playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
             metaObservable = observeOnMain(Observable.zip(

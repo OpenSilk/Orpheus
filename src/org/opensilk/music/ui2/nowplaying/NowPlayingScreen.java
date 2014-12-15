@@ -32,10 +32,12 @@ import com.andrew.apollo.provider.MusicProviderUtil;
 import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
+import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.AppPreferences;
@@ -59,6 +61,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.greenrobot.event.EventBus;
+import flow.Flow;
 import flow.Layout;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
@@ -84,6 +87,10 @@ import static org.opensilk.common.rx.RxUtils.observeOnMain;
  */
 @Layout(R.layout.now_playing)
 @WithModule(NowPlayingScreen.Module.class)
+@WithTransitions(
+        forward = { R.anim.shrink_fade_out, R.anim.slide_in_child_bottom },
+        backward = { R.anim.slide_out_child_bottom, R.anim.grow_fade_in }
+)
 public class NowPlayingScreen extends Screen {
 
     @dagger.Module(
@@ -194,28 +201,20 @@ public class NowPlayingScreen extends Screen {
                             getView().play.setChecked(playing);
                         }
                     }),
-                    BroadcastObservables.trackChanged(appContext).subscribe(new Action1<String>() {
-                        @Override
-                        public void call(String s) {
-                            if (getView() == null) return;
-                            getView().toolbar.setTitle(s);
-                            refreshTotalTimeText();
-                        }
-                    }),
-                    BroadcastObservables.artistChanged(appContext).subscribe(new Action1<String>() {
-                        @Override
-                        public void call(String s) {
-                            if (getView() == null) return;
-                            getView().toolbar.setSubtitle(s);
-                        }
-                    }),
+                    BroadcastObservables.trackChanged(appContext)
+                            .subscribe(new Action1<String>() {
+                                @Override
+                                public void call(String s) {
+                                    refreshTotalTimeText();
+                                }
+                            }),
                     observeOnMain(BroadcastObservables.artworkChanged(appContext, musicService))
                             .subscribe(new Action1<ArtInfo>() {
                                 @Override
                                 public void call(ArtInfo artInfo) {
                                     if (getView() == null) return;
                                     requestor.newAlbumRequest(getView().artwork,
-                                            paletteObserver, artInfo, ArtworkType.LARGE);
+                                            null, artInfo, ArtworkType.LARGE);
                                 }
                             }),
                     observeOnMain(BroadcastObservables.shuffleModeChanged(appContext, musicService))
@@ -532,26 +531,30 @@ public class NowPlayingScreen extends Screen {
                 }
             };
             actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
-                .setUpButtonEnabled(true)
-                .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
-                                .withMenus(
-                                        R.menu.popup_share,
-                                        R.menu.popup_set_ringtone,
-                                        R.menu.popup_delete
-                                )
-                                .setActionHandler(handler).build()
-                ).build()
+                            .setTitle(R.string.now_playing)
+                            .setUpButtonEnabled(true)
+                            .setMenuConfig(new ActionBarOwner.MenuConfig.Builder()
+                                            .withMenus(
+                                                    R.menu.popup_share,
+                                                    R.menu.popup_set_ringtone,
+                                                    R.menu.popup_delete
+                                            )
+                                            .setActionHandler(handler).build()
+                            ).build()
             );
         }
 
-        final PaletteObserver paletteObserver = new PaletteObserver() {
-            @Override
-            public void onNext(PaletteResponse paletteResponse) {
-                if (getView() == null) return;
-                getView().colorize(paletteResponse.palette);
-            }
-        };
+    }
 
+    public static void toggleNowPlaying(Context context) {
+        if (context == null) return;
+        Flow flow = AppFlow.get(context);
+        if (flow == null) return;
+        if (flow.getBackstack().current().getScreen() instanceof NowPlayingScreen) {
+            flow.goBack();
+        } else {
+            flow.goTo(new NowPlayingScreen());
+        }
     }
 
     public static final Creator<NowPlayingScreen> CREATOR = new Creator<NowPlayingScreen>() {
