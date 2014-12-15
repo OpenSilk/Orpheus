@@ -1490,6 +1490,7 @@ public class MusicPlaybackService extends Service {
         musicIntent.setAction(what.replace(APOLLO_PACKAGE_NAME, MUSIC_PACKAGE_NAME));
         musicIntent.putExtra("player", getString(R.string.app_name));
         musicIntent.putExtra("package", getPackageName());
+        musicIntent.putExtra("id", getTrackIdentity());
         sendStickyBroadcast(musicIntent);
 
         //notify widgets
@@ -1985,6 +1986,21 @@ public class MusicPlaybackService extends Service {
             }
         }
         return -1;
+    }
+
+    public long getTrackIdentity() {
+        if (!isFromSDCard()) {
+            return -1;
+        }
+        synchronized (this) {
+            ensureCursor();
+            String id = CursorHelpers.getStringOrNull(mCursor, MusicStore.Cols.IDENTITY);
+            try {
+                return Long.decode(id);
+            } catch (NumberFormatException|NullPointerException e) {
+                return -1;
+            }
+        }
     }
 
     /**
