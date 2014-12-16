@@ -39,6 +39,7 @@ import org.opensilk.music.ui2.BaseSwitcherToolbarActivity;
 import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
+import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenDialog;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.ui2.loader.NowPlayingCursor;
@@ -57,6 +58,7 @@ import de.greenrobot.event.EventBus;
 import flow.Backstack;
 import flow.Flow;
 import flow.Layout;
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -166,6 +168,7 @@ public class QueueScreen extends Screen {
             musicService.moveQueueItem(from, to);
         }
 
+        //@DebugLog
         List<RecentSong> getQueue() {
             Cursor c = new NowPlayingCursor(appContext, musicService);
             List<RecentSong> songs = new ArrayList<>(c.getCount());
@@ -194,11 +197,11 @@ public class QueueScreen extends Screen {
         Observable<List<RecentSong>> queueChangedObservable;
 
         void setupObservables() {
-            playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
-            metaChangedObservable = observeOnMain(BroadcastObservables.trackIdChanged(appContext));
+            playStateObservable = BroadcastObservables.playStateChanged(appContext);
+            metaChangedObservable = BroadcastObservables.trackIdChanged(appContext);
             queueChangedObservable = observeOnMain(
                     BroadcastObservables.queueChanged(appContext)
-                            .debounce(500, TimeUnit.MILLISECONDS)
+                            .debounce(250, TimeUnit.MILLISECONDS)
                             .observeOn(Schedulers.io())
                             .map(new Func1<Intent, List<RecentSong>>() {
                                 @Override
@@ -295,10 +298,12 @@ public class QueueScreen extends Screen {
                                                         long[] playlist = MusicProviderUtil.transformListToRealIds(appContext, queue);
                                                         if (playlist.length > 0) {
                                                             bus.post(new OpenDialog(AddToPlaylistDialog.newInstance(playlist)));
-                                                            return;
+                                                        } else {
+                                                            bus.post(new MakeToast(R.string.err_unsupported_for_library));
                                                         }
+                                                    } else {
+                                                        bus.post(new MakeToast(R.string.err_generic));
                                                     }
-                                                    //TODO toast
                                                 }
                                             });
                                             return true;
