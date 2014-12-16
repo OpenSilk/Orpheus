@@ -57,62 +57,55 @@
                 style="@style/SeekArcLight"
                 />
 
-            <RelativeLayout
-                android:id="@+id/now_playing_actions"
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                android:layout_centerInParent="true">
 
-                <org.opensilk.common.widget.ImageButtonCheckable
-                    android:id="@id/now_playing_play"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:padding="8dp"
-                    tools:src="@drawable/ic_play_arrow_black_36dp"
-                    style="?nowPlayingPlayStyle"/>
+            <org.opensilk.common.widget.ImageButtonCheckable
+                android:id="@id/now_playing_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:padding="8dp"
+                tools:src="@drawable/ic_play_arrow_black_36dp"
+                style="?nowPlayingPlayStyle"/>
 
-                <ImageButton
-                    android:id="@id/now_playing_previous"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/now_playing_play"
-                    android:layout_toLeftOf="@id/now_playing_play"
-                    android:padding="8dp"
-                    tools:src="@drawable/ic_skip_previous_black_36dp"
-                    style="?nowPlayingPrevStyle"/>
+            <ImageButton
+                android:id="@id/now_playing_previous"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/now_playing_play"
+                android:layout_toLeftOf="@id/now_playing_play"
+                android:padding="8dp"
+                tools:src="@drawable/ic_skip_previous_black_36dp"
+                style="?nowPlayingPrevStyle"/>
 
-                <ImageButton
-                    android:id="@id/now_playing_next"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_above="@id/now_playing_play"
-                    android:layout_toRightOf="@id/now_playing_play"
-                    android:padding="8dp"
-                    tools:src="@drawable/ic_skip_next_black_36dp"
-                    style="?nowPlayingNextStyle"/>
+            <ImageButton
+                android:id="@id/now_playing_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_play"
+                android:layout_toRightOf="@id/now_playing_play"
+                android:padding="8dp"
+                tools:src="@drawable/ic_skip_next_black_36dp"
+                style="?nowPlayingNextStyle"/>
 
-                <ImageButton
-                    android:id="@id/now_playing_repeat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_above="@id/now_playing_play"
-                    android:layout_toLeftOf="@id/now_playing_play"
-                    android:padding="8dp"
-                    tools:src="@drawable/ic_repeat_black_36dp"
-                    style="?nowPlayingRepeatStyle"/>
+            <ImageButton
+                android:id="@id/now_playing_repeat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/now_playing_play"
+                android:layout_toLeftOf="@id/now_playing_play"
+                android:padding="8dp"
+                tools:src="@drawable/ic_repeat_black_36dp"
+                style="?nowPlayingRepeatStyle"/>
 
-                <ImageButton
-                    android:id="@id/now_playing_shuffle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/now_playing_play"
-                    android:layout_toRightOf="@id/now_playing_play"
-                    android:padding="8dp"
-                    tools:src="@drawable/ic_shuffle_black_36dp"
-                    style="?nowPlayingShuffleStyle"/>
-
-            </RelativeLayout>
+            <ImageButton
+                android:id="@id/now_playing_shuffle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/now_playing_play"
+                android:layout_toRightOf="@id/now_playing_play"
+                android:padding="8dp"
+                tools:src="@drawable/ic_shuffle_black_36dp"
+                style="?nowPlayingShuffleStyle"/>
 
             <!-- current playtime -->
             <TextView
