@@ -24,6 +24,7 @@ import android.os.Parcel;
 
 import com.andrew.apollo.menu.AddToPlaylistDialog;
 import com.andrew.apollo.model.RecentSong;
+import com.andrew.apollo.provider.MusicProvider;
 import com.andrew.apollo.provider.MusicProviderUtil;
 
 import org.opensilk.common.flow.AppFlow;
@@ -41,9 +42,12 @@ import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenDialog;
+import org.opensilk.music.ui2.loader.OrderPreservingCursor;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.ui2.loader.NowPlayingCursor;
 import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.util.Projections;
+import org.opensilk.music.util.Selections;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -170,7 +174,8 @@ public class QueueScreen extends Screen {
 
         //@DebugLog
         List<RecentSong> getQueue() {
-            Cursor c = new NowPlayingCursor(appContext, musicService);
+            final long[] queue = musicService.getQueue().toBlocking().first();
+            Cursor c = new NowPlayingCursor(appContext, queue);
             List<RecentSong> songs = new ArrayList<>(c.getCount());
             if (c.moveToFirst()) {
                 do {

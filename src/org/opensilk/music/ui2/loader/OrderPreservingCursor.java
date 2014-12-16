@@ -6,7 +6,6 @@ import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import org.opensilk.music.util.Projections;
@@ -40,11 +39,6 @@ public class OrderPreservingCursor extends AbstractCursor {
     private String mSelection;
     private String[] mSelectionArgs;
 
-    /**
-     * Constructor of <code>NowPlayingCursor</code>
-     *
-     * @param context The {@link Context} to use
-     */
     public OrderPreservingCursor(final Context context, long[] ids) {
         super();
         mContext = context;
@@ -53,7 +47,7 @@ public class OrderPreservingCursor extends AbstractCursor {
         mProjection= Projections.LOCAL_SONG;
         mSelection = Selections.LOCAL_SONG + " AND ";
         mSelectionArgs = SelectionArgs.LOCAL_SONG;
-        makeNowPlayingCursor();
+        makeDelegateCursor();
     }
 
     public OrderPreservingCursor(Context context, long[] ids,
@@ -66,20 +60,14 @@ public class OrderPreservingCursor extends AbstractCursor {
         mProjection = projection;
         mSelection = !TextUtils.isEmpty(selection) ? selection + " AND " : "";
         mSelectionArgs = selectionArgs;
-        makeNowPlayingCursor();
+        makeDelegateCursor();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getCount() {
         return mSize;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean onMove(final int oldPosition, final int newPosition) {
         if (oldPosition == newPosition) {
@@ -97,9 +85,6 @@ public class OrderPreservingCursor extends AbstractCursor {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getString(final int column) {
         try {
@@ -110,17 +95,11 @@ public class OrderPreservingCursor extends AbstractCursor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public short getShort(final int column) {
         return mDelegateCursor.getShort(column);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getInt(final int column) {
         try {
@@ -131,9 +110,6 @@ public class OrderPreservingCursor extends AbstractCursor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getLong(final int column) {
         try {
@@ -144,49 +120,31 @@ public class OrderPreservingCursor extends AbstractCursor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public float getFloat(final int column) {
         return mDelegateCursor.getFloat(column);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getDouble(final int column) {
         return mDelegateCursor.getDouble(column);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getType(final int column) {
         return mDelegateCursor.getType(column);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isNull(final int column) {
         return mDelegateCursor.isNull(column);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String[] getColumnNames() {
         return mProjection;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("deprecation")
     @Override
     public void deactivate() {
@@ -195,18 +153,12 @@ public class OrderPreservingCursor extends AbstractCursor {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean requery() {
-        makeNowPlayingCursor();
+        makeDelegateCursor();
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void close() {
         try {
@@ -215,17 +167,18 @@ public class OrderPreservingCursor extends AbstractCursor {
                 mDelegateCursor = null;
             }
         } catch (final Exception close) {
+        } finally {
+            super.close();
         }
-        super.close();
     }
 
-    /**
-     * Actually makes the queue
-     */
-    private void makeNowPlayingCursor() {
-        mDelegateCursor = null;
+    private void makeDelegateCursor() {
+        resetDelegateCursor();
+
         mSize = mQuery.length;
+
         if (mSize == 0) {
+            resetDelegateCursor();
             return;
         }
 
@@ -240,6 +193,7 @@ public class OrderPreservingCursor extends AbstractCursor {
         selection.append(")");
 
         if (mContext == null) {
+            resetDelegateCursor();
             return;
         }
 
@@ -251,20 +205,34 @@ public class OrderPreservingCursor extends AbstractCursor {
                 BaseColumns._ID);
 
         if (mDelegateCursor == null) {
-            mSize = 0;
+            resetDelegateCursor();
             return;
         }
 
-        final int playlistSize = mDelegateCursor.getCount();
-        mCursorIndexes = new long[playlistSize];
-        mDelegateCursor.moveToFirst();
-        final int columnIndex = mDelegateCursor.getColumnIndexOrThrow(BaseColumns._ID);
-        for (int i = 0; i < playlistSize; i++) {
-            mCursorIndexes[i] = mDelegateCursor.getLong(columnIndex);
-            mDelegateCursor.moveToNext();
+        try {
+            final int playlistSize = mDelegateCursor.getCount();
+            mCursorIndexes = new long[playlistSize];
+            if (mDelegateCursor.moveToFirst()) {
+                final int columnIndex = mDelegateCursor.getColumnIndexOrThrow(BaseColumns._ID);
+                for (int i = 0; i < playlistSize; i++) {
+                    mCursorIndexes[i] = mDelegateCursor.getLong(columnIndex);
+                    mDelegateCursor.moveToNext();
+                }
+            }
+            mDelegateCursor.moveToFirst();
+            mCurPos = -1;
+        } catch (Exception e) {
+            resetDelegateCursor();
         }
-        mDelegateCursor.moveToFirst();
-        mCurPos = -1;
+
+    }
+
+    void resetDelegateCursor() {
+        if (mDelegateCursor != null && !mDelegateCursor.isClosed()) {
+            mDelegateCursor.close();
+        }
+        mDelegateCursor = null;
+        mSize = 0;
     }
 
 }
