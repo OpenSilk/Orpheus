@@ -50,6 +50,12 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
+    <style name="SeekArcNowPlaying" parent="SeekArcLight">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:padding">48dp</item>
+    </style>
+
     <style name="GalleryTabs">
         <item name="invertedTabBar">false</item>
     </style>
@@ -177,11 +183,13 @@
 
     <style name="nowPlayingActionDark">
         <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>
 
     <style name="nowPlayingActionLight">
         <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>
 

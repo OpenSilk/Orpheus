@@ -18,4 +18,10 @@
 
 <resources>
 
+    <style name="SeekArcNowPlaying" parent="SeekArcLight">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:padding">64dp</item>
+    </style>
+
 </resources>

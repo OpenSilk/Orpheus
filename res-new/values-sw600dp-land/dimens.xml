@@ -20,4 +20,7 @@
 
     <!--Fab-->
     <dimen name="fab_margin_end">24dp</dimen>
+
+    <!--now playing-->
+    <dimen name="now_playing_button_padding">12dp</dimen>
 </resources>

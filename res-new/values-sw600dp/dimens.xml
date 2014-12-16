@@ -27,4 +27,7 @@
     <integer name="grid_columns">3</integer>
 
     <dimen name="action_bar_double_height">128dp</dimen>
+
+    <!--now playing-->
+    <dimen name="now_playing_button_padding">12dp</dimen>
 </resources>

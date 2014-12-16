@@ -25,11 +25,13 @@
 
     <style name="nowPlayingActionDark">
         <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="nowPlayingActionLight">
         <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
         <item name="android:background">?android:selectableItemBackgroundBorderless</item>
     </style>
 
