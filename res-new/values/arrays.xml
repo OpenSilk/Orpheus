@@ -35,6 +35,16 @@
         <item>controls</item>
     </string-array>
 
+    <string-array name="now_playing_artwork_scale" translatable="false">
+        <item>@string/settings_now_playing_artwork_fill</item>
+        <item>@string/settings_now_playing_artwork_fit</item>
+    </string-array>
+
+    <string-array name="now_playing_artwork_scale_values" translatable="false">
+        <item>fill</item>
+        <item>fit</item>
+    </string-array>
+
     <string-array name="fab_actions" translatable="false">
         <item>@string/settings_fab_play_pause</item>
         <item>@string/settings_fab_quick_controls</item>

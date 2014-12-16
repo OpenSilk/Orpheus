@@ -35,6 +35,13 @@
             android:entryValues="@array/now_playing_start_screen_values"
             android:defaultValue="artwork"/>
 
+        <ListPreference
+            android:key="now_playing_artwork_scale"
+            android:title="@string/settings_now_playing_artwork_scale"
+            android:entries="@array/now_playing_artwork_scale"
+            android:entryValues="@array/now_playing_artwork_scale_values"
+            android:defaultValue="fill"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

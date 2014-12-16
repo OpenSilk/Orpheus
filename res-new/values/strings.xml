@@ -63,9 +63,12 @@
     <!-- interface home -->
     <string name="settings_pick_home_pages">Manage pages</string>
     <!-- interface now playing -->
-    <string name="settings_now_playing_start_screen">Start screen</string>
+    <string name="settings_now_playing_start_screen">Start screen (portrait)</string>
     <string name="settings_now_playing_screen_artwork">Artwork</string>
     <string name="settings_now_playing_screen_controls">Controls</string>
+    <string name="settings_now_playing_artwork_scale">Artwork size (portrait)</string>
+    <string name="settings_now_playing_artwork_fill">Fill screen</string>
+    <string name="settings_now_playing_artwork_fit">Fit screen</string>
     <!-- interface fab -->
     <string name="settings_fab">Action button configuration</string>
     <string name="settings_fab_click">Click action</string>

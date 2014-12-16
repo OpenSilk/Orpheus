@@ -30,6 +30,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -59,6 +60,9 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_START_SCREEN;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_SCREEN_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_SCREEN_CONTROLS;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_SCALE;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_FILL;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_FIT;
 
 /**
  * Created by drew on 11/17/14.
@@ -100,6 +104,12 @@ public class NowPlayingView extends RelativeLayout {
             } else {
                 artwork.setVisibility(GONE);
                 actionsContainer.setVisibility(VISIBLE);
+            }
+            String scaleType = presenter.settings.getString(NOW_PLAYING_ARTWORK_SCALE, NOW_PLAYING_ARTWORK_FILL);
+            if (NOW_PLAYING_ARTWORK_FILL.equals(scaleType)) {
+                artwork.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            } else {
+                artwork.setScaleType(ImageView.ScaleType.FIT_CENTER);
             }
         } else { //landscape
             artwork.setVisibility(VISIBLE);

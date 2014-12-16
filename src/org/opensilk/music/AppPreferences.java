@@ -90,6 +90,10 @@ public class AppPreferences {
     //values must mirror array
     public static final String NOW_PLAYING_SCREEN_ARTWORK = "artwork";
     public static final String NOW_PLAYING_SCREEN_CONTROLS = "controls";
+    public static final String NOW_PLAYING_ARTWORK_SCALE = "now_playing_artwork_scale";
+    //values must mirror array
+    public static final String NOW_PLAYING_ARTWORK_FILL = "fill";
+    public static final String NOW_PLAYING_ARTWORK_FIT = "fit";
 
     // action button
     public static final String FAB_CLICK = "fab_click";
