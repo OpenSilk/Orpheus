@@ -14,6 +14,7 @@ import android.preference.Preference;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import org.opensilk.common.rx.RxUtils;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 
@@ -92,8 +93,7 @@ public class SettingsAudioFragment extends SettingsFragment implements
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mEqualizer) {
-            mMusicService.getAudioSessionId()
-                    .subscribeOn(AndroidSchedulers.mainThread())
+            RxUtils.observeOnMain(mMusicService.getAudioSessionId())
                     .subscribe(new Action1<Integer>() {
                         @Override
                         public void call(Integer sessionId) {
