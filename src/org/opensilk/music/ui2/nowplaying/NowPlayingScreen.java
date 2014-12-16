@@ -19,13 +19,10 @@ package org.opensilk.music.ui2.nowplaying;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.SystemClock;
-import android.support.v7.graphics.Palette;
 import android.view.View;
-import android.widget.SeekBar;
 
 import com.andrew.apollo.menu.DeleteDialog;
 import com.andrew.apollo.provider.MusicProviderUtil;
@@ -40,7 +37,6 @@ import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
@@ -48,8 +44,6 @@ import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkProvider;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.ui2.BaseSwitcherToolbarActivity;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.ui2.core.android.ActionBarOwner;
@@ -67,7 +61,6 @@ import de.greenrobot.event.EventBus;
 import flow.Backstack;
 import flow.Flow;
 import flow.Layout;
-import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -77,7 +70,6 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
-import rx.functions.Func3;
 import rx.functions.Func4;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -121,12 +113,10 @@ public class NowPlayingScreen extends Screen {
         CompositeSubscription broadcastSubscription;
         Scheduler.Worker timeWorker;
         
-        volatile long mPosOverride = -1;
-        long mStartSeekPos = 0;
-        long mLastSeekEventTime;
-        long mLastShortSeekEventTime;
-        volatile boolean mFromTouch = false;
-        volatile boolean mIsPlaying;
+        volatile long posOverride = -1;
+        long lastSeekEventTime;
+        volatile boolean fromTouch = false;
+        volatile boolean isPlaying;
 
         @Inject
         public Presenter(@ForApplication Context appContext,
@@ -200,7 +190,7 @@ public class NowPlayingScreen extends Screen {
                     BroadcastObservables.playStateChanged(appContext).subscribe(new Action1<Boolean>() {
                         @Override
                         public void call(Boolean playing) {
-                            mIsPlaying = playing;
+                            isPlaying = playing;
                             if (getView() == null) return;
                             getView().play.setChecked(playing);
                         }
@@ -251,31 +241,16 @@ public class NowPlayingScreen extends Screen {
         public void onProgressChanged(final SeekArc bar, final int progress, final boolean fromuser) {
             if (!fromuser) return;
             final long now = SystemClock.elapsedRealtime();
-            musicService.getDuration()
-                    .subscribeOn(AndroidSchedulers.mainThread())
+            observeOnMain(musicService.getDuration())
                     .subscribe(new Action1<Long>() {
                         @Override
                         public void call(Long duration) {
-                            if (now - mLastSeekEventTime > 250) {
-                                mLastSeekEventTime = now;
-                                mLastShortSeekEventTime = now;
-                                try {
-                                    mPosOverride = duration * progress / 1000;
-                                    musicService.seek(mPosOverride);
-                                } catch (Exception e) {
-
-                                }
-                                if (!mFromTouch) {
-                                    // refreshCurrentTime();
-                                    mPosOverride = -1;
-                                }
-                            } else if (now - mLastShortSeekEventTime > 5) {
-                                mLastShortSeekEventTime = now;
-                                try {
-                                    mPosOverride = duration * progress / 1000;
-                                    refreshCurrentTimeText(mPosOverride);
-                                } catch (Exception e) {
-
+                            if (now - lastSeekEventTime > 10) {
+                                lastSeekEventTime = now;
+                                posOverride = duration * progress / 1000;
+                                refreshCurrentTimeText(posOverride);
+                                if (!fromTouch) {
+                                    posOverride = -1;
                                 }
                             }
                         }
@@ -284,20 +259,21 @@ public class NowPlayingScreen extends Screen {
 
         @Override
         public void onStartTrackingTouch(final SeekArc bar) {
-            mLastSeekEventTime = 0;
-            mFromTouch = true;
+            lastSeekEventTime = 0;
+            posOverride = -1;
+            fromTouch = true;
             setCurrentTimeVisibile();
         }
 
         @Override
         public void onStopTrackingTouch(final SeekArc bar) {
-            if (mPosOverride != -1) {
+            if (posOverride != -1) {
                 try {
-                    musicService.seek(mPosOverride).subscribe();
+                    musicService.seek(posOverride).subscribe();
                 } catch (Exception e) {}
             }
-            mPosOverride = -1;
-            mFromTouch = false;
+            posOverride = -1;
+            fromTouch = false;
         }
 
         void updateProgress(int progress) {
@@ -355,15 +331,14 @@ public class NowPlayingScreen extends Screen {
                     try {
                         final long playPos = musicService.getPosition().toBlocking().first();
                         final long playDur = musicService.getDuration().toBlocking().first();
-                        final long pos = mPosOverride < 0 ? playPos : mPosOverride;
-                        if (pos >= 0 && playDur > 0) {
-                            final int progress = (int) (1000 * pos / playDur);
-                            if (!mFromTouch) {
-                                if (mIsPlaying) {
+                        if (playPos >= 0 && playDur > 0) {
+                            final int progress = (int) (1000 * playPos / playDur);
+                            if (!fromTouch) {
+                                if (isPlaying) {
                                     getView().post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            refreshCurrentTimeText(pos);
+                                            refreshCurrentTimeText(playPos);
                                             updateProgress(progress);
                                             setCurrentTimeVisibile();
                                         }
@@ -373,7 +348,7 @@ public class NowPlayingScreen extends Screen {
                                     getView().post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            refreshCurrentTimeText(pos);
+                                            refreshCurrentTimeText(playPos);
                                             updateProgress(progress);
                                             toggleCurrentTimeVisiblility();
                                         }
