@@ -33,10 +33,11 @@ public class DreamPrefs {
     /**
      * Available dream layouts
      */
-    public class DreamLayout {
-        public static final int ART_ONLY = 0;
-        public static final int ART_META = 1;
-        public static final int ART_CONTROLS = 2;
+    public interface DreamLayout {
+        int ART_ONLY = 0;
+        int ART_META = 1;
+        int ART_CONTROLS = 2;
+        int VISUALIZER_WAVE = 3;
     }
 
     final AppPreferences prefs;

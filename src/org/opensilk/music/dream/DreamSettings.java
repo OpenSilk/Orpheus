@@ -28,6 +28,7 @@ import org.opensilk.music.dream.views.ArtOnly;
 import org.opensilk.music.dream.views.ArtWithControls;
 import org.opensilk.music.dream.views.ArtWithMeta;
 import org.opensilk.music.MusicServiceConnection;
+import org.opensilk.music.dream.views.VisualizerWave;
 
 import java.util.List;
 
@@ -66,6 +67,7 @@ public class DreamSettings extends PreferenceActivity {
                     ArtOnly.class,
                     ArtWithControls.class,
                     ArtWithMeta.class,
+                    VisualizerWave.class,
             }
     )
     public static class Module {

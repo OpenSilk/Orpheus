@@ -34,6 +34,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.dream.views.ArtOnly;
 import org.opensilk.music.dream.views.ArtWithControls;
 import org.opensilk.music.dream.views.ArtWithMeta;
+import org.opensilk.music.dream.views.VisualizerWave;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.MusicServiceConnection;
 
@@ -81,6 +82,7 @@ public class DayDreamService extends DreamService {
                     ArtOnly.class,
                     ArtWithControls.class,
                     ArtWithMeta.class,
+                    VisualizerWave.class,
             }
     )
     public static class Module {
@@ -204,21 +206,24 @@ public class DayDreamService extends DreamService {
 
         setScreenBright(!mDreamPrefs.wantNightMode());
         setFullscreen(mDreamPrefs.wantFullscreen());
+        setInteractive(false);
 
         LayoutInflater inflater = getWindow().getLayoutInflater();
         int style = mDreamPrefs.getDreamLayout();
         switch (style) {
             case DreamPrefs.DreamLayout.ART_ONLY:
                 mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_only, mSaverView, false);
-                setInteractive(false);
                 break;
             case DreamPrefs.DreamLayout.ART_META:
                 mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_meta, mSaverView, false);
-                setInteractive(false);
                 break;
             case DreamPrefs.DreamLayout.ART_CONTROLS:
                 mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_controls, mSaverView, false);
                 setInteractive(true);
+                break;
+            case DreamPrefs.DreamLayout.VISUALIZER_WAVE:
+                mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_visualizer_wave, mSaverView, false);
+                break;
         }
         if (mDreamView != null) {
             mSaverView.addView(mDreamView);

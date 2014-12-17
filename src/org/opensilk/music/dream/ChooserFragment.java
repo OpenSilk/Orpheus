@@ -140,6 +140,7 @@ public class ChooserFragment extends Fragment implements
                     R.layout.daydream_art_only,
                     R.layout.daydream_art_meta,
                     R.layout.daydream_art_controls,
+                    R.layout.daydream_visualizer_wave
             };
         }
 

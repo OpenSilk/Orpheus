@@ -34,34 +34,24 @@ public class AudioVisualizationView extends View {
     private float[] mPoints;
     private Rect mRect = new Rect();
 
-    private Paint mForePaint = new Paint();
-    private Context mContext;
-
-    public AudioVisualizationView(Context context) {
-        super(context);
-        mContext = context;
-        init();
-    }
+    private final Paint mForePaint;
 
     public AudioVisualizationView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
-        init();
-    }
-
-
-    private void init() {
         mBytes = null;
-
+        mForePaint = new Paint();
         mForePaint.setAntiAlias(true);
         final int accentColor = ThemeUtils.getColorAccent(getContext());
         mForePaint.setColor(accentColor);
-        mForePaint.setAlpha(150);
     }
 
     public void updateVisualizer(byte[] bytes) {
         mBytes = bytes;
         invalidate();
+    }
+
+    public void setWaveColor(int color) {
+        mForePaint.setColor(color);
     }
 
     @Override
