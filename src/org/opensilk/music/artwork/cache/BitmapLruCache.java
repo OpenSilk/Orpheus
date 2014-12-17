@@ -20,6 +20,11 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.v4.util.LruCache;
+import android.util.Log;
+
+import java.util.Locale;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 3/11/14.
@@ -28,6 +33,7 @@ public class BitmapLruCache extends LruCache<String, Bitmap> {
 
     public BitmapLruCache(int maxSize) {
         super(maxSize);
+        Log.i("BitmapLruCache", String.format(Locale.US, "BitmapLruCache size=%.02fM", ((float) maxSize / 1024 / 1024)));
     }
 
     @Override

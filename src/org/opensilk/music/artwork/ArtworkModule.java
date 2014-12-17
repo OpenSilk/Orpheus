@@ -27,6 +27,7 @@ import com.android.volley.toolbox.HurlStack;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.MusicApp;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
@@ -36,6 +37,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import timber.log.Timber;
 
 /**
  * Created by drew on 6/21/14.
@@ -52,8 +54,9 @@ public class ArtworkModule {
     private static final int VOLLEY_CACHE_SIZE = 16 * 1024 * 1024;
     private static final String VOLLEY_CACHE_DIR = "volley/1";
     private static final int VOLLEY_POOL_SIZE = 4;
+    private static final int VOLLEY_POOL_SIZE_SMALL = 2;
 
-    static final float THUMB_MEM_CACHE_DIVIDER = 0.16f;
+    static final float THUMB_MEM_CACHE_DIVIDER = 0.15f;
     public static final String DISK_CACHE_DIRECTORY = "artworkcache";
 
     @Provides @Singleton
@@ -63,10 +66,11 @@ public class ArtworkModule {
 
     @Provides @Singleton
     public RequestQueue provideRequestQueue(@ForApplication Context context) {
+        final int poolSize = MusicApp.isLowEndHardware(context) ? VOLLEY_POOL_SIZE_SMALL : VOLLEY_POOL_SIZE;
         RequestQueue queue = new RequestQueue(
                 new DiskBasedCache(CacheUtil.getCacheDir(context, VOLLEY_CACHE_DIR), VOLLEY_CACHE_SIZE),
                 new BasicNetwork(new HurlStack()),
-                VOLLEY_POOL_SIZE
+                poolSize
         );
         queue.start();
         return queue;
@@ -74,7 +78,7 @@ public class ArtworkModule {
 
     @Provides @Singleton
     public ArtworkLruCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(calculateL1CacheSize(context));
+        return new ArtworkLruCache(calculateL1CacheSize(context, false));
     }
 
     @Provides @Singleton //TODO when/how to close this?
@@ -86,10 +90,9 @@ public class ArtworkModule {
         );
     }
 
-    private static int calculateL1CacheSize(Context context) {
-        final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        final int memClass = context.getResources().getBoolean(R.bool.config_largeHeap) ?
-                activityManager.getLargeMemoryClass() : activityManager.getMemoryClass();
+    public static int calculateL1CacheSize(Context context, boolean forceLarge) {
+        final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        final int memClass = (forceLarge || !MusicApp.isLowEndHardware(context)) ? am.getLargeMemoryClass() : am.getMemoryClass();
         return Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
     }
 }

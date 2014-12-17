@@ -16,19 +16,14 @@
 
 package org.opensilk.music.artwork;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 
-import org.opensilk.common.util.ObjectUtils;
-import org.opensilk.music.BuildConfig;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
 import java.io.IOException;
@@ -50,12 +45,7 @@ public class ArtworkProviderUtil {
 
     public ArtworkProviderUtil(Context context) {
         mContext = context;
-        final ActivityManager activityManager = (ActivityManager)mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        final int lruThumbCacheSize = Math.round(
-                ArtworkModule.THUMB_MEM_CACHE_DIVIDER * activityManager.getMemoryClass() * 1024 * 1024
-        );
-        Timber.i("thumbcache=%.02fMB", ((float) lruThumbCacheSize / 1024 / 1024));
-        mL1Cache = new BitmapLruCache(lruThumbCacheSize);
+        mL1Cache = new BitmapLruCache(ArtworkModule.calculateL1CacheSize(context, true));
     }
 
     private Bitmap getDefaultArt() {
@@ -65,9 +55,6 @@ public class ArtworkProviderUtil {
     /**
      * Fetches artwork from the ArtworkProvider, attempts to get fullscreen
      * artwork first, on failure tries to get a thumbnail
-     *
-     * @param artistName
-     * @param albumName
      * @return Bitmap if found else null
      */
     //@DebugLog
@@ -87,9 +74,7 @@ public class ArtworkProviderUtil {
 
     /**
      * Fetches thumbnail from the ArtworkProvider
-     * @param artistName
-     * @param albumName
-     * @return
+     * @return Bitmap if found else default artwork
      */
     //@DebugLog
     public Bitmap getArtworkThumbnail(String artistName, String albumName) {
@@ -108,8 +93,6 @@ public class ArtworkProviderUtil {
 
     /**
      * Queries ArtworkProvider for given uri, first checking local cache
-     * @param artworkUri
-     * @param cacheKey
      * @return Decoded bitmap
      */
     public Bitmap queryArtworkProvider(Uri artworkUri, String cacheKey) {

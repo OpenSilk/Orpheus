@@ -20,8 +20,13 @@ package org.opensilk.music.artwork.cache;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 
 import org.opensilk.music.artwork.Artwork;
+
+import java.util.Locale;
+
+import timber.log.Timber;
 
 /**
  * Created by drew on 10/31/14.
@@ -30,6 +35,7 @@ public class ArtworkLruCache extends LruCache<String, Artwork> {
 
     public ArtworkLruCache(int maxSize) {
         super(maxSize);
+        Log.i("ArtworkLruCache", String.format(Locale.US, "ArtworkLruCache size=%.02fM", ((float) maxSize / 1024 / 1024)));
     }
 
     @Override

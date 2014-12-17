@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.WindowManager;
 
@@ -33,6 +34,7 @@ import com.splunk.mint.Mint;
 
 import org.apache.commons.io.FileUtils;
 import org.opensilk.cast.manager.MediaCastManager;
+import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkRequestManagerImpl;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
@@ -66,8 +68,6 @@ public class MusicApp extends Application implements DaggerInjector {
     public static int sDefaultMaxImageWidthPx;
     /** Largest size a thumbnail will be */
     public static int sDefaultThumbnailWidthPx;
-    /** Disable some features depending on device type */
-    public static boolean sIsLowEndHardware;
 
     protected ObjectGraph mScopedGraphe;
 
@@ -101,7 +101,6 @@ public class MusicApp extends Application implements DaggerInjector {
                 convertDpToPx(getApplicationContext(), MAX_ARTWORK_SIZE_DP)
         );
         sDefaultThumbnailWidthPx = convertDpToPx(getApplicationContext(), DEFAULT_THUMBNAIL_SIZE_DP);
-        sIsLowEndHardware = isLowEndHardware(getApplicationContext());
 
         /*
          * Debugging
@@ -192,10 +191,17 @@ public class MusicApp extends Application implements DaggerInjector {
         return Math.min(metrics.widthPixels, metrics.heightPixels);
     }
 
+    /** Disable some features depending on device type */
+    @SuppressWarnings("NewApi")
+    @DebugLog
     public static boolean isLowEndHardware(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            ActivityManager am = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+        ActivityManager am = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+        if (VersionUtils.hasKitkat()) {
             return am.isLowRamDevice();
+        } else if (VersionUtils.hasJellyBean()) {
+            ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+            am.getMemoryInfo(mi);
+            return mi.totalMem < (512 * 1024 * 1024);
         } else {
             return Runtime.getRuntime().availableProcessors() == 1;
         }
@@ -222,7 +228,7 @@ public class MusicApp extends Application implements DaggerInjector {
         @DebugLog
         public void onTrimMemory(int level) {
             if (level >= TRIM_MEMORY_COMPLETE) {
-                //mArtworkRequestor.onDeathImminent();
+                mArtworkRequestor.onDeathImminent();
             } else if (level >= 15 /*TRIM_MEMORY_RUNNING_CRITICAL*/) {
                 mArtworkRequestor.evictL1();
                 Runtime.getRuntime().gc();

@@ -135,6 +135,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 subscription.unsubscribe();
                 subscription = null;
             }
+            if (artInfo != null) {
+                mVolleyQueue.cancelAll(artInfo);
+            }
             unregisterWithImageView();
             imageViewWeakReference.clear();
             palleteObserverWeakReference.clear();
@@ -566,14 +569,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     @Override
     @DebugLog
     public void onDeathImminent() {
-        diskCacheQueue.clear();
-        if (diskCacheWorker != null) {
-            diskCacheWorker.unsubscribe();
-            diskCacheWorker = null;
-        }
+//        diskCacheQueue.clear();
+//        if (diskCacheWorker != null) {
+//            diskCacheWorker.unsubscribe();
+//            diskCacheWorker = null;
+//        }
         clearVolleyQueue();
-        mVolleyQueue.stop();
-        mVolleyQueue.start();
     }
 
     /*
@@ -797,8 +798,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         subscriber.onCompleted();
                     }
                 };
-                ArtworkRequest2 request = new ArtworkRequest2(url, artworkType, listener);
-                mVolleyQueue.add(request);
+                mVolleyQueue.add(new ArtworkRequest2(url, artworkType, listener).setTag(artInfo));
                 // Here we take advantage of volleys coolest feature,
                 // We have 2 types of images, a thumbnail and a larger image suitable for
                 // fullscreen use. these are almost never required at the same time so we create
@@ -822,7 +822,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 putInDiskCache(getCacheKey(artInfo, artworkType), artwork.bitmap);
             }
         };
-        mVolleyQueue.add(new ArtworkRequest2(url, artworkType, listener));
+        mVolleyQueue.add(new ArtworkRequest2(url, artworkType, listener).setTag(artInfo));
     }
 
     public Observable<Artwork> createMediaStoreRequestObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
