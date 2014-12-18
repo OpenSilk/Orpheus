@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -266,7 +267,9 @@ public class IabHelper {
         Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
         serviceIntent.setPackage("com.android.vending");
         List<ResolveInfo> infos = mContext.getPackageManager().queryIntentServices(serviceIntent, 0);
-        if (infos != null && !infos.isEmpty()) {
+        if (infos != null && !infos.isEmpty() && infos.get(0).serviceInfo != null) {
+            ServiceInfo si = infos.get(0).serviceInfo;
+            serviceIntent.setComponent(new ComponentName(si.packageName, si.name));
             // service available to handle that Intent
             mContext.bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
         }
