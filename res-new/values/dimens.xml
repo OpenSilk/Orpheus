@@ -15,8 +15,7 @@
     <dimen name="music_widget_mini_min_height">110dp</dimen>
 
     <dimen name="music_widget_small_min_width">250dp</dimen>
-    <dimen name="music_widget_small_min_height">56dp</dimen>
-    <dimen name="music_widget_small_artwork_size">56dp</dimen>
+    <dimen name="music_widget_small_min_height">64dp</dimen>
 
     <dimen name="music_widget_mini_button_bar_height">48.0dip</dimen>
     <dimen name="music_widget_large_button_bar_width">48.0dip</dimen>

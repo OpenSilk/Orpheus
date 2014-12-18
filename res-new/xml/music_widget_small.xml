@@ -22,4 +22,5 @@
     android:minHeight="@dimen/music_widget_small_min_height"
     android:minWidth="@dimen/music_widget_small_min_width"
     android:updatePeriodMillis="0"
+    android:resizeMode="horizontal"
     android:widgetCategory="keyguard|home_screen" />

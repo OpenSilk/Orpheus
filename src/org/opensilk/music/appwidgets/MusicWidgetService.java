@@ -242,7 +242,7 @@ public class MusicWidgetService extends Service {
 
         RemoteViews views = new RemoteViews(getPackageName(), layoutId);
 
-        /* Album artwork -- set for all widgets */
+        // Album artwork -- set for all widgets
         if (meta.artwork != null) {
             views.setImageViewBitmap(R.id.widget_album_art, meta.artwork);
         } else {
@@ -254,24 +254,24 @@ public class MusicWidgetService extends Service {
             views.setOnClickPendingIntent(R.id.widget_album_art, pendingIntent);
         }
 
-        /* Pause / Play -- set for all widgets */
+        // Pause / Play -- set for all widgets
         views.setImageViewResource(R.id.widget_play, meta.isplaying ?
                 R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
         views.setOnClickPendingIntent(R.id.widget_play, buildPendingIntent(MusicPlaybackService.TOGGLEPAUSE_ACTION));
 
-        /* Next / Prev */
-        if (widget.compareTo(MusicWidget.MINI) >= 0) { // Mini, Small, Large
+        // Next / Prev
+        if (widget.compareTo(MusicWidget.ULTRA_MINI) != 0 && widget.compareTo(MusicWidget.SMALL) != 0) { // Mini, Large
             views.setOnClickPendingIntent(R.id.widget_previous, buildPendingIntent(MusicPlaybackService.PREVIOUS_ACTION));
             views.setOnClickPendingIntent(R.id.widget_next, buildPendingIntent(MusicPlaybackService.NEXT_ACTION));
         }
 
-        /* Artist name and song title */
+        // Artist name and song title
         if (widget.compareTo(MusicWidget.SMALL) >= 0) { //Small, Large
             views.setTextViewText(R.id.widget_artist_name, meta.artistName);
             views.setTextViewText(R.id.widget_song_title, meta.trackName);
         }
 
-        /* Shuffle / Repeat */
+        // Shuffle / Repeat
         if (widget == MusicWidget.LARGE) {
             views.setOnClickPendingIntent(R.id.widget_shuffle, buildPendingIntent(MusicPlaybackService.SHUFFLE_ACTION));
             views.setOnClickPendingIntent(R.id.widget_repeat, buildPendingIntent(MusicPlaybackService.REPEAT_ACTION));
