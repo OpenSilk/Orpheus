@@ -132,42 +132,42 @@ public class DreamPresenter extends Presenter<IDreamView> {
     void subscribeBroadcasts() {
         if (notSubscribed(broadcastSubscriptions)) {
             broadcastSubscriptions = new CompositeSubscription(
-                    observeOnMain(BroadcastObservables.playStateChanged(appContext)).subscribe(new Action1<Boolean>() {
+                    BroadcastObservables.playStateChanged(appContext).subscribe(new Action1<Boolean>() {
                         @Override
                         public void call(Boolean playing) {
                             isPlaying = playing;
                             updatePlaystate();
                         }
                     }),
-                    observeOnMain(BroadcastObservables.shuffleModeChanged(appContext, connection)).subscribe(new Action1<Integer>() {
+                    BroadcastObservables.shuffleModeChanged(appContext, connection).subscribe(new Action1<Integer>() {
                         @Override
                         public void call(Integer integer) {
                             shuffleMode = integer;
                             updateShuffleState();
                         }
                     }),
-                    observeOnMain(BroadcastObservables.repeatModeChanged(appContext, connection)).subscribe(new Action1<Integer>() {
+                    BroadcastObservables.repeatModeChanged(appContext, connection).subscribe(new Action1<Integer>() {
                         @Override
                         public void call(Integer integer) {
                             repeatMode = integer;
                             updateRepeatState();
                         }
                     }),
-                    observeOnMain(BroadcastObservables.trackChanged(appContext)).subscribe(new Action1<String>() {
+                    BroadcastObservables.trackChanged(appContext).subscribe(new Action1<String>() {
                         @Override
                         public void call(String s) {
                             track = s;
                             updateTrack();
                         }
                     }),
-                    observeOnMain(BroadcastObservables.artistChanged(appContext)).subscribe(new Action1<String>() {
+                    BroadcastObservables.artistChanged(appContext).subscribe(new Action1<String>() {
                         @Override
                         public void call(String s) {
                             artist = s;
                             updateArtist();
                         }
                     }),
-                    observeOnMain(BroadcastObservables.albumChanged(appContext)).subscribe(new Action1<String>() {
+                    BroadcastObservables.albumChanged(appContext).subscribe(new Action1<String>() {
                         @Override
                         public void call(String s) {
                             album = s;

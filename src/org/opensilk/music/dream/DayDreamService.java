@@ -122,7 +122,7 @@ public class DayDreamService extends DreamService {
         mDreamScope.onCreate(null);
         Mortar.inject(this, this);
         mServiceConnection.bind();
-        playStateSubscription = observeOnMain(BroadcastObservables.playStateChanged(this)).subscribe(new Action1<Boolean>() {
+        playStateSubscription = BroadcastObservables.playStateChanged(this).subscribe(new Action1<Boolean>() {
             @Override
             public void call(Boolean playing) {
                 isPlaying = playing;

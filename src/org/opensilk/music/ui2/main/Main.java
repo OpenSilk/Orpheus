@@ -212,7 +212,7 @@ public class Main {
         Observable<Integer> repeatModeObservable;
 
         void setupObservables() {
-            playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
+            playStateObservable = BroadcastObservables.playStateChanged(appContext);
             shuffleModeObservable = observeOnMain(BroadcastObservables.shuffleModeChanged(appContext, musicService));
             repeatModeObservable = observeOnMain(BroadcastObservables.repeatModeChanged(appContext, musicService));
         }

@@ -195,7 +195,7 @@ public class Footer {
         }
 
         void setupObserables() {
-            playStateObservable = observeOnMain(BroadcastObservables.playStateChanged(appContext));
+            playStateObservable = BroadcastObservables.playStateChanged(appContext);
             metaObservable = observeOnMain(Observable.zip(
                     BroadcastObservables.trackChanged(appContext),
                     BroadcastObservables.artistChanged(appContext),
