@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.opensilk.music.dream;
+package org.opensilk.music.dream.mover;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -27,7 +27,7 @@ import android.view.animation.DecelerateInterpolator;
 
 public class ScreenSaverAnimation implements Runnable {
     static final long MOVE_DELAY = 60000; // DeskClock.SCREEN_SAVER_MOVE_DELAY;
-    static final long SLIDE_TIME = 80000;
+    static final long SLIDE_TIME = 8000;
     static final long FADE_TIME = 3000;
 
     static final boolean SLIDE = true;

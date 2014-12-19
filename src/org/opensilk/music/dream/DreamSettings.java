@@ -54,26 +54,7 @@ public class DreamSettings extends PreferenceActivity {
 
         @Override
         public Object getDaggerModule() {
-            return new Module();
-        }
-    }
-
-    @dagger.Module(
-            addsTo = AppModule.class,
-            injects = {
-                    DreamSettings.class,
-                    AlternateDreamFragment.class,
-                    ChooserFragment.class,
-                    ArtOnly.class,
-                    ArtWithControls.class,
-                    ArtWithMeta.class,
-                    VisualizerWave.class,
-            }
-    )
-    public static class Module {
-        @Provides @Singleton @Named("activity")
-        public EventBus provideEventBus() {
-            return new EventBus();
+            return new DreamModule();
         }
     }
 

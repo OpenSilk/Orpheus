@@ -46,14 +46,14 @@ public class ArtOnly extends RelativeLayout implements IDreamView {
 
     public ArtOnly(Context context, AttributeSet attrs) {
         super(context, attrs);
-        Mortar.inject(context, this);
+        if (!isInEditMode()) Mortar.inject(context, this);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        mPresenter.takeView(this);
+        if (!isInEditMode()) mPresenter.takeView(this);
     }
 
     @Override

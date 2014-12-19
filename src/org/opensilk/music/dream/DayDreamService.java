@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
+import org.opensilk.music.dream.mover.DayDreamAnimation;
 import org.opensilk.music.dream.views.ArtOnly;
 import org.opensilk.music.dream.views.ArtWithControls;
 import org.opensilk.music.dream.views.ArtWithMeta;
@@ -54,7 +55,6 @@ import rx.functions.Action1;
 import timber.log.Timber;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
-import static org.opensilk.common.rx.RxUtils.observeOnMain;
 
 /**
  * Created by drew on 4/4/14.
@@ -70,33 +70,18 @@ public class DayDreamService extends DreamService {
 
         @Override
         public Object getDaggerModule() {
-            return new Module();
+            return new DreamModule();
         }
 
-    }
-
-    @dagger.Module(
-            addsTo = AppModule.class,
-            injects = {
-                    DayDreamService.class,
-                    ArtOnly.class,
-                    ArtWithControls.class,
-                    ArtWithMeta.class,
-                    VisualizerWave.class,
-            }
-    )
-    public static class Module {
-        @Provides @Singleton @Named("activity")
-        public EventBus provideEventBus() {
-            return new EventBus();
-        }
     }
 
     @Inject MusicServiceConnection mServiceConnection;
     @Inject DreamPrefs mDreamPrefs;
 
     final Handler mHandler;
-    final ScreenSaverAnimation mMoveSaverRunnable;
+    //final ScreenSaverAnimation mMoverSaverRunnable;
+    final DayDreamAnimation mMoveSaverRunnable;
+
 
     MortarActivityScope mDreamScope;
     Subscription playStateSubscription;
@@ -109,7 +94,8 @@ public class DayDreamService extends DreamService {
 
     public DayDreamService() {
         mHandler = new Handler();
-        mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
+        //mMoveSaverRunnable = new ScreenSaverAnimation(mHandler);
+        mMoveSaverRunnable = new DayDreamAnimation(mHandler);
     }
 
     //@DebugLog
@@ -173,7 +159,10 @@ public class DayDreamService extends DreamService {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (!isBoundToAltDream) {
-            setupSaverView();
+//            setupSaverView();
+            if (mSaverView != null) mSaverView.setAlpha(0f);
+            mHandler.removeCallbacks(mMoveSaverRunnable);
+            mHandler.postDelayed(mMoveSaverRunnable, 100);
         }
     }
 
@@ -229,7 +218,6 @@ public class DayDreamService extends DreamService {
             mSaverView.addView(mDreamView);
         }
         mMoveSaverRunnable.registerViews(mContentView, mSaverView);
-
         mHandler.post(mMoveSaverRunnable);
     }
 
