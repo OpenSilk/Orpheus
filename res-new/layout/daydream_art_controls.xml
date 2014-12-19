@@ -20,30 +20,40 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="@dimen/dream_art_size"
+    android:layout_height="@dimen/dream_art_size"
     tools:ignore="RtlCompat">
-
-    <TextView
-        android:id="@+id/track_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/SingleLineTextView"
-        android:textAppearance="?android:textAppearanceLarge"/>
 
     <org.opensilk.common.widget.SquareImageView
         android:id="@+id/album_art"
-        android:layout_below="@id/track_title"
-        android:layout_width="@dimen/dream_art_size"
-        android:layout_height="@dimen/dream_art_size" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:src="@drawable/default_artwork"/>
 
     <LinearLayout
-        android:layout_below="@id/album_art"
-        android:layout_alignStart="@id/album_art"
-        android:layout_alignEnd="@id/album_art"
-        android:layout_width="wrap_content"
-        android:gravity="center"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/scrim_top_black"
+        android:layout_alignParentTop="true"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/track_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            tools:text="Track Title"
+            style="@style/SingleLineTextView"
+            android:textAppearance="?android:textAppearanceLarge"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:background="@drawable/scrim_bottom_black"
         style="?android:buttonBarStyle">
 
         <ImageButton
