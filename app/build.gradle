@@ -157,7 +157,7 @@ dependencies {
     compile 'com.squareup.dagger:dagger:1.2.2'
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
     //rx
-    compile 'io.reactivex:rxandroid:0.22.0'
+    compile 'io.reactivex:rxandroid:0.23.0'
     //apache
     compile 'commons-io:commons-io:2.4'
     //google
@@ -172,7 +172,7 @@ dependencies {
     compile 'com.github.amlcurran:showcaseview:5.1.0-SNAPSHOT@aar'
 
     compile 'org.opensilk:silkcastservice:0.2.3-SNAPSHOT@aar'
-    compile 'org.opensilk.music.plugin:folders:0.2.0-SNAPSHOT@aar'
+    compile 'org.opensilk.music.plugin:folders:0.2.1-SNAPSHOT@aar'
 
 //    compile project(':../OrpheusPlugins:folders')
 //    compile project(':../SilkCastService:library')
