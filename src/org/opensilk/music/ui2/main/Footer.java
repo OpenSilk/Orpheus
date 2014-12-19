@@ -303,7 +303,12 @@ public class Footer {
                         public void call(Throwable throwable) {
                             Timber.i("progressObserver(error) resubscribing");
                             unsubscribeProgress();
-                            subscribeProgress();
+                            Observable.timer(2, TimeUnit.SECONDS).subscribe(new Action1<Long>() {
+                                @Override
+                                public void call(Long aLong) {
+                                    subscribeProgress();
+                                }
+                            });
                         }
                     }
             );
