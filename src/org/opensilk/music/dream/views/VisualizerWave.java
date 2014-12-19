@@ -58,6 +58,7 @@ public class VisualizerWave extends RelativeLayout implements IDreamView {
     @InjectView(R.id.artist_name) TextView mArtist;
 
     Visualizer mVisualizer;
+    boolean isPlaying;
 
     public VisualizerWave(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -99,9 +100,9 @@ public class VisualizerWave extends RelativeLayout implements IDreamView {
                 mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
                 mVisualizer.setDataCaptureListener(new VisualizerListener(),
                         Math.min(Visualizer.getMaxCaptureRate()/2, 7000), true, false);
-                mVisualizer.setEnabled(true);
+                if (isPlaying) mVisualizer.setEnabled(true);
             } catch (RuntimeException e) {
-                mWaveView.setVisibility(GONE);
+                //mWaveView.setVisibility(GONE);
             }
         }
     }
@@ -114,7 +115,10 @@ public class VisualizerWave extends RelativeLayout implements IDreamView {
 
     @Override
     public void updatePlaystate(boolean playing) {
-
+        isPlaying = playing;
+        if (mVisualizer != null) {
+            mVisualizer.setEnabled(playing);
+        }
     }
 
     @Override
