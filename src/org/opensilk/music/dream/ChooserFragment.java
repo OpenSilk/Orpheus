@@ -27,24 +27,47 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.widget.FloatingActionButtonCheckable;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
+import org.opensilk.music.ui2.core.BroadcastObservables;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
 import mortar.Mortar;
+import rx.Subscription;
+import rx.functions.Action1;
 
 /**
  * Created by drew on 4/13/14.
  */
 public class ChooserFragment extends Fragment implements
-        View.OnClickListener,
         ViewPager.OnPageChangeListener {
 
-    @Inject DreamPrefs mDreamPrefs;
+    static final int[] LAYOUTS;
 
-    protected ViewPager mViewPager;
-    protected ChooserPagerAdapter mPagerAdapter;
-    protected ImageView mCheckMark;
+    static {
+        LAYOUTS = new int[] {
+                //Order must match DreamPrefs.DreamLayout
+                R.layout.daydream_art_only,
+                R.layout.daydream_art_meta,
+                R.layout.daydream_art_controls,
+                R.layout.daydream_visualization,
+        };
+    }
+
+    @Inject DreamPrefs mDreamPrefs;
+    @Inject MusicServiceConnection mMusicService;
+
+    @InjectView(R.id.pager) ViewPager mViewPager;
+    @InjectView(R.id.checkmark) ImageView mCheckMark;
+    @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable mFab;
+
+    ChooserPagerAdapter mPagerAdapter;
+    Subscription playPauseSubscripton;
 
     @Override
     public void onAttach(Activity activity) {
@@ -61,20 +84,65 @@ public class ChooserFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.daydream_pager, container, false);
-        mViewPager = (ViewPager) v.findViewById(R.id.pager);
+        ButterKnife.inject(this, v);
         mViewPager.setOnPageChangeListener(this);
         mViewPager.setAdapter(mPagerAdapter);
-        mCheckMark = (ImageView) v.findViewById(R.id.checkmark);
-        mCheckMark.setOnClickListener(this);
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        playPauseSubscripton = BroadcastObservables
+                .playStateChanged(getActivity().getApplicationContext())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        mFab.setChecked(aBoolean);
+                    }
+                });
         mViewPager.setCurrentItem(mDreamPrefs.getDreamLayout());
         // Work around for fist item selected
         onPageSelected(mViewPager.getCurrentItem());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (playPauseSubscripton != null) {
+            playPauseSubscripton.unsubscribe();
+        }
+    }
+
+    @OnClick(R.id.checkmark)
+    void selectDream() {
+        mDreamPrefs.saveDreamLayout(mViewPager.getCurrentItem());
+        setCheckSelected();
+    }
+
+    void setCheckSelected() {
+        mCheckMark.setImageDrawable(
+                ThemeUtils.colorizeBitmapDrawableCopy(
+                        getActivity(),
+                        R.drawable.ic_action_tick_white,
+                        getResources().getColor(android.R.color.holo_blue_light)
+                )
+        );
+    }
+
+    void setCheckUnSelected() {
+        mCheckMark.setImageResource(R.drawable.ic_action_tick_white);
+    }
+
+    @OnClick(R.id.floating_action_button)
+    void playOrPause() {
+        mMusicService.playOrPause();
     }
 
     /*
@@ -100,49 +168,12 @@ public class ChooserFragment extends Fragment implements
         //pass
     }
 
-    /*
-     * OnClickListener
-     */
-
-    @Override
-    public void onClick(View v) {
-        if (v == mCheckMark) {
-            mDreamPrefs.saveDreamLayout(mViewPager.getCurrentItem());
-            setCheckSelected();
-        }
-    }
-
-    protected void setCheckSelected() {
-        mCheckMark.setImageDrawable(
-                ThemeUtils.colorizeBitmapDrawableCopy(
-                        getActivity(),
-                        R.drawable.ic_action_tick_white,
-                        getResources().getColor(android.R.color.holo_blue_light)
-                )
-        );
-    }
-
-    protected void setCheckUnSelected() {
-        mCheckMark.setImageResource(R.drawable.ic_action_tick_white);
-    }
-
     /**
      * PagerAdapter, very simple just inflates the views into the container
      */
-    private static class ChooserPagerAdapter extends PagerAdapter {
+    static class ChooserPagerAdapter extends PagerAdapter {
 
         private final LayoutInflater mInflater;
-        private static final int[] LAYOUTS;
-
-        static {
-            LAYOUTS = new int[] {
-                    //Order must match DreamPrefs.DreamLayout
-                    R.layout.daydream_art_only,
-                    R.layout.daydream_art_meta,
-                    R.layout.daydream_art_controls,
-                    R.layout.daydream_visualizer_wave
-            };
-        }
 
         private ChooserPagerAdapter(LayoutInflater inflater) {
             mInflater = inflater;

@@ -19,12 +19,19 @@ package org.opensilk.music.dream.views;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.media.AudioManager;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.media.audiofx.AudioEffect;
 import android.media.audiofx.Visualizer;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.pheelicks.visualizer.VisualizerView;
+import com.pheelicks.visualizer.renderer.CircleBarRenderer;
+import com.pheelicks.visualizer.renderer.CircleRenderer;
+import com.pheelicks.visualizer.renderer.LineRenderer;
 
 import org.opensilk.common.rx.RxUtils;
 import org.opensilk.common.widget.AnimatedImageView;
@@ -32,35 +39,32 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.widgets.AudioVisualizationView;
+import org.opensilk.music.dream.DreamPrefs;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import hugo.weaving.DebugLog;
 import mortar.Mortar;
 import mortar.MortarScope;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
 /**
- * Created by drew on 12/16/14.
+ * Created by drew on 12/19/14.
  */
-public class VisualizerWave extends RelativeLayout implements IDreamView {
+public class Visualization extends RelativeLayout implements IDreamView {
 
-    @Inject ArtworkRequestManager mRequestor;
+    //@Inject ArtworkRequestManager mRequestor;
     @Inject DreamPresenter mPresenter;
 
-    @InjectView(R.id.dream_visualizer) AudioVisualizationView mWaveView;
-    @InjectView(R.id.album_art) AnimatedImageView mArtwork;
+    @InjectView(R.id.dream_visualizer) VisualizerView mVisualizerView;
+    //@InjectView(R.id.album_art) AnimatedImageView mArtwork;
     @InjectView(R.id.track_name) TextView mTrack;
     @InjectView(R.id.artist_name) TextView mArtist;
 
-    Visualizer mVisualizer;
     boolean isPlaying;
 
-    public VisualizerWave(Context context, AttributeSet attrs) {
+    public Visualization(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) Mortar.inject(getContext(), this);
     }
@@ -69,7 +73,15 @@ public class VisualizerWave extends RelativeLayout implements IDreamView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        mWaveView.setWaveColor(Color.WHITE);
+
+        Paint paint = new Paint();
+        paint.setStrokeWidth(8f);
+        paint.setAntiAlias(true);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.LIGHTEN));
+        paint.setColor(Color.argb(255, 222, 92, 143));
+        CircleBarRenderer circleBarRenderer = new CircleBarRenderer(paint, 32, true);
+        mVisualizerView.addRenderer(circleBarRenderer);
+
     }
 
     @Override
@@ -96,11 +108,8 @@ public class VisualizerWave extends RelativeLayout implements IDreamView {
         if (id != AudioEffect.ERROR_BAD_VALUE) {
             try {
                 destroyVisualizer();
-                mVisualizer = new Visualizer(id);
-                mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-                mVisualizer.setDataCaptureListener(new VisualizerListener(),
-                        Math.min(Visualizer.getMaxCaptureRate()/2, 7000), true, false);
-                if (isPlaying) mVisualizer.setEnabled(true);
+                mVisualizerView.link(id);
+                if (isPlaying) mVisualizerView.setEnabled(true);
             } catch (RuntimeException e) {
                 //mWaveView.setVisibility(GONE);
             }
@@ -108,16 +117,15 @@ public class VisualizerWave extends RelativeLayout implements IDreamView {
     }
 
     void destroyVisualizer() {
-        if (mVisualizer == null) return;
-        mVisualizer.release();
-        mVisualizer = null;
+        if (mVisualizerView == null) return;
+        mVisualizerView.release();
     }
 
     @Override
     public void updatePlaystate(boolean playing) {
         isPlaying = playing;
-        if (mVisualizer != null) {
-            mVisualizer.setEnabled(playing);
+        if (mVisualizerView != null) {
+            mVisualizerView.setEnabled(playing);
         }
     }
 
@@ -148,24 +156,12 @@ public class VisualizerWave extends RelativeLayout implements IDreamView {
 
     @Override
     public void updateArtwork(ArtInfo artInfo) {
-        mRequestor.newAlbumRequest(mArtwork, null, artInfo, ArtworkType.LARGE);
+        //mRequestor.newAlbumRequest(mArtwork, null, artInfo, ArtworkType.LARGE);
     }
 
     @Override
     public MortarScope getScope() {
         return Mortar.getScope(getContext());
-    }
-
-    class VisualizerListener implements Visualizer.OnDataCaptureListener {
-        @Override
-        public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-            mWaveView.updateVisualizer(waveform);
-        }
-
-        @Override
-        public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
-
-        }
     }
 
 }

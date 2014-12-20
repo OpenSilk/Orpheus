@@ -37,7 +37,7 @@ public class DreamPrefs {
         int ART_ONLY = 0;
         int ART_META = 1;
         int ART_CONTROLS = 2;
-        int VISUALIZER_WAVE = 3;
+        int VISUALIZER = 3;
     }
 
     final AppPreferences prefs;

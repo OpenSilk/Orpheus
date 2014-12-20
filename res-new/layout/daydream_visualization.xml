@@ -16,50 +16,39 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.dream.views.VisualizerWave
+<org.opensilk.music.dream.views.Visualization
     xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="@dimen/dream_art_size"
-                android:layout_height="200dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/dream_art_size"
+    android:layout_height="@dimen/dream_art_size">
 
-    <org.opensilk.common.widget.SquareImageView
-        android:id="@+id/album_art"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentBottom="true"
-        tools:src="@drawable/default_artwork"
-        />
+    <com.pheelicks.visualizer.VisualizerView
+        android:id="@+id/dream_visualizer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@id/album_art"
         android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:paddingLeft="16dp">
+        android:gravity="center">
 
         <TextView
             android:id="@+id/track_name"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearanceMedium"
+            android:textAppearance="?android:textAppearanceLarge"
             tools:text="Track Name"/>
 
         <TextView
             android:id="@+id/artist_name"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:textAppearance"
+            android:textAppearance="?android:textAppearanceMedium"
             tools:text="Artist Name"/>
 
     </LinearLayout>
-
-    <org.opensilk.music.widgets.AudioVisualizationView
-        android:id="@+id/dream_visualizer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/album_art"/>
     
-</org.opensilk.music.dream.views.VisualizerWave>
+</org.opensilk.music.dream.views.Visualization>

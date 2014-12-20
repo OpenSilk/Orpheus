@@ -212,5 +212,7 @@
     <string name="err_unable_to_fetch_songs">Unable to get songs</string>
     <string name="err_offline">You are offline</string>
     <string name="err_unsupported_for_library">Operation only supported with local songs</string>
+    <!--misc-->
+    <string name="err_no_visualizations_foru">Unable to create visualizer</string>
 
 </resources>

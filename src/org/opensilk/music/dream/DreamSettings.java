@@ -22,22 +22,13 @@ import android.preference.PreferenceActivity;
 import android.view.MenuItem;
 
 import org.opensilk.common.util.VersionUtils;
-import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
-import org.opensilk.music.dream.views.ArtOnly;
-import org.opensilk.music.dream.views.ArtWithControls;
-import org.opensilk.music.dream.views.ArtWithMeta;
 import org.opensilk.music.MusicServiceConnection;
-import org.opensilk.music.dream.views.VisualizerWave;
 
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 
-import dagger.Provides;
-import de.greenrobot.event.EventBus;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 

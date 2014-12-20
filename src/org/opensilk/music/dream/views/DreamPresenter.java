@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.dream.DreamPrefs;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.common.dagger.qualifier.ForApplication;

@@ -21,7 +21,7 @@ import org.opensilk.music.AppModule;
 import org.opensilk.music.dream.views.ArtOnly;
 import org.opensilk.music.dream.views.ArtWithControls;
 import org.opensilk.music.dream.views.ArtWithMeta;
-import org.opensilk.music.dream.views.VisualizerWave;
+import org.opensilk.music.dream.views.Visualization;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -42,7 +42,7 @@ import de.greenrobot.event.EventBus;
                 ArtOnly.class,
                 ArtWithControls.class,
                 ArtWithMeta.class,
-                VisualizerWave.class,
+                Visualization.class,
         }
 )
 public class DreamModule {

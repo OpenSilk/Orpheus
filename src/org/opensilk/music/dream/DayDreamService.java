@@ -29,13 +29,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import org.opensilk.common.util.VersionUtils;
-import org.opensilk.music.AppModule;
 import org.opensilk.music.R;
 import org.opensilk.music.dream.mover.DayDreamAnimation;
-import org.opensilk.music.dream.views.ArtOnly;
-import org.opensilk.music.dream.views.ArtWithControls;
-import org.opensilk.music.dream.views.ArtWithMeta;
-import org.opensilk.music.dream.views.VisualizerWave;
 import org.opensilk.music.ui2.core.BroadcastObservables;
 import org.opensilk.music.MusicServiceConnection;
 
@@ -43,11 +38,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 
-import dagger.Provides;
-import de.greenrobot.event.EventBus;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 import rx.Subscription;
@@ -210,15 +201,15 @@ public class DayDreamService extends DreamService {
                 mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_art_controls, mSaverView, false);
                 setInteractive(true);
                 break;
-            case DreamPrefs.DreamLayout.VISUALIZER_WAVE:
-                mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_visualizer_wave, mSaverView, false);
+            case DreamPrefs.DreamLayout.VISUALIZER:
+                mDreamView = (ViewGroup) inflater.inflate(R.layout.daydream_visualization, mSaverView, false);
                 break;
         }
         if (mDreamView != null) {
             mSaverView.addView(mDreamView);
+            mMoveSaverRunnable.registerViews(mContentView, mSaverView);
+            mHandler.post(mMoveSaverRunnable);
         }
-        mMoveSaverRunnable.registerViews(mContentView, mSaverView);
-        mHandler.post(mMoveSaverRunnable);
     }
 
     /**
