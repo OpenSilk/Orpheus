@@ -86,10 +86,15 @@ public class AppPreferences {
     public static final String ORPHEUS_THEME = "orpheus_theme";
 
     //Now Playing
-    public static final String NOW_PLAYING_START_SCREEN = "now_playing_start_screen";
+    public static final String NOW_PLAYING_START_CONTROLS = "now_playing_start_controls";
+
+    public static final String NOW_PLAYING_VIEW = "now_playing_view";
     //values must mirror array
-    public static final String NOW_PLAYING_SCREEN_ARTWORK = "artwork";
-    public static final String NOW_PLAYING_SCREEN_CONTROLS = "controls";
+    public static final String NOW_PLAYING_VIEW_ARTWORK = "artwork";
+    public static final String NOW_PLAYING_VIEW_VIS_CIRCLE = "vis_circle";
+    public static final String NOW_PLAYING_VIEW_VIS_CIRCLE_BAR = "vis_circle_bar";
+    public static final String NOW_PLAYING_VIEW_VIS_LINES = "vis_lines";
+
     public static final String NOW_PLAYING_ARTWORK_SCALE = "now_playing_artwork_scale";
     //values must mirror array
     public static final String NOW_PLAYING_ARTWORK_FILL = "fill";

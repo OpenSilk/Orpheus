@@ -63,9 +63,12 @@
     <!-- interface home -->
     <string name="settings_pick_home_pages">Manage pages</string>
     <!-- interface now playing -->
-    <string name="settings_now_playing_start_screen">Start screen (portrait)</string>
-    <string name="settings_now_playing_screen_artwork">Artwork</string>
-    <string name="settings_now_playing_screen_controls">Controls</string>
+    <string name="settings_now_playing_start_controls">Start on controls screen (portrait)</string>
+    <string name="settings_now_playing_view">Select view</string>
+    <string name="settings_now_playing_view_artwork">Artwork</string>
+    <string name="settings_now_playing_view_visualizer_circle">Visualization (circle lines)</string>
+    <string name="settings_now_playing_view_visualizer_circle_bars">Visualization (circle bars)</string>
+    <string name="settings_now_playing_view_visualizer_lines">Visualization (lines)</string>
     <string name="settings_now_playing_artwork_scale">Artwork size (portrait)</string>
     <string name="settings_now_playing_artwork_fill">Fill screen</string>
     <string name="settings_now_playing_artwork_fit">Fit screen</string>

@@ -25,11 +25,10 @@
     android:layout_marginTop="?mainContentTopMargin"
     >
 
-    <org.opensilk.common.widget.AnimatedImageView
-        android:id="@+id/now_playing_image"
+    <FrameLayout
+        android:id="@+id/now_playing_something"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:src="@drawable/default_artwork"/>
+        android:layout_height="match_parent"/>
 
     <RelativeLayout
         android:id="@+id/now_playing_actions_container"

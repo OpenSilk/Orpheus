@@ -19,6 +19,7 @@ package org.opensilk.music.ui2.nowplaying;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.audiofx.AudioEffect;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.SystemClock;
@@ -37,6 +38,7 @@ import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.common.mortarflow.WithTransitions;
 import org.opensilk.common.rx.SimpleObserver;
+import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
@@ -117,6 +119,7 @@ public class NowPlayingScreen extends Screen {
         long lastSeekEventTime;
         volatile boolean fromTouch = false;
         volatile boolean isPlaying;
+        int sessionId = AudioEffect.ERROR_BAD_VALUE;
 
         @Inject
         public Presenter(@ForApplication Context appContext,
@@ -139,6 +142,7 @@ public class NowPlayingScreen extends Screen {
         protected void onEnterScope(MortarScope scope) {
             super.onEnterScope(scope);
             pauseAndResumeRegistrar.register(scope, this);
+            getAudioSessionId();
         }
 
         @Override
@@ -167,11 +171,18 @@ public class NowPlayingScreen extends Screen {
         @Override
         public void onResume() {
             setup();
+            if (getView() != null) {
+                getView().attachVisualizer(sessionId);
+                getView().setEnabled(isPlaying);
+            }
         }
 
         @Override
         public void onPause() {
             teardown();
+            if (getView() != null) {
+                getView().destroyVisualizer();
+            }
         }
 
         void setup() {
@@ -193,6 +204,7 @@ public class NowPlayingScreen extends Screen {
                             isPlaying = playing;
                             if (getView() == null) return;
                             getView().play.setChecked(playing);
+                            getView().setVisualizerEnabled(playing);
                         }
                     }),
                     BroadcastObservables.trackChanged(appContext)
@@ -207,8 +219,9 @@ public class NowPlayingScreen extends Screen {
                                 @Override
                                 public void call(ArtInfo artInfo) {
                                     if (getView() == null) return;
-                                    requestor.newAlbumRequest(getView().artwork,
-                                            null, artInfo, ArtworkType.LARGE);
+                                    AnimatedImageView v = getView().getArtwork();
+                                    if (v == null) return;
+                                    requestor.newAlbumRequest(v, null, artInfo, ArtworkType.LARGE);
                                 }
                             }),
                     observeOnMain(BroadcastObservables.shuffleModeChanged(appContext, musicService))
@@ -235,6 +248,18 @@ public class NowPlayingScreen extends Screen {
                 broadcastSubscription.unsubscribe();
                 broadcastSubscription = null;
             }
+        }
+
+        void getAudioSessionId() {
+            observeOnMain(musicService.getAudioSessionId())
+                    .subscribe(new Action1<Integer>() {
+                        @Override
+                        public void call(Integer id) {
+                            sessionId = id;
+                            if (getView() == null) return;
+                            getView().attachVisualizer(id);
+                        }
+                    });
         }
 
         @Override
@@ -371,7 +396,9 @@ public class NowPlayingScreen extends Screen {
                     } catch (final Exception ignored) {
                         nextUpdate = 500;
                     }
-                    timeWorker.schedule(this, nextUpdate, TimeUnit.MILLISECONDS);
+                    if (timeWorker != null && !timeWorker.isUnsubscribed()) {
+                        timeWorker.schedule(this, nextUpdate, TimeUnit.MILLISECONDS);
+                    }
                 }
             });
         }

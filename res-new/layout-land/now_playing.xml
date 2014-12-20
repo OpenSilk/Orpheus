@@ -29,11 +29,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <org.opensilk.common.widget.SquareImageView
-            android:id="@id/now_playing_image"
+        <org.opensilk.common.widget.SquareFrameLayout
+            android:id="@id/now_playing_something"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            tools:src="@drawable/default_artwork"/>
+            android:layout_height="match_parent"/>
 
         <RelativeLayout
             android:id="@id/now_playing_actions_container"

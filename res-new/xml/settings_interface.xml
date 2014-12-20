@@ -28,11 +28,16 @@
     <PreferenceCategory
         android:title="@string/now_playing">
 
+        <CheckBoxPreference
+            android:key="now_playing_start_controls"
+            android:title="@string/settings_now_playing_start_controls"
+            android:defaultValue="false"/>
+
         <ListPreference
-            android:key="now_playing_start_screen"
-            android:title="@string/settings_now_playing_start_screen"
-            android:entries="@array/now_playing_start_screen"
-            android:entryValues="@array/now_playing_start_screen_values"
+            android:key="now_playing_view"
+            android:title="@string/settings_now_playing_view"
+            android:entries="@array/now_playing_view"
+            android:entryValues="@array/now_playing_view_values"
             android:defaultValue="artwork"/>
 
         <ListPreference
