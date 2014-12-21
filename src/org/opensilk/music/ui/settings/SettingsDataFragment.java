@@ -35,7 +35,7 @@ public class SettingsDataFragment extends SettingsFragment {
     @Inject AppPreferences mSettings;
     @Inject ArtworkRequestManager mRequestor;
 
-    private ListPreference mCacheSize;
+    ListPreference mCacheSize;
 
     @Override
     public void onAttach(Activity activity) {
@@ -53,17 +53,20 @@ public class SettingsDataFragment extends SettingsFragment {
         mCacheSize.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                setCacheSizeSummary(Integer.valueOf((String) newValue));
+                setCacheSizeSummary(Integer.decode((String) newValue));
                 return true;
             }
         });
 
-        setCacheSizeSummary(Integer.decode(
-                mSettings.getString(AppPreferences.IMAGE_DISK_CACHE_SIZE, "60")) / 1024 / 1024);
+        setCacheSizeSummary(getCacheSize());
         setupDeleteCache();
     }
 
-    private void setCacheSizeSummary(int size) {
+    int getCacheSize() {
+        return Integer.decode(mSettings.getString(AppPreferences.IMAGE_DISK_CACHE_SIZE, "60"));
+    }
+
+    void setCacheSizeSummary(int size) {
         if (mCacheSize != null) {
             mCacheSize.setSummary(String.format(Locale.US, "%.02f/%d MB",
                     (float) FileUtils.sizeOfDirectory(CacheUtil.getCacheDir(
@@ -74,7 +77,7 @@ public class SettingsDataFragment extends SettingsFragment {
     /**
      * Removes all of the cache entries.
      */
-    private void setupDeleteCache() {
+    void setupDeleteCache() {
         final Preference deleteCache = findPreference("pref_delete_cache");
         if (deleteCache != null) {
             deleteCache.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -87,18 +90,14 @@ public class SettingsDataFragment extends SettingsFragment {
                                     dialog.dismiss();
                                     if (mRequestor.clearCaches()) {
                                         Toast.makeText(getActivity(), "Caches cleared", Toast.LENGTH_LONG).show();
+                                        setCacheSizeSummary(getCacheSize());
                                     } else {
                                         Toast.makeText(getActivity(), "Failed to clear caches", Toast.LENGTH_LONG).show();
                                     }
                                 }
                             })
-                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(final DialogInterface dialog, final int which) {
-                                    dialog.dismiss();
-                                }
-                            })
-                            .create().show();
+                            .setNegativeButton(R.string.cancel, null)
+                            .show();
                     return true;
                 }
             });
