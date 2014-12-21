@@ -46,8 +46,10 @@ import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.util.AbstractMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -88,6 +90,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     final RequestQueue mVolleyQueue;
     final Gson mGson;
 
+    final Map<RequestKey, IArtworkRequest> mActiveRequests = new LinkedHashMap<>(10);
+
     @Inject
     public ArtworkRequestManagerImpl(@ForApplication Context mContext, AppPreferences mPreferences,
                                      ArtworkLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
@@ -100,37 +104,34 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         this.mGson = mGson;
     }
 
-    abstract class BaseArtworkRequest implements Subscription {
-        final WeakReference<AnimatedImageView> imageViewWeakReference;
-        final WeakReference<PaletteObserver> palleteObserverWeakReference;
+    interface IArtworkRequest {
+        void addRecipient(ImageContainer c);
+    }
+
+    abstract class BaseArtworkRequest implements Subscription, IArtworkRequest {
+        final RequestKey key;
         final ArtInfo artInfo;
         final ArtworkType artworkType;
 
+        final List<ImageContainer> recipients = new LinkedList<>();
         final StringBuilder breadcrumbs;
 
         Subscription subscription;
         boolean unsubscribed = false;
+        boolean inflight = false;
 
-        BaseArtworkRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                           ArtInfo artInfo, ArtworkType artworkType) {
-            this.imageViewWeakReference = new WeakReference<>(imageView);
-            this.palleteObserverWeakReference = new WeakReference<>(paletteObserver);
-            this.artInfo = artInfo;
-            this.artworkType = artworkType;
+        BaseArtworkRequest(RequestKey key) {
+            this.key = key;
+            this.artInfo = key.artInfo;
+            this.artworkType = key.artworkType;
             breadcrumbs = new StringBuilder(500);
             if (this.artInfo != null) breadcrumbs.append(getCacheKey(artInfo, artworkType));
-        }
-
-        Subscription start() {
-            registerWithImageView();
-            addBreadcrumb("start");
-            tryForCache();
-            return this;
         }
 
         @Override
         public void unsubscribe() {
             addBreadcrumb("unsubscribe");
+            unsubscribed = true;
             if (subscription != null) {
                 subscription.unsubscribe();
                 subscription = null;
@@ -138,10 +139,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             if (artInfo != null) {
                 mVolleyQueue.cancelAll(artInfo);
             }
-            unregisterWithImageView();
-            imageViewWeakReference.clear();
-            palleteObserverWeakReference.clear();
-            unsubscribed = true;
+            onComplete();
         }
 
         @Override
@@ -149,51 +147,43 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             return unsubscribed;
         }
 
-        void registerWithImageView() {
-            AnimatedImageView imageView = imageViewWeakReference.get();
-            if (imageView != null) {
-                imageView.addSubscription(this);
+        @Override
+        public void addRecipient(ImageContainer c) {
+            recipients.add(c);
+            if (!inflight) {
+                inflight = true;
+                start();
+            } else {
+                c.setDefaultImage();
             }
         }
 
-        void unregisterWithImageView() {
-            AnimatedImageView imageView = imageViewWeakReference.get();
-            if (imageView != null) {
-                imageView.removeSubscription(this);
-            }
+        void start() {
+            addBreadcrumb("start");
+            tryForCache();
+        }
+
+        void onComplete() {
+            addBreadcrumb("complete");
+            mActiveRequests.remove(key);
         }
 
         void setDefaultImage() {
             addBreadcrumb("setDefaultImage");
             if (unsubscribed) return;
-            unregisterWithImageView();
-            AnimatedImageView imageView = imageViewWeakReference.get();
-            if (imageView == null) return;
-            imageView.setDefaultImage();
-        }
-
-        void setImageBitmap(Bitmap bitmap) {
-            setImageBitmap(bitmap, false, true);
-        }
-
-        void setImageBitmap(final Bitmap bitmap, boolean fromCache, boolean shouldAnimate) {
-            addBreadcrumb("setImageBitmap("+fromCache+")");
-            if (unsubscribed) return;
-            unregisterWithImageView();
-            final AnimatedImageView imageView = imageViewWeakReference.get();
-            if (imageView == null) return;
-            if (fromCache) {
-                imageView.setImageBitmap(bitmap, shouldAnimate);
-            } else {
-                imageView.setImageBitmap(bitmap, shouldAnimate);
+            for (ImageContainer c : recipients) {
+                if (c.isUnsubscribed()) continue;
+                c.setDefaultImage();
             }
         }
 
-        void notifyPaletteObserver(Palette palette, boolean shouldAnimate) {
-            PaletteObserver po = palleteObserverWeakReference.get();
-            if (po != null) {
-                po.onNext(new PaletteResponse(palette, shouldAnimate));
-                po.onCompleted();
+        void onResponse(Artwork artwork, boolean fromCache, boolean shouldAnimate) {
+            addBreadcrumb("onResponse("+fromCache+")");
+            if (unsubscribed) return;
+            for (ImageContainer c : recipients) {
+                if (c.isUnsubscribed()) continue;
+                c.setImageBitmap(artwork.bitmap, shouldAnimate);
+                c.notifyPaletteObserver(artwork.palette, shouldAnimate);
             }
         }
 
@@ -209,8 +199,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(CacheResponse cr) {
                             addBreadcrumb("tryForCache hit");
-                            setImageBitmap(cr.artwork.bitmap, true, !cr.fromL1);
-                            notifyPaletteObserver(cr.artwork.palette, !cr.fromL1);
+                            onResponse(cr.artwork, true, !cr.fromL1);
+                            onComplete();
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -220,6 +210,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                                 onCacheMiss();
                             } else {
                                 setDefaultImage();
+                                onComplete();
                             }
                         }
                     });
@@ -237,9 +228,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     class ArtistArtworkRequest extends BaseArtworkRequest {
 
-        ArtistArtworkRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                             ArtInfo artInfo, ArtworkType artworkType) {
-            super(imageView, paletteObserver, artInfo, artworkType);
+        ArtistArtworkRequest(RequestKey key) {
+            super(key);
         }
 
         @Override
@@ -256,6 +246,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             if (isOnline && wantArtistImages) {
                 addBreadcrumb("goingForNetwork");
                 tryForNetwork();
+            } else {
+                onComplete();
             }
         }
 
@@ -265,14 +257,15 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Artwork artwork) {
                             addBreadcrumb("tryForNetwork hit");
-                            setImageBitmap(artwork.bitmap);
-                            notifyPaletteObserver(artwork.palette, true);
+                            onResponse(artwork, false, true);
+                            onComplete();
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
                             addBreadcrumb("tryForNetwork miss");
 //                            Timber.w(throwable, "Unable to obtain image for %s", artInfo);
+                            onComplete();
                         }
                     });
         }
@@ -280,9 +273,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     class AlbumArtworkRequest extends BaseArtworkRequest {
 
-        AlbumArtworkRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                            ArtInfo artInfo, ArtworkType artworkType) {
-            super(imageView, paletteObserver, artInfo, artworkType);
+        AlbumArtworkRequest(RequestKey key) {
+            super(key);
         }
 
         @Override
@@ -335,6 +327,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 } else {
                     //  were offline and cant get artwork or the user wants to defer
                     addBreadcrumb("defer fetching art");
+                    onComplete();
                 }
             } else if (hasAlbumArtist) {
                 addBreadcrumb("hasAlbumArtist");
@@ -342,6 +335,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     addBreadcrumb("tryForNetwork(false)");
                     // try for network, we dont have a uri so dont fallback on failure
                     tryForNetwork(false);
+                } else {
+                    onComplete();
                 }
             } else if (hasUri) {
                 addBreadcrumb("hasUri");
@@ -353,8 +348,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     addBreadcrumb("goingForUrl");
                     //all we have is a url so go for it
                     tryForUrl();
+                } else {
+                    onComplete();
                 }
-            } //else just ignore the request
+            } else { // just ignore the request
+                onComplete();
+            }
         }
 
         void tryForNetwork(final boolean tryFallbackOnFail) {
@@ -363,8 +362,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Artwork artwork) {
                             addBreadcrumb("tryForNetwork hit");
-                            setImageBitmap(artwork.bitmap);
-                            notifyPaletteObserver(artwork.palette, true);
+                            onResponse(artwork, false, true);
+                            onComplete();
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -386,6 +385,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     addBreadcrumb("goingForUrl");
                     tryForUrl();
                 }
+            } else {
+                onComplete();
             }
         }
 
@@ -395,8 +396,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Artwork artwork) {
                             addBreadcrumb("tryForMediaStore hit");
-                            setImageBitmap(artwork.bitmap);
-                            notifyPaletteObserver(artwork.palette, true);
+                            onResponse(artwork, false, true);
+                            onComplete();
                         }
                     }, new Action1<Throwable>() {
                         @Override
@@ -412,6 +413,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             if (tryNetwork) {
                 addBreadcrumb("goingForNetwork");
                 tryForNetwork(false);
+            } else {
+                onComplete();
             }
         }
 
@@ -421,91 +424,63 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         @Override
                         public void call(Artwork artwork) {
                             addBreadcrumb("tryForUrl hit");
-                            setImageBitmap(artwork.bitmap);
-                            notifyPaletteObserver(artwork.palette, true);
+                            onResponse(artwork, false, true);
+                            onComplete();
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
                             addBreadcrumb("tryForUrl miss");
 //                            Timber.w(throwable, "tryForUrl %s", artInfo);
+                            onComplete();
                         }
                     });
         }
     }
 
-    public class AlbumArtworkRequestWrapped extends BaseArtworkRequest {
+    class WrappedImageContainer implements Subscription {
 
-        final long id;
-        AlbumArtworkRequest wrappedRequest;
+        final ImageContainer container;
 
-        AlbumArtworkRequestWrapped(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                                   long id, ArtworkType artworkType) {
-            super(imageView, paletteObserver, null, artworkType);
-            this.id =id;
-            addBreadcrumb("albumId="+id);
-        }
+        Subscription subscription;
 
-        @Override
-        Subscription start() {
-            addBreadcrumb("start");
-            getArtInfo();
-            return this;
+        WrappedImageContainer(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                              long albumId, ArtworkType artworkType) {
+            this.container = new ImageContainer(imageView, paletteObserver);
+            getArtInfo(albumId, artworkType);
         }
 
         @Override
         public void unsubscribe() {
-            addBreadcrumb("unsubscribe");
-            if (wrappedRequest != null) {
-                wrappedRequest.unsubscribe();
-            } else {
-                super.unsubscribe();
+            container.unsubscribe();
+            if (subscription != null) {
+                subscription.unsubscribe();
             }
         }
 
         @Override
         public boolean isUnsubscribed() {
-            if (wrappedRequest != null) {
-                return wrappedRequest.isUnsubscribed();
-            } else {
-                return super.isUnsubscribed();
-            }
+            return container.isUnsubscribed();
         }
 
-        @Override
-        boolean validateArtInfo() {
-            return true;
-        }
-
-        @Override
-        void onCacheMiss() {
-            addBreadcrumb("onCacheMiss");
-            setDefaultImage();
-        }
-
-        void getArtInfo() {
-            subscription = new AlbumArtInfoLoader(mContext, new long[]{id}).createObservable()
-                    .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        void getArtInfo(final long albumId, final ArtworkType artworkType) {
+            subscription = new AlbumArtInfoLoader(mContext, new long[]{albumId})
+                    .createObservable()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<ArtInfo>() {
                         @Override
                         public void call(ArtInfo artInfo) {
-                            addBreadcrumb("getArtInfo hit");
-                            if (!unsubscribed && imageViewWeakReference.get() != null) {
-                                wrappedRequest = new AlbumArtworkRequest(imageViewWeakReference.get(),
-                                        palleteObserverWeakReference.get(), artInfo, artworkType);
-                                wrappedRequest.start();
-                            }
+                            RequestKey k = new RequestKey(artInfo, artworkType);
+                            queueRequest(container, k, true);
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            addBreadcrumb("getArtInfo miss");
-//                            Timber.w(throwable, "Unable to obtain artinfo from mediastore for id=%d", id);
-                            onCacheMiss();
+                            container.setDefaultImage();
                         }
                     });
         }
-
     }
 
     /*
@@ -513,18 +488,27 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
      */
 
     @Override
-    public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType) {
-        return new AlbumArtworkRequest(imageView, paletteObserver, artInfo, artworkType).start();
+    public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                                        ArtInfo artInfo, ArtworkType artworkType) {
+        ImageContainer c = new ImageContainer(imageView, paletteObserver);
+        RequestKey k = new RequestKey(artInfo, artworkType);
+        queueRequest(c, k, true);
+        return c;
     }
 
     @Override
-    public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, long albumId, ArtworkType artworkType) {
-        return new AlbumArtworkRequestWrapped(imageView, paletteObserver, albumId, artworkType).start();
+    public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                                        long albumId, ArtworkType artworkType) {
+        return new WrappedImageContainer(imageView, paletteObserver, albumId, artworkType);
     }
 
     @Override
-    public Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType) {
-        return new ArtistArtworkRequest(imageView, paletteObserver, artInfo, artworkType).start();
+    public Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                                         ArtInfo artInfo, ArtworkType artworkType) {
+        ImageContainer c = new ImageContainer(imageView, paletteObserver);
+        RequestKey k = new RequestKey(artInfo, artworkType);
+        queueRequest(c, k, false);
+        return c;
     }
 
     @Override
@@ -580,6 +564,17 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     /*
      * End IMPL
      */
+
+    void queueRequest(ImageContainer c, RequestKey k, boolean isAlbum) {
+        IArtworkRequest r = mActiveRequests.get(k);
+        if (r == null) {
+            r = isAlbum ? new AlbumArtworkRequest(k) : new ArtistArtworkRequest(k);
+            mActiveRequests.put(k, r);
+        } else {
+            Timber.d("Attaching recipient to running request %s", k.artInfo);
+        }
+        r.addRecipient(c);
+    }
 
     void clearVolleyQueue() {
         mVolleyQueue.cancelAll(new RequestQueue.RequestFilter() {
@@ -841,6 +836,15 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     // this is not only easier but safer since all bitmap processing is serial.
                     ArtworkRequest2 request = new ArtworkRequest2("fauxrequest", artworkType, null);
                     Response<Artwork> result = request.parseNetworkResponse(response);
+                    // make the opposite as well
+                    ArtworkType artworkType2 = ArtworkType.opposite(artworkType);
+                    ArtworkRequest2 request2 = new ArtworkRequest2("fauxrequest2", artworkType2, null);
+                    Response<Artwork> result2 = request2.parseNetworkResponse(response);
+                    // add to cache first so we dont return before its added
+                    if (result2.isSuccess()) {
+                        String cacheKey = getCacheKey(artInfo, artworkType2);
+                        putInDiskCache(cacheKey, result2.result.bitmap);
+                    }
                     if (result.isSuccess()) {
                         //always add to cache
                         String cacheKey = getCacheKey(artInfo, artworkType);
@@ -878,8 +882,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                         try {
                             Map.Entry<String, Bitmap> entry = diskCacheQueue.pollFirst(60, TimeUnit.SECONDS);
                             if (entry != null) {
-                                Timber.v("Adding %s to L2Cache", entry.getKey());
-                                mL2Cache.putBitmap(entry.getKey(), entry.getValue());
+                                writeToL2(entry.getKey(), entry.getValue());
                                 continue;
                             }
                         } catch (InterruptedException ignored) {
@@ -890,6 +893,11 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 }
             });
         }
+    }
+
+    void writeToL2(final String key, final Bitmap bitmap) {
+        Timber.v("writeToL2(%s)", key);
+        mL2Cache.putBitmap(key, bitmap);
     }
 
     private ParcelFileDescriptor pullSnapshot(String cacheKey) {
