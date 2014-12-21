@@ -33,7 +33,7 @@ public class ImageContainer implements Subscription {
     final WeakReference<AnimatedImageView> imageViewWeakReference;
     final WeakReference<PaletteObserver> palleteObserverWeakReference;
 
-    private boolean unsubscribed;
+    private boolean unsubscribed = false;
 
     ImageContainer(AnimatedImageView imageView, PaletteObserver paletteObserver) {
         this.imageViewWeakReference = new WeakReference<>(imageView);
@@ -70,7 +70,6 @@ public class ImageContainer implements Subscription {
 
     void setDefaultImage() {
         if (unsubscribed) return;
-        unregisterWithImageView();
         AnimatedImageView imageView = imageViewWeakReference.get();
         if (imageView == null) return;
         imageView.setDefaultImage();
@@ -78,17 +77,16 @@ public class ImageContainer implements Subscription {
 
     void setImageBitmap(final Bitmap bitmap, boolean shouldAnimate) {
         if (unsubscribed) return;
-        unregisterWithImageView();
         AnimatedImageView imageView = imageViewWeakReference.get();
         if (imageView == null) return;
         imageView.setImageBitmap(bitmap, shouldAnimate);
     }
 
     void notifyPaletteObserver(Palette palette, boolean shouldAnimate) {
+        if (unsubscribed) return;
         PaletteObserver po = palleteObserverWeakReference.get();
-        if (po != null) {
-            po.onNext(new PaletteResponse(palette, shouldAnimate));
-            po.onCompleted();
-        }
+        if (po == null) return;
+        po.onNext(new PaletteResponse(palette, shouldAnimate));
+        po.onCompleted();
     }
 }

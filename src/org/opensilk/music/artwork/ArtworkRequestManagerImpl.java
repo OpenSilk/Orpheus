@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,28 +105,63 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         this.mGson = mGson;
     }
 
+    static class CrumbTrail {
+        final ArrayList<String> breadcrumbs = new ArrayList<>();
+        boolean followed = false;
+
+        void drop(String msg) {
+            breadcrumbs.add(msg);
+        }
+
+        void follow() {
+            followed = true;
+            Timber.v(assembleTrail());
+        }
+
+        private String assembleTrail() {
+            StringBuilder b = new StringBuilder(500);
+            for (int ii=0; ii<breadcrumbs.size(); ii++) {
+                b.append(breadcrumbs.get(ii));
+                if (ii < breadcrumbs.size()-1)
+                    b.append(" -> ");
+            }
+            return b.toString();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            if (!followed) {
+                Timber.e("CrumbTrail never followed: %s", assembleTrail());
+            }
+            super.finalize();
+        }
+    }
+
     interface IArtworkRequest {
         void addRecipient(ImageContainer c);
     }
 
+    /**
+     * TODO hook ImageContainer to unsubscribe request when all containers
+     * TODO have unsubscribed, and find way to cancel volley requests when unsubscribed
+     */
     abstract class BaseArtworkRequest implements Subscription, IArtworkRequest {
         final RequestKey key;
         final ArtInfo artInfo;
         final ArtworkType artworkType;
 
         final List<ImageContainer> recipients = new LinkedList<>();
-        final StringBuilder breadcrumbs;
 
         Subscription subscription;
         boolean unsubscribed = false;
         boolean inflight = false;
+        boolean complete = false;
 
         BaseArtworkRequest(RequestKey key) {
             this.key = key;
             this.artInfo = key.artInfo;
             this.artworkType = key.artworkType;
-            breadcrumbs = new StringBuilder(500);
-            if (this.artInfo != null) breadcrumbs.append(getCacheKey(artInfo, artworkType));
+            addBreadcrumb(getCacheKey(artInfo, artworkType));
         }
 
         @Override
@@ -149,6 +185,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         @Override
         public void addRecipient(ImageContainer c) {
+            if (complete) {
+                mActiveRequests.remove(key);
+                throw new IllegalStateException("Tried to add recipient after complete");
+            }
             recipients.add(c);
             if (!inflight) {
                 inflight = true;
@@ -165,7 +205,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void onComplete() {
             addBreadcrumb("complete");
+            complete = true;
             mActiveRequests.remove(key);
+            printTrail();
         }
 
         void setDefaultImage() {
@@ -192,6 +234,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             if (!validateArtInfo()) {
                 addBreadcrumb("malformedArtInfo");
                 setDefaultImage();
+                onComplete();
                 return;
             }
             subscription = createCacheObservable(artInfo, artworkType)
@@ -219,10 +262,17 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         abstract boolean validateArtInfo();
         abstract void onCacheMiss();
 
+        CrumbTrail crumbTrail;
         void addBreadcrumb(String crumb) {
             if (!DROP_CRUMBS) return;
-            breadcrumbs.append(" -> ").append(crumb);
-            Timber.v(breadcrumbs.toString());
+            if (crumbTrail == null)
+                crumbTrail = new CrumbTrail();
+            crumbTrail.drop(crumb);
+        }
+
+        void printTrail() {
+            if (!DROP_CRUMBS) return;
+            crumbTrail.follow();
         }
     }
 
@@ -536,7 +586,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         try {
             clearVolleyQueue();
             mVolleyQueue.getCache().clear();
-            mL1Cache.evictAll();
+            evictL1();
             mL2Cache.clearCache();
             return true;
         } catch (IOException e) {
@@ -554,10 +604,6 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     @DebugLog
     public void onDeathImminent() {
 //        diskCacheQueue.clear();
-//        if (diskCacheWorker != null) {
-//            diskCacheWorker.unsubscribe();
-//            diskCacheWorker = null;
-//        }
         clearVolleyQueue();
     }
 
@@ -678,16 +724,15 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     public Observable<Artwork> createArtistNetworkRequest(final ArtInfo artInfo, final ArtworkType artworkType) {
         return createArtistLastFmApiRequestObservable(artInfo)
-                .flatMap(new Func1<Artist, Observable<String>>() {
+                .map(new Func1<Artist, String>() {
                     @Override
-                    public Observable<String> call(Artist artist) {
+                    public String call(Artist artist) {
                         String url = getBestImage(artist, !mPreferences.getBoolean(AppPreferences.WANT_LOW_RESOLUTION_ART, false));
                         if (!TextUtils.isEmpty(url)) {
-                            return Observable.just(url);
-                        } else {
-                            Timber.v("ArtistApiRequest: No image urls for %s", artist.getName());
-                            return Observable.error(new NullPointerException("No image urls for " + artist.getName()));
+                            return url;
                         }
+                        Timber.v("ArtistApiRequest: No image urls for %s", artist.getName());
+                        throw new NullPointerException("No image urls for " + artist.getName());
                     }
                 })
                 .flatMap(new Func1<String, Observable<Artwork>>() {
@@ -830,7 +875,6 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     final Uri uri = artInfo.artworkUri;
                     in = mContext.getContentResolver().openInputStream(uri);
                     final NetworkResponse response = new NetworkResponse(IOUtils.toByteArray(in));
-                    if (subscriber.isUnsubscribed()) return;
                     // We create a faux ImageRequest so we can cheat and use it
                     // to processs the bitmap like a real network request
                     // this is not only easier but safer since all bitmap processing is serial.
@@ -878,7 +922,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             diskCacheWorker.schedule(new Action0() {
                 @Override
                 public void call() {
-                    while (diskCacheWorker != null && !diskCacheWorker.isUnsubscribed()) {
+                    while (true) {
                         try {
                             Map.Entry<String, Bitmap> entry = diskCacheQueue.pollFirst(60, TimeUnit.SECONDS);
                             if (entry != null) {
@@ -886,8 +930,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                                 continue;
                             }
                         } catch (InterruptedException ignored) {
+                            //fall
                         }
-                        diskCacheWorker.unsubscribe();
+                        if (diskCacheWorker != null) {
+                            diskCacheWorker.unsubscribe();
+                            diskCacheWorker = null;
+                        }
                         break;
                     }
                 }
