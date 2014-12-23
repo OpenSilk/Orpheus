@@ -44,6 +44,7 @@ public class PlaylistDragSortView extends DragSortListView implements
         super(context, attrs);
         Mortar.inject(getContext(), this);
         mAdapter = new PlaylistAdapter(getContext(), presenter.playlist.mPlaylistId);
+        setDividerHeight(0);
     }
 
     @Override
