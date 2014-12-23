@@ -206,7 +206,7 @@ public class QueueScreen extends Screen {
             metaChangedObservable = BroadcastObservables.trackIdChanged(appContext);
             queueChangedObservable = observeOnMain(
                     BroadcastObservables.queueChanged(appContext)
-                            .debounce(250, TimeUnit.MILLISECONDS)
+                            .debounce(150, TimeUnit.MILLISECONDS)
                             .observeOn(Schedulers.io())
                             .map(new Func1<Intent, List<RecentSong>>() {
                                 @Override
