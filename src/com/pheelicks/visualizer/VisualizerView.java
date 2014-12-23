@@ -37,9 +37,10 @@ import org.opensilk.music.R;
 public class VisualizerView extends View {
   private static final String TAG = "VisualizerView";
 
-  private byte[] mBytes;
-  private byte[] mFFTBytes;
+  private AudioData mData;
+  private FFTData mFFTData;
   private Rect mRect = new Rect();
+  private Matrix mBitmapMatrix = new Matrix();
   private Visualizer mVisualizer;
 
   private Set<Renderer> mRenderers;
@@ -64,8 +65,8 @@ public class VisualizerView extends View {
   }
 
   private void init() {
-    mBytes = null;
-    mFFTBytes = null;
+    mData = null;
+    mFFTData = null;
 
     mFlashPaint.setColor(Color.argb(122, 255, 255, 255));
     mFadePaint.setColor(Color.argb(238, 255, 255, 255)); // Adjust alpha to change how quickly the image fades
@@ -171,7 +172,7 @@ public class VisualizerView extends View {
    * @param bytes
    */
   public void updateVisualizer(byte[] bytes) {
-    mBytes = bytes;
+    mData = new AudioData(bytes);
     invalidate();
   }
 
@@ -182,7 +183,7 @@ public class VisualizerView extends View {
    * @param bytes
    */
   public void updateVisualizerFFT(byte[] bytes) {
-    mFFTBytes = bytes;
+    mFFTData = new FFTData(bytes);
     invalidate();
   }
 
@@ -217,21 +218,19 @@ public class VisualizerView extends View {
       mCanvas = new Canvas(mCanvasBitmap);
     }
 
-    if (mBytes != null) {
+    if (mData != null) {
       // Render all audio renderers
-      AudioData audioData = new AudioData(mBytes);
       for(Renderer r : mRenderers)
       {
-        r.render(mCanvas, audioData, mRect);
+        r.render(mCanvas, mData, mRect);
       }
     }
 
-    if (mFFTBytes != null) {
+    if (mFFTData != null) {
       // Render all FFT renderers
-      FFTData fftData = new FFTData(mFFTBytes);
       for(Renderer r : mRenderers)
       {
-        r.render(mCanvas, fftData, mRect);
+        r.render(mCanvas, mFFTData, mRect);
       }
     }
 
@@ -244,6 +243,6 @@ public class VisualizerView extends View {
       mCanvas.drawPaint(mFlashPaint);
     }
 
-    canvas.drawBitmap(mCanvasBitmap, new Matrix(), null);
+    canvas.drawBitmap(mCanvasBitmap, mBitmapMatrix, null);
   }
 }
