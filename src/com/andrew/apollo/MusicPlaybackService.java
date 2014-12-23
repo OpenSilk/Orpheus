@@ -2412,6 +2412,7 @@ public class MusicPlaybackService extends Service {
             mShuffleMode = shufflemode;
             if (mShuffleMode == SHUFFLE_AUTO) {
                 if (makeAutoShuffleList()) {
+                    removeTracksInternal(0, Integer.MAX_VALUE);
                     mPlayListLen = 0;
                     doAutoShuffleUpdate();
                     mPlayPos = 0;
