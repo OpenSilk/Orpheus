@@ -177,7 +177,7 @@ dependencies {
 //    compile project(':../SilkCastService:library')
 //    compile project(':../SilkFileBrowser:lib_sfb')
 
-    compile "com.splunk.mint:mint:4.0.6"
+    compile "com.splunk.mint:mint:4.0.7"
 
     compile project(':api')
 
