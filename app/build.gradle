@@ -169,7 +169,6 @@ dependencies {
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
     compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
     compile 'com.triggertrap:seekarc:1.1-SNAPSHOT@aar'
-    compile 'com.github.amlcurran:showcaseview:5.1.0-SNAPSHOT@aar'
 
     compile 'org.opensilk:silkcastservice:0.2.3-SNAPSHOT@aar'
     compile 'org.opensilk.music.plugin:folders:0.2.1-SNAPSHOT@aar'

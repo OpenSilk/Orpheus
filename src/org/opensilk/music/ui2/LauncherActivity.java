@@ -43,8 +43,6 @@ import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.iab.event.IABQueryResult;
 import com.andrew.apollo.menu.SleepTimerDialog;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import org.opensilk.music.iab.IabUtil;
 import org.opensilk.music.theme.OrpheusTheme;
@@ -129,7 +127,6 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         setupDrawer();
 
         AppFlow.loadInitialScreen(this);
-        showShowCase();
 
         // Update count for donate dialog
         IabUtil.incrementAppLaunchCount(mSettings);
@@ -369,29 +366,4 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         });
     }
 
-    void showShowCase() {
-        //mSettings.putBoolean(AppPreferences.FAB_SHOWCASE, false);
-        if (!mSettings.getBoolean(AppPreferences.FAB_SHOWCASE, false)) {
-            mSettings.putBoolean(AppPreferences.FAB_SHOWCASE, true);
-            ViewTarget t = new ViewTarget(R.id.floating_action_button, this);
-            ShowcaseView sw = new ShowcaseView.Builder(this)
-                    .setContentTitle(R.string.showcase_title)
-                    .setContentText(R.string.showcase_text)
-                    .setStyle(R.style.Orpheus_ShowCase)
-                    .setTarget(t)
-                    .build();
-            RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-            lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            int marginLR, marginB;
-            marginLR = marginB = (int) (getResources().getDisplayMetrics().density * 16);
-            if (VersionUtils.hasLollipop()) {
-                marginB = (int) (getResources().getDisplayMetrics().density * 64);
-            }
-            lps.setMargins(marginLR, 0, marginLR, marginB);
-            sw.setButtonPosition(lps);
-            sw.show();
-        }
-    }
 }

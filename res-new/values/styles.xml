@@ -245,20 +245,4 @@
 
     <!-- end now playing buttons -->
 
-    <!-- showcase -->
-    <style name="Orpheus.ShowCase">
-        <item name="sv_titleTextAppearance">@style/ShowCaseTextAppearanceTitle</item>
-        <item name="sv_detailTextAppearance">@style/ShowCaseTextAppearanceDetail</item>
-        <item name="sv_backgroundColor">#CC000000</item>
-        <item name="sv_buttonText">@android:string/ok</item>
-    </style>
-
-    <style name="ShowCaseTextAppearanceTitle" parent="android:TextAppearance.DeviceDefault.Large">
-        <item name="android:textColor">@color/white_text</item>
-    </style>
-
-    <style name="ShowCaseTextAppearanceDetail" parent="android:TextAppearance.DeviceDefault">
-        <item name="android:textColor">@color/white_text</item>
-    </style>
-
 </resources>
