@@ -19,8 +19,8 @@ apply plugin: 'robolectric'
 
 // Versioning
 def versionMajor = 2
-def versionMinor = 0
-def versionPatch = 4
+def versionMinor = 1
+def versionPatch = 0
 def versionBuild = 0 // bump for dogfood builds, public betas, etc.
 
 assert(versionMinor < 100) // Double digits

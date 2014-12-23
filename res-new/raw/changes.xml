@@ -17,6 +17,12 @@
 
 <changelog bulletedList="true">
 
+    <changelogversion versionName="2.1.0">
+        <changelogtext>New now playing screen</changelogtext>
+        <changelogtext>Option to show visualizer on now playing screen instead of artwork</changelogtext>
+        <changelogtext>Improve memory usage on low ram devices</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="2.0.+">
         <changelogtext>Bug fixes</changelogtext>
     </changelogversion>
