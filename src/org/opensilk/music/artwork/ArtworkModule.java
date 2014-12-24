@@ -29,10 +29,14 @@ import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicApp;
 import org.opensilk.music.R;
+import org.opensilk.music.artwork.cache.ArtworkCache;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
+import org.opensilk.music.artwork.cache.BitmapCache;
+import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -76,13 +80,13 @@ public class ArtworkModule {
         return queue;
     }
 
-    @Provides @Singleton
-    public ArtworkLruCache provideArtworkLruCache(@ForApplication Context context) {
+    @Provides @Singleton @Named("L1Cache")
+    public ArtworkCache provideArtworkLruCache(@ForApplication Context context) {
         return new ArtworkLruCache(calculateL1CacheSize(context, false));
     }
 
-    @Provides @Singleton //TODO when/how to close this?
-    public BitmapDiskLruCache provideBitmapDiskLruCache(@ForApplication Context context, AppPreferences preferences) {
+    @Provides @Singleton @Named("L2Cache") //TODO when/how to close this?
+    public BitmapDiskCache provideBitmapDiskLruCache(@ForApplication Context context, AppPreferences preferences) {
         final int size = Integer.decode(preferences.getString(AppPreferences.IMAGE_DISK_CACHE_SIZE, "60")) * 1024 * 1024;
         return BitmapDiskLruCache.open(
                 CacheUtil.getCacheDir(context, DISK_CACHE_DIRECTORY),

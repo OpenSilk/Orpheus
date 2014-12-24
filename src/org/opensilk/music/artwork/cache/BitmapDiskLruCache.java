@@ -17,7 +17,7 @@ import java.io.OutputStream;
  * Implementation of DiskLruCache by Jake Wharton
  * modified from http://stackoverflow.com/questions/10185898/using-disklrucache-in-android-4-0-does-not-provide-for-opencache-method
  */
-public class BitmapDiskLruCache {
+public class BitmapDiskLruCache implements BitmapDiskCache {
 
     private File mDiskCacheDir;
     private int mDiskCacheSize;
@@ -70,11 +70,6 @@ public class BitmapDiskLruCache {
         }
     }
 
-    public void clearCache() throws IOException {
-        mDiskCache.delete();
-        mDiskCache = DiskLruCache.open(mDiskCacheDir, APP_VERSION, VALUE_COUNT, mDiskCacheSize);
-    }
-
     public File getCacheFolder() {
         return mDiskCache.getDirectory();
     }
@@ -83,7 +78,7 @@ public class BitmapDiskLruCache {
      * @param url
      * @return raw snapshot of given url
      */
-    public DiskLruCache.Snapshot get(String url) {
+    public DiskLruCache.Snapshot getSnapshot(String url) {
         try {
             return mDiskCache.get(CacheUtil.md5(url));
         } catch (IOException e) {
@@ -162,6 +157,16 @@ public class BitmapDiskLruCache {
             }
         }
         return contained;
+    }
+
+    public boolean clearCache() {
+        try {
+            mDiskCache.delete();
+            mDiskCache = DiskLruCache.open(mDiskCacheDir, APP_VERSION, VALUE_COUNT, mDiskCacheSize);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
 }

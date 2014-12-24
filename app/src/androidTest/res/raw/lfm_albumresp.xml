@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lfm status="ok">
+    <album>
+        <name>Gold Motel</name>
+        <artist>Gold Motel</artist>
+        <id>207631908</id>
+        <mbid>488fb0f9-1f19-4253-a2ce-a1059609484e</mbid>
+        <url>http://www.last.fm/music/Gold+Motel/Gold+Motel</url>
+        <releasedate>    3 Jul 2012, 00:00</releasedate>
+        <image size="small">http://userserve-ak.last.fm/serve/34s/77201856.png</image>
+        <image size="medium">http://userserve-ak.last.fm/serve/64s/77201856.png</image>
+        <image size="large">http://userserve-ak.last.fm/serve/174s/77201856.png</image>
+        <image size="extralarge">http://userserve-ak.last.fm/serve/300x300/77201856.png</image>
+        <image size="mega">http://userserve-ak.last.fm/serve/_/77201856/Gold+Motel.png</image>
+        <listeners>7303</listeners>
+        <playcount>143094</playcount>
+        <tracks>
+            <track rank="1">
+                <name>Brand New Kind Of Blue</name>
+                <duration>184</duration>
+
+                <mbid></mbid>
+
+
+                <url>http://www.last.fm/music/Gold+Motel/_/Brand+New+Kind+Of+Blue</url>
+                <streamable fulltrack="0">0</streamable>
+                <artist>
+                    <name>Gold Motel</name>
+                    <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                    <url>http://www.last.fm/music/Gold+Motel</url>
+                </artist>
+            </track>                <track rank="2">
+            <name>These Sore Eyes</name>
+            <duration>175</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/These+Sore+Eyes</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="3">
+            <name>Musicians</name>
+            <duration>162</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Musicians</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="4">
+            <name>In Broad Daylight</name>
+            <duration>234</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/In+Broad+Daylight</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="5">
+            <name>Slow Emergency</name>
+            <duration>211</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Slow+Emergency</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="6">
+            <name>Cold Shoulders</name>
+            <duration>198</duration>
+
+            <mbid>149ac39d-e760-442c-bf99-103d84060c98</mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Cold+Shoulders</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="7">
+            <name>Your Own Ghost</name>
+            <duration>251</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Your+Own+Ghost</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="8">
+            <name>Always One Step Ahead</name>
+            <duration>259</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Always+One+Step+Ahead</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="9">
+            <name>Counter Clockwise</name>
+            <duration>203</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Counter+Clockwise</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="10">
+            <name>At Least We Tried</name>
+            <duration>189</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/At+Least+We+Tried</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="11">
+            <name>Santa Cruz</name>
+            <duration>241</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Santa+Cruz</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>                <track rank="12">
+            <name>Leave You In Love</name>
+            <duration>195</duration>
+
+            <mbid></mbid>
+
+
+            <url>http://www.last.fm/music/Gold+Motel/_/Leave+You+In+Love</url>
+            <streamable fulltrack="0">0</streamable>
+            <artist>
+                <name>Gold Motel</name>
+                <mbid>163c8bbc-053d-4208-ae42-4cb0dc75f050</mbid>
+
+                <url>http://www.last.fm/music/Gold+Motel</url>
+            </artist>
+        </track>        </tracks>
+        <toptags>
+        </toptags>
+    </album></lfm>

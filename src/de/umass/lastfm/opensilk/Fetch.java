@@ -33,10 +33,12 @@ import de.umass.lastfm.Artist;
  */
 public class Fetch {
 
-    private static final String DEFAULT_API_ROOT = "http://ws.audioscrobbler.com/2.0/";
+    public static final String DEFAULT_API_ROOT = "http://ws.audioscrobbler.com/2.0/";
 
     private static final String PARAM_API_KEY = "api_key";
     private static final String PARAM_METHOD = "method";
+    public static final String PARAM_METHOD_ARTIST_INFO = "artist.getInfo";
+    public static final String PARAM_METHOD_ALBUM_INFO = "album.getInfo";
     private static final String PARAM_ARTIST = "artist";
     private static final String PARAM_ALBUM = "album";
 
@@ -49,7 +51,7 @@ public class Fetch {
                                              MusicEntryResponseCallback<Artist> listener,
                                              Request.Priority priority) {
         StringBuilder fetchUrl = baseUrl();
-        fetchUrl.append("artist.getInfo")
+        fetchUrl.append(PARAM_METHOD_ARTIST_INFO)
                 .append("&")
                 .append(PARAM_ARTIST).append("=").append(encode(artistName))
                 .append("&")
@@ -70,7 +72,7 @@ public class Fetch {
                                            MusicEntryResponseCallback<Album> listener,
                                            Request.Priority priority) {
         StringBuilder fetchUrl = baseUrl();
-        fetchUrl.append("album.getInfo")
+        fetchUrl.append(PARAM_METHOD_ALBUM_INFO)
                 .append("&")
                 .append(PARAM_ARTIST).append("=").append(encode(artistName))
                 .append("&")

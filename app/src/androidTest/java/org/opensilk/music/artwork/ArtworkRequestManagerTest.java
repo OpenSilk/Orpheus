@@ -18,92 +18,97 @@
 package org.opensilk.music.artwork;
 
 import android.app.Activity;
-import android.content.Context;
-import android.util.JsonReader;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.RequestFuture;
-import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.message.BasicHttpResponse;
-import org.fest.assertions.api.Assertions;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.opensilk.music.TestMusicApp;
+import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.music.AppPreferences;
+import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.cache.ArtworkCache;
+import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.tester.org.apache.http.TestHttpResponse;
-
-
-import java.io.StringReader;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
 
 import de.umass.lastfm.Album;
-import mortar.Mortar;
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
-import timber.log.Timber;
+import de.umass.lastfm.Artist;
 
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
  * Created by drew on 10/21/14.
  */
-@Config(emulateSdk = 18, reportSdk = 18)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class ArtworkRequestManagerTest {
 
-    static final String TEST_MBID1 = "5f482bbe-d747-4b10-b0a9-2b0873f24928";
-    static final String TEST_MBID1_RESPONSE = "{\"images\":[{\"types\":[\"Front\"],\"front\":true,\"back\":false,\"edit\"" +
-            ":24993236,\"image\":\"http://coverartarchive.org/release/5f482bbe-d747-4b10-b0a9-2b0873f24928/5806163660.jpg\"," +
-            "\"comment\":\"\",\"approved\":true,\"id\":\"5806163660\",\"thumbnails\":{\"large\":" +
-            "\"http://coverartarchive.org/release/5f482bbe-d747-4b10-b0a9-2b0873f24928/5806163660-500.jpg\"," +
-            "\"small\":\"http://coverartarchive.org/release/5f482bbe-d747-4b10-b0a9-2b0873f24928/5806163660-250.jpg\"}}]" +
-            ",\"release\":\"http://musicbrainz.org/release/5f482bbe-d747-4b10-b0a9-2b0873f24928\"}";
-    static final String TEST_MBID1_RESULT = "http://coverartarchive.org/release/5f482bbe-d747-4b10-b0a9-2b0873f24928/5806163660.jpg";
+    static final String TEST_MBID1 = "488fb0f9-1f19-4253-a2ce-a1059609484e";
+    static final String TEST_MBID1_RESULT = "http://coverartarchive.org/release/488fb0f9-1f19-4253-a2ce-a1059609484e/3085051593.jpg";
+    static final String TEST_MBID2 = "163c8bbc-053d-4208-ae42-4cb0dc75f050";
 
-    @Inject
+    @Mock AppPreferences prefs;
+    @Mock ArtworkCache l1;
+    @Mock BitmapDiskCache l2;
+    RequestQueue queue;
+    Gson gson;
     ArtworkRequestManagerImpl artworkManager;
 
     @Before
     public void setUp() {
-        TestMusicApp.injectTest(this);
+        initMocks(this);
+        queue = new RequestQueue(new MockCache(), new BasicNetwork(new MockHttpStack()), 1, new ImmediateResponseDelivery());
+        queue.start();
+        gson = new Gson();
+        artworkManager = new ArtworkRequestManagerImpl(Robolectric.application, prefs, l1, l2, queue, gson);
     }
 
     @After
     public void tearDown() {
-
+        queue.stop();
     }
 
     @Test
     public void testCoverArtRequest() {
         String url = artworkManager.createAlbumCoverArtRequestObservable(TEST_MBID1).toBlocking().first();
-        Assert.assertEquals(url,TEST_MBID1_RESULT);
+        assertThat(url).isEqualTo(TEST_MBID1_RESULT);
     }
 
+    @Test
+    public void testAlbumApiRequest() {
+        Album album = artworkManager.createAlbumLastFmApiRequestObservable(new ArtInfo("notused", "notused", null)).toBlocking().first();
+        assertThat(album.getMbid()).isEqualTo(TEST_MBID1);
+    }
 
     @Test
-    public void testAlbumRequest() {
+    public void testArtistApiRequest() {
+        Artist artist = artworkManager.createArtistLastFmApiRequestObservable(new ArtInfo("notused", null, null)).toBlocking().first();
+        assertThat(artist.getMbid()).isEqualTo(TEST_MBID2);
+    }
 
+    @Test
+    public void testL1CacheAlbumRequest() {
+        ArtInfo artInfo = new ArtInfo("artist", "album", null);
+        String cacheKey = ArtworkRequestManagerImpl.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
+        Bitmap bitmap = Bitmap.createBitmap(24, 24, Bitmap.Config.RGB_565);
+        Artwork artwork = new Artwork(bitmap, null);
+        Mockito.when(l1.getArtwork(cacheKey)).thenReturn(artwork);
+        Activity activity = Robolectric.buildActivity(Activity.class).create().get();
+        AnimatedImageView imageView = new AnimatedImageView(activity, null);
+        artworkManager.newAlbumRequest(imageView, null, artInfo, ArtworkType.THUMBNAIL);
+        Mockito.verify(l1).getArtwork(cacheKey);
+        Mockito.verify(l2, Mockito.never()).getBitmap(cacheKey);
+        assertThat(((BitmapDrawable) imageView.getDrawable()).getBitmap()).isSameAs(bitmap);
     }
 
 }

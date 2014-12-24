@@ -29,7 +29,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 3/11/14.
  */
-public class BitmapLruCache extends LruCache<String, Bitmap> {
+public class BitmapLruCache extends LruCache<String, Bitmap> implements BitmapCache {
 
     public BitmapLruCache(int maxSize) {
         super(maxSize);
@@ -58,5 +58,11 @@ public class BitmapLruCache extends LruCache<String, Bitmap> {
 
     public boolean containsKey(String url) {
         return get(CacheUtil.md5(url)) != null;
+    }
+
+    @Override
+    public boolean clearCache() {
+        evictAll();
+        return true;
     }
 }

@@ -119,9 +119,9 @@ configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
-robolectric {
-    include '**/*Test.class'
-}
+//robolectric {
+//    include '**/*Test.class'
+//}
 // hack for robolectric
 // https://github.com/JakeWharton/gradle-android-test-plugin/issues/54
 tasks.whenTaskAdded { task ->

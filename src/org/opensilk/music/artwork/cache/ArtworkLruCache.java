@@ -31,7 +31,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/31/14.
  */
-public class ArtworkLruCache extends LruCache<String, Artwork> {
+public class ArtworkLruCache extends LruCache<String, Artwork> implements ArtworkCache {
 
     public ArtworkLruCache(int maxSize) {
         super(maxSize);
@@ -62,4 +62,9 @@ public class ArtworkLruCache extends LruCache<String, Artwork> {
         return get(CacheUtil.md5(url)) != null;
     }
 
+    @Override
+    public boolean clearCache() {
+        evictAll();
+        return true;
+    }
 }

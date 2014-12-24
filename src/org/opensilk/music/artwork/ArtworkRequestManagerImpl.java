@@ -39,7 +39,10 @@ import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.artwork.cache.ArtworkCache;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
+import org.opensilk.music.artwork.cache.BitmapCache;
+import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.ui2.loader.AlbumArtInfoLoader;
 
@@ -57,6 +60,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import de.umass.lastfm.Album;
@@ -86,17 +90,20 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     final Context mContext;
     final AppPreferences mPreferences;
-    final ArtworkLruCache mL1Cache;
-    final BitmapDiskLruCache mL2Cache;
+    final ArtworkCache mL1Cache;
+    final BitmapDiskCache mL2Cache;
     final RequestQueue mVolleyQueue;
     final Gson mGson;
 
     final Map<RequestKey, IArtworkRequest> mActiveRequests = new LinkedHashMap<>(10);
 
     @Inject
-    public ArtworkRequestManagerImpl(@ForApplication Context mContext, AppPreferences mPreferences,
-                                     ArtworkLruCache mL1Cache, BitmapDiskLruCache mL2Cache,
-                                     RequestQueue mVolleyQueue, Gson mGson) {
+    public ArtworkRequestManagerImpl(@ForApplication Context mContext,
+                                     AppPreferences mPreferences,
+                                     @Named("L1Cache") ArtworkCache mL1Cache,
+                                     @Named("L2Cache") BitmapDiskCache mL2Cache,
+                                     RequestQueue mVolleyQueue,
+                                     Gson mGson) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
         this.mL1Cache = mL1Cache;
@@ -583,21 +590,18 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
     @Override
     public boolean clearCaches() {
-        try {
-            clearVolleyQueue();
-            mVolleyQueue.getCache().clear();
-            evictL1();
-            mL2Cache.clearCache();
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
+        boolean success;
+        clearVolleyQueue();
+        mVolleyQueue.getCache().clear();
+        evictL1();
+        success = mL2Cache.clearCache();
+        return success;
     }
 
     @Override
     @DebugLog
     public void evictL1() {
-        mL1Cache.evictAll();
+        mL1Cache.clearCache();
     }
 
     @Override
@@ -956,7 +960,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             }
             final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
             final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
-            final DiskLruCache.Snapshot snapshot = mL2Cache.get(cacheKey);
+            final DiskLruCache.Snapshot snapshot = mL2Cache.getSnapshot(cacheKey);
             if (snapshot != null && snapshot.getInputStream(0) != null) {
                 final Scheduler.Worker worker = Schedulers.io().createWorker();
                 worker.schedule(new Action0() {

@@ -47,9 +47,7 @@ public class TestGlobalModule {
         }
     }
 
-    @Provides
-    @Singleton
-    @ForApplication
+    @Provides @Singleton @ForApplication
     public Context provideAppContext() {
         return appContext;
     }

@@ -15,31 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui2;
+package org.opensilk.music.artwork.cache;
 
-import android.app.Activity;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import static org.fest.assertions.api.ANDROID.assertThat;
+import android.graphics.Bitmap;
 
 /**
- * Created by drew on 10/17/14.
+ * Created by drew on 12/23/14.
  */
-@Config(
-        emulateSdk = 18,
-        reportSdk = 18
-)
-@RunWith(RobolectricTestRunner.class)
-public class LauncherActivityTest {
+public interface BitmapCache {
+    public Bitmap getBitmap(String url);
 
-    @Test
-    public void thisTestAlwaysPasses() {
-        org.junit.Assert.assertTrue(true);
-    }
+    public void putBitmap(String url, Bitmap bitmap);
 
+    public boolean containsKey(String url);
+
+    public boolean clearCache();
 }
