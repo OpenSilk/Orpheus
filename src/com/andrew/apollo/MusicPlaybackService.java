@@ -656,6 +656,14 @@ public class MusicPlaybackService extends Service {
     }
 
     @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        if (level >= TRIM_MEMORY_COMPLETE) {
+            mArtworkUtil.trim();
+        }
+    }
+
+    @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         if (D) Log.d(TAG, "Got new intent " + intent + ", startId = " + startId);
 

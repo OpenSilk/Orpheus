@@ -42,10 +42,12 @@ public class ArtworkProviderUtil {
 
     private final Context mContext;
     private final BitmapLruCache mL1Cache;
+    private final int mMaxSize;
 
     public ArtworkProviderUtil(Context context) {
         mContext = context;
-        mL1Cache = new BitmapLruCache(ArtworkModule.calculateL1CacheSize(context, true));
+        mMaxSize = ArtworkModule.calculateL1CacheSize(context, true);
+        mL1Cache = new BitmapLruCache(mMaxSize);
     }
 
     private Bitmap getDefaultArt() {
@@ -131,6 +133,12 @@ public class ArtworkProviderUtil {
     @DebugLog
     public void evict() {
         mL1Cache.evictAll();
+        Runtime.getRuntime().gc();
+    }
+
+    @DebugLog
+    public void trim() {
+        mL1Cache.trimToSize(mMaxSize/2);
         Runtime.getRuntime().gc();
     }
 
