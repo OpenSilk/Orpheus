@@ -150,7 +150,7 @@ public class MediaSessionHelper {
 
             if (what.equals(PLAYSTATE_CHANGED) || what.equals(POSITION_CHANGED)) {
                 setPlaybackState(playState);
-            } else if (what.equals(META_CHANGED) || what.equals(QUEUE_CHANGED)) {
+            } else if (what.equals(META_CHANGED)) {
                 Bitmap albumArt;
                 if (VersionUtils.hasKitkat()) {
                     //Kitkat has fullscreen artwork
