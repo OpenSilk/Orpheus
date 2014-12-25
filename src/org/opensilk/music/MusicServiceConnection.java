@@ -28,11 +28,9 @@ import android.os.RemoteException;
 import com.andrew.apollo.IApolloService;
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.provider.MusicProviderUtil;
-import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.common.util.ObjectUtils;
-import org.opensilk.music.R;
+import org.opensilk.common.rx.SingleThreadScheduler;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui2.event.MakeToast;
@@ -49,8 +47,6 @@ import javax.inject.Singleton;
 import de.greenrobot.event.EventBus;
 import rx.Observable;
 import rx.Scheduler;
-import rx.Subscriber;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func0;
 import rx.functions.Func1;
@@ -75,7 +71,7 @@ public class MusicServiceConnection {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            IApolloService connection = IApolloService.Stub.asInterface(service);
+            final IApolloService connection = IApolloService.Stub.asInterface(service);
             subject.onNext(connection);
             subject.onCompleted();
         }
@@ -85,6 +81,8 @@ public class MusicServiceConnection {
             unbind();
         }
     }
+
+    static final Scheduler SCHEDULER = new SingleThreadScheduler();
 
     private final Context context;
     private final EventBus eventBus;
@@ -115,14 +113,6 @@ public class MusicServiceConnection {
         serviceToken = null;
     }
 
-    public synchronized boolean isBound() {
-        return (serviceToken != null);
-    }
-
-    synchronized void ensureConnection() {
-        if (serviceToken == null) bind();
-    }
-
     void onError(Exception e) {
         Timber.w(e, "MusicServiceConnection");
         unbind();
@@ -134,13 +124,13 @@ public class MusicServiceConnection {
     }
 
     Observable<IApolloService> getObservable() {
-        ensureConnection();
+        bind();
         // NOTE: onServiceConnected() is called from main thread
         // hence the onNext() in the subject is called from main thread
         // for this reason we 'observe' the onNextCall on an IO thread.
         // so when the functions will receive the Func1.call() in the flatMap
         // on the IO thread not the main thread.
-        return serviceToken.subject.asObservable().first().observeOn(Schedulers.io());
+        return serviceToken.subject.asObservable().first().observeOn(SCHEDULER);
     }
 
     /*
