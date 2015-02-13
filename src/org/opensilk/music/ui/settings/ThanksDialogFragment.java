@@ -82,8 +82,9 @@ public class ThanksDialogFragment extends DialogFragment {
                     getString(R.string.settings_thanks_dialog_caa_url)));
             thankees.add(new Thankee(getString(R.string.settings_thanks_dialog_an), null,
                     getString(R.string.settings_thanks_dialog_an_desc), null));
-            thankees.add(new Thankee(getString(R.string.settings_thanks_dialog_ac), null,
-                    getString(R.string.settings_thanks_dialog_ac_desc), null));
+            thankees.add(new Thankee(getString(R.string.settings_thanks_dialog_mc), null,
+                    getString(R.string.settings_thanks_dialog_mc_desc),
+                    getString(R.string.settings_thanks_dialog_mc_url)));
             mAdapter = new ThanksAdapter(getContext(), thankees);
             mListView = (ListView) findViewById(android.R.id.list);
             mListView.setAdapter(mAdapter);

@@ -39,8 +39,9 @@
     <!-- lecal people -->
     <string name="settings_thanks_dialog_an" translatable="false">Andrew Neal</string>
     <string name="settings_thanks_dialog_an_desc" translatable="false">Apollo</string>
-    <string name="settings_thanks_dialog_ac" translatable="false">Alex Cruz</string>
-    <string name="settings_thanks_dialog_ac_desc">Banner and icon design</string>
+    <string name="settings_thanks_dialog_mc" translatable="false">Matthew Carter</string>
+    <string name="settings_thanks_dialog_mc_desc">Banner and icon design</string>
+    <string name="settings_thanks_dialog_mc_url" translatable="false">https://plus.google.com/111519147913981849095/about</string>
     <string name="settings_feedback">Send feedback</string>
     <string name="settings_feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
     <string name="settings_feedback_email_subject">Feedback for Orpheus Music Player</string>

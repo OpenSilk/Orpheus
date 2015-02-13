@@ -19,6 +19,7 @@ package org.opensilk.music.widgets;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RotateDrawable;
 import android.os.Build;
@@ -32,6 +33,7 @@ import android.view.animation.Transformation;
 import android.widget.ImageView;
 
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.R;
 
 /**
@@ -56,29 +58,13 @@ public class PlayingIndicator extends ImageView {
     private boolean isAnimating;
     private boolean mShouldAnimate;
 
-    public PlayingIndicator(Context context) {
-        super(context);
-        init();
-    }
-
     public PlayingIndicator(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
-    }
-
-    public PlayingIndicator(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init();
-    }
-
-    protected void init() {
-        if (ThemeUtils.isLightTheme(getContext())) {
-            setImageResource(R.drawable.playing_indicator_light);
-        } else {
-            setImageResource(R.drawable.playing_indicator_dark);
+        setImageResource(R.drawable.now_playing_indicator);
+        mRotateDrawable = (RotateDrawable) getDrawable();
+        if (!VersionUtils.hasLollipop()) {
+            mRotateDrawable.setColorFilter(ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN);
         }
-        LayerDrawable ld = (LayerDrawable) getDrawable();
-        mRotateDrawable = (RotateDrawable) ld.getDrawable(0);
     }
 
     /**

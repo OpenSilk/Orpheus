@@ -31,10 +31,8 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="@dimen/action_bar_double_height"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:scaleType="fitStart"
-        android:src="@drawable/orpheus_logo_record"/>
+        android:scaleType="fitXY"
+        android:src="@drawable/banner"/>
 
     <org.opensilk.music.ui2.main.NavView
         android:id="@+id/drawer_list"
