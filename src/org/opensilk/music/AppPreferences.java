@@ -113,8 +113,6 @@ public class AppPreferences {
 
     //Misc
     public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
-    public static final String SEND_CRASH_REPORTS = "send_crash_reports";
-
 
     private final Context appContext;
     private final SharedPreferences prefs;

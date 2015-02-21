@@ -22,7 +22,6 @@ import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -30,8 +29,10 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.WindowManager;
 
-import com.splunk.mint.Mint;
-
+import org.acra.ACRA;
+import org.acra.annotation.ReportsCrashes;
+import org.acra.log.ACRALog;
+import org.acra.sender.HttpSender;
 import org.apache.commons.io.FileUtils;
 import org.opensilk.cast.manager.MediaCastManager;
 import org.opensilk.common.util.VersionUtils;
@@ -54,9 +55,46 @@ import mortar.Mortar;
 import mortar.MortarScope;
 import timber.log.Timber;
 
+import static org.acra.ReportField.*;
+
 /**
  * Use to initilaze singletons and global static variables that require context
  */
+@ReportsCrashes(
+        formUri = BuildConfig.ACRA_REPORTING_URL,
+        /*i know this isnt secure */
+        formUriBasicAuthLogin = BuildConfig.ACRA_REPORTING_USR,
+        formUriBasicAuthPassword = BuildConfig.ACRA_REPORTING_PASS,
+        httpMethod = HttpSender.Method.PUT,
+        reportType = HttpSender.Type.JSON,
+        customReportContent = {
+                REPORT_ID,
+                APP_VERSION_CODE,
+                APP_VERSION_NAME,
+                PACKAGE_NAME,
+                PHONE_MODEL,
+                BRAND,
+                PRODUCT,
+                ANDROID_VERSION,
+                BUILD,
+                TOTAL_MEM_SIZE,
+                AVAILABLE_MEM_SIZE,
+                BUILD_CONFIG,
+                CUSTOM_DATA,
+                IS_SILENT,
+                STACK_TRACE,
+                INITIAL_CONFIGURATION,
+                CRASH_CONFIGURATION,
+                DISPLAY,
+                USER_COMMENT,
+                USER_APP_START_DATE,
+                USER_CRASH_DATE,
+                INSTALLATION_ID,
+                DEVICE_FEATURES,
+                ENVIRONMENT,
+                SHARED_PREFERENCES,
+        }
+)
 public class MusicApp extends Application implements DaggerInjector {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
@@ -73,7 +111,6 @@ public class MusicApp extends Application implements DaggerInjector {
 
     protected MortarScope mRootScope;
 
-    @Inject AppPreferences mSettings;
     @Inject ArtworkRequestManager mArtworkRequestor;
 
     @Override
@@ -110,12 +147,7 @@ public class MusicApp extends Application implements DaggerInjector {
         enableStrictMode();
 
         // crash reports
-        Mint.disableNetworkMonitoring();
-        if (isMainProcess
-                    && !TextUtils.isEmpty(BuildConfig.SPLUNK_MINT_KEY)
-                    && mSettings.getBoolean(AppPreferences.SEND_CRASH_REPORTS, true)) {
-                Mint.initAndStartSession(getApplicationContext(), BuildConfig.SPLUNK_MINT_KEY);
-        }
+        setupReporting();
 
     }
 
@@ -130,6 +162,16 @@ public class MusicApp extends Application implements DaggerInjector {
 
     protected void setupMortar() {
         mRootScope = Mortar.createRootScope(DEBUG, mScopedGraphe);
+    }
+
+    protected void setupReporting() {
+        if (TextUtils.isEmpty(BuildConfig.ACRA_REPORTING_URL)) {
+            return;
+        }
+        if (!DEBUG) {
+            ACRA.setLog(new AcraLogStub());
+        }
+        ACRA.init(this);
     }
 
     @Override
@@ -247,7 +289,7 @@ public class MusicApp extends Application implements DaggerInjector {
         }
     };
 
-    private static class ReleaseTree extends Timber.DebugTree {
+    static class ReleaseTree extends Timber.DebugTree {
         //Tree stumps
         @Override public void v(String message, Object... args) {}
         @Override public void v(Throwable t, String message, Object... args) {}
@@ -264,10 +306,25 @@ public class MusicApp extends Application implements DaggerInjector {
         static void sendException(Throwable t) {
             try {
                 if (t instanceof Exception)
-                    Mint.logException((Exception)t);
+                    ACRA.getErrorReporter().handleSilentException(t);
             } catch (Exception ignored) {/*safety*/}
         }
 
+    }
+
+    static class AcraLogStub implements ACRALog {
+        @Override public int v(String tag, String msg) { return 0; }
+        @Override public int v(String tag, String msg, Throwable tr) { return 0; }
+        @Override public int d(String tag, String msg) { return 0; }
+        @Override public int d(String tag, String msg, Throwable tr) { return 0; }
+        @Override public int i(String tag, String msg) { return 0; }
+        @Override public int i(String tag, String msg, Throwable tr) { return 0; }
+        @Override public int w(String tag, String msg) { return 0; }
+        @Override public int w(String tag, String msg, Throwable tr) { return 0; }
+        @Override public int w(String tag, Throwable tr) { return 0; }
+        @Override public int e(String tag, String msg) { return 0; }
+        @Override public int e(String tag, String msg, Throwable tr) { return 0; }
+        @Override public String getStackTraceString(Throwable tr) { return Log.getStackTraceString(tr); }
     }
 
 }

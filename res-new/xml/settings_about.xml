@@ -25,7 +25,7 @@
         </Preference>
 
         <CheckBoxPreference
-            android:key="send_crash_reports"
+            android:key="acra.enable"
             android:title="@string/settings_send_crash_reports"
             android:summary="@string/settings_send_crash_reports_summary"
             android:defaultValue="true"/>
