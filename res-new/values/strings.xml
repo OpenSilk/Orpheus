@@ -74,7 +74,7 @@
     <string name="settings_now_playing_artwork_fill">Fill screen</string>
     <string name="settings_now_playing_artwork_fit">Fit screen</string>
     <!-- interface fab -->
-    <string name="settings_fab">Action button configuration</string>
+    <string name="settings_fab">Action button</string>
     <string name="settings_fab_click">Click action</string>
     <string name="settings_fab_double_click">Double click action</string>
     <string name="settings_fab_long_click_action">Long click action</string>
@@ -83,6 +83,15 @@
     <string name="settings_fab_quick_controls">Toggle quick controls</string>
     <string name="settings_fab_open_now_playing">Open now playing</string>
     <string name="settings_fab_none">None</string>
+    <!-- interface footer -->
+    <string name="settings_footer">Footer</string>
+    <string name="settings_footer_click">Click action</string>
+    <string name="settings_footer_long_click">Long click action</string>
+    <string name="settings_footer_thumb_click">Thumbnail click action</string>
+    <string name="settings_footer_thumb_long_click">Thumbnail long click action</string>
+    <string name="settings_footer_open_queue">Open queue</string>
+    <string name="settings_footer_open_now_playing">Open now playing</string>
+    <string name="settings_footer_none">None</string>
     <!-- data NOTE Some strings in res/-->
     <!-- data download -->
     <string name="settings_download_category">Download</string>

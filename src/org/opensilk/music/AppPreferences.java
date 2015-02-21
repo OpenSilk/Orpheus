@@ -111,6 +111,16 @@ public class AppPreferences {
     public static final String FAB_ACTION_NONE = "none";
     public static final String FAB_SHOWCASE = "was_shown_fab_showcase";
 
+    //footer
+    public static final String FOOTER_CLICK = "footer_click";
+    public static final String FOOTER_LONG_CLICK = "footer_long_click";
+    public static final String FOOTER_THUMB_CLICK = "footer_thumb_click";
+    public static final String FOOTER_THUMB_LONG_CLICK = "footer_thumb_long_click";
+
+    public static final String FOOTER_ACTION_QUEUE = "open_queue";
+    public static final String FOOTER_ACTION_NOW_PLAYING = "open_now_playing";
+    public static final String FOOTER_ACTION_NONE = "none";
+
     //Misc
     public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
 

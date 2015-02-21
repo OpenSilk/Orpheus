@@ -23,6 +23,7 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.artwork.ArtworkRequestManager;
@@ -31,6 +32,8 @@ import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.ui2.core.BroadcastObservables;
+import org.opensilk.music.ui2.nowplaying.NowPlayingScreen;
+import org.opensilk.music.ui2.queue.QueueScreen;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +41,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import flow.Flow;
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
@@ -77,8 +81,8 @@ public class Footer {
         final PauseAndResumeRegistrar pauseAndResumeRegistrar;
         final MusicServiceConnection musicService;
         final ArtworkRequestManager artworkReqestor;
+        final AppPreferences settings;
 
-        CompositeSubscription clicksSubscriptions;
         CompositeSubscription broadcastSubscriptions;
         //These are separate since they query the service
         //and need error handling
@@ -102,12 +106,14 @@ public class Footer {
         public Presenter(@ForApplication Context context,
                          PauseAndResumeRegistrar pauseAndResumeRegistrar,
                          MusicServiceConnection musicService,
-                         ArtworkRequestManager artworkReqestor) {
+                         ArtworkRequestManager artworkReqestor,
+                         AppPreferences settings) {
             Timber.v("new FooterViewBlueprint.Presenter");
             this.appContext = context;
             this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
             this.musicService = musicService;
             this.artworkReqestor = artworkReqestor;
+            this.settings = settings;
         }
 
         @Override
@@ -192,6 +198,37 @@ public class Footer {
             FooterView v = getView();
             if (v == null) return;
             v.updateBackground(paletteResponse);
+        }
+
+        void onClick(Context context) {
+            handleClick(settings.getString(AppPreferences.FOOTER_CLICK, AppPreferences.FOOTER_ACTION_QUEUE), context);
+        }
+
+        boolean onLongClick(Context context) {
+            return handleClick(settings.getString(AppPreferences.FOOTER_LONG_CLICK, AppPreferences.FOOTER_ACTION_NONE), context);
+        }
+
+        void onThumbClick(Context context) {
+            handleClick(settings.getString(AppPreferences.FOOTER_THUMB_CLICK, AppPreferences.FOOTER_ACTION_NOW_PLAYING), context);
+        }
+
+        boolean onThumbLongClick(Context context) {
+            return handleClick(settings.getString(AppPreferences.FOOTER_THUMB_LONG_CLICK, AppPreferences.FOOTER_ACTION_NONE), context);
+        }
+
+        @DebugLog
+        boolean handleClick(String action, Context context) {
+            switch (action) {
+                case AppPreferences.FOOTER_ACTION_QUEUE:
+                    QueueScreen.toggleQueue(context);
+                    return true;
+                case AppPreferences.FOOTER_ACTION_NOW_PLAYING:
+                    NowPlayingScreen.toggleNowPlaying(context);
+                    return true;
+                case AppPreferences.FOOTER_ACTION_NONE:
+                default:
+                    return false;
+            }
         }
 
         void setupObserables() {

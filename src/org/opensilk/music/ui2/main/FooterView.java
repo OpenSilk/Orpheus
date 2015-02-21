@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -60,7 +61,6 @@ public class FooterView extends RelativeLayout {
     @InjectView(R.id.footer_track_title) TextView trackTitle;
     @InjectView(R.id.footer_artist_name) TextView artistName;
 
-    CompositeSubscription clicksSubscriptions;
     final boolean lightTheme;
 
     public FooterView(Context context, AttributeSet attrs) {
@@ -94,27 +94,37 @@ public class FooterView extends RelativeLayout {
     }
 
     void subscribeClicks() {
-        if (isSubscribed(clicksSubscriptions)) return;
-        clicksSubscriptions = new CompositeSubscription(
-                ViewObservable.clicks(this).subscribe(new Action1<OnClickEvent>() {
-                    @Override
-                    public void call(OnClickEvent onClickEvent) {
-                        QueueScreen.toggleQueue(getContext());
-                    }
-                }),
-                ViewObservable.clicks(artworkThumbnail).subscribe(new Action1<OnClickEvent>() {
-                    @Override
-                    public void call(OnClickEvent onClickEvent) {
-                        NowPlayingScreen.toggleNowPlaying(getContext());
-                    }
-                })
-        );
+        this.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.onClick(getContext());
+            }
+        });
+        this.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return presenter.onLongClick(getContext());
+            }
+        });
+        artworkThumbnail.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.onThumbClick(getContext());
+            }
+        });
+        artworkThumbnail.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return presenter.onThumbLongClick(getContext());
+            }
+        });
     }
 
     void unsubscribeClicks() {
-        if (notSubscribed(clicksSubscriptions)) return;
-        clicksSubscriptions.unsubscribe();
-        clicksSubscriptions = null;
+        this.setOnClickListener(null);
+        this.setOnLongClickListener(null);
+        artworkThumbnail.setOnClickListener(null);
+        artworkThumbnail.setOnLongClickListener(null);
     }
 
     public void updateBackground(PaletteResponse paletteResponse) {
