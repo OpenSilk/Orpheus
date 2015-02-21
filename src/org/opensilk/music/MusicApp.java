@@ -121,6 +121,13 @@ public class MusicApp extends Application implements DaggerInjector {
         //logs
         Timber.plant(DEBUG ? new Timber.DebugTree() : new ReleaseTree());
 
+        // Init global static variables
+        sDefaultMaxImageWidthPx = Math.min(
+                getMinDisplayWidth(getApplicationContext()),
+                convertDpToPx(getApplicationContext(), MAX_ARTWORK_SIZE_DP)
+        );
+        sDefaultThumbnailWidthPx = convertDpToPx(getApplicationContext(), DEFAULT_THUMBNAIL_SIZE_DP);
+
         //prevents allocating resources the service doesnt need
         final boolean isMainProcess = !isServiceProcess();
 
@@ -130,24 +137,12 @@ public class MusicApp extends Application implements DaggerInjector {
             setupMortar();
             inject(this);
             registerComponentCallbacks(mMainComponentCallbacks);
+            // crash reports
+            setupReporting();
         }
-
-        // Init global static variables
-        sDefaultMaxImageWidthPx = Math.min(
-                getMinDisplayWidth(getApplicationContext()),
-                convertDpToPx(getApplicationContext(), MAX_ARTWORK_SIZE_DP)
-        );
-        sDefaultThumbnailWidthPx = convertDpToPx(getApplicationContext(), DEFAULT_THUMBNAIL_SIZE_DP);
-
-        /*
-         * Debugging
-         */
 
         // Enable strict mode logging
         enableStrictMode();
-
-        // crash reports
-        setupReporting();
 
     }
 
