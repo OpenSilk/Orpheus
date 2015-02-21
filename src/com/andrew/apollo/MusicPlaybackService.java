@@ -135,6 +135,8 @@ public class MusicPlaybackService extends Service {
      */
     public static final String SERVICECMD = APOLLO_PACKAGE_NAME+".musicservicecommand";
 
+    public static final String EXTERNAL_SERVICECMD = MUSIC_PACKAGE_NAME+".musicservicecommand";
+
     /**
      * Called to go toggle between pausing and playing the music
      */
@@ -262,7 +264,7 @@ public class MusicPlaybackService extends Service {
     /**
      * Idle time before stopping the foreground notfication (1 minute)
      */
-    private static final int IDLE_DELAY = 60000 * 2;
+    private static final int IDLE_DELAY = 60000 * 6;
 
     /**
      * Song play time used as threshold for rewinding to the beginning of the
@@ -549,6 +551,7 @@ public class MusicPlaybackService extends Service {
         // Initialize the intent filter and each action
         final IntentFilter filter = new IntentFilter();
         filter.addAction(SERVICECMD);
+        filter.addAction(EXTERNAL_SERVICECMD);
         filter.addAction(TOGGLEPAUSE_ACTION);
         filter.addAction(PAUSE_ACTION);
         filter.addAction(STOP_ACTION);
@@ -760,7 +763,8 @@ public class MusicPlaybackService extends Service {
 
     private void handleCommandIntent(Intent intent) {
         final String action = intent.getAction();
-        final String command = SERVICECMD.equals(action) ? intent.getStringExtra(CMDNAME) : null;
+        final String command = (SERVICECMD.equals(action) || EXTERNAL_SERVICECMD.equals(action))
+                                    ? intent.getStringExtra(CMDNAME) : null;
 
         if (D) Log.d(TAG, "handleCommandIntent: action = " + action + ", command = " + command);
 
