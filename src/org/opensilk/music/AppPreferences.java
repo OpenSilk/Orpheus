@@ -109,7 +109,6 @@ public class AppPreferences {
     public static final String FAB_ACTION_QUICK_CONTROLS = "quick_controls";
     public static final String FAB_ACTION_OPEN_NOW_PLAYING = "open_now_playing";
     public static final String FAB_ACTION_NONE = "none";
-    public static final String FAB_SHOWCASE = "was_shown_fab_showcase";
 
     //footer
     public static final String FOOTER_CLICK = "footer_click";
@@ -123,6 +122,7 @@ public class AppPreferences {
 
     //Misc
     public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
+    public static final String FIRST_RUN = "is_first_run";
 
     private final Context appContext;
     private final SharedPreferences prefs;

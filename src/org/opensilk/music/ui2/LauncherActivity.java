@@ -31,12 +31,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.util.ThemeUtils;
-import org.opensilk.common.util.VersionUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
@@ -50,6 +48,7 @@ import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
+import org.opensilk.music.ui2.welcome.TipsScreen;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 import org.opensilk.music.ui2.core.android.DrawerOwner;
 import org.opensilk.music.ui2.main.Main;
@@ -135,6 +134,11 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
 
         if (savedInstanceState == null) {
             handleIntent();
+        }
+
+        if (mSettings.getBoolean(AppPreferences.FIRST_RUN, true)) {
+            //mSettings.putBoolean(AppPreferences.FIRST_RUN, false);
+            AppFlow.get(this).goTo(new TipsScreen());
         }
 
     }

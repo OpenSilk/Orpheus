@@ -175,6 +175,14 @@
     <string name="dream_settings_fullscreen">Fullscreen mode</string>
     <string name="dream_settings_fullscreen_summary">Hide status bar and blacks out navigation bar</string>
 
+    <!-- ## intro ## -->
+    <string name="demo_title">Welcome</string>
+    <string name="demo_intro_text">Orpheus has a minimalist interface that obscures some functionality, here are some tips to get you started</string>
+    <string name="demo_action_button_title">Action Button</string>
+    <string name="demo_action_button_text">Controls playback\n\n -Single click plays/pauses\n -Double click opens quick controls\n -Fling (swipe) in any direction to open the now playing screen\n\nThese actions are configurable in settings</string>
+    <string name="demo_footer_title">Footer (mini player)</string>
+    <string name="demo_footer_text">Displays information about the current song\n\n -Click to open the queue screen\n -Click the thumbnail to open the now playing screen\n\nThese actions are configurable in settings</string>
+
     <!-- ### Muzei ### -->
 
     <string name="muzei_description">Album art</string>
@@ -183,8 +191,6 @@
 
     <string name="opensilk_org_url" translatable="false">http://opensilk.org/</string>
     <string name="playstore_package_url" translatable="false">https://play.google.com/store/apps/details?id=%s</string>
-    <string name="showcase_title">This is the action button</string>
-    <string name="showcase_text">It is the primary source of control for playback\n\n -Single click plays/pauses\n -Double click opens quick actions\n -Fling (swipe) in any direction to open the Now Playing screen\n\nThese actions are configurable in settings.</string>
 
     <!-- song collections title -->
     <string name="title_all_songs">All songs</string>
