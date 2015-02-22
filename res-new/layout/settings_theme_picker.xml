@@ -29,6 +29,11 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:dividerHorizontal"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -40,6 +45,7 @@
             android:id="@+id/btn_negative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="80dp"
             android:text="@android:string/cancel"
             style="?android:buttonBarButtonStyle"/>
 
@@ -47,6 +53,7 @@
             android:id="@+id/btn_positive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="80dp"
             android:text="@android:string/ok"
             style="?android:buttonBarButtonStyle"/>
 
