@@ -259,10 +259,14 @@ public class MusicWidgetService extends Service {
                 R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
         views.setOnClickPendingIntent(R.id.widget_play, buildPendingIntent(MusicPlaybackService.TOGGLEPAUSE_ACTION));
 
-        // Next / Prev
+        // Next
+        if (widget.compareTo(MusicWidget.ULTRA_MINI) != 0) { // Mini, Small, Large
+            views.setOnClickPendingIntent(R.id.widget_next, buildPendingIntent(MusicPlaybackService.NEXT_ACTION));
+        }
+
+        // Prev
         if (widget.compareTo(MusicWidget.ULTRA_MINI) != 0 && widget.compareTo(MusicWidget.SMALL) != 0) { // Mini, Large
             views.setOnClickPendingIntent(R.id.widget_previous, buildPendingIntent(MusicPlaybackService.PREVIOUS_ACTION));
-            views.setOnClickPendingIntent(R.id.widget_next, buildPendingIntent(MusicPlaybackService.NEXT_ACTION));
         }
 
         // Artist name and song title

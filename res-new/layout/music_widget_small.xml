@@ -71,4 +71,15 @@
         android:contentDescription="@string/accessibility_play"
         tools:src="@drawable/ic_play_arrow_white_36dp" />
 
+    <ImageButton
+        android:id="@+id/widget_next"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:background="?android:selectableItemBackground"
+        android:focusable="true"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/accessibility_next"
+        android:src="@drawable/ic_skip_next_white_36dp" />
+
 </LinearLayout>
