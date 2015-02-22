@@ -105,20 +105,19 @@ public class AppPreferences {
     public static final String FAB_DOUBLE_CLICK = "fab_double_click";
     public static final String FAB_LONG_CLICK = "fab_long_click";
     public static final String FAB_FLING = "fab_fling";
-    public static final String FAB_ACTION_PLAYPAUSE = "play_pause";
-    public static final String FAB_ACTION_QUICK_CONTROLS = "quick_controls";
-    public static final String FAB_ACTION_OPEN_NOW_PLAYING = "open_now_playing";
-    public static final String FAB_ACTION_NONE = "none";
 
-    //footer
+    //footer actions
     public static final String FOOTER_CLICK = "footer_click";
     public static final String FOOTER_LONG_CLICK = "footer_long_click";
     public static final String FOOTER_THUMB_CLICK = "footer_thumb_click";
     public static final String FOOTER_THUMB_LONG_CLICK = "footer_thumb_long_click";
 
-    public static final String FOOTER_ACTION_QUEUE = "open_queue";
-    public static final String FOOTER_ACTION_NOW_PLAYING = "open_now_playing";
-    public static final String FOOTER_ACTION_NONE = "none";
+    //common actions
+    public static final String ACTION_PLAYPAUSE = "play_pause";
+    public static final String ACTION_QUICK_CONTROLS = "quick_controls";
+    public static final String ACTION_OPEN_NOW_PLAYING = "open_now_playing";
+    public static final String ACTION_OPEN_QUEUE = "open_queue";
+    public static final String ACTION_NONE = "none";
 
     //Misc
     public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";

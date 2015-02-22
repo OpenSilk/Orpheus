@@ -79,19 +79,18 @@
     <string name="settings_fab_double_click">Double click action</string>
     <string name="settings_fab_long_click_action">Long click action</string>
     <string name="settings_fab_fling_action">Fling action</string>
-    <string name="settings_fab_play_pause">Play/Pause</string>
-    <string name="settings_fab_quick_controls">Toggle quick controls</string>
-    <string name="settings_fab_open_now_playing">Open now playing</string>
-    <string name="settings_fab_none">None</string>
     <!-- interface footer -->
     <string name="settings_footer">Footer</string>
     <string name="settings_footer_click">Click action</string>
     <string name="settings_footer_long_click">Long click action</string>
     <string name="settings_footer_thumb_click">Thumbnail click action</string>
     <string name="settings_footer_thumb_long_click">Thumbnail long click action</string>
-    <string name="settings_footer_open_queue">Open queue</string>
-    <string name="settings_footer_open_now_playing">Open now playing</string>
-    <string name="settings_footer_none">None</string>
+    <!-- interface actions dialog -->
+    <string name="settings_action_play_pause">Play/Pause</string>
+    <string name="settings_action_quick_controls">Toggle quick controls</string>
+    <string name="settings_action_open_now_playing">Open now playing</string>
+    <string name="settings_action_open_queue">Open queue</string>
+    <string name="settings_action_none">None</string>
     <!-- data NOTE Some strings in res/-->
     <!-- data download -->
     <string name="settings_download_category">Download</string>

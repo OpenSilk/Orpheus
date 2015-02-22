@@ -19,7 +19,6 @@ package org.opensilk.music.ui2.main;
 import android.content.Context;
 import android.os.Bundle;
 
-import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.widget.AnimatedImageView;
@@ -40,15 +39,12 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import flow.Flow;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -201,31 +197,31 @@ public class Footer {
         }
 
         void onClick(Context context) {
-            handleClick(settings.getString(AppPreferences.FOOTER_CLICK, AppPreferences.FOOTER_ACTION_QUEUE), context);
+            handleClick(settings.getString(AppPreferences.FOOTER_CLICK, AppPreferences.ACTION_OPEN_QUEUE), context);
         }
 
         boolean onLongClick(Context context) {
-            return handleClick(settings.getString(AppPreferences.FOOTER_LONG_CLICK, AppPreferences.FOOTER_ACTION_NONE), context);
+            return handleClick(settings.getString(AppPreferences.FOOTER_LONG_CLICK, AppPreferences.ACTION_NONE), context);
         }
 
         void onThumbClick(Context context) {
-            handleClick(settings.getString(AppPreferences.FOOTER_THUMB_CLICK, AppPreferences.FOOTER_ACTION_NOW_PLAYING), context);
+            handleClick(settings.getString(AppPreferences.FOOTER_THUMB_CLICK, AppPreferences.ACTION_OPEN_NOW_PLAYING), context);
         }
 
         boolean onThumbLongClick(Context context) {
-            return handleClick(settings.getString(AppPreferences.FOOTER_THUMB_LONG_CLICK, AppPreferences.FOOTER_ACTION_NONE), context);
+            return handleClick(settings.getString(AppPreferences.FOOTER_THUMB_LONG_CLICK, AppPreferences.ACTION_NONE), context);
         }
 
         @DebugLog
         boolean handleClick(String action, Context context) {
             switch (action) {
-                case AppPreferences.FOOTER_ACTION_QUEUE:
+                case AppPreferences.ACTION_OPEN_QUEUE:
                     QueueScreen.toggleQueue(context);
                     return true;
-                case AppPreferences.FOOTER_ACTION_NOW_PLAYING:
+                case AppPreferences.ACTION_OPEN_NOW_PLAYING:
                     NowPlayingScreen.toggleNowPlaying(context);
                     return true;
-                case AppPreferences.FOOTER_ACTION_NONE:
+                case AppPreferences.ACTION_NONE:
                 default:
                     return false;
             }

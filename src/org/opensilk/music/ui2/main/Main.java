@@ -17,22 +17,18 @@
 package org.opensilk.music.ui2.main;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
 import com.andrew.apollo.MusicPlaybackService;
 
-import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.mortar.PausesAndResumes;
 import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.MusicServiceConnection;
-import org.opensilk.music.R;
 import org.opensilk.music.ui2.core.BroadcastObservables;
-import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.nowplaying.NowPlayingScreen;
+import org.opensilk.music.ui2.queue.QueueScreen;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,8 +40,6 @@ import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
 import rx.functions.Action1;
 import rx.observers.Observers;
 import rx.subscriptions.CompositeSubscription;
@@ -171,40 +165,44 @@ public class Main {
         void handlePrimaryAction(String event, String def) {
             String pref = settings.getString(event, def);
             switch (pref) {
-                case AppPreferences.FAB_ACTION_PLAYPAUSE:
+                case AppPreferences.ACTION_PLAYPAUSE:
                     musicService.playOrPause();
                     break;
-                case AppPreferences.FAB_ACTION_QUICK_CONTROLS:
+                case AppPreferences.ACTION_QUICK_CONTROLS:
                     if (getView() != null) {
                         getView().toggleSecondaryFabs();
                     }
                     break;
-                case AppPreferences.FAB_ACTION_OPEN_NOW_PLAYING:
+                case AppPreferences.ACTION_OPEN_NOW_PLAYING:
                     if (getView() != null) {
                         NowPlayingScreen.toggleNowPlaying(getView().getContext());
                     }
                     break;
-                case AppPreferences.FAB_ACTION_NONE:
+                case AppPreferences.ACTION_OPEN_QUEUE:
+                    if (getView() != null) {
+                        QueueScreen.toggleQueue(getView().getContext());
+                    }
+                    break;
+                case AppPreferences.ACTION_NONE:
                 default:
                     break;
-
             }
         }
 
         void handlePrimaryClick() {
-            handlePrimaryAction(AppPreferences.FAB_CLICK, AppPreferences.FAB_ACTION_PLAYPAUSE);
+            handlePrimaryAction(AppPreferences.FAB_CLICK, AppPreferences.ACTION_PLAYPAUSE);
         }
 
         void handlePrimaryDoubleClick() {
-            handlePrimaryAction(AppPreferences.FAB_DOUBLE_CLICK, AppPreferences.FAB_ACTION_QUICK_CONTROLS);
+            handlePrimaryAction(AppPreferences.FAB_DOUBLE_CLICK, AppPreferences.ACTION_QUICK_CONTROLS);
         }
 
         void handlePrimaryLongClick() {
-            handlePrimaryAction(AppPreferences.FAB_LONG_CLICK, AppPreferences.FAB_ACTION_QUICK_CONTROLS);
+            handlePrimaryAction(AppPreferences.FAB_LONG_CLICK, AppPreferences.ACTION_QUICK_CONTROLS);
         }
 
         void handlePrimaryFling() {
-            handlePrimaryAction(AppPreferences.FAB_FLING, AppPreferences.FAB_ACTION_OPEN_NOW_PLAYING);
+            handlePrimaryAction(AppPreferences.FAB_FLING, AppPreferences.ACTION_OPEN_NOW_PLAYING);
         }
 
         Observable<Boolean> playStateObservable;
