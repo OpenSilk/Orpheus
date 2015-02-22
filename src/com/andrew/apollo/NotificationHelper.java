@@ -87,26 +87,7 @@ public class NotificationHelper {
             final String trackName, final Bitmap albumArt,
             final boolean isPlaying, MediaSession.Token mediaToken) {
 
-        if (VersionUtils.hasLollipop()) {
-            Timber.d("mediaToken=%s", mediaToken);
-            mNotification = new Notification.Builder(mService)
-                    .setSmallIcon(R.drawable.stat_notify_music)
-                    .setLargeIcon(albumArt)
-                    .setContentTitle(trackName)
-                    .setContentText(artistName + " - " + albumName)
-                    .setContentIntent(getPendingIntent())
-                    .addAction(getPrevAction())
-                    .addAction(getPlayPauseAction(isPlaying))
-                    .addAction(getNextAction())
-                    .setPriority(Notification.PRIORITY_DEFAULT)
-                    .setVisibility(Notification.VISIBILITY_PUBLIC)
-                    .setShowWhen(false)
-                    .setStyle(new Notification.MediaStyle()
-                        .setShowActionsInCompactView(1,2)
-                        .setMediaSession(mediaToken)
-                    )
-                    .build();
-        } else {
+        {
             // Default notfication layout
             mNotificationTemplate = new RemoteViews(mService.getPackageName(),
                     R.layout.notification_template_base);
@@ -119,6 +100,8 @@ public class NotificationHelper {
                     .setSmallIcon(R.drawable.stat_notify_music)
                     .setContentIntent(getPendingIntent())
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
                     .setContent(mNotificationTemplate)
                     .build();
             // Control playback from the notification
@@ -157,17 +140,13 @@ public class NotificationHelper {
             return;
         }
 
-        if (VersionUtils.hasLollipop()) {
-            mNotification.actions[1] = getPlayPauseAction(isPlaying);
-        } else {
+        {
             if (mNotificationTemplate != null) {
-                mNotificationTemplate.setImageViewResource(R.id.notification_base_play,
-                        isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
+                mNotificationTemplate.setImageViewResource(R.id.notification_base_play, getPlayPauseIcon(isPlaying));
             }
 
             if (VersionUtils.hasJellyBean() && mExpandedView != null) {
-                mExpandedView.setImageViewResource(R.id.notification_expanded_base_play,
-                        isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
+                mExpandedView.setImageViewResource(R.id.notification_expanded_base_play, getPlayPauseIcon(isPlaying));
             }
         }
 
@@ -205,8 +184,7 @@ public class NotificationHelper {
                 retreivePlaybackActions(4));
 
         // Update the play button image
-        mExpandedView.setImageViewResource(R.id.notification_expanded_base_play,
-                isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
+        mExpandedView.setImageViewResource(R.id.notification_expanded_base_play, getPlayPauseIcon(isPlaying));
     }
 
     /**
@@ -221,24 +199,19 @@ public class NotificationHelper {
         mNotificationTemplate.setOnClickPendingIntent(R.id.notification_base_next,
                 retreivePlaybackActions(2));
 
-        // Previous tracks
-        mNotificationTemplate.setOnClickPendingIntent(R.id.notification_base_previous,
-                retreivePlaybackActions(3));
-
         // Stop and collapse the notification
         mNotificationTemplate.setOnClickPendingIntent(R.id.notification_base_collapse,
                 retreivePlaybackActions(4));
 
         // Update the play button image
-        mNotificationTemplate.setImageViewResource(R.id.notification_base_play,
-                isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp);
+        mNotificationTemplate.setImageViewResource(R.id.notification_base_play, getPlayPauseIcon(isPlaying));
     }
 
     /**
      * @param which Which {@link PendingIntent} to return
      * @return A {@link PendingIntent} ready to control playback
      */
-    private final PendingIntent retreivePlaybackActions(final int which) {
+    private PendingIntent retreivePlaybackActions(final int which) {
         Intent action;
         PendingIntent pendingIntent;
         final ComponentName serviceName = new ComponentName(mService, MusicPlaybackService.class);
@@ -302,25 +275,12 @@ public class NotificationHelper {
         mExpandedView.setImageViewBitmap(R.id.notification_expanded_base_image, albumArt);
     }
 
-    private Notification.Action getPlayPauseAction(boolean isPlaying) {
-        return new Notification.Action(
-                isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp,
-                null,
-                retreivePlaybackActions(1));
-    }
-
-    private Notification.Action getNextAction() {
-        return new Notification.Action(
-                R.drawable.ic_skip_next_white_36dp,
-                null,
-                retreivePlaybackActions(2));
-    }
-
-    private Notification.Action getPrevAction() {
-        return new Notification.Action(
-                R.drawable.ic_skip_previous_white_36dp,
-                null,
-                retreivePlaybackActions(3));
+    private int getPlayPauseIcon(boolean isPlaying) {
+        if (VersionUtils.hasLollipop()) {
+            return isPlaying ? R.drawable.ic_pause_black_36dp : R.drawable.ic_play_arrow_black_36dp;
+        } else {
+            return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
+        }
     }
 
 }

@@ -19,7 +19,6 @@
     <dimen name="notification_big_icon_height">64.0dip</dimen>
     <dimen name="notification_big_icon_width">64.0dip</dimen>
     <dimen name="notification_info_container_padding_left">8.0dip</dimen>
-    <dimen name="notification_info_container_padding_bottom">4.0dip</dimen>
     <dimen name="notification_action_padding">8.0dip</dimen>
     <dimen name="notification_action_height">48.0dip</dimen>
     <dimen name="notification_action_width">48.0dip</dimen>
@@ -27,9 +26,6 @@
     <!-- Notification template expanded -->
     <dimen name="notification_expanded_height">128.0dip</dimen>
     <dimen name="notification_expanded_buttons_divider_padding">12.0dip</dimen>
-    <dimen name="notification_expanded_button_height">48.0dip</dimen>
-    <dimen name="notification_expanded_button_padding">10.0dip</dimen>
     <dimen name="notification_expanded_content_padding_top">8.0dip</dimen>
-    <dimen name="notification_expanded_collapse_padding">8.0dip</dimen>
 
 </resources>
