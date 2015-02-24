@@ -29,51 +29,36 @@
         android:orientation="vertical"
         android:gravity="center_vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/tile_title"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearance"
-                android:textSize="16sp"
-                tools:text="Title"
-                style="@style/SingleLineTextView"/>
-
-        </LinearLayout>
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/tile_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp">
+            android:textAppearance="?android:textAppearance"
+            android:textSize="16sp"
+            tools:text="Title"
+            style="@style/SingleLineTextView"/>
 
-            <TextView
-                android:id="@+id/tile_subtitle"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceSmall"
-                android:textSize="14sp"
-                tools:text="SubTitle"
-                style="@style/SingleLineTextView"/>
-
-            <TextView
-                android:id="@+id/tile_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceSmall"
-                android:textSize="14sp"
-                tools:text="Info"
-                android:visibility="gone"
-                style="@style/SingleLineTextView"/>
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tile_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceSmall"
+            android:textSize="14sp"
+            tools:text="SubTitle"
+            style="@style/SingleLineTextView"/>
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tile_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textAppearance="?android:textAppearanceSmall"
+        android:textSize="14sp"
+        tools:text="Info"
+        android:visibility="gone"
+        style="@style/SingleLineTextView"/>
 
     <org.opensilk.music.widgets.PlayingIndicator
         android:id="@+id/playing_indicator"
