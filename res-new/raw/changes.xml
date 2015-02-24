@@ -17,6 +17,13 @@
 
 <changelog bulletedList="true">
 
+    <changelogversion versionName="2.2.0">
+        <changelogtext>Fix lollipop notification and lockscreen artwork</changelogtext>
+        <changelogtext>Add support for Commandr skip/prev/pause voice commands</changelogtext>
+        <changelogtext>Fix sortby menu item</changelogtext>
+        <changelogtext>Added settings to configure footer click actions</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="2.1.0">
         <changelogtext>New now playing screen</changelogtext>
         <changelogtext>Option to show visualizer on now playing screen instead of artwork</changelogtext>
