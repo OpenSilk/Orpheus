@@ -2,6 +2,12 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <CheckBoxPreference
+        android:key="keep_screen_on"
+        android:title="@string/settings_keep_screen_on"
+        android:summary="@string/settings_keep_screen_on_summary"
+        android:defaultValue="false"/>
+
     <PreferenceCategory
         android:title="@string/settings_theme_category">
 

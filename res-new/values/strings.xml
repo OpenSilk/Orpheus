@@ -49,6 +49,8 @@
     <string name="settings_send_crash_reports">Send crash reports</string>
     <string name="settings_send_crash_reports_summary">Crash reports are anonymous and allow us to make Orpheus better</string>
     <!-- interface -->
+    <string name="settings_keep_screen_on">Keep screen on</string>
+    <string name="settings_keep_screen_on_summary">While charging screen will not sleep</string>
     <!-- interface theme -->
     <string name="settings_theme_category">Theme</string>
     <string name="settings_dark_theme">Use dark themes</string>

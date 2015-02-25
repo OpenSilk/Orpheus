@@ -46,6 +46,9 @@ import javax.inject.Singleton;
 @Singleton
 public class AppPreferences {
 
+    //Interface
+    public static final String KEEP_SCREEN_ON = "keep_screen_on";
+
     //Gallery pages
     public static final int DEFAULT_PAGE = 2;
     public static final String START_PAGE = "start_page";

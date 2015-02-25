@@ -20,8 +20,10 @@ package org.opensilk.music.ui2;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -31,9 +33,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
+import org.opensilk.common.rx.RxUtils;
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -58,6 +63,9 @@ import javax.inject.Inject;
 
 import butterknife.InjectView;
 import hugo.weaving.DebugLog;
+import rx.Subscription;
+import rx.android.observables.AndroidObservable;
+import rx.functions.Action1;
 import timber.log.Timber;
 
 
@@ -96,6 +104,8 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
 
     ActionBarDrawerToggle mDrawerToggle;
+
+    Subscription chargingSubscription;
 
     @Override
     protected mortar.Blueprint getBlueprint(String scopeName) {
@@ -157,12 +167,40 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     protected void onStart() {
         super.onStart();
         mPluginConnectionManager.onResume();
+        if (RxUtils.notSubscribed(chargingSubscription)) {
+            //check if already plugged first
+            IntentFilter filter2 = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            Intent battChanged = registerReceiver(null, filter2);
+            int battStatus = (battChanged != null) ? battChanged.getIntExtra(BatteryManager.EXTRA_STATUS, -1) : -1;
+            if (battStatus == BatteryManager.BATTERY_STATUS_CHARGING
+                    || battStatus == BatteryManager.BATTERY_STATUS_FULL) {
+                keepScreenOn(true);
+            }
+            // keep apprised of future plug events
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_POWER_CONNECTED);
+            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+            chargingSubscription = AndroidObservable.fromBroadcast(this, filter)
+                    .subscribe(new Action1<Intent>() {
+                        @Override
+                        public void call(Intent intent) {
+                            if (Intent.ACTION_POWER_CONNECTED.equals(intent.getAction())) {
+                                keepScreenOn(true);
+                            } else if (Intent.ACTION_POWER_DISCONNECTED.equals(intent.getAction())) {
+                                keepScreenOn(false);
+                            }
+                        }
+                    });
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         mPluginConnectionManager.onPause();
+        if (RxUtils.isSubscribed(chargingSubscription)) {
+            chargingSubscription.unsubscribe();
+        }
     }
 
     @Override
@@ -368,6 +406,14 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
                 mDrawerToggle.syncState();
             }
         });
+    }
+
+    void keepScreenOn(boolean makeOn) {
+        if (makeOn && mSettings.getBoolean(AppPreferences.KEEP_SCREEN_ON, false)) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
     }
 
 }
