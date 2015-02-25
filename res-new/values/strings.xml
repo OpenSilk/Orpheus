@@ -4,8 +4,8 @@
     <string name="app_name" translatable="false">Orpheus</string>
 
     <!--  ### GENERAL ### -->
-    <string name="add">Add</string>
-    <string name="accessibility_select">select</string>
+    <string name="accessibility_add">Add</string>
+    <string name="accessibility_select">Select</string>
     <string name="error">Error</string>
     <string name="retry">Retry</string>
     <string name="empty"> </string>

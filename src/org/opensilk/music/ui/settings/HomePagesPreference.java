@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -31,6 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import butterknife.ButterKnife;
 
 /**
  * Created by andrew on 4/13/14.
@@ -100,9 +103,9 @@ public class HomePagesPreference extends DialogPreference implements
         listView.setDropListener(this);
         listView.setRemoveListener(this);
 
-        final Button addButton = (Button) view.findViewById(R.id.add_item);
+        final ImageButton addButton = ButterKnife.findById(view, R.id.add_item);
         final int icon = ThemeUtils.isLightTheme(getContext()) ? R.drawable.ic_action_add_light : R.drawable.ic_action_add_dark;
-        addButton.setCompoundDrawablesWithIntrinsicBounds(0, 0, icon, 0);
+        addButton.setImageResource(icon);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
