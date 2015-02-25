@@ -137,7 +137,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         }
 
         if (mSettings.getBoolean(AppPreferences.FIRST_RUN, true)) {
-            //mSettings.putBoolean(AppPreferences.FIRST_RUN, false);
+            mSettings.putBoolean(AppPreferences.FIRST_RUN, false);
             AppFlow.get(this).goTo(new TipsScreen());
         }
 
