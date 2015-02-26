@@ -93,6 +93,10 @@ import static org.acra.ReportField.*;
                 DEVICE_FEATURES,
                 ENVIRONMENT,
                 SHARED_PREFERENCES,
+                THREAD_DETAILS,
+        },
+        excludeMatchingSharedPreferencesKeys = {
+                ".*_defInfo$", //Plugins (might contain emails)
         }
 )
 public class MusicApp extends Application implements DaggerInjector {
