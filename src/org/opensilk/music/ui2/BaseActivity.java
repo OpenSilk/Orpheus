@@ -43,7 +43,6 @@ import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.cast.CastUtils;
-import org.opensilk.music.cast.dialogs.StyledMediaRouteDialogFactory;
 import org.opensilk.music.MusicServiceConnection;
 
 import java.lang.ref.WeakReference;
@@ -186,7 +185,6 @@ public class BaseActivity extends ActionBarActivity {
             MediaRouteActionProvider mediaRouteActionProvider =
                     (MediaRouteActionProvider) MenuItemCompat.getActionProvider(mediaRouteMenuItem);
             mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
-//            mediaRouteActionProvider.setDialogFactory(new StyledMediaRouteDialogFactory());
         }
         return true;
     }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 apply plugin: 'com.android.library'
-apply plugin: 'robolectric'
+apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
@@ -46,24 +46,17 @@ android {
 
 robolectric {
     include '**/*Test.class'
-}
-// hack for robolectric
-// https://github.com/JakeWharton/gradle-android-test-plugin/issues/54
-tasks.whenTaskAdded { task ->
-    if (task.name == 'testDebug') {
-        task.jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-        // use afterTest to listen to the test execution results
-        afterTest { descriptor, result ->
-            println "Executing test for {$descriptor.name} with result: ${result.resultType}"
-        }
+    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
+    afterTest {
+        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
     }
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:21.0.3'
+    compile 'com.android.support:support-annotations:22.0.0'
 
-    androidTestCompile('junit:junit:4.11')
-    androidTestCompile('org.robolectric:robolectric:2.4') {
+    testCompile('junit:junit:4.12')
+    testCompile('org.robolectric:robolectric:2.4') {
 //        exclude module: 'classworlds'
         exclude module: 'commons-logging'
         exclude module: 'httpclient'
@@ -80,7 +73,7 @@ dependencies {
 //        exclude module: 'wagon-http-lightweight'
 //        exclude module: 'wagon-provider-api'
     }
-    androidTestCompile('com.squareup:fest-android:1.0.0')
+    testCompile('com.squareup:fest-android:1.0.0')
 }
 
 // for uploadArchives
