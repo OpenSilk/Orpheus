@@ -20,7 +20,7 @@
     <!-- Daydream -->
     <dimen name="dream_art_size">400dp</dimen>
 
-    <dimen name="navigation_drawer_width">320dp</dimen>
+    <dimen name="drawer_width">400dp</dimen>
 
     <integer name="profile_grid_cols_vertical">3</integer>
     <integer name="profile_grid_cols_horizontal">3</integer>

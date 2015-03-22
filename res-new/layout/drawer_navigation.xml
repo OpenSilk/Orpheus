@@ -22,7 +22,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_container"
     android:orientation="vertical"
-    android:layout_width="@dimen/navigation_drawer_width"
+    android:layout_width="@dimen/drawer_width"
     android:layout_height="match_parent"
     android:background="?android:colorBackground"
     android:layout_gravity="start"
