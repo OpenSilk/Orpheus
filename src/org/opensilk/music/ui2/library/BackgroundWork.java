@@ -135,7 +135,7 @@ public class BackgroundWork {
                     if (subscriber.isUnsubscribed()) return;
                     subscriber.onNext(songs);
                     subscriber.onCompleted();
-                    if (result.token != null) {
+                    if (result.token != null && !songs.isEmpty()) {
                         if (!outerSubscriber.isUnsubscribed())
                             outerSubscriber.onNext(getSome(outerSubscriber, item, result.token));
                     } else {
