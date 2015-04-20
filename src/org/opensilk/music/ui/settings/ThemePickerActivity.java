@@ -19,34 +19,21 @@ package org.opensilk.music.ui.settings;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.support.v4.util.SparseArrayCompat;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
 
-import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
-import org.opensilk.common.mortarflow.MortarContextFactory;
 import org.opensilk.common.mortarflow.MortarPagerAdapter;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.theme.OrpheusTheme;
-import org.opensilk.music.ui2.BaseActivity;
 import org.opensilk.music.ui2.BaseMortarActivity;
-import org.opensilk.music.ui2.main.Main;
+import org.opensilk.music.ui2.BaseMortarActivityBlueprint;
+import org.opensilk.music.ui2.BaseMortarActivityModule;
+import org.opensilk.music.ui2.main.MainModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +48,7 @@ import flow.Layout;
  */
 public class ThemePickerActivity extends BaseMortarActivity {
 
-    public static class Blueprint extends BaseMortarActivity.Blueprint {
+    public static class Blueprint extends BaseMortarActivityBlueprint {
 
         public Blueprint(String scopeName) {
             super(scopeName);
@@ -73,7 +60,7 @@ public class ThemePickerActivity extends BaseMortarActivity {
         }
     }
 
-    @dagger.Module(includes = BaseMortarActivity.Module.class, injects = ThemePickerActivity.class)
+    @dagger.Module(includes = BaseMortarActivityModule.class, injects = ThemePickerActivity.class)
     public static class Module {
 
     }
@@ -169,7 +156,7 @@ public class ThemePickerActivity extends BaseMortarActivity {
             super.writeToParcel(dest, flags);
         }
 
-        @dagger.Module(addsTo = ThemePickerActivity.Module.class, includes = Main.Module.class)
+        @dagger.Module(addsTo = ThemePickerActivity.Module.class, includes = MainModule.class)
         public static class Module {
 
         }

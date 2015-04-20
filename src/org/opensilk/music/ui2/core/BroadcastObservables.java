@@ -23,8 +23,8 @@ import android.content.IntentFilter;
 
 import com.andrew.apollo.MusicPlaybackService;
 
-import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.MusicServiceConnection;
+import org.opensilk.music.api.meta.ArtInfo;
 
 import rx.Observable;
 import rx.android.observables.AndroidObservable;

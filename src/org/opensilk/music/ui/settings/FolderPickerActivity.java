@@ -39,12 +39,11 @@ import com.andrew.apollo.utils.MusicUtils;
 
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.common.widget.LetterTileDrawable;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.ui2.BaseActivity;
 import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.ui2.BaseActivityModule;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -70,7 +69,7 @@ import rx.schedulers.Schedulers;
  */
 public class FolderPickerActivity extends BaseActivity {
 
-    @dagger.Module(includes = BaseActivity.Module.class, injects = FolderPickerActivity.class)
+    @dagger.Module(includes = BaseActivityModule.class, injects = FolderPickerActivity.class)
     public static class Module {
     }
 

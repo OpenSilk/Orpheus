@@ -54,12 +54,12 @@ import timber.log.Timber;
  */
 public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHolder> {
 
-    final LibraryScreen.Presenter presenter;
+    final LibraryScreenPresenter presenter;
     final ArrayList<Bundleable> items;
 
     LayoutInflater inflater;
 
-    public LibraryAdapter(LibraryScreen.Presenter presenter) {
+    public LibraryAdapter(LibraryScreenPresenter presenter) {
         this.presenter = presenter;
         this.items = new ArrayList<>();
     }

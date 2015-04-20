@@ -17,62 +17,20 @@
 
 package org.opensilk.music.ui2.welcome;
 
-import android.content.Context;
-import android.os.Bundle;
 import android.os.Parcel;
 
-import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.LauncherActivity;
-import org.opensilk.music.ui2.core.android.ActionBarOwner;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import flow.Layout;
-import hugo.weaving.DebugLog;
-import mortar.ViewPresenter;
-import timber.log.Timber;
 
 /**
  * Created by drew on 2/22/15.
  */
 @Layout(R.layout.welcome_tipsscreen)
-@WithModule(TipsScreen.Module.class)
+@WithModule(TipsScreenModule.class)
 public class TipsScreen extends Screen {
-
-    @dagger.Module(addsTo = LauncherActivity.Module.class, injects = TipsView.class)
-    public static class Module {
-
-    }
-
-    @Singleton
-    public static class Presenter extends ViewPresenter<TipsView> {
-
-        final ActionBarOwner actionBarOwner;
-
-        @Inject
-        public Presenter(ActionBarOwner actionBarOwner) {
-            this.actionBarOwner = actionBarOwner;
-        }
-
-        @Override
-        protected void onLoad(Bundle savedInstanceState) {
-            super.onLoad(savedInstanceState);
-            actionBarOwner.setConfig(
-                    new ActionBarOwner.Config.Builder()
-                            .setTitle(R.string.demo_title)
-                            .build()
-            );
-        }
-
-        void goBack(Context context) {
-            AppFlow.get(context).goBack();
-        }
-
-    }
 
     public static final Creator<TipsScreen> CREATOR = new Creator<TipsScreen>() {
         @Override

@@ -37,17 +37,6 @@ import flow.Flow;
 public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
         ActionBarOwner.Activity {
 
-
-    @dagger.Module(
-            includes = {
-                    BaseSwitcherActivity.Module.class,
-                    ActionBarOwner.Module.class,
-            }
-    )
-    public static class Module {
-
-    }
-
     @Inject protected ActionBarOwner mActionBarOwner;
 
     @InjectView(R.id.main_toolbar) protected Toolbar mToolbar;
@@ -147,7 +136,6 @@ public class BaseSwitcherToolbarActivity extends BaseSwitcherActivity implements
             }
         }
     }
-
 
     protected boolean handleOptionItemSelected(MenuItem item) {
         return mMenuConfig != null

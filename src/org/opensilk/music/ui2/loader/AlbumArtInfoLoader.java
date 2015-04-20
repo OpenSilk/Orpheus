@@ -20,7 +20,6 @@ package org.opensilk.music.ui2.loader;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
-import android.provider.MediaStore;
 
 import org.opensilk.music.api.meta.ArtInfo;
 import org.opensilk.music.util.CursorHelpers;
@@ -28,12 +27,6 @@ import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.Uris;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/19/14.

@@ -36,7 +36,7 @@ public class PlaylistDragSortView extends DragSortListView implements
         DragSortListView.DropListener,
         DragSortListView.RemoveListener{
 
-    @Inject PlaylistScreen.PresenterDslv presenter;
+    @Inject PlaylistScreenPresenterDslv presenter;
 
     final PlaylistAdapter mAdapter;
 

@@ -26,6 +26,7 @@ import android.provider.MediaStore;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 
+import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.R;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
@@ -33,7 +34,6 @@ import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
-import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import java.util.List;
 

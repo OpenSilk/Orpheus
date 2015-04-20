@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<org.opensilk.music.ui2.library.PluginView
+<org.opensilk.music.ui2.library.PluginScreenView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/library_plugin"
     android:orientation="vertical"
@@ -34,4 +34,4 @@
         android:visibility="gone"
         style="?android:buttonStyleSmall"/>
 
-</org.opensilk.music.ui2.library.PluginView>
+</org.opensilk.music.ui2.library.PluginScreenView>

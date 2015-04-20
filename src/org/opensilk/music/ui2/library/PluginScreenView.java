@@ -17,7 +17,6 @@
 package org.opensilk.music.ui2.library;
 
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,14 +41,14 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/6/14.
  */
-public class PluginView extends RelativeLayout {
+public class PluginScreenView extends RelativeLayout {
 
-    @Inject PluginScreen.Presenter presenter;
+    @Inject PluginScreenPresenter presenter;
     @InjectView(R.id.btn_chooselibrary) Button chooser;
 
     AlertDialog upgradeAlert;
 
-    public PluginView(Context context, AttributeSet attrs) {
+    public PluginScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) Mortar.inject(getContext(), this);
     }

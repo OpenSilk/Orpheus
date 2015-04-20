@@ -19,16 +19,13 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.andrew.apollo.Config;
 
 import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
-import org.opensilk.music.ui2.BaseActivity;
-import org.opensilk.music.ui2.BaseMortarActivity;
+import org.opensilk.music.ui2.BaseActivityModule;
 import org.opensilk.music.ui2.event.MakeToast;
 
 import com.andrew.apollo.utils.MusicUtils;
@@ -37,11 +34,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import de.greenrobot.event.EventBus;
-import mortar.Blueprint;
 import mortar.Mortar;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 /**
@@ -66,7 +61,7 @@ public class DeleteDialog extends DialogFragment {
     }
 
     @dagger.Module(
-            addsTo = BaseActivity.Module.class,
+            addsTo = BaseActivityModule.class,
             injects = DeleteDialog.class
     )
     public static class Module {

@@ -31,30 +31,20 @@ import android.widget.TextView;
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.AnimatedImageView;
 import org.opensilk.music.R;
-
 import org.opensilk.music.artwork.PaletteResponse;
-import org.opensilk.music.ui2.nowplaying.NowPlayingScreen;
-import org.opensilk.music.ui2.queue.QueueScreen;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.Mortar;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
-import rx.functions.Action1;
-import rx.subscriptions.CompositeSubscription;
-
-import static org.opensilk.common.rx.RxUtils.isSubscribed;
-import static org.opensilk.common.rx.RxUtils.notSubscribed;
 
 /**
  * Created by drew on 10/15/14.
  */
 public class FooterView extends RelativeLayout {
 
-    @Inject Footer.Presenter presenter;
+    @Inject FooterPresenter presenter;
 
     @InjectView(R.id.footer_thumbnail) AnimatedImageView artworkThumbnail;
     @InjectView(R.id.footer_progress) ProgressBar progressBar;

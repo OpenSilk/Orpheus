@@ -31,7 +31,6 @@ import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 
 import org.opensilk.common.content.RecyclerListAdapter;
 import org.opensilk.common.flow.AppFlow;

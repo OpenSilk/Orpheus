@@ -22,17 +22,15 @@ import android.database.Cursor;
 
 import com.andrew.apollo.model.LocalAlbum;
 
+import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
 import org.opensilk.music.util.Uris;
-import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/24/14.

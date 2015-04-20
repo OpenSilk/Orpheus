@@ -29,7 +29,6 @@ import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 
 import javax.inject.Inject;

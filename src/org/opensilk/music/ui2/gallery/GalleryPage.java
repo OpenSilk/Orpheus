@@ -18,7 +18,6 @@
 package org.opensilk.music.ui2.gallery;
 
 import org.opensilk.common.flow.Screen;
-import org.opensilk.music.R;
 
 /**
  * Created by drew on 10/3/14.

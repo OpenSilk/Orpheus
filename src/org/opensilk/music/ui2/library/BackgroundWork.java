@@ -42,11 +42,11 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
  */
 public class BackgroundWork {
 
-    final LibraryScreen.Presenter presenter;
+    final LibraryScreenPresenter presenter;
 
     Subscription subscription;
 
-    public BackgroundWork(LibraryScreen.Presenter presenter) {
+    public BackgroundWork(LibraryScreenPresenter presenter) {
         this.presenter = presenter;
     }
 

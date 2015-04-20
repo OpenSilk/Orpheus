@@ -25,10 +25,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.drawable.Drawable;
 import android.media.audiofx.AudioEffect;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -66,15 +64,21 @@ import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
-import static org.opensilk.common.rx.RxUtils.observeOnMain;
-import static org.opensilk.music.AppPreferences.*;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_FILL;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_SCALE;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_START_CONTROLS;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE_BAR;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_LINES;
 
 /**
  * Created by drew on 11/17/14.
  */
 public class NowPlayingView extends RelativeLayout {
 
-    @Inject NowPlayingScreen.Presenter presenter;
+    @Inject NowPlayingScreenPresenter presenter;
 
     @InjectView(R.id.now_playing_something) ViewGroup placeholder;
     @InjectView(R.id.now_playing_actions_container) ViewGroup actionsContainer;

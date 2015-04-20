@@ -26,15 +26,16 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Toast;
+
+import com.andrew.apollo.menu.SleepTimerDialog;
 
 import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
@@ -42,22 +43,17 @@ import org.opensilk.common.rx.RxUtils;
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.iab.event.IABQueryResult;
-import com.andrew.apollo.menu.SleepTimerDialog;
-
 import org.opensilk.music.iab.IabUtil;
+import org.opensilk.music.iab.event.IABQueryResult;
 import org.opensilk.music.theme.OrpheusTheme;
+import org.opensilk.music.ui2.core.android.DrawerOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.gallery.GalleryScreen;
-import org.opensilk.music.ui2.welcome.TipsScreen;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
-import org.opensilk.music.ui2.core.android.DrawerOwner;
-import org.opensilk.music.ui2.main.Main;
-import org.opensilk.music.ui2.main.Nav;
+import org.opensilk.music.ui2.welcome.TipsScreen;
 
 import javax.inject.Inject;
 
@@ -72,31 +68,6 @@ import timber.log.Timber;
 public class LauncherActivity extends BaseSwitcherToolbarActivity implements
         DrawerOwner.Activity {
 
-    public static class Blueprint extends BaseMortarActivity.Blueprint {
-
-        public Blueprint(String scopeName) {
-            super(scopeName);
-        }
-
-        @Override
-        public Object getDaggerModule() {
-            return new Module();
-        }
-
-    }
-
-    @dagger.Module (
-            includes = {
-                    BaseSwitcherToolbarActivity.Module.class,
-                    Main.Module.class,
-                    Nav.Module.class
-            },
-            injects = LauncherActivity.class
-    )
-    public static class Module {
-
-    }
-
     @Inject DrawerOwner mDrawerOwner;
     @Inject PluginConnectionManager mPluginConnectionManager;
 
@@ -109,7 +80,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
 
     @Override
     protected mortar.Blueprint getBlueprint(String scopeName) {
-        return new Blueprint(scopeName);
+        return new LauncherActivityBlueprint(scopeName);
     }
 
     @Override

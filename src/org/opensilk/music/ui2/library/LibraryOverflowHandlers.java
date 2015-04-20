@@ -46,9 +46,9 @@ public class LibraryOverflowHandlers {
                 R.menu.popup_add_to_queue,
         };
 
-        final LibraryScreen.Presenter presenter;
+        final LibraryScreenPresenter presenter;
 
-        public Bundleables(LibraryScreen.Presenter presenter) {
+        public Bundleables(LibraryScreenPresenter presenter) {
             this.presenter = presenter;
         }
 

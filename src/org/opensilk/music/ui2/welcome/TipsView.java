@@ -34,7 +34,7 @@ import mortar.Mortar;
  */
 public class TipsView extends ScrollView {
 
-    @Inject TipsScreen.Presenter presenter;
+    @Inject TipsScreenPresenter presenter;
 
     public TipsView(Context context, AttributeSet attrs) {
         super(context, attrs);

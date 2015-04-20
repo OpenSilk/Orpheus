@@ -21,26 +21,17 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.andrew.apollo.utils.MusicUtils;
-import com.google.gson.Gson;
 
-import org.opensilk.common.flow.GsonParcer;
 import org.opensilk.common.mortar.PauseAndResumeActivity;
-import org.opensilk.common.mortar.PauseAndResumeModule;
 import org.opensilk.common.mortar.PauseAndResumePresenter;
 import org.opensilk.common.util.ObjectUtils;
-import org.opensilk.music.AppModule;
 import org.opensilk.music.ui2.event.MakeToast;
 import org.opensilk.music.ui2.event.OpenDialog;
-import org.opensilk.music.ui2.loader.LoaderModule;
 
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-import dagger.Provides;
-import flow.Parcer;
-import mortar.Blueprint;
 import mortar.Mortar;
 import mortar.MortarActivityScope;
 import mortar.MortarScope;
@@ -50,35 +41,6 @@ import timber.log.Timber;
  * Created by drew on 11/7/14.
  */
 public class BaseMortarActivity extends BaseActivity implements PauseAndResumeActivity {
-
-    public static abstract class Blueprint implements mortar.Blueprint {
-        /**
-         * Required for a race condition cause by Android when a new scope is created
-         * before the old one is destroyed
-         * <p/>
-         * https://github.com/square/mortar/issues/87#issuecomment-43849264
-         */
-        private final String scopeName;
-
-        public Blueprint(String scopeName) {
-            this.scopeName = scopeName;
-        }
-
-        @Override public String getMortarScopeName() {
-            return scopeName;
-        }
-
-    }
-
-    @dagger.Module(
-            includes = {
-                    BaseActivity.Module.class,
-                    PauseAndResumeModule.class
-            }
-    )
-    public static class Module {
-
-    }
 
     @Inject PauseAndResumePresenter mPauseResumePresenter;
 

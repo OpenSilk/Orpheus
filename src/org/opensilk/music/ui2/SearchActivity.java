@@ -18,11 +18,8 @@
 package org.opensilk.music.ui2;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,17 +28,11 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.music.R;
 import org.opensilk.music.theme.OrpheusTheme;
-import org.opensilk.music.ui2.core.android.ActionBarOwner;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
-import org.opensilk.music.ui2.main.Main;
 import org.opensilk.music.ui2.search.SearchScreen;
 import org.opensilk.music.ui2.search.SearchViewOwner;
 
-
 import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import dagger.Provides;
 
 import static android.app.SearchManager.QUERY;
 
@@ -50,39 +41,12 @@ import static android.app.SearchManager.QUERY;
  */
 public class SearchActivity extends BaseSwitcherToolbarActivity {
 
-    public static class Blueprint extends BaseMortarActivity.Blueprint {
-
-        public Blueprint(String scopeName) {
-            super(scopeName);
-        }
-
-        @Override
-        public Object getDaggerModule() {
-            return new Module();
-        }
-
-    }
-
-    @dagger.Module (
-            includes = {
-                    BaseSwitcherToolbarActivity.Module.class,
-                    Main.Module.class,
-            },
-            injects = SearchActivity.class
-    )
-    public static class Module {
-        @Provides @Singleton
-        public SearchViewOwner provideSearchviewOwner() {
-            return new SearchViewOwner();
-        }
-    }
-
     @Inject SearchViewOwner mSearchViewOwner;
     @Inject PluginConnectionManager mPluginConnectionManager;
 
     @Override
     protected mortar.Blueprint getBlueprint(String scopeName) {
-        return new Blueprint(scopeName);
+        return new SearchActivityBlueprint(scopeName);
     }
 
     @Override

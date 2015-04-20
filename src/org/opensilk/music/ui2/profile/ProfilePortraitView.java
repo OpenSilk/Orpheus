@@ -56,7 +56,7 @@ import mortar.MortarScope;
  */
 public class ProfilePortraitView extends FrameLayout implements ProfileView {
 
-    @Inject BasePresenter presenter;
+    @Inject ProfilePresenter presenter;
 
     @InjectView(android.R.id.list) RecyclerView mList;
     @InjectView(R.id.sticky_header) ViewGroup mStickyHeader;

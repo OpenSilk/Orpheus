@@ -3,17 +3,14 @@ package org.opensilk.music.ui.settings;
 import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuItem;
 
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
-import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.ui2.BaseActivity;
 import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.music.ui2.BaseActivityModule;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -24,7 +21,7 @@ import dagger.ObjectGraph;
  */
 public class SettingsActivity extends BaseActivity implements DaggerInjector {
 
-    @dagger.Module(includes = BaseActivity.Module.class, injects = SettingsActivity.class)
+    @dagger.Module(includes = BaseActivityModule.class, injects = SettingsActivity.class)
     public static class Module {
     }
 

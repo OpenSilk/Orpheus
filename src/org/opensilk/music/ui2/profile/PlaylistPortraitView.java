@@ -22,8 +22,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.graphics.Palette;
@@ -38,7 +36,6 @@ import android.widget.TextView;
 
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.AnimatedImageView;
-import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
@@ -55,7 +52,7 @@ import mortar.MortarScope;
  */
 public class PlaylistPortraitView extends FrameLayout implements ProfileView {
 
-    @Inject PlaylistScreen.Presenter presenter;
+    @Inject PlaylistScreenPresenter presenter;
 
     @InjectView(android.R.id.list) PlaylistDragSortView mList;
     @InjectView(R.id.sticky_header) ViewGroup mStickyHeader;

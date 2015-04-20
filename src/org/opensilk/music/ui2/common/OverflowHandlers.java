@@ -33,18 +33,16 @@ import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.model.RecentSong;
 import com.andrew.apollo.utils.MusicUtils;
-import com.andrew.apollo.utils.NavUtils;
 
+import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.R;
 import org.opensilk.music.api.model.Song;
 import org.opensilk.music.ui2.event.GoToScreen;
 import org.opensilk.music.ui2.event.MakeToast;
-import org.opensilk.music.MusicServiceConnection;
 import org.opensilk.music.ui2.event.OpenDialog;
-import org.opensilk.music.ui2.event.StartActivityForResult;
 import org.opensilk.music.ui2.profile.ArtistScreen;
 import org.opensilk.music.util.CursorHelpers;
-import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Inject;
 import javax.inject.Named;

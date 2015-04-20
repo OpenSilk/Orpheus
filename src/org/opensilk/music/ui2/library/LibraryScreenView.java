@@ -22,15 +22,12 @@ import android.content.DialogInterface;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.animation.AnimationUtils;
 
 import org.opensilk.music.R;
 import org.opensilk.music.widgets.RecyclerListFrame;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.Mortar;
 import timber.log.Timber;
@@ -38,9 +35,9 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/5/14.
  */
-public class LibraryView extends RecyclerListFrame {
+public class LibraryScreenView extends RecyclerListFrame {
 
-    @Inject LibraryScreen.Presenter presenter;
+    @Inject LibraryScreenPresenter presenter;
 
     @InjectView(R.id.more_loading_progress) ContentLoadingProgressBar mMoreLoadingProgress;
 
@@ -48,7 +45,7 @@ public class LibraryView extends RecyclerListFrame {
 
     ProgressDialog mProgressDialog;
 
-    public LibraryView(Context context, AttributeSet attrs) {
+    public LibraryScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
         Mortar.inject(getContext(), this);
         adapter = new LibraryAdapter(presenter);

@@ -35,7 +35,7 @@ import static org.opensilk.common.rx.RxUtils.isSubscribed;
 /**
  * Created by drew on 11/18/14.
  */
-public abstract class BasePresenter extends mortar.Presenter<ProfileView> {
+public abstract class ProfilePresenter extends mortar.Presenter<ProfileView> {
 
     final ActionBarOwner actionBarOwner;
     final ArtworkRequestManager requestor;
@@ -43,9 +43,9 @@ public abstract class BasePresenter extends mortar.Presenter<ProfileView> {
 
     Subscription loaderSubscription;
 
-    protected BasePresenter(ActionBarOwner actionBarOwner,
-                            ArtworkRequestManager requestor,
-                            AppPreferences settings) {
+    protected ProfilePresenter(ActionBarOwner actionBarOwner,
+                               ArtworkRequestManager requestor,
+                               AppPreferences settings) {
         this.actionBarOwner = actionBarOwner;
         this.requestor = requestor;
         this.settings = settings;

@@ -23,7 +23,6 @@ import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
 import com.andrew.apollo.model.Playlist;
 
-import org.opensilk.music.api.meta.PluginInfo;
 import org.opensilk.music.ui2.library.LibraryConnection;
 import org.opensilk.music.ui2.library.PluginConnectionManager;
 

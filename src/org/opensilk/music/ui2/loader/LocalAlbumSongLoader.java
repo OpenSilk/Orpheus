@@ -18,18 +18,14 @@ package org.opensilk.music.ui2.loader;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.provider.MediaStore;
-import android.support.v4.content.CursorLoader;
 
 import com.andrew.apollo.model.LocalSong;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
-import org.opensilk.music.ui2.loader.RxCursorLoader;
 import org.opensilk.music.util.CursorHelpers;
 import org.opensilk.music.util.Projections;
 import org.opensilk.music.util.SelectionArgs;
 import org.opensilk.music.util.Selections;
-import org.opensilk.music.util.SortOrder;
 import org.opensilk.music.util.Uris;
 
 import javax.inject.Inject;

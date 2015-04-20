@@ -31,7 +31,6 @@ import com.andrew.apollo.model.Genre;
 import com.andrew.apollo.model.LocalAlbum;
 import com.andrew.apollo.model.LocalArtist;
 import com.andrew.apollo.model.LocalSong;
-import com.andrew.apollo.model.LocalSongGroup;
 import com.andrew.apollo.model.Playlist;
 import com.andrew.apollo.utils.MusicUtils;
 
@@ -52,26 +51,19 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.api.model.spi.Bundleable;
 import org.opensilk.music.artwork.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.ui2.common.OverflowHandlers;
 import org.opensilk.music.ui2.library.LibraryScreen;
 import org.opensilk.music.ui2.profile.AlbumScreen;
 import org.opensilk.music.ui2.profile.ArtistScreen;
 import org.opensilk.music.ui2.profile.GenreScreen;
 import org.opensilk.music.ui2.profile.PlaylistScreen;
-import org.opensilk.music.widgets.GridTileDescription;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
-import hugo.weaving.DebugLog;
 import mortar.Mortar;
-import rx.Observable;
-import rx.functions.Action1;
 import rx.functions.Func0;
 import rx.subscriptions.CompositeSubscription;
-import timber.log.Timber;
 
 /**
  * Created by drew on 11/24/14.

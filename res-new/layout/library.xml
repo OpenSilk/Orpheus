@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<org.opensilk.music.ui2.library.LibraryView
+<org.opensilk.music.ui2.library.LibraryScreenView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/library_container"
     android:layout_width="match_parent"
@@ -35,4 +35,4 @@
         android:visibility="gone"
         style="?android:progressBarStyle"/>
 
-</org.opensilk.music.ui2.library.LibraryView>
+</org.opensilk.music.ui2.library.LibraryScreenView>

@@ -42,7 +42,7 @@ public class SearchListView extends RecyclerListFrame implements
         SearchView.OnQueryTextListener,
         SearchViewOwner.View {
 
-    @Inject SearchScreen.Presenter presenter;
+    @Inject SearchScreenPresenter presenter;
     @Inject SearchViewOwner searchViewOwner;
 
     SearchAdapter adapter;

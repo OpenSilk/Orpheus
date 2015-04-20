@@ -21,8 +21,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 
 import org.opensilk.music.BuildConfig;
-import org.opensilk.music.api.PluginConfig;
 import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.music.api.PluginConfig;
 import org.opensilk.music.api.RemoteLibrary;
 import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.api.meta.LibraryInfo;

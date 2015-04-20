@@ -31,9 +31,6 @@ import android.support.v7.media.MediaRouter;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.opensilk.music.AppModule;
-import org.opensilk.music.R;
-
 import com.andrew.apollo.MusicPlaybackService;
 import com.andrew.apollo.utils.MusicUtils;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -42,19 +39,17 @@ import com.google.android.gms.cast.CastStatusCodes;
 import org.opensilk.cast.helpers.RemoteCastServiceManager;
 import org.opensilk.cast.util.CastPreferences;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.cast.CastUtils;
 import org.opensilk.music.MusicServiceConnection;
+import org.opensilk.music.R;
+import org.opensilk.music.cast.CastUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
-import dagger.Provides;
 import de.greenrobot.event.EventBus;
-import rx.functions.Action1;
 import timber.log.Timber;
 
 import static org.opensilk.cast.CastMessage.CAST_APPLICATION_CONNECTION_FAILED;
@@ -68,14 +63,6 @@ import static org.opensilk.cast.CastMessage.CAST_FAILED;
  * Created by drew on 8/10/14.
  */
 public class BaseActivity extends ActionBarActivity {
-
-    @dagger.Module(addsTo = AppModule.class, library = true)
-    public static class Module {
-        @Provides @Singleton @Named("activity")
-        public EventBus provideEventBus() {
-            return new EventBus();
-        }
-    }
 
     // Cast stuff
     private RemoteCastServiceManager.ServiceToken mCastServiceToken;

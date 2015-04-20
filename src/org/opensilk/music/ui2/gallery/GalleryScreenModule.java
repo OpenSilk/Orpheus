@@ -17,13 +17,13 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import org.opensilk.music.ui2.LauncherActivity;
+import org.opensilk.music.ui2.LauncherActivityModule;
 
 /**
  * Created by drew on 4/20/15.
  */
 @dagger.Module(
-        addsTo = LauncherActivity.Module.class,
+        addsTo = LauncherActivityModule.class,
         injects = GalleryScreenView.class
 )
 public class GalleryScreenModule {

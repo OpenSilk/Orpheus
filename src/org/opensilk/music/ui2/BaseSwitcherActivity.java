@@ -18,7 +18,6 @@
 package org.opensilk.music.ui2;
 
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.view.MenuItem;
 
 import org.opensilk.common.flow.AppFlow;
@@ -27,48 +26,18 @@ import org.opensilk.common.mortarflow.AppFlowPresenter;
 import org.opensilk.common.mortarflow.FrameScreenSwitcherView;
 import org.opensilk.music.R;
 import org.opensilk.music.ui2.event.GoToScreen;
-import org.opensilk.music.ui2.loader.LoaderModule;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import dagger.Provides;
 import flow.Flow;
-import flow.Parcer;
 
 /**
  * Created by drew on 11/7/14.
  */
 public class BaseSwitcherActivity extends BaseMortarActivity implements
         AppFlowPresenter.Activity {
-
-    @dagger.Module(
-            includes = {
-                    BaseMortarActivity.Module.class,
-                    LoaderModule.class,
-            }, library = true
-    )
-    public static class Module {
-        @Provides @Singleton
-        public Parcer<Object> provideParcer() {
-            return new Parcer<Object>() {
-                @Override
-                public Parcelable wrap(Object instance) {
-                    return (Parcelable) instance;
-                }
-                @Override
-                public Object unwrap(Parcelable parcelable) {
-                    return parcelable;
-                }
-            };
-        }
-        @Provides @Singleton
-        public AppFlowPresenter<BaseSwitcherActivity> providePresenter(Parcer<Object> floParcer) {
-            return new AppFlowPresenter<>(floParcer);
-        }
-    }
 
     @Inject AppFlowPresenter<BaseSwitcherActivity> mAppFlowPresenter;
 

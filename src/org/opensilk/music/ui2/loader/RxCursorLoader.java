@@ -24,16 +24,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
-import org.apache.commons.io.IOUtils;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;

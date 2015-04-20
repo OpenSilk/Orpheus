@@ -17,31 +17,13 @@
 
 package org.opensilk.music.ui2.gallery;
 
-import android.content.Context;
 import android.os.Parcel;
 
-import com.andrew.apollo.model.Genre;
-import com.andrew.apollo.utils.MusicUtils;
-
-import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
-import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.common.widget.LetterTileDrawable;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.RxLoader;
-import org.opensilk.music.ui2.profile.GenreScreen;
-import org.opensilk.music.util.SortOrder;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import flow.Layout;
-import rx.functions.Func1;
 
 /**
  * Created by drew on 10/19/14.

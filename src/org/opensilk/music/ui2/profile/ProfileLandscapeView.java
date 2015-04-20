@@ -43,7 +43,7 @@ import mortar.MortarScope;
  */
 public class ProfileLandscapeView extends LinearLayout implements ProfileView {
 
-    @Inject BasePresenter presenter;
+    @Inject ProfilePresenter presenter;
 
     @InjectView(android.R.id.list) RecyclerView mList;
     @InjectView(R.id.hero_image) AnimatedImageView mArtwork;

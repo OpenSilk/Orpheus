@@ -22,21 +22,16 @@ import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LevelListDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
-import org.opensilk.common.util.ThemeUtils;
-import org.opensilk.common.util.VersionUtils;
+import org.opensilk.common.widget.FlingyFabLayout;
+import org.opensilk.common.widget.FloatingActionButton;
 import org.opensilk.common.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
-
-import org.opensilk.common.widget.FloatingActionButton;
-import org.opensilk.common.widget.FlingyFabLayout;
 import org.opensilk.music.theme.PlaybackDrawableTint;
 
 import javax.inject.Inject;
@@ -58,7 +53,7 @@ import static org.opensilk.common.rx.RxUtils.notSubscribed;
  */
 public class MainView extends FlingyFabLayout {
 
-    @Inject Main.Presenter presenter;
+    @Inject MainPresenter presenter;
 
     @InjectView(R.id.floating_action_button) FloatingActionButtonCheckable fabPlay;
     @InjectView(R.id.floating_action_next) FloatingActionButton fabNext;

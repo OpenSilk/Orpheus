@@ -18,25 +18,14 @@
 package org.opensilk.music.ui2.profile;
 
 import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
-import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import org.opensilk.common.util.ThemeUtils;
 import org.opensilk.common.widget.AnimatedImageView;
-import org.opensilk.common.widget.SquareImageView;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
 
 import javax.inject.Inject;
 
@@ -51,7 +40,7 @@ import mortar.MortarScope;
  */
 public class PlaylistLandscapeView extends LinearLayout implements ProfileView {
 
-    @Inject PlaylistScreen.Presenter presenter;
+    @Inject PlaylistScreenPresenter presenter;
 
     @InjectView(android.R.id.list) PlaylistDragSortView mList;
     @InjectView(R.id.hero_image) AnimatedImageView mArtwork;

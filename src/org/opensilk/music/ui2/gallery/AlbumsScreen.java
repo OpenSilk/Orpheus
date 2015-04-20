@@ -19,34 +19,11 @@ package org.opensilk.music.ui2.gallery;
 
 import android.os.Parcel;
 
-import com.andrew.apollo.model.LocalAlbum;
-
-import org.opensilk.music.util.SortOrder;
-
-import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.mortar.WithModule;
-import org.opensilk.common.rx.SimpleObserver;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.api.meta.ArtInfo;
-import org.opensilk.music.artwork.ArtworkRequestManager;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.ui2.common.OverflowHandlers;
-import org.opensilk.music.ui2.core.android.ActionBarOwner;
-import org.opensilk.music.ui2.loader.RxLoader;
-import org.opensilk.music.ui2.profile.AlbumScreen;
-
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import flow.Layout;
-import hugo.weaving.DebugLog;
-import rx.functions.Func1;
-import timber.log.Timber;
 
 /**
  * Created by drew on 10/3/14.
