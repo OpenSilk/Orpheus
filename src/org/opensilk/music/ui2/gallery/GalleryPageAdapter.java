@@ -45,19 +45,19 @@ import rx.subscriptions.CompositeSubscription;
 /**
  * Created by drew on 10/18/14.
  */
-public abstract class BaseAdapter<T> extends RecyclerListAdapter<T, BaseAdapter.ViewHolder> {
+public abstract class GalleryPageAdapter<T> extends RecyclerListAdapter<T, GalleryPageAdapter.ViewHolder> {
 
-    protected final BasePresenter<T> presenter;
+    protected final GalleryPagePresenter<T> presenter;
     protected final ArtworkRequestManager artworkRequestor;
 
     private LayoutInflater inflater;
     protected boolean mGridStyle = true;
 
-    public BaseAdapter(BasePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
+    public GalleryPageAdapter(GalleryPagePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
         this(new ArrayList<T>(), presenter, artworkRequestor);
     }
 
-    public BaseAdapter(List<T> items, BasePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
+    public GalleryPageAdapter(List<T> items, GalleryPagePresenter<T> presenter, ArtworkRequestManager artworkRequestor) {
         super(items);
         this.presenter = presenter;
         this.artworkRequestor = artworkRequestor;

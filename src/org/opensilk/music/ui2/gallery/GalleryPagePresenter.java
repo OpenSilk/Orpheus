@@ -22,8 +22,6 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.view.View;
 import android.widget.PopupMenu;
 
 import org.opensilk.music.AppPreferences;
@@ -40,7 +38,6 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Subscription;
-import timber.log.Timber;
 
 import static org.opensilk.common.rx.RxUtils.isSubscribed;
 import static org.opensilk.common.rx.RxUtils.notSubscribed;
@@ -48,7 +45,7 @@ import static org.opensilk.common.rx.RxUtils.notSubscribed;
 /**
  * Created by drew on 10/19/14.
  */
-public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> implements HasOptionsMenu, RxLoader.ContentChangedListener {
+public abstract class GalleryPagePresenter<T> extends ViewPresenter<GalleryPageView> implements HasOptionsMenu, RxLoader.ContentChangedListener {
 
     protected final AppPreferences preferences;
     protected final ArtworkRequestManager artworkRequestor;
@@ -59,8 +56,8 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     protected ActionBarOwner.MenuConfig actionBarMenu;
     protected boolean adapterIsDirty = false;
 
-    public BasePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
-                         RxLoader<T> loader, OverflowHandler<T> popupHandler) {
+    public GalleryPagePresenter(AppPreferences preferences, ArtworkRequestManager artworkRequestor,
+                                RxLoader<T> loader, OverflowHandler<T> popupHandler) {
         this.preferences = preferences;
         this.artworkRequestor = artworkRequestor;
         this.loader = loader;
@@ -100,7 +97,7 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     // Init the recyclerview
     protected void setupRecyclerView(boolean clear) {
         if (!viewNotNull()) return;
-        BaseAdapter<T> adapter = newAdapter();
+        GalleryPageAdapter<T> adapter = newAdapter();
         adapter.setGridStyle(isGrid());
         RecyclerView v = getView().getListView();
         v.setHasFixedSize(true);
@@ -129,9 +126,9 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
         if (viewNotNull()) getView().setEmptyText(R.string.empty_music);
     }
 
-    protected BaseAdapter<T> getAdapter() {
+    protected GalleryPageAdapter<T> getAdapter() {
         if (!viewNotNull()) throw new NullPointerException("You didn't check if list was null");
-        return (BaseAdapter<T>) getView().getListView().getAdapter();
+        return (GalleryPageAdapter<T>) getView().getListView().getAdapter();
     }
 
     protected boolean viewNotNull() {
@@ -139,9 +136,9 @@ public abstract class BasePresenter<T> extends ViewPresenter<GalleryPageView> im
     }
 
     //handle item clicks
-    protected abstract void onItemClicked(BaseAdapter.ViewHolder holder, T item);
+    protected abstract void onItemClicked(GalleryPageAdapter.ViewHolder holder, T item);
     // make a new adapter
-    protected abstract BaseAdapter<T> newAdapter();
+    protected abstract GalleryPageAdapter<T> newAdapter();
     // start the loader
     protected abstract void load();
     // init overflow menu

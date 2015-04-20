@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<org.opensilk.music.ui2.gallery.GalleryView
+<org.opensilk.music.ui2.gallery.GalleryScreenView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/pager_container"
@@ -40,4 +40,4 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-</org.opensilk.music.ui2.gallery.GalleryView>
+</org.opensilk.music.ui2.gallery.GalleryScreenView>
