@@ -20,6 +20,7 @@ package org.opensilk.music.ui2.library;
 import android.os.Bundle;
 import android.os.RemoteException;
 
+import org.opensilk.music.BuildConfig;
 import org.opensilk.music.api.PluginConfig;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.RemoteLibrary;
@@ -100,8 +101,7 @@ public class LibraryConnection {
         }
     }
 
-    public static final boolean D = true;
-    public static final int STEP = D ? 4 : 30;
+    public static final int STEP = BuildConfig.DEBUG ? 4 : 30;
 
     final Map<LibraryInfo, Result> browseCache = new LinkedHashMap<>();
     final PluginConnectionManager connectionManager;
