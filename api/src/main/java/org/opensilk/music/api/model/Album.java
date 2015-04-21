@@ -126,6 +126,10 @@ public class Album implements Bundleable {
         return name;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final BundleCreator<Album> BUNDLE_CREATOR = new BundleCreator<Album>() {
         @Override
         public Album fromBundle(Bundle b) throws IllegalArgumentException {

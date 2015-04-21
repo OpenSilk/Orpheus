@@ -108,6 +108,10 @@ public class Artist implements Bundleable {
         return name;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final BundleCreator<Artist> BUNDLE_CREATOR = new BundleCreator<Artist>() {
         @Override
         public Artist fromBundle(Bundle b) throws IllegalArgumentException {

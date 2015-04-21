@@ -117,6 +117,10 @@ public class Folder implements Bundleable {
         return name;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static BundleCreator<Folder> BUNDLE_CREATOR = new BundleCreator<Folder>() {
         @Override
         public Folder fromBundle(Bundle b) throws IllegalArgumentException {

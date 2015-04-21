@@ -159,6 +159,10 @@ public class Song implements Bundleable {
         return name;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final BundleCreator<Song> BUNDLE_CREATOR = new BundleCreator<Song>() {
         @Override
         public Song fromBundle(Bundle b) throws IllegalArgumentException {
