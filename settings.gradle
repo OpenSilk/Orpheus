@@ -1,4 +1,4 @@
-include ':app'
+include ':app', ':common'
 include ':api'
 //include ':../OrpheusPlugins:folders'
 //include ':../SilkCastService:library'

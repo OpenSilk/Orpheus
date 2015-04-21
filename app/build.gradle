@@ -176,6 +176,7 @@ dependencies {
 //    compile project(':../SilkFileBrowser:lib_sfb')
 
     compile project(':api')
+    compile project(':common')
 
 //    compile fileTree(dir: '../libs', include: ['*.jar'])
 
