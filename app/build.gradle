@@ -161,7 +161,7 @@ dependencies {
     //greenrobot
     compile 'de.greenrobot:eventbus:2.4.0'
     //acra
-    compile 'ch.acra:acra:4.6.1'
+    compile 'ch.acra:acra:4.6.2-SNAPSHOT'
 
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
