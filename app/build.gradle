@@ -46,18 +46,11 @@ android {
 
     sourceSets {
         main {
-            manifest.srcFile 'AndroidManifest.xml'
             res {
                 //This appends the extra dirs to res.srcDirs
                 srcDir 'src/main/res-themes'
                 srcDir 'src/main/res-translations'
             }
-        }
-        debug {
-            res.srcDirs = ['variants/debug/res']
-        }
-        release {
-            res.srcDirs = ['variants/release/res']
         }
     }
 
