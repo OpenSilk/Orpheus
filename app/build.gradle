@@ -155,6 +155,8 @@ dependencies {
     //acra
     compile 'ch.acra:acra:4.6.2-SNAPSHOT'
 
+    compile(group: 'com.google.android.exoplayer', name: 'exoplayer', version: 'r1.2.4', ext: 'aar')
+
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
     compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
