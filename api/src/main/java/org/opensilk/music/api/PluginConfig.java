@@ -104,6 +104,10 @@ public class PluginConfig {
         );
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
         private int apiVersion = OrpheusApi.API_VERSION;
         private int capabilities;
