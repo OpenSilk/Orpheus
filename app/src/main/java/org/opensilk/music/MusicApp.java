@@ -25,13 +25,11 @@ import android.content.res.Configuration;
 import android.os.StrictMode;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.WindowManager;
 
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
-import org.acra.log.ACRALog;
 import org.acra.sender.HttpSender;
 import org.apache.commons.io.FileUtils;
 import org.opensilk.cast.manager.MediaCastManager;
@@ -97,6 +95,9 @@ import static org.acra.ReportField.*;
         },
         excludeMatchingSharedPreferencesKeys = {
                 ".*_defInfo$", //Plugins (might contain emails)
+        },
+        additionalSharedPreferences = {
+                "Service",
         }
 )
 public class MusicApp extends Application implements DaggerInjector {
@@ -168,7 +169,7 @@ public class MusicApp extends Application implements DaggerInjector {
             return;
         }
         if (!DEBUG) {
-            ACRA.setLog(new AcraLogStub());
+            ACRA.disableLog();
         }
         ACRA.init(this);
     }
@@ -304,26 +305,10 @@ public class MusicApp extends Application implements DaggerInjector {
 
         static void sendException(Throwable t) {
             try {
-                if (t instanceof Exception)
-                    ACRA.getErrorReporter().handleSilentException(t);
+                ACRA.getErrorReporter().handleSilentException(t);
             } catch (Exception ignored) {/*safety*/}
         }
 
-    }
-
-    static class AcraLogStub implements ACRALog {
-        @Override public int v(String tag, String msg) { return 0; }
-        @Override public int v(String tag, String msg, Throwable tr) { return 0; }
-        @Override public int d(String tag, String msg) { return 0; }
-        @Override public int d(String tag, String msg, Throwable tr) { return 0; }
-        @Override public int i(String tag, String msg) { return 0; }
-        @Override public int i(String tag, String msg, Throwable tr) { return 0; }
-        @Override public int w(String tag, String msg) { return 0; }
-        @Override public int w(String tag, String msg, Throwable tr) { return 0; }
-        @Override public int w(String tag, Throwable tr) { return 0; }
-        @Override public int e(String tag, String msg) { return 0; }
-        @Override public int e(String tag, String msg, Throwable tr) { return 0; }
-        @Override public String getStackTraceString(Throwable tr) { return Log.getStackTraceString(tr); }
     }
 
 }
