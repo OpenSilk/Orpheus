@@ -51,7 +51,6 @@ android {
             resources.srcDirs = ['../src']
             aidl.srcDirs = ['../src']
             renderscript.srcDirs = ['../src']
-            assets.srcDirs = ['../assets']
             res {
                 //This appends the extra dirs to res.srcDirs
                 srcDir 'src/main/res-themes'
