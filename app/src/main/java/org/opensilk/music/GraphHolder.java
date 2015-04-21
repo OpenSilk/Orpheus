@@ -18,6 +18,7 @@ package org.opensilk.music;
 
 import android.content.Context;
 
+import org.opensilk.common.dagger.AppContextModule;
 import org.opensilk.music.artwork.ArtworkModule;
 import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.common.dagger.qualifier.ForApplication;
@@ -45,7 +46,7 @@ public class GraphHolder implements DaggerInjector {
     private ObjectGraph graph;
 
     private GraphHolder(Context context) {
-        this.graph = ObjectGraph.create(new GlobalModule(context));
+        this.graph = ObjectGraph.create(new AppContextModule(context)).plus(new GlobalModule());
     }
 
     @Override

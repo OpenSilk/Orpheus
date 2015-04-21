@@ -22,4 +22,7 @@
     <issue id="MissingTranslation">
         <ignore path="**/values*/strings.xml"/>
     </issue>
+    <issue id="MissingTranslation">
+        <ignore path="**/values*/strings2.xml"/>
+    </issue>
 </lint>

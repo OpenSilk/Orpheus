@@ -40,7 +40,7 @@ import javax.inject.Inject;
  */
 public class SettingsPluginFragment extends SettingsFragment implements Preference.OnPreferenceChangeListener {
 
-    @dagger.Module(addsTo = AppModule.class, injects = SettingsPluginFragment.class)
+    @dagger.Module(addsTo = SettingsActivity.Module.class, injects = SettingsPluginFragment.class)
     public static class Module {
 
     }

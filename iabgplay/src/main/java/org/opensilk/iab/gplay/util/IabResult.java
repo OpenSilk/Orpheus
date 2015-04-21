@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.iab;
+package org.opensilk.iab.gplay.util;
 
 /**
  * Represents the result of an in-app billing operation.

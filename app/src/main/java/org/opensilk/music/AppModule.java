@@ -17,6 +17,7 @@
 package org.opensilk.music;
 
 import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.iab.gplay.IabGplayModule;
 
 import javax.inject.Singleton;
 
@@ -29,7 +30,10 @@ import dagger.Provides;
 @Module (
         library = true,
         addsTo = GlobalModule.class,
-        injects = MusicApp.class
+        injects = MusicApp.class,
+        includes = {
+                IabGplayModule.class,
+        }
 )
 public class AppModule {
 

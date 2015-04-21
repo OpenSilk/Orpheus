@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.iab;
+package org.opensilk.iab.gplay.util;
 
 import android.text.TextUtils;
 import android.util.Log;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 
 import java.security.InvalidKeyException;

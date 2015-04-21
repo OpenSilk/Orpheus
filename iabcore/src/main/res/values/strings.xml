@@ -1,0 +1,35 @@
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+  <!-- donate -->
+  <string name="iab_donate">Donate</string>
+  <!-- donate/IAB -->
+  <string name="iab_donate_unpurchased">Click for details</string>
+  <string name="iab_purchased">Purchased</string>
+  <string name="iab_err_purchase_failed">Purchase failed</string>
+  <string name="iab_msg_fetching_inventory">Obtaining product list</string>
+  <string name="iab_err_unable_to_fetch_inventory">Unable to fetch inventory</string>
+  <string name="iab_err_service_error">Billing service unavailable</string>
+  <string name="iab_donate_dialog_title">Donate</string>
+  <string name="iab_donate_dialog_message">Thank you for using Orpheus. Please consider a donation to support the developers.</string>
+  <string name="iab_msg_thanks">Thank you for your kindness</string>
+  <string name="iab_opensilk_donate_url" translatable="false">http://www.opensilk.org/donate/</string>
+  <string name="iab_opensilk_donate">Billing services unavailable. Please visit our website for donate options.</string>
+  <string name="iab_retry">Retry</string>
+  <string name="iab_error">Error</string>
+</resources>
