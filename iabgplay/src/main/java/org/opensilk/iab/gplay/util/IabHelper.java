@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.iab;
+package org.opensilk.iab.gplay.util;
 
 import android.app.Activity;
 import android.app.PendingIntent;

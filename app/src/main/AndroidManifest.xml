@@ -39,8 +39,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- Used for the Visualizer -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <!-- IAB -->
-    <uses-permission android:name="com.android.vending.BILLING" />
+
     <!-- sdcard access Kitkat+ -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 

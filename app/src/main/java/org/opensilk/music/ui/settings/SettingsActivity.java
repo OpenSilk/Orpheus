@@ -44,6 +44,7 @@ public class SettingsActivity extends BaseActivity implements DaggerInjector {
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
 
         if (savedInstanceState == null) {
             //Load the main fragment
@@ -75,19 +76,8 @@ public class SettingsActivity extends BaseActivity implements DaggerInjector {
     }
 
     @Override
-    //@DebugLog
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Fragment f = getFragmentManager().findFragmentByTag(SettingsDonateFragment.class.getName());
-        if (f != null) {
-            f.onActivityResult(requestCode, resultCode, data);
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    @Override
     public void inject(Object obj) {
-        mGraph.inject(this);
+        mGraph.inject(obj);
     }
 
     @Override

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.iab;
+package org.opensilk.iab.gplay.util;
 
 /**
  * Exception thrown when something went wrong with in-app billing.

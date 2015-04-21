@@ -16,13 +16,11 @@
 
 package org.opensilk.music;
 
-import android.content.Context;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.opensilk.common.dagger.AppContextModule;
 import org.opensilk.music.artwork.ArtworkModule;
-import org.opensilk.common.dagger.qualifier.ForApplication;
 
 import javax.inject.Singleton;
 
@@ -33,6 +31,7 @@ import dagger.Provides;
  * Created by drew on 6/21/14.
  */
 @Module(
+        addsTo = AppContextModule.class,
         library = true,
         includes = {
                 ArtworkModule.class,
@@ -40,19 +39,6 @@ import dagger.Provides;
         injects = AppPreferences.class
 )
 public class GlobalModule {
-    private Context appContext;
-
-    public GlobalModule(Context context) {
-        this.appContext = context.getApplicationContext();
-        if (this.appContext == null) {
-            throw new NullPointerException("Null application context what?");
-        }
-    }
-
-    @Provides @Singleton @ForApplication
-    public Context provideAppContext() {
-        return appContext;
-    }
 
     @Provides @Singleton
     public Gson provideGson() {

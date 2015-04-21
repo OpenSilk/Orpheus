@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.iab;
+package org.opensilk.iab.gplay.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,8 +81,12 @@ public class Inventory {
     }
 
     /** Returns a list of all purchases. */
-    List<Purchase> getAllPurchases() {
+    public List<Purchase> getAllPurchases() {
         return new ArrayList<Purchase>(mPurchaseMap.values());
+    }
+
+    public List<SkuDetails> getAllSkus() {
+        return new ArrayList<SkuDetails>(mSkuMap.values());
     }
 
     void addSkuDetails(SkuDetails d) {

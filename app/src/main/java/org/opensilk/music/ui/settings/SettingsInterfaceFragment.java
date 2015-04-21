@@ -40,7 +40,7 @@ public class SettingsInterfaceFragment extends SettingsFragment implements
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((DaggerInjector) activity).getObjectGraph().plus(new Object[]{new Module()}).inject(this);
+        ((DaggerInjector) activity).getObjectGraph().plus(new Module()).inject(this);
     }
 
     @Override

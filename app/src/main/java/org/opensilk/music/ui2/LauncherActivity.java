@@ -41,11 +41,10 @@ import org.opensilk.common.flow.AppFlow;
 import org.opensilk.common.flow.Screen;
 import org.opensilk.common.rx.RxUtils;
 import org.opensilk.common.util.ThemeUtils;
+import org.opensilk.iab.core.DonateManager;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.iab.IabUtil;
-import org.opensilk.music.iab.event.IABQueryResult;
 import org.opensilk.music.theme.OrpheusTheme;
 import org.opensilk.music.ui2.core.android.DrawerOwner;
 import org.opensilk.music.ui2.event.ActivityResult;
@@ -58,7 +57,6 @@ import org.opensilk.music.ui2.welcome.TipsScreen;
 import javax.inject.Inject;
 
 import butterknife.InjectView;
-import hugo.weaving.DebugLog;
 import rx.Subscription;
 import rx.android.observables.AndroidObservable;
 import rx.functions.Action1;
@@ -70,6 +68,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
 
     @Inject DrawerOwner mDrawerOwner;
     @Inject PluginConnectionManager mPluginConnectionManager;
+    @Inject DonateManager mDonateManager;
 
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container) ViewGroup mNavContainer;
@@ -77,6 +76,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     ActionBarDrawerToggle mDrawerToggle;
 
     Subscription chargingSubscription;
+    Subscription donateSubscription;
 
     @Override
     protected mortar.Blueprint getBlueprint(String scopeName) {
@@ -108,10 +108,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
 
         AppFlow.loadInitialScreen(this);
 
-        // Update count for donate dialog
-        IabUtil.incrementAppLaunchCount(mSettings);
-        // check for donations
-        IabUtil.queryDonateAsync(getApplicationContext(), mBus);
+        donateSubscription = mDonateManager.onCreate(this);
 
         if (savedInstanceState == null) {
             handleIntent();
@@ -127,6 +124,7 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (donateSubscription != null) donateSubscription.unsubscribe();
         if (mDrawerOwner != null) mDrawerOwner.dropView(this);
         if (!mConfigurationChangeIncoming) {
             // Release service connection
@@ -292,16 +290,6 @@ public class LauncherActivity extends BaseSwitcherToolbarActivity implements
     public void onEventMainThread(StartActivityForResult req) {
         req.intent.putExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, ThemeUtils.isLightTheme(this));
         startActivityForResult(req.intent, req.reqCode);
-    }
-
-    @DebugLog
-    public void onEventMainThread(IABQueryResult r) {
-        if (r.error == IABQueryResult.Error.NO_ERROR) {
-            if (!r.isApproved) {
-                IabUtil.maybeShowDonateDialog(mSettings, this);
-            }
-        }
-        //TODO handle faliurs
     }
 
     @Override

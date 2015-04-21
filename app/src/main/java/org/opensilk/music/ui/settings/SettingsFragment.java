@@ -21,7 +21,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mTitle = getArguments().getString("title");
+            mTitle = getString(getArguments().getInt("title"));
         }
     }
 
