@@ -169,7 +169,7 @@ public class MusicApp extends Application implements DaggerInjector {
             return;
         }
         if (!DEBUG) {
-            ACRA.disableLog();
+            ACRA.disableLogging();
         }
         ACRA.init(this);
     }
