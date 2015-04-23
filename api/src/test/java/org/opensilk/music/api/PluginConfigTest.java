@@ -39,7 +39,7 @@ public class PluginConfigTest {
 
     @Before
     public void setUp() {
-        config_1 = new PluginConfig.Builder().addAbility(PluginConfig.SEARCHABLE).addAbility(PluginConfig.SETTINGS)
+        config_1 = PluginConfig.builder().addAbility(PluginConfig.SEARCHABLE).addAbility(PluginConfig.SETTINGS)
                 .setPickerComponent(new ComponentName("com.test", "TestClass"), null)
                 .setSettingsComponent(new ComponentName("com.test", "TestClassSettings"), null)
                 .build();

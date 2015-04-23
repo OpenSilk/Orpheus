@@ -40,9 +40,9 @@ public class FolderTest {
 
     @Before
     public void setUp() {
-        folder1 = new Folder.Builder().setIdentity("1").setName("Folder1").setChildCount(25).build();
-        folder1_copy = new Folder.Builder().setIdentity("1").setName("Folder1").setChildCount(25).build();
-        folder2 = new Folder.Builder().setIdentity("1").setName("Folder2").setChildCount(25).build();
+        folder1 = Folder.builder().setIdentity("1").setName("Folder1").setChildCount(25).build();
+        folder1_copy = Folder.builder().setIdentity("1").setName("Folder1").setChildCount(25).build();
+        folder2 = Folder.builder().setIdentity("1").setName("Folder2").setChildCount(25).build();
     }
 
     @Test
@@ -66,11 +66,11 @@ public class FolderTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureFolderNullIdentityThrows() {
-        Folder f = new Folder.Builder().setName("Folder1").build();
+        Folder f = Folder.builder().setName("Folder1").build();
     }
 
     @Test(expected = NullPointerException.class)
     public void ensureFolderNullNameThrows() {
-        Folder f = new Folder.Builder().setName("Folder1").build();
+        Folder f = Folder.builder().setName("Folder1").build();
     }
 }

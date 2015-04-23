@@ -39,7 +39,7 @@ public class OrpheusApiTest {
 
     @Test
     public void testMaterilizeBundleWorks() throws Exception {
-        Folder f = new Folder.Builder().setIdentity("1").setName("Folder1").build();
+        Folder f = Folder.builder().setIdentity("1").setName("Folder1").build();
         Bundle b = f.toBundle();
 
         Parcel p = Parcel.obtain();
@@ -57,7 +57,7 @@ public class OrpheusApiTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void ensureMalformedBundleThrows() throws Exception {
-        Bundle b =  new Folder.Builder().setIdentity("1").setName("Folder1").build().toBundle();
+        Bundle b =  Folder.builder().setIdentity("1").setName("Folder1").build().toBundle();
         b.putString("clz", null);
         Folder f = OrpheusApi.materializeBundle(Folder.class, b);
     }

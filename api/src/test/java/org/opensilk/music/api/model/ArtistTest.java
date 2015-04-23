@@ -40,9 +40,9 @@ public class ArtistTest {
 
     @Before
     public void setUp() {
-        artist1 = new Artist.Builder().setIdentity("1").setName("Artist1").setSongCount(25).build();
-        artist1_copy = new Artist.Builder().setIdentity("1").setName("Artist1").setSongCount(25).build();
-        artist2 = new Artist.Builder().setIdentity("2").setName("Artist1").setSongCount(22).build();
+        artist1 = Artist.builder().setIdentity("1").setName("Artist1").setSongCount(25).build();
+        artist1_copy = Artist.builder().setIdentity("1").setName("Artist1").setSongCount(25).build();
+        artist2 = Artist.builder().setIdentity("2").setName("Artist1").setSongCount(22).build();
     }
 
     @Test
@@ -66,12 +66,12 @@ public class ArtistTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureArtistNullIdentityThrows() {
-        Artist a = new Artist.Builder().setName("Artist1").build();
+        Artist a = Artist.builder().setName("Artist1").build();
     }
 
     @Test(expected = NullPointerException.class)
     public void ensureArtistNullNameThrows() {
-        Artist a = new Artist.Builder().setIdentity("1").build();;
+        Artist a = Artist.builder().setIdentity("1").build();;
     }
 
 }

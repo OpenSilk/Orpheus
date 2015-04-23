@@ -44,9 +44,9 @@ public class AlbumTest {
 
     @Before
     public void setUp() {
-        album1 = new Album.Builder().setIdentity("1").setName("Album1").setArtworkUri(Uri.parse("http://example.com/Art1")).build();
-        album1_copy = new Album.Builder().setIdentity("1").setName("Album1").setArtworkUri(Uri.parse("http://example.com/Art1")).build();
-        album2 = new Album.Builder().setIdentity("2").setName("Album1").build();
+        album1 = Album.builder().setIdentity("1").setName("Album1").setArtworkUri(Uri.parse("http://example.com/Art1")).build();
+        album1_copy = Album.builder().setIdentity("1").setName("Album1").setArtworkUri(Uri.parse("http://example.com/Art1")).build();
+        album2 = Album.builder().setIdentity("2").setName("Album1").build();
     }
 
     @Test
@@ -70,12 +70,12 @@ public class AlbumTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureAlbumNullIdentityThrows() {
-        Album a = new Album.Builder().setName("Album1").build();
+        Album a = Album.builder().setName("Album1").build();
     }
 
     @Test(expected = NullPointerException.class)
     public void ensureAlbumNullNameThrows() {
-        Album a = new Album.Builder().setIdentity("1").build();
+        Album a = Album.builder().setIdentity("1").build();
     }
 
 

@@ -41,9 +41,9 @@ public class SongTest {
 
     @Before
     public void setUp() {
-        song1 = new Song.Builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
-        song1_copy = new Song.Builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
-        song2 = new Song.Builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).setMimeType("audio/mp3").build();
+        song1 = Song.builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
+        song1_copy = Song.builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
+        song2 = Song.builder().setIdentity("1").setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).setMimeType("audio/mp3").build();
     }
 
     @Test
@@ -67,17 +67,17 @@ public class SongTest {
 
     @Test(expected = NullPointerException.class)
     public void ensureSongNullIdentityThrows() {
-        Song s = new Song.Builder().setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
+        Song s = Song.builder().setName("Song1").setDataUri(Uri.parse("http://example.com/song1")).build();
     }
 
     @Test(expected = NullPointerException.class)
     public void ensureSongNullNameThrows() {
-        Song s = new Song.Builder().setIdentity("1").setDataUri(Uri.parse("http://example.com/song1")).build();
+        Song s = Song.builder().setIdentity("1").setDataUri(Uri.parse("http://example.com/song1")).build();
     }
 
     @Test(expected = NullPointerException.class)
     public void ensureSongNullDataUriThrows() {
-        Song s = new Song.Builder().setIdentity("1").setName("Song1").build();
+        Song s = Song.builder().setIdentity("1").setName("Song1").build();
     }
 
     @Test
