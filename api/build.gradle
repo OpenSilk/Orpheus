@@ -74,6 +74,8 @@ dependencies {
 //        exclude module: 'wagon-provider-api'
     }
     testCompile('com.squareup:fest-android:1.0.0')
+
+    androidTestCompile('com.squareup:fest-android:1.0.0')
 }
 
 // for uploadArchives
