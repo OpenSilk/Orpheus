@@ -94,6 +94,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     final BitmapDiskCache mL2Cache;
     final RequestQueue mVolleyQueue;
     final Gson mGson;
+    final ConnectivityManager mConnectivityManager;
 
     final Map<RequestKey, IArtworkRequest> mActiveRequests = new LinkedHashMap<>(10);
 
@@ -103,13 +104,16 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                                      @Named("L1Cache") ArtworkCache mL1Cache,
                                      @Named("L2Cache") BitmapDiskCache mL2Cache,
                                      RequestQueue mVolleyQueue,
-                                     Gson mGson) {
+                                     Gson mGson,
+                                     ConnectivityManager mConnectivityManager
+    ) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
         this.mL1Cache = mL1Cache;
         this.mL2Cache = mL2Cache;
         this.mVolleyQueue = mVolleyQueue;
         this.mGson = mGson;
+        this.mConnectivityManager = mConnectivityManager;
     }
 
     static class CrumbTrail {
@@ -1053,13 +1057,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         boolean state = false;
 
-        /* Monitor network connections */
-        final ConnectivityManager connectivityManager =
-                (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
         /* Wi-Fi connection */
         final NetworkInfo wifiNetwork =
-                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (wifiNetwork != null) {
             state = wifiNetwork.isConnectedOrConnecting();
         }
@@ -1071,13 +1071,13 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         /* Mobile data connection */
         final NetworkInfo mbobileNetwork =
-                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+                mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         if (mbobileNetwork != null) {
             state = mbobileNetwork.isConnectedOrConnecting();
         }
 
         /* Other networks */
-        final NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        final NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
         if (activeNetwork != null) {
             state = activeNetwork.isConnectedOrConnecting();
         }
