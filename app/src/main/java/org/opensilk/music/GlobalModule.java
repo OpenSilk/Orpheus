@@ -16,10 +16,14 @@
 
 package org.opensilk.music;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.opensilk.common.dagger.AppContextModule;
+import org.opensilk.common.dagger.qualifier.ForApplication;
 import org.opensilk.music.artwork.ArtworkModule;
 
 import javax.inject.Singleton;
@@ -43,6 +47,11 @@ public class GlobalModule {
     @Provides @Singleton
     public Gson provideGson() {
         return new GsonBuilder().create();
+    }
+
+    @Provides @Singleton
+    public ConnectivityManager provideConnectivityManager(@ForApplication Context appContext) {
+        return (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
 }
