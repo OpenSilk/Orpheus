@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.api;
+package org.opensilk.music.api.pm;
 
 import android.os.Binder;
 import android.os.IBinder;

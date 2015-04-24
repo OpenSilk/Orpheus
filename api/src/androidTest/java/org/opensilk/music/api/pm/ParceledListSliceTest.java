@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.api;
+package org.opensilk.music.api.pm;
 
 import android.net.Uri;
 import android.os.Bundle;
