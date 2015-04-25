@@ -115,7 +115,7 @@ public class MultiPlayer implements
     }
 
     @Override
-    public long getPosition() {
+    public void getPosition() {
         long pos = -1;
         synchronized (mLock) {
             if (isInitialized()) {
@@ -124,14 +124,15 @@ public class MultiPlayer implements
                 } catch (IllegalStateException e) {
                     mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
                     setInitializedLocked(false);
+                    return;
                 }
             }
         }
-        return pos;
+        mCallback.onPlayerEvent(PlayerEvent.position(pos));
     }
 
     @Override
-    public long getDuration() {
+    public void getDuration() {
         long dur = -1;
         synchronized (mLock) {
             if (isInitialized()) {
@@ -140,10 +141,11 @@ public class MultiPlayer implements
                 } catch (IllegalStateException e) {
                     mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
                     setInitializedLocked(false);
+                    return;
                 }
             }
         }
-        return dur;
+        mCallback.onPlayerEvent(PlayerEvent.duration(dur));
     }
 
     @Override

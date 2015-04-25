@@ -226,9 +226,10 @@
         <service android:name="org.opensilk.music.appwidgets.MusicWidgetService" />
 
         <!-- Media button receiver -->
-        <receiver android:name="com.andrew.apollo.MediaButtonIntentReceiver" >
+        <receiver android:name="com.andrew.apollo.MediaButtonIntentReceiver"
+                  android:process=":service">
             <intent-filter>
-                <!--<action android:name="android.intent.action.MEDIA_BUTTON" />-->
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />
             </intent-filter>
         </receiver>
