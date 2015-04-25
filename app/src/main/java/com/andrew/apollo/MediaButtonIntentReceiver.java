@@ -11,34 +11,14 @@
 
 package com.andrew.apollo;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.camera2.CaptureResult;
 import android.media.AudioManager;
-import android.os.Handler;
-import android.os.Message;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.support.v4.content.WakefulBroadcastReceiver;
-import android.util.Log;
-import android.view.KeyEvent;
-
-import com.andrew.apollo.utils.NavUtils;
-
-import org.opensilk.music.BuildConfig;
 
 import timber.log.Timber;
 
-
-/**
- * Used to control headset playback.
- *   Single press: pause/resume
- *   Double press: next track
- *   Triple press: previous track
- *   Long press: voice search
- */
 public class MediaButtonIntentReceiver extends WakefulBroadcastReceiver {
 
     @Override

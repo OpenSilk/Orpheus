@@ -150,7 +150,6 @@ public class MediaButtonHandler extends Handler {
         final Intent i = new Intent();
         i.setAction(MusicPlaybackService.SERVICECMD);
         i.putExtra(MusicPlaybackService.CMDNAME, command);
-        i.putExtra(MusicPlaybackService.FROM_MEDIA_BUTTON, true);
         MusicPlaybackService s = mService.get();
         if (s != null) {
             s.postCommandIntent(i);
