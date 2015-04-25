@@ -458,6 +458,8 @@ public class MusicPlaybackService extends Service {
      */
     Scheduler.Worker mHandleIntentWorker;
 
+    MediaButtonHandler mMediaButtonHandler;
+
     public MusicPlaybackService() {
         super();
         mBinder = new ApolloServiceBinder(this);
@@ -548,6 +550,8 @@ public class MusicPlaybackService extends Service {
             mCastServiceToken = LocalCastServiceManager.bindToService(this, mCastServiceConnectionCallback);
         }
 
+        mMediaButtonHandler = new MediaButtonHandler(this);
+
         // Initialize the intent filter and each action
         final IntentFilter filter = new IntentFilter();
         filter.addAction(SERVICECMD);
@@ -613,6 +617,8 @@ public class MusicPlaybackService extends Service {
 
         //release the worker
         mHandleIntentWorker.unsubscribe();
+
+        mMediaButtonHandler.removeCallbacksAndMessages(null);
 
         // Close the cursor
         closeCursor();
@@ -692,12 +698,12 @@ public class MusicPlaybackService extends Service {
                 return START_NOT_STICKY;
             }
 
-            mHandleIntentWorker.schedule(new Action0() {
-                @Override
-                public void call() {
-                    handleCommandIntent(intent);
-                }
-            });
+            if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+                mMediaButtonHandler.processIntent(intent);
+            } else {
+                postCommandIntent(intent);
+            }
+
         }
 
         // Make sure the service will shut down on its own if it was
@@ -759,6 +765,15 @@ public class MusicPlaybackService extends Service {
             saveQueue(true);
             stopSelf();
         }
+    }
+
+    void postCommandIntent(final Intent intent) {
+        mHandleIntentWorker.schedule(new Action0() {
+            @Override
+            public void call() {
+                handleCommandIntent(intent);
+            }
+        });
     }
 
     private void handleCommandIntent(Intent intent) {
@@ -2641,12 +2656,7 @@ public class MusicPlaybackService extends Service {
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            mHandleIntentWorker.schedule(new Action0() {
-                @Override
-                public void call() {
-                    handleCommandIntent(intent);
-                }
-            });
+            postCommandIntent(intent);
         }
     };
 
