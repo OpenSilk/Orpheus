@@ -30,6 +30,7 @@ import android.view.WindowManager;
 
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
+import org.acra.log.HollowLog;
 import org.acra.sender.HttpSender;
 import org.apache.commons.io.FileUtils;
 import org.opensilk.cast.manager.MediaCastManager;
@@ -169,7 +170,7 @@ public class MusicApp extends Application implements DaggerInjector {
             return;
         }
         if (!DEBUG) {
-            ACRA.disableLogging();
+            ACRA.setLog(new HollowLog());
         }
         ACRA.init(this);
     }
