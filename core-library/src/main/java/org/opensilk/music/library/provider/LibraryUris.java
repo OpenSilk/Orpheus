@@ -36,36 +36,36 @@ public class LibraryUris {
     static final String tracks = "tracks";
     static final String track = "track";
 
-    public static Uri albums(String authority) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(albums).build();
+    public static Uri albums(String authority, String library) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(albums).build();
     }
 
-    public static Uri album(String authority, String id) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(album).appendPath(id).build();
+    public static Uri album(String authority, String library, String id) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(album).appendPath(id).build();
     }
 
-    public static Uri artists(String authority) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(artists).build();
+    public static Uri artists(String authority, String library) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(artists).build();
     }
 
-    public static Uri artist(String authority, String id) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(artist).appendPath(id).build();
+    public static Uri artist(String authority, String library, String id) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(artist).appendPath(id).build();
     }
 
-    public static Uri folders(String authority) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(folders).build();
+    public static Uri folders(String authority, String library) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folders).build();
     }
 
-    public static Uri folder(String authority, String id) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(folder).appendPath(id).build();
+    public static Uri folder(String authority, String library, String id) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folder).appendPath(id).build();
     }
 
-    public static Uri tracks(String authority) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(tracks).build();
+    public static Uri tracks(String authority, String library) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(tracks).build();
     }
 
-    public static Uri track(String authority, String id) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(track).appendPath(id).build();
+    public static Uri track(String authority, String library, String id) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(track).appendPath(id).build();
     }
 
     static final int M_ALBUMS = 1;

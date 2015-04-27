@@ -35,7 +35,7 @@ import org.opensilk.music.library.proj.TrackProj;
 /**
  * Created by drew on 4/27/15.
  */
-public class CursorUtils {
+public class CursorUtil {
 
     public static void populateRow(MatrixCursor.RowBuilder rb, Bundleable b) {
         rb.add(b.getIdentity());
@@ -79,7 +79,7 @@ public class CursorUtils {
                 .setArtistName(c.getString(2))
                 .setSongCount(c.getInt(3))
                 .setDate(c.getString(4))
-                .setArtworkUri(c.isNull(5) ? Uri.parse(c.getString(5)) : null)
+                .setArtworkUri(!c.isNull(5) ? Uri.parse(c.getString(5)) : null)
                 .build();
     }
 
@@ -124,7 +124,7 @@ public class CursorUtils {
                 .setAlbumIdentity(c.getString(5))
                 .setDuration(c.getInt(6))
                 .setDataUri(Uri.parse(c.getString(7))) //never null
-                .setArtworkUri(c.isNull(8) ? Uri.parse(c.getString(8)) : null)
+                .setArtworkUri(!c.isNull(8) ? Uri.parse(c.getString(8)) : null)
                 .setMimeType(c.getString(9))
                 .build();
     }
@@ -181,7 +181,7 @@ public class CursorUtils {
                         .setAlbumIdentity(c.getString(9))
                         .setDuration(c.getInt(10))
                         .setDataUri(Uri.parse(c.getString(11))) //never null
-                        .setArtworkUri(c.isNull(12) ? Uri.parse(c.getString(12)) : null)
+                        .setArtworkUri(!c.isNull(12) ? Uri.parse(c.getString(12)) : null)
                         .setMimeType(c.getString(13))
                         .build();
             default:

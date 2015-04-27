@@ -38,9 +38,9 @@ public class FolderTrackCompare {
                     Comparator<Track> ct = TrackCompare.comparator(sort);
                     return ct.compare((Track) lhs, (Track) rhs);
                 } else if (lhs instanceof Folder) {
-                    return 1; //Folders higher
+                    return -1; //Folders higher
                 } else {
-                    return -1;
+                    return 1;
                 }
             }
         };
