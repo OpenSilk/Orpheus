@@ -41,7 +41,7 @@ public class Folder implements Bundleable {
                   @Nullable String date
     ) {
         this.identity = identity;
-        this.name =name;
+        this.name = name;
         this.parentIdentity = parentIdentity;
         this.childCount = childCount;
         this.date = date;

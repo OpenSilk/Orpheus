@@ -66,7 +66,11 @@ public class BundleableUtil {
      */
     @NonNull @SuppressWarnings("unchecked")
     public static <T extends Bundleable> T materializeBundle(String name, Bundle b) throws BadBundleableException {
-        return (T) getCreator(name, b).fromBundle(b);
+        try {
+            return (T) getCreator(name, b).fromBundle(b);
+        } catch (IllegalArgumentException e) {
+            throw new BadBundleableException(e);
+        }
     }
 
     private static final HashMap<String, Bundleable.BundleCreator> sCreatorCache = new HashMap<>();
