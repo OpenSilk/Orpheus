@@ -107,11 +107,7 @@ public class MultiPlayer implements
 
     @Override
     public void skipToNext() {
-        synchronized (mLock) {
-            if (isInitialized()) {
-
-            }
-        }
+        mHandler.sendEmptyMessage(E.SKIPTONEXT);
     }
 
     @Override
@@ -262,6 +258,7 @@ public class MultiPlayer implements
     private interface E {
         int SETDATASOURCE = 1;
         int SETNEXTDATASOURCE = 2;
+        int SKIPTONEXT = 3;
 
         int FADEDOWN = 1001;
         int FADEUP = 1002;
@@ -316,12 +313,12 @@ public class MultiPlayer implements
                         player.releaseNextLocked();
                     }
                     final CompatMediaPlayer mp = new CompatMediaPlayer();
-                    if (player.setDataSourceInternal(mp, (Uri)msg.obj)) {
+                    if (player.setDataSourceInternal(mp, (Uri) msg.obj)) {
                         synchronized (player.mLock) {
                             try {
                                 player.mNextMediaPlayer = mp;
                                 player.mCurrentMediaPlayer.setNextMediaPlayer(mp);
-                            } catch (IllegalArgumentException|IllegalStateException e) {
+                            } catch (IllegalArgumentException | IllegalStateException e) {
                                 Timber.w(e, "setNextDataSource: setNextMediaPlayer()");
                                 player.releaseNextLocked();
                                 player.mCallback.onPlayerEvent(PlayerEvent.openNextFailed());
@@ -330,6 +327,9 @@ public class MultiPlayer implements
                     } else {
                         player.mCallback.onPlayerEvent(PlayerEvent.openNextFailed());
                     }
+                    return;
+                } case E.SKIPTONEXT: {
+                    player.onCompletion(player.mCurrentMediaPlayer);
                     return;
                 } case E.FADEDOWN: {
                     mCurrentVolume -= 0.1f;
