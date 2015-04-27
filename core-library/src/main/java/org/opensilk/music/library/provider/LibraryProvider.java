@@ -19,6 +19,7 @@ package org.opensilk.music.library.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
@@ -29,18 +30,21 @@ import org.opensilk.music.core.model.Artist;
 import org.opensilk.music.core.model.Folder;
 import org.opensilk.music.core.model.Track;
 import org.opensilk.music.core.spi.Bundleable;
-import org.opensilk.music.library.proj.FolderTrackProj;
+import org.opensilk.music.library.compare.AlbumCompare;
+import org.opensilk.music.library.compare.ArtistCompare;
 import org.opensilk.music.library.compare.FolderTrackCompare;
+import org.opensilk.music.library.util.CursorUtils;
 
 import java.util.List;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action2;
 import rx.functions.Func1;
 import rx.functions.Func2;
 
-import static org.opensilk.music.library.provider.Uris.*;
+import static org.opensilk.music.library.provider.LibraryUris.*;
 
 /**
  * Created by drew on 4/26/15.
@@ -48,33 +52,25 @@ import static org.opensilk.music.library.provider.Uris.*;
 public class LibraryProvider extends ContentProvider {
 
     public static final String AUTHORITY_PFX = "orpheus.library.";
-    public static final String AUTHORITY;
 
-    static {
-        try {
-            Class<?> clz = Class.forName("org.opensilk.music.library.Authority");
-            Field f = clz.getDeclaredField("RESPECT_MY_ATHORITAH");
-
-        }
-        AUTHORITY = AUTHORITY_PFX + BuildConfig.RESPECT_MY_AUTHORITAH;
-    }
+    private UriMatcher mMatcher;
 
     @Override
     public boolean onCreate() {
-
+        mMatcher = LibraryUris.makeMatcher(AUTHORITY_PFX + getAuthority());
         return true;
+    }
+
+    protected String getAuthority() {
+        return "";
     }
 
     @Override
     public final Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Log.i("LibraryProvider", "uri="+uri);
+        if (sortOrder == null) sortOrder = "";
         Cursor c = null;
-        switch (MATCHER.match(uri)) {
-            case M_FOLDERS:
-                c = getFoldersTracksInternal(null, projection, selection, selectionArgs, sortOrder);
-                break;
-            case M_FOLDER:
-                c = getFoldersTracksInternal(uri.getLastPathSegment(), projection, selection, selectionArgs, sortOrder);
-                break;
+        switch (mMatcher.match(uri)) {
             case M_ALBUMS:
                 c = queryAlbumsInternal(projection, selection, selectionArgs, sortOrder);
                 break;
@@ -87,6 +83,12 @@ public class LibraryProvider extends ContentProvider {
             case M_ARTIST:
                 c = getArtistInternal(uri.getLastPathSegment());
                 break;
+            case M_FOLDERS:
+                c = getFoldersTracksInternal(null, projection, selection, selectionArgs, sortOrder);
+                break;
+            case M_FOLDER:
+                c = getFoldersTracksInternal(uri.getLastPathSegment(), projection, selection, selectionArgs, sortOrder);
+                break;
             case M_TRACKS:
                 c = queryTracksInternal(projection, selection, selectionArgs, sortOrder);
                 break;
@@ -97,10 +99,108 @@ public class LibraryProvider extends ContentProvider {
         if (c != null) {
             c.setNotificationUri(getContext().getContentResolver(), uri);
         }
+        return c;
+    }
+
+    protected Cursor queryAlbumsInternal(String[] projection, String selection, String[] selectionArgs, final String sortOrder) {
+        MatrixCursor c = null;
+        try {
+            c = Observable.create(new Observable.OnSubscribe<Album>() {
+                @Override
+                public void call(Subscriber<? super Album> subscriber) {
+                    queryAlbums(subscriber);
+                }
+            }).toSortedList(new Func2<Album, Album, Integer>() {
+                @Override
+                public Integer call(Album album, Album album2) {
+                    return AlbumCompare.comparator(sortOrder).compare(album, album2);
+                }
+            }).flatMap(new Func1<List<Album>, Observable<Album>>() {
+                @Override
+                public Observable<Album> call(List<Album> albums) {
+                    return Observable.from(albums);
+                }
+            }).collect(CursorUtils.newAlbumCursor(), new Action2<MatrixCursor, Album>() {
+                @Override
+                public void call(MatrixCursor matrixCursor, Album album) {
+                    CursorUtils.populateRow(matrixCursor.newRow(), album);
+                }
+            }).toBlocking().first();
+        } catch (Exception e) {
+            Log.w("LibraryProvider", "getAlbumsInternal", e);
+        }
+        return c;
+    }
+
+    protected void queryAlbums(Subscriber<? super Album> subscriber) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected Cursor getAlbumInternal(final String identity) {
+        MatrixCursor c = null;
+        try {
+            Album album = Observable.create(new Observable.OnSubscribe<Album>() {
+                @Override
+                public void call(Subscriber<? super Album> subscriber) {
+                    getAlbum(identity, subscriber);
+                }
+            }).toBlocking().first();
+            c = CursorUtils.newAlbumCursor();
+            CursorUtils.populateRow(c.newRow(), album);
+        } catch (Exception e) {
+            Log.w("LibraryProvider", "getAlbumsInternal", e);
+        }
+        return c;
+    }
+
+    protected void getAlbum(String identity, Subscriber<? super Album> subscriber) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected Cursor queryArtistsInternal(String[] projection, String selection, String[] selectionArgs, final String sortOrder) {
+        MatrixCursor c = null;
+        try {
+            c = Observable.create(new Observable.OnSubscribe<Artist>() {
+                @Override
+                public void call(Subscriber<? super Artist> subscriber) {
+                    queryArtists(subscriber);
+                }
+            }).toSortedList(new Func2<Artist, Artist, Integer>() {
+                @Override
+                public Integer call(Artist artist, Artist artist2) {
+                    return ArtistCompare.comparator(sortOrder).compare(artist, artist2);
+                }
+            }).flatMap(new Func1<List<Artist>, Observable<Artist>>() {
+                @Override
+                public Observable<Artist> call(List<Artist> artists) {
+                    return Observable.from(artists);
+                }
+            }).collect(CursorUtils.newArtistCursor(), new Action2<MatrixCursor, Artist>() {
+                @Override
+                public void call(MatrixCursor matrixCursor, Artist artist) {
+                    CursorUtils.populateRow(matrixCursor.newRow(), artist);
+                }
+            }).toBlocking().first();
+        } catch (Exception e) {
+            Log.w("LibraryProvider", "getAlbumsInternal", e);
+        }
+        return c;
+    }
+
+    protected void queryArtists(Subscriber<? super Artist> subscriber) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected Cursor getArtistInternal(String identity) {
         return null;
     }
 
-    protected Cursor getFoldersTracksInternal(String identity, String[] projection, String selection, String[] selectionArgs, final String sortOrder) {
+    protected void getArtist(String identity, Subscriber<? super Artist> subscriber) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    @DebugLog
+    protected Cursor getFoldersTracksInternal(final String identity, String[] projection, String selection, String[] selectionArgs, final String sortOrder) {
         MatrixCursor c = null;
         try {
             c = Observable.create(new Observable.OnSubscribe<Bundleable>() {
@@ -111,6 +211,7 @@ public class LibraryProvider extends ContentProvider {
             }).filter(new Func1<Bundleable, Boolean>() {
                 @Override
                 public Boolean call(Bundleable bundleable) {
+                    //In a perfect world this wouldn't be needed
                     return (bundleable instanceof Folder) || (bundleable instanceof Track);
                 }
             }).toSortedList(new Func2<Bundleable, Bundleable, Integer>() {
@@ -123,34 +224,14 @@ public class LibraryProvider extends ContentProvider {
                 public Observable<Bundleable> call(List<Bundleable> bundleables) {
                     return Observable.from(bundleables);
                 }
-            }).collect(new MatrixCursor(FolderTrackProj.ALL), new Action2<MatrixCursor, Bundleable>() {
+            }).collect(CursorUtils.newFolderTrackCursor(), new Action2<MatrixCursor, Bundleable>() {
                 @Override
                 public void call(MatrixCursor matrixCursor, Bundleable bundleable) {
-                    MatrixCursor.RowBuilder rb = matrixCursor.newRow();
-                    rb.add(bundleable.getIdentity());
-                    rb.add(bundleable.getName());
-                    if (bundleable instanceof Folder) {
-                        rb.add(FolderTrackProj.KIND_FOLDER);
-                        Folder folder = (Folder) bundleable;
-                        rb.add(folder.parentIdentity);
-                        rb.add(folder.childCount);
-                        rb.add(folder.date);
-                    } else {
-                        rb.add(FolderTrackProj.KIND_TRACK);
-                        Track track = (Track) bundleable;
-                        rb.add(track.albumName);
-                        rb.add(track.artistName);
-                        rb.add(track.albumArtistName);
-                        rb.add(track.albumIdentity);
-                        rb.add(track.duration);
-                        rb.add(track.dataUri);
-                        rb.add(track.artworkUri);
-                        rb.add(track.mimeType);
-                    }
+                    CursorUtils.populateFolderTrackRow(matrixCursor.newRow(), bundleable);
                 }
             }).toBlocking().first();
         } catch (Exception e) {
-            Log.w("LibraryProvider", e);
+            Log.w("LibraryProvider", "getFoldersTracksInternal", e);
         }
         return c;
     }
@@ -159,44 +240,12 @@ public class LibraryProvider extends ContentProvider {
         subscriber.onError(new Throwable(new UnsupportedOperationException()));
     }
 
-    protected Cursor queryAlbumsInternal(String[] projection, String selection, String[] selectionArgs, final String sortOrder) {
-        return null;
-    }
-
-    protected void queryAlbums(Subscriber<? super Album> subscriber) {
-
-    }
-
-    protected Cursor getAlbumInternal(String identity) {
-        return null;
-    }
-
-    protected void getAlbum(String identity, Subscriber<? super Album> subcriber) {
-
-    }
-
-    protected Cursor queryArtistsInternal(String[] projection, String selection, String[] selectionArgs, final String sortOrder) {
-        return null;
-    }
-
-    protected void queryArtists(Subscriber<? super Artist> subscriber) {
-
-    }
-
-    protected Cursor getArtistInternal(String identity) {
-        return null;
-    }
-
-    protected void getArtist(String identity, Subscriber<? super Artist> subscriber) {
-
-    }
-
     protected Cursor queryTracksInternal(String[] projection, String selection, String[] selectionArgs, final String sortOrder) {
         return null;
     }
 
     protected void queryTracks(Subscriber<? super Track> subscriber) {
-
+        subscriber.onError(new UnsupportedOperationException());
     }
 
     protected Cursor getTrackInternal(String identity) {
@@ -204,7 +253,7 @@ public class LibraryProvider extends ContentProvider {
     }
 
     protected void getTrack(String identity, Subscriber<? super Track> subscriber) {
-
+        subscriber.onError(new UnsupportedOperationException());
     }
 
     @Override

@@ -42,6 +42,7 @@ public interface FolderTrackProj {
                 ARTWORK_URI,
                 MIME_TYPE,
         };
+        //TODO any better place for these? Should only be needed internally
         String KIND_FOLDER = "folder";
         String KIND_TRACK = "track";
 }
