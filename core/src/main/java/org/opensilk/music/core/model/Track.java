@@ -21,8 +21,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import org.opensilk.music.core.spi.Bundleable;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by drew on 6/10/14.
@@ -41,6 +46,7 @@ public class Track implements Bundleable {
     public final Uri dataUri;
     public final Uri artworkUri;
     public final String mimeType;
+    private final String headers;
 
     protected Track(@NonNull String identity,
                     @NonNull String name,
@@ -51,7 +57,8 @@ public class Track implements Bundleable {
                     int duration,
                     @NonNull Uri dataUri,
                     @Nullable Uri artworkUri,
-                    @Nullable String mimeType
+                    @Nullable String mimeType,
+                    @Nullable String headers
     ) {
         this.identity = identity;
         this.name = name;
@@ -63,6 +70,7 @@ public class Track implements Bundleable {
         this.dataUri = dataUri;
         this.artworkUri = artworkUri;
         this.mimeType = mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
+        this.headers = headers;
     }
 
     @Override
@@ -73,6 +81,22 @@ public class Track implements Bundleable {
     @Override
     public String getName() {
         return name;
+    }
+
+    @NonNull
+    public Map<String, String> getHeaders() {
+        if (TextUtils.isEmpty(headers)) {
+            return Collections.emptyMap();
+        }
+        HashMap<String, String> hdrs = new HashMap<>();
+        String[] lines = headers.split("\n");
+        for (String line : lines) {
+            String[] entry = line.split(":");
+            if (entry.length == 2) {
+                hdrs.put(entry[0].trim(), entry[1].trim());
+            }
+        }
+        return hdrs;
     }
 
     @Override
@@ -89,6 +113,7 @@ public class Track implements Bundleable {
         b.putParcelable("_8", dataUri);
         b.putParcelable("_9", artworkUri);
         b.putString("_10", mimeType);
+        b.putString("_11", headers);
         return b;
     }
 
@@ -107,6 +132,7 @@ public class Track implements Bundleable {
                 .setDataUri(b.<Uri>getParcelable("_8"))
                 .setArtworkUri(b.<Uri>getParcelable("_9"))
                 .setMimeType(b.getString("_10"))
+                .setHeaders(b.getString("_11"))
                 .build();
     }
 
@@ -133,6 +159,7 @@ public class Track implements Bundleable {
             return false;
         if (name != null ? !name.equals(track.name) : track.name != null) return false;
         if (mimeType != null ? !mimeType.equals(track.mimeType) : track.name != null) return false;
+        //ignoring headers
 
         return true;
     }
@@ -149,6 +176,7 @@ public class Track implements Bundleable {
         result = 31 * result + (dataUri != null ? dataUri.hashCode() : 0);
         result = 31 * result + (artworkUri != null ? artworkUri.hashCode() : 0);
         result = 31 * result + (mimeType != null ? mimeType.hashCode() : 0);
+        //ignoring headers
         return result;
     }
 
@@ -179,6 +207,7 @@ public class Track implements Bundleable {
         private Uri dataUri;
         private Uri artworkUri;
         private String mimeType = DEFAULT_MIME_TYPE;
+        private String headers = "";
 
         public Builder setIdentity(String identity) {
             this.identity = identity;
@@ -230,12 +259,26 @@ public class Track implements Bundleable {
             return this;
         }
 
+        private Builder setHeaders(String headers) {
+            this.headers = headers;
+            return this;
+        }
+
+        public Builder addHeader(String key, String val) {
+            String n = "";
+            if (!TextUtils.isEmpty(headers)) {
+                n += "\n";
+            }
+            headers += n + key + ":" + val;
+            return this;
+        }
+
         public Track build() {
             if (identity == null || name == null || dataUri == null) {
                 throw new NullPointerException("identity, name, and dataUri are required");
             }
             return new Track(identity, name, albumName, artistName, albumArtistName,
-                    albumIdentity, duration, dataUri, artworkUri, mimeType);
+                    albumIdentity, duration, dataUri, artworkUri, mimeType, headers);
         }
     }
 }

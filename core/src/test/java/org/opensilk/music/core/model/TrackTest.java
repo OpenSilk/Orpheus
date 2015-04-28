@@ -26,6 +26,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.Map;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
@@ -88,5 +90,16 @@ public class TrackTest {
     @Test
     public void ensureSongDefaultMimeTypeWasOverridden() {
         assertThat(song2.mimeType).isNotEqualTo(Track.DEFAULT_MIME_TYPE);
+    }
+
+    @Test
+    public void testHeaderParsing() {
+        Track t = Track.builder().setIdentity("1").setName("1").setDataUri(Uri.parse("http://somedomain/1"))
+                .addHeader("Authorization ", " Bearer aosinaotuhasoniu ")
+                .addHeader("Foo", "Bar; Pie")
+                .build();
+        Map<String, String> m = t.getHeaders();
+        assertThat(m.get("Authorization")).isEqualTo("Bearer aosinaotuhasoniu");
+        assertThat(m.get("Foo")).isEqualTo("Bar; Pie");
     }
 }

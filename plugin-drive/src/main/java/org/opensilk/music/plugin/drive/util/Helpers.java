@@ -36,8 +36,6 @@ import java.util.Locale;
  */
 public class Helpers {
 
-    public static final String FIELDS = "items/id,items/mimeType,items/parents,items/title,items/downloadUrl,items/modifiedDate";
-
     public static Folder buildFolder(File f) {
         final String id = f.getId();
         final String title = f.getTitle();
