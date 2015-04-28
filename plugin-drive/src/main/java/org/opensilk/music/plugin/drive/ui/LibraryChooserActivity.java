@@ -23,44 +23,35 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
-import org.opensilk.common.dagger.DaggerInjector;
-import org.opensilk.common.rx.SimpleObserver;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.plugin.drive.R;
-import org.opensilk.music.plugin.drive.util.AuthTest;
 import org.opensilk.music.plugin.drive.util.DriveHelper;
 
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
-import rx.Subscription;
-
-import static org.opensilk.common.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 6/15/14.
  */
-public class LibraryChooserActivity extends Activity {
+public class LibraryChooserActivity extends Activity implements AuthTestFragment.OnTestResults {
 
-    public static final int REQUEST_ACCOUNT_PICKER = RESULT_FIRST_USER << 1;
-    public static final int REQUEST_AUTH_APPROVAL = RESULT_FIRST_USER << 2;
+    public static final int REQUEST_ACCOUNT_PICKER = 1001;
+    public static final int REQUEST_AUTH_APPROVAL = 1002;
 
     @Inject DriveHelper mDriveHelper;
 
     private String mAccountName;
-    private Subscription mAuthTestSubscription;
+    private AuthTestFragment mAuthTestFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ((DaggerInjector) getApplication()).inject(this);
 
         boolean wantLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
         if (wantLightTheme) {
@@ -69,23 +60,36 @@ public class LibraryChooserActivity extends Activity {
             setTheme(R.style.AppThemeTranslucentDark);
         }
 
-        // hack, no rotating, background task will leak activity
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-
         setResult(RESULT_CANCELED);
 
         if (savedInstanceState == null) {
             Intent i = AccountManager.newChooseAccountIntent(
                     null, null, new String[]{"com.google"}, true, null, null, null, null);
             startActivityForResult(i, REQUEST_ACCOUNT_PICKER);
+        } else {
+            if (savedInstanceState.getBoolean("istesting", false)) {
+                mAuthTestFragment = (AuthTestFragment) getFragmentManager().findFragmentByTag(AuthTestFragment.TAG);
+                if (mAuthTestFragment != null) {//Shouldnt happen
+                    mAuthTestFragment.setListener(this);
+                }
+            }
+            mAccountName = savedInstanceState.getString("account");
         }
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("account", mAccountName);
+        outState.putBoolean("istesting", mAuthTestFragment != null);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isSubscribed(mAuthTestSubscription)) mAuthTestSubscription.unsubscribe();
+        if (mAuthTestFragment != null) {
+            mAuthTestFragment.setListener(null);
+        }
     }
 
     @Override
@@ -108,6 +112,7 @@ public class LibraryChooserActivity extends Activity {
                 } else {
                     finishFailure();
                 }
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
@@ -115,26 +120,32 @@ public class LibraryChooserActivity extends Activity {
 
     private void startTest() {
         // show progress
-        ProgressFragment.newInstance().show(getFragmentManager(), "progress");
-        // start the test
-        mAuthTestSubscription = AuthTest.create(mDriveHelper.getSession(mAccountName),
-                new SimpleObserver<Boolean>() {
-                    @Override
-                    public void onNext(Boolean aBoolean) {
-                        finishSuccess();
-                    }
-                    @Override
-                    public void onError(Throwable e) {
-                        if (e instanceof UserRecoverableAuthIOException) {
-                            Intent intent = ((UserRecoverableAuthIOException) e).getIntent();
-                            if (intent != null) {
-                                startActivityForResult(intent, REQUEST_AUTH_APPROVAL);
-                                return;
-                            }
-                        }
-                        finishFailure();
-                    }
-                });
+        ProgressFragment.newInstance().show(getFragmentManager(), ProgressFragment.TAG);
+        // Add tester fragment. It starts the test;
+        mAuthTestFragment = AuthTestFragment.newInstance(mAccountName);
+        mAuthTestFragment.setListener(this);
+        getFragmentManager().beginTransaction()
+                .add(mAuthTestFragment, AuthTestFragment.TAG)
+                .commit();
+    }
+
+    @Override
+    @DebugLog
+    public void onAuthTestSuccess() {
+        finishSuccess();
+    }
+
+    @Override
+    @DebugLog
+    public void onAuthTestFailure(Throwable e) {
+        if (e instanceof UserRecoverableAuthIOException) {
+            Intent intent = ((UserRecoverableAuthIOException) e).getIntent();
+            if (intent != null) {
+                startActivityForResult(intent, REQUEST_AUTH_APPROVAL);
+                return;
+            }
+        }
+        finishFailure();
     }
 
     private void finishSuccess() {
@@ -152,6 +163,7 @@ public class LibraryChooserActivity extends Activity {
     }
 
     public static class ProgressFragment extends DialogFragment {
+        public static final String TAG = ProgressFragment.class.getSimpleName();
 
         public static ProgressFragment newInstance() {
             return new ProgressFragment();
