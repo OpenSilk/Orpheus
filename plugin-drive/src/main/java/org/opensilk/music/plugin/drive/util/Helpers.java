@@ -19,16 +19,13 @@ package org.opensilk.music.plugin.drive.util;
 
 import android.net.Uri;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.plugin.drive.DriveApp;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
