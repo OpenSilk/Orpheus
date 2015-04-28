@@ -43,6 +43,10 @@ import java.util.List;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action2;
+import rx.functions.Func0;
+import rx.functions.Func1;
+import rx.functions.Func2;
 
 import static org.opensilk.music.library.provider.LibraryUris.*;
 
@@ -128,124 +132,217 @@ public class LibraryProvider extends ContentProvider {
         return c;
     }
 
-    protected Cursor queryAlbumsInternal(String library, Bundle args) {
+    protected Cursor queryAlbumsInternal(final String library, final Bundle args) {
         MatrixCursor c = null;
         try {
-            Observable<Album> o = Observable.create(subscriber -> {
-                queryAlbums(library, subscriber, args);
-            });
-            c = o.toSortedList((album1, album2) -> AlbumCompare.comparator(args.getString(ARG_SORTORDER)).compare(album1, album2))
-                    .flatMap(Observable::from)
-                    .collect(CursorUtil.newAlbumCursor(), (matrixCursor, album) ->
-                            CursorUtil.populateRow(matrixCursor.newRow(), album))
-                    .toBlocking().first();
+            c = doQueryInternal(
+                    new Observable.OnSubscribe<Album>() {
+                        @Override
+                        public void call(Subscriber<? super Album> subscriber) {
+                            queryAlbums(library, subscriber, args);
+                        }
+                    },
+                    new Func2<Album, Album, Integer>() {
+                        @Override
+                        public Integer call(Album album, Album album2) {
+                            return AlbumCompare.comparator(args.getString(ARG_SORTORDER)).compare(album, album2);
+                        }
+                    },
+                    new Func0<MatrixCursor>() {
+                        @Override
+                        public MatrixCursor call() {
+                            return CursorUtil.newAlbumCursor();
+                        }
+                    },
+                    new Action2<MatrixCursor, Album>() {
+                        @Override
+                        public void call(MatrixCursor matrixCursor, Album album) {
+                            CursorUtil.populateRow(matrixCursor.newRow(), album);
+                        }
+                    }
+            );
         } catch (Exception e) {
-            Log.w("LibraryProvider", "getAlbumsInternal", e);
+            Log.w(TAG, "getAlbumsInternal", e);
         }
         return c;
     }
 
-    protected Cursor getAlbumInternal(String library, String identity, Bundle args) {
+    protected Cursor getAlbumInternal(final String library, final String identity, final Bundle args) {
         MatrixCursor c = null;
         try {
-            Observable<Album> o = Observable.create(subscriber -> {
-                getAlbum(library, identity, subscriber, args);
-            });
-            Album album = o.toBlocking().first();
+            Album album = Observable.create(new Observable.OnSubscribe<Album>() {
+                @Override
+                public void call(Subscriber<? super Album> subscriber) {
+                    getAlbum(library, identity, subscriber, args);
+                }
+            }).toBlocking().first();
             c = CursorUtil.newAlbumCursor();
             CursorUtil.populateRow(c.newRow(), album);
         } catch (Exception e) {
-            Log.w("LibraryProvider", "getAlbumInternal", e);
+            Log.w(TAG, "getAlbumInternal", e);
         }
         return c;
     }
 
-    protected Cursor queryArtistsInternal(String library, Bundle args) {
+    protected Cursor queryArtistsInternal(final String library, final Bundle args) {
         MatrixCursor c = null;
         try {
-            Observable<Artist> o = Observable.create(subscriber -> {
-                queryArtists(library, subscriber, args);
-            });
-            c = o.toSortedList((artist1, artist2) -> ArtistCompare.comparator(args.getString(ARG_SORTORDER)).compare(artist1, artist2))
-                    .flatMap(Observable::from)
-                    .collect(CursorUtil.newArtistCursor(), (matrixCursor, artist1) ->
-                            CursorUtil.populateRow(matrixCursor.newRow(), artist1))
-                    .toBlocking().first();
+            c = doQueryInternal(
+                    new Observable.OnSubscribe<Artist>() {
+                        @Override
+                        public void call(Subscriber<? super Artist> subscriber) {
+                            queryArtists(library, subscriber, args);
+                        }
+                    },
+                    new Func2<Artist, Artist, Integer>() {
+                        @Override
+                        public Integer call(Artist artist, Artist artist2) {
+                            return ArtistCompare.comparator(args.getString(ARG_SORTORDER)).compare(artist, artist2);
+                        }
+                    },
+                    new Func0<MatrixCursor>() {
+                        @Override
+                        public MatrixCursor call() {
+                            return CursorUtil.newArtistCursor();
+                        }
+                    },
+                    new Action2<MatrixCursor, Artist>() {
+                        @Override
+                        public void call(MatrixCursor matrixCursor, Artist artist) {
+                            CursorUtil.populateRow(matrixCursor.newRow(), artist);
+                        }
+                    }
+            );
         } catch (Exception e) {
-            Log.w("LibraryProvider", "queryArtistsInternal", e);
+            Log.w(TAG, "queryArtistsInternal", e);
         }
         return c;
     }
 
-    protected Cursor getArtistInternal(String library, String identity, Bundle args) {
+    protected Cursor getArtistInternal(final String library, final String identity, final Bundle args) {
         MatrixCursor c = null;
         try {
-            Observable<Artist> o = Observable.create(subscriber -> {
-                getArtist(library, identity, subscriber, args);
-            });
-            Artist artist = o.toBlocking().first();
+            Artist artist = Observable.create(new Observable.OnSubscribe<Artist>() {
+                @Override
+                public void call(Subscriber<? super Artist> subscriber) {
+                    getArtist(library, identity, subscriber, args);
+                }
+            }).toBlocking().first();
             c = CursorUtil.newArtistCursor();
             CursorUtil.populateRow(c.newRow(), artist);
         } catch (Exception e) {
-            Log.w("LibraryProvider", "getArtistInternal", e);
+            Log.w(TAG, "getArtistInternal", e);
         }
         return c;
     }
 
     @DebugLog
-    protected Cursor getFoldersTracksInternal(String library, String identity, Bundle args) {
+    protected Cursor getFoldersTracksInternal(final String library, final String identity, final Bundle args) {
         MatrixCursor c = null;
         try {
-            Observable<Bundleable> o = Observable.create(subscriber -> {
-                getFoldersTracks(library, identity, subscriber, args);
-            });
-            c = o.filter(
-                    bundleable -> {
-                        //In a perfect world this wouldn't be needed
-                        return (bundleable instanceof Folder) || (bundleable instanceof Track);
-                    })
-                    .toSortedList((bundleable, bundleable2) ->
-                            FolderTrackCompare.comparator(args.getString(ARG_SORTORDER)).compare(bundleable, bundleable2))
-                    .flatMap(Observable::from)
-                    .collect(CursorUtil.newFolderTrackCursor(), (matrixCursor, bundleable) ->
-                                    CursorUtil.populateFolderTrackRow(matrixCursor.newRow(), bundleable))
-                    .toBlocking().first();
+            c = Observable.create(new Observable.OnSubscribe<Bundleable>() {
+                @Override
+                public void call(Subscriber<? super Bundleable> subscriber) {
+                    getFoldersTracks(library, identity, subscriber, args);
+                }
+            }).filter(new Func1<Bundleable, Boolean>() {
+                @Override
+                public Boolean call(Bundleable bundleable) {
+                    //In a perfect world this wouldn't be needed
+                    return (bundleable instanceof Folder) || (bundleable instanceof Track);
+                }
+            }).toSortedList(new Func2<Bundleable, Bundleable, Integer>() {
+                @Override
+                public Integer call(Bundleable bundleable, Bundleable bundleable2) {
+                    return FolderTrackCompare.comparator(args.getString(ARG_SORTORDER)).compare(bundleable, bundleable2);
+                }
+            }).flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
+                @Override
+                public Observable<Bundleable> call(List<Bundleable> bundleables) {
+                    return Observable.from(bundleables);
+                }
+            }).collect(CursorUtil.newFolderTrackCursor(), new Action2<MatrixCursor, Bundleable>() {
+                @Override
+                public void call(MatrixCursor matrixCursor, Bundleable bundleable) {
+                    CursorUtil.populateFolderTrackRow(matrixCursor.newRow(), bundleable);
+                }
+            }).toBlocking().first();
         } catch (Exception e) {
-            Log.w("LibraryProvider", "getFoldersTracksInternal", e);
+            Log.w(TAG, "getFoldersTracksInternal", e);
         }
         return c;
     }
 
-    protected Cursor queryTracksInternal(String library, Bundle args) {
+    protected Cursor queryTracksInternal(final String library, final Bundle args) {
         MatrixCursor c = null;
         try {
-            Observable<Track> o = Observable.create(subscriber -> {
-                queryTracks(library, subscriber, args);
-            });
-            c = o.toSortedList((track, track2) -> TrackCompare.comparator(args.getString(ARG_SORTORDER)).compare(track, track2))
-                    .flatMap(Observable::from)
-                    .collect(CursorUtil.newTrackCursor(), (matrixCursor, track) ->
-                            CursorUtil.populateRow(matrixCursor.newRow(), track))
-                    .toBlocking().first();
+            c = doQueryInternal(
+                    new Observable.OnSubscribe<Track>() {
+                        @Override
+                        public void call(Subscriber<? super Track> subscriber) {
+                            queryTracks(library, subscriber, args);
+                        }
+                    },
+                    new Func2<Track, Track, Integer>() {
+                        @Override
+                        public Integer call(Track track, Track track2) {
+                            return TrackCompare.comparator(args.getString(ARG_SORTORDER)).compare(track, track2);
+                        }
+                    },
+                    new Func0<MatrixCursor>() {
+                        @Override
+                        public MatrixCursor call() {
+                            return CursorUtil.newTrackCursor();
+                        }
+                    },
+                    new Action2<MatrixCursor, Track>() {
+                        @Override
+                        public void call(MatrixCursor matrixCursor, Track track) {
+                            CursorUtil.populateRow(matrixCursor.newRow(), track);
+                        }
+                    }
+            );
         } catch (Exception e) {
-            Log.w("LibraryProvider", "queryTracksInternal", e);
+            Log.w(TAG, "queryTracksInternal", e);
         }
         return c;
     }
 
-    protected Cursor getTrackInternal(String library, String identity, Bundle args) {
+    protected Cursor getTrackInternal(final String library, final String identity, final Bundle args) {
         MatrixCursor c = null;
         try {
-            Observable<Track> o = Observable.create(subscriber -> {
-                getTrack(library, identity, subscriber, args);
-            });
-            Track track = o.toBlocking().first();
+            Track track = Observable.create(new Observable.OnSubscribe<Track>() {
+                @Override
+                public void call(Subscriber<? super Track> subscriber) {
+                    getTrack(library, identity, subscriber, args);
+                }
+            }).toBlocking().first();
             c = CursorUtil.newTrackCursor();
             CursorUtil.populateRow(c.newRow(), track);
         } catch (Exception e) {
-            Log.w("LibraryProvider", "getTrackInternal", e);
+            Log.w(TAG, "getTrackInternal", e);
         }
         return c;
+    }
+
+    //The magick function
+    protected <T> MatrixCursor doQueryInternal(
+            final Observable.OnSubscribe<T> onSubscribe,
+            final Func2<T, T, Integer> sortFunc,
+            final Func0<MatrixCursor> collector,
+            final Action2<MatrixCursor, T> collectAction
+    ) {
+        return Observable.create(onSubscribe)
+                .toSortedList(sortFunc)
+                .flatMap(new Func1<List<T>, Observable<T>>() {
+                    @Override
+                    public Observable<T> call(List<T> ts) {
+                        return Observable.from(ts);
+                    }
+                })
+                .collect(collector.call(), collectAction)
+                .toBlocking()
+                .first();
     }
 
     protected void queryAlbums(String library, Subscriber<? super Album> subscriber, Bundle args) {
@@ -296,4 +393,8 @@ public class LibraryProvider extends ContentProvider {
         return 0;
     }
 
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+        return super.call(method, arg, extras);
+    }
 }
