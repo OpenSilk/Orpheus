@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.storage.StorageManager;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -45,7 +46,7 @@ import java.util.Locale;
  * Created by drew on 11/13/14.
  */
 public class FileUtil {
-    private static final boolean DUMPSTACKS = false;
+    private static final boolean DUMPSTACKS = true;
 
     //Library identities
     public static final String PRIMARY_STORAGE_ID = "0";
@@ -90,6 +91,43 @@ public class FileUtil {
         sDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     }
 
+    public static String[] getStoragePaths(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                Field scu = Environment.class.getDeclaredField("sCurrentUser");
+                scu.setAccessible(true);
+                Object cu = scu.get(null);
+                Class<?> ue = Class.forName("android.os.Environment$UserEnvironment");
+                Method getExternalDirsForApp = ue.getDeclaredMethod("getExternalDirsForApp");
+                Object[] dirs = (Object[]) getExternalDirsForApp.invoke(cu);
+                String[] paths = new String[dirs.length];
+                for (int ii=0; ii<dirs.length; ii++) {
+                    paths[ii] = ((File)dirs[ii]).getPath();
+                }
+                return paths;
+            } catch (Exception e) {
+                if (DUMPSTACKS) Log.e("FileUtil", "getStoragePaths", e);
+            }
+        } else {
+            try {
+                StorageManager sm = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+                Method getVolumeList = StorageManager.class.getDeclaredMethod("getVolumeList");
+                Class<?> volume = Class.forName("android.os.storage.StorageVolume");
+                Method getPath =  volume.getDeclaredMethod("getPath");
+                Object[] volumes = (Object[]) getVolumeList.invoke(sm);
+                String[] paths = new String[volumes.length];
+                for (int ii=0; ii<volumes.length; ii++) {
+                    paths[ii] = (String) getPath.invoke(volumes[ii]);
+                }
+                return paths;
+            } catch (Exception e) {
+                if (DUMPSTACKS) Log.e("FileUtil", "getStoragePaths", e);
+            }
+        }
+        Log.w("FileUtil", "Failed to get storage paths via reflection");
+        return new String[]{Environment.getExternalStorageDirectory().getPath()};
+    }
+
     @Nullable
     static File getSecondaryStorageDir() {
         File[] files = checkSecondaryStorage();
@@ -113,7 +151,7 @@ public class FileUtil {
             Object o2 = m.invoke(o);
             return (File[]) o2;
         } catch (Exception e) {
-            if (DUMPSTACKS) e.printStackTrace();
+            if (DUMPSTACKS) Log.e("FileUtil", "checkSecondaryStorage", e);
             return new File[0];
         }
     }
@@ -214,7 +252,7 @@ public class FileUtil {
                     .setAlbumArtistName(c2.getString(c2.getColumnIndexOrThrow(MediaStore.Audio.AlbumColumns.ARTIST)))
                     .build();
         } catch (Exception e) {
-            if (DUMPSTACKS) e.printStackTrace();
+            if (DUMPSTACKS) Log.e("FileUtil", "makeSong", e);
             return new Song.Builder()
                     .setIdentity(toRelativePath(base, f))
                     .setName(f.getName())
@@ -240,7 +278,7 @@ public class FileUtil {
             int mediaType = c.getInt(0);
             return mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO;
         } catch (Exception e) {
-            if (DUMPSTACKS) e.printStackTrace();
+            if (DUMPSTACKS) Log.e("FileUtil", "isAudio", e);
             String mime = guessMimeType(f);
             return mime.contains("audio") || mime.equals("application/ogg");
         } finally {
