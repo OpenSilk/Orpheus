@@ -54,7 +54,7 @@ public class PurchaseFragment extends Fragment implements IabHelper.OnIabPurchas
 
     public void setListener(PurchaseCallback l) {
         mListener = l;
-        if (mHolder != null) {
+        if (l != null && mHolder != null) {
             l.onResult(mHolder.result, mHolder.info);
         }
     }
