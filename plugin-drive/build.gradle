@@ -91,26 +91,30 @@ robolectric {
 }
 
 dependencies {
-    compile 'com.jakewharton:butterknife:6.0.0'
+    provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
 
-    provided 'com.squareup.dagger:dagger-compiler:1.2.2'
-    compile 'com.squareup.dagger:dagger:1.2.2'
+    compile project(':plugin-common')
+    compile project(':core-library')
+
+    compile (group:'com.jakewharton', name:'butterknife', version: rootProject.ext.butterKnifeVersion)
 
     //https://github.com/google/google-api-java-client/releases
     compile ('com.google.api-client:google-api-client-android:1.20.0') {
         exclude module: 'httpclient'
+        exclude group: 'com.google.guava'
     }
-    compile ('com.google.api-client:google-api-client-gson:1.20.0') {
-        exclude module: 'httpclient'
-    }
+//    compile ('com.google.api-client:google-api-client-gson:1.20.0') {
+//        exclude module: 'httpclient'
+//    }
     //https://developers.google.com/api-client-library/java/apis/drive/v2
     compile ('com.google.apis:google-api-services-drive:v2-rev168-1.20.0') {
         exclude module: 'httpclient'
+        exclude group: 'com.google.guava'
     }
-    compile 'com.google.android.gms:play-services-identity:7.0.0'
-
-    compile project(':plugin-common')
-    compile project(':core-library')
+    compile 'com.google.android.gms:play-services-identity:6.5.87'
+    //workaround for build fail similar to https://github.com/groovy/groovy-android-gradle-plugin/issues/32
+    //default is 13 which borks dagger
+    compile 'com.google.guava:guava-jdk5:17.0'
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {

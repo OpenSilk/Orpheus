@@ -18,36 +18,37 @@
 package org.opensilk.music.plugin.drive.ui;
 
 import android.accounts.AccountManager;
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
+import org.opensilk.common.core.app.MortarActivity;
+import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.plugin.drive.GlobalComponent;
 import org.opensilk.music.plugin.drive.R;
-import org.opensilk.music.plugin.drive.util.DriveHelper;
-
-import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
+import mortar.MortarScope;
 
 /**
  * Created by drew on 6/15/14.
  */
-public class LibraryChooserActivity extends Activity implements AuthTestFragment.OnTestResults {
+public class LibraryChooserActivity extends MortarActivity implements AuthTestFragment.OnTestResults {
 
     public static final int REQUEST_ACCOUNT_PICKER = 1001;
     public static final int REQUEST_AUTH_APPROVAL = 1002;
 
-    @Inject DriveHelper mDriveHelper;
-
     private String mAccountName;
     private AuthTestFragment mAuthTestFragment;
+
+    @Override
+    protected void onCreateScope(MortarScope.Builder builder) {
+        builder.withService(DaggerService.DAGGER_SERVICE, ActivityComponent.FACTORY.call(
+                DaggerService.<GlobalComponent>getDaggerComponent(getApplicationContext())));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,27 +161,6 @@ public class LibraryChooserActivity extends Activity implements AuthTestFragment
     private void finishFailure() {
         setResult(RESULT_CANCELED);
         finish();
-    }
-
-    public static class ProgressFragment extends DialogFragment {
-        public static final String TAG = ProgressFragment.class.getSimpleName();
-
-        public static ProgressFragment newInstance() {
-            return new ProgressFragment();
-        }
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setCancelable(false);
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            ProgressDialog mProgressDialog = new ProgressDialog(getActivity());
-            mProgressDialog.setMessage(getString(R.string.authorizing));
-            return mProgressDialog;
-        }
     }
 
 }

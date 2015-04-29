@@ -20,23 +20,21 @@ package org.opensilk.music.plugin.drive;
 import android.app.Application;
 import android.os.StrictMode;
 
-import org.opensilk.common.dagger.DaggerApplication;
-import org.opensilk.common.dagger.DaggerInjector;
+import org.opensilk.common.core.mortar.DaggerService;
 
-import dagger.ObjectGraph;
+import mortar.MortarScope;
 import timber.log.Timber;
 
 /**
  * Created by drew on 6/12/14.
  */
-public class App extends Application implements DaggerInjector {
+public class App extends Application {
 
-    protected ObjectGraph mGraph;
+    private MortarScope mRootScope;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mGraph = GlobalGraph.get(this).getObjectGraph().plus(new AppModule(this));
         if (BuildConfig.DEBUG) {
             // logging
             Timber.plant(new Timber.DebugTree());
@@ -58,13 +56,15 @@ public class App extends Application implements DaggerInjector {
     }
 
     @Override
-    public void inject(Object obj) {
-        mGraph.inject(obj);
+    public Object getSystemService(String name) {
+        if (mRootScope == null) {
+            mRootScope = MortarScope.buildRootScope()
+                    .withService(DaggerService.DAGGER_SERVICE, GlobalComponent.FACTORY.call(this))
+                    .build("ROOT");
+        }
+        if (mRootScope.hasService(name)) {
+            return mRootScope.getService(name);
+        }
+        return super.getSystemService(name);
     }
-
-    @Override
-    public ObjectGraph getObjectGraph() {
-        return mGraph;
-    }
-
 }

@@ -20,13 +20,13 @@ package org.opensilk.music.plugin.drive.util;
 import android.content.Context;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 
 import org.opensilk.music.plugin.drive.BuildConfig;
-import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.common.core.dagger2.ForApplication;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,7 +87,7 @@ public class DriveHelperImpl implements DriveHelper {
         final GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(context,
                 Collections.singleton(DriveScopes.DRIVE_READONLY)).setSelectedAccountName(accountName);
         final Drive drive = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
-                GsonFactory.getDefaultInstance(), credential).setApplicationName(APP_NAME).build();
+                AndroidJsonFactory.getDefaultInstance(), credential).setApplicationName(APP_NAME).build();
         final Holder holder = new Holder(credential, drive);
         SESSIONS.put(accountName, holder);
         return holder;

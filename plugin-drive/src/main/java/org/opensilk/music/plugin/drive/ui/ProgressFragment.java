@@ -17,18 +17,32 @@
 
 package org.opensilk.music.plugin.drive.ui;
 
-import android.app.ListActivity;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.PersistableBundle;
+
+import org.opensilk.music.plugin.drive.R;
 
 /**
- * Created by drew on 4/28/15.
+ * Created by drew on 4/29/15.
  */
-public class DriveTest extends ListActivity {
+public class ProgressFragment extends DialogFragment {
+    public static final String TAG = ProgressFragment.class.getSimpleName();
 
-    @Override
-    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
+    public static ProgressFragment newInstance() {
+        return new ProgressFragment();
     }
 
-}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setCancelable(false);
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        ProgressDialog mProgressDialog = new ProgressDialog(getActivity());
+        mProgressDialog.setMessage(getString(R.string.authorizing));
+        return mProgressDialog;
+    }}

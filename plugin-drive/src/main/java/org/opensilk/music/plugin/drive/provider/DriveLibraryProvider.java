@@ -18,7 +18,6 @@
 package org.opensilk.music.plugin.drive.provider;
 
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.text.TextUtils;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -26,11 +25,13 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
+import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.api.exception.ParcelableException;
-import org.opensilk.music.core.spi.Bundleable;
+import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.plugin.common.LibraryPreferences;
-import org.opensilk.music.plugin.drive.GlobalGraph;
+import org.opensilk.music.plugin.drive.BuildConfig;
+import org.opensilk.music.plugin.drive.GlobalComponent;
 import org.opensilk.music.plugin.drive.ModelUtil;
 import org.opensilk.music.plugin.drive.SessionFactory;
 
@@ -59,13 +60,20 @@ import static org.opensilk.music.plugin.drive.Constants.FOLDER_SONG_QUERY;
  */
 public class DriveLibraryProvider extends LibraryProvider {
 
+    public static final String AUTHORITY = AUTHORITY_PFX+BuildConfig.APPLICATION_ID;
+
     @Inject SessionFactory mSessionFactory;
     @Inject LibraryPreferences mLibraryPrefs;
 
     @Override
     public boolean onCreate() {
-        GlobalGraph.get(getContext()).inject(this);
+        DaggerService.<GlobalComponent>getDaggerComponent(getContext()).inject(this);
         return super.onCreate();
+    }
+
+    @Override
+    protected String getAuthority() {
+        return BuildConfig.APPLICATION_ID;
     }
 
     @DebugLog

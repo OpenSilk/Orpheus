@@ -22,8 +22,8 @@ import android.net.Uri;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 
-import org.opensilk.music.core.model.Folder;
-import org.opensilk.music.core.model.Track;
+import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Track;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

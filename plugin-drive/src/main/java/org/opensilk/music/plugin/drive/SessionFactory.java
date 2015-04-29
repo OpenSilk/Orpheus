@@ -22,12 +22,10 @@ import android.content.Context;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 
-import org.opensilk.common.dagger.qualifier.ForApplication;
-import org.opensilk.music.plugin.drive.util.DriveHelper;
+import org.opensilk.common.core.dagger2.ForApplication;
 
 import java.util.Collections;
 import java.util.HashMap;

@@ -39,7 +39,6 @@ import org.opensilk.music.plugin.drive.ui.SettingsActivity;
 import org.opensilk.music.plugin.drive.util.Helpers;
 import org.opensilk.music.plugin.drive.util.RequestCache;
 import org.opensilk.music.plugin.drive.util.DriveHelper;
-import org.opensilk.common.dagger.DaggerInjector;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,7 +73,6 @@ public class DriveLibraryService extends RemoteLibraryService {
     @Override
     public void onCreate() {
         super.onCreate();
-        ((DaggerInjector) getApplication()).inject(this);
     }
 
     @Override

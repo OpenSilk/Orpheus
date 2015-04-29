@@ -21,8 +21,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 
-import org.opensilk.common.dagger.DaggerInjector;
-import org.opensilk.music.plugin.drive.util.DriveHelper;
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.music.plugin.drive.SessionFactory;
 
 import javax.inject.Inject;
 
@@ -93,12 +93,12 @@ public class AuthTestFragment extends Fragment implements Observer<Boolean> {
     public void onNext(Boolean aBoolean) {
     }
 
-    @Inject DriveHelper mDriveHelper;
+    @Inject SessionFactory mSessionFactory;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ((DaggerInjector) activity.getApplication()).inject(this);
+        DaggerService.<ActivityComponent>getDaggerComponent(activity).inject(this);
         setRetainInstance(true);
     }
 
@@ -114,13 +114,15 @@ public class AuthTestFragment extends Fragment implements Observer<Boolean> {
                         @Override
                         public void call(Subscriber<? super Boolean> subscriber) {
                             try {
-                                mDriveHelper.getSession(getArguments().getString("account"))
-                                        .getDrive()
-                                        .files()
-                                        .list()
-                                        .setFields("items/id")
-                                        .setMaxResults(1)
-                                        .execute();
+//                                mSessionFactory.getSession(getArguments().getString("account"))
+//                                        .getDrive()
+//                                        .files()
+//                                        .list()
+//                                        .setFields("items/id")
+//                                        .setMaxResults(1)
+//                                        .execute();
+                                mSessionFactory.getSession(getArguments().getString("account"))
+                                        .getCredential().getToken();
                                 //if (subscriber.isUnsubscribed()) return;
                                 //subscriber.onNext(true);
                                 subscriber.onCompleted();

@@ -20,7 +20,7 @@ package org.opensilk.music.plugin.drive;
 import android.app.Application;
 import android.content.Context;
 
-import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.plugin.drive.ui.AuthTestFragment;
 import org.opensilk.music.plugin.drive.ui.SettingsActivity;
 import org.opensilk.music.plugin.drive.util.DriveHelper;
@@ -33,15 +33,7 @@ import dagger.Provides;
 /**
  * Created by drew on 4/28/15.
  */
-@dagger.Module(
-        injects = {
-                AuthTestFragment.class,
-                SettingsActivity.SettingsFragment.class,
-                DriveLibraryService.class,
-        },
-        addsTo = GlobalModule.class,
-        library = true
-)
+@dagger.Module
 public class AppModule {
     private final Application app;
 

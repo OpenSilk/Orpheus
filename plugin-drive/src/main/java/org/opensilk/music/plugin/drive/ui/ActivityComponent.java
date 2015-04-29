@@ -15,20 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.folders.ui;
+package org.opensilk.music.plugin.drive.ui;
 
-import org.opensilk.common.core.dagger2.AppContextComponent;
+import org.opensilk.common.core.dagger2.ActivityScope;
+import org.opensilk.music.plugin.drive.GlobalComponent;
 
 import dagger.Component;
+import rx.functions.Func1;
 
 /**
- * Created by drew on 4/28/15.
+ * Created by drew on 4/29/15.
  */
-@StoragePickerScope
+@ActivityScope
 @Component(
-        dependencies = AppContextComponent.class,
-        modules = StoragePickerModule.class
+        dependencies = GlobalComponent.class
 )
-public interface StoragePickerComponent {
-    void inject(StoragePickerActivity activity);
+public interface ActivityComponent {
+    Func1<GlobalComponent, ActivityComponent> FACTORY = new Func1<GlobalComponent, ActivityComponent>() {
+        @Override
+        public ActivityComponent call(GlobalComponent globalComponent) {
+            return DaggerActivityComponent.builder()
+                    .globalComponent(globalComponent)
+                    .build();
+        }
+    };
+    void inject(AuthTestFragment fragment);
+    void inject(SettingsFragment fragment);
 }
