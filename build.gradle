@@ -26,6 +26,13 @@ ext.buildToolsVersion  = "22.0.1"
 // defaultConfig
 ext.targetSdkVersion = 22
 
+ext.supportLibVersion = "22.1.1"
+ext.dagger2Version = "2.0"
+ext.rxAndroidVersion = "0.23.0"
+ext.timberVersion = "2.5.0"
+ext.commonsLangVersion = "3.3.2"
+ext.butterKnifeVersion = "6.0.0"
+
 def gitSha() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
 }
