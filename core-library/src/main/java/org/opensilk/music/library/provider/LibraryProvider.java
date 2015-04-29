@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.opensilk.music.core.exception.ParcelableException;
 import org.opensilk.music.core.model.Album;
 import org.opensilk.music.core.model.Artist;
 import org.opensilk.music.core.model.Folder;
@@ -38,7 +39,10 @@ import org.opensilk.music.library.compare.TrackCompare;
 import org.opensilk.music.library.sort.BundleableSortOrder;
 import org.opensilk.music.library.util.CursorUtil;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import hugo.weaving.DebugLog;
 import rx.Observable;
@@ -71,6 +75,8 @@ public class LibraryProvider extends ContentProvider {
     public static final String ARG_SORTORDER = "arg_sortorder";
 
     private UriMatcher mMatcher;
+    private final Map<String, ParcelableException> mCaughtExceptions =
+            Collections.synchronizedMap(new HashMap<String, ParcelableException>());
 
     @Override
     public boolean onCreate() {
@@ -163,6 +169,7 @@ public class LibraryProvider extends ContentProvider {
             );
         } catch (Exception e) {
             Log.w(TAG, "getAlbumsInternal", e);
+            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
         }
         return c;
     }
@@ -180,6 +187,7 @@ public class LibraryProvider extends ContentProvider {
             CursorUtil.populateRow(c.newRow(), album);
         } catch (Exception e) {
             Log.w(TAG, "getAlbumInternal", e);
+            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
         }
         return c;
     }
@@ -215,6 +223,7 @@ public class LibraryProvider extends ContentProvider {
             );
         } catch (Exception e) {
             Log.w(TAG, "queryArtistsInternal", e);
+            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
         }
         return c;
     }
@@ -232,6 +241,7 @@ public class LibraryProvider extends ContentProvider {
             CursorUtil.populateRow(c.newRow(), artist);
         } catch (Exception e) {
             Log.w(TAG, "getArtistInternal", e);
+            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
         }
         return c;
     }
@@ -269,6 +279,7 @@ public class LibraryProvider extends ContentProvider {
             }).toBlocking().first();
         } catch (Exception e) {
             Log.w(TAG, "getFoldersTracksInternal", e);
+            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
         }
         return c;
     }
@@ -304,6 +315,7 @@ public class LibraryProvider extends ContentProvider {
             );
         } catch (Exception e) {
             Log.w(TAG, "queryTracksInternal", e);
+            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
         }
         return c;
     }
@@ -321,6 +333,7 @@ public class LibraryProvider extends ContentProvider {
             CursorUtil.populateRow(c.newRow(), track);
         } catch (Exception e) {
             Log.w(TAG, "getTrackInternal", e);
+            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
         }
         return c;
     }
@@ -393,8 +406,70 @@ public class LibraryProvider extends ContentProvider {
         return 0;
     }
 
+    /**
+     * Out of band stuffs
+     */
+    public interface OB {
+        /**
+         * Methods
+         */
+        interface M {
+            /**
+             * Called after receiving a null cursor
+             * arg = Uri string
+             */
+            String ONNULLCURSOR = "m_onnullcursor";
+        }
+
+        /**
+         * Response Bundle keys
+         */
+        interface K {
+            /**
+             * ParcelalbeException
+             */
+            String EX = "k_ex";
+        }
+    }
+
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
-        return super.call(method, arg, extras);
+        if (method == null) method = "";
+        switch (method) {
+            case OB.M.ONNULLCURSOR:
+                return retrieveSavedException(arg);
+            default:
+                return null;
+        }
+    }
+
+    protected Bundle retrieveSavedException(String uri) {
+        ParcelableException e = mCaughtExceptions.remove(uri);
+        if (e != null) {
+            Bundle b = new Bundle();
+            b.putParcelable(OB.K.EX, e);
+            return b;
+        }
+        return null;
+    }
+
+    protected void saveForLater(Uri uri, Exception e) {
+        Exception ex = unwrapE(e);
+        if (ex instanceof ParcelableException) {
+            mCaughtExceptions.put(uri.toString(), (ParcelableException) ex);
+        } else {
+            Log.w(TAG, "Thrown exception not instance of ParcelableException");
+        }
+    }
+
+    //Blocking observable always throws RuntimeExceptions
+    private static Exception unwrapE(Exception e) {
+        if (e instanceof RuntimeException) {
+            Throwable c = e.getCause();
+            if (c instanceof Exception) {
+                return (Exception) c;
+            }
+        }
+        return e;
     }
 }
