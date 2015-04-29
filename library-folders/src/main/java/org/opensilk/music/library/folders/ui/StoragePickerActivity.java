@@ -26,18 +26,25 @@ import android.os.Bundle;
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
 import org.opensilk.music.library.folders.R;
+import org.opensilk.music.library.folders.StorageLookup;
 import org.opensilk.music.library.folders.util.FileUtil;
+
+import javax.inject.Inject;
 
 /**
  * Created by drew on 11/13/14.
  */
-public class StorageLocationPicker extends Activity {
+public class StoragePickerActivity extends Activity {
 
-    AlertDialog dialog;
+    @Inject StorageLookup mStorageLookup;
+
+    AlertDialog mDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        StoragePickerModule.injectSelf(this);
 
         boolean wantLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
         if (wantLightTheme) {
@@ -60,7 +67,7 @@ public class StorageLocationPicker extends Activity {
             };
         }
 
-        dialog = new AlertDialog.Builder(this)
+        mDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.folders_picker_title)
                 .setItems(storageLocations, new DialogInterface.OnClickListener() {
                     @Override
@@ -86,5 +93,13 @@ public class StorageLocationPicker extends Activity {
                     }
                 })
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
+        }
     }
 }

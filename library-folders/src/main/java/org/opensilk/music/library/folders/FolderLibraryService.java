@@ -30,7 +30,7 @@ import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.library.folders.ui.StorageLocationPicker;
+import org.opensilk.music.library.folders.ui.StoragePickerActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ public class FolderLibraryService extends RemoteLibraryService {
     @Override
     protected PluginConfig getConfig() {
         return new PluginConfig.Builder()
-                .setPickerComponent(new ComponentName(this, StorageLocationPicker.class), getString(R.string.folders_picker_title))
+                .setPickerComponent(new ComponentName(this, StoragePickerActivity.class), getString(R.string.folders_picker_title))
                 .build();
     }
 

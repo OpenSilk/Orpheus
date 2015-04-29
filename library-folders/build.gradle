@@ -57,6 +57,8 @@ version android.defaultConfig.versionName
 apply from: '../../maven_local.gradle'
 
 dependencies {
+    provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
+    compile project(':common-core')
     compile project(':core-library')
     // for library
     compile project(':api')
