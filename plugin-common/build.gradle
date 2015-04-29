@@ -41,9 +41,7 @@ apply from: '../../maven_local.gradle'
 
 dependencies {
     compile project(':api')
-    compile project(':common')
-    provided 'com.squareup.dagger:dagger-compiler:1.2.2'
-    compile 'com.squareup.dagger:dagger:1.2.2'
-    compile 'io.reactivex:rxandroid:0.23.0'
-    compile 'com.jakewharton.timber:timber:2.5.0'
+    compile project(':common-core')
+    compile project(':core-library')
+    provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
 }

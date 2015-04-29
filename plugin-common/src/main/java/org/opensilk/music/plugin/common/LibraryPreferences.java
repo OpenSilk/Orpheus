@@ -20,7 +20,7 @@ package org.opensilk.music.plugin.common;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.opensilk.common.dagger.qualifier.ForApplication;
+import org.opensilk.common.core.dagger2.ForApplication;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -83,9 +83,22 @@ public class LibraryPreferences {
     SharedPreferences obtainPrefs(String libraryId) {
         SharedPreferences prefs = PREFS.get(libraryId);
         if (prefs == null) {
-            prefs = appContext.getSharedPreferences(PluginUtil.posixSafe(libraryId), Context.MODE_PRIVATE);
+            prefs = appContext.getSharedPreferences(posixSafe(libraryId), Context.MODE_PRIVATE);
             PREFS.put(libraryId, prefs);
         }
         return prefs;
+    }
+
+    /**
+     * Mangles the input to create a posix safe file name.
+     * All illegal characters are replaced with '_' (underscores)
+     * This could potentially replace the entire string with underscores,
+     */
+    public static String posixSafe(String string) {
+        String s = string;
+        if (string.startsWith("-")) {
+            s = string.replaceFirst("-", "_");
+        }
+        return s.replaceAll("[^a-zA-Z0-9_\\.\\-]", "_");
     }
 }

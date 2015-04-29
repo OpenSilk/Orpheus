@@ -27,18 +27,19 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 
-import org.opensilk.music.api.OrpheusApi;
+import org.opensilk.common.core.app.MortarActivity;
+import org.opensilk.music.library.LibraryConstants;
 
 /**
  * Created by drew on 7/19/14.
  */
-public abstract class AbsSettingsActivity extends Activity {
+public abstract class AbsSettingsActivity extends MortarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        boolean wantLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
+        boolean wantLightTheme = getIntent().getBooleanExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, false);
         if (wantLightTheme) {
             setTheme(R.style.AppThemeLight);
         } else {
@@ -46,14 +47,14 @@ public abstract class AbsSettingsActivity extends Activity {
         }
 
         FrameLayout root = new FrameLayout(this);
-        root.setId(android.R.id.content);
+        root.setId(R.id.main);
         setContentView(root, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        String libraryId = getIntent().getStringExtra(OrpheusApi.EXTRA_LIBRARY_ID);
+        String libraryId = getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, getSettingsFragment(libraryId), "settings")
+                    .replace(R.id.main, getSettingsFragment(libraryId), "settings")
                     .commit();
         }
     }
