@@ -16,15 +16,15 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.opensilk.music.plugin.folders">
+          package="org.opensilk.music.library.folders">
 
     <application>
 
-        <activity android:name=".ui.StorageLocationPicker"
+        <activity android:name="org.opensilk.music.library.folders.ui.StorageLocationPicker"
                   android:theme="@style/FoldersThemeTranslucentDark"/>
 
         <!--Non exported service since its bundled-->
-        <service android:name=".FolderLibraryService"
+        <service android:name="org.opensilk.music.library.folders.FolderLibraryService"
                  android:icon="@drawable/ic_folder_grey600_24dp"
                  android:label="@string/folders_plugin_name"
                  android:description="@string/folders_plugin_description"

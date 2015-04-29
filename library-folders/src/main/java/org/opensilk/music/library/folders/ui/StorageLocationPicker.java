@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.plugin.folders.ui;
+package org.opensilk.music.library.folders.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,8 +25,8 @@ import android.os.Bundle;
 
 import org.opensilk.music.api.OrpheusApi;
 import org.opensilk.music.api.meta.LibraryInfo;
-import org.opensilk.music.plugin.folders.R;
-import org.opensilk.music.plugin.folders.util.FileUtil;
+import org.opensilk.music.library.folders.R;
+import org.opensilk.music.library.folders.util.FileUtil;
 
 /**
  * Created by drew on 11/13/14.

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.plugin.folders.util;
+package org.opensilk.music.library.folders.util;
 
 import android.content.ContentUris;
 import android.content.Context;

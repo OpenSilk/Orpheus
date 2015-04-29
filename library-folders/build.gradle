@@ -57,7 +57,7 @@ version android.defaultConfig.versionName
 apply from: '../../maven_local.gradle'
 
 dependencies {
-    compile 'io.reactivex:rxandroid:0.23.0'
+    compile project(':core-library')
     // for library
     compile project(':api')
 

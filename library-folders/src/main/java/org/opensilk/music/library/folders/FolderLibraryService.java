@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.plugin.folders;
+package org.opensilk.music.library.folders;
 
 import android.content.ComponentName;
 import android.os.Bundle;
@@ -30,7 +30,7 @@ import org.opensilk.music.api.callback.Result;
 import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.api.model.Folder;
 import org.opensilk.music.api.model.Song;
-import org.opensilk.music.plugin.folders.ui.StorageLocationPicker;
+import org.opensilk.music.library.folders.ui.StorageLocationPicker;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
-import static org.opensilk.music.plugin.folders.util.FileUtil.*;
+import static org.opensilk.music.library.folders.util.FileUtil.*;
 
 /**
  * Created by drew on 11/13/14.
