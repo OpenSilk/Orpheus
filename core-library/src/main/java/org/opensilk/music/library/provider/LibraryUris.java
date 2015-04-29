@@ -81,17 +81,17 @@ public class LibraryUris {
         Log.i("Uris", "Creating matcher for authority="+authority);
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        uriMatcher.addURI(authority, albums, M_ALBUMS);
-        uriMatcher.addURI(authority, album + "/*", M_ALBUM);
+        uriMatcher.addURI(authority, "*/" + albums, M_ALBUMS);
+        uriMatcher.addURI(authority, "*/" + album + "/*", M_ALBUM);
 
-        uriMatcher.addURI(authority, artists, M_ARTISTS);
-        uriMatcher.addURI(authority, artist + "/*", M_ARTIST);
+        uriMatcher.addURI(authority, "*/" + artists, M_ARTISTS);
+        uriMatcher.addURI(authority, "*/" + artist + "/*", M_ARTIST);
 
-        uriMatcher.addURI(authority, folders, M_FOLDERS);
-        uriMatcher.addURI(authority, folder + "/*", M_FOLDER);
+        uriMatcher.addURI(authority, "*/" + folders, M_FOLDERS);
+        uriMatcher.addURI(authority, "*/" + folder + "/*", M_FOLDER);
 
-        uriMatcher.addURI(authority, tracks, M_TRACKS);
-        uriMatcher.addURI(authority, track + "/*", M_TRACK);
+        uriMatcher.addURI(authority, "*/" + tracks, M_TRACKS);
+        uriMatcher.addURI(authority, "*/" + track + "/*", M_TRACK);
 
         return uriMatcher;
     }
