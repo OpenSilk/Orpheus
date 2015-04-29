@@ -65,11 +65,15 @@ public class ParcelableException extends Exception implements Parcelable {
     }
 
     @Override public void writeToParcel(Parcel dest, int flags) {
-        dest.writeSerializable(this);
+        dest.writeInt(code);
+        dest.writeSerializable(getCause());
     }
 
     private static ParcelableException readParcel(Parcel in) {
-        return (ParcelableException) in.readSerializable();
+        return new ParcelableException(
+                in.readInt(),
+                (Throwable) in.readSerializable()
+        );
     }
 
     public static final Creator<ParcelableException> CREATOR = new Creator<ParcelableException>() {
