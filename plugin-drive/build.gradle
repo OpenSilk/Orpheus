@@ -96,18 +96,21 @@ dependencies {
     provided 'com.squareup.dagger:dagger-compiler:1.2.2'
     compile 'com.squareup.dagger:dagger:1.2.2'
 
-    compile ('com.google.api-client:google-api-client-android:1.19.0') {
+    //https://github.com/google/google-api-java-client/releases
+    compile ('com.google.api-client:google-api-client-android:1.20.0') {
         exclude module: 'httpclient'
     }
-    compile ('com.google.apis:google-api-services-drive:v2-rev151-1.19.0') {
+    compile ('com.google.api-client:google-api-client-gson:1.20.0') {
         exclude module: 'httpclient'
     }
-    compile ('com.google.api-client:google-api-client-gson:1.19.0') {
+    //https://developers.google.com/api-client-library/java/apis/drive/v2
+    compile ('com.google.apis:google-api-services-drive:v2-rev168-1.20.0') {
         exclude module: 'httpclient'
     }
-    compile 'com.google.android.gms:play-services-identity:6.5.87'
+    compile 'com.google.android.gms:play-services-identity:7.0.0'
 
     compile project(':plugin-common')
+    compile project(':core-library')
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {

@@ -31,6 +31,7 @@ import org.opensilk.common.dagger.DaggerInjector;
 import org.opensilk.music.plugin.common.AbsSettingsActivity;
 import org.opensilk.music.plugin.common.FolderPickerActivity;
 import org.opensilk.music.plugin.common.PluginUtil;
+import org.opensilk.music.plugin.drive.Constants;
 import org.opensilk.music.plugin.drive.DriveLibraryService;
 import org.opensilk.music.plugin.drive.R;
 import org.opensilk.music.plugin.drive.util.RequestCache;
@@ -116,7 +117,7 @@ public class SettingsActivity extends AbsSettingsActivity {
                 Intent i = getActivity().getIntent()
                         .setClass(getActivity(), FolderPickerActivity.class)
                         .putExtra(FolderPickerActivity.SERVICE_COMPONENT, new ComponentName(getActivity(), DriveLibraryService.class))
-                        .putExtra(FolderPickerActivity.STARTING_FOLDER, DriveLibraryService.DEFAULT_ROOT_FOLDER);
+                        .putExtra(FolderPickerActivity.STARTING_FOLDER, Constants.DEFAULT_ROOT_FOLDER);
                 getPreferenceManager().getSharedPreferences().edit().remove(ROOT_FOLDER).remove(ROOT_FOLDER_NAME).apply();
                 findPreference(ROOT_FOLDER).setSummary(null);
                 startActivityForResult(i, 0);

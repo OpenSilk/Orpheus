@@ -26,6 +26,11 @@
                  android:permission="org.opensilk.music.debug.api.permission.BIND_LIBRARY_SERVICE"
                  tools:replace="permission" />
 
+        <provider
+            android:name=".provider.DriveLibraryProvider"
+            android:authorities="orpheus.library.org.opensilk.music.plugin.drive.debug"
+            tools:replace="authorities"/>
+
     </application>
 
 </manifest>

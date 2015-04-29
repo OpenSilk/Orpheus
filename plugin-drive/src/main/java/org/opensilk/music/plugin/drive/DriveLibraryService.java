@@ -20,8 +20,6 @@ package org.opensilk.music.plugin.drive;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -38,9 +36,9 @@ import org.opensilk.music.api.model.Song;
 import org.opensilk.music.plugin.common.LibraryPreferences;
 import org.opensilk.music.plugin.drive.ui.LibraryChooserActivity;
 import org.opensilk.music.plugin.drive.ui.SettingsActivity;
+import org.opensilk.music.plugin.drive.util.Helpers;
 import org.opensilk.music.plugin.drive.util.RequestCache;
 import org.opensilk.music.plugin.drive.util.DriveHelper;
-import org.opensilk.music.plugin.drive.util.Helpers;
 import org.opensilk.common.dagger.DaggerInjector;
 
 import java.io.IOException;
@@ -58,6 +56,7 @@ import timber.log.Timber;
 
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 
+import static org.opensilk.music.plugin.drive.Constants.*;
 import static org.opensilk.music.api.exception.ParcelableException.NETWORK;
 import static org.opensilk.music.api.exception.ParcelableException.AUTH_FAILURE;
 
@@ -65,16 +64,6 @@ import static org.opensilk.music.api.exception.ParcelableException.AUTH_FAILURE;
  * Created by drew on 6/13/14.
  */
 public class DriveLibraryService extends RemoteLibraryService {
-
-    public static final String DEFAULT_ROOT_FOLDER = "root";
-    public static final String BASE_QUERY = " in parents and trashed=false ";
-    public static final String FOLDER_MIMETYPE = "application/vnd.google-apps.folder";
-    public static final String AUDIO_MIME_WILDCARD = "audio";
-    public static final String AUDIO_OGG_MIMETYPE = "application/ogg";
-    public static final String FOLDER_SONG_QUERY = " (mimeType='"+FOLDER_MIMETYPE+"' or mimeType contains '"
-            +AUDIO_MIME_WILDCARD+"' or mimeType='"+AUDIO_OGG_MIMETYPE+"')";
-    public static final String SONG_QUERY = " (mimeType contains '"+AUDIO_MIME_WILDCARD+"' or mimeType='"
-            +AUDIO_OGG_MIMETYPE+"')";
 
     @Inject DriveHelper mDriveHelper;
     @Inject LibraryPreferences mLibraryPrefs;
@@ -181,7 +170,7 @@ public class DriveLibraryService extends RemoteLibraryService {
                     do {
                         Drive.Files.List req = session.getDrive().files().list()
                                 .setQ(q)
-                                .setFields(Helpers.FIELDS)
+                                .setFields(FIELDS)
                                 .setMaxResults(500); //More the better
                         if (!TextUtils.isEmpty(pageToken)) req.setPageToken(pageToken);
                         FileList resp = req.execute();
@@ -260,7 +249,7 @@ public class DriveLibraryService extends RemoteLibraryService {
                     Timber.d("q=" + query);
                     Drive.Files.List req = driveSession.getDrive().files().list()
                             .setQ(query)
-                            .setFields(Helpers.FIELDS)
+                            .setFields(FIELDS)
                             .setMaxResults(500); //More the better
                     if (!TextUtils.isEmpty(paginationToken)) req.setPageToken(paginationToken);
                     FileList resp = req.execute();
@@ -486,7 +475,7 @@ public class DriveLibraryService extends RemoteLibraryService {
                 Timber.d("q=" + query);
                 Drive.Files.List req = driveSession.getDrive().files().list()
                         .setQ(query)
-                        .setFields(Helpers.FIELDS)
+                        .setFields(FIELDS)
                         .setMaxResults(maxResults);
                 if (!TextUtils.isEmpty(paginationToken)) {
                     req.setPageToken(paginationToken);
@@ -564,7 +553,7 @@ public class DriveLibraryService extends RemoteLibraryService {
                 try {
                     Drive.Files.List req = session.getDrive().files().list()
                             .setQ("trashed=false and (mimeType contains 'audio' or mimeType = 'application/ogg')")
-                            .setFields(Helpers.FIELDS)
+                            .setFields(FIELDS)
                             .setMaxResults(maxResults);
                     if (!TextUtils.isEmpty(paginationToken)) {
                         req.setPageToken(paginationToken);

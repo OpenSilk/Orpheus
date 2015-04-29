@@ -39,6 +39,7 @@ import dagger.Provides;
                 SettingsActivity.SettingsFragment.class,
                 DriveLibraryService.class,
         },
+        addsTo = GlobalModule.class,
         library = true
 )
 public class AppModule {
@@ -48,15 +49,7 @@ public class AppModule {
         this.app = app;
     }
 
-    @Provides
-    @Singleton
-    @ForApplication
-    public Context provideAppContext() {
-        return app.getApplicationContext();
-    }
-
-    @Provides
-    @Singleton
+    @Provides @Singleton
     public DriveHelper provideDriveApi(DriveHelperImpl api) {
         return api;
     }

@@ -17,20 +17,26 @@
 
 package org.opensilk.music.plugin.drive;
 
+import android.app.Application;
 import android.os.StrictMode;
 
 import org.opensilk.common.dagger.DaggerApplication;
+import org.opensilk.common.dagger.DaggerInjector;
 
+import dagger.ObjectGraph;
 import timber.log.Timber;
 
 /**
  * Created by drew on 6/12/14.
  */
-public class App extends DaggerApplication {
+public class App extends Application implements DaggerInjector {
+
+    protected ObjectGraph mGraph;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mGraph = GlobalGraph.get(this).getObjectGraph().plus(new AppModule(this));
         if (BuildConfig.DEBUG) {
             // logging
             Timber.plant(new Timber.DebugTree());
@@ -52,9 +58,13 @@ public class App extends DaggerApplication {
     }
 
     @Override
-    protected Object[] getModules() {
-        return new Object[] {
-                new AppModule(this)
-        };
+    public void inject(Object obj) {
+        mGraph.inject(obj);
     }
+
+    @Override
+    public ObjectGraph getObjectGraph() {
+        return mGraph;
+    }
+
 }
