@@ -18,27 +18,31 @@
 
 <resources>
     <!-- Base dark theme for dialog style activities -->
-    <style name="AppThemeDialogDark" parent="android:Theme.DeviceDefault.Dialog.NoActionBar.MinWidth">
-
+    <style name="AppThemeDialogDark" parent="Theme.AppCompat.Dialog.MinWidth">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Base light theme for dialog style activities -->
-    <style name="AppThemeDialogLight" parent="android:Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth">
-
+    <style name="AppThemeDialogLight" parent="Theme.AppCompat.Light.Dialog.MinWidth">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Base dark theme for settings -->
-    <style name="AppThemeDark" parent="android:Theme.DeviceDefault.DialogWhenLarge">
-
+    <style name="AppThemeDark" parent="Theme.AppCompat.DialogWhenLarge">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- base light theme for settings -->
-    <style name="AppThemeLight" parent="android:Theme.DeviceDefault.Light.DialogWhenLarge">
-
+    <style name="AppThemeLight" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Base theme for picker activity that just starts another activity -->
-    <style name="AppThemeTranslucentDark" parent="android:Theme.DeviceDefault.NoActionBar">
+    <style name="AppThemeTranslucentDark" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -49,7 +53,7 @@
     </style>
 
     <!--Base theme for picker activity that just starts another activity -->
-    <style name="AppThemeTranslucentLight" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+    <style name="AppThemeTranslucentLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>

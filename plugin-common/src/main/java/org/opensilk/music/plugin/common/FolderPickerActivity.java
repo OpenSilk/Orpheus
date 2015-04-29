@@ -17,40 +17,20 @@
 
 package org.opensilk.music.plugin.common;
 
-import android.app.Activity;
-import android.app.FragmentTransaction;
-import android.app.ListFragment;
-import android.app.LoaderManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
-import android.content.pm.ActivityInfo;
-import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import org.opensilk.music.library.LibraryConstants;
-import org.opensilk.music.library.proj.FolderTrackProj;
-import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.sort.FolderTrackSortOrder;
-import org.opensilk.music.library.util.CursorUtil;
-import org.opensilk.music.model.Album;
-import org.opensilk.music.model.Artist;
-import org.opensilk.music.model.Folder;
-import org.opensilk.music.model.spi.Bundleable;
 
 /**
  * Created by drew on 7/18/14.
  */
-public class FolderPickerActivity extends Activity {
+public class FolderPickerActivity extends AppCompatActivity {
 
     public static final String STARTING_FOLDER = "starting_folder";
     public static final String PICKED_FOLDER_IDENTITY = "picked_folder_identity";
@@ -71,7 +51,6 @@ public class FolderPickerActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
         boolean wantLightTheme = getIntent().getBooleanExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, false);
         if (wantLightTheme) {
@@ -80,9 +59,13 @@ public class FolderPickerActivity extends Activity {
             setTheme(R.style.AppThemeDark);
         }
 
-        FrameLayout root = new FrameLayout(this);
-        root.setId(android.R.id.content);
-        setContentView(root, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_toolbar_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mAuthority = getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_AUTHORITY);
         mLibraryId = getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
@@ -100,140 +83,18 @@ public class FolderPickerActivity extends Activity {
         super.onDestroy();
     }
 
-    private void pushFolder(String authority, String libraryid, String folderid) {
-        FragmentTransaction ft = getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, PickerFragment.newInstance(authority, libraryid, folderid));
+    void pushFolder(String authority, String libraryid, String folderid) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main, FolderPickerFragment.newInstance(authority, libraryid, folderid));
         if (!TextUtils.isEmpty(folderid) && !TextUtils.equals(folderid, mStartingFolder)) {
             ft.addToBackStack(folderid);
         }
         ft.commit();
     }
 
-    private void onFolderSelected(String identity, String title) {
+    void onFolderSelected(String identity, String title) {
         setResult(RESULT_OK, getIntent().putExtra(PICKED_FOLDER_IDENTITY, identity)
                 .putExtra(PICKED_FOLDER_TITLE, title));
         finish();
-    }
-
-    public static class PickerFragment extends ListFragment implements
-            AdapterView.OnItemClickListener,
-            AdapterView.OnItemLongClickListener,
-            LoaderManager.LoaderCallbacks<Cursor> {
-
-        private FolderPickerActivity mActivity;
-        private String mAuthority;
-        private String mSourceIdentity;
-        private String mFolderIdentity;
-        private ArrayAdapter<Bundleable> mAdapter;
-
-        public static PickerFragment newInstance(String authority, String identity, String folderId) {
-            PickerFragment f = new PickerFragment();
-            Bundle b = new Bundle();
-            b.putString("__a", authority);
-            b.putString("__id", identity);
-            b.putString("__fid", folderId);
-            f.setArguments(b);
-            return f;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            mActivity = (FolderPickerActivity) activity;
-        }
-
-        @Override
-        public void onDetach() {
-            super.onDetach();
-            mActivity = null;
-        }
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mAuthority = getArguments().getString("__a");
-            mSourceIdentity = getArguments().getString("__id");
-            mFolderIdentity = getArguments().getString("__fid");
-            mAdapter = new ArrayAdapter<Bundleable>(getActivity(), android.R.layout.simple_list_item_1);
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            setListAdapter(null);
-            mAdapter = null;
-        }
-
-        @Override
-        public void onViewCreated(View view, Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-            setEmptyText(getString(R.string.no_results));
-            getListView().setOnItemClickListener(this);
-            getListView().setOnItemLongClickListener(this);
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            Toast.makeText(mActivity, R.string.toast_how_to_pick, Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Bundleable item = (Bundleable) mAdapter.getItem(position);
-            if ((item instanceof Folder)
-                    || (item instanceof Album)
-                    || (item instanceof Artist)) {
-                mActivity.pushFolder(mAuthority, mSourceIdentity, item.getIdentity());
-            } else {
-                Toast.makeText(mActivity, R.string.err_song_click, Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            Bundleable item = (Bundleable) mAdapter.getItem(position);
-            if ((item instanceof Folder)
-                    || (item instanceof Album)
-                    || (item instanceof Artist)) {
-                mActivity.onFolderSelected(item.getIdentity(), item.getName());
-                return true;
-            } else {
-                Toast.makeText(mActivity, R.string.err_song_click, Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        }
-
-        @Override
-        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            return new CursorLoader(
-                    mActivity,
-                    LibraryUris.folder(mAuthority, mSourceIdentity, mFolderIdentity),
-                    FolderTrackProj.ALL,
-                    null,
-                    null,
-                    FolderTrackSortOrder.A_Z
-            );
-        }
-
-        @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            if (data != null) {
-                mAdapter.clear();
-                data.moveToFirst();
-                while (!data.isAfterLast()) {
-                    mAdapter.add(CursorUtil.fromFolderTrackCursor(data));
-                    data.moveToNext();
-                }
-                setListAdapter(mAdapter);
-            } else {
-                setListShown(true);
-            }
-        }
-
-        @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
-
-        }
     }
 }

@@ -25,6 +25,8 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.api.exception.ParcelableException;
 import org.opensilk.music.model.spi.Bundleable;
@@ -128,12 +130,12 @@ public class DriveLibraryProvider extends LibraryProvider {
                     }
                     Drive.Files.List req = driveSession.getDrive().files().list()
                             .setQ(query)
-                            .setFields(FIELDS)
-                            .setMaxResults(1); //More the better
+                            .setFields(FIELDS);
                     if (!TextUtils.isEmpty(paginationToken)) {
                         req.setPageToken(paginationToken);
                     }
                     FileList resp = req.execute();
+                    //Timber.w(ReflectionToStringBuilder.toString(resp, RecursiveToStringStyle.MULTI_LINE_STYLE));
                     //TODO cache response
                     if (!subscriber.isUnsubscribed()) {
                         List<File> files = resp.getItems();

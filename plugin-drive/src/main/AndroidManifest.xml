@@ -41,7 +41,13 @@
              optional component corresponding to PluginConfig#SETTINGS -->
         <activity android:name=".ui.SettingsActivity"
             android:exported="true"
-            android:theme="@style/AppThemeLight"/>
+            android:theme="@style/AppThemeDark"
+            android:launchMode="singleTop"/>
+
+        <activity android:name="org.opensilk.music.plugin.common.FolderPickerActivity">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                       android:value="org.opensilk.music.plugin.drive.ui.SettingsActivity"/>
+        </activity>
 
         <!-- RemoteLibrary implementation
              all items here required for Orpheus to populate the PluginInfo -->

@@ -112,7 +112,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             getPreferenceManager().getSharedPreferences().edit().remove(ROOT_FOLDER).remove(ROOT_FOLDER_NAME).apply();
             findPreference(ROOT_FOLDER).setSummary(null);
             startActivityForResult(FolderPickerActivity.buildIntent(getActivity().getIntent(), getActivity(),
-                    DriveLibraryProvider.AUTHORITY, mLibraryId, Constants.DEFAULT_ROOT_FOLDER), 44);
+                    DriveLibraryProvider.AUTHORITY, mLibraryId, null), 44);
             return true;
         } else if (findPreference(CLEAR_CACHE) == preference) {
             mCache.clear();

@@ -23,11 +23,10 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.view.ViewGroup;
+import android.support.v7.widget.Toolbar;
 import android.webkit.WebView;
-import android.widget.FrameLayout;
 
-import org.opensilk.common.core.app.MortarActivity;
+import org.opensilk.common.core.support.MortarActivity;
 import org.opensilk.music.library.LibraryConstants;
 
 /**
@@ -37,7 +36,6 @@ public abstract class AbsSettingsActivity extends MortarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
         boolean wantLightTheme = getIntent().getBooleanExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, false);
         if (wantLightTheme) {
@@ -46,16 +44,27 @@ public abstract class AbsSettingsActivity extends MortarActivity {
             setTheme(R.style.AppThemeDark);
         }
 
-        FrameLayout root = new FrameLayout(this);
-        root.setId(R.id.main);
-        setContentView(root, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        super.onCreate(savedInstanceState);
 
-        String libraryId = getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
+        setContentView(R.layout.activity_toolbar_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        String libraryId = "dr3wsuth3rland@gmail.com";// getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
                     .replace(R.id.main, getSettingsFragment(libraryId), "settings")
                     .commit();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!getFragmentManager().popBackStackImmediate()) {
+            finish();
         }
     }
 

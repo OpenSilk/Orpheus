@@ -19,7 +19,9 @@
     package="org.opensilk.music.plugin.common">
 
     <application>
-        <activity android:name=".FolderPickerActivity"/>
+        <activity android:name=".FolderPickerActivity"
+            android:theme="@style/AppThemeDark">
+        </activity>
     </application>
 
 </manifest>
