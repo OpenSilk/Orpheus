@@ -22,6 +22,7 @@ import android.content.Context;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 4/28/15.
@@ -31,5 +32,13 @@ import dagger.Component;
         modules = AppContextModule.class
 )
 public interface AppContextComponent {
+    Func1<Context, AppContextComponent> FACTORY = new Func1<Context, AppContextComponent>() {
+        @Override
+        public AppContextComponent call(Context context) {
+            return DaggerAppContextComponent.builder()
+                    .appContextModule(new AppContextModule(context))
+                    .build();
+        }
+    };
     @ForApplication Context appContext();
 }
