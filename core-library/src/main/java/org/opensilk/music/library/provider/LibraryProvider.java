@@ -26,12 +26,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.opensilk.music.core.exception.ParcelableException;
-import org.opensilk.music.core.model.Album;
-import org.opensilk.music.core.model.Artist;
-import org.opensilk.music.core.model.Folder;
-import org.opensilk.music.core.model.Track;
-import org.opensilk.music.core.spi.Bundleable;
+import org.opensilk.music.library.ex.ParcelableException;
+import org.opensilk.music.model.Album;
+import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Track;
+import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.library.compare.AlbumCompare;
 import org.opensilk.music.library.compare.ArtistCompare;
 import org.opensilk.music.library.compare.FolderTrackCompare;

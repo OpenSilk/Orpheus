@@ -17,6 +17,7 @@
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
@@ -48,8 +49,23 @@ android {
 
 }
 
+robolectric {
+    include '**/*Test.class'
+    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
+    afterTest {
+        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
+    }
+}
+
 dependencies {
-    compile project(':core')
-    compile 'org.apache.commons:commons-lang3:3.3.2'
-    compile 'io.reactivex:rxandroid:0.23.0'
+    compile project(':core-model')
+    compile(group:'org.apache.commons', name:'commons-lang3', version: rootProject.ext.commonsLangVersion)
+    compile(group:'io.reactivex', name: 'rxandroid', version: rootProject.ext.rxAndroidVersion)
+
+    testCompile('junit:junit:4.12')
+    testCompile('org.robolectric:robolectric:2.4') {
+        exclude module: 'commons-logging'
+        exclude module: 'httpclient'
+    }
+    testCompile('com.squareup:fest-android:1.0.0')
 }

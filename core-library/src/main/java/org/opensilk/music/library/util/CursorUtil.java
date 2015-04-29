@@ -21,11 +21,11 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
 
-import org.opensilk.music.core.model.Album;
-import org.opensilk.music.core.model.Artist;
-import org.opensilk.music.core.model.Folder;
-import org.opensilk.music.core.model.Track;
-import org.opensilk.music.core.spi.Bundleable;
+import org.opensilk.music.model.Album;
+import org.opensilk.music.model.Artist;
+import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Track;
+import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.library.proj.AlbumProj;
 import org.opensilk.music.library.proj.ArtistProj;
 import org.opensilk.music.library.proj.FolderProj;

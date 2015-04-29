@@ -17,9 +17,9 @@
 
 package org.opensilk.music.library.compare;
 
-import org.opensilk.music.core.model.Folder;
-import org.opensilk.music.core.model.Track;
-import org.opensilk.music.core.spi.Bundleable;
+import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Track;
+import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.Comparator;
 

@@ -18,7 +18,7 @@
 package org.opensilk.music.library.compare;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.opensilk.music.core.spi.Bundleable;
+import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.library.sort.BundleableSortOrder;
 
 import java.util.Comparator;

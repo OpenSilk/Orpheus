@@ -18,7 +18,7 @@
 package org.opensilk.music.library.compare;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.opensilk.music.core.model.Track;
+import org.opensilk.music.model.Track;
 import org.opensilk.music.library.sort.TrackSortOrder;
 
 import java.util.Comparator;
