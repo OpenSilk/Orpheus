@@ -37,34 +37,46 @@ public class LibraryUris {
     static final String track = "track";
 
     public static Uri albums(String authority, String library) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(albums).build();
+        return album(authority, library, null);
     }
 
     public static Uri album(String authority, String library, String id) {
+        if (id == null) {
+            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(albums).build();
+        }
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(album).appendPath(id).build();
     }
 
     public static Uri artists(String authority, String library) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(artists).build();
+        return artist(authority, library, null);
     }
 
     public static Uri artist(String authority, String library, String id) {
+        if (id == null) {
+            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(artists).build();
+        }
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(artist).appendPath(id).build();
     }
 
     public static Uri folders(String authority, String library) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folders).build();
+        return folder(authority, library, null);
     }
 
     public static Uri folder(String authority, String library, String id) {
+        if (id == null) {
+            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folders).build();
+        }
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folder).appendPath(id).build();
     }
 
     public static Uri tracks(String authority, String library) {
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(tracks).build();
+        return track(authority, library, null);
     }
 
     public static Uri track(String authority, String library, String id) {
+        if (id == null) {
+            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(tracks).build();
+        }
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(track).appendPath(id).build();
     }
 
