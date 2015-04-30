@@ -26,7 +26,11 @@ public interface LibraryConstants {
      */
     String EXTRA_LIBRARY_ID = "org.opensilk.music.library.extra.LIBRARY_ID";
     /**
-     * Intent extra containing the {@link org.opensilk.music.api.meta.LibraryInfo}
+     * Intent extra containing the {@link org.opensilk.music.library.LibraryInfo}
+     */
+    String EXTRA_LIBRARY_INFO = "org.opensilk.music.api.LIBRARY_INFO";
+    /**
+     * Intent extra containing the library's content authority
      */
     String EXTRA_LIBRARY_AUTHORITY = "org.opensilk.music.library.extra.LIBRARY_AUTHORITY";
     /**

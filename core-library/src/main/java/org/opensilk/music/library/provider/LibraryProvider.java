@@ -26,6 +26,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.apache.commons.lang3.NotImplementedException;
+import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.ex.ParcelableException;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
@@ -52,6 +54,7 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 import rx.functions.Func2;
 
+import static org.opensilk.music.library.provider.QueryArgs.*;
 import static org.opensilk.music.library.provider.LibraryUris.*;
 
 /**
@@ -62,31 +65,31 @@ public class LibraryProvider extends ContentProvider {
 
     public static final String AUTHORITY_PFX = "orpheus.library.";
 
-    /*
-     * Bundle keys for args
-     */
-
-    //Never null
-    public static final String ARG_URI = "arg_uri";
-    public static final String ARG_PROJECTION = "arg_projection";
-    public static final String ARG_SELECTION = "arg_selection";
-    public static final String ARG_SELECTIONARGS = "arg_selectionargs";
-    //Never null
-    public static final String ARG_SORTORDER = "arg_sortorder";
-
     private UriMatcher mMatcher;
     private final Map<String, ParcelableException> mCaughtExceptions =
             Collections.synchronizedMap(new HashMap<String, ParcelableException>());
 
     @Override
     public boolean onCreate() {
-        mMatcher = LibraryUris.makeMatcher(AUTHORITY_PFX + getAuthority());
+        mMatcher = LibraryUris.makeMatcher(AUTHORITY_PFX + getBaseAuthority());
         return true;
     }
 
-    protected String getAuthority() {
+    /*
+     * Start Config
+     */
+
+    protected String getBaseAuthority() {
         return getContext().getPackageName();
     }
+
+    protected LibraryConfig getLibraryConfig() {
+        throw new NotImplementedException("Subclass must override");
+    }
+
+    /*
+     * End config
+     */
 
     @Override
     public final Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -98,11 +101,11 @@ public class LibraryProvider extends ContentProvider {
         //Merge everything into a bundle, This is much nicer than passing 50 arguments
         //and allows easier extending in the future.
         Bundle args = new Bundle(6);
-        args.putParcelable(ARG_URI, uri);
-        args.putStringArray(ARG_PROJECTION, projection);
-        args.putString(ARG_SELECTION, selection);
-        args.putStringArray(ARG_SELECTIONARGS, selectionArgs);
-        args.putString(ARG_SORTORDER, sortOrder != null ? sortOrder : BundleableSortOrder.A_Z);
+        args.putParcelable(URI, uri);
+        args.putStringArray(PROJECTION, projection);
+        args.putString(SELECTION, selection);
+        args.putStringArray(SELECTIONARGS, selectionArgs);
+        args.putString(SORTORDER, sortOrder != null ? sortOrder : BundleableSortOrder.A_Z);
         final String library = pathSegments.get(0);
 
         Cursor c = null;
@@ -151,7 +154,7 @@ public class LibraryProvider extends ContentProvider {
                     new Func2<Album, Album, Integer>() {
                         @Override
                         public Integer call(Album album, Album album2) {
-                            return AlbumCompare.comparator(args.getString(ARG_SORTORDER)).compare(album, album2);
+                            return AlbumCompare.comparator(args.getString(SORTORDER)).compare(album, album2);
                         }
                     },
                     new Func0<MatrixCursor>() {
@@ -169,7 +172,7 @@ public class LibraryProvider extends ContentProvider {
             );
         } catch (Exception e) {
             Log.w(TAG, "getAlbumsInternal", e);
-            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
+            saveForLater(args.<Uri>getParcelable(URI), e);
         }
         return c;
     }
@@ -187,7 +190,7 @@ public class LibraryProvider extends ContentProvider {
             CursorUtil.populateRow(c.newRow(), album);
         } catch (Exception e) {
             Log.w(TAG, "getAlbumInternal", e);
-            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
+            saveForLater(args.<Uri>getParcelable(URI), e);
         }
         return c;
     }
@@ -205,7 +208,7 @@ public class LibraryProvider extends ContentProvider {
                     new Func2<Artist, Artist, Integer>() {
                         @Override
                         public Integer call(Artist artist, Artist artist2) {
-                            return ArtistCompare.comparator(args.getString(ARG_SORTORDER)).compare(artist, artist2);
+                            return ArtistCompare.comparator(args.getString(SORTORDER)).compare(artist, artist2);
                         }
                     },
                     new Func0<MatrixCursor>() {
@@ -223,7 +226,7 @@ public class LibraryProvider extends ContentProvider {
             );
         } catch (Exception e) {
             Log.w(TAG, "queryArtistsInternal", e);
-            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
+            saveForLater(args.<Uri>getParcelable(URI), e);
         }
         return c;
     }
@@ -241,7 +244,7 @@ public class LibraryProvider extends ContentProvider {
             CursorUtil.populateRow(c.newRow(), artist);
         } catch (Exception e) {
             Log.w(TAG, "getArtistInternal", e);
-            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
+            saveForLater(args.<Uri>getParcelable(URI), e);
         }
         return c;
     }
@@ -256,15 +259,19 @@ public class LibraryProvider extends ContentProvider {
                     getFoldersTracks(library, identity, subscriber, args);
                 }
             }).filter(new Func1<Bundleable, Boolean>() {
+                final String foldersOnly = args.<Uri>getParcelable(URI).getQueryParameter(QUERY_FOLDERS_ONLY);
                 @Override
                 public Boolean call(Bundleable bundleable) {
-                    //In a perfect world this wouldn't be needed
-                    return (bundleable instanceof Folder) || (bundleable instanceof Track);
+                    if (foldersOnly != null && Boolean.parseBoolean(foldersOnly)) {
+                        return (bundleable instanceof Folder);
+                    } else {
+                        return (bundleable instanceof Folder) || (bundleable instanceof Track);
+                    }
                 }
             }).toSortedList(new Func2<Bundleable, Bundleable, Integer>() {
                 @Override
                 public Integer call(Bundleable bundleable, Bundleable bundleable2) {
-                    return FolderTrackCompare.comparator(args.getString(ARG_SORTORDER)).compare(bundleable, bundleable2);
+                    return FolderTrackCompare.comparator(args.getString(SORTORDER)).compare(bundleable, bundleable2);
                 }
             }).flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
                 @Override
@@ -279,7 +286,7 @@ public class LibraryProvider extends ContentProvider {
             }).toBlocking().first();
         } catch (Exception e) {
             Log.w(TAG, "getFoldersTracksInternal", e);
-            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
+            saveForLater(args.<Uri>getParcelable(URI), e);
         }
         return c;
     }
@@ -297,7 +304,7 @@ public class LibraryProvider extends ContentProvider {
                     new Func2<Track, Track, Integer>() {
                         @Override
                         public Integer call(Track track, Track track2) {
-                            return TrackCompare.comparator(args.getString(ARG_SORTORDER)).compare(track, track2);
+                            return TrackCompare.comparator(args.getString(SORTORDER)).compare(track, track2);
                         }
                     },
                     new Func0<MatrixCursor>() {
@@ -315,7 +322,7 @@ public class LibraryProvider extends ContentProvider {
             );
         } catch (Exception e) {
             Log.w(TAG, "queryTracksInternal", e);
-            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
+            saveForLater(args.<Uri>getParcelable(URI), e);
         }
         return c;
     }
@@ -333,7 +340,7 @@ public class LibraryProvider extends ContentProvider {
             CursorUtil.populateRow(c.newRow(), track);
         } catch (Exception e) {
             Log.w(TAG, "getTrackInternal", e);
-            saveForLater(args.<Uri>getParcelable(ARG_URI), e);
+            saveForLater(args.<Uri>getParcelable(URI), e);
         }
         return c;
     }
@@ -357,6 +364,10 @@ public class LibraryProvider extends ContentProvider {
                 .toBlocking()
                 .first();
     }
+
+    /*
+     * Start query stubs
+     */
 
     protected void queryAlbums(String library, Subscriber<? super Album> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
@@ -386,6 +397,10 @@ public class LibraryProvider extends ContentProvider {
         subscriber.onError(new UnsupportedOperationException());
     }
 
+    /*
+     * End query stubs
+     */
+
     @Override
     public String getType(Uri uri) {
         return null;
@@ -406,36 +421,12 @@ public class LibraryProvider extends ContentProvider {
         return 0;
     }
 
-    /**
-     * Out of band stuffs
-     */
-    public interface OB {
-        /**
-         * Methods
-         */
-        interface M {
-            /**
-             * Called after receiving a null cursor
-             * arg = Uri string
-             */
-            String ONNULLCURSOR = "m_onnullcursor";
-        }
-
-        /**
-         * Response Bundle keys
-         */
-        interface K {
-            /**
-             * ParcelalbeException
-             */
-            String EX = "k_ex";
-        }
-    }
-
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if (method == null) method = "";
         switch (method) {
+            case OB.M.LIBRARYCONF:
+                return getLibraryConfig().dematerialize();
             case OB.M.ONNULLCURSOR:
                 return retrieveSavedException(arg);
             default:

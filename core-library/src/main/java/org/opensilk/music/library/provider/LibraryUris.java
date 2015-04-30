@@ -26,6 +26,8 @@ import android.util.Log;
  */
 public class LibraryUris {
 
+    public static final String QUERY_FOLDERS_ONLY = "foldersOnly";
+
     static final String scheme = "content";
     static final String albums = "albums";
     static final String album = "album";
@@ -59,10 +61,18 @@ public class LibraryUris {
     }
 
     public static Uri folders(String authority, String library) {
-        return folder(authority, library, null);
+        return foldersTracks(authority, library).buildUpon().appendQueryParameter(QUERY_FOLDERS_ONLY, "true").build();
     }
 
-    public static Uri folder(String authority, String library, String id) {
+    public static Uri folders(String authority, String library, String id) {
+        return foldersTracks(authority, library, id).buildUpon().appendQueryParameter(QUERY_FOLDERS_ONLY, "true").build();
+    }
+
+    public static Uri foldersTracks(String authority, String library) {
+        return foldersTracks(authority, library, null);
+    }
+
+    public static Uri foldersTracks(String authority, String library, String id) {
         if (id == null) {
             return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folders).build();
         }
