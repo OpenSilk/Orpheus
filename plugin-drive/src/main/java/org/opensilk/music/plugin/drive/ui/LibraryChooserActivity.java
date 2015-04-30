@@ -27,8 +27,8 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecovera
 
 import org.opensilk.common.core.app.MortarActivity;
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.music.library.LibraryConstants;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.plugin.drive.GlobalComponent;
 import org.opensilk.music.plugin.drive.R;
 
@@ -151,8 +151,8 @@ public class LibraryChooserActivity extends MortarActivity implements AuthTestFr
     private void finishSuccess() {
         LibraryInfo libraryInfo = new LibraryInfo(mAccountName, mAccountName, null, null);
         Intent i = new Intent()
-                .putExtra(OrpheusApi.EXTRA_LIBRARY_ID, mAccountName)
-                .putExtra(OrpheusApi.EXTRA_LIBRARY_INFO, libraryInfo);
+                .putExtra(LibraryConstants.EXTRA_LIBRARY_ID, mAccountName)
+                .putExtra(LibraryConstants.EXTRA_LIBRARY_INFO, libraryInfo);
         setResult(RESULT_OK, i);
         finish();
     }
