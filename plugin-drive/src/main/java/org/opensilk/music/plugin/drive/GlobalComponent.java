@@ -22,7 +22,6 @@ import android.content.Context;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.plugin.drive.provider.DriveLibraryProvider;
-import org.opensilk.music.plugin.drive.util.RequestCache;
 
 import javax.inject.Singleton;
 
@@ -47,5 +46,4 @@ public interface GlobalComponent extends AppContextComponent {
         };
         void inject(DriveLibraryProvider provider);
         SessionFactory sessionFactory();
-        RequestCache requestCache();
 }

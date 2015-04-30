@@ -20,7 +20,9 @@ package org.opensilk.music.plugin.drive.ui;
 import android.accounts.AccountManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
+import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
 import org.opensilk.common.core.app.MortarActivity;
@@ -52,14 +54,8 @@ public class LibraryChooserActivity extends MortarActivity implements AuthTestFr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //We Ignore light/dark theme suggestion since google login starts dark then goes to light so fuck it.
         super.onCreate(savedInstanceState);
-
-        boolean wantLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
-        if (wantLightTheme) {
-            setTheme(R.style.AppThemeTranslucentLight);
-        } else {
-            setTheme(R.style.AppThemeTranslucentDark);
-        }
 
         setResult(RESULT_CANCELED);
 
@@ -139,14 +135,17 @@ public class LibraryChooserActivity extends MortarActivity implements AuthTestFr
     @Override
     @DebugLog
     public void onAuthTestFailure(Throwable e) {
+        Intent intent = null;
         if (e instanceof UserRecoverableAuthIOException) {
-            Intent intent = ((UserRecoverableAuthIOException) e).getIntent();
-            if (intent != null) {
-                startActivityForResult(intent, REQUEST_AUTH_APPROVAL);
-                return;
-            }
+            intent = ((UserRecoverableAuthIOException) e).getIntent();
+        } else if (e instanceof UserRecoverableAuthException) {
+            intent = ((UserRecoverableAuthException) e).getIntent();
         }
-        finishFailure();
+        if (intent != null) {
+            startActivityForResult(intent, REQUEST_AUTH_APPROVAL);
+        } else {
+            finishFailure();
+        }
     }
 
     private void finishSuccess() {
@@ -159,6 +158,7 @@ public class LibraryChooserActivity extends MortarActivity implements AuthTestFr
     }
 
     private void finishFailure() {
+        Toast.makeText(this, R.string.msg_unable_to_authorize, Toast.LENGTH_LONG).show();
         setResult(RESULT_CANCELED);
         finish();
     }

@@ -25,10 +25,11 @@
 
     <!-- Library picker -->
     <string name="authorizing">Authorizing…</string>
+    <string name="msg_unable_to_authorize">Authorization failed</string>
 
     <!-- Settings-->
     <string name="about_me" translatable="false">OpenSilk Productions LLC</string>
-    <string name="about_me_url" translatable="false">http://opensilk.org</string>
+    <string name="about_me_url" translatable="false">http://www.opensilk.org/</string>
     <string name="clear_cache">Clear request cache</string>
     <string name="clear_cache_summary">Only needed if getting stale results (must restart Orpheus after)</string>
 

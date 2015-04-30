@@ -17,25 +17,32 @@
 
 package org.opensilk.music.plugin.drive.provider;
 
+import android.content.ComponentName;
 import android.os.Bundle;
-import android.text.TextUtils;
 
 import com.google.android.gms.auth.GoogleAuthException;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.music.api.exception.ParcelableException;
-import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.ex.ParcelableException;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.model.Track;
+import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.plugin.common.LibraryPreferences;
 import org.opensilk.music.plugin.drive.BuildConfig;
 import org.opensilk.music.plugin.drive.GlobalComponent;
 import org.opensilk.music.plugin.drive.ModelUtil;
+import org.opensilk.music.plugin.drive.R;
 import org.opensilk.music.plugin.drive.SessionFactory;
+import org.opensilk.music.plugin.drive.ui.LibraryChooserActivity;
+import org.opensilk.music.plugin.drive.ui.SettingsActivity;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,15 +54,17 @@ import rx.Observable;
 import rx.Subscriber;
 import timber.log.Timber;
 
-import static org.opensilk.music.api.exception.ParcelableException.AUTH_FAILURE;
-import static org.opensilk.music.api.exception.ParcelableException.NETWORK;
-import static org.opensilk.music.plugin.drive.Constants.AUDIO_MIME_WILDCARD;
-import static org.opensilk.music.plugin.drive.Constants.AUDIO_OGG_MIMETYPE;
-import static org.opensilk.music.plugin.drive.Constants.BASE_QUERY;
+import static org.opensilk.music.library.LibraryCapability.FOLDERS;
+import static org.opensilk.music.library.LibraryCapability.SETTINGS;
+import static org.opensilk.music.library.LibraryCapability.TRACKS;
+import static org.opensilk.music.library.ex.ParcelableException.AUTH_FAILURE;
+import static org.opensilk.music.library.ex.ParcelableException.NETWORK;
+import static org.opensilk.music.library.ex.ParcelableException.UNKNOWN;
+import static org.opensilk.music.plugin.drive.Constants.BASE_FOLDERS_TRACKS_QUERY;
 import static org.opensilk.music.plugin.drive.Constants.DEFAULT_ROOT_FOLDER;
-import static org.opensilk.music.plugin.drive.Constants.FIELDS;
-import static org.opensilk.music.plugin.drive.Constants.FOLDER_MIMETYPE;
-import static org.opensilk.music.plugin.drive.Constants.FOLDER_SONG_QUERY;
+import static org.opensilk.music.plugin.drive.Constants.IS_AUDIO;
+import static org.opensilk.music.plugin.drive.Constants.LIST_FIELDS;
+import static org.opensilk.music.plugin.drive.Constants.TRACKS_QUERY;
 
 /**
  * Created by drew on 4/28/15.
@@ -74,25 +83,86 @@ public class DriveLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected String getAuthority() {
+    protected LibraryConfig getLibraryConfig() {
+        return LibraryConfig.builder()
+                .addAbility(FOLDERS)
+                .addAbility(TRACKS)
+                .addAbility(SETTINGS)
+                .setPickerComponent(new ComponentName(getContext(), LibraryChooserActivity.class),
+                        getContext().getResources().getString(R.string.menu_change_source))
+                .setSettingsComponent(new ComponentName(getContext(), SettingsActivity.class),
+                        getContext().getResources().getString(R.string.menu_library_settings))
+                .build();
+    }
+
+    @Override
+    protected String getBaseAuthority() {
         return BuildConfig.APPLICATION_ID;
     }
 
     @DebugLog
     @Override
     protected void getFoldersTracks(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
-        final SessionFactory.Session session = mSessionFactory.getSession(library);
+        final SessionFactory.Session session;
+        try {
+            session = mSessionFactory.getSession(library);
+        } catch (Exception e) {
+            handleException(e, subscriber);
+            return;
+        }
 
         final String folder = getFolder(library, identity);
-        final String q = folder + BASE_QUERY + " and" + FOLDER_SONG_QUERY;
-        final FileSubscriber fileSubscriber = new FileSubscriber(session, subscriber);
+        final String q = folder + BASE_FOLDERS_TRACKS_QUERY;
+
+        final FileSubscriber fileSubscriber = new FileSubscriber(session, subscriber, null);
+
         getFiles(session, q).subscribe(fileSubscriber);
     }
 
+    @Override
+    protected void queryTracks(String library, Subscriber<? super Track> subscriber, Bundle args) {
+        final SessionFactory.Session session;
+        try {
+            session = mSessionFactory.getSession(library);
+        } catch (Exception e) {
+            handleException(e, subscriber);
+            return;
+        }
+
+        final String folder = getFolder(library, null);
+        final String q = TRACKS_QUERY;
+
+        final FileSubscriber fileSubscriber = new FileSubscriber(session,
+                new TracksProxySubscriber(subscriber), null);//TODO new TracksFilterer(folder));
+
+        getFiles(session, q).subscribe(fileSubscriber);
+    }
+
+    @Override
+    protected void getTrack(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
+        final SessionFactory.Session session;
+        try {
+            session = mSessionFactory.getSession(library);
+        } catch (Exception e) {
+            handleException(e, subscriber);
+            return;
+        }
+
+        try {
+            File file = session.getDrive().files().get(identity).execute();
+            if (!subscriber.isUnsubscribed() && file != null && IS_AUDIO.call(file)) {
+                subscriber.onNext(ModelUtil.buildTrack(file, session.getToken()));
+                subscriber.onCompleted();
+            }
+        } catch (Exception e) {
+            handleException(e, subscriber);
+        }
+    }
+
     String getFolder(String libraryIdentity, String folderIdentity) {
-        if (TextUtils.isEmpty(folderIdentity)) {
+        if (StringUtils.isEmpty(folderIdentity)) {
             String root = mLibraryPrefs.getRootFolder(libraryIdentity);
-            if (!TextUtils.isEmpty(root)) {
+            if (!StringUtils.isEmpty(root)) {
                 // use preferred root
                 return "'"+root+"'";
             } else {
@@ -105,7 +175,10 @@ public class DriveLibraryProvider extends LibraryProvider {
     }
 
     @DebugLog
-    Observable<Observable<List<File>>> getFiles(final SessionFactory.Session driveSession, final String query) {
+    Observable<Observable<List<File>>> getFiles(
+            final SessionFactory.Session driveSession,
+            final String query
+    ) {
         return Observable.create(new Observable.OnSubscribe<Observable<List<File>>>() {
             @Override
             public void call(Subscriber<? super Observable<List<File>>> subscriber) {
@@ -116,26 +189,28 @@ public class DriveLibraryProvider extends LibraryProvider {
     }
 
     @DebugLog
-    Observable<List<File>> getPage(final Subscriber<? super Observable<List<File>>> outerSubscriber,
-                             final SessionFactory.Session driveSession,
-                             final String query,
-                             final String paginationToken) {
+    Observable<List<File>> getPage(
+            final Subscriber<? super Observable<List<File>>> outerSubscriber,
+            final SessionFactory.Session driveSession,
+            final String query,
+            final String paginationToken
+    ) {
         return Observable.create(new Observable.OnSubscribe<List<File>>() {
             @Override
             public void call(Subscriber<? super List<File>> subscriber) {
                 try {
-                    Timber.d("q=" + query);
+                    Timber.d("q=%s", query);
                     if (subscriber.isUnsubscribed()) {
                         return; //Shortcircuit if nobody listening
                     }
                     Drive.Files.List req = driveSession.getDrive().files().list()
                             .setQ(query)
-                            .setFields(FIELDS);
-                    if (!TextUtils.isEmpty(paginationToken)) {
+                            .setFields(LIST_FIELDS);
+                    if (!StringUtils.isEmpty(paginationToken)) {
                         req.setPageToken(paginationToken);
                     }
                     FileList resp = req.execute();
-                    //Timber.w(ReflectionToStringBuilder.toString(resp, RecursiveToStringStyle.MULTI_LINE_STYLE));
+                    Timber.v(ReflectionToStringBuilder.toString(resp, RecursiveToStringStyle.MULTI_LINE_STYLE));
                     //TODO cache response
                     if (!subscriber.isUnsubscribed()) {
                         List<File> files = resp.getItems();
@@ -145,7 +220,7 @@ public class DriveLibraryProvider extends LibraryProvider {
                         subscriber.onCompleted();
                     }
                     if (!outerSubscriber.isUnsubscribed()) {
-                        if (!TextUtils.isEmpty(resp.getNextPageToken())) {
+                        if (!StringUtils.isEmpty(resp.getNextPageToken())) {
                             outerSubscriber.onNext(getPage(outerSubscriber, driveSession, query, resp.getNextPageToken()));
                         } else {
                             outerSubscriber.onCompleted();
@@ -160,94 +235,17 @@ public class DriveLibraryProvider extends LibraryProvider {
         });
     }
 
-    class FileSubscriber extends Subscriber<Observable<List<File>>> {
-
-        final SessionFactory.Session driveSession;
-        final Subscriber<? super Bundleable> wrapped;
-
-        String authToken = null;
-
-        public FileSubscriber(SessionFactory.Session driveSession, Subscriber<? super Bundleable> wrapped) {
-            this.driveSession = driveSession;
-            this.wrapped = wrapped;
+    static void handleException(Throwable e, Subscriber<?> subscriber) {
+        if (subscriber.isUnsubscribed()) {
+            return;
         }
-
-        @Override
-        @DebugLog
-        public void onStart() {
-            super.onStart();
-            //TODO not the best place for this. need to push it up higher. and cache in Session
-            try {
-                authToken = driveSession.getCredential().getToken();
-            } catch (Exception e) {
-                unsubscribe();
-                onError(e);
-            }
-            //ensure we get unsubscribed if they are
-            wrapped.add(this);
-        }
-
-        @Override
-        public void onCompleted() {
-            Timber.v("onCompleted(outer)");
-            wrapped.onCompleted();
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            Timber.e(e, "onError(outer)");
-            if (e instanceof GoogleAuthException) {
-                wrapped.onError(new ParcelableException(AUTH_FAILURE,e));
-            } else if (e instanceof IOException) {
-                wrapped.onError(new ParcelableException(NETWORK, e));
-            } else {
-                wrapped.onError(new ParcelableException(e));
-            }
-            wrapped.onError(e);
-        }
-
-        @Override
-        public void onNext(Observable<List<File>> fileObservable) {
-            add(fileObservable.subscribe(new Subscriber<List<File>>() {
-                @Override
-                public void onCompleted() {
-                    Timber.v("onCompleted(inner)");
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    Timber.e("onError(inner)");
-                    FileSubscriber.this.onError(e);
-                }
-
-                @Override
-                //@DebugLog
-                public void onNext(List<File> files) {
-                    for (File f : files) {
-                        final String mime = f.getMimeType();
-                        Bundleable b = null;
-                        if (TextUtils.equals(FOLDER_MIMETYPE, mime)) {
-                            try {
-                                b = ModelUtil.buildFolder(f);
-                            } catch (Exception e) {
-                                Timber.w(e, "Error transforming File to Folder");
-                            }
-                            //Extra precaution
-                        } else if (mime.contains(AUDIO_MIME_WILDCARD)
-                                || TextUtils.equals(mime, AUDIO_OGG_MIMETYPE)) {
-                            try {
-                                b = ModelUtil.buildTrack(f, authToken);
-                            } catch (Exception e) {
-                                Timber.w(e, "Error transforming File to Track");
-                            }
-                        }
-                        Timber.d("Bundleable=%s", b);
-                        if (b != null) {
-                            wrapped.onNext(b);
-                        }
-                    }
-                }
-            }));
+        if (e instanceof GoogleAuthException || e instanceof UserRecoverableAuthIOException) {
+            subscriber.onError(new ParcelableException(AUTH_FAILURE, e));
+        } else if (e instanceof IOException) {
+            subscriber.onError(new ParcelableException(NETWORK, e));
+        } else {
+            subscriber.onError(new ParcelableException(UNKNOWN, e));
         }
     }
+
 }

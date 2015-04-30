@@ -22,19 +22,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.text.TextUtils;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.plugin.common.AbsSettingsActivity;
 import org.opensilk.music.plugin.common.FolderPickerActivity;
 import org.opensilk.music.plugin.common.LibraryPreferences;
-import org.opensilk.music.plugin.drive.Constants;
 import org.opensilk.music.plugin.drive.R;
 import org.opensilk.music.plugin.drive.provider.DriveLibraryProvider;
-import org.opensilk.music.plugin.drive.util.RequestCache;
-
-import javax.inject.Inject;
 
 import static org.opensilk.music.plugin.common.LibraryPreferences.ROOT_FOLDER;
 import static org.opensilk.music.plugin.common.LibraryPreferences.ROOT_FOLDER_NAME;
@@ -54,8 +50,6 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         f.setArguments(b);
         return f;
     }
-
-    @Inject RequestCache mCache;
 
     private String mLibraryId;
 
@@ -77,7 +71,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         // default browse folder
         findPreference(ROOT_FOLDER).setOnPreferenceClickListener(this);
         String rootFolderTitle = getPreferenceManager().getSharedPreferences().getString(ROOT_FOLDER_NAME, null);
-        if (!TextUtils.isEmpty(rootFolderTitle)) {
+        if (!StringUtils.isEmpty(rootFolderTitle)) {
             findPreference(ROOT_FOLDER).setSummary(rootFolderTitle);
         }
 
@@ -94,7 +88,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             if (resultCode == Activity.RESULT_OK) {
                 String pickedFolder = data.getStringExtra(FolderPickerActivity.PICKED_FOLDER_IDENTITY);
                 String pickedFolderTitle = data.getStringExtra(FolderPickerActivity.PICKED_FOLDER_TITLE);
-                if (!TextUtils.isEmpty(pickedFolder)) {
+                if (!StringUtils.isEmpty(pickedFolder)) {
                     getPreferenceManager().getSharedPreferences().edit()
                             .putString(ROOT_FOLDER, pickedFolder)
                             .putString(ROOT_FOLDER_NAME, pickedFolderTitle).apply();
@@ -115,7 +109,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                     DriveLibraryProvider.AUTHORITY, mLibraryId, null), 44);
             return true;
         } else if (findPreference(CLEAR_CACHE) == preference) {
-            mCache.clear();
+            //TODO
             Toast.makeText(getActivity(), R.string.msg_cache_cleared, Toast.LENGTH_SHORT).show();
             return true;
         } else if (findPreference(LICENSES) == preference) {

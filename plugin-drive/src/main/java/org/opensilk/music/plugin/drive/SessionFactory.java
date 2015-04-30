@@ -19,6 +19,7 @@ package org.opensilk.music.plugin.drive;
 
 import android.content.Context;
 
+import com.google.android.gms.auth.GoogleAuthException;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -27,6 +28,7 @@ import com.google.api.services.drive.DriveScopes;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,10 +46,12 @@ public class SessionFactory {
 
         final GoogleAccountCredential credential;
         final Drive drive;
+        final String token;
 
-        public Session (GoogleAccountCredential credential, Drive drive) {
+        public Session (GoogleAccountCredential credential, Drive drive, String token) {
             this.credential = credential;
             this.drive = drive;
+            this.token = token;
         }
 
         public Drive getDrive() {
@@ -57,6 +61,11 @@ public class SessionFactory {
         public GoogleAccountCredential getCredential() {
             return credential;
         }
+
+        public String getToken() {
+            return token;
+        }
+
     }
 
     private static final String APP_NAME = BuildConfig.APPLICATION_ID+"/"+BuildConfig.VERSION_NAME;
@@ -69,21 +78,19 @@ public class SessionFactory {
         this.context = context;
     }
 
-    public Session getSession(String accountName) {
+    public Session getSession(String accountName) throws IOException, GoogleAuthException {
         Session s = sSessions.get(accountName);
         if (s != null) {
             return s;
         }
-        return createSession(accountName);
-    }
-
-    private Session createSession(String accountName) {
         final GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(context,
                 Collections.singleton(DriveScopes.DRIVE_READONLY)).setSelectedAccountName(accountName);
         final Drive drive = new Drive.Builder(AndroidHttp.newCompatibleTransport(),
                 AndroidJsonFactory.getDefaultInstance(), credential).setApplicationName(APP_NAME).build();
-        final Session holder = new Session(credential, drive);
+        final String token = credential.getToken();
+        final Session holder = new Session(credential, drive, token);
         sSessions.put(accountName, holder);
         return holder;
     }
+
 }

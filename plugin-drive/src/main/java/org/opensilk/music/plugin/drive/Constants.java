@@ -17,18 +17,44 @@
 
 package org.opensilk.music.plugin.drive;
 
+import com.google.api.services.drive.model.File;
+
+import org.apache.commons.lang3.StringUtils;
+
+import rx.functions.Func1;
+
 /**
  * Created by drew on 4/28/15.
  */
 public interface Constants {
+
     String DEFAULT_ROOT_FOLDER = "root";
-    String BASE_QUERY = " in parents and trashed=false ";
+
     String FOLDER_MIMETYPE = "application/vnd.google-apps.folder";
     String AUDIO_MIME_WILDCARD = "audio";
     String AUDIO_OGG_MIMETYPE = "application/ogg";
-    String FOLDER_SONG_QUERY = " (mimeType='"+FOLDER_MIMETYPE+"' or mimeType contains '"
-            +AUDIO_MIME_WILDCARD+"' or mimeType='"+AUDIO_OGG_MIMETYPE+"')";
-    String SONG_QUERY = " (mimeType contains '"+AUDIO_MIME_WILDCARD+"' or mimeType='"
-            +AUDIO_OGG_MIMETYPE+"')";
-    String FIELDS = "items/id,items/mimeType,items/parents,items/title,items/downloadUrl,items/modifiedDate";
+
+    String BASE_FOLDERS_TRACKS_QUERY = " in parents and trashed=false and " +
+            "(mimeType='" + FOLDER_MIMETYPE  + "' or mimeType contains '"
+            + AUDIO_MIME_WILDCARD + "' or mimeType='" + AUDIO_OGG_MIMETYPE + "')";
+
+    String TRACKS_QUERY = "trashed=false and " +
+            "(mimeType contains '" + AUDIO_MIME_WILDCARD + "' or mimeType='" + AUDIO_OGG_MIMETYPE + "')";
+
+    String LIST_FIELDS = "items/id,items/mimeType,items/parents,items/title,items/downloadUrl,items/modifiedDate";
+
+    Func1<File, Boolean> IS_FOLDER = new Func1<File, Boolean>() {
+        @Override
+        public Boolean call(File file) {
+            return StringUtils.equals(FOLDER_MIMETYPE, file.getMimeType());
+        }
+    };
+
+    Func1<File, Boolean> IS_AUDIO = new Func1<File, Boolean>() {
+        @Override
+        public Boolean call(File file) {
+            return StringUtils.contains(file.getMimeType(), AUDIO_MIME_WILDCARD)
+                    || StringUtils.equals(file.getMimeType(), AUDIO_OGG_MIMETYPE);
+        }
+    };
 }

@@ -140,7 +140,7 @@ public class FolderPickerFragment extends ListFragment implements
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(
                 mActivity,
-                LibraryUris.folder(mAuthority, mSourceIdentity, mFolderIdentity),
+                LibraryUris.folders(mAuthority, mSourceIdentity, mFolderIdentity),
                 FolderTrackProj.ALL,
                 null,
                 null,

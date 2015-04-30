@@ -45,4 +45,5 @@ public class ProgressFragment extends DialogFragment {
         ProgressDialog mProgressDialog = new ProgressDialog(getActivity());
         mProgressDialog.setMessage(getString(R.string.authorizing));
         return mProgressDialog;
-    }}
+    }
+}
