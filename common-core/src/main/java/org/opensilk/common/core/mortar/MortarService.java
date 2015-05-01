@@ -27,7 +27,7 @@ import timber.log.Timber;
  */
 public abstract class MortarService extends Service {
 
-    MortarScope mServiceScope;
+    protected MortarScope mServiceScope;
 
     protected abstract void onBuildScope(MortarScope.Builder builder);
 
