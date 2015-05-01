@@ -26,7 +26,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.webkit.WebView;
 
-import org.opensilk.common.core.support.MortarActivity;
+import org.opensilk.common.core.mortar.MortarActivity;
 import org.opensilk.music.library.LibraryConstants;
 
 /**

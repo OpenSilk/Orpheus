@@ -25,8 +25,8 @@ import android.widget.Toast;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
-import org.opensilk.common.core.app.MortarActivity;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.mortar.MortarActivity;
 import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.plugin.drive.GlobalComponent;

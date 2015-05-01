@@ -17,54 +17,23 @@
 
 package org.opensilk.music.plugin.drive;
 
-import android.app.Application;
-import android.os.StrictMode;
-
-import org.opensilk.common.core.mortar.DaggerService;
-
-import mortar.MortarScope;
-import timber.log.Timber;
-
+import org.opensilk.common.core.app.BaseApp;
 /**
  * Created by drew on 6/12/14.
  */
-public class App extends Application {
-
-    private MortarScope mRootScope;
+public class App extends BaseApp {
 
     @Override
     public void onCreate() {
         super.onCreate();
+        setupTimber(BuildConfig.DEBUG, null);
         if (BuildConfig.DEBUG) {
-            // logging
-            Timber.plant(new Timber.DebugTree());
-
-            // enable strict mode
-            final StrictMode.ThreadPolicy.Builder threadPolicyBuilder
-                    = new StrictMode.ThreadPolicy.Builder()
-                    .detectAll()
-                    .penaltyLog()
-                    .penaltyFlashScreen();
-            StrictMode.setThreadPolicy(threadPolicyBuilder.build());
-
-            final StrictMode.VmPolicy.Builder vmPolicyBuilder
-                    = new StrictMode.VmPolicy.Builder()
-                    .detectAll()
-                    .penaltyLog();
-            StrictMode.setVmPolicy(vmPolicyBuilder.build());
-        } //else TODO
+            enableStrictMode();
+        }
     }
 
     @Override
-    public Object getSystemService(String name) {
-        if (mRootScope == null) {
-            mRootScope = MortarScope.buildRootScope()
-                    .withService(DaggerService.DAGGER_SERVICE, GlobalComponent.FACTORY.call(this))
-                    .build("ROOT");
-        }
-        if (mRootScope.hasService(name)) {
-            return mRootScope.getService(name);
-        }
-        return super.getSystemService(name);
+    protected Object getRootComponent() {
+        return GlobalComponent.FACTORY.call(this);
     }
 }

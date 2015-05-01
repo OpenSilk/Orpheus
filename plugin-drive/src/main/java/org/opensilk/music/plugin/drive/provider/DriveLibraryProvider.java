@@ -92,6 +92,7 @@ public class DriveLibraryProvider extends LibraryProvider {
                         getContext().getResources().getString(R.string.menu_change_source))
                 .setSettingsComponent(new ComponentName(getContext(), SettingsActivity.class),
                         getContext().getResources().getString(R.string.menu_library_settings))
+                .setAuthority(AUTHORITY)
                 .build();
     }
 
