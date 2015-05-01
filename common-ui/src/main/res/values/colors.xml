@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <!-- Background colors for LetterTileDrawables. This set of colors is a subset of
+    https://spec.googleplex.com/quantumpalette#extended which passes Google Accessibility
+    Requirements for the color in question on white with >= 3.0 contrast. We used
+    http://leaverou.github.io/contrast-ratio/#white-on-%23db4437 to double-check the contrast.
+
+    These colors are also used by MaterialColorMapUtils to generate primary activity colors.
+-->
+    <array name="letter_tile_colors">
+        <item>#DB4437</item>
+        <item>#E91E63</item>
+        <item>#9C27B0</item>
+        <item>#673AB7</item>
+        <item>#3F51B5</item>
+        <item>#4285F4</item>
+        <item>#039BE5</item>
+        <item>#0097A7</item>
+        <item>#009688</item>
+        <item>#0F9D58</item>
+        <item>#689F38</item>
+        <item>#EF6C00</item>
+        <item>#FF5722</item>
+    </array>
+
+    <color name="letter_tile_default_color">#cccccc</color>
+    <color name="letter_tile_font_color">#ffffff</color>
+
+    <!-- Colors for colorcoded thumbnail -->
+    <color name="blue">#0000B4</color>
+    <color name="red_violet">#AF0D66</color>
+    <color name="green_yellow">#92F846</color>
+    <color name="yellow_orange">#FFC82F</color>
+    <color name="orange">#FF7600</color>
+    <color name="light_gray">#B9B9B9</color>
+    <color name="off_white">#EBEBDE</color>
+    <color name="gray">#646464</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="dark_purple">#371370</color>
+    <color name="light_yellow">#FFFF96</color>
+    <color name="dark_pink">#CA3E5E</color>
+    <color name="dark_orange">#CD913F</color>
+    <color name="teal">#0C4B64</color>
+    <color name="red">#FF0000</color>
+    <color name="dark_yellow">#AF9B32</color>
+    <color name="dark_green">#254619</color>
+    <color name="purple">#792187</color>
+    <color name="light_blue">#538CD0</color>
+    <color name="green">#009A25</color>
+    <color name="cyan">#B2DCCD</color>
+    <color name="pink">#FF98D5</color>
+    <color name="dark_blue">#00004A</color>
+    <color name="olive_green">#AFC84A</color>
+    <color name="red_brown">#3F190C</color>
+
+</resources>

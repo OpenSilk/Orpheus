@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~ Copyright (c) 2014 OpenSilk Productions LLC
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -17,16 +17,7 @@
   -->
 
 <resources>
-    <!--FloatingActionButton-->
-    <dimen name="fab_size_normal">56dp</dimen>
-    <dimen name="fab_size_mini">40dp</dimen>
-
-    <!--LetterTileDrawable-->
-    <item name="letter_to_tile_ratio" type="fraction">67%</item>
-
-    <!--unused-->
-    <item name="dialog_fixed_height_major2" type="dimen">80%</item>
-    <item name="dialog_fixed_height_minor2" type="dimen">100%</item>
-    <item name="dialog_fixed_width_major2" type="dimen">320dp</item>
-    <item name="dialog_fixed_width_minor2" type="dimen">320dp</item>
+    <!-- Font family used when drawing letters for letter tile avatars.
+     Do not translate. -->
+    <string name="letter_tile_letter_font_family">sans-serif-light</string>
 </resources>
