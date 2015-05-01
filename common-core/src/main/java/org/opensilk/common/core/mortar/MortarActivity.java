@@ -17,7 +17,7 @@
 package org.opensilk.common.core.mortar;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 
 import org.opensilk.common.core.util.ObjectUtils;
 
@@ -28,9 +28,12 @@ import mortar.bundler.BundleServiceRunner;
 import timber.log.Timber;
 
 /**
+ * Even though this in a ui component its in core so simpler apps can pull it
+ * without the bloat of common-ui
+ *
  * Created by drew on 3/6/15.
  */
-public abstract class MortarActivity extends ActionBarActivity implements HasScope {
+public abstract class MortarActivity extends AppCompatActivity implements HasScope {
 
     private String mScopeName;
     protected MortarScope mActivityScope;
@@ -103,6 +106,9 @@ public abstract class MortarActivity extends ActionBarActivity implements HasSco
 
     @Override
     public Object getSystemService(String name) {
+        //Note we dont create the scope here since this is usually called
+        //before onCreate and we need to be able to fetch our scope name
+        //on configuration changes
         return (mActivityScope != null && mActivityScope.hasService(name))
                 ? mActivityScope.getService(name) : super.getSystemService(name);
     }
