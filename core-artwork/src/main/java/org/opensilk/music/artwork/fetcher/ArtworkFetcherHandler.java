@@ -24,6 +24,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.model.ArtInfo;
 
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherManager.CompletionListener;
@@ -44,25 +45,30 @@ public class ArtworkFetcherHandler extends Handler {
     public interface MSG {
         int NEW_INTENT = 1;
         int CLEAR_CACHES = 2;
+        int RELOAD_PREFS = 3;
+        int ON_LOW_MEM = 4;
     }
 
     WeakReference<ArtworkFetcherService> mService;
     final ArtworkFetcherManager mFetcherManager;
+    final ArtworkPreferences mArtworkPrefs;
 
     @Inject
     public ArtworkFetcherHandler(
             @Named("fetcher")HandlerThread mHandlerThread,
-            ArtworkFetcherManager mFetcherManager
+            ArtworkFetcherManager mFetcherManager,
+            ArtworkPreferences mArtworkPrefs
     ) {
         super(mHandlerThread.getLooper());
         this.mFetcherManager = mFetcherManager;
+        this.mArtworkPrefs = mArtworkPrefs;
     }
 
     @Override
     public void handleMessage(Message msg) {
+        final int startId = msg.arg1;
         switch (msg.what) {
             case MSG.NEW_INTENT: {
-                final int startId = msg.arg1;
                 Intent i = (Intent) msg.obj;
                 Uri uri = i.getData();
                 ArtInfo artInfo = i.getParcelableExtra(ArtworkFetcherService.EXTRA.ARTINFO);
@@ -70,22 +76,24 @@ public class ArtworkFetcherHandler extends Handler {
                 Subscription s = mFetcherManager.fetch(uri, artInfo, artworkType, new CompletionListener() {
                     @Override
                     public void onComplete() {
-                        ArtworkFetcherService s = mService != null ? mService.get() : null;
-                        if (s != null) s.stopSelf(startId);
+                        stopService(startId);
                     }
                 });
                 //TODO keep subscriptions around?
                 break;
             } case MSG.CLEAR_CACHES: {
                 mFetcherManager.clearCaches();
+                stopService(startId);
+                break;
+            }case MSG.RELOAD_PREFS: {
+                mArtworkPrefs.reloadPrefs();
+                stopService(startId);
+                break;
+            }case MSG.ON_LOW_MEM: {
+                mFetcherManager.clearVolleyQueue();
                 break;
             }
         }
-    }
-
-    //Break Dependency cycle
-    void setService(ArtworkFetcherService service) {
-        mService = new WeakReference<ArtworkFetcherService>(service);
     }
 
     void processIntent(Intent intent, int startId) {
@@ -97,8 +105,26 @@ public class ArtworkFetcherHandler extends Handler {
                 obtainMessage(MSG.NEW_INTENT, startId, 0, intent).sendToTarget();
                 break;
             case ArtworkFetcherService.ACTION.CLEARCACHE:
-                sendEmptyMessage(MSG.CLEAR_CACHES);
+                obtainMessage(MSG.CLEAR_CACHES, startId, 0).sendToTarget();
+                break;
+            case ArtworkFetcherService.ACTION.RELOADPREFS:
+                obtainMessage(MSG.RELOAD_PREFS, startId, 0).sendToTarget();
                 break;
         }
+    }
+
+    //Break Dependency cycle
+    void setService(ArtworkFetcherService service) {
+        mService = new WeakReference<ArtworkFetcherService>(service);
+    }
+
+    void onDestroy() {
+        removeCallbacksAndMessages(null);
+        mFetcherManager.onDestroy();
+    }
+
+    private void stopService(int startId) {
+        ArtworkFetcherService s = mService != null ? mService.get() : null;
+        if (s != null) s.maybeStopSelf(startId);
     }
 }

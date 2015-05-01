@@ -15,15 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.requestor;
+package org.opensilk.music.artwork.provider;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
-import org.opensilk.music.artwork.Util;
-import org.opensilk.music.artwork.cache.ArtworkCache;
-import org.opensilk.music.artwork.cache.ArtworkLruCache;
 
 import javax.inject.Singleton;
 
@@ -33,16 +30,12 @@ import dagger.Provides;
 /**
  * Created by drew on 5/1/15.
  */
-@Module(
-        includes = ArtworkAuthorityModule.class
-)
-public class ArtworkRequestorModule {
+@Module
+public class SystemServicesModule {
+
     @Provides @Singleton
-    public ArtworkCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(Util.calculateL1CacheSize(context, false));
+    public ConnectivityManager provideConnectivityManager(@ForApplication Context appContext) {
+        return (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
-    @Provides @Singleton
-    public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl iml) {
-        return iml;
-    }
+
 }

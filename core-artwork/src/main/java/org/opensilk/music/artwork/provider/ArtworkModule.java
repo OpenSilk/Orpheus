@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.provider;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
+import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
@@ -39,7 +37,11 @@ import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
  * Created by drew on 6/21/14.
  */
 @Module(
-        includes = ArtworkAuthorityModule.class
+        includes = {
+                ArtworkAuthorityModule.class,
+                GsonModule.class,
+                SystemServicesModule.class,
+        }
 )
 public class ArtworkModule {
 
@@ -52,13 +54,4 @@ public class ArtworkModule {
         );
     }
 
-    @Provides @Singleton
-    public Gson provideGson() {
-        return new GsonBuilder().create();
-    }
-
-    @Provides @Singleton
-    public ConnectivityManager provideConnectivityManager(@ForApplication Context appContext) {
-        return (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-    }
 }

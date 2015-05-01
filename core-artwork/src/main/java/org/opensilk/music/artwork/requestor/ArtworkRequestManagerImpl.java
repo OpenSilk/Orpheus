@@ -18,73 +18,52 @@
 package org.opensilk.music.artwork.requestor;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.gson.Gson;
-import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.widget.AnimatedImageView;
-import org.opensilk.music.artwork.ArtworkPreferences;
+import org.opensilk.music.artwork.shared.ArtworkPreferences;
+import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.CrumbTrail;
 import org.opensilk.music.artwork.Util;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.Artwork;
-import org.opensilk.music.artwork.ArtworkRequest2;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.CacheMissException;
-import org.opensilk.music.artwork.CacheArtworkResponse;
-import org.opensilk.music.artwork.CoverArtJsonRequest;
 import org.opensilk.music.artwork.ImageContainer;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.RequestKey;
 import org.opensilk.music.artwork.cache.ArtworkCache;
-import org.opensilk.music.artwork.cache.BitmapDiskCache;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.AbstractMap;
-import java.util.Iterator;
+import java.io.FileNotFoundException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import de.umass.lastfm.Album;
-import de.umass.lastfm.Artist;
-import de.umass.lastfm.ImageSize;
-import de.umass.lastfm.MusicEntry;
-import de.umass.lastfm.opensilk.Fetch;
-import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -94,32 +73,42 @@ import timber.log.Timber;
 @Singleton
 public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
     final static boolean DROP_CRUMBS = false;
+    final static boolean VERIFY_THREAD = true;
 
     final Context mContext;
     final ArtworkPreferences mPreferences;
     final ArtworkCache mL1Cache;
+    final Gson mGson;
+    final String mAuthority;
 
+    final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
+    final Scheduler scheduler = Schedulers.computation();
+    final Scheduler oScheduler = AndroidSchedulers.handlerThread(mMainThreadHandler);
     final Map<RequestKey, IArtworkRequest> mActiveRequests = new LinkedHashMap<>(10);
+
 
     @Inject
     public ArtworkRequestManagerImpl(@ForApplication Context mContext,
                                      ArtworkPreferences mPreferences,
-                                     ArtworkCache mL1Cache
+                                     ArtworkCache mL1Cache,
+                                     Gson mGson,
+                                     @Named("artworkauthority") String authority
     ) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
         this.mL1Cache = mL1Cache;
+        this.mGson = mGson;
+        this.mAuthority = authority;
     }
 
     interface IArtworkRequest {
         void addRecipient(ImageContainer c);
     }
 
-    /**
-     * TODO hook ImageContainer to unsubscribe request when all containers
-     * TODO have unsubscribed, and find way to cancel volley requests when unsubscribed
+    /*
+     * All interaction with this class must be on the main thread to avoid synchronization errors
      */
-    abstract class BaseArtworkRequest implements Subscription, IArtworkRequest {
+    abstract class BaseArtworkRequest implements Subscription, IArtworkRequest, ImageContainer.UnsubscribeListener {
         final RequestKey key;
         final ArtInfo artInfo;
         final ArtworkType artworkType;
@@ -161,11 +150,22 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 throw new IllegalStateException("Tried to add recipient after complete");
             }
             recipients.add(c);
+            c.setUnsubscribeListener(this);
             if (!inflight) {
                 inflight = true;
                 start();
             } else {
                 c.setDefaultImage();
+            }
+        }
+
+        @Override
+        public void onContainerUnsubscribed(ImageContainer c) {
+            addBreadcrumb("onContainerUnsubscribed");
+            c.setUnsubscribeListener(null);
+            recipients.remove(c);
+            if (recipients.isEmpty()) {
+                unsubscribe();
             }
         }
 
@@ -178,35 +178,24 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             addBreadcrumb("complete");
             complete = true;
             mActiveRequests.remove(key);
+            unregisterContentObserver();
             printTrail();
         }
 
         void setDefaultImage() {
             addBreadcrumb("setDefaultImage");
             if (unsubscribed) return;
-            Iterator<ImageContainer> ii = recipients.iterator();
-            while (ii.hasNext()) {
-                ImageContainer c = ii.next();
-                if (c.isUnsubscribed()) {
-                    ii.remove();
-                } else {
-                    c.setDefaultImage();
-                }
+            for (ImageContainer c : recipients) {
+                c.setDefaultImage();
             }
         }
 
         void onResponse(Artwork artwork, boolean fromCache, boolean shouldAnimate) {
-            addBreadcrumb("onResponse("+fromCache+")");
+            addBreadcrumb("onResponse(%s)", fromCache);
             if (unsubscribed) return;
-            Iterator<ImageContainer> ii = recipients.iterator();
-            while (ii.hasNext()) {
-                ImageContainer c = ii.next();
-                if (c.isUnsubscribed()) {
-                    ii.remove();
-                } else {
-                    c.setImageBitmap(artwork.bitmap, shouldAnimate);
-                    c.notifyPaletteObserver(artwork.palette, shouldAnimate);
-                }
+            for (ImageContainer c : recipients) {
+                c.setImageBitmap(artwork.bitmap, shouldAnimate);
+                c.notifyPaletteObserver(artwork.palette, shouldAnimate);
             }
         }
 
@@ -218,42 +207,105 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 onComplete();
                 return;
             }
-            subscription = createCacheObservable(artInfo, artworkType)
-                    .subscribe(new Action1<CacheArtworkResponse>() {
+            final String cacheKey = Util.getCacheKey(artInfo, artworkType);
+            Artwork artwork = mL1Cache.getArtwork(cacheKey);
+            if (artwork != null) {
+                addBreadcrumb("tryForCache hit");
+                onResponse(artwork, true, false);
+                onComplete();
+            } else {
+                onCacheMiss();
+            }
+        }
+
+        void onCacheMiss() {
+            addBreadcrumb("onCacheMiss");
+            setDefaultImage();
+            tryForProvider(false);
+        }
+
+        abstract boolean validateArtInfo();
+        abstract Uri getUri();
+
+        void tryForProvider(final boolean secondTry) {
+            final Uri uri = getUri();
+            final String cacheKey = Util.getCacheKey(artInfo, artworkType);
+            subscription = createArtworkProviderObservable(uri, cacheKey)
+                    .subscribeOn(scheduler)
+                    .observeOn(oScheduler)
+                    .subscribe(new Action1<Artwork>() {
                         @Override
-                        public void call(CacheArtworkResponse cr) {
-                            addBreadcrumb("tryForCache hit");
-                            onResponse(cr.artwork, true, !cr.fromL1);
+                        public void call(Artwork artwork) {
+                            addBreadcrumb("tryForProvider hit");
+                            onResponse(artwork, false, true);
                             onComplete();
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            addBreadcrumb("tryForCache miss");
-                            if (throwable instanceof CacheMissException) {
-                                onCacheMiss();
+                            addBreadcrumb("tryForProvider(%s) miss", secondTry);
+                            if (throwable instanceof FileNotFoundException && !secondTry) {
+                                onProviderMiss(uri);
                             } else {
-                                setDefaultImage();
                                 onComplete();
                             }
                         }
                     });
         }
 
-        abstract boolean validateArtInfo();
-        abstract void onCacheMiss();
+        void onProviderMiss(Uri uri) {
+            registerContentObserver(uri);
+            //Make sure we dont stick around if we aren't notified
+            subscription = Observable.timer(5, TimeUnit.MINUTES)
+                    .subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            onComplete();
+                        }
+                    });
+        }
+
+        void registerContentObserver(Uri uri) {
+            mContext.getContentResolver().registerContentObserver(uri, false, contentObserver);
+        }
+
+        void unregisterContentObserver() {
+            try {
+                mContext.getContentResolver().unregisterContentObserver(contentObserver);
+            } catch (Exception ignored) {/*safety i dont think anything is thrown*/}
+        }
+
+        final ContentObserver contentObserver = new ContentObserver(mMainThreadHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                addBreadcrumb("ContentObserver#onChange");
+                if (subscription != null) {
+                    //Unsubscribe the timer
+                    subscription.unsubscribe();
+                }
+                unregisterContentObserver();
+                tryForProvider(true);
+            }
+        };
 
         CrumbTrail crumbTrail;
-        void addBreadcrumb(String crumb) {
+        void addBreadcrumb(String crumb, Object... args) {
+            if (VERIFY_THREAD) assertMainThread();
             if (!DROP_CRUMBS) return;
             if (crumbTrail == null)
                 crumbTrail = new CrumbTrail();
-            crumbTrail.drop(crumb);
+            crumbTrail.drop(String.format(Locale.US, crumb, args));
         }
 
         void printTrail() {
             if (!DROP_CRUMBS) return;
             crumbTrail.follow();
+        }
+
+        void assertMainThread() {
+            if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
+                throw new IllegalStateException("Called from wrong thread " + Thread.currentThread().getName());
+            }
         }
     }
 
@@ -269,12 +321,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         @Override
-        void onCacheMiss() {
-            addBreadcrumb("onCacheMiss");
-            setDefaultImage();
-            //TODO
+        Uri getUri() {
+            return ArtworkUris.createArtistReq(mAuthority, Util.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
         }
-
     }
 
     class AlbumArtworkRequest extends BaseArtworkRequest {
@@ -290,12 +339,9 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         @Override
-        void onCacheMiss() {
-            addBreadcrumb("onCacheMiss");
-            setDefaultImage();
-            //TODO
+        Uri getUri() {
+            return ArtworkUris.createAlbumReq(mAuthority, Util.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
         }
-
     }
 
     /*
@@ -340,20 +386,28 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         r.addRecipient(c);
     }
 
-    public Observable<CacheArtworkResponse> createCacheObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
-        final String cacheKey = Util.getCacheKey(artInfo, artworkType);
-        return Observable.create(new Observable.OnSubscribe<CacheArtworkResponse>() {
+    Observable<Artwork> createArtworkProviderObservable(final Uri uri, final String cacheKey) {
+        return Observable.create(new Observable.OnSubscribe<Artwork>() {
             @Override
-            public void call(Subscriber<? super CacheArtworkResponse> subscriber) {
-//                    Timber.v("Trying L1 for %s, from %s", cacheKey, Thread.currentThread().getName());
-                Artwork artwork = mL1Cache.getArtwork(cacheKey);
-                if (!subscriber.isUnsubscribed()) {
-                    if (artwork != null) {
-                        subscriber.onNext(new CacheArtworkResponse(artwork, true));
-                        subscriber.onCompleted();
-                    } else {
-                        subscriber.onError(new CacheMissException());
-                    }
+            public void call(Subscriber<? super Artwork> subscriber) {
+                ParcelFileDescriptor pfd = null;
+                try {
+                    pfd = mContext.getContentResolver().openFileDescriptor(uri, "r");
+                    if (pfd == null) throw new FileNotFoundException("Null descriptor");
+                    Bitmap bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                    if (bitmap == null) throw new NullPointerException("Error decoding bitmap");
+                    Palette palette = new Palette.Builder(bitmap).generate();
+                    Artwork artwork = new Artwork(bitmap, palette);
+                    //always add to cache
+                    mL1Cache.putArtwork(cacheKey, artwork);
+                    if (subscriber.isUnsubscribed()) return;
+                    subscriber.onNext(artwork);
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    if (subscriber.isUnsubscribed()) return;
+                    subscriber.onError(e);
+                } finally {
+                    IOUtils.closeQuietly(pfd);
                 }
             }
         });

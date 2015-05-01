@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.shared;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,19 +27,22 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
+ * Artwork related settings, shared between provider and ui processes
+ * For performance reasons the sharedprefs are cached. to notify the provider
+ * process instance of changes made in the ui process, ping the ArtworkFetcherService.
+ *
  * Created by drew on 4/30/15.
  */
 @Singleton
 public class ArtworkPreferences extends PreferencesWrapper {
     public static final String NAME = "artwork";
 
-    // Artwork
     public static final String ONLY_ON_WIFI = "only_on_wifi";
     public static final String DOWNLOAD_MISSING_ARTWORK = "download_missing_artwork";
-    public static final String PREFER_DOWNLOAD_ARTWORK = "prefer_download_artwork";
+    public static final String PREFER_DOWNLOAD_ARTWORK = "prefer_downloaded_artwork";
     public static final String DOWNLOAD_MISSING_ARTIST_IMAGES = "download_missing_artist_images";
-    public static final String IMAGE_DISK_CACHE_SIZE = "pref_cache_size";
-    public static final String WANT_LOW_RESOLUTION_ART = "pref_low_resolution";
+    public static final String IMAGE_DISK_CACHE_SIZE = "image_cache_size";
+    public static final String WANT_LOW_RESOLUTION_ART = "want_low_resolution";
 
     final Context appcontext;
     private final Object sPrefLock = new Object();
@@ -51,6 +54,10 @@ public class ArtworkPreferences extends PreferencesWrapper {
         this.appcontext = appcontext;
     }
 
+    /**
+     * Gotcha, multiprocess prefs cant be cached but for performance reasons we do it anyway,
+     * the ui must notify us if they make changes.
+     */
     public void reloadPrefs() {
         needReload = true;
     }

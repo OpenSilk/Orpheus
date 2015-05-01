@@ -21,7 +21,7 @@
     <application>
         <provider
             android:authorities="must_override"
-            android:name=".ArtworkProvider"
+            android:name=".provider.ArtworkProvider"
             android:exported="true"
             android:grantUriPermissions="true"
             android:process=":prvdr"/>

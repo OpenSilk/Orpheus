@@ -17,32 +17,30 @@
 
 package org.opensilk.music.artwork.requestor;
 
-import android.content.Context;
-
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
-import org.opensilk.music.artwork.Util;
-import org.opensilk.music.artwork.cache.ArtworkCache;
-import org.opensilk.music.artwork.cache.ArtworkLruCache;
+import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.common.core.gson.GsonComponentStub;
+import org.opensilk.music.artwork.provider.GsonModule;
+import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
 
 import javax.inject.Singleton;
 
-import dagger.Module;
-import dagger.Provides;
+import dagger.Component;
 
 /**
+ * Extend this as part of root component
+ *
+ * Annotations for documentation and build purposes, dont use directly
+ *
  * Created by drew on 5/1/15.
  */
-@Module(
-        includes = ArtworkAuthorityModule.class
+@Singleton
+@Component(
+        modules = {
+                ArtworkRequestorModule.class,
+                GsonModule.class,
+                AppContextModule.class
+        }
 )
-public class ArtworkRequestorModule {
-    @Provides @Singleton
-    public ArtworkCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(Util.calculateL1CacheSize(context, false));
-    }
-    @Provides @Singleton
-    public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl iml) {
-        return iml;
-    }
+public interface ArtworkRequestorComponent extends ArtworkComponentCommon, GsonComponentStub {
+    ArtworkRequestManager artworkRequestManager();
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -30,6 +30,10 @@ import com.jakewharton.disklrucache.DiskLruCache;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.ArtworkUris;
+import org.opensilk.music.artwork.Constants;
+import org.opensilk.music.artwork.Util;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.model.ArtInfo;
@@ -44,7 +48,6 @@ import javax.inject.Named;
 
 import rx.Scheduler;
 import rx.functions.Action0;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -107,7 +110,7 @@ public class ArtworkProvider extends ContentProvider {
     //@DebugLog
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         if (!"r".equals(mode)) {
-            throw new IllegalArgumentException("Provider is read only");
+            throw new FileNotFoundException("Provider is read only");
         }
         switch (mUriMatcher.match(uri)) {
             case ArtworkUris.MATCH.ARTWORK: { //Fullscreen
@@ -165,7 +168,7 @@ public class ArtworkProvider extends ContentProvider {
         final String cacheKey = Util.getCacheKey(artInfo, ArtworkType.LARGE);
         ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         // Create request so it will be there next time
-        if (pfd == null) sendRequestToFetcher(uri, artInfo, ArtworkType.LARGE);
+        if (pfd == null) ArtworkFetcherService.newTask(getContext(), uri, artInfo, ArtworkType.LARGE);
         return pfd;
     }
 
@@ -173,7 +176,7 @@ public class ArtworkProvider extends ContentProvider {
         final String cacheKey = Util.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
         ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         // Create request so it will be there next time
-        if (pfd == null) sendRequestToFetcher(uri, artInfo, ArtworkType.THUMBNAIL);
+        if (pfd == null) ArtworkFetcherService.newTask(getContext(), uri, artInfo, ArtworkType.THUMBNAIL);
         return pfd;
     }
 
@@ -211,15 +214,6 @@ public class ArtworkProvider extends ContentProvider {
             Timber.w("pullSnapshot failed: %s", e.getMessage());
         }
         return null;
-    }
-
-    void sendRequestToFetcher(Uri uri, ArtInfo artInfo, ArtworkType type) {
-        Intent i = new Intent(getContext(), ArtworkFetcherService.class)
-                .setAction(ArtworkFetcherService.ACTION.NEWTASK)
-                .setData(uri)
-                .putExtra(ArtworkFetcherService.EXTRA.ARTINFO, artInfo)
-                .putExtra(ArtworkFetcherService.EXTRA.ARTTYPE, type.toString());
-        getContext().startService(i);
     }
 
 }

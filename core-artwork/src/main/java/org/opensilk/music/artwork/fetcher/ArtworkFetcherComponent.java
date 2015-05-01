@@ -17,7 +17,7 @@
 
 package org.opensilk.music.artwork.fetcher;
 
-import org.opensilk.music.artwork.ArtworkComponent;
+import org.opensilk.music.artwork.provider.ArtworkComponent;
 
 import dagger.Component;
 import rx.functions.Func2;

@@ -15,34 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.requestor;
+package org.opensilk.music.artwork.shared;
 
 import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
-import org.opensilk.music.artwork.Util;
-import org.opensilk.music.artwork.cache.ArtworkCache;
-import org.opensilk.music.artwork.cache.ArtworkLruCache;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
 
 /**
+ * Since were in a library package we cant hardcode the provider authority
+ * so we use this to inject it where needed. Corresponds to manifest entry
+ * <pre>
+ *     android:authorities="${applicationId}.provider.artwork"
+ * </pre>
+ *
  * Created by drew on 5/1/15.
  */
-@Module(
-        includes = ArtworkAuthorityModule.class
-)
-public class ArtworkRequestorModule {
-    @Provides @Singleton
-    public ArtworkCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(Util.calculateL1CacheSize(context, false));
-    }
-    @Provides @Singleton
-    public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl iml) {
-        return iml;
+@Module
+public class ArtworkAuthorityModule {
+    @Provides @Singleton @Named("artworkauthority")
+    public String provideArtworkAuthority(@ForApplication Context context) {
+        return context.getPackageName() + ".provider.artwork";
     }
 }

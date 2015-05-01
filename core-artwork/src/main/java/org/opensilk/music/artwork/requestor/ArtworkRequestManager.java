@@ -17,8 +17,6 @@
 
 package org.opensilk.music.artwork.requestor;
 
-import android.os.ParcelFileDescriptor;
-
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkType;

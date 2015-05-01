@@ -15,34 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.provider;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
 
-import com.google.gson.Gson;
-
-import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
+import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Component;
 import rx.functions.Func1;
 
 /**
+ * Root component for provider process, This isnt used directly but extended to allow
+ * additional providers to be used. Annotations for documentation and clarity.
+ *
  * Created by drew on 5/1/15.
  */
 @Singleton
 @Component(
         modules = {
                 AppContextModule.class,
-                ArtworkModule.class
+                ArtworkModule.class,
         }
 )
-public interface ArtworkComponent extends AppContextComponent {
+public interface ArtworkComponent extends ArtworkComponentCommon, GsonComponent, SystemServicesComponent {
     Func1<Context, ArtworkComponent> FACTORY = new Func1<Context, ArtworkComponent>() {
         @Override
         public ArtworkComponent call(Context context) {
@@ -52,9 +51,5 @@ public interface ArtworkComponent extends AppContextComponent {
         }
     };
     void inject(ArtworkProvider provider);
-    ArtworkPreferences artworkPreferences();
-    Gson gson();
-    ConnectivityManager connectivityManager();
-    @Named("artworkauthority") String artworkAuthority();
     BitmapDiskCache bitmapDiskCache();
 }

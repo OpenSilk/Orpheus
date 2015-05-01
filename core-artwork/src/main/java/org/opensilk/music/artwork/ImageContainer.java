@@ -30,10 +30,15 @@ import rx.Subscription;
  * Created by drew on 12/20/14.
  */
 public class ImageContainer implements Subscription {
+    public interface UnsubscribeListener {
+        void onContainerUnsubscribed(ImageContainer container);
+    }
+
     final WeakReference<AnimatedImageView> imageViewWeakReference;
     final WeakReference<PaletteObserver> palleteObserverWeakReference;
 
     private boolean unsubscribed = false;
+    private UnsubscribeListener listener;
 
     public ImageContainer(AnimatedImageView imageView, PaletteObserver paletteObserver) {
         this.imageViewWeakReference = new WeakReference<>(imageView);
@@ -47,11 +52,18 @@ public class ImageContainer implements Subscription {
         unregisterWithImageView();
         imageViewWeakReference.clear();
         palleteObserverWeakReference.clear();
+        if (listener != null) {
+            listener.onContainerUnsubscribed(this);
+        }
     }
 
     @Override
     public boolean isUnsubscribed() {
         return unsubscribed;
+    }
+
+    public void setUnsubscribeListener(UnsubscribeListener l) {
+        listener = l;
     }
 
     public void registerWithImageView() {

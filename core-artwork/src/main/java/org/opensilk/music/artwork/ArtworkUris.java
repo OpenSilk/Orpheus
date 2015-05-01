@@ -64,6 +64,7 @@ public class ArtworkUris {
         int ARTIST_REQ = 4;
     }
 
+    //XXX when adding new matches be sure to update both the provider and the fetchermanager
     public static UriMatcher makeMatcher(String authority) {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(authority, artwork + "/*/*", MATCH.ARTWORK);

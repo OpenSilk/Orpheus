@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.provider;
 
-import android.content.Context;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import org.opensilk.common.core.dagger2.ForApplication;
-
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -31,9 +29,9 @@ import dagger.Provides;
  * Created by drew on 5/1/15.
  */
 @Module
-public class ArtworkAuthorityModule {
-    @Provides @Singleton @Named("artworkauthority")
-    public String provideArtworkAuthority(@ForApplication Context context) {
-        return context.getPackageName() + ".provider.artwork";
+public class GsonModule {
+    @Provides @Singleton
+    public Gson provideGson() {
+        return new GsonBuilder().create();
     }
 }

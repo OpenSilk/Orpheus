@@ -34,7 +34,7 @@ import com.google.gson.Gson;
 
 import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.ArtworkPreferences;
+import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.artwork.ArtworkRequest2;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.ArtworkUris;
@@ -49,6 +49,7 @@ import org.opensilk.music.model.ArtInfo;
 import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -56,7 +57,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
@@ -65,14 +65,12 @@ import de.umass.lastfm.MusicEntry;
 import de.umass.lastfm.opensilk.Fetch;
 import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
 import rx.Observable;
-import rx.Observer;
 import rx.Scheduler;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -90,6 +88,14 @@ public class ArtworkFetcherManager {
     final ConnectivityManager mConnectivityManager;
 
     final UriMatcher mUriMatcher;
+    /*
+     * Scheduler our requests are observed on.
+     * Normally volley dispatches results on the main thread but we are
+     * using a custom dispatcher to receive them on a worker thread since we write
+     * to disk. This also means our final onComplete will be called on that worker thread
+     * which we dont want, so we use this to push the onComplete call over to the same
+     * thread that created the request so we dont need to worry about synchronization
+     */
     final Scheduler oScheduler;
 
     final Scheduler scheduler = Constants.ARTWORK_SCHEDULER;
@@ -191,11 +197,11 @@ public class ArtworkFetcherManager {
         abstract void onStart();
 
         CrumbTrail crumbTrail;
-        void addBreadcrumb(String crumb) {
+        void addBreadcrumb(String crumb, Object... args) {
             if (!DROP_CRUMBS) return;
             if (crumbTrail == null)
                 crumbTrail = new CrumbTrail();
-            crumbTrail.drop(crumb);
+            crumbTrail.drop(String.format(Locale.US, crumb, args));
         }
 
         void printTrail() {
@@ -230,6 +236,7 @@ public class ArtworkFetcherManager {
 
         void tryForNetwork() {
             subscription = createArtistNetworkRequest(artInfo, artworkType)
+                    .observeOn(oScheduler)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
@@ -337,6 +344,7 @@ public class ArtworkFetcherManager {
 
         void tryForNetwork(final boolean tryFallbackOnFail) {
             subscription = createAlbumNetworkObservable(artInfo, artworkType)
+                    .observeOn(oScheduler)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
@@ -375,6 +383,7 @@ public class ArtworkFetcherManager {
 
         void tryForMediaStore(final boolean tryNetworkOnFailure) {
             subscription = createMediaStoreRequestObservable(artInfo, artworkType)
+                    .observeOn(oScheduler)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
@@ -407,6 +416,7 @@ public class ArtworkFetcherManager {
 
         void tryForUrl() {
             subscription = createImageRequestObservable(artInfo.artworkUri.toString(), artInfo, artworkType)
+                    .observeOn(oScheduler)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
@@ -430,6 +440,9 @@ public class ArtworkFetcherManager {
         }
     }
 
+    /**
+     * Entry point
+     */
     public Subscription fetch(Uri uri, ArtInfo artInfo, ArtworkType artworkType, CompletionListener l) {
         IFetcherTask t = null;
         final RequestKey k = new RequestKey(artInfo, artworkType);
@@ -456,15 +469,22 @@ public class ArtworkFetcherManager {
         }
     }
 
+    /**
+     * Clears the disk caches
+     */
     public void clearCaches() {
+        clearVolleyQueue();
+        mVolleyQueue.getCache().clear();
+        mL2Cache.clearCache();
+    }
+
+    public void clearVolleyQueue() {
         mVolleyQueue.cancelAll(new RequestQueue.RequestFilter() {
             @Override
             public boolean apply(Request<?> request) {
                 return true;
             }
         });
-        mVolleyQueue.getCache().clear();
-        mL2Cache.clearCache();
     }
 
     public void onDestroy() {
@@ -512,7 +532,7 @@ public class ArtworkFetcherManager {
                     public Observable<Bitmap> call(String s) {
                         return createImageRequestObservable(s, artInfo, artworkType);
                     }
-                }).observeOn(oScheduler);
+                });
     }
 
     public Observable<Bitmap> createArtistNetworkRequest(final ArtInfo artInfo, final ArtworkType artworkType) {
@@ -533,7 +553,7 @@ public class ArtworkFetcherManager {
                     public Observable<Bitmap> call(String s) {
                         return createImageRequestObservable(s, artInfo, artworkType);
                     }
-                }).observeOn(oScheduler);
+                });
     }
 
     public Observable<Album> createAlbumLastFmApiRequestObservable(final ArtInfo artInfo) {
@@ -699,17 +719,18 @@ public class ArtworkFetcherManager {
                     IOUtils.closeQuietly(in);
                 }
             }
-        }).subscribeOn(scheduler).observeOn(oScheduler);
+        }).subscribeOn(scheduler);
     }
 
     final BlockingDeque<Map.Entry<String, Bitmap>> diskCacheQueue = new LinkedBlockingDeque<>();
     Scheduler.Worker diskCacheWorker;
 
+    //Unused but keeping around
     public void putInDiskCache(final String key, final Bitmap bitmap) {
         Timber.v("putInDiskCache(%s)", key);
         diskCacheQueue.addLast(new AbstractMap.SimpleEntry<>(key, bitmap));
         if (diskCacheWorker == null || diskCacheWorker.isUnsubscribed()) {
-            diskCacheWorker = Schedulers.io().createWorker();
+            diskCacheWorker = scheduler.createWorker();
             diskCacheWorker.schedule(new Action0() {
                 @Override
                 public void call() {
