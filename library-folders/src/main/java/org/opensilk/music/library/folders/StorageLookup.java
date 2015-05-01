@@ -38,7 +38,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 4/28/15.
  */
-//@Singleton
+@FoldersScope
 public class StorageLookup {
 
     //Library identities

@@ -44,7 +44,6 @@ public class StoragePickerActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        StoragePickerModule.injectSelf(this);
 
         boolean wantLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
         if (wantLightTheme) {

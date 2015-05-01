@@ -55,7 +55,6 @@ public class FoldersLibraryProvider extends LibraryProvider {
 
     @Override
     public boolean onCreate() {
-        FoldersProviderModule.injectSelf(this);
         return super.onCreate();
     }
 
