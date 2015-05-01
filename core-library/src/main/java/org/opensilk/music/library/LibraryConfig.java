@@ -21,6 +21,8 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import static org.opensilk.music.library.LibraryCapability.*;
 
 /**
@@ -55,6 +57,10 @@ public class LibraryConfig {
      * Contains optional config information
      */
     public final Bundle meta;
+    /**
+     * Librarys authority
+     */
+    public final String authority;
 
     public static final String META_MENU_NAME_PICKER = "menu_picker";
     public static final String META_SETTINGS_COMPONENT = "settingsComponent";
@@ -63,11 +69,14 @@ public class LibraryConfig {
     protected LibraryConfig(int apiVersion,
                            int capabilities,
                            @NonNull ComponentName pickerComponent,
-                           @NonNull Bundle meta) {
+                           @NonNull Bundle meta,
+                            @NonNull String authority
+    ) {
         this.apiVersion = apiVersion;
         this.capabilities = capabilities;
         this.pickerComponent = pickerComponent;
         this.meta = meta;
+        this.authority = authority;
     }
 
     public boolean hasAbility(int ability) {
@@ -84,6 +93,7 @@ public class LibraryConfig {
         b.putInt("_2", capabilities);
         b.putParcelable("_3", pickerComponent);
         b.putBundle("_4", meta);
+        b.putString("_5", authority);
         return b;
     }
 
@@ -92,7 +102,8 @@ public class LibraryConfig {
                 b.getInt("_1"),
                 b.getInt("_2"),
                 b.<ComponentName>getParcelable("_3"),
-                b.getBundle("_4")
+                b.getBundle("_4"),
+                b.getString("_5")
         );
     }
 
@@ -105,6 +116,7 @@ public class LibraryConfig {
         private int capabilities;
         private ComponentName pickerComponent;
         private Bundle meta = new Bundle();
+        private String authority;
 
         public Builder setCapabilities(int capabilities) {
             this.capabilities = capabilities;
@@ -138,6 +150,11 @@ public class LibraryConfig {
             return this;
         }
 
+        public Builder setAuthority(String authority) {
+            this.authority = authority;
+            return this;
+        }
+
         public LibraryConfig build() {
             if (pickerComponent == null) {
                 throw new IllegalArgumentException("pickerComponent must not be null");
@@ -145,7 +162,10 @@ public class LibraryConfig {
             if ((capabilities & SETTINGS) != 0 && meta.getParcelable(META_SETTINGS_COMPONENT) == null) {
                 throw new IllegalArgumentException("You defined SETTINGS but left settingsComponent null");
             }
-            return new LibraryConfig(apiVersion, capabilities, pickerComponent, meta);
+            if ((StringUtils.isEmpty(authority))) {
+                throw new IllegalArgumentException("Authority may not be null");
+            }
+            return new LibraryConfig(apiVersion, capabilities, pickerComponent, meta, authority);
         }
 
     }
