@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+
+    <!--Common styles for light theme-->
+    <style name="Theme.LightConfig" parent="Theme.AppCompat.Light.NoActionBar">
+
+    </style>
+
+    <style name="Theme.LightBase" parent="Theme.LightConfig">
+        <!--TODO cant have both light toolbar style and dark
+            toolbarstyle, need to fix tinting action icons
+            so it only tints if the actionbar is light
+            right now,
+            without tinting light toolbar gets white icons
+            with tinting dark toolbar gets dark icons
+            also the tabstrip needs dark text for light toolbar-->
+        <!--<item name="toolbarStyle">@style/Toolbar.Light</item>-->
+        <item name="toolbarStyle">@style/Toolbar.Dark.WhiteOverflow</item>
+    </style>
+
+    <style name="Theme.Light" parent="Theme.LightBase">
+
+        <item name="colorPrimary">@color/green_500</item>
+        <item name="colorPrimaryDark">@color/green_700</item>
+        <item name="colorAccent">@color/amber_A400</item>
+
+    </style>
+
+    <!--Common styles for dark theme-->
+    <style name="Theme.DarkConfig" parent="Theme.AppCompat.NoActionBar">
+
+    </style>
+
+    <style name="Theme.DarkBase" parent="Theme.DarkConfig">
+        <item name="toolbarStyle">@style/Toolbar.Dark</item>
+    </style>
+
+    <style name="Theme.Dark" parent="Theme.DarkBase">
+
+    </style>
+
+    <!-- End common themes -->
+
+    <!-- Base themes for dialog activities -->
+
+    <style name="Theme.Dialog.LightBase" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarStyle">@style/Toolbar.Dark.WhiteOverflow</item>
+        <!--Light dark actionbar-->
+        <item name="colorPrimary">@color/primary_material_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+    </style>
+
+    <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.DialogWhenLarge">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarStyle">@style/Toolbar.Dark</item>
+    </style>
+
+    <!-- end base dialog themes -->
+
+    <!-- Settings themes -->
+
+    <style name="Theme.Settings.Light" parent="Theme.Dialog.LightBase">
+
+    </style>
+
+    <style name="Theme.Settings.Dark" parent="Theme.Dialog.DarkBase">
+
+    </style>
+
+    <!-- end settings themes -->
+
+    <!--Toolbar Styles -->
+
+    <style name="Toolbar.Light" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?colorPrimary</item>
+        <item name="theme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <style name="Toolbar.Light.Transparent">
+        <item name="android:background">@null</item>
+        <item name="toolbarNavigationButtonStyle">@style/Widget.AppCompat.Toolbar.Button.Navigation</item>
+    </style>
+
+    <style name="Toolbar.Dark" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">?colorPrimary</item>
+        <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+    </style>
+
+    <style name="Toolbar.Dark.Transparent">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="Toolbar.Dark.WhiteOverflow">
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <style name="Toolbar.Dark.WhiteOverflow.Transparent">
+        <item name="android:background">@null</item>
+        <item name="toolbarNavigationButtonStyle">@style/Widget.AppCompat.Toolbar.Button.Navigation</item>
+    </style>
+
+    <!-- end toolbar styles -->
+
+</resources>

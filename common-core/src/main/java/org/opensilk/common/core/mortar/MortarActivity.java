@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.opensilk.common.core.support;
+package org.opensilk.common.core.mortar;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
-import org.opensilk.common.core.mortar.HasScope;
 import org.opensilk.common.core.util.ObjectUtils;
 
 import java.util.UUID;

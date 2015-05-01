@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <!-- Base themes for dialog activities -->
+
+    <style name="Theme.Dialog.LightBase" parent="Theme.AppCompat.Light.DialogWhenLarge">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarStyle">@style/Toolbar.Dark.WhiteOverflow</item>
+        <!--Light dark actionbar-->
+        <item name="colorPrimary">@color/primary_material_dark</item>
+        <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
+
+        <item name="windowFixedWidthMajor">@dimen/dialog_fixed_width_major2</item>
+        <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor2</item>
+        <item name="windowFixedHeightMajor">@dimen/dialog_fixed_height_major2</item>
+        <item name="windowFixedHeightMinor">@dimen/dialog_fixed_height_minor2</item>
+    </style>
+
+    <style name="Theme.Dialog.DarkBase" parent="Theme.AppCompat.DialogWhenLarge">
+        <!--NoActionBar-->
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <!--DarkActionBar-->
+        <item name="toolbarStyle">@style/Toolbar.Dark</item>
+
+        <item name="windowFixedWidthMajor">@dimen/dialog_fixed_width_major2</item>
+        <item name="windowFixedWidthMinor">@dimen/dialog_fixed_width_minor2</item>
+        <item name="windowFixedHeightMajor">@dimen/dialog_fixed_height_major2</item>
+        <item name="windowFixedHeightMinor">@dimen/dialog_fixed_height_minor2</item>
+    </style>
+
+    <!-- end base dialog themes -->
+</resources>
