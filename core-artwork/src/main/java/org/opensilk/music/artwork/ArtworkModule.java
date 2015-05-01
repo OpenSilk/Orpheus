@@ -16,68 +16,34 @@
 
 package org.opensilk.music.artwork;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.HurlStack;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import org.opensilk.common.core.app.BaseApp;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.music.artwork.cache.ArtworkCache;
-import org.opensilk.music.artwork.cache.ArtworkLruCache;
-import org.opensilk.music.artwork.cache.BitmapCache;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import timber.log.Timber;
+
+import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
 
 /**
  * Created by drew on 6/21/14.
  */
-@Module
+@Module(
+        includes = ArtworkAuthorityModule.class
+)
 public class ArtworkModule {
 
-    private static final int VOLLEY_CACHE_SIZE = 16 * 1024 * 1024;
-    private static final String VOLLEY_CACHE_DIR = "volley/1";
-    private static final int VOLLEY_POOL_SIZE = 4;
-    private static final int VOLLEY_POOL_SIZE_SMALL = 2;
-
-    static final float THUMB_MEM_CACHE_DIVIDER = 0.15f;
-    public static final String DISK_CACHE_DIRECTORY = "artworkcache";
-
-    @Provides @Singleton
-    public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl impl) {
-        return impl;
-    }
-
-    @Provides @Singleton
-    public RequestQueue provideRequestQueue(@ForApplication Context context) {
-        final int poolSize = BaseApp.isLowEndHardware(context) ? VOLLEY_POOL_SIZE_SMALL : VOLLEY_POOL_SIZE;
-        RequestQueue queue = new RequestQueue(
-                new DiskBasedCache(CacheUtil.getCacheDir(context, VOLLEY_CACHE_DIR), VOLLEY_CACHE_SIZE),
-                new BasicNetwork(new HurlStack()),
-                poolSize
-        );
-        queue.start();
-        return queue;
-    }
-
-    @Provides @Singleton @Named("L1Cache")
-    public ArtworkCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(calculateL1CacheSize(context, false));
-    }
-
-    @Provides @Singleton @Named("L2Cache") //TODO when/how to close this?
+    @Provides @Singleton //TODO when/how to close this?
     public BitmapDiskCache provideBitmapDiskLruCache(@ForApplication Context context, ArtworkPreferences preferences) {
         final int size = Integer.decode(preferences.getString(ArtworkPreferences.IMAGE_DISK_CACHE_SIZE, "60")) * 1024 * 1024;
         return BitmapDiskLruCache.open(
@@ -86,9 +52,13 @@ public class ArtworkModule {
         );
     }
 
-    public static int calculateL1CacheSize(Context context, boolean forceLarge) {
-        final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        final int memClass = (forceLarge || !BaseApp.isLowEndHardware(context)) ? am.getLargeMemoryClass() : am.getMemoryClass();
-        return Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
+    @Provides @Singleton
+    public Gson provideGson() {
+        return new GsonBuilder().create();
+    }
+
+    @Provides @Singleton
+    public ConnectivityManager provideConnectivityManager(@ForApplication Context appContext) {
+        return (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 }

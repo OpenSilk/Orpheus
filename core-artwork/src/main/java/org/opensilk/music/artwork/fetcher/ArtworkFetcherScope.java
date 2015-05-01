@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 OpenSilk Productions LLC
+ * Copyright (c) 2015 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.fetcher;
+
+import javax.inject.Scope;
 
 /**
- * Created by drew on 10/21/14.
+ * Created by drew on 5/1/15.
  */
-public class CacheMissException extends Exception {
-    private static final long serialVersionUID = -8387292426825461011L;
+@Scope
+public @interface ArtworkFetcherScope {
 }

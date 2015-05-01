@@ -15,12 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.artwork.requestor;
 
 import android.os.ParcelFileDescriptor;
 
-import org.opensilk.common.widget.AnimatedImageView;
-import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.common.ui.widget.AnimatedImageView;
+import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.PaletteObserver;
 
 import rx.Subscription;
 
@@ -30,14 +32,8 @@ import rx.Subscription;
 public interface ArtworkRequestManager {
 
     Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
-    Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, long albumId, ArtworkType artworkType);
     Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
 
-    ParcelFileDescriptor getArtwork(String artistName, String albumName);
-    ParcelFileDescriptor getArtworkThumbnail(String artistName, String albumName);
-
-    boolean clearCaches();
     void evictL1();
-    void onDeathImminent();
 
 }

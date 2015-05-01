@@ -16,8 +16,12 @@
 
 package org.opensilk.music.artwork;
 
-import static org.opensilk.music.MusicApp.sDefaultMaxImageWidthPx;
-import static org.opensilk.music.MusicApp.sDefaultThumbnailWidthPx;
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.WindowManager;
+
+import static org.opensilk.music.artwork.Constants.*;
 
 /**
  * Created by drew on 3/29/14.
@@ -26,17 +30,42 @@ public enum ArtworkType {
     THUMBNAIL,
     LARGE;
 
-    static int getWidth(ArtworkType type) {
+    private int px = -1;
+
+    //TODO this in only used an ArtwokrRequst2, move it in there.
+    public static int getWidth(Context context, ArtworkType type) {
         switch (type) {
             case LARGE:
-                return sDefaultMaxImageWidthPx;
+                if (LARGE.px < 0) {
+                    LARGE.px = Math.min(getMinDisplayWidth(context), convertDpToPx(context, MAX_ARTWORK_SIZE_DP));
+                }
+                return LARGE.px;
             case THUMBNAIL:
             default:
-                return sDefaultThumbnailWidthPx;
+                if (THUMBNAIL.px < 0) {
+                    THUMBNAIL.px = convertDpToPx(context, DEFAULT_THUMBNAIL_SIZE_DP);
+                }
+                return THUMBNAIL.px;
         }
     }
 
-    static ArtworkType opposite(ArtworkType artworkType) {
+    public static ArtworkType opposite(ArtworkType artworkType) {
         return artworkType == THUMBNAIL ? LARGE : THUMBNAIL;
+    }
+
+    /** Converts given dp value to density specific pixel value */
+    public static int convertDpToPx(Context context, float dp) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(metrics);
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
+    }
+
+    /** Returns smallest screen dimension */
+    public static int getMinDisplayWidth(Context context) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(metrics);
+        return Math.min(metrics.widthPixels, metrics.heightPixels);
     }
 }

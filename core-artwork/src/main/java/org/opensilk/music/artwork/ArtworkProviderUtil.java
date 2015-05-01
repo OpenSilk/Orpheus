@@ -23,7 +23,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
-import org.opensilk.music.R;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 
 import java.io.IOException;
@@ -41,12 +40,14 @@ public class ArtworkProviderUtil {
     private static final Object sDecodeLock = new Object();
 
     private final Context mContext;
+    private final String mAuthority;
     private final BitmapLruCache mL1Cache;
     private final int mMaxSize;
 
-    public ArtworkProviderUtil(Context context) {
+    public ArtworkProviderUtil(Context context, String authority) {
         mContext = context;
-        mMaxSize = ArtworkModule.calculateL1CacheSize(context, true);
+        mAuthority = authority;
+        mMaxSize = Util.calculateL1CacheSize(context, true);
         mL1Cache = new BitmapLruCache(mMaxSize);
     }
 
@@ -65,7 +66,7 @@ public class ArtworkProviderUtil {
             return getDefaultArt();
         }
         final String cacheKey = makeCacheKey(artistName, albumName,"LARGE");
-        final Uri artworkUri = ArtworkProvider.createArtworkUri(artistName, albumName);
+        final Uri artworkUri = ArtworkUris.createArtworkUri(mAuthority, artistName, albumName);
         Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
         if (bitmap == null) {
             // Fullscreen not available try the thumbnail for a temp fix
@@ -85,7 +86,7 @@ public class ArtworkProviderUtil {
             return getDefaultArt();
         }
         final String cacheKey = makeCacheKey(artistName, albumName, "THUMB");
-        final Uri artworkUri = ArtworkProvider.createArtworkThumbnailUri(artistName, albumName);
+        final Uri artworkUri = ArtworkUris.createThumbnailUri(mAuthority, artistName, albumName);
         Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
         if (bitmap == null) {
             bitmap = getDefaultArt();

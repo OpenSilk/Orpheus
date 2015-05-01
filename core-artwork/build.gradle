@@ -45,6 +45,15 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    if (file('../../KeyStore').exists()) {
+        def Properties otherProps = new Properties();
+        otherProps.load(new FileInputStream(file('../../KeyStore/orpheus.properties')))
+        defaultConfig.buildConfigField "String", "LASTFM_KEY", otherProps.lastfmKey
+    } else {
+        println "No KeyStore directory found! (You can ignore this warning if your name is not drew)"
+        defaultConfig.buildConfigField "String", "LASTFM_KEY", "null"
+    }
+
     defaultPublishConfig "debug"
 
 }
@@ -61,8 +70,10 @@ dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
     compile (group: 'com.android.support', name: 'palette-v7', version: rootProject.ext.supportLibVersion)
     compile (group: 'com.google.code.gson', name: 'gson', version: rootProject.ext.gsonVersion)
+    compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
     compile project(':common-core')
     compile project(':common-ui')
+    compile project(':core-model')
     compile 'com.jakewharton:disklrucache:2.0.2'
     compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
 }

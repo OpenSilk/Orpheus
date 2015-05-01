@@ -16,30 +16,27 @@
 
 package org.opensilk.music.artwork;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.support.v7.graphics.Palette;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.HttpHeaderParser;
 
-import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
 /**
  * A canned request for getting an image at a given URL and calling
  * back with a decoded Bitmap.
  */
-public class ArtworkRequest2 extends Request<Artwork> {
+public class ArtworkRequest2 extends Request<Bitmap> {
 
-
-    public interface Listener extends Response.Listener<Artwork>, Response.ErrorListener {
+    public interface Listener extends Response.Listener<Bitmap>, Response.ErrorListener {
 
     }
 
@@ -79,13 +76,13 @@ public class ArtworkRequest2 extends Request<Artwork> {
      * @param decodeConfig Format to decode the bitmap to
      * @param errorListener Error listener, or null to ignore errors
      */
-    public ArtworkRequest2(String url, ArtworkType imageType, Listener listener) {
+    public ArtworkRequest2(Context context, String url, ArtworkType imageType, Listener listener) {
         super(Method.GET, url, listener);
         setRetryPolicy(new DefaultRetryPolicy(IMAGE_TIMEOUT_MS, IMAGE_MAX_RETRIES, IMAGE_BACKOFF_MULT));
         mListener = listener;
         mDecodeConfig = BITMAP_CONFIG;
-        mMaxWidth = ArtworkType.getWidth(imageType);
-        mMaxHeight = ArtworkType.getWidth(imageType);
+        mMaxWidth = ArtworkType.getWidth(context, imageType);
+        mMaxHeight = ArtworkType.getWidth(context, imageType);
     }
 
     @Override
@@ -130,7 +127,7 @@ public class ArtworkRequest2 extends Request<Artwork> {
     }
 
     @Override
-    protected Response<Artwork> parseNetworkResponse(NetworkResponse response) {
+    public Response<Bitmap> parseNetworkResponse(NetworkResponse response) {
         // Serialize all decode on a global lock to reduce concurrent heap usage.
         synchronized (sDecodeLock) {
             try {
@@ -138,11 +135,10 @@ public class ArtworkRequest2 extends Request<Artwork> {
                 if (bitmap == null) {
                     return Response.error(new ParseError(response));
                 } else {
-                    Palette palette = Palette.generate(bitmap);
-                    return Response.success(new Artwork(bitmap, palette), HttpHeaderParser.parseCacheHeaders(response));
+                    return Response.success(bitmap, HttpHeaderParser.parseCacheHeaders(response));
                 }
             } catch (OutOfMemoryError e) {
-                VolleyLog.e("Caught OOM for %d byte image, url=%s", response.data.length, getUrl());
+                Timber.e("Caught OOM for %d byte image, url=%s", response.data.length, getUrl());
                 return Response.error(new ParseError(e));
             }
         }
@@ -198,21 +194,21 @@ public class ArtworkRequest2 extends Request<Artwork> {
             int w = tempBitmap2.getWidth();
             int h = tempBitmap2.getHeight();
             if (w > h) {
-//                Timber.d("Center cropping %d %d %s", w, h, getUrl());
+                Timber.v("Center cropping %d %d %s", w, h, getUrl());
                 //center crop
                 bitmap = Bitmap.createBitmap(tempBitmap2, w/2 - h/2, 0, h, h);
                 tempBitmap2.recycle();
             } else if (h > w) {
-//                Timber.d("Top cropping %d %d %s", w, h, getUrl());
+                Timber.v("Top cropping %d %d %s", w, h, getUrl());
                 // top crop
                 bitmap = Bitmap.createBitmap(tempBitmap2, 0, 0, w, w);
                 tempBitmap2.recycle();
             } else {
-//                Timber.d("No cropping %d %d %s", w, h, getUrl());
+                Timber.v("No cropping %d %d %s", w, h, getUrl());
                 bitmap = tempBitmap2;
             }
 
-//            Timber.d("Bitmap %d %d %s", bitmap.getWidth(), bitmap.getHeight(), getUrl());
+            Timber.v("Bitmap %d %d %s", bitmap.getWidth(), bitmap.getHeight(), getUrl());
 
         }
 
@@ -220,7 +216,7 @@ public class ArtworkRequest2 extends Request<Artwork> {
     }
 
     @Override
-    protected void deliverResponse(Artwork response) {
+    protected void deliverResponse(Bitmap response) {
         mListener.onResponse(response);
     }
 

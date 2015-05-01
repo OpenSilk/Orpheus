@@ -20,10 +20,10 @@ package org.opensilk.music.artwork;
 /**
  * Created by drew on 10/26/14.
  */
-public class CacheResponse {
+public class CacheArtworkResponse {
     public final Artwork artwork;
     public final boolean fromL1;
-    public CacheResponse(Artwork artwork, boolean fromL1) {
+    public CacheArtworkResponse(Artwork artwork, boolean fromL1) {
         this.artwork = artwork;
         this.fromL1 = fromL1;
     }

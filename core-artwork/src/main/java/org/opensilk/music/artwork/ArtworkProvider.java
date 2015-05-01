@@ -18,19 +18,34 @@ package org.opensilk.music.artwork;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 
-import org.opensilk.music.BuildConfig;
-import org.opensilk.music.GraphHolder;
+import com.google.gson.Gson;
+import com.jakewharton.disklrucache.DiskLruCache;
+
+import org.apache.commons.io.IOUtils;
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.music.artwork.cache.BitmapDiskCache;
+import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
+import org.opensilk.music.model.ArtInfo;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+
+import rx.Scheduler;
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by drew on 3/25/14.
@@ -38,42 +53,19 @@ import javax.inject.Inject;
 public class ArtworkProvider extends ContentProvider {
     private static final String TAG = ArtworkProvider.class.getSimpleName();
 
-    private static final String AUTHORITY = BuildConfig.ARTWORK_AUTHORITY;
-    private static final UriMatcher sUriMatcher;
+    final Scheduler mScheduler = Constants.ARTWORK_SCHEDULER;
 
-    public static final Uri ARTWORK_URI;
-    public static final Uri ARTWORK_THUMB_URI;
+    @Inject @Named("artworkauthority") String mAuthority;
+    @Inject BitmapDiskCache mL2Cache;
+    @Inject Gson mGson;
 
-    static {
-        sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-
-        ARTWORK_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("artwork").build();
-        sUriMatcher.addURI(AUTHORITY, "artwork/*/*", 1);
-
-        ARTWORK_THUMB_URI = new Uri.Builder().scheme("content").authority(AUTHORITY).appendPath("thumbnail").build();
-        sUriMatcher.addURI(AUTHORITY, "thumbnail/*/*", 2);
-    }
-
-    /**
-     * @return Uri to retrieve large (fullscreen) artwork for specified albumId
-     */
-    public static Uri createArtworkUri(String artistName, String albumName) {
-        return ARTWORK_URI.buildUpon().appendPath(artistName).appendPath(albumName).build();
-    }
-
-    /**
-     * @return Uri to retrieve thumbnail for specified albumId
-     */
-    public static Uri createArtworkThumbnailUri(String artistName, String albumName) {
-        return ARTWORK_THUMB_URI.buildUpon().appendPath(artistName).appendPath(albumName).build();
-    }
-
-    @Inject ArtworkRequestManager mArtworkRequestor;
+    private UriMatcher mUriMatcher;
 
     @Override
     //@DebugLog
     public boolean onCreate() {
-        GraphHolder.get(getContext()).inject(this);
+        DaggerService.<ArtworkComponent>getDaggerComponent(getContext()).inject(this);
+        mUriMatcher = ArtworkUris.makeMatcher(mAuthority);
         return true;
     }
 
@@ -84,7 +76,7 @@ public class ArtworkProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        switch (sUriMatcher.match(uri)) {
+        switch (mUriMatcher.match(uri)) {
             case 1:
                 return "image/*";
         }
@@ -117,31 +109,117 @@ public class ArtworkProvider extends ContentProvider {
         if (!"r".equals(mode)) {
             throw new IllegalArgumentException("Provider is read only");
         }
-        final List<String> seg;
-        final ParcelFileDescriptor pfd;
-        switch (sUriMatcher.match(uri)) {
-            case 1: //Fullscreen
-                seg = uri.getPathSegments();
+        switch (mUriMatcher.match(uri)) {
+            case ArtworkUris.MATCH.ARTWORK: { //Fullscreen
+                final List<String> seg = uri.getPathSegments();
                 if (seg == null || seg.size() < 2) {
                     break;
                 }
-                pfd = mArtworkRequestor.getArtwork(seg.get(seg.size()-2), seg.get(seg.size()-1));
+                final ArtInfo artInfo = new ArtInfo(seg.get(seg.size() - 2), seg.get(seg.size() - 1), null);
+                final ParcelFileDescriptor pfd = getArtwork(uri, artInfo);
                 if (pfd != null) {
                     return pfd;
                 }
                 break;
-            case 2: //Thumbnail
-                seg = uri.getPathSegments();
+            } case ArtworkUris.MATCH.THUMBNAIL: { //Thumbnail
+                final List<String> seg = uri.getPathSegments();
                 if (seg == null || seg.size() < 2) {
                     break;
                 }
-                pfd = mArtworkRequestor.getArtworkThumbnail(seg.get(seg.size()-2), seg.get(seg.size()-1));
+                final ArtInfo artInfo = new ArtInfo(seg.get(seg.size() - 2), seg.get(seg.size() - 1), null);
+                final ParcelFileDescriptor pfd = getArtworkThumbnail(uri, artInfo);
                 if (pfd != null) {
                     return pfd;
                 }
                 break;
+            } case ArtworkUris.MATCH.ALBUM_REQ:
+              case ArtworkUris.MATCH.ARTIST_REQ: {
+                  final String q = uri.getQueryParameter("q");
+                  final String t = uri.getQueryParameter("t");
+                  if (q != null) {
+                    final ArtInfo artInfo = Util.artInfoFromBase64EncodedJson(mGson, q);
+                    ArtworkType artworkType = ArtworkType.THUMBNAIL;
+                    if (t != null) {
+                        artworkType = ArtworkType.valueOf(t);
+                    }
+                    final ParcelFileDescriptor pfd;
+                    switch (artworkType) {
+                        case LARGE:
+                            pfd = getArtwork(uri, artInfo);
+                            break;
+                        default:
+                            pfd = getArtworkThumbnail(uri, artInfo);
+                            break;
+                    }
+                    if (pfd != null) {
+                        return pfd;
+                    }
+                }
+                break;
+            }
         }
         throw new FileNotFoundException("Could not obtain image from cache");
+    }
+
+    public ParcelFileDescriptor getArtwork(Uri uri, ArtInfo artInfo) {
+        final String cacheKey = Util.getCacheKey(artInfo, ArtworkType.LARGE);
+        ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
+        // Create request so it will be there next time
+        if (pfd == null) sendRequestToFetcher(uri, artInfo, ArtworkType.LARGE);
+        return pfd;
+    }
+
+    public ParcelFileDescriptor getArtworkThumbnail(Uri uri, ArtInfo artInfo) {
+        final String cacheKey = Util.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
+        ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
+        // Create request so it will be there next time
+        if (pfd == null) sendRequestToFetcher(uri, artInfo, ArtworkType.THUMBNAIL);
+        return pfd;
+    }
+
+    private ParcelFileDescriptor pullSnapshot(String cacheKey) {
+        Timber.d("Checking DiskCache for " + cacheKey);
+        try {
+            if (mL2Cache == null) {
+                throw new IOException("Unable to obtain cache instance");
+            }
+            final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+            final OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]);
+            final DiskLruCache.Snapshot snapshot = mL2Cache.getSnapshot(cacheKey);
+            if (snapshot != null && snapshot.getInputStream(0) != null) {
+                final Scheduler.Worker worker = mScheduler.createWorker();
+                worker.schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        try {
+                            IOUtils.copy(snapshot.getInputStream(0), out);
+                        } catch (IOException e) {
+                            Timber.e(e, "ParcelFileDescriptorPipe");
+                        } finally {
+                            snapshot.close();
+                            IOUtils.closeQuietly(out);
+                            worker.unsubscribe();
+                        }
+                    }
+                });
+                return pipe[0];
+            } else {
+                pipe[0].close();
+                out.close();
+            }
+        } catch (IOException e) {
+            Timber.w("pullSnapshot failed: %s", e.getMessage());
+        }
+        return null;
+    }
+
+    void sendRequestToFetcher(Uri uri, ArtInfo artInfo, ArtworkType type) {
+        Intent i = new Intent(getContext(), ArtworkFetcherService.class)
+                .setAction(ArtworkFetcherService.ACTION.NEWTASK)
+                .setData(uri)
+                .putExtra(ArtworkFetcherService.EXTRA.ARTINFO, artInfo)
+                .putExtra(ArtworkFetcherService.EXTRA.ARTTYPE, type.toString());
+        getContext().startService(i);
     }
 
 }

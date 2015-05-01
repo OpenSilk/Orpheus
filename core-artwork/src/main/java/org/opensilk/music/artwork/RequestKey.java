@@ -17,16 +17,16 @@
 
 package org.opensilk.music.artwork;
 
-import org.opensilk.music.api.meta.ArtInfo;
+import org.opensilk.music.model.ArtInfo;
 
 /**
  * Created by drew on 12/20/14.
  */
-class RequestKey {
-    final ArtInfo artInfo;
-    final ArtworkType artworkType;
+public class RequestKey {
+    public final ArtInfo artInfo;
+    public final ArtworkType artworkType;
 
-    RequestKey(ArtInfo artInfo, ArtworkType artworkType) {
+    public RequestKey(ArtInfo artInfo, ArtworkType artworkType) {
         this.artInfo = artInfo;
         this.artworkType = artworkType;
     }

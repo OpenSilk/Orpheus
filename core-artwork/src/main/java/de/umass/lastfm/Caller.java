@@ -29,9 +29,7 @@ package de.umass.lastfm;
 import android.content.Context;
 import android.util.Log;
 
-import org.opensilk.music.BuildConfig;
-import com.andrew.apollo.Config;
-
+import org.opensilk.music.artwork.BuildConfig;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -181,7 +179,7 @@ public class Caller {
     }
 
     public Result call(String method, Map<String, String> params) throws CallException {
-        return call(method, Config.LASTFM_API_KEY, params);
+        return call(method, BuildConfig.LASTFM_KEY, params);
     }
 
     /**

@@ -32,10 +32,10 @@ import java.util.List;
 /**
  * Created by drew on 10/21/14.
  */
-class CoverArtJsonRequest extends JsonRequest<String> {
-    static final String API_ROOT = "http://coverartarchive.org/release/";
+public class CoverArtJsonRequest extends JsonRequest<String> {
+    static final String API_ROOT = Constants.COVERART_API_ROOT;
 
-    interface Listener extends Response.Listener<String>, Response.ErrorListener {
+    public interface Listener extends Response.Listener<String>, Response.ErrorListener {
 
     }
 
@@ -61,7 +61,7 @@ class CoverArtJsonRequest extends JsonRequest<String> {
     final Listener listener;
     final Gson gson;
 
-    CoverArtJsonRequest(String mbid, Listener listener, Gson gson) {
+    public CoverArtJsonRequest(String mbid, Listener listener, Gson gson) {
         super(Request.Method.GET, makeUrl(mbid), null, listener, listener);
         this.listener = listener;
         this.gson = gson;
@@ -71,7 +71,6 @@ class CoverArtJsonRequest extends JsonRequest<String> {
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         try {
             String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-            // gson is so fucking awesome
             CoverArtResponse car = gson.fromJson(jsonString, CoverArtResponse.class);
             for (CoverArtResponse.Image image : car.images) {
                 if (image.front && !TextUtils.isEmpty(image.image)) {

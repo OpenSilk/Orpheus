@@ -17,25 +17,30 @@
 
 package org.opensilk.music.artwork;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
+import com.android.volley.ExecutorDelivery;
 
-import org.opensilk.music.artwork.cache.BitmapDiskCache;
-import org.opensilk.music.artwork.cache.BitmapLruCache;
+import java.util.concurrent.Executor;
 
-import javax.inject.Inject;
+import rx.Scheduler;
+import rx.functions.Action0;
 
 /**
  * Created by drew on 4/30/15.
  */
-public class ArtworkService extends Service {
-
-    @Inject BitmapDiskCache mDiskCache;
-    @Inject BitmapLruCache mL2Cache;
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+public class SchedulerResponseDelivery extends ExecutorDelivery {
+    public SchedulerResponseDelivery() {
+        super(new Executor() {
+            @Override
+            public void execute(final Runnable command) {
+                final Scheduler.Worker worker = Constants.ARTWORK_SCHEDULER.createWorker();
+                worker.schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        command.run();
+                        worker.unsubscribe();
+                    }
+                });
+            }
+        });
     }
 }

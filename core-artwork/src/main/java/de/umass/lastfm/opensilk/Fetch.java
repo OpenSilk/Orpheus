@@ -16,8 +16,9 @@
 
 package de.umass.lastfm.opensilk;
 
-import com.andrew.apollo.Config;
 import com.android.volley.Request;
+
+import org.opensilk.music.artwork.BuildConfig;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -90,7 +91,7 @@ public class Fetch {
         StringBuilder baseUrl = new StringBuilder(200);
         baseUrl.append(DEFAULT_API_ROOT)
                 .append("?")
-                .append(PARAM_API_KEY).append("=").append(Config.LASTFM_API_KEY)
+                .append(PARAM_API_KEY).append("=").append(BuildConfig.LASTFM_KEY)
                 .append("&")
                 .append("autocorrect=1")
                 .append("&")

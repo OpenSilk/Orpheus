@@ -20,7 +20,7 @@ package org.opensilk.music.artwork;
 import android.graphics.Bitmap;
 import android.support.v7.graphics.Palette;
 
-import org.opensilk.common.widget.AnimatedImageView;
+import org.opensilk.common.ui.widget.AnimatedImageView;
 
 import java.lang.ref.WeakReference;
 
@@ -35,7 +35,7 @@ public class ImageContainer implements Subscription {
 
     private boolean unsubscribed = false;
 
-    ImageContainer(AnimatedImageView imageView, PaletteObserver paletteObserver) {
+    public ImageContainer(AnimatedImageView imageView, PaletteObserver paletteObserver) {
         this.imageViewWeakReference = new WeakReference<>(imageView);
         this.palleteObserverWeakReference = new WeakReference<>(paletteObserver);
         registerWithImageView();
@@ -54,35 +54,35 @@ public class ImageContainer implements Subscription {
         return unsubscribed;
     }
 
-    void registerWithImageView() {
+    public void registerWithImageView() {
         AnimatedImageView imageView = imageViewWeakReference.get();
         if (imageView != null) {
             imageView.addSubscription(this);
         }
     }
 
-    void unregisterWithImageView() {
+    public void unregisterWithImageView() {
         AnimatedImageView imageView = imageViewWeakReference.get();
         if (imageView != null) {
             imageView.removeSubscription(this);
         }
     }
 
-    void setDefaultImage() {
+    public void setDefaultImage() {
         if (unsubscribed) return;
         AnimatedImageView imageView = imageViewWeakReference.get();
         if (imageView == null) return;
-        imageView.setDefaultImage();
+        imageView.setDefaultImage(R.drawable.default_artwork);
     }
 
-    void setImageBitmap(final Bitmap bitmap, boolean shouldAnimate) {
+    public void setImageBitmap(final Bitmap bitmap, boolean shouldAnimate) {
         if (unsubscribed) return;
         AnimatedImageView imageView = imageViewWeakReference.get();
         if (imageView == null) return;
         imageView.setImageBitmap(bitmap, shouldAnimate);
     }
 
-    void notifyPaletteObserver(Palette palette, boolean shouldAnimate) {
+    public void notifyPaletteObserver(Palette palette, boolean shouldAnimate) {
         if (unsubscribed) return;
         PaletteObserver po = palleteObserverWeakReference.get();
         if (po == null) return;

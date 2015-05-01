@@ -19,8 +19,15 @@
           package="org.opensilk.music.artwork">
 
     <application>
-        <service android:name=".ArtworkService"
-                 android:process="prvdr"/>
+        <provider
+            android:authorities="must_override"
+            android:name=".ArtworkProvider"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:process=":prvdr"/>
+        <service
+            android:name=".fetcher.ArtworkFetcherService"
+            android:process=":prvdr"/>
     </application>
 
 </manifest>
