@@ -26,6 +26,7 @@ import org.opensilk.music.model.spi.Bundleable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,20 +49,19 @@ public abstract class TrackCollection implements Bundleable {
     ) {
         this.identity = identity;
         this.name = name;
-        this.trackUris = trackUris;
-        this.albumUris = albumUris;
-        this.artworkUris = artworkUris;
+        this.trackUris = Collections.unmodifiableList(trackUris);
+        this.albumUris = Collections.unmodifiableList(albumUris);
+        this.artworkUris = Collections.unmodifiableList(artworkUris);
     }
 
     protected TrackCollection(Bundle b) {
-        if (!getClz().equals(b.getString("clz"))) {
-            throw new IllegalArgumentException("Wrong class for TrackCollection: "+b.getString("clz"));
-        }
-        this.identity = b.getString("_1");
-        this.name = b.getString("_2");
-        this.trackUris = new ArrayList<>(Arrays.asList((Uri[])b.getParcelableArray("_3")));
-        this.albumUris = new ArrayList<>(Arrays.asList((Uri[])b.getParcelableArray("_4")));
-        this.artworkUris = new ArrayList<>(Arrays.asList((Uri[])b.getParcelableArray("_5")));
+        this(
+                b.getString("_1"),
+                b.getString("_2"),
+                Arrays.asList((Uri[])b.getParcelableArray("_3")),
+                Arrays.asList((Uri[])b.getParcelableArray("_4")),
+                Arrays.asList((Uri[])b.getParcelableArray("_5"))
+        );
     }
 
     @Override

@@ -54,6 +54,9 @@ public class Playlist extends TrackCollection {
     public static final BundleCreator<Playlist> BUNDLE_CREATOR = new BundleCreator<Playlist>() {
         @Override
         public Playlist fromBundle(Bundle b) throws IllegalArgumentException {
+            if (!Playlist.class.getName().equals(b.getString("clz"))) {
+                throw new IllegalArgumentException("Wrong class for Playlist: "+b.getString("clz"));
+            }
             return new Playlist(b);
         }
     };
@@ -61,6 +64,9 @@ public class Playlist extends TrackCollection {
     public static final class Builder extends TrackCollection.Builder<Playlist> {
         @Override
         public Playlist build() {
+            if (identity == null || name == null) {
+                throw new NullPointerException("identity and name are required");
+            }
             return new Playlist(identity, name, trackUris, albumUris, artworkUris);
         }
     }

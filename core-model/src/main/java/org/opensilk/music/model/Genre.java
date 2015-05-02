@@ -54,6 +54,9 @@ public class Genre extends TrackCollection {
     public static final BundleCreator<Genre> BUNDLE_CREATOR = new BundleCreator<Genre>() {
         @Override
         public Genre fromBundle(Bundle b) throws IllegalArgumentException {
+            if (!Genre.class.getName().equals(b.getString("clz"))) {
+                throw new IllegalArgumentException("Wrong class for Genre: "+b.getString("clz"));
+            }
             return new Genre(b);
         }
     };
