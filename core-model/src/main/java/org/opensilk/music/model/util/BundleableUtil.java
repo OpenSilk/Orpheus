@@ -24,7 +24,10 @@ import org.opensilk.music.model.ex.BadBundleableException;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by drew on 4/25/15.
@@ -71,6 +74,31 @@ public class BundleableUtil {
         } catch (IllegalArgumentException e) {
             throw new BadBundleableException(e);
         }
+    }
+
+    //Laziness need to just make everything parcelable.
+    public static Bundle flatten(@NonNull List<Bundleable> bundleables) {
+        ArrayList<ParcelableBundleable> pbs = new ArrayList<>(bundleables.size());
+        for (Bundleable b : bundleables) {
+            pbs.add(new ParcelableBundleable(b));
+        }
+        Bundle b = new Bundle();
+        b.putParcelableArrayList("wrapped", pbs);
+        return b;
+    }
+
+    public static List<Bundleable> unflatten(@NonNull Bundle b) {
+        if (b.containsKey("wrapped")) {
+            ArrayList<ParcelableBundleable> pbs = b.getParcelableArrayList("wrapped");
+            if (pbs != null) {
+                ArrayList<Bundleable> bundleables = new ArrayList<>(pbs.size());
+                for (ParcelableBundleable pb : pbs) {
+                    bundleables.add(pb.bundleable);
+                }
+                return bundleables;
+            }
+        }
+        return Collections.emptyList();
     }
 
     private static final HashMap<String, Bundleable.BundleCreator> sCreatorCache = new HashMap<>();
