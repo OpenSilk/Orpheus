@@ -37,11 +37,11 @@ public class LibraryInfo implements Parcelable {
      */
     public final String libraryName;
     /**
-     * Unique foldersTracks identifier for this request
+     * Unique folder identifier for this request
      */
     public final String folderId;
     /**
-     * Human readable name for foldersTracks;
+     * Human readable name for folder;
      */
     public final String folderName;
 

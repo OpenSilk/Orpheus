@@ -90,6 +90,10 @@ public class LibraryUris {
         return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(track).appendPath(id).build();
     }
 
+    public static Uri call(String authority) {
+        return new Uri.Builder().scheme(scheme).authority(authority).build();
+    }
+
     static final int M_ALBUMS = 1;
     static final int M_ALBUM = 2;
     static final int M_ARTISTS = 3;
