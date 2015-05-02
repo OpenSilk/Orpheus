@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2012 Andrew Neal
+     Copyright (C) 2014 OpenSilk Productions LLC
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+    package="org.opensilk.music">
+
+    <!-- Used for caching and creating new playlists -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Used to check for a network connection -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Used to download images -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Used to keep the service running when the phone sleeps -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- The main service uses a sticky broadcast -->
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <!-- Lower or raise the music based on the phone state -->
+    <!--<uses-permission android:name="android.permission.READ_PHONE_STATE" />-->
+    <!-- Used to set the devices's ringtone -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <!-- Used to create launcher shortcuts -->
+    <!--<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />-->
+    <!-- Used to check if the app is in the background -->
+    <!--<uses-permission android:name="android.permission.GET_TASKS" />-->
+    <!-- Used to get ip address for casting -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Used for the Visualizer -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- sdcard access Kitkat+ -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <!-- permissions for librarys -->
+    <permission android:name="${applicationId}.api.permission.BIND_LIBRARY_SERVICE"
+                android:protectionLevel="signature"/>
+    <uses-permission android:name="${applicationId}.api.permission.BIND_LIBRARY_SERVICE"/>
+
+    <!-- Casting is currently only supported over wifi -->
+    <uses-feature android:name="android.hardware.wifi"/>
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:hardwareAccelerated="@bool/config_hardwareAccelerated"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="@bool/config_largeHeap">
+
+        <activity android:name=".ui3.LauncherActivity"
+            android:theme="@style/Theme.Dark"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustPan"
+            android:process=":ui"/>
+
+        <!-- The God Activity -->
+        <activity-alias
+            android:name="org.opensilk.music.ui.activities.HomeSlidingActivity"
+            android:targetActivity=".ui3.LauncherActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MUSIC_PLAYER" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.APP_MUSIC" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/playlist" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.opensilk.music.AUDIO_PLAYER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.PICK" />-->
+                <!--<category android:name="android.intent.category.DEFAULT" />-->
+                <!--<category android:name="android.intent.category.OPENABLE" />-->
+                <!--<data android:mimeType="vnd.android.cursor.dir/audio"/>-->
+            <!--</intent-filter>-->
+        </activity-alias>
+
+        <!-- Artwork provider -->
+        <provider
+            android:name="org.opensilk.music.artwork.provider.ArtworkProvider"
+            android:authorities="${applicationId}.provider.artwork"
+            tools:replace="authorities"/>
+
+    </application>
+
+</manifest>

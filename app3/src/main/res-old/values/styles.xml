@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2012 Andrew Neal
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Notification bar event text -->
+    <style name="NotificationText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:fadingEdge">horizontal</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="NotificationText.Title">
+        <item name="android:textAppearance">@android:style/TextAppearance.StatusBar.EventContent.Title</item>
+    </style>
+
+    <style name="NotificationText.Content">
+        <item name="android:textAppearance">@android:style/TextAppearance.StatusBar.EventContent</item>
+    </style>
+
+    <style name="NotificationDividerHorizontal">
+        <item name="android:background">@android:drawable/divider_horizontal_dark</item>
+    </style>
+
+    <!-- Notification bar actions -->
+    <style name="NotificationAction" parent="@android:style/Widget.Holo.ImageButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">@dimen/notification_action_width</item>
+        <item name="android:minHeight">@dimen/notification_action_height</item>
+        <item name="android:padding">@dimen/notification_action_padding</item>
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="NotificationAction.Previous" parent="@style/NotificationAction">
+        <item name="android:src">@drawable/ic_skip_previous_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_prev</item>
+    </style>
+
+    <style name="NotificationAction.Play" parent="@style/NotificationAction">
+        <item name="android:src">@drawable/ic_play_arrow_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="NotificationAction.Next" parent="@style/NotificationAction">
+        <item name="android:src">@drawable/ic_skip_next_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_next</item>
+    </style>
+
+    <style name="NotificationAction.Collapse" parent="@style/NotificationAction">
+        <item name="android:src">@drawable/ic_clear_grey600_18dp</item>
+    </style>
+
+</resources>

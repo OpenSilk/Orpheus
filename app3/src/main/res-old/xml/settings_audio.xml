@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/settings_general_category">
+
+        <Preference
+            android:key="pref_equalizer"
+            android:title="@string/menu_equalizer"
+            android:summary="@string/settings_equalizer_summary"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_cast_category">
+
+        <CheckBoxPreference
+            android:key="pref_cast_enabled"
+            android:title="@string/settings_cast_enable_title"
+            android:summary="@string/settings_cast_enable_summary"
+            android:defaultValue="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_storage_category">
+
+        <Preference
+            android:key="auto_shuffle_directory"
+            android:title="@string/settings_storage_default_folder_title"
+            android:summary="@string/settings_storage_default_folder_summary"
+            />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,160 @@
+/*
+ * Copyright (C) 2014 OpenSilk Productions LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'org.robolectric'
+
+// Versioning
+def versionMajor = 3
+def versionMinor = 0
+def versionPatch = 0
+def versionBuild = 0 // bump for dogfood builds, public betas, etc.
+
+assert(versionMinor < 100) // Double digits
+assert(versionPatch < 100) // Double digits
+assert(versionBuild < 100) // Double digits
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "org.opensilk.music"
+        minSdkVersion 15
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
+        versionName String.format("%d.%d.%d", versionMajor, versionMinor, versionPatch)
+    }
+
+    sourceSets {
+        main {
+            res {
+                //This appends the extra dirs to res.srcDirs
+                srcDir 'src/main/res-old'
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "${gitSha()}".isEmpty() ? "-SNAPSHOT" : "-SNAPSHOT-${gitSha()}"
+        }
+    }
+
+    if (file('../../KeyStore').exists()) {
+        signingConfigs {
+            release {
+                def Properties keyProps = new Properties()
+                keyProps.load(new FileInputStream(file('../../KeyStore/release2.properties')))
+                storeFile file(keyProps["store"])
+                keyAlias keyProps["alias"]
+                storePassword keyProps["storePass"]
+                keyPassword keyProps["pass"]
+            }
+        }
+        buildTypes.release.signingConfig signingConfigs.release
+        signingConfigs {
+            debug {
+                def Properties keyProps = new Properties()
+                keyProps.load(new FileInputStream(file('../../KeyStore/debug2.properties')))
+                storeFile file(keyProps["store"])
+                keyAlias keyProps["alias"]
+                storePassword keyProps["storePass"]
+                keyPassword keyProps["pass"]
+            }
+        }
+        buildTypes.debug.signingConfig signingConfigs.debug
+        def Properties otherProps = new Properties();
+        otherProps.load(new FileInputStream(file('../../KeyStore/orpheus.properties')))
+        defaultConfig.buildConfigField "String", "LASTFM_KEY", otherProps.lastfmKey
+        buildTypes.debug.resValue "string", "cast_id", otherProps.castDebugKey
+        buildTypes.release.resValue "string", "cast_id", otherProps.castKey
+        defaultConfig.buildConfigField "String", "ACRA_REPORTING_URL", otherProps.acraReportingUrl
+        defaultConfig.buildConfigField "String", "ACRA_REPORTING_USR", otherProps.acraReportingUsr
+        defaultConfig.buildConfigField "String", "ACRA_REPORTING_PASS", otherProps.acraReportingPass
+    } else {
+        println "No KeyStore directory found! (You can ignore this warning if your name is not drew)"
+        defaultConfig.buildConfigField "String", "LASTFM_KEY", "null"
+        defaultConfig.resValue "string", "cast_id", "CC1AD845" //CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID
+        defaultConfig.buildConfigField "String", "ACRA_REPORTING_URL", "null"
+        defaultConfig.buildConfigField "String", "ACRA_REPORTING_USR", "null"
+        defaultConfig.buildConfigField "String", "ACRA_REPORTING_PASS", "null"
+    }
+
+}
+
+//configurations.all {
+//    // check for updates every build
+//    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}
+
+robolectric {
+    include '**/*Test.class'
+    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
+    afterTest {
+        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
+    }
+}
+
+dependencies {
+    //SDK
+    compile (group: 'com.android.support', name: 'cardview-v7', version: rootProject.ext.supportLibVersion)
+    compile (group: 'com.android.support', name: 'recyclerview-v7', version: rootProject.ext.supportLibVersion)
+    compile (group: 'com.android.support', name: 'mediarouter-v7', version: rootProject.ext.supportLibVersion)
+    //jake wharton
+    compile (group: 'com.jakewharton', name: 'butterknife', version: rootProject.ext.butterKnifeVersion)
+    compile (group:'com.jakewharton.timber', name:'timber', version:rootProject.ext.timberVersion)
+    //square
+    provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
+    //apache
+    compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
+    //google
+    compile (group: 'com.google.code.gson', name: 'gson', version: rootProject.ext.gsonVersion)
+    //greenrobot
+    compile 'de.greenrobot:eventbus:2.4.0'
+
+    compile(group: 'com.google.android.exoplayer', name: 'exoplayer', version: 'r1.2.4', ext: 'aar')
+
+    //local m2
+    compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
+    compile 'com.triggertrap:seekarc:1.1-SNAPSHOT@aar'
+
+    compile project(':core-model')
+    compile project(':core-library')
+    compile project(':core-artwork')
+    compile project(':common-core')
+    compile project(':common-ui')
+
+    testCompile('junit:junit:4.12')
+    testCompile('org.robolectric:robolectric:2.4') {
+        exclude module: 'commons-logging'
+        exclude module: 'httpclient'
+    }
+    testCompile('com.squareup:fest-android:1.0.0')
+    testCompile('org.mockito:mockito-core:1.10.19')
+
+}

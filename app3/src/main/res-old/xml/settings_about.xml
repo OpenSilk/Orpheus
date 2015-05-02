@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/settings_about_apollo">
+
+        <Preference
+            android:key="pref_author"
+            android:title="@string/settings_created_by"
+            android:summary="@string/opensilk_org_url">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="@string/opensilk_org_url"/>
+            </Preference>
+
+        <Preference
+            android:key="send_feedback"
+            android:title="@string/settings_feedback">
+            <intent android:action="android.intent.action.SENDTO"
+                android:data="@string/settings_feedback_url">
+                <extra
+                    android:name="android.intent.extra.SUBJECT"
+                    android:value="@string/settings_feedback_email_subject"/>
+            </intent>
+        </Preference>
+
+        <CheckBoxPreference
+            android:key="acra.enable"
+            android:title="@string/settings_send_crash_reports"
+            android:summary="@string/settings_send_crash_reports_summary"
+            android:defaultValue="true"/>
+
+        <Preference
+            android:key="pref_version"
+            android:title="@string/settings_version_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_legal_category">
+
+        <Preference
+            android:key="pref_licenses"
+            android:title="@string/settings_open_source_licenses"/>
+
+        <Preference
+            android:key="pref_thanks"
+            android:title="@string/settings_special_thanks"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

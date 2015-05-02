@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2014 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:app="http://schemas.android.com/apk/res-auto"
+       xmlns:tools="http://schemas.android.com/tools">
+
+    <org.opensilk.common.widget.FloatingActionButtonCheckable
+        android:id="@id/floating_action_button"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="156dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        style="?fabPlayStyle"/>
+
+    <org.opensilk.common.widget.FloatingActionButton
+        android:id="@id/floating_action_next"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_button"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        style="?fabNextStyle"/>
+
+    <org.opensilk.common.widget.FloatingActionButton
+        android:id="@id/floating_action_prev"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_next"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        style="?fabPrevStyle"/>
+
+    <org.opensilk.common.widget.FloatingActionButton
+        android:id="@id/floating_action_shuffle"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_prev"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        style="?fabShuffleStyle"/>
+
+    <org.opensilk.common.widget.FloatingActionButton
+        android:id="@id/floating_action_repeat"
+        android:layout_width="@dimen/fab_size_normal"
+        android:layout_height="@dimen/fab_size_normal"
+        android:layout_marginEnd="@dimen/fab_margin_end"
+        android:layout_marginRight="@dimen/fab_margin_end"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/floating_action_shuffle"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        style="?fabRepeatStyle"/>
+
+
+</merge>

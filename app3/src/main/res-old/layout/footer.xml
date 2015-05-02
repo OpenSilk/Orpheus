@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (C) 2014 OpenSilk Productions LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<org.opensilk.music.ui3.main.FooterView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/footer_view"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/footer_height"
+    android:background="?android:selectableItemBackground">
+
+    <org.opensilk.common.widget.SquareImageView
+        android:id="@+id/footer_thumbnail"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"/>
+
+    <ProgressBar
+        android:id="@+id/footer_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/footer_thumbnail"
+        android:layout_toRightOf="@id/footer_thumbnail"
+        android:layout_marginTop="-6dp"
+        style="?android:progressBarStyleHorizontal"
+        android:max="1000"/>
+
+    <TextView
+        android:id="@+id/footer_track_title"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_toEndOf="@id/footer_thumbnail"
+        android:layout_toRightOf="@id/footer_thumbnail"
+        android:layout_below="@id/footer_progress"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        tools:text="Track Title"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        style="@style/SingleLineTextView"/>
+
+    <TextView
+        android:id="@+id/footer_artist_name"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_toEndOf="@id/footer_thumbnail"
+        android:layout_toRightOf="@id/footer_thumbnail"
+        android:layout_below="@id/footer_track_title"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        tools:text="Artist Name"
+        android:textAppearance="?android:textAppearance"
+        android:fontFamily="sans-serif-condensed"
+        style="@style/SingleLineTextView"/>
+
+</org.opensilk.music.ui3.main.FooterView>

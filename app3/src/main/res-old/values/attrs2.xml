@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ThemeStyleables">
+        <attr name="toolbarTheme" format="reference"/>
+        <attr name="fabPlayStyle" format="reference"/>
+        <attr name="fabNextStyle" format="reference"/>
+        <attr name="fabPrevStyle" format="reference"/>
+        <attr name="fabShuffleStyle" format="reference"/>
+        <attr name="fabRepeatStyle" format="reference"/>
+        <attr name="gridTileDescriptionStyle" format="reference"/>
+        <attr name="gridTileDescriptionTitleStyle" format="reference"/>
+        <attr name="gridTileDescriptionSubTitleStyle" format="reference"/>
+        <attr name="nowPlayingPlayStyle" format="reference"/>
+        <attr name="nowPlayingNextStyle" format="reference"/>
+        <attr name="nowPlayingPrevStyle" format="reference"/>
+        <attr name="nowPlayingShuffleStyle" format="reference"/>
+        <attr name="nowPlayingRepeatStyle" format="reference"/>
+        <attr name="mainContentTopMargin" format="reference"/>
+    </declare-styleable>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Panel-->
+    <dimen name="panel_header_height">68dp</dimen>
+
+    <!--Widgets-->
+    <dimen name="music_widget_large_min_width">250dp</dimen>
+    <dimen name="music_widget_large_min_height">110dp</dimen>
+
+    <dimen name="music_widget_ultra_mini_min_width">56dp</dimen>
+    <dimen name="music_widget_ultra_mini_min_height">56dp</dimen>
+
+    <dimen name="music_widget_mini_min_width">110dp</dimen>
+    <dimen name="music_widget_mini_min_height">110dp</dimen>
+
+    <dimen name="music_widget_small_min_width">250dp</dimen>
+    <dimen name="music_widget_small_min_height">64dp</dimen>
+
+    <dimen name="music_widget_mini_button_bar_height">48.0dip</dimen>
+    <dimen name="music_widget_large_button_bar_width">48.0dip</dimen>
+    <!--end Widgets-->
+
+    <!--Daydream-->
+    <dimen name="dream_art_size">300dp</dimen>
+
+    <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
+     https://developer.android.com/design/patterns/navigation-drawer.html -->
+    <dimen name="drawer_width">240dp</dimen>
+
+    <integer name="profile_grid_cols_vertical">2</integer>
+    <integer name="profile_grid_cols_horizontal">2</integer>
+    <integer name="grid_columns">2</integer>
+
+    <dimen name="action_bar_double_height">112dp</dimen>
+
+    <!--Fab-->
+    <dimen name="fab_margin_end">32dp</dimen>
+
+    <!--footer dont change this without updating fab margins-->
+    <dimen name="footer_height">64dp</dimen>
+
+    <!--profile-->
+    <dimen name="hero_margin_top">2dp</dimen>
+    <dimen name="hero_margin_bottom">2dp</dimen>
+    <dimen name="hero_margin_right">2dp</dimen>
+    <dimen name="hero_margin_left">2dp</dimen>
+
+    <!--now playing-->
+    <dimen name="now_playing_button_padding">8dp</dimen>
+</resources>
