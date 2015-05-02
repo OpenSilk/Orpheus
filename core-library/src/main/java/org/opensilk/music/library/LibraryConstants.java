@@ -22,6 +22,14 @@ package org.opensilk.music.library;
  */
 public interface LibraryConstants {
     /**
+     * Incremented when breaking changes made
+     */
+    int API_VERSION_MAJOR = 0;
+    /**
+     * New feature or removal or whatever. As long as major is same orpheus will still work
+     */
+    int API_VERSION_MINOR = 3;
+    /**
      * Intent extra containing {@link String} library identity, used in multiple places
      */
     String EXTRA_LIBRARY_ID = "org.opensilk.music.library.extra.LIBRARY_ID";

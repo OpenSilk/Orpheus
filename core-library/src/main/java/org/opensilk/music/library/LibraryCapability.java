@@ -21,16 +21,17 @@ package org.opensilk.music.library;
  * Created by drew on 4/29/15.
  */
 public interface LibraryCapability {
-    int ALBUMS    = 1 << 1;
-    int ARTISTS   = 1 << 2;
-    int FOLDERS   = 1 << 3;
-    int GENRES    = 1 << 4;
-    int PLAYLISTS = 1 << 5;
-    int TRACKS    = 1 << 6;
+    int ALBUMS        = 1 << 1;
+    int ARTISTS       = 1 << 2;
+    int FOLDERSTRACKS = 1 << 3;
+    int FOLDERSALL    = 1 << 4;
+    int GENRES        = 1 << 5;
+    int PLAYLISTS     = 1 << 6;
+    int TRACKS        = 1 << 7;
 
-    int SEARCHABLE = 1 << 7;
-    int SETTINGS   = 1 << 8;
-    int DELETE     = 1 << 9;
-    int RENAME     = 1 << 10;
-    int DOWNLOAD   = 1 << 11;
+    int SEARCHABLE = 1 << 8;
+    int SETTINGS   = 1 << 9;
+    int DELETE     = 1 << 10;
+    int RENAME     = 1 << 11;
+    int DOWNLOAD   = 1 << 12;
 }
