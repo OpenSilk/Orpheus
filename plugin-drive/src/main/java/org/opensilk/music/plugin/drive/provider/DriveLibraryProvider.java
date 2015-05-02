@@ -54,7 +54,7 @@ import rx.Observable;
 import rx.Subscriber;
 import timber.log.Timber;
 
-import static org.opensilk.music.library.LibraryCapability.FOLDERS;
+import static org.opensilk.music.library.LibraryCapability.FOLDERSTRACKS;
 import static org.opensilk.music.library.LibraryCapability.SETTINGS;
 import static org.opensilk.music.library.LibraryCapability.TRACKS;
 import static org.opensilk.music.library.ex.ParcelableException.AUTH_FAILURE;
@@ -85,7 +85,7 @@ public class DriveLibraryProvider extends LibraryProvider {
     @Override
     protected LibraryConfig getLibraryConfig() {
         return LibraryConfig.builder()
-                .addAbility(FOLDERS)
+                .addAbility(FOLDERSTRACKS)
                 .addAbility(TRACKS)
                 .addAbility(SETTINGS)
                 .setPickerComponent(new ComponentName(getContext(), LibraryChooserActivity.class),
