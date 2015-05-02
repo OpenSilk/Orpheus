@@ -16,9 +16,13 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui3.library.LandingScreenView
+<org.opensilk.music.ui3.common.BundleableRecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    android:layout_height="match_parent">
+
+    <include layout="@layout/recycler_list_frame_base"/>
+
+</org.opensilk.music.ui3.common.BundleableRecyclerView>

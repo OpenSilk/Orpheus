@@ -24,10 +24,20 @@ import android.widget.TextView;
 
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 
+import javax.inject.Inject;
+
 /**
  * Created by drew on 5/1/15.
  */
-public class LandingScreenViewAdapter extends RecyclerListAdapter<LandingScreenViewAdapter.ViewItem, LandingScreenViewAdapter.ViewHolder> {
+public class LandingScreenViewAdapter extends
+        RecyclerListAdapter<LandingScreenViewAdapter.ViewItem, LandingScreenViewAdapter.ViewHolder> {
+
+    final LandingScreenPresenter presenter;
+
+    @Inject
+    public LandingScreenViewAdapter(LandingScreenPresenter presenter) {
+        this.presenter = presenter;
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -40,6 +50,10 @@ public class LandingScreenViewAdapter extends RecyclerListAdapter<LandingScreenV
     }
 
     public static class ViewItem {
+        public static final ViewItem ALBUMS = new ViewItem("Albums");
+        public static final ViewItem ARTISTS = new ViewItem("Artists");
+        public static final ViewItem FOLDERS = new ViewItem("Folders");
+        public static final ViewItem TRACKS = new ViewItem("Tracks");
         final String text;
 
         public ViewItem(String text) {

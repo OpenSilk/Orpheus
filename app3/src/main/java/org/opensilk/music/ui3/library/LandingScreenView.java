@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.library;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.AttributeSet;
 
 import org.opensilk.common.core.mortar.DaggerService;
@@ -31,6 +32,7 @@ import javax.inject.Inject;
 public class LandingScreenView extends RecyclerListFrame {
 
     @Inject LandingScreenPresenter mPresenter;
+    @Inject LandingScreenViewAdapter mAdapter;
 
     public LandingScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,6 +42,8 @@ public class LandingScreenView extends RecyclerListFrame {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        getListView().setAdapter(mAdapter);
+        getListView().setLayoutManager(new LinearLayoutManager(getContext()));
         mPresenter.takeView(this);
     }
 
@@ -47,5 +51,9 @@ public class LandingScreenView extends RecyclerListFrame {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mPresenter.dropView(this);
+    }
+
+    public LandingScreenViewAdapter getAdapter() {
+        return mAdapter;
     }
 }

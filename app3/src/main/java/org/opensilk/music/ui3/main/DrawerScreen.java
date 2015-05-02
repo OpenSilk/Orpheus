@@ -31,7 +31,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/1/15.
  */
-@Layout(R.layout.drawer_screen)
+@Layout(R.layout.screen_drawer)
 @WithComponentFactory(DrawerScreen.Factory.class)
 public class DrawerScreen {
     public static class Factory extends ComponentFactory<DrawerScreen> {

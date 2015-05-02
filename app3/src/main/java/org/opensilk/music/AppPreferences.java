@@ -274,7 +274,7 @@ public class AppPreferences extends PreferencesWrapper {
     }
 
     public LibraryInfo getDefaultLibraryInfo(LibraryConfig pluginInfo) {
-        String json = getString(makePluginPrefKey(pluginInfo), null);
+        String json = getString(makePluginPrefKey(pluginInfo)+".default_library", null);
         if (json == null) return null;
         try {
             return gson.fromJson(json, LibraryInfo.class);
@@ -287,16 +287,16 @@ public class AppPreferences extends PreferencesWrapper {
     public void setDefaultLibraryInfo(LibraryConfig pluginInfo, LibraryInfo libraryInfo) {
         String json = gson.toJson(libraryInfo);
         if (json != null) {
-            putString(makePluginPrefKey(pluginInfo), json);
+            putString(makePluginPrefKey(pluginInfo)+".default_library", json);
         }
     }
 
     public void removeDefaultLibraryInfo(LibraryConfig pluginInfo) {
-        remove(makePluginPrefKey(pluginInfo));
+        remove(makePluginPrefKey(pluginInfo)+".default_library");
     }
 
     private String makePluginPrefKey(LibraryConfig pluginInfo) {
-        return pluginInfo.authority+"_defInfo";
+        return pluginInfo.authority;
     }
 
     /*

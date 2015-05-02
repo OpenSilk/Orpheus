@@ -32,6 +32,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:name="org.opensilk.music.ui3.main.DrawerScreenFragment"
-        tools:layout="@layout/drawer_screen"/>
+        tools:layout="@layout/screen_drawer"/>
 
 </android.support.v4.widget.DrawerLayout>

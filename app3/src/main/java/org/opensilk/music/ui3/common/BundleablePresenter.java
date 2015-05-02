@@ -15,22 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
+package org.opensilk.music.ui3.common;
 
 import android.content.Context;
+import android.view.Menu;
+import android.widget.PopupMenu;
 
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
-import org.opensilk.music.AppPreferences;
+import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.model.spi.Bundleable;
+
+import mortar.ViewPresenter;
 
 /**
- * Requires ActivityResultsOwnerModule
- *
- * Created by drew on 5/1/15.
+ * Created by drew on 5/2/15.
  */
-public interface MusicActivityComponent extends MortarFragmentActivityComponent {
-    @ForApplication Context appContext();
-    AppPreferences appPreferences();
-    ActivityResultsController activityResultsController();
+public abstract class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> {
+    public abstract void onItemClicked(Context context, Bundleable item);
+    public abstract void onOverflowClicked(Context context, PopupMenu m, Bundleable item);
+    public abstract boolean onOverflowActionClicked(Context context, OverflowAction action, Bundleable item);
+    public abstract ArtworkRequestManager getRequestor();
 }

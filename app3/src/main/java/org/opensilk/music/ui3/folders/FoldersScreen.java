@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.library;
+package org.opensilk.music.ui3.folders;
 
 import android.content.res.Resources;
 
@@ -25,27 +25,35 @@ import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortarfragment.Layout;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.MusicActivityComponent;
 
 import mortar.MortarScope;
 
 /**
- * Created by drew on 5/1/15.
+ * Created by drew on 5/2/15.
  */
-@Layout(R.layout.screen_library_landing)
-@WithComponentFactory(LandingScreen.Factory.class)
-public class LandingScreen {
-    final LibraryConfig libraryConfig;
+@Layout(R.layout.bundleable_recycler)
+@WithComponentFactory(FoldersScreen.Factory.class)
+public class FoldersScreen {
 
-    public LandingScreen(LibraryConfig libraryConfig) {
+    final LibraryConfig libraryConfig;
+    final LibraryInfo libraryInfo;
+
+    public FoldersScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
         this.libraryConfig = libraryConfig;
+        this.libraryInfo = libraryInfo;
     }
 
-    public static class Factory extends ComponentFactory<LandingScreen> {
+    @Override
+    public String toString() {
+        return libraryInfo.folderId;
+    }
+
+    public static class Factory extends ComponentFactory<FoldersScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, LandingScreen screen) {
-            return LandingScreenComponent.FACTORY.call(DaggerService.<MusicActivityComponent>getDaggerComponent(parentScope), screen);
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, FoldersScreen screen) {
+            return FoldersScreenComponent.FACTORY.call(DaggerService.<MusicActivityComponent>getDaggerComponent(parentScope), screen);
         }
     }
-
 }

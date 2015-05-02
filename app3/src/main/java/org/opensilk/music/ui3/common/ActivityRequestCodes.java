@@ -15,22 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
-
-import android.content.Context;
-
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
-import org.opensilk.music.AppPreferences;
+package org.opensilk.music.ui3.common;
 
 /**
- * Requires ActivityResultsOwnerModule
- *
- * Created by drew on 5/1/15.
+ * Created by drew on 5/2/15.
  */
-public interface MusicActivityComponent extends MortarFragmentActivityComponent {
-    @ForApplication Context appContext();
-    AppPreferences appPreferences();
-    ActivityResultsController activityResultsController();
+public interface ActivityRequestCodes {
+    int LIBRARY_PICKER = 1001;
 }

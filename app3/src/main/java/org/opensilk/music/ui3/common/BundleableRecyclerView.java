@@ -15,22 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
+package org.opensilk.music.ui3.common;
 
 import android.content.Context;
+import android.util.AttributeSet;
 
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
-import org.opensilk.music.AppPreferences;
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.recycler.RecyclerListFrame;
+
+import javax.inject.Inject;
 
 /**
- * Requires ActivityResultsOwnerModule
- *
- * Created by drew on 5/1/15.
+ * Created by drew on 5/2/15.
  */
-public interface MusicActivityComponent extends MortarFragmentActivityComponent {
-    @ForApplication Context appContext();
-    AppPreferences appPreferences();
-    ActivityResultsController activityResultsController();
+public class BundleableRecyclerView extends RecyclerListFrame {
+
+    @Inject BundleablePresenter mPresenter;
+
+    public BundleableRecyclerView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        DaggerService.<BundleableComponentStub>getDaggerComponent(context).inject(this);
+    }
+
+
+
 }

@@ -43,7 +43,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 4/30/15.
  */
-public class LauncherActivity extends MortarFragmentActivity implements DrawerOwnerActivity {
+public class LauncherActivity extends MusicActivity implements DrawerOwnerActivity {
 
     @Inject DrawerOwner mDrawerOwner;
 
