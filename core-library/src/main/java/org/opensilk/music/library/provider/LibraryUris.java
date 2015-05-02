@@ -94,16 +94,16 @@ public class LibraryUris {
         return new Uri.Builder().scheme(scheme).authority(authority).build();
     }
 
-    static final int M_ALBUMS = 1;
-    static final int M_ALBUM = 2;
-    static final int M_ARTISTS = 3;
-    static final int M_ARTIST = 4;
-    static final int M_FOLDERS = 5;
-    static final int M_FOLDER = 6;
-    static final int M_TRACKS = 7;
-    static final int M_TRACK = 8;
+    public static final int M_ALBUMS = 1;
+    public static final int M_ALBUM = 2;
+    public static final int M_ARTISTS = 3;
+    public static final int M_ARTIST = 4;
+    public static final int M_FOLDERS = 5;
+    public static final int M_FOLDER = 6;
+    public static final int M_TRACKS = 7;
+    public static final int M_TRACK = 8;
 
-    static UriMatcher makeMatcher(String authority) {
+    public static UriMatcher makeMatcher(String authority) {
         Log.i("Uris", "Creating matcher for authority="+authority);
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
