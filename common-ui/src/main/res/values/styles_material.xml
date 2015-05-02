@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+
+    <style name="mtrl">
+
+    </style>
+
+    <!-- Lists -->
+
+    <style name="mtrl.List">
+        <!--<item name="android:paddingTop">8dp</item>-->
+        <!--<item name="android:paddingBottom">8dp</item>-->
+        <item name="android:scrollbars">vertical</item>
+        <item name="android:listDivider">?android:dividerHorizontal</item>
+    </style>
+
+    <!--List item as textview-->
+    <style name="mtrl.SingleLineListItemTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <!--<item name="android:paddingTop">16dp</item>-->
+        <!--<item name="android:paddingBottom">20dp</item>-->
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+        <item name="android:textColor">@color/black_text</item>
+    </style>
+
+    <!--List item as textview with compound drawable-->
+    <style name="mtrl.SingleLineListItemTextView.Icon">
+        <item name="android:layout_height">56dp</item>
+        <item name="android:drawablePadding">16dp</item>
+    </style>
+
+    <!--List item as textview with compound drawable-->
+    <style name="mtrl.SingleLineListItemTextView.Header">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/black_text_secondary</item>
+    </style>
+
+    <!--list item as horizontal linear layout-->
+    <style name="mtrl.SingleLineListItemLinear">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="mtrl.SingleLineListItemLinearInner">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
+    <!--linear layout imageview avatar on left-->
+    <style name="mtrl.SingleLineListItemLinearInner.Avatar">
+        <!--<item name="android:paddingTop">8dp</item>-->
+        <!--<item name="android:paddingBottom">8dp</item>-->
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <!--linear layout textview in middle-->
+    <style name="mtrl.SingleLineListItemLinearInner.Text">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:textSize">16sp</item>
+        <!--<item name="android:paddingTop">20dp</item>-->
+        <!--<item name="android:paddingBottom">24dp</item>-->
+        <item name="android:textColor">@color/black_text</item>
+    </style>
+
+    <!--linear layout imagebutton on right 24dp-->
+    <style name="mtrl.SingleLineListItemLinearInner.Icon">
+        <item name="android:padding">8dp</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <!--Button bars-->
+    <style name="mtrl.ButtonBar">
+        <item name="android:background">@null</item>
+    </style>
+
+    <!-- also in -v21-->
+    <style name="mtrl.ButtonBarButton" parent="Widget.AppCompat.Button">
+
+    </style>
+
+    <!-- also in -v21-->
+    <style name="mtrl.ButtonBarButton.Small" parent="Widget.AppCompat.Button.Small">
+        <item name="android:minWidth">78dip</item><!--88 norm 48 small-->
+    </style>
+
+</resources>

@@ -59,5 +59,6 @@ robolectric {
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
     compile (group: 'com.android.support', name: 'recyclerview-v7', version: rootProject.ext.supportLibVersion)
+    compile (group: 'com.jakewharton', name: 'butterknife', version: rootProject.ext.butterKnifeVersion)
     compile project(':common-core')
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.common.ui.content;
+package org.opensilk.common.ui.recycler;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

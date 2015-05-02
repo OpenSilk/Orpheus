@@ -1,5 +1,5 @@
 
-package org.opensilk.common.ui.content;
+package org.opensilk.common.ui.loader;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
