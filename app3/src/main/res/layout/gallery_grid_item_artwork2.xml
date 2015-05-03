@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.common.widget.ForegroundLinearLayout
+<org.opensilk.common.ui.widget.ForegroundLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
@@ -25,15 +25,31 @@
     android:foreground="?selectableItemBackground"
     android:layout_margin="2dp">
 
-    <org.opensilk.common.widget.SquareImageView
-        android:id="@+id/artwork_thumb"
+    <org.opensilk.common.ui.widget.HalfHeightFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:transitionName="artwork"
-        style="@style/Orpheus.Thumbnail"/>
+        android:layout_height="wrap_content">
+
+        <org.opensilk.common.ui.widget.SquareImageView
+            android:id="@+id/artwork_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top|left"
+            android:layout_marginRight="1dp"
+            style="@style/Orpheus.Thumbnail"/>
+
+        <org.opensilk.common.ui.widget.SquareImageView
+            android:id="@+id/artwork_thumb2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top|right"
+            android:layout_marginLeft="1dp"
+            style="@style/Orpheus.Thumbnail"/>
+
+    </org.opensilk.common.ui.widget.HalfHeightFrameLayout>
 
     <include layout="@layout/gallery_grid_item_description"
         android:layout_width="match_parent"
-        android:layout_height="58dp"/>
+        android:layout_height="58dp"
+        android:layout_below="@id/artwork_thumb"/>
 
-</org.opensilk.common.widget.ForegroundLinearLayout>
+</org.opensilk.common.ui.widget.ForegroundLinearLayout>

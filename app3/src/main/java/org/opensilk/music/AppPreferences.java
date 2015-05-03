@@ -16,19 +16,14 @@
 
 package org.opensilk.music;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.JsonReader;
-import android.util.JsonWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.PreferencesWrapper;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.LibraryConfig;
@@ -37,10 +32,6 @@ import org.opensilk.music.theme.OrpheusTheme;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -69,17 +60,18 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String HOME_PAGES = "pref_home_pages";
 
     //Gallery sort orders
-    public static final String ARTIST_SORT_ORDER = "artist_sort_order";
     public static final String ALBUM_SORT_ORDER = "album_sort_order";
-    public static final String SONG_SORT_ORDER = "song_sort_order";
+    public static final String ARTIST_SORT_ORDER = "artist_sort_order";
+    public static final String FOLDER_SORT_ORDER = "folder_sort_order";
     public static final String GENRE_SORT_ORDER = "genre_sort_order";
     public static final String PLAYLIST_SORT_ORDER = "playlist_sort_order";
+    public static final String TRACK_SORT_ORDER = "track_sort_order";
 
     //profile sort orders
+    public static final String ALBUM_TRACK_SORT_ORDER = "album_track_sort_order";
     public static final String ARTIST_ALBUM_SORT_ORDER = "artist_album_sort_order";
-    public static final String ALBUM_SONG_SORT_ORDER = "album_song_sort_order";
     public static final String GENRE_ALBUM_SORT_ORDER = "genre_album_sort_order";
-    public static final String SONG_COLLECTION_SORT_ORDER = "song_collection_sort_order";
+    public static final String TRACK_COLLECTION_SORT_ORDER = "track_collection_sort_order";
 
     //Gallery list styles
     public static final String ARTIST_LAYOUT = "artist_layout";
@@ -134,6 +126,7 @@ public class AppPreferences extends PreferencesWrapper {
 
     //library plugins
     public static final String DISABLED_PLUGINS = "disabled_plugins";
+    public static final String DEFAULT_LIBRARY = "default_library";
 
     private final Context appContext;
     private final SharedPreferences prefs;
@@ -190,6 +183,20 @@ public class AppPreferences extends PreferencesWrapper {
                     .remove("pref_low_resolution")
                     //changed from component name to authority name
                     .remove(DISABLED_PLUGINS)
+                    //managed per plugin now
+                    .remove(ARTIST_SORT_ORDER)
+                    .remove(ALBUM_SORT_ORDER)
+                    .remove("song_sort_order")
+                    .remove(GENRE_SORT_ORDER)
+                    .remove(PLAYLIST_SORT_ORDER)
+                    .remove(ARTIST_ALBUM_SORT_ORDER)
+                    .remove("album_song_sort_order")
+                    .remove(TRACK_COLLECTION_SORT_ORDER)
+                    .remove("song_collection_sort_order")
+                    .remove(ARTIST_LAYOUT)
+                    .remove(ALBUM_LAYOUT)
+                    .remove(GENRE_LAYOUT)
+                    .remove(PLAYLIST_LAYOUT)
                     .apply();
         }
         if (schema < MY_VERSION) {
@@ -274,7 +281,7 @@ public class AppPreferences extends PreferencesWrapper {
     }
 
     public LibraryInfo getDefaultLibraryInfo(LibraryConfig pluginInfo) {
-        String json = getString(makePluginPrefKey(pluginInfo)+".default_library", null);
+        String json = getString(makePluginPrefKey(pluginInfo, DEFAULT_LIBRARY), null);
         if (json == null) return null;
         try {
             return gson.fromJson(json, LibraryInfo.class);
@@ -287,16 +294,16 @@ public class AppPreferences extends PreferencesWrapper {
     public void setDefaultLibraryInfo(LibraryConfig pluginInfo, LibraryInfo libraryInfo) {
         String json = gson.toJson(libraryInfo);
         if (json != null) {
-            putString(makePluginPrefKey(pluginInfo)+".default_library", json);
+            putString(makePluginPrefKey(pluginInfo, DEFAULT_LIBRARY), json);
         }
     }
 
     public void removeDefaultLibraryInfo(LibraryConfig pluginInfo) {
-        remove(makePluginPrefKey(pluginInfo)+".default_library");
+        remove(makePluginPrefKey(pluginInfo, DEFAULT_LIBRARY));
     }
 
-    private String makePluginPrefKey(LibraryConfig pluginInfo) {
-        return pluginInfo.authority;
+    public String makePluginPrefKey(LibraryConfig libraryConfig, String key) {
+        return libraryConfig.authority+"."+key;
     }
 
     /*

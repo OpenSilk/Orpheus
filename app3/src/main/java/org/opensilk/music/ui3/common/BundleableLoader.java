@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxCursorLoader;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.util.CursorUtil;
@@ -34,6 +35,7 @@ import org.opensilk.music.model.spi.Bundleable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import rx.Observable;
@@ -46,19 +48,21 @@ import timber.log.Timber;
 /**
  * Created by drew on 5/2/15.
  */
+@ScreenScope
 public class BundleableLoader extends RxCursorLoader<Bundleable> {
 
     final UriMatcher uriMatcher;
 
+    @Inject
     public BundleableLoader(
             @ForApplication Context context,
             @Named("loader_uri") Uri uri,
             @Named("loader_proj")String[] projection,
-            @Named("loader_sel")String selection,
-            @Named("loader_selargsi")String[] selectionArgs,
+//            @Named("loader_sel")String selection,
+//            @Named("loader_selargsi")String[] selectionArgs,
             @Named("loader_sortorder")String sortOrder
     ) {
-        super(context, uri, projection, selection, selectionArgs, sortOrder);
+        super(context, uri, projection, null, null, sortOrder);
         uriMatcher = LibraryUris.makeMatcher(uri.getAuthority());
     }
 

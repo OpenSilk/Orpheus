@@ -23,6 +23,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 
 /**
  * Requires ActivityResultsOwnerModule
@@ -33,4 +34,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     @ForApplication Context appContext();
     AppPreferences appPreferences();
     ActivityResultsController activityResultsController();
+    ArtworkRequestManager artworkRequestor();
 }

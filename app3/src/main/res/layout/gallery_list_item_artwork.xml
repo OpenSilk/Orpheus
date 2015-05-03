@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.common.widget.ForegroundLinearLayout
+<org.opensilk.common.ui.widget.ForegroundLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -26,7 +26,7 @@
     android:layout_height="72dp"
     android:foreground="?selectableItemBackground">
 
-    <org.opensilk.common.widget.CircleImageView
+    <org.opensilk.common.ui.widget.CircleImageView
         android:id="@+id/artwork_thumb"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -37,4 +37,4 @@
 
     <include layout="@layout/gallery_list_item_common"/>
 
-</org.opensilk.common.widget.ForegroundLinearLayout>
+</org.opensilk.common.ui.widget.ForegroundLinearLayout>

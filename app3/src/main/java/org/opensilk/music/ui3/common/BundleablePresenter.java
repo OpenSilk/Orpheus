@@ -18,20 +18,240 @@
 package org.opensilk.music.ui3.common;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.widget.PopupMenu;
 
+import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.rx.RxLoader;
+import org.opensilk.common.core.rx.SimpleObserver;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
+import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.music.model.util.BundleableUtil;
 
+import java.util.Collection;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+import hugo.weaving.DebugLog;
+import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Subscription;
+
+import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
+import static org.opensilk.common.core.rx.RxUtils.notSubscribed;
 
 /**
  * Created by drew on 5/2/15.
  */
-public abstract class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> {
-    public abstract void onItemClicked(Context context, Bundleable item);
-    public abstract void onOverflowClicked(Context context, PopupMenu m, Bundleable item);
-    public abstract boolean onOverflowActionClicked(Context context, OverflowAction action, Bundleable item);
-    public abstract ArtworkRequestManager getRequestor();
+@ScreenScope
+public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> implements RxLoader.ContentChangedListener {
+
+    protected final AppPreferences preferences;
+    protected final ArtworkRequestManager requestor;
+    protected final BundleableLoader loader;
+    protected final FragmentManagerOwner fm;
+    protected final ItemClickListener itemClickListener;
+
+    protected Boolean wantGrid;
+
+    protected Subscription subscription;
+    protected boolean adapterIsDirty;
+
+    @Inject
+    public BundleablePresenter(
+            AppPreferences preferences,
+            ArtworkRequestManager requestor,
+            BundleableLoader loader,
+            @Named("presenter_wantGrid") Boolean wantGrid,
+            FragmentManagerOwner fm,
+            ItemClickListener itemClickListener
+    ) {
+        this.preferences = preferences;
+        this.requestor = requestor;
+        this.loader = loader;
+        this.wantGrid = wantGrid;
+        this.fm = fm;
+        this.itemClickListener = itemClickListener;
+    }
+
+    @Override
+    protected void onEnterScope(MortarScope scope) {
+        super.onEnterScope(scope);
+        loader.addContentChangedListener(this);
+    }
+
+    @Override
+    @DebugLog
+    protected void onLoad(Bundle savedInstanceState) {
+        super.onLoad(savedInstanceState);
+        setupRecyclerView(false);
+        if (savedInstanceState != null) {
+            addAll(BundleableUtil.unflatten(savedInstanceState));
+            getView().setListShown(true, false);
+            adapterIsDirty = true;
+        } else {
+            getView().setLoading(true);
+        }
+        if (notSubscribed(subscription)) {
+            load();
+        }
+    }
+
+    @Override
+    @DebugLog
+    protected void onSave(Bundle outState) {
+        super.onSave(outState);
+        if (hasView()) {
+            BundleableUtil.flatten(outState, getView().getAdapter().getItems());
+        }
+    }
+
+    @Override
+    protected void onExitScope() {
+        super.onExitScope();
+        if (subscription != null) subscription.unsubscribe();
+        loader.removeContentChangedListener(this);
+    }
+
+    protected void setupRecyclerView(boolean clear) {
+        if (hasView()) {
+            BundleableRecyclerAdapter adapter = getView().getAdapter();
+            adapter.setGridStyle(isGrid());
+            RecyclerView v = getView().getListView();
+            v.setLayoutManager(getLayoutManager(v.getContext()));
+            if (clear) {
+                load();
+            }
+        }
+    }
+
+    // reset the recyclerview for eg layoutmanager change
+    protected void resetRecyclerView() {
+        setupRecyclerView(true);
+    }
+
+    protected void showRecyclerView() {
+        if (hasView()) {
+            getView().setListShown(true, true);
+        }
+    }
+
+    protected void showEmptyView() {
+        if (hasView()) {
+            setEmptyText();
+            getView().setListEmpty(true, true);
+        }
+    }
+
+    protected void setEmptyText() {
+        if (hasView()) {
+            getView().setEmptyText(R.string.empty_music);
+        }
+    }
+
+    // start the loader
+    @DebugLog
+    protected void load() {
+        subscription = loader.getListObservable().subscribe(new SimpleObserver<List<Bundleable>>() {
+            @Override
+            @DebugLog
+            public void onNext(List<Bundleable> bundleables) {
+                addAll(bundleables);
+            }
+
+            @Override
+            public void onCompleted() {
+                if (hasView() && getView().getAdapter().isEmpty()){
+                    showEmptyView();
+                }
+            }
+        });
+    }
+
+    // cancels any ongoing load and starts a new one
+    @DebugLog
+    public void reload() {
+        if (isSubscribed(subscription)) subscription.unsubscribe();
+        adapterIsDirty = true;
+        loader.reset();
+        load();
+    }
+
+    protected void addAll(Collection<Bundleable> collection) {
+        if (hasView()) {
+            if (adapterIsDirty) {
+                adapterIsDirty = false;
+                getView().getAdapter().replaceAll(collection);
+            } else {
+                getView().getAdapter().addAll(collection);
+            }
+            showRecyclerView();
+        }
+    }
+
+    protected void addItem(Bundleable item) {
+        if (hasView()) {
+            if (adapterIsDirty) {
+                adapterIsDirty = false;
+                getView().getAdapter().clear();
+            }
+            getView().getAdapter().addItem(item);
+            showRecyclerView();
+        }
+    }
+
+    public void setWantsGrid(boolean yes) {
+        wantGrid = yes;
+    }
+
+    protected boolean isGrid() {
+        return wantGrid;
+    }
+
+    protected RecyclerView.LayoutManager getLayoutManager(Context context) {
+        if (isGrid()) {
+            return makeGridLayoutManager(context);
+        } else {
+            return makeListLayoutManager(context);
+        }
+    }
+
+    protected RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
+        int numCols = context.getResources().getInteger(R.integer.grid_columns);
+        return new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
+    }
+
+    protected RecyclerView.LayoutManager makeListLayoutManager(Context context) {
+        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+    }
+
+    public void onItemClicked(Context context, Bundleable item) {
+        itemClickListener.onItemClicked(this, context, item);
+    }
+
+    public void onOverflowClicked(Context context, PopupMenu m, Bundleable item) {
+
+    }
+
+    public boolean onOverflowActionClicked(Context context, OverflowAction action, Bundleable item) {
+        return false;
+    }
+
+    public ArtworkRequestManager getRequestor() {
+        return requestor;
+    }
+
+    public FragmentManagerOwner getFm() {
+        return fm;
+    }
 }

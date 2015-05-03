@@ -35,14 +35,14 @@
         android:scaleType="center"
         android:src="@drawable/card_drag"/>
 
-    <org.opensilk.common.widget.ForegroundLinearLayout
+    <org.opensilk.common.ui.widget.ForegroundLinearLayout
         android:id="@+id/tile_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:foreground="?selectableItemBackground">
 
-        <org.opensilk.common.widget.CircleImageView
+        <org.opensilk.common.ui.widget.CircleImageView
             android:id="@+id/artwork_thumb"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -51,6 +51,6 @@
 
         <include layout="@layout/gallery_list_item_common"/>
 
-    </org.opensilk.common.widget.ForegroundLinearLayout>
+    </org.opensilk.common.ui.widget.ForegroundLinearLayout>
 
 </LinearLayout>

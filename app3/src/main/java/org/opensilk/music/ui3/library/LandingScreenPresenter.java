@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.library;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -25,11 +26,14 @@ import android.text.TextUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.ActivityResultsListener;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
+import org.opensilk.music.ui3.folders.FoldersScreenFragment;
+import org.opensilk.music.ui3.library.LandingScreenViewAdapter.ViewItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +53,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     final AppPreferences settings;
     final LandingScreen screen;
     final ActivityResultsController activityResultsController;
+    final FragmentManagerOwner fm;
 
     LibraryInfo currentSelection;
 
@@ -56,11 +61,13 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     public LandingScreenPresenter(
             AppPreferences settings,
             LandingScreen screen,
-            ActivityResultsController activityResultsController
+            ActivityResultsController activityResultsController,
+            FragmentManagerOwner fm
     ) {
         this.settings = settings;
         this.screen = screen;
         this.activityResultsController = activityResultsController;
+        this.fm = fm;
     }
 
     @Override
@@ -93,18 +100,24 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     }
 
     void createCategories() {
-        List<LandingScreenViewAdapter.ViewItem> items = new ArrayList<>();
+        List<ViewItem> items = new ArrayList<>();
         if (screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
-            items.add(LandingScreenViewAdapter.ViewItem.ALBUMS);
+            items.add(ViewItem.ALBUMS);
         }
         if (screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
-            items.add(LandingScreenViewAdapter.ViewItem.ARTISTS);
+            items.add(ViewItem.ARTISTS);
         }
         if (screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS)) {
-            items.add(LandingScreenViewAdapter.ViewItem.FOLDERS);
+            items.add(ViewItem.FOLDERS);
+        }
+        if (screen.libraryConfig.hasAbility(LibraryCapability.GENRES)) {
+            items.add(ViewItem.GENRES);
+        }
+        if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
+            items.add(ViewItem.PLAYLISTS);
         }
         if (screen.libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
-            items.add(LandingScreenViewAdapter.ViewItem.TRACKS);
+            items.add(ViewItem.TRACKS);
         }
         if (hasView()) {
             getView().getAdapter().replaceAll(items);
@@ -141,6 +154,13 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
                 return true;
             default:
                 return false;
+        }
+    }
+
+    void onItemClicked(Context context, ViewItem item) {
+        if (item == ViewItem.FOLDERS) {
+            FoldersScreenFragment f = FoldersScreenFragment.newInstance(screen.libraryConfig, currentSelection);
+            fm.replaceMainContent(f, FoldersScreenFragment.TAG, true);
         }
     }
 }

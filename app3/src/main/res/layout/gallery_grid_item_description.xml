@@ -53,7 +53,7 @@
 
     </LinearLayout>
 
-    <org.opensilk.common.widget.TintImageButton
+    <org.opensilk.common.ui.widget.TintImageButton
         android:id="@+id/tile_overflow"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"

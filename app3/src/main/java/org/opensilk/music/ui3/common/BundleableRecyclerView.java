@@ -31,12 +31,28 @@ import javax.inject.Inject;
 public class BundleableRecyclerView extends RecyclerListFrame {
 
     @Inject BundleablePresenter mPresenter;
+    @Inject BundleableRecyclerAdapter mAdapter;
 
     public BundleableRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        DaggerService.<BundleableComponentStub>getDaggerComponent(context).inject(this);
+        DaggerService.<BundleableComponent>getDaggerComponent(context).inject(this);
     }
 
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        getListView().setHasFixedSize(true);
+        getListView().setAdapter(mAdapter);
+        mPresenter.takeView(this);
+    }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mPresenter.dropView(this);
+    }
 
+    public BundleableRecyclerAdapter getAdapter() {
+        return mAdapter;
+    }
 }

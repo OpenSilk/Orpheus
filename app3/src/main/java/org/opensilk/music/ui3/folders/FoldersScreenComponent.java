@@ -19,7 +19,7 @@ package org.opensilk.music.ui3.folders;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.common.BundleableComponentStub;
+import org.opensilk.music.ui3.common.BundleableComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -32,7 +32,7 @@ import rx.functions.Func2;
         dependencies = MusicActivityComponent.class,
         modules = FoldersScreenModule.class
 )
-public interface FoldersScreenComponent extends BundleableComponentStub {
+public interface FoldersScreenComponent extends BundleableComponent {
         Func2<MusicActivityComponent, FoldersScreen, FoldersScreenComponent> FACTORY =
                 new Func2<MusicActivityComponent, FoldersScreen, FoldersScreenComponent>() {
                         @Override

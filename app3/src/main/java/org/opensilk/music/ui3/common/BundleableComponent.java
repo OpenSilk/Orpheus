@@ -20,6 +20,6 @@ package org.opensilk.music.ui3.common;
 /**
  * Created by drew on 5/2/15.
  */
-public interface BundleableComponentStub {
+public interface BundleableComponent {
     void inject(BundleableRecyclerView view);
 }

@@ -15,18 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.folders;
+package org.opensilk.music.ui3.common;
 
 import android.content.Context;
-import android.util.AttributeSet;
 
-import org.opensilk.common.ui.recycler.RecyclerListFrame;
+import org.opensilk.music.model.spi.Bundleable;
 
 /**
  * Created by drew on 5/2/15.
  */
-public class FoldersScreenView extends RecyclerListFrame {
-    public FoldersScreenView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+public interface ItemClickListener {
+    void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item);
 }

@@ -24,15 +24,27 @@ import android.widget.TextView;
 
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import javax.inject.Inject;
+
+import rx.Observer;
+import rx.Subscription;
+import rx.android.events.OnClickEvent;
+import rx.android.observables.AndroidObservable;
+import rx.android.observables.ViewObservable;
+import rx.android.subscriptions.AndroidSubscriptions;
 
 /**
  * Created by drew on 5/1/15.
  */
 public class LandingScreenViewAdapter extends
-        RecyclerListAdapter<LandingScreenViewAdapter.ViewItem, LandingScreenViewAdapter.ViewHolder> {
+        RecyclerListAdapter<LandingScreenViewAdapter.ViewItem, LandingScreenViewAdapter.ViewHolder>
+        implements Observer<OnClickEvent> {
 
     final LandingScreenPresenter presenter;
+    final Map<View, SubscriptionContainer> itemClickSubscriptions = new WeakHashMap<>();
 
     @Inject
     public LandingScreenViewAdapter(LandingScreenPresenter presenter) {
@@ -46,13 +58,54 @@ public class LandingScreenViewAdapter extends
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ((TextView) holder.itemView).setText(getItem(position).text);
+        ViewItem item = getItem(position);
+        ((TextView) holder.itemView).setText(item.text);
+        itemClickSubscriptions.put(holder.itemView,
+                new SubscriptionContainer(position, ViewObservable.clicks(holder.itemView).subscribe(this)));
+    }
+
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        SubscriptionContainer c = itemClickSubscriptions.remove(holder.itemView);
+        if (c != null) {
+            c.s.unsubscribe();
+        }
+    }
+
+    @Override
+    public void onCompleted() {
+
+    }
+
+    @Override
+    public void onError(Throwable e) {
+
+    }
+
+    @Override
+    public void onNext(OnClickEvent onClickEvent) {
+        SubscriptionContainer c = itemClickSubscriptions.get(onClickEvent.view);
+        if (c != null) {
+            presenter.onItemClicked(onClickEvent.view.getContext(), getItem(c.pos));
+        }
+    }
+
+    static class SubscriptionContainer{
+        final int pos;
+        final Subscription s;
+
+        public SubscriptionContainer(int pos, Subscription s) {
+            this.pos = pos;
+            this.s = s;
+        }
     }
 
     public static class ViewItem {
         public static final ViewItem ALBUMS = new ViewItem("Albums");
         public static final ViewItem ARTISTS = new ViewItem("Artists");
         public static final ViewItem FOLDERS = new ViewItem("Folders");
+        public static final ViewItem GENRES = new ViewItem("Genres");
+        public static final ViewItem PLAYLISTS = new ViewItem("Playlists");
         public static final ViewItem TRACKS = new ViewItem("Tracks");
         final String text;
 
