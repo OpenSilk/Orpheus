@@ -60,18 +60,20 @@ import static org.opensilk.music.library.provider.LibraryUris.*;
 /**
  * Created by drew on 4/26/15.
  */
-public class LibraryProvider extends ContentProvider {
+public abstract class LibraryProvider extends ContentProvider {
     public static final String TAG = LibraryProvider.class.getSimpleName();
 
     public static final String AUTHORITY_PFX = "orpheus.library.";
 
+    protected String mAuthority;
     private UriMatcher mMatcher;
     private final Map<String, ParcelableException> mCaughtExceptions =
             Collections.synchronizedMap(new HashMap<String, ParcelableException>());
 
     @Override
     public boolean onCreate() {
-        mMatcher = LibraryUris.makeMatcher(AUTHORITY_PFX + getBaseAuthority());
+        mAuthority = AUTHORITY_PFX + getBaseAuthority();
+        mMatcher = LibraryUris.makeMatcher(mAuthority);
         return true;
     }
 
@@ -83,9 +85,7 @@ public class LibraryProvider extends ContentProvider {
         return getContext().getPackageName();
     }
 
-    protected LibraryConfig getLibraryConfig() {
-        throw new NotImplementedException("Subclass must override");
-    }
+    protected abstract LibraryConfig getLibraryConfig();
 
     /*
      * End config

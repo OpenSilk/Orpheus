@@ -22,7 +22,7 @@ import org.opensilk.music.library.cols.FolderCols;
 /**
  * Created by drew on 4/26/15.
  */
-public interface FolderSortOrder {
+public interface FolderSortOrder extends BundleableSortOrder {
     String CHILD_COUNT = FolderCols.CHILD_COUNT + " DESC";
     String DATE = FolderCols.DATE + " DESC";
 }
