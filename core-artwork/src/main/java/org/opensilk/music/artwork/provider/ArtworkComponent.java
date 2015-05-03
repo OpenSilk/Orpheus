@@ -22,6 +22,7 @@ import android.content.Context;
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
+import org.opensilk.music.artwork.shared.GsonComponent;
 
 import javax.inject.Singleton;
 

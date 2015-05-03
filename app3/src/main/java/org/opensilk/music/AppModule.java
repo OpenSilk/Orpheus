@@ -33,11 +33,7 @@ import dagger.Provides;
 /**
  * Created by drew on 6/16/14.
  */
-@Module(
-        includes = {
-                ArtworkAuthorityModule.class,
-        }
-)
+@Module
 public class AppModule {
 
     private final App app;
@@ -54,11 +50,6 @@ public class AppModule {
     @Provides @Singleton @ForApplication
     public Context provideAppContext() {
         return app;
-    }
-
-    @Provides @Singleton
-    public Gson provideGson() {
-        return new GsonBuilder().create();
     }
 
 }

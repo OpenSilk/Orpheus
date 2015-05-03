@@ -78,7 +78,7 @@ import timber.log.Timber;
  */
 @ArtworkFetcherScope
 public class ArtworkFetcherManager {
-    final static boolean DROP_CRUMBS = false;
+    final static boolean DROP_CRUMBS = true;
 
     final Context mContext;
     final ArtworkPreferences mPreferences;

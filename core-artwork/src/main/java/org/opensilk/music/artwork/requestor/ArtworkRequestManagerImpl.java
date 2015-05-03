@@ -72,7 +72,7 @@ import timber.log.Timber;
  */
 @Singleton
 public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
-    final static boolean DROP_CRUMBS = false;
+    final static boolean DROP_CRUMBS = true;
     final static boolean VERIFY_THREAD = true;
 
     final Context mContext;
@@ -257,6 +257,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             registerContentObserver(uri);
             //Make sure we dont stick around if we aren't notified
             subscription = Observable.timer(5, TimeUnit.MINUTES)
+                    .observeOn(oScheduler)
                     .subscribe(new Action1<Long>() {
                         @Override
                         public void call(Long aLong) {
@@ -266,10 +267,12 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         void registerContentObserver(Uri uri) {
+            addBreadcrumb("registerContentObserver(%s)", uri);
             mContext.getContentResolver().registerContentObserver(uri, false, contentObserver);
         }
 
         void unregisterContentObserver() {
+            addBreadcrumb("unregisterContentObserver()");
             try {
                 mContext.getContentResolver().unregisterContentObserver(contentObserver);
             } catch (Exception ignored) {/*safety i dont think anything is thrown*/}

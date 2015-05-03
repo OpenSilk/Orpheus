@@ -48,12 +48,12 @@ public class ArtworkUris {
     }
 
     public static Uri createAlbumReq(String authority, String base64Artinfo, ArtworkType type) {
-        return new Uri.Builder().scheme(content).authority(authority).appendPath(albumReq)
+        return new Uri.Builder().scheme(content).authority(authority).appendEncodedPath(albumReq)
                 .appendQueryParameter("q", base64Artinfo).appendQueryParameter("t", type.toString()).build();
     }
 
     public static Uri createArtistReq(String authority, String base64Artinfo, ArtworkType type) {
-        return new Uri.Builder().scheme(content).authority(authority).appendPath(artistReq)
+        return new Uri.Builder().scheme(content).authority(authority).appendEncodedPath(artistReq)
                 .appendQueryParameter("q", base64Artinfo).appendQueryParameter("t", type.toString()).build();
     }
 

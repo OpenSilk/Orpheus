@@ -19,8 +19,8 @@ package org.opensilk.music.artwork.requestor;
 
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.common.core.gson.GsonComponentStub;
-import org.opensilk.music.artwork.provider.GsonModule;
 import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
+import org.opensilk.music.artwork.shared.GsonModule;
 
 import javax.inject.Singleton;
 

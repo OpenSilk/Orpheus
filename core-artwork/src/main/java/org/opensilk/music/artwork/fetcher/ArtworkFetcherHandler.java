@@ -35,6 +35,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import rx.Subscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 5/1/15.
@@ -97,6 +98,7 @@ public class ArtworkFetcherHandler extends Handler {
     }
 
     void processIntent(Intent intent, int startId) {
+        Timber.d("processIntent id=%d, i=%s", startId,intent);
         if (intent == null) return;
         String action = intent.getAction();
         if (action == null) return;

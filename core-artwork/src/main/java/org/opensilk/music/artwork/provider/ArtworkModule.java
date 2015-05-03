@@ -25,6 +25,7 @@ import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.cache.BitmapDiskLruCache;
 import org.opensilk.music.artwork.cache.CacheUtil;
+import org.opensilk.music.artwork.shared.GsonModule;
 
 import javax.inject.Singleton;
 

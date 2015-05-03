@@ -15,23 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.provider;
+package org.opensilk.music.artwork.shared;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
+import org.opensilk.common.core.gson.GsonComponentStub;
 
 /**
  * Created by drew on 5/1/15.
  */
-@Module
-public class GsonModule {
-    @Provides @Singleton
-    public Gson provideGson() {
-        return new GsonBuilder().create();
-    }
+public interface GsonComponent extends GsonComponentStub {
 }

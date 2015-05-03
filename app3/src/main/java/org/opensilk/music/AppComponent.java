@@ -18,9 +18,10 @@
 package org.opensilk.music;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
-import org.opensilk.common.core.gson.GsonComponentStub;
 import org.opensilk.music.artwork.requestor.ArtworkRequestorComponent;
 import org.opensilk.music.artwork.requestor.ArtworkRequestorModule;
+import org.opensilk.music.artwork.shared.GsonComponent;
+import org.opensilk.music.artwork.shared.GsonModule;
 
 import javax.inject.Singleton;
 
@@ -35,9 +36,10 @@ import rx.functions.Func1;
         modules = {
                 AppModule.class,
                 ArtworkRequestorModule.class,
+                GsonModule.class
         }
 )
-public interface AppComponent extends AppContextComponent, ArtworkRequestorComponent, GsonComponentStub {
+public interface AppComponent extends AppContextComponent, ArtworkRequestorComponent, GsonComponent {
     Func1<App, AppComponent> FACTORY = new Func1<App, AppComponent>() {
         @Override
         public AppComponent call(App app) {
