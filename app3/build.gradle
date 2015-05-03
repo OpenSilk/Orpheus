@@ -148,6 +148,7 @@ dependencies {
     compile project(':core-artwork')
     compile project(':common-core')
     compile project(':common-ui')
+    compile project(':library-folders')
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {

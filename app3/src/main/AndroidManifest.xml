@@ -128,6 +128,12 @@
             android:authorities="${applicationId}.provider.artwork"
             tools:replace="authorities"/>
 
+        <!--Folders plugin provider-->
+        <provider
+            android:authorities="orpheus.library.${applicationId}.provider.foldersLibrary"
+            android:name="org.opensilk.music.library.folders.provider.FoldersLibraryProvider"
+            tools:replace="authorities"/>
+
     </application>
 
 </manifest>
