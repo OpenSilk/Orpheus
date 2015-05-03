@@ -24,7 +24,8 @@ import android.text.TextUtils;
 /**
  * Created by drew on 6/21/14.
  */
-public class ArtInfo implements Parcelable {
+public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
+    public static final ArtInfo NULLINSTANCE = new ArtInfo(null, null, null);
 
     public final String artistName;
     public final String albumName;
@@ -60,6 +61,12 @@ public class ArtInfo implements Parcelable {
     @Override
     public String toString() {
         return "ArtInfo{ artist="+artistName+" album="+albumName+" uri="+artworkUri+" }";
+    }
+
+    @Override
+    public int compareTo(ArtInfo another) {
+        //Idk just be consistent, and this way i don't have to do null checks'
+        return toString().compareTo(another.toString());
     }
 
     @Override

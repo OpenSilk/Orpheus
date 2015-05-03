@@ -77,19 +77,17 @@ public class BundleableUtil {
     }
 
     //Laziness need to just make everything parcelable.
-    public static Bundle flatten(@NonNull List<Bundleable> bundleables) {
+    public static void flatten(@NonNull Bundle outState, @NonNull List<Bundleable> bundleables) {
         ArrayList<ParcelableBundleable> pbs = new ArrayList<>(bundleables.size());
         for (Bundleable b : bundleables) {
             pbs.add(new ParcelableBundleable(b));
         }
-        Bundle b = new Bundle();
-        b.putParcelableArrayList("wrapped", pbs);
-        return b;
+        outState.putParcelableArrayList("wrapped", pbs);
     }
 
-    public static List<Bundleable> unflatten(@NonNull Bundle b) {
-        if (b.containsKey("wrapped")) {
-            ArrayList<ParcelableBundleable> pbs = b.getParcelableArrayList("wrapped");
+    public static List<Bundleable> unflatten(@NonNull Bundle savedInstanceState) {
+        if (savedInstanceState.containsKey("wrapped")) {
+            ArrayList<ParcelableBundleable> pbs = savedInstanceState.getParcelableArrayList("wrapped");
             if (pbs != null) {
                 ArrayList<Bundleable> bundleables = new ArrayList<>(pbs.size());
                 for (ParcelableBundleable pb : pbs) {

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -38,20 +39,20 @@ public abstract class TrackCollection implements Bundleable {
     public final String name;
     public final List<Uri> trackUris;
     public final List<Uri> albumUris;
-    public final List<Uri> artworkUris;
+    public final List<ArtInfo> artInfos;
 
     protected TrackCollection(
             @NonNull String identity,
             @NonNull String name,
             @NonNull List<Uri> trackUris,
             @NonNull List<Uri> albumUris,
-            @NonNull List<Uri> artworkUris
+            @NonNull List<ArtInfo> artInfos
     ) {
         this.identity = identity;
         this.name = name;
         this.trackUris = Collections.unmodifiableList(trackUris);
         this.albumUris = Collections.unmodifiableList(albumUris);
-        this.artworkUris = Collections.unmodifiableList(artworkUris);
+        this.artInfos = Collections.unmodifiableList(artInfos);
     }
 
     protected TrackCollection(Bundle b) {
@@ -60,7 +61,7 @@ public abstract class TrackCollection implements Bundleable {
                 b.getString("_2"),
                 Arrays.asList((Uri[])b.getParcelableArray("_3")),
                 Arrays.asList((Uri[])b.getParcelableArray("_4")),
-                Arrays.asList((Uri[])b.getParcelableArray("_5"))
+                Arrays.asList((ArtInfo[])b.getParcelableArray("_5"))
         );
     }
 
@@ -72,7 +73,7 @@ public abstract class TrackCollection implements Bundleable {
         b.putString("_2", name);
         b.putParcelableArray("_3", trackUris.toArray(new Uri[trackUris.size()]));
         b.putParcelableArray("_4", albumUris.toArray(new Uri[albumUris.size()]));
-        b.putParcelableArray("_5", artworkUris.toArray(new Uri[artworkUris.size()]));
+        b.putParcelableArray("_5", artInfos.toArray(new ArtInfo[artInfos.size()]));
         return null;
     }
 
@@ -100,7 +101,7 @@ public abstract class TrackCollection implements Bundleable {
             return false;
         if (albumUris != null ? !albumUris.equals(that.albumUris) : that.albumUris != null)
             return false;
-        return !(artworkUris != null ? !artworkUris.equals(that.artworkUris) : that.artworkUris != null);
+        return !(artInfos != null ? !artInfos.equals(that.artInfos) : that.artInfos != null);
 
     }
 
@@ -110,7 +111,7 @@ public abstract class TrackCollection implements Bundleable {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (trackUris != null ? trackUris.hashCode() : 0);
         result = 31 * result + (albumUris != null ? albumUris.hashCode() : 0);
-        result = 31 * result + (artworkUris != null ? artworkUris.hashCode() : 0);
+        result = 31 * result + (artInfos != null ? artInfos.hashCode() : 0);
         return result;
     }
 
@@ -122,9 +123,9 @@ public abstract class TrackCollection implements Bundleable {
     public static abstract class Builder<T extends TrackCollection> {
         protected String identity;
         protected String name;
-        protected List<Uri> trackUris = new ArrayList<>();
-        protected List<Uri> albumUris = new ArrayList<>();
-        protected List<Uri> artworkUris = new ArrayList<>();
+        protected ArrayList<Uri> trackUris = new ArrayList<>();
+        protected HashSet<Uri> albumUris = new HashSet<>();
+        protected HashSet<ArtInfo> artInfos = new HashSet<>();
 
         public Builder setIdentity(String identity) {
             this.identity = identity;
@@ -156,13 +157,18 @@ public abstract class TrackCollection implements Bundleable {
             return this;
         }
 
-        public Builder addArtworkUri(Uri uri) {
-            this.artworkUris.add(uri);
+        public Builder addArtInfo(String artist, String album, Uri uri) {
+            this.artInfos.add(new ArtInfo(artist, album, uri));
             return this;
         }
 
-        public Builder addArtworkUris(Collection<Uri> uris) {
-            this.artworkUris.addAll(uris);
+        public Builder addArtInfo(ArtInfo info) {
+            this.artInfos.add(info);
+            return this;
+        }
+
+        public Builder addArtworkInfos(Collection<ArtInfo> infos) {
+            this.artInfos.addAll(infos);
             return this;
         }
 

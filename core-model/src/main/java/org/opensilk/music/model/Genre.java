@@ -21,6 +21,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,9 +35,9 @@ public class Genre extends TrackCollection {
             @NonNull String name,
             @NonNull List<Uri> trackUris,
             @NonNull List<Uri> albumUris,
-            @NonNull List<Uri> artworkUris
+            @NonNull List<ArtInfo> artInfos
     ) {
-        super(identity, name, trackUris, albumUris, artworkUris);
+        super(identity, name, trackUris, albumUris, artInfos);
     }
 
     protected Genre(Bundle b) {
@@ -67,7 +69,14 @@ public class Genre extends TrackCollection {
             if (identity == null || name == null) {
                 throw new NullPointerException("identity and name are required");
             }
-            return new Genre(identity, name, trackUris, albumUris, artworkUris);
+            List<Uri> albums = Arrays.asList(albumUris.toArray(new Uri[albumUris.size()]));
+            List<ArtInfo> artworks = Arrays.asList(artInfos.toArray(new ArtInfo[artInfos.size()]));
+            Collections.sort(albums);
+            Collections.sort(artworks);
+            if (artworks.size() > 4) {
+                artworks = artworks.subList(0, 3); //Only need 4;
+            }
+            return new Genre(identity, name, trackUris, albums, artworks);
         }
     }
 }
