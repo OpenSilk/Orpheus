@@ -31,7 +31,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import timber.log.Timber;
 

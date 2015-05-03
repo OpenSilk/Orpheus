@@ -26,7 +26,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.webkit.MimeTypeMap;
 
-import org.opensilk.music.api.model.Folder;
+import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 
 import java.io.File;
@@ -41,7 +41,7 @@ import timber.log.Timber;
  * Created by drew on 4/28/15.
  */
 public class ModelUtil {
-    private static final boolean DUMPSTACKS = true;
+    public static final boolean DUMPSTACKS = BuildConfig.DEBUG;
 
     public static final Uri BASE_ARTWORK_URI;
     public static final String[] SONG_PROJECTION;
@@ -64,12 +64,15 @@ public class ModelUtil {
                 MediaStore.Audio.AudioColumns.ALBUM_ID,
                 MediaStore.Audio.AudioColumns.DURATION,
                 MediaStore.Audio.AudioColumns.MIME_TYPE,
+                MediaStore.Audio.AudioColumns.DATA,
         };
         SONG_ALBUM_PROJECTION = new String[] {
+                BaseColumns._ID,
                 MediaStore.Audio.AlbumColumns.ARTIST
         };
         MEDIA_TYPE_PROJECTION = new String[] {
-                MediaStore.Files.FileColumns.MEDIA_TYPE
+                MediaStore.Files.FileColumns.MEDIA_TYPE,
+                MediaStore.Audio.AudioColumns.DATA
         };
         SONG_SELECTION = MediaStore.Audio.AudioColumns.DATA+"=?";
         SONG_ALBUM_SELECTION = BaseColumns._ID+"=?";
@@ -207,7 +210,7 @@ public class ModelUtil {
         }
     }
 
-    static void closeQuietly(Cursor c) {
+    public static void closeQuietly(Cursor c) {
         try {
             if (c != null) c.close();
         } catch (Exception ignored) { }

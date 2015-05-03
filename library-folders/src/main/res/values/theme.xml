@@ -18,7 +18,7 @@
 
 <resources>
     <!-- Base theme for picker activity that just starts another activity -->
-    <style name="FoldersThemeTranslucentDark" parent="android:Theme.DeviceDefault.NoActionBar">
+    <style name="FoldersThemeTranslucentDark" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
@@ -29,7 +29,7 @@
     </style>
 
     <!--Base theme for picker activity that just starts another activity -->
-    <style name="FoldersThemeTranslucentLight" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+    <style name="FoldersThemeTranslucentLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>

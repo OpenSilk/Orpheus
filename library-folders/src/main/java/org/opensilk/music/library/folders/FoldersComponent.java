@@ -22,15 +22,25 @@ import org.opensilk.music.library.folders.provider.FoldersLibraryProvider;
 import org.opensilk.music.library.folders.ui.StoragePickerActivity;
 
 import dagger.Component;
+import rx.functions.Func1;
 
 /**
  * Created by drew on 4/28/15.
  */
 @FoldersScope
 @Component(
-       // dependencies = StorageLookupComponent.class
+       dependencies = AppContextComponent.class
 )
 public interface FoldersComponent {
-//    void inject(FoldersLibraryProvider provider);
-//    void inject(StoragePickerActivity activity);
+    Func1<AppContextComponent, FoldersComponent> FACTORY =
+            new Func1<AppContextComponent, FoldersComponent>() {
+                @Override
+                public FoldersComponent call(AppContextComponent appContextComponent) {
+                    return DaggerFoldersComponent.builder()
+                            .appContextComponent(appContextComponent)
+                            .build();
+                }
+            };
+    void inject(FoldersLibraryProvider provider);
+    void inject(StoragePickerActivity activity);
 }

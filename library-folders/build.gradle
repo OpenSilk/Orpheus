@@ -20,8 +20,8 @@ apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
-def versionMinor = 2 //Mirror api version
-def versionPatch = 1
+def versionMinor = 3 //Mirror api version
+def versionPatch = 0
 
 assert(versionMinor < 100) // Double digits
 assert(versionPatch < 1000)
@@ -41,6 +41,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
+    defaultPublishConfig "debug"
 }
 
 robolectric {
@@ -60,8 +62,6 @@ dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
     compile project(':common-core')
     compile project(':core-library')
-    // for library
-    compile project(':api')
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {

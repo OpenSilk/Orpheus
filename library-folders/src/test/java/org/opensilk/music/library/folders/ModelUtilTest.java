@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.folders.util;
+package org.opensilk.music.library.folders;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,14 +25,14 @@ import org.robolectric.annotation.Config;
 import java.io.File;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.opensilk.music.library.folders.util.FileUtil.*;
+import static org.opensilk.music.library.folders.ModelUtil.*;
 
 /**
  * Created by drew on 11/11/14.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config( manifest = Config.NONE)
-public class FileUtilTest {
+public class ModelUtilTest {
 
     @Test
     public void testGetFileExtension() {

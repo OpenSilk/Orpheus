@@ -17,45 +17,58 @@
 
 package org.opensilk.music.library.folders.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
-import org.opensilk.music.api.OrpheusApi;
-import org.opensilk.music.api.meta.LibraryInfo;
+import org.opensilk.common.core.dagger2.AppContextComponent;
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.mortar.MortarActivity;
+import org.opensilk.music.library.LibraryConstants;
+import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.library.folders.FoldersComponent;
 import org.opensilk.music.library.folders.R;
 import org.opensilk.music.library.folders.StorageLookup;
-import org.opensilk.music.library.folders.util.FileUtil;
 
 import javax.inject.Inject;
+
+import mortar.MortarScope;
 
 /**
  * Created by drew on 11/13/14.
  */
-public class StoragePickerActivity extends Activity {
+public class StoragePickerActivity extends MortarActivity {
 
     @Inject StorageLookup mStorageLookup;
 
     AlertDialog mDialog;
 
     @Override
+    protected void onCreateScope(MortarScope.Builder builder) {
+        AppContextComponent acc = DaggerService.getDaggerComponent(getApplicationContext());
+        builder.withService(DaggerService.DAGGER_SERVICE, FoldersComponent.FACTORY.call(acc));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-
-        boolean wantLightTheme = getIntent().getBooleanExtra(OrpheusApi.EXTRA_WANT_LIGHT_THEME, false);
+        boolean wantLightTheme = getIntent().getBooleanExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, false);
         if (wantLightTheme) {
             setTheme(R.style.FoldersThemeTranslucentLight);
         } else {
             setTheme(R.style.FoldersThemeTranslucentDark);
         }
 
+        super.onCreate(savedInstanceState);
+
+        DaggerService.<FoldersComponent>getDaggerComponent(this).inject(this);
+
         setResult(RESULT_CANCELED, new Intent());
 
+        final String[] storagePaths = mStorageLookup.getStoragePaths();
         final String[] storageLocations;
-        if (FileUtil.SECONDARY_STORAGE_DIR != null) {
+        if (storagePaths.length == 2) {
             storageLocations = new String[] {
                     getString(R.string.folders_storage_primary),
                     getString(R.string.folders_storage_secondary)
@@ -72,8 +85,7 @@ public class StoragePickerActivity extends Activity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LibraryInfo libraryInfo = new LibraryInfo(String.valueOf(which), storageLocations[which], null, null);
-                        Intent i = new Intent()
-                                .putExtra(OrpheusApi.EXTRA_LIBRARY_INFO, libraryInfo);
+                        Intent i = new Intent().putExtra(LibraryConstants.EXTRA_LIBRARY_INFO, libraryInfo);
                         setResult(RESULT_OK, i);
                         dialog.dismiss();
                         finish();
