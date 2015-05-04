@@ -153,7 +153,7 @@ public class LibraryUris {
     public static final int M_TRACK = 12;
 
     private static final String slash_wild = "/*";
-    private static final String model_base_match = model + slash_wild + "/";
+    private static final String model_base_match = "*/" + model + "/";
 
     public static UriMatcher makeMatcher(String authority) {
         Log.i("LibraryUris", "Creating matcher for authority="+authority);

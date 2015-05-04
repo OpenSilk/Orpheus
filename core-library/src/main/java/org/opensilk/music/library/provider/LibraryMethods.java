@@ -29,13 +29,9 @@ public interface LibraryMethods {
      */
     String LIBRARYCONF = "conf";
     /**
-     * For when we want a list
+     * Query the library
      */
     String QUERY = "query";
-    /**
-     * For when we want a single item
-     */
-    String GET = "get";
 
     /**
      * Bundle keys for the extras bundle for the call
@@ -46,7 +42,7 @@ public interface LibraryMethods {
          */
         String URI = "uri";
         /**
-         * Sortorder: one of the strings in the sort package.
+         * Sortorder: one of the strings in the sort package. never null for {@link #QUERY}
          */
         String SORTORDER = "sortorder";
         /**

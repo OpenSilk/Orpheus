@@ -37,6 +37,8 @@ import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.library.provider.LibraryMethods.Extras;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
@@ -56,7 +58,6 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import static org.opensilk.music.library.provider.LibraryUris.*;
-import static org.opensilk.music.library.provider.LibraryMethods.Extras.*;
 import static org.opensilk.music.library.internal.LibraryException.Kind.*;
 
 /**
@@ -101,29 +102,32 @@ public abstract class LibraryProvider extends ContentProvider {
 
     @Override
     public final Bundle call(String method, String arg, Bundle extras) {
-        extras.setClassLoader(LibraryProvider.class.getClassLoader());
+
         final Bundle ok = new Bundle();
-        ok.putBoolean(OK, true);
+        ok.putBoolean(Extras.OK, true);
+
         if (method == null) method = "";
         switch (method) {
             case LibraryMethods.QUERY: {
+                extras.setClassLoader(getClass().getClassLoader());
+
                 final IBinder binder = getBinderCallbackFromBundle(extras);
                 if (binder == null || !binder.isBinderAlive()) {
                     //this is mostly for the null, if the binder is dead then
                     //sending them a reason is moot. but we check the binder here
                     //so we dont have to do it 50 times below and we can be pretty
                     //sure the linkToDeath will succeed
-                    ok.putBoolean(OK, false);
-                    ok.putParcelable(CAUSE, new LibraryException(BAD_BINDER, null));
+                    ok.putBoolean(Extras.OK, false);
+                    writeCause(ok, new LibraryException(BAD_BINDER, null));
                     return ok;
                 }
 
-                final Uri uri = extras.getParcelable(URI);
+                final Uri uri = extras.getParcelable(Extras.URI);
                 final List<String> pathSegments = uri.getPathSegments();
-                if (pathSegments.size() != 2) {
-                    Log.e(TAG, "Not enough path segments: uri=" + uri);
-                    ok.putBoolean(OK, false);
-                    ok.putParcelable(CAUSE, new LibraryException(ILLEGAL_URI,
+                if (pathSegments.size() < 3 || pathSegments.size() > 4) {
+                    Log.e(TAG, "Wrong number of path segments: uri=" + uri);
+                    ok.putBoolean(Extras.OK, false);
+                    writeCause(ok, new LibraryException(ILLEGAL_URI,
                             new IllegalArgumentException(uri.toString())));
                     return ok;
                 }
@@ -131,8 +135,9 @@ public abstract class LibraryProvider extends ContentProvider {
                 final String library = pathSegments.get(0);
 
                 final Bundle args = new Bundle();
-                args.putParcelable(URI, uri);
-                args.putString(SORTORDER, extras.getString(SORTORDER));
+                args.putParcelable(Extras.URI, uri);
+                String sortOrder = extras.getString(Extras.SORTORDER);
+                args.putString(Extras.SORTORDER, sortOrder != null ? sortOrder : BundleableSortOrder.A_Z);
 
                 switch (mMatcher.match(uri)) {
                     case M_ALBUMS: {
@@ -165,37 +170,7 @@ public abstract class LibraryProvider extends ContentProvider {
                         queryTracksInternal(library, subscriber, args);
                         break;
                     }
-                }
-                return ok;
-            }
-            case LibraryMethods.GET: {
-                final IBinder binder = getBinderCallbackFromBundle(extras);
-                if (binder == null || !binder.isBinderAlive()) {
-                    //this is mostly for the null, if the binder is dead then
-                    //sending them a reason is moot. but we check the binder here
-                    //so we dont have to do it 50 times below and we can be pretty
-                    //sure the linkToDeath will succeed
-                    ok.putBoolean(OK, false);
-                    ok.putParcelable(CAUSE, new LibraryException(BAD_BINDER, null));
-                    return ok;
-                }
-
-                final Uri uri = extras.getParcelable(URI);
-                final List<String> pathSegments = uri.getPathSegments();
-                if (pathSegments.size() != 3) {
-                    Log.e(TAG, "Not enough path segments: uri=" + uri);
-                    ok.putBoolean(OK, false);
-                    ok.putParcelable(CAUSE, new LibraryException(ILLEGAL_URI,
-                            new IllegalArgumentException(uri.toString())));
-                    return ok;
-                }
-
-                final String library = pathSegments.get(0);
-
-                final Bundle args = new Bundle();
-                args.putParcelable(URI, uri);
-
-                switch (mMatcher.match(uri)) {
+                    //
                     case M_ALBUM: {
                         final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
                         getAlbumInternal(library, uri.getLastPathSegment(), subscriber, args);
@@ -226,6 +201,11 @@ public abstract class LibraryProvider extends ContentProvider {
                         getTrackInternal(library, uri.getLastPathSegment(), subscriber, args);
                         break;
                     }
+                    default: {
+                        ok.putBoolean(Extras.OK, false);
+                        writeCause(ok, new LibraryException(ILLEGAL_URI,
+                                new IllegalArgumentException(uri.toString())));
+                    }
                 }
                 return ok;
             }
@@ -233,8 +213,8 @@ public abstract class LibraryProvider extends ContentProvider {
                 return getLibraryConfig().dematerialize();
             default:
                 Log.e(TAG, "Unknown method " + method);
-                ok.putBoolean(OK, false);
-                ok.putParcelable(CAUSE, new LibraryException(METHOD_NOT_IMPLEMENTED, new UnsupportedOperationException(method)));
+                ok.putBoolean(Extras.OK, false);
+                writeCause(ok, new LibraryException(METHOD_NOT_IMPLEMENTED, new UnsupportedOperationException(method)));
                 return ok;
         }
     }
@@ -243,9 +223,10 @@ public abstract class LibraryProvider extends ContentProvider {
 
     /*
      * Start internal methods.
-     * You can override these if you need specialized handling, for instance
-     * if you have a network cache, you can hit that and return a list immediately, then hit the network
-     * if the cache is outdated resend the new list.
+     * You can override these if you need specialized handling.
+     *
+     * You don't need to override these for caching, you can just send the cached list, then hit the network
+     * and once it comes in send a notify on the Uri, Orpheus will requery and you can send the updated cached list.
      */
 
     @DebugLog
@@ -258,7 +239,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler);
-        final String q = args.<Uri>getParcelable(URI).getQueryParameter(Q.Q);
+        final String q = args.<Uri>getParcelable(Extras.URI).getQueryParameter(Q.Q);
         if (StringUtils.equals(q, Q.FOLDERS_ONLY)) {
             o = o.filter(new Func1<Bundleable, Boolean>() {
                 @Override
@@ -274,7 +255,7 @@ public abstract class LibraryProvider extends ContentProvider {
                 }
             });
         }
-        o.compose(new BundleableListTransformer<Bundleable>(FolderTrackCompare.func(args.getString(SORTORDER))))
+        o.compose(new BundleableListTransformer<Bundleable>(FolderTrackCompare.func(args.getString(Extras.SORTORDER))))
                 .subscribe(subscriber);
     }
 
@@ -287,7 +268,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(SORTORDER))))
+                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(Extras.SORTORDER))))
                 .subscribe(subscriber);
     }
 
@@ -314,7 +295,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Artist>(ArtistCompare.func(args.getString(SORTORDER))))
+                .compose(new BundleableListTransformer<Artist>(ArtistCompare.func(args.getString(Extras.SORTORDER))))
                 .subscribe(subscriber);
     }
 
@@ -341,7 +322,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Genre>(BundleableCompare.<Genre>func(args.getString(SORTORDER))))
+                .compose(new BundleableListTransformer<Genre>(BundleableCompare.<Genre>func(args.getString(Extras.SORTORDER))))
                 .subscribe(subscriber);
     }
 
@@ -368,7 +349,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Playlist>(BundleableCompare.<Playlist>func(args.getString(SORTORDER))))
+                .compose(new BundleableListTransformer<Playlist>(BundleableCompare.<Playlist>func(args.getString(Extras.SORTORDER))))
                 .subscribe(subscriber);
     }
 
@@ -395,7 +376,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(SORTORDER))))
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
                 .subscribe(subscriber);
     }
 
@@ -514,10 +495,20 @@ public abstract class LibraryProvider extends ContentProvider {
         return e;
     }
 
+    private void writeCause(Bundle ok, LibraryException cause) {
+        //HAX since the bundle is returned (i guess)
+        //the system classloader remarshals the bundle before we
+        //can set our classloader...causing ClassNotFoundException.
+        //To remedy nest the cause in another bundle.
+        Bundle b = new Bundle();
+        b.putParcelable(Extras.CAUSE, cause);
+        ok.putBundle(Extras.CAUSE, b);
+    }
+
     private Method _getIBinder = null;
     private IBinder getBinderCallbackFromBundle(Bundle b) {
         if (Build.VERSION.SDK_INT >= 18) {
-            return b.getBinder(CALLBACK);
+            return b.getBinder(Extras.CALLBACK);
         } else {
             try {
                 synchronized (this) {
@@ -525,7 +516,7 @@ public abstract class LibraryProvider extends ContentProvider {
                         _getIBinder = Bundle.class.getDeclaredMethod("getIBinder", String.class);
                     }
                 }
-                return (IBinder) _getIBinder.invoke(b, CALLBACK);
+                return (IBinder) _getIBinder.invoke(b, Extras.CALLBACK);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
