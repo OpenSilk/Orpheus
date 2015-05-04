@@ -22,9 +22,7 @@ import android.net.Uri;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.proj.FolderProj;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.FolderSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
@@ -49,12 +47,7 @@ public class FoldersScreenModule {
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return LibraryUris.foldersTracks(screen.libraryConfig.authority, screen.libraryInfo.libraryId, screen.libraryInfo.folderId);
-    }
-
-    @Provides @Named("loader_proj")
-    public String[] provideLoaderProj() {
-        return FolderProj.ALL;
+        return LibraryUris.folders(screen.libraryConfig.authority, screen.libraryInfo.libraryId, screen.libraryInfo.folderId);
     }
 
     @Provides @Named("loader_sortorder")

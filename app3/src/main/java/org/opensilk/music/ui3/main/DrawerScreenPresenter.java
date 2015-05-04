@@ -32,7 +32,6 @@ import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.provider.OB;
 import org.opensilk.music.ui3.library.LandingScreen;
 import org.opensilk.music.ui3.library.LandingScreenFragment;
 
@@ -45,6 +44,8 @@ import hugo.weaving.DebugLog;
 import mortar.ViewPresenter;
 import rx.functions.Action1;
 import timber.log.Timber;
+
+import static org.opensilk.music.library.provider.LibraryMethods.*;
 
 /**
  * Created by drew on 5/1/15.
@@ -107,7 +108,7 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
 
     @DebugLog
     void onItemClick(LibraryProviderInfo item) {
-        Bundle b = appContext.getContentResolver().call(LibraryUris.call(item.authority), OB.M.LIBRARYCONF, null, null);
+        Bundle b = appContext.getContentResolver().call(LibraryUris.call(item.authority), LIBRARYCONF, null, null);
         if (b == null) {
             //TODO toast
             return;

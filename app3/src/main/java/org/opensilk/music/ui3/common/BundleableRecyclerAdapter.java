@@ -64,6 +64,8 @@ import rx.Observer;
 import rx.Subscription;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.ViewObservable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
@@ -311,24 +313,40 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             Observable<ArtInfo> o = null;
             Context context = holder.itemView.getContext().getApplicationContext();
             for (Uri u : trunkAlbumUris) {
-                ArtInfoForAlbumLoader l = new ArtInfoForAlbumLoader(context, u);
+                BundleableLoader l = new BundleableLoader(context, u, null);
+                Observable<ArtInfo> ao = l.createObservable()
+                        .flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
+                            @Override
+                            public Observable<Bundleable> call(List<Bundleable> bundleables) {
+                                return Observable.from(bundleables);
+                            }
+                        })
+                        .first()
+                        .cast(Album.class)
+                        .map(new Func1<Album, ArtInfo>() {
+                            @Override
+                            public ArtInfo call(Album album) {
+                                return Utils.makeBestfitArtInfo(album.artistName, null, album.name, album.artworkUri);
+                            }
+                        });
                 if (o == null) {
-                    o = l.createObservable();
+                    o = ao;
                 } else {
-                    o.mergeWith(l.createObservable());
+                    o.mergeWith(ao);
                 }
             }
             if (o == null) return;
             final WeakReference<ViewHolder> wHolder = new WeakReference<ViewHolder>(holder);
-            cs.add(o.toSortedList().subscribe(new SimpleObserver<List<ArtInfo>>() {
-                @Override
-                public void onNext(List<ArtInfo> artInfos) {
-                    ViewHolder h = wHolder.get();
-                    if (h != null) {
-                        loadMultiArtwork(h, trunkAlbumUris, artInfos, true);
-                    }
-                }
-            }));
+            cs.add(o.toSortedList().subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new SimpleObserver<List<ArtInfo>>() {
+                        @Override
+                        public void onNext(List<ArtInfo> artInfos) {
+                            ViewHolder h = wHolder.get();
+                            if (h != null) {
+                                loadMultiArtwork(h, trunkAlbumUris, artInfos, true);
+                            }
+                        }
+                    }));
         }
     }
 
