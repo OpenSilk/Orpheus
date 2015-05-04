@@ -21,41 +21,43 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
+import org.opensilk.music.library.compare.AlbumCompare;
+import org.opensilk.music.library.compare.ArtistCompare;
+import org.opensilk.music.library.compare.BundleableCompare;
+import org.opensilk.music.library.compare.FolderTrackCompare;
+import org.opensilk.music.library.compare.TrackCompare;
+import org.opensilk.music.library.internal.BundleableListTransformer;
+import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.ex.ParcelableException;
+import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Genre;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.library.compare.AlbumCompare;
-import org.opensilk.music.library.compare.ArtistCompare;
-import org.opensilk.music.library.compare.FolderTrackCompare;
-import org.opensilk.music.library.compare.TrackCompare;
-import org.opensilk.music.library.sort.BundleableSortOrder;
-import org.opensilk.music.library.util.CursorUtil;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 
 import hugo.weaving.DebugLog;
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscriber;
-import rx.functions.Action2;
-import rx.functions.Func0;
 import rx.functions.Func1;
-import rx.functions.Func2;
+import rx.schedulers.Schedulers;
 
-import static org.opensilk.music.library.provider.QueryArgs.*;
 import static org.opensilk.music.library.provider.LibraryUris.*;
+import static org.opensilk.music.library.provider.LibraryMethods.Extras.*;
+import static org.opensilk.music.library.internal.LibraryException.Kind.*;
 
 /**
  * Created by drew on 4/26/15.
@@ -63,12 +65,18 @@ import static org.opensilk.music.library.provider.LibraryUris.*;
 public abstract class LibraryProvider extends ContentProvider {
     public static final String TAG = LibraryProvider.class.getSimpleName();
 
+    /**
+     * Authority prefix all libraries must start with to be discoverable by orpheus
+     */
     public static final String AUTHORITY_PFX = "orpheus.library.";
 
+    /**
+     * Our full authority
+     */
     protected String mAuthority;
+
     private UriMatcher mMatcher;
-    private final Map<String, ParcelableException> mCaughtExceptions =
-            Collections.synchronizedMap(new HashMap<String, ParcelableException>());
+    private Scheduler scheduler = Schedulers.computation();
 
     @Override
     public boolean onCreate() {
@@ -77,297 +85,346 @@ public abstract class LibraryProvider extends ContentProvider {
         return true;
     }
 
-    /*
-     * Start Config
+    /**
+     * Base authority for library appended to {@link #AUTHORITY_PFX}
+     * default is package name, this is usually sufficient unless package contains
+     * multiple libraries
      */
-
     protected String getBaseAuthority() {
         return getContext().getPackageName();
     }
 
+    /**
+     * @return This libraries config
+     */
     protected abstract LibraryConfig getLibraryConfig();
 
+    @Override
+    public final Bundle call(String method, String arg, Bundle extras) {
+        extras.setClassLoader(LibraryProvider.class.getClassLoader());
+        final Bundle ok = new Bundle();
+        ok.putBoolean(OK, true);
+        if (method == null) method = "";
+        switch (method) {
+            case LibraryMethods.QUERY: {
+                final IBinder binder = getBinderCallbackFromBundle(extras);
+                if (binder == null || !binder.isBinderAlive()) {
+                    //this is mostly for the null, if the binder is dead then
+                    //sending them a reason is moot. but we check the binder here
+                    //so we dont have to do it 50 times below and we can be pretty
+                    //sure the linkToDeath will succeed
+                    ok.putBoolean(OK, false);
+                    ok.putParcelable(CAUSE, new LibraryException(BAD_BINDER, null));
+                    return ok;
+                }
+
+                final Uri uri = extras.getParcelable(URI);
+                final List<String> pathSegments = uri.getPathSegments();
+                if (pathSegments.size() != 2) {
+                    Log.e(TAG, "Not enough path segments: uri=" + uri);
+                    ok.putBoolean(OK, false);
+                    ok.putParcelable(CAUSE, new LibraryException(ILLEGAL_URI,
+                            new IllegalArgumentException(uri.toString())));
+                    return ok;
+                }
+
+                final String library = pathSegments.get(0);
+
+                final Bundle args = new Bundle();
+                args.putParcelable(URI, uri);
+                args.putString(SORTORDER, extras.getString(SORTORDER));
+
+                switch (mMatcher.match(uri)) {
+                    case M_ALBUMS: {
+                        final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                        queryAlbumsInternal(library, subscriber, args);
+                        break;
+                    }
+                    case M_ARTISTS: {
+                        final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
+                        queryArtistsInternal(library, subscriber, args);
+                        break;
+                    }
+                    case M_FOLDERS: {
+                        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
+                        browseFoldersInternal(library, null, subscriber, args);
+                        break;
+                    }
+                    case M_GENRES: {
+                        final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
+                        queryGenresInternal(library, subscriber, args);
+                        break;
+                    }
+                    case M_PLAYLISTS: {
+                        final BundleableSubscriber<Playlist> subscriber = new BundleableSubscriber<>(binder);
+                        queryPlaylistsInternal(library, subscriber, args);
+                        break;
+                    }
+                    case M_TRACKS: {
+                        final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                        queryTracksInternal(library, subscriber, args);
+                        break;
+                    }
+                }
+                return ok;
+            }
+            case LibraryMethods.GET: {
+                final IBinder binder = getBinderCallbackFromBundle(extras);
+                if (binder == null || !binder.isBinderAlive()) {
+                    //this is mostly for the null, if the binder is dead then
+                    //sending them a reason is moot. but we check the binder here
+                    //so we dont have to do it 50 times below and we can be pretty
+                    //sure the linkToDeath will succeed
+                    ok.putBoolean(OK, false);
+                    ok.putParcelable(CAUSE, new LibraryException(BAD_BINDER, null));
+                    return ok;
+                }
+
+                final Uri uri = extras.getParcelable(URI);
+                final List<String> pathSegments = uri.getPathSegments();
+                if (pathSegments.size() != 3) {
+                    Log.e(TAG, "Not enough path segments: uri=" + uri);
+                    ok.putBoolean(OK, false);
+                    ok.putParcelable(CAUSE, new LibraryException(ILLEGAL_URI,
+                            new IllegalArgumentException(uri.toString())));
+                    return ok;
+                }
+
+                final String library = pathSegments.get(0);
+
+                final Bundle args = new Bundle();
+                args.putParcelable(URI, uri);
+
+                switch (mMatcher.match(uri)) {
+                    case M_ALBUM: {
+                        final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                        getAlbumInternal(library, uri.getLastPathSegment(), subscriber, args);
+                        break;
+                    }
+                    case M_ARTIST: {
+                        final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
+                        getArtistInternal(library, uri.getLastPathSegment(), subscriber, args);
+                        break;
+                    }
+                    case M_FOLDER: {
+                        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
+                        browseFoldersInternal(library, uri.getLastPathSegment(), subscriber, args);
+                        break;
+                    }
+                    case M_GENRE: {
+                        final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
+                        getGenreInternal(library, uri.getLastPathSegment(), subscriber, args);
+                        break;
+                    }
+                    case M_PLAYLIST: {
+                        final BundleableSubscriber<Playlist> subscriber = new BundleableSubscriber<>(binder);
+                        getPlaylistInternal(library, uri.getLastPathSegment(), subscriber, args);
+                        break;
+                    }
+                    case M_TRACK: {
+                        final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                        getTrackInternal(library, uri.getLastPathSegment(), subscriber, args);
+                        break;
+                    }
+                }
+                return ok;
+            }
+            case LibraryMethods.LIBRARYCONF:
+                return getLibraryConfig().dematerialize();
+            default:
+                Log.e(TAG, "Unknown method " + method);
+                ok.putBoolean(OK, false);
+                ok.putParcelable(CAUSE, new LibraryException(METHOD_NOT_IMPLEMENTED, new UnsupportedOperationException(method)));
+                return ok;
+        }
+    }
+
+    //TODO cache all these observables
+
     /*
-     * End config
+     * Start internal methods.
+     * You can override these if you need specialized handling, for instance
+     * if you have a network cache, you can hit that and return a list immediately, then hit the network
+     * if the cache is outdated resend the new list.
      */
 
-    @Override
-    public final Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        List<String> pathSegments = uri.getPathSegments();
-        if (pathSegments.size() < 2) {
-            Log.w(TAG, "Not enough path segments: uri="+uri);
-            return null;
-        }
-        //Merge everything into a bundle, This is much nicer than passing 50 arguments
-        //and allows easier extending in the future.
-        Bundle args = new Bundle(6);
-        args.putParcelable(URI, uri);
-        args.putStringArray(PROJECTION, projection);
-        args.putString(SELECTION, selection);
-        args.putStringArray(SELECTIONARGS, selectionArgs);
-        args.putString(SORTORDER, sortOrder != null ? sortOrder : BundleableSortOrder.A_Z);
-        final String library = pathSegments.get(0);
-
-        Cursor c = null;
-        switch (mMatcher.match(uri)) {
-            case M_ALBUMS:
-                c = queryAlbumsInternal(library, args);
-                break;
-            case M_ALBUM:
-                c = getAlbumInternal(library, uri.getLastPathSegment(), args);
-                break;
-            case M_ARTISTS:
-                c = queryArtistsInternal(library, args);
-                break;
-            case M_ARTIST:
-                c = getArtistInternal(library, uri.getLastPathSegment(), args);
-                break;
-            case M_FOLDERS:
-                c = getFoldersTracksInternal(library, null, args);
-                break;
-            case M_FOLDER:
-                c = getFoldersTracksInternal(library, uri.getLastPathSegment(), args);
-                break;
-            case M_TRACKS:
-                c = queryTracksInternal(library, args);
-                break;
-            case M_TRACK:
-                c = getTrackInternal(library, uri.getLastPathSegment(), args);
-                break;
-        }
-        if (c != null) {
-            c.setNotificationUri(getContext().getContentResolver(), uri);
-        }
-        return c;
-    }
-
-    protected Cursor queryAlbumsInternal(final String library, final Bundle args) {
-        MatrixCursor c = null;
-        try {
-            c = doQueryInternal(
-                    new Observable.OnSubscribe<Album>() {
-                        @Override
-                        public void call(Subscriber<? super Album> subscriber) {
-                            queryAlbums(library, subscriber, args);
-                        }
-                    },
-                    new Func2<Album, Album, Integer>() {
-                        @Override
-                        public Integer call(Album album, Album album2) {
-                            return AlbumCompare.comparator(args.getString(SORTORDER)).compare(album, album2);
-                        }
-                    },
-                    new Func0<MatrixCursor>() {
-                        @Override
-                        public MatrixCursor call() {
-                            return CursorUtil.newAlbumCursor();
-                        }
-                    },
-                    new Action2<MatrixCursor, Album>() {
-                        @Override
-                        public void call(MatrixCursor matrixCursor, Album album) {
-                            CursorUtil.populateRow(matrixCursor.newRow(), album);
-                        }
-                    }
-            );
-        } catch (Exception e) {
-            Log.w(TAG, "getAlbumsInternal", e);
-            saveForLater(args.<Uri>getParcelable(URI), e);
-        }
-        return c;
-    }
-
-    protected Cursor getAlbumInternal(final String library, final String identity, final Bundle args) {
-        MatrixCursor c = null;
-        try {
-            Album album = Observable.create(new Observable.OnSubscribe<Album>() {
-                @Override
-                public void call(Subscriber<? super Album> subscriber) {
-                    getAlbum(library, identity, subscriber, args);
-                }
-            }).toBlocking().first();
-            c = CursorUtil.newAlbumCursor();
-            CursorUtil.populateRow(c.newRow(), album);
-        } catch (Exception e) {
-            Log.w(TAG, "getAlbumInternal", e);
-            saveForLater(args.<Uri>getParcelable(URI), e);
-        }
-        return c;
-    }
-
-    protected Cursor queryArtistsInternal(final String library, final Bundle args) {
-        MatrixCursor c = null;
-        try {
-            c = doQueryInternal(
-                    new Observable.OnSubscribe<Artist>() {
-                        @Override
-                        public void call(Subscriber<? super Artist> subscriber) {
-                            queryArtists(library, subscriber, args);
-                        }
-                    },
-                    new Func2<Artist, Artist, Integer>() {
-                        @Override
-                        public Integer call(Artist artist, Artist artist2) {
-                            return ArtistCompare.comparator(args.getString(SORTORDER)).compare(artist, artist2);
-                        }
-                    },
-                    new Func0<MatrixCursor>() {
-                        @Override
-                        public MatrixCursor call() {
-                            return CursorUtil.newArtistCursor();
-                        }
-                    },
-                    new Action2<MatrixCursor, Artist>() {
-                        @Override
-                        public void call(MatrixCursor matrixCursor, Artist artist) {
-                            CursorUtil.populateRow(matrixCursor.newRow(), artist);
-                        }
-                    }
-            );
-        } catch (Exception e) {
-            Log.w(TAG, "queryArtistsInternal", e);
-            saveForLater(args.<Uri>getParcelable(URI), e);
-        }
-        return c;
-    }
-
-    protected Cursor getArtistInternal(final String library, final String identity, final Bundle args) {
-        MatrixCursor c = null;
-        try {
-            Artist artist = Observable.create(new Observable.OnSubscribe<Artist>() {
-                @Override
-                public void call(Subscriber<? super Artist> subscriber) {
-                    getArtist(library, identity, subscriber, args);
-                }
-            }).toBlocking().first();
-            c = CursorUtil.newArtistCursor();
-            CursorUtil.populateRow(c.newRow(), artist);
-        } catch (Exception e) {
-            Log.w(TAG, "getArtistInternal", e);
-            saveForLater(args.<Uri>getParcelable(URI), e);
-        }
-        return c;
-    }
-
     @DebugLog
-    protected Cursor getFoldersTracksInternal(final String library, final String identity, final Bundle args) {
-        MatrixCursor c = null;
-        try {
-            c = Observable.create(new Observable.OnSubscribe<Bundleable>() {
-                @Override
-                public void call(Subscriber<? super Bundleable> subscriber) {
-                    getFoldersTracks(library, identity, subscriber, args);
-                }
-            }).filter(new Func1<Bundleable, Boolean>() {
-                final String foldersOnly = args.<Uri>getParcelable(URI).getQueryParameter(QUERY_FOLDERS_ONLY);
-                @Override
-                public Boolean call(Bundleable bundleable) {
-                    if (foldersOnly != null && Boolean.parseBoolean(foldersOnly)) {
-                        return (bundleable instanceof Folder);
-                    } else {
-                        return (bundleable instanceof Folder) || (bundleable instanceof Track);
-                    }
-                }
-            }).toSortedList(new Func2<Bundleable, Bundleable, Integer>() {
-                @Override
-                public Integer call(Bundleable bundleable, Bundleable bundleable2) {
-                    return FolderTrackCompare.comparator(args.getString(SORTORDER)).compare(bundleable, bundleable2);
-                }
-            }).flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
-                @Override
-                public Observable<Bundleable> call(List<Bundleable> bundleables) {
-                    return Observable.from(bundleables);
-                }
-            }).collect(CursorUtil.newFolderTrackCursor(), new Action2<MatrixCursor, Bundleable>() {
-                @Override
-                public void call(MatrixCursor matrixCursor, Bundleable bundleable) {
-                    CursorUtil.populateFolderTrackRow(matrixCursor.newRow(), bundleable);
-                }
-            }).toBlocking().first();
-        } catch (Exception e) {
-            Log.w(TAG, "getFoldersTracksInternal", e);
-            saveForLater(args.<Uri>getParcelable(URI), e);
-        }
-        return c;
-    }
-
-    protected Cursor queryTracksInternal(final String library, final Bundle args) {
-        MatrixCursor c = null;
-        try {
-            c = doQueryInternal(
-                    new Observable.OnSubscribe<Track>() {
-                        @Override
-                        public void call(Subscriber<? super Track> subscriber) {
-                            queryTracks(library, subscriber, args);
-                        }
-                    },
-                    new Func2<Track, Track, Integer>() {
-                        @Override
-                        public Integer call(Track track, Track track2) {
-                            return TrackCompare.comparator(args.getString(SORTORDER)).compare(track, track2);
-                        }
-                    },
-                    new Func0<MatrixCursor>() {
-                        @Override
-                        public MatrixCursor call() {
-                            return CursorUtil.newTrackCursor();
-                        }
-                    },
-                    new Action2<MatrixCursor, Track>() {
-                        @Override
-                        public void call(MatrixCursor matrixCursor, Track track) {
-                            CursorUtil.populateRow(matrixCursor.newRow(), track);
-                        }
-                    }
-            );
-        } catch (Exception e) {
-            Log.w(TAG, "queryTracksInternal", e);
-            saveForLater(args.<Uri>getParcelable(URI), e);
-        }
-        return c;
-    }
-
-    protected Cursor getTrackInternal(final String library, final String identity, final Bundle args) {
-        MatrixCursor c = null;
-        try {
-            Track track = Observable.create(new Observable.OnSubscribe<Track>() {
-                @Override
-                public void call(Subscriber<? super Track> subscriber) {
-                    getTrack(library, identity, subscriber, args);
-                }
-            }).toBlocking().first();
-            c = CursorUtil.newTrackCursor();
-            CursorUtil.populateRow(c.newRow(), track);
-        } catch (Exception e) {
-            Log.w(TAG, "getTrackInternal", e);
-            saveForLater(args.<Uri>getParcelable(URI), e);
-        }
-        return c;
-    }
-
-    //The magick function
-    protected <T> MatrixCursor doQueryInternal(
-            final Observable.OnSubscribe<T> onSubscribe,
-            final Func2<T, T, Integer> sortFunc,
-            final Func0<MatrixCursor> collector,
-            final Action2<MatrixCursor, T> collectAction
-    ) {
-        return Observable.create(onSubscribe)
-                .toSortedList(sortFunc)
-                .flatMap(new Func1<List<T>, Observable<T>>() {
+    protected void browseFoldersInternal(final String library, final String identity, final Subscriber<List<Bundleable>> subscriber, final Bundle args) {
+        Observable<Bundleable> o = Observable.create(
+                new Observable.OnSubscribe<Bundleable>() {
                     @Override
-                    public Observable<T> call(List<T> ts) {
-                        return Observable.from(ts);
+                    public void call(Subscriber<? super Bundleable> subscriber) {
+                        browseFolders(library, identity, subscriber, args);
                     }
                 })
-                .collect(collector.call(), collectAction)
-                .toBlocking()
-                .first();
+                .subscribeOn(scheduler);
+        final String q = args.<Uri>getParcelable(URI).getQueryParameter(Q.Q);
+        if (StringUtils.equals(q, Q.FOLDERS_ONLY)) {
+            o = o.filter(new Func1<Bundleable, Boolean>() {
+                @Override
+                public Boolean call(Bundleable bundleable) {
+                    return bundleable instanceof Folder;
+                }
+            });
+        } else if (StringUtils.equals(q, Q.TRACKS_ONLY)) {
+            o = o.filter(new Func1<Bundleable, Boolean>() {
+                @Override
+                public Boolean call(Bundleable bundleable) {
+                    return bundleable instanceof Track;
+                }
+            });
+        }
+        o.compose(new BundleableListTransformer<Bundleable>(FolderTrackCompare.func(args.getString(SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void queryAlbumsInternal(final String library, final Subscriber<List<Album>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Album>() {
+                    @Override
+                    public void call(Subscriber<? super Album> subscriber) {
+                        queryAlbums(library, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void getAlbumInternal(final String library, final String identity, final Subscriber<List<Album>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Album>() {
+                    @Override
+                    public void call(Subscriber<? super Album> subscriber) {
+                        getAlbum(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .compose(new BundleableListTransformer<Album>(null))
+                .subscribe(subscriber);
+    }
+
+    protected void queryArtistsInternal(final String library, final Subscriber<List<Artist>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Artist>() {
+                    @Override
+                    public void call(Subscriber<? super Artist> subscriber) {
+                        queryArtists(library, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Artist>(ArtistCompare.func(args.getString(SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void getArtistInternal(final String library, final String identity, final Subscriber<List<Artist>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Artist>() {
+                    @Override
+                    public void call(Subscriber<? super Artist> subscriber) {
+                        getArtist(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .compose(new BundleableListTransformer<Artist>(null))
+                .subscribe(subscriber);
+    }
+
+    protected void queryGenresInternal(final String library, final Subscriber<List<Genre>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Genre>() {
+                    @Override
+                    public void call(Subscriber<? super Genre> subscriber) {
+                        queryGenres(library, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Genre>(BundleableCompare.<Genre>func(args.getString(SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void getGenreInternal(final String library, final String identity, final Subscriber<List<Genre>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Genre>() {
+                    @Override
+                    public void call(Subscriber<? super Genre> subscriber) {
+                        getGenre(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .compose(new BundleableListTransformer<Genre>(null))
+                .subscribe(subscriber);
+    }
+
+    protected void queryPlaylistsInternal(final String library, final Subscriber<List<Playlist>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Playlist>() {
+                    @Override
+                    public void call(Subscriber<? super Playlist> subscriber) {
+                        queryPlaylists(library, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Playlist>(BundleableCompare.<Playlist>func(args.getString(SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void getPlaylistInternal(final String library, final String identity, final Subscriber<List<Playlist>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Playlist>() {
+                    @Override
+                    public void call(Subscriber<? super Playlist> subscriber) {
+                        getPlaylist(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .compose(new BundleableListTransformer<Playlist>(null))
+                .subscribe(subscriber);
+    }
+
+    protected void queryTracksInternal(final String library, final Subscriber<List<Track>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Track>() {
+                    @Override
+                    public void call(Subscriber<? super Track> subscriber) {
+                        queryTracks(library, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void getTrackInternal(final String library, final String identity, final Subscriber<List<Track>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Track>() {
+                    @Override
+                    public void call(Subscriber<? super Track> subscriber) {
+                        getTrack(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .compose(new BundleableListTransformer<Track>(null))
+                .subscribe(subscriber);
     }
 
     /*
      * Start query stubs
+     *
+     * Primary handlers for library, You must override all methods corresponding to the abilitys
+     * you declare in your config
+     *
+     * You must call onComplete after emitting the list
      */
+
+    protected void browseFolders(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
 
     protected void queryAlbums(String library, Subscriber<? super Album> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
@@ -385,7 +442,19 @@ public abstract class LibraryProvider extends ContentProvider {
         subscriber.onError(new UnsupportedOperationException());
     }
 
-    protected void getFoldersTracks(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void queryGenres(String library, Subscriber<? super Genre> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected void getGenre(String library, String identity, Subscriber<? super Genre> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected void queryPlaylists(String library, Subscriber<? super Playlist> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected void getPlaylist(String library, String identity, Subscriber<? super Playlist> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
@@ -401,57 +470,38 @@ public abstract class LibraryProvider extends ContentProvider {
      * End query stubs
      */
 
+    /*
+     * Start abstract methods, we are 100% out-of-band and do not support any of these
+     */
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public String getType(Uri uri) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Bundle call(String method, String arg, Bundle extras) {
-        if (method == null) method = "";
-        switch (method) {
-            case OB.M.LIBRARYCONF:
-                return getLibraryConfig().dematerialize();
-            case OB.M.ONNULLCURSOR:
-                return retrieveSavedException(arg);
-            default:
-                return null;
-        }
-    }
-
-    protected Bundle retrieveSavedException(String uri) {
-        ParcelableException e = mCaughtExceptions.remove(uri);
-        if (e != null) {
-            Bundle b = new Bundle();
-            b.putParcelable(OB.K.EX, e);
-            return b;
-        }
-        return null;
-    }
-
-    protected void saveForLater(Uri uri, Exception e) {
-        Exception ex = unwrapE(e);
-        if (ex instanceof ParcelableException) {
-            mCaughtExceptions.put(uri.toString(), (ParcelableException) ex);
-        } else {
-            Log.w(TAG, "Thrown exception not instance of ParcelableException");
-        }
-    }
+    /*
+     * End abstract methods
+     */
 
     //Blocking observable always throws RuntimeExceptions
     private static Exception unwrapE(Exception e) {
@@ -462,5 +512,23 @@ public abstract class LibraryProvider extends ContentProvider {
             }
         }
         return e;
+    }
+
+    private Method _getIBinder = null;
+    private IBinder getBinderCallbackFromBundle(Bundle b) {
+        if (Build.VERSION.SDK_INT >= 18) {
+            return b.getBinder(CALLBACK);
+        } else {
+            try {
+                synchronized (this) {
+                    if (_getIBinder == null) {
+                        _getIBinder = Bundle.class.getDeclaredMethod("getIBinder", String.class);
+                    }
+                }
+                return (IBinder) _getIBinder.invoke(b, CALLBACK);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

@@ -17,12 +17,10 @@
 
 package org.opensilk.music.library.sort;
 
-import org.opensilk.music.library.cols.ArtistCols;
-
 /**
  * Created by drew on 4/26/15.
  */
-public interface ArtistSortOrder {
-    String SONG_COUNT = ArtistCols.SONG_COUNT + " DESC";
-    String ALBUM_COUNT = ArtistCols.ALBUM_COUNT + " DESC";
+public interface ArtistSortOrder extends BundleableSortOrder {
+    String MOST_TRACKS = "trackCount DESC";
+    String MOST_ALBUMS =  "albumCount DESC";
 }

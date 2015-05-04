@@ -15,19 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.proj;
-
-import static org.opensilk.music.library.cols.ArtistCols.*;
+package org.opensilk.music.library.sort;
 
 /**
- * Created by drew on 4/26/15.
+ * Created by drew on 5/3/15.
  */
-public interface ArtistProj {
-    String[] ALL = new String[] {
-            IDENTITY,
-            NAME,
+public interface GenreSortOrder extends TrackCollectionSortOrder {
 
-            ALBUM_COUNT,
-            SONG_COUNT,
-    };
 }

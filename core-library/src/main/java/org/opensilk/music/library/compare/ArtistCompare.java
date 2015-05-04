@@ -23,25 +23,37 @@ import org.opensilk.music.library.sort.ArtistSortOrder;
 
 import java.util.Comparator;
 
+import rx.functions.Func2;
+
 /**
  * Created by drew on 4/26/15.
  */
 public class ArtistCompare {
+
+    public static Func2<Artist, Artist, Integer> func(final String sort) {
+        return new Func2<Artist, Artist, Integer>() {
+            @Override
+            public Integer call(Artist artist, Artist artist2) {
+                return comparator(sort).compare(artist, artist2);
+            }
+        };
+    }
+
     public static Comparator<Artist> comparator(String sort) {
         switch (sort) {
-            case ArtistSortOrder.SONG_COUNT:
+            case ArtistSortOrder.MOST_TRACKS:
                 return new Comparator<Artist>() {
                     @Override
                     public int compare(Artist lhs, Artist rhs) {
                         //reversed
-                        int c = rhs.songCount - lhs.songCount;
+                        int c = rhs.trackCount - lhs.trackCount;
                         if (c == 0) {
                             return ObjectUtils.compare(lhs.name, rhs.name);
                         }
                         return c;
                     }
                 };
-            case ArtistSortOrder.ALBUM_COUNT:
+            case ArtistSortOrder.MOST_ALBUMS:
                 return new Comparator<Artist>() {
                     @Override
                     public int compare(Artist lhs, Artist rhs) {

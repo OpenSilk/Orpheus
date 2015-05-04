@@ -17,12 +17,10 @@
 
 package org.opensilk.music.library.sort;
 
-import org.opensilk.music.library.cols.BundleableCols;
-
 /**
  * Created by drew on 4/26/15.
  */
 public interface BundleableSortOrder {
-    String A_Z = BundleableCols.NAME;
-    String Z_A = BundleableCols.NAME + " DESC";
+    String A_Z = "name";
+    String Z_A = "name DESC";
 }

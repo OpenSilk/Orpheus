@@ -23,13 +23,24 @@ import org.opensilk.music.library.sort.FolderSortOrder;
 
 import java.util.Comparator;
 
+import rx.functions.Func2;
+
 /**
  * Created by drew on 4/26/15.
  */
 public class FolderCompare {
+    public static Func2<Folder, Folder, Integer> func(final String sort) {
+        return new Func2<Folder, Folder, Integer>() {
+            @Override
+            public Integer call(Folder folder, Folder folder2) {
+                return comparator(sort).compare(folder, folder2);
+            }
+        };
+    }
+
     public static Comparator<Folder> comparator(String sort) {
         switch (sort) {
-            case FolderSortOrder.CHILD_COUNT:
+            case FolderSortOrder.MOST_CHILDREN:
                 return new Comparator<Folder>() {
                     @Override
                     public int compare(Folder lhs, Folder rhs) {
@@ -41,7 +52,7 @@ public class FolderCompare {
                         return c;
                     }
                 };
-            case FolderSortOrder.DATE:
+            case FolderSortOrder.NEWEST:
                 return new Comparator<Folder>() {
                     @Override
                     public int compare(Folder lhs, Folder rhs) {

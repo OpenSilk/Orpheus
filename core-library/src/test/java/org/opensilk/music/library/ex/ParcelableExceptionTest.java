@@ -21,6 +21,7 @@ import android.os.Parcel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.opensilk.music.library.internal.LibraryException;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -37,12 +38,12 @@ public class ParcelableExceptionTest {
 
     @Test
     public void testParcelableExceptionWorks() {
-        ParcelableException ex =
-                new ParcelableException(ParcelableException.NETWORK, new IOException("No network"));
+        LibraryException ex =
+                new LibraryException(LibraryException.NETWORK, new IOException("No network"));
         Parcel p = Parcel.obtain();
         ex.writeToParcel(p, 0);
         p.setDataPosition(0);
-        ParcelableException fromP = ParcelableException.CREATOR.createFromParcel(p);
+        LibraryException fromP = LibraryException.CREATOR.createFromParcel(p);
         assertThat(ex.getCode() == fromP.getCode());
         assertThat(ex.getCause().toString().equals(fromP.getCause().toString()));
     }

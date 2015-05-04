@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 OpenSilk Productions LLC
+ * Copyright (c) 2014 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.provider;
+package org.opensilk.music.library.internal;
 
-/**
- * Bundle keys for args
- *
- * Created by drew on 4/29/15.
- */
-public interface QueryArgs {
-    //Never null
-    String URI = "arg_uri";
-    String PROJECTION = "arg_projection";
-    String SELECTION = "arg_selection";
-    String SELECTIONARGS = "arg_selectionargs";
-    //Never null
-    String SORTORDER = "arg_sortorder";
-}
+parcelable LibraryException;

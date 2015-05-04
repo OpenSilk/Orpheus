@@ -23,10 +23,22 @@ import org.opensilk.music.library.sort.TrackSortOrder;
 
 import java.util.Comparator;
 
+import rx.functions.Func2;
+
 /**
  * Created by drew on 4/26/15.
  */
 public class TrackCompare {
+
+    public static Func2<Track, Track, Integer> func(final String sort) {
+        return new Func2<Track, Track, Integer>() {
+            @Override
+            public Integer call(Track track, Track track2) {
+                return comparator(sort).compare(track, track2);
+            }
+        };
+    }
+
     public static Comparator<Track> comparator(String sort) {
         switch (sort) {
             case TrackSortOrder.ARTIST:
@@ -52,7 +64,7 @@ public class TrackCompare {
                         return c;
                     }
                 };
-            case TrackSortOrder.DURATION:
+            case TrackSortOrder.LONGEST:
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 OpenSilk Productions LLC
+ * Copyright (c) 2014 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.cols;
+package org.opensilk.music.library.internal;
 
-/**
- * Created by drew on 4/26/15.
- */
-public interface TrackCols extends BundleableCols {
-    String ALBUM_NAME = "album_name";
-    String ARTIST_NAME = "artist_name";
-    String ALBUM_ARTIST_NAME = "album_artist_name";
-    String ALBUM_IDENTITIY = "album_id";
-    String DURATION = "duration";
-    String DATA_URI = "_data";
-    String ARTWORK_URI = "artwork_uri";
-    String MIME_TYPE = "mime_type";
-}
+parcelable BundleableListSlice;

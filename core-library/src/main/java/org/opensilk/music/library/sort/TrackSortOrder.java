@@ -17,13 +17,11 @@
 
 package org.opensilk.music.library.sort;
 
-import org.opensilk.music.library.cols.TrackCols;
-
 /**
  * Created by drew on 4/26/15.
  */
 public interface TrackSortOrder extends BundleableSortOrder {
-    String ARTIST = TrackCols.ARTIST_NAME;
-    String ALBUM = TrackCols.ALBUM_NAME;
-    String DURATION = TrackCols.DURATION + " DESC";
+    String ARTIST = "artistName";
+    String ALBUM = "albumName";
+    String LONGEST = "duration DESC";
 }

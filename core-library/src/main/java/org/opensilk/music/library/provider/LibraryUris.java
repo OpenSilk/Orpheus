@@ -26,17 +26,34 @@ import android.util.Log;
  */
 public class LibraryUris {
 
-    public static final String QUERY_FOLDERS_ONLY = "foldersOnly";
+    public interface Q {
+        String Q = "q";
+        String FOLDERS_ONLY = "foldersOnly";
+        String TRACKS_ONLY = "tracksOnly";
+    }
 
     static final String scheme = "content";
+    static final String model = "model";
     static final String albums = "albums";
     static final String album = "album";
     static final String artists = "artists";
     static final String artist = "artist";
     static final String folders = "folders";
     static final String folder = "folder";
+    static final String genres = "genres";
+    static final String genre = "genre";
+    static final String playlists = "playlists";
+    static final String playlist = "playlist";
     static final String tracks = "tracks";
     static final String track = "track";
+
+    private static Uri.Builder modelBase(String authority, String library){
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(model);
+    }
+
+    public static Uri withQ(Uri uri, String q) {
+        return uri.buildUpon().appendQueryParameter(Q.Q, q).build();
+    }
 
     public static Uri albums(String authority, String library) {
         return album(authority, library, null);
@@ -44,9 +61,9 @@ public class LibraryUris {
 
     public static Uri album(String authority, String library, String id) {
         if (id == null) {
-            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(albums).build();
+            return modelBase(authority, library).appendPath(albums).build();
         }
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(album).appendPath(id).build();
+        return modelBase(authority, library).appendPath(album).appendPath(id).build();
     }
 
     public static Uri artists(String authority, String library) {
@@ -55,28 +72,56 @@ public class LibraryUris {
 
     public static Uri artist(String authority, String library, String id) {
         if (id == null) {
-            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(artists).build();
+            return modelBase(authority, library).appendPath(artists).build();
         }
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(artist).appendPath(id).build();
+        return modelBase(authority, library).appendPath(artist).appendPath(id).build();
     }
 
     public static Uri folders(String authority, String library) {
-        return foldersTracks(authority, library).buildUpon().appendQueryParameter(QUERY_FOLDERS_ONLY, "true").build();
+        return folders(authority, library, null);
     }
 
     public static Uri folders(String authority, String library, String id) {
-        return foldersTracks(authority, library, id).buildUpon().appendQueryParameter(QUERY_FOLDERS_ONLY, "true").build();
-    }
-
-    public static Uri foldersTracks(String authority, String library) {
-        return foldersTracks(authority, library, null);
-    }
-
-    public static Uri foldersTracks(String authority, String library, String id) {
         if (id == null) {
-            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folders).build();
+            return modelBase(authority, library).appendPath(folders).build();
         }
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(folder).appendPath(id).build();
+        return modelBase(authority, library).appendPath(folder).appendPath(id).build();
+    }
+
+    /**
+     * @return Uri with query for children of type {@link org.opensilk.music.model.Folder}
+     */
+    public static Uri folderFolders(String authority, String library, String id) {
+        return withQ(folders(authority, library, id), Q.FOLDERS_ONLY);
+    }
+
+    /**
+     * @return Uri with query for children of type {@link org.opensilk.music.model.Track}
+     */
+    public static Uri folderTracks(String authority, String library, String id) {
+        return withQ(folders(authority, library, id), Q.TRACKS_ONLY);
+    }
+
+    public static Uri genres(String authority, String library) {
+        return genre(authority, library, null);
+    }
+
+    public static Uri genre(String authority, String library, String id) {
+        if (id == null) {
+            return modelBase(authority, library).appendPath(genres).build();
+        }
+        return modelBase(authority, library).appendPath(genre).appendPath(id).build();
+    }
+
+    public static Uri playlists(String authority, String library) {
+        return playlist(authority, library, null);
+    }
+
+    public static Uri playlist(String authority, String library, String id) {
+        if (id == null) {
+            return modelBase(authority, library).appendPath(playlists).build();
+        }
+        return modelBase(authority, library).appendPath(playlist).appendPath(id).build();
     }
 
     public static Uri tracks(String authority, String library) {
@@ -85,9 +130,9 @@ public class LibraryUris {
 
     public static Uri track(String authority, String library, String id) {
         if (id == null) {
-            return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(tracks).build();
+            return modelBase(authority, library).appendPath(tracks).build();
         }
-        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).appendPath(track).appendPath(id).build();
+        return modelBase(authority, library).appendPath(track).appendPath(id).build();
     }
 
     public static Uri call(String authority) {
@@ -100,24 +145,37 @@ public class LibraryUris {
     public static final int M_ARTIST = 4;
     public static final int M_FOLDERS = 5;
     public static final int M_FOLDER = 6;
-    public static final int M_TRACKS = 7;
-    public static final int M_TRACK = 8;
+    public static final int M_GENRES = 7;
+    public static final int M_GENRE = 8;
+    public static final int M_PLAYLISTS = 9;
+    public static final int M_PLAYLIST = 10;
+    public static final int M_TRACKS = 11;
+    public static final int M_TRACK = 12;
+
+    private static final String slash_wild = "/*";
+    private static final String model_base_match = model + slash_wild + "/";
 
     public static UriMatcher makeMatcher(String authority) {
-        Log.i("Uris", "Creating matcher for authority="+authority);
+        Log.i("LibraryUris", "Creating matcher for authority="+authority);
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        uriMatcher.addURI(authority, "*/" + albums, M_ALBUMS);
-        uriMatcher.addURI(authority, "*/" + album + "/*", M_ALBUM);
+        uriMatcher.addURI(authority, model_base_match + albums, M_ALBUMS);
+        uriMatcher.addURI(authority, model_base_match + album + slash_wild, M_ALBUM);
 
-        uriMatcher.addURI(authority, "*/" + artists, M_ARTISTS);
-        uriMatcher.addURI(authority, "*/" + artist + "/*", M_ARTIST);
+        uriMatcher.addURI(authority, model_base_match + artists, M_ARTISTS);
+        uriMatcher.addURI(authority, model_base_match + artist + slash_wild, M_ARTIST);
 
-        uriMatcher.addURI(authority, "*/" + folders, M_FOLDERS);
-        uriMatcher.addURI(authority, "*/" + folder + "/*", M_FOLDER);
+        uriMatcher.addURI(authority, model_base_match + folders, M_FOLDERS);
+        uriMatcher.addURI(authority, model_base_match + folder + slash_wild, M_FOLDER);
 
-        uriMatcher.addURI(authority, "*/" + tracks, M_TRACKS);
-        uriMatcher.addURI(authority, "*/" + track + "/*", M_TRACK);
+        uriMatcher.addURI(authority, model_base_match + genres, M_GENRES);
+        uriMatcher.addURI(authority, model_base_match + genre + slash_wild, M_GENRE);
+
+        uriMatcher.addURI(authority, model_base_match + playlists, M_PLAYLISTS);
+        uriMatcher.addURI(authority, model_base_match + playlist + slash_wild, M_PLAYLIST);
+
+        uriMatcher.addURI(authority, model_base_match + tracks, M_TRACKS);
+        uriMatcher.addURI(authority, model_base_match + track + slash_wild, M_TRACK);
 
         return uriMatcher;
     }

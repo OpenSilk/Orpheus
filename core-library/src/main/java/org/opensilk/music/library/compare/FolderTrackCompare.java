@@ -23,10 +23,22 @@ import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.Comparator;
 
+import rx.functions.Func2;
+
 /**
  * Created by drew on 4/26/15.
  */
 public class FolderTrackCompare {
+
+    public static Func2<Bundleable, Bundleable, Integer> func(final String sort) {
+        return new Func2<Bundleable, Bundleable, Integer>() {
+            @Override
+            public Integer call(Bundleable bundleable, Bundleable bundleable2) {
+                return comparator(sort).compare(bundleable, bundleable2);
+            }
+        };
+    }
+
     public static Comparator<Bundleable> comparator(final String sort) {
         return new Comparator<Bundleable>() {
             @Override

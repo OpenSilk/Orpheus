@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 OpenSilk Productions LLC
+ * Copyright (c) 2014 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.cols;
+package org.opensilk.music.library.internal;
 
-/**
- * Created by drew on 4/26/15.
- */
-public interface FolderCols extends BundleableCols {
-    String PARENT_IDENTITY = "parent_id";
-    String CHILD_COUNT = "child_count";
-    String DATE = "date";
+import org.opensilk.music.library.internal.BundleableListSlice;
+import org.opensilk.music.library.internal.LibraryException;
+
+oneway interface IBundleableObserver {
+    void onNext(in BundleableListSlice slice);
+    void onError(in LibraryException e);
+    void onCompleted();
 }

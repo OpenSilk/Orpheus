@@ -15,25 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.proj;
-
-import static org.opensilk.music.library.cols.TrackCols.*;
+package org.opensilk.music.library.sort;
 
 /**
- * Created by drew on 4/26/15.
+ * Created by drew on 5/3/15.
  */
-public interface TrackProj {
-    String[] ALL = new String[] {
-            IDENTITY,
-            NAME,
+public interface TrackCollectionSortOrder extends BundleableSortOrder {
 
-            ALBUM_NAME,
-            ARTIST_NAME,
-            ALBUM_ARTIST_NAME,
-            ALBUM_IDENTITIY,
-            DURATION,
-            DATA_URI,
-            ARTWORK_URI,
-            MIME_TYPE,
-    };
 }

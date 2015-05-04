@@ -23,10 +23,22 @@ import org.opensilk.music.library.sort.BundleableSortOrder;
 
 import java.util.Comparator;
 
+import rx.functions.Func2;
+
 /**
  * Created by drew on 4/26/15.
  */
 public class BundleableCompare {
+
+    public static <T extends Bundleable> Func2<T, T, Integer> func(final String sort) {
+        return new Func2<T, T, Integer>() {
+            @Override
+            public Integer call(T t, T t2) {
+                return comparator(sort).compare(t, t2);
+            }
+        };
+    }
+
     public static <T extends Bundleable> Comparator<T> comparator(String sort) {
         switch (sort) {
             case BundleableSortOrder.Z_A:
