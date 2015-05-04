@@ -30,17 +30,17 @@ public class Artist implements Bundleable {
     public final String identity;
     public final String name;
     public final int albumCount;
-    public final int songCount;
+    public final int trackCount;
 
     protected Artist(@NonNull String identity,
                      @NonNull String name,
                      int albumCount,
-                     int songCount
+                     int trackCount
     ) {
         this.identity = identity;
         this.name = name;
         this.albumCount = albumCount;
-        this.songCount = songCount;
+        this.trackCount = trackCount;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class Artist implements Bundleable {
         b.putString("_1", identity);
         b.putString("_2", name);
         b.putInt("_3", albumCount);
-        b.putInt("_4", songCount);
+        b.putInt("_4", trackCount);
         return b;
     }
 
@@ -72,7 +72,7 @@ public class Artist implements Bundleable {
                 .setIdentity(b.getString("_1"))
                 .setName(b.getString("_2"))
                 .setAlbumCount(b.getInt("_3"))
-                .setSongCount(b.getInt("_4"))
+                .setTrackCount(b.getInt("_4"))
                 .build();
     }
 
@@ -84,7 +84,7 @@ public class Artist implements Bundleable {
         Artist artist = (Artist) o;
 
         if (albumCount != artist.albumCount) return false;
-        if (songCount != artist.songCount) return false;
+        if (trackCount != artist.trackCount) return false;
         if (identity != null ? !identity.equals(artist.identity) : artist.identity != null)
             return false;
         if (name != null ? !name.equals(artist.name) : artist.name != null) return false;
@@ -97,7 +97,7 @@ public class Artist implements Bundleable {
         int result = identity != null ? identity.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + albumCount;
-        result = 31 * result + songCount;
+        result = 31 * result + trackCount;
         return result;
     }
 
@@ -121,7 +121,7 @@ public class Artist implements Bundleable {
         private String identity;
         private String name;
         private int albumCount;
-        private int songCount;
+        private int trackCount;
 
         public Builder setIdentity(String identity) {
             this.identity = identity;
@@ -138,8 +138,8 @@ public class Artist implements Bundleable {
             return this;
         }
 
-        public Builder setSongCount(int songCount) {
-            this.songCount = songCount;
+        public Builder setTrackCount(int trackCount) {
+            this.trackCount = trackCount;
             return this;
         }
 
@@ -147,7 +147,7 @@ public class Artist implements Bundleable {
             if (identity == null || name == null) {
                 throw new NullPointerException("identity and name are required");
             }
-            return new Artist(identity, name, albumCount, songCount);
+            return new Artist(identity, name, albumCount, trackCount);
         }
     }
 }

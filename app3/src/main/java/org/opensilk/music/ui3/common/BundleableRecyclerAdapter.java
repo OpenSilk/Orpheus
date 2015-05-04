@@ -138,9 +138,9 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         if (artist.albumCount > 0) {
             subtitle += Utils.makeLabel(context, R.plurals.Nalbums, artist.albumCount);
         }
-        if (artist.songCount > 0) {
+        if (artist.trackCount > 0) {
             if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
-            subtitle += Utils.makeLabel(context, R.plurals.Nsongs, artist.songCount);
+            subtitle += Utils.makeLabel(context, R.plurals.Nsongs, artist.trackCount);
         }
         holder.subtitle.setText(subtitle);
         if (artInfo == ArtInfo.NULLINSTANCE) {

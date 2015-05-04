@@ -42,7 +42,7 @@ public class BundleableUtil {
      * @throws BadBundleableException if bundle is malformed
      */
     @NonNull
-    public static Bundleable materializeBundle(Bundle b) throws BadBundleableException {
+    public static <T extends Bundleable> T materializeBundle(Bundle b) throws BadBundleableException {
         return materializeBundle(b.getString("clz"), b);
     }
 
@@ -71,7 +71,7 @@ public class BundleableUtil {
     public static <T extends Bundleable> T materializeBundle(String name, Bundle b) throws BadBundleableException {
         try {
             return (T) getCreator(name, b).fromBundle(b);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException|ClassCastException e) {
             throw new BadBundleableException(e);
         }
     }

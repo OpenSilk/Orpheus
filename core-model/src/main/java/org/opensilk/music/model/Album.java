@@ -32,21 +32,21 @@ public class Album implements Bundleable {
     public final String identity;
     public final String name;
     public final String artistName;
-    public final int songCount;
+    public final int trackCount;
     public final String date;
     public final Uri artworkUri;
 
     protected Album(@NonNull String identity,
                     @NonNull String name,
                     @Nullable String artistName,
-                    int songCount,
+                    int trackCount,
                     @Nullable String date,
                     @Nullable Uri artworkUri
     ) {
         this.identity = identity;
         this.name = name;
         this.artistName = artistName;
-        this.songCount = songCount;
+        this.trackCount = trackCount;
         this.date = date;
         this.artworkUri = artworkUri;
     }
@@ -68,7 +68,7 @@ public class Album implements Bundleable {
         b.putString("_1", identity);
         b.putString("_2", name);
         b.putString("_3", artistName);
-        b.putInt("_4", songCount);
+        b.putInt("_4", trackCount);
         b.putString("_5", date);
         b.putParcelable("_6", artworkUri);
         return b;
@@ -82,7 +82,7 @@ public class Album implements Bundleable {
                 .setIdentity(b.getString("_1"))
                 .setName(b.getString("_2"))
                 .setArtistName(b.getString("_3"))
-                .setSongCount(b.getInt("_4"))
+                .setTrackCount(b.getInt("_4"))
                 .setDate(b.getString("_5"))
                 .setArtworkUri(b.<Uri>getParcelable("_6"))
                 .build();
@@ -95,7 +95,7 @@ public class Album implements Bundleable {
 
         Album album = (Album) o;
 
-        if (songCount != album.songCount) return false;
+        if (trackCount != album.trackCount) return false;
         if (artistName != null ? !artistName.equals(album.artistName) : album.artistName != null)
             return false;
         if (artworkUri != null ? !artworkUri.equals(album.artworkUri) : album.artworkUri != null)
@@ -113,7 +113,7 @@ public class Album implements Bundleable {
         int result = identity != null ? identity.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (artistName != null ? artistName.hashCode() : 0);
-        result = 31 * result + songCount;
+        result = 31 * result + trackCount;
         result = 31 * result + (date != null ? date.hashCode() : 0);
         result = 31 * result + (artworkUri != null ? artworkUri.hashCode() : 0);
         return result;
@@ -139,7 +139,7 @@ public class Album implements Bundleable {
         private String identity;
         private String name;
         private String artistName;
-        private int songCount;
+        private int trackCount;
         private String date;
 
         private Uri artworkUri;
@@ -159,8 +159,8 @@ public class Album implements Bundleable {
             return this;
         }
 
-        public Builder setSongCount(int songCount) {
-            this.songCount = songCount;
+        public Builder setTrackCount(int trackCount) {
+            this.trackCount = trackCount;
             return this;
         }
 
@@ -178,7 +178,7 @@ public class Album implements Bundleable {
             if (identity == null || name == null) {
                 throw new NullPointerException("identity and name are required");
             }
-            return new Album(identity, name, artistName, songCount, date, artworkUri);
+            return new Album(identity, name, artistName, trackCount, date, artworkUri);
         }
     }
 
