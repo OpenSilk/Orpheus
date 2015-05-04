@@ -56,8 +56,8 @@ import timber.log.Timber;
 
 import static org.opensilk.music.library.LibraryCapability.*;
 import static org.opensilk.music.library.folders.ModelUtil.*;
-import static org.opensilk.music.library.provider.LibraryUris.QUERY_FOLDERS_ONLY;
-import static org.opensilk.music.library.provider.QueryArgs.URI;
+import static org.opensilk.music.library.provider.LibraryMethods.Extras.*;
+import static org.opensilk.music.library.provider.LibraryUris.Q.*;
 
 /**
  * Created by drew on 4/28/15.
@@ -92,7 +92,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
     }
 
     @Override
-    protected void getFoldersTracks(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void browseFolders(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
         doListing(library, identity, subscriber, args);
     }
 
@@ -114,6 +114,11 @@ public class FoldersLibraryProvider extends LibraryProvider {
             subscriber.onCompleted();
             return;
         }
+
+        final String q = args.<Uri>getParcelable(URI).getQueryParameter(Q);
+        final boolean dirsOnly = StringUtils.equals(q, FOLDERS_ONLY);
+        final boolean tracksOnly = StringUtils.equals(q, TRACKS_ONLY);
+
         File[] dirList = rootDir.listFiles();
         List<File> files = new ArrayList<>(dirList.length);
         for (File f : dirList) {
@@ -123,19 +128,17 @@ public class FoldersLibraryProvider extends LibraryProvider {
             if (f.getName().startsWith(".")) {
                 continue;
             }
-            if (f.isDirectory()) {
+            if (f.isDirectory() && !tracksOnly) {
                 subscriber.onNext(makeFolder(base, f));
             } else if (f.isFile()) {
                 files.add(f);
             }
         }
         //Save ourselves the trouble
-        final String foldersOnly = args.<Uri>getParcelable(URI).getQueryParameter(QUERY_FOLDERS_ONLY);
-        if (Boolean.parseBoolean(foldersOnly)) {
+        if (dirsOnly) {
             subscriber.onCompleted();
             return;
-        }
-        if (subscriber.isUnsubscribed()) {
+        } else if (subscriber.isUnsubscribed()) {
             return;
         }
         // convert raw file list into something useful
