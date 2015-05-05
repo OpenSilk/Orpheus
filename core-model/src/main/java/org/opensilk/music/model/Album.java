@@ -64,7 +64,7 @@ public class Album implements Bundleable {
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(14); //2x
-        b.putString("clz", Album.class.getName());
+        b.putString(CLZ, Album.class.getName());
         b.putString("_1", identity);
         b.putString("_2", name);
         b.putString("_3", artistName);
@@ -75,8 +75,8 @@ public class Album implements Bundleable {
     }
 
     protected static Album fromBundle(Bundle b) throws IllegalArgumentException {
-        if (!Album.class.getName().equals(b.getString("clz"))) {
-            throw new IllegalArgumentException("Wrong class for Album: "+b.getString("clz"));
+        if (!Album.class.getName().equals(b.getString(CLZ))) {
+            throw new IllegalArgumentException("Wrong class for Album: "+b.getString(CLZ));
         }
         return new Builder()
                 .setIdentity(b.getString("_1"))

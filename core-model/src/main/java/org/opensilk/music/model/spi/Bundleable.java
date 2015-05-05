@@ -22,6 +22,7 @@ import android.os.Bundle;
  * Created by drew on 6/23/14.
  */
 public interface Bundleable {
+    String CLZ = "clz";
 
     /*
      * @since API_010

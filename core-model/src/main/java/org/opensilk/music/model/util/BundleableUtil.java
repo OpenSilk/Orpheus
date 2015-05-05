@@ -43,7 +43,7 @@ public class BundleableUtil {
      */
     @NonNull
     public static <T extends Bundleable> T materializeBundle(Bundle b) throws BadBundleableException {
-        return materializeBundle(b.getString("clz"), b);
+        return materializeBundle(b.getString(Bundleable.CLZ), b);
     }
 
     /**
@@ -109,7 +109,7 @@ public class BundleableUtil {
             creator = sCreatorCache.get(name);
             if (creator == null) {
                 try {
-                    Class clz = Class.forName(b.getString("clz"));
+                    Class clz = Class.forName(b.getString(Bundleable.CLZ));
                     Field f = clz.getDeclaredField("BUNDLE_CREATOR");
                     creator = (Bundleable.BundleCreator)f.get(null);
                 } catch (Exception e) {

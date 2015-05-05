@@ -60,7 +60,7 @@ public class Folder implements Bundleable {
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(12); //2x
-        b.putString("clz", Folder.class.getName());
+        b.putString(CLZ, Folder.class.getName());
         b.putString("_1", identity);
         b.putString("_2", name);
         b.putString("_3", parentIdentity);
@@ -70,8 +70,8 @@ public class Folder implements Bundleable {
     }
 
     protected static Folder fromBundle(Bundle b) throws IllegalArgumentException {
-        if (!Folder.class.getName().equals(b.getString("clz"))) {
-            throw new IllegalArgumentException("Wrong class for Folder: "+b.getString("clz"));
+        if (!Folder.class.getName().equals(b.getString(CLZ))) {
+            throw new IllegalArgumentException("Wrong class for Folder: "+b.getString(CLZ));
         }
         return new Builder()
                 .setIdentity(b.getString("_1"))

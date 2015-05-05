@@ -102,7 +102,7 @@ public class Track implements Bundleable {
     @Override
     public Bundle toBundle() {
         Bundle b = new Bundle(22); //2x
-        b.putString("clz", Track.class.getName());
+        b.putString(CLZ, Track.class.getName());
         b.putString("_1", identity);
         b.putString("_2", name);
         b.putString("_3", albumName);
@@ -118,8 +118,8 @@ public class Track implements Bundleable {
     }
 
     protected static Track fromBundle(Bundle b) throws IllegalArgumentException {
-        if (!Track.class.getName().equals(b.getString("clz"))) {
-            throw new IllegalArgumentException("Wrong class for Song: "+b.getString("clz"));
+        if (!Track.class.getName().equals(b.getString(CLZ))) {
+            throw new IllegalArgumentException("Wrong class for Track: "+b.getString(CLZ));
         }
         return new Builder()
                 .setIdentity(b.getString("_1"))
@@ -189,6 +189,10 @@ public class Track implements Bundleable {
         return new Builder();
     }
 
+    public Builder buildUpon() {
+        return new Builder(this);
+    }
+
     public static final BundleCreator<Track> BUNDLE_CREATOR = new BundleCreator<Track>() {
         @Override
         public Track fromBundle(Bundle b) throws IllegalArgumentException {
@@ -208,6 +212,23 @@ public class Track implements Bundleable {
         private Uri artworkUri;
         private String mimeType = DEFAULT_MIME_TYPE;
         private String headers = "";
+
+        private Builder() {
+        }
+
+        private Builder(Track t) {
+            identity = t.identity;
+            name = t.name;
+            albumName = t.albumName;
+            artistName = t.artistName;
+            albumArtistName = t.albumArtistName;
+            albumIdentity = t.albumIdentity;
+            duration = t.duration;
+            dataUri = t.dataUri;
+            artworkUri = t.artworkUri;
+            mimeType = t.mimeType;
+            headers = t.headers;
+        }
 
         public Builder setIdentity(String identity) {
             this.identity = identity;
