@@ -29,17 +29,20 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.provider.ArtworkComponent;
 import org.opensilk.music.model.ArtInfo;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
+import timber.log.Timber;
 
 /**
  * Created by drew on 4/30/15.
@@ -81,8 +84,8 @@ public class ArtworkFetcherService extends MortarService {
     @Inject @Named("fetcher") HandlerThread mHandlerThread;
     @Inject ArtworkFetcherHandler mHandler;
 
-    final List<Integer> mStartIds = new ArrayList<>();
-    int mLastStartId = -1;
+    private final AtomicInteger mTimesStarted = new AtomicInteger(0);
+    private final Runnable mStopSelfTask = new StopSelfTask(this);
 
     @Override
     protected void onBuildScope(MortarScope.Builder builder) {
@@ -116,10 +119,8 @@ public class ArtworkFetcherService extends MortarService {
     @Override
     @DebugLog
     public int onStartCommand(Intent intent, int flags, int startId) {
-        synchronized (mStartIds) {
-            mStartIds.add(startId);
-            mLastStartId = startId;
-        }
+        mTimesStarted.incrementAndGet();
+        mHandler.removeCallbacks(mStopSelfTask);
         mHandler.processIntent(intent, startId);
         return START_REDELIVER_INTENT;
     }
@@ -136,13 +137,26 @@ public class ArtworkFetcherService extends MortarService {
         }
     }
 
-    // We have the potential to finish out of order
-    // so we only stop the service if everyone has finished
     void maybeStopSelf(int startId) {
-        synchronized (mStartIds) {
-            mStartIds.remove(startId);
-            if (mStartIds.isEmpty()) {
-                stopSelf(mLastStartId);
+        int remaining = mTimesStarted.decrementAndGet();
+        Timber.v("finished %d: %d tasks remain", startId, remaining);
+        if (remaining == 0) {
+            mHandler.postDelayed(mStopSelfTask, 60 * 1000);
+        }
+    }
+
+    private static final class StopSelfTask implements Runnable {
+        final WeakReference<ArtworkFetcherService> service;
+
+        public StopSelfTask(ArtworkFetcherService service) {
+            this.service = new WeakReference<ArtworkFetcherService>(service);
+        }
+
+        @Override
+        public void run() {
+            ArtworkFetcherService s = service.get();
+            if (s != null) {
+                s.stopSelf();
             }
         }
     }
