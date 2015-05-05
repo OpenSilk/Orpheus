@@ -66,6 +66,10 @@ public class LibraryUris {
         return modelBase(authority, library).appendPath(album).appendPath(id).build();
     }
 
+    public static Uri albumTracks(String authority, String library, String id) {
+        return modelBase(authority, library).appendPath(album).appendPath(id).appendPath(tracks).build();
+    }
+
     public static Uri artists(String authority, String library) {
         return artist(authority, library, null);
     }
@@ -75,6 +79,14 @@ public class LibraryUris {
             return modelBase(authority, library).appendPath(artists).build();
         }
         return modelBase(authority, library).appendPath(artist).appendPath(id).build();
+    }
+
+    public static Uri artistAlbums(String authority, String library, String id) {
+        return modelBase(authority, library).appendPath(artist).appendPath(id).appendPath(albums).build();
+    }
+
+    public static Uri artistTracks(String authority, String library, String id) {
+        return modelBase(authority, library).appendPath(artist).appendPath(id).appendPath(tracks).build();
     }
 
     public static Uri folders(String authority, String library) {
@@ -113,6 +125,14 @@ public class LibraryUris {
         return modelBase(authority, library).appendPath(genre).appendPath(id).build();
     }
 
+    public static Uri genreAlbums(String authority, String library, String id) {
+        return modelBase(authority, library).appendPath(genre).appendPath(id).appendPath(albums).build();
+    }
+
+    public static Uri genreTracks(String authority, String library, String id) {
+        return modelBase(authority, library).appendPath(genre).appendPath(id).appendPath(tracks).build();
+    }
+
     public static Uri playlists(String authority, String library) {
         return playlist(authority, library, null);
     }
@@ -122,6 +142,10 @@ public class LibraryUris {
             return modelBase(authority, library).appendPath(playlists).build();
         }
         return modelBase(authority, library).appendPath(playlist).appendPath(id).build();
+    }
+
+    public static Uri playlistTracks(String authority, String library, String id) {
+        return modelBase(authority, library).appendPath(playlist).appendPath(id).appendPath(tracks).build();
     }
 
     public static Uri tracks(String authority, String library) {
@@ -151,8 +175,15 @@ public class LibraryUris {
     public static final int M_PLAYLIST = 10;
     public static final int M_TRACKS = 11;
     public static final int M_TRACK = 12;
+    public static final int M_ALBUM_TRACKS = 13;
+    public static final int M_ARTIST_ALBUMS = 14;
+    public static final int M_ARTIST_TRACKS = 15;
+    public static final int M_GENRE_ALBUMS = 16;
+    public static final int M_GENRE_TRACKS = 17;
+    public static final int M_PLAYLIST_TRACKS = 18;
 
     private static final String slash_wild = "/*";
+    private static final String slash_wild_slash = "/*/";
     private static final String model_base_match = "*/" + model + "/";
 
     public static UriMatcher makeMatcher(String authority) {
@@ -161,18 +192,24 @@ public class LibraryUris {
 
         uriMatcher.addURI(authority, model_base_match + albums, M_ALBUMS);
         uriMatcher.addURI(authority, model_base_match + album + slash_wild, M_ALBUM);
+        uriMatcher.addURI(authority, model_base_match + album + slash_wild_slash + tracks, M_ALBUM_TRACKS);
 
         uriMatcher.addURI(authority, model_base_match + artists, M_ARTISTS);
         uriMatcher.addURI(authority, model_base_match + artist + slash_wild, M_ARTIST);
+        uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + albums, M_ARTIST_ALBUMS);
+        uriMatcher.addURI(authority, model_base_match + artist + slash_wild_slash + tracks, M_ARTIST_TRACKS);
 
         uriMatcher.addURI(authority, model_base_match + folders, M_FOLDERS);
         uriMatcher.addURI(authority, model_base_match + folder + slash_wild, M_FOLDER);
 
         uriMatcher.addURI(authority, model_base_match + genres, M_GENRES);
         uriMatcher.addURI(authority, model_base_match + genre + slash_wild, M_GENRE);
+        uriMatcher.addURI(authority, model_base_match + genre + slash_wild_slash + albums, M_GENRE_ALBUMS);
+        uriMatcher.addURI(authority, model_base_match + genre + slash_wild_slash + tracks, M_GENRE_TRACKS);
 
         uriMatcher.addURI(authority, model_base_match + playlists, M_PLAYLISTS);
         uriMatcher.addURI(authority, model_base_match + playlist + slash_wild, M_PLAYLIST);
+        uriMatcher.addURI(authority, model_base_match + playlist + slash_wild_slash + tracks, M_PLAYLIST_TRACKS);
 
         uriMatcher.addURI(authority, model_base_match + tracks, M_TRACKS);
         uriMatcher.addURI(authority, model_base_match + track + slash_wild, M_TRACK);

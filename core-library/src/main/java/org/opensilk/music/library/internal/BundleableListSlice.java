@@ -63,6 +63,11 @@ public class BundleableListSlice<T extends Bundleable> implements Parcelable {
     }
 
     private BundleableListSlice(Parcel p, ClassLoader loader) {
+
+        if (loader == null) {
+            loader = getClass().getClassLoader();
+        }
+
         final int N = p.readInt();
         mList = new ArrayList<T>(N);
         if (DEBUG) Log.d(TAG, "Retrieving " + N + " items");

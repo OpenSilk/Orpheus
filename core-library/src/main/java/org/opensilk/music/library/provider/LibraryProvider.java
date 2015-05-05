@@ -124,7 +124,7 @@ public abstract class LibraryProvider extends ContentProvider {
 
                 final Uri uri = extras.getParcelable(Extras.URI);
                 final List<String> pathSegments = uri.getPathSegments();
-                if (pathSegments.size() < 3 || pathSegments.size() > 4) {
+                if (pathSegments.size() < 3 || pathSegments.size() > 5) {
                     Log.e(TAG, "Wrong number of path segments: uri=" + uri);
                     ok.putBoolean(Extras.OK, false);
                     writeCause(ok, new LibraryException(ILLEGAL_URI,
@@ -133,6 +133,12 @@ public abstract class LibraryProvider extends ContentProvider {
                 }
 
                 final String library = pathSegments.get(0);
+                final String identity;
+                if (pathSegments.size() > 3) {
+                    identity = pathSegments.get(3);
+                } else {
+                    identity = null;
+                }
 
                 final Bundle args = new Bundle();
                 args.putParcelable(Extras.URI, uri);
@@ -145,14 +151,40 @@ public abstract class LibraryProvider extends ContentProvider {
                         queryAlbumsInternal(library, subscriber, args);
                         break;
                     }
+                    case M_ALBUM: {
+                        final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                        getAlbumInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_ALBUM_TRACKS: {
+                        final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                        getAlbumTracksInternal(library, identity, subscriber, args);
+                        break;
+                    }
                     case M_ARTISTS: {
                         final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
                         queryArtistsInternal(library, subscriber, args);
                         break;
                     }
-                    case M_FOLDERS: {
+                    case M_ARTIST: {
+                        final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
+                        getArtistInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_ARTIST_ALBUMS: {
+                        final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                        getArtistAlbumsInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_ARTIST_TRACKS: {
+                        final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                        getArtistTracksInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_FOLDERS:
+                    case M_FOLDER: {
                         final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
-                        browseFoldersInternal(library, null, subscriber, args);
+                        browseFoldersInternal(library, identity, subscriber, args);
                         break;
                     }
                     case M_GENRES: {
@@ -160,9 +192,34 @@ public abstract class LibraryProvider extends ContentProvider {
                         queryGenresInternal(library, subscriber, args);
                         break;
                     }
+                    case M_GENRE: {
+                        final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
+                        getGenreInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_GENRE_ALBUMS: {
+                        final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
+                        getGenreAlbumsInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_GENRE_TRACKS: {
+                        final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                        getGenreTracksInternal(library, identity, subscriber, args);
+                        break;
+                    }
                     case M_PLAYLISTS: {
                         final BundleableSubscriber<Playlist> subscriber = new BundleableSubscriber<>(binder);
                         queryPlaylistsInternal(library, subscriber, args);
+                        break;
+                    }
+                    case M_PLAYLIST: {
+                        final BundleableSubscriber<Playlist> subscriber = new BundleableSubscriber<>(binder);
+                        getPlaylistInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_PLAYLIST_TRACKS: {
+                        final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
+                        getPlaylistTracksInternal(library, identity, subscriber, args);
                         break;
                     }
                     case M_TRACKS: {
@@ -170,35 +227,9 @@ public abstract class LibraryProvider extends ContentProvider {
                         queryTracksInternal(library, subscriber, args);
                         break;
                     }
-                    //
-                    case M_ALBUM: {
-                        final BundleableSubscriber<Album> subscriber = new BundleableSubscriber<>(binder);
-                        getAlbumInternal(library, uri.getLastPathSegment(), subscriber, args);
-                        break;
-                    }
-                    case M_ARTIST: {
-                        final BundleableSubscriber<Artist> subscriber = new BundleableSubscriber<>(binder);
-                        getArtistInternal(library, uri.getLastPathSegment(), subscriber, args);
-                        break;
-                    }
-                    case M_FOLDER: {
-                        final BundleableSubscriber<Bundleable> subscriber = new BundleableSubscriber<>(binder);
-                        browseFoldersInternal(library, uri.getLastPathSegment(), subscriber, args);
-                        break;
-                    }
-                    case M_GENRE: {
-                        final BundleableSubscriber<Genre> subscriber = new BundleableSubscriber<>(binder);
-                        getGenreInternal(library, uri.getLastPathSegment(), subscriber, args);
-                        break;
-                    }
-                    case M_PLAYLIST: {
-                        final BundleableSubscriber<Playlist> subscriber = new BundleableSubscriber<>(binder);
-                        getPlaylistInternal(library, uri.getLastPathSegment(), subscriber, args);
-                        break;
-                    }
                     case M_TRACK: {
                         final BundleableSubscriber<Track> subscriber = new BundleableSubscriber<>(binder);
-                        getTrackInternal(library, uri.getLastPathSegment(), subscriber, args);
+                        getTrackInternal(library, identity, subscriber, args);
                         break;
                     }
                     default: {
@@ -286,6 +317,19 @@ public abstract class LibraryProvider extends ContentProvider {
                 .subscribe(subscriber);
     }
 
+    protected void getAlbumTracksInternal(final String library, final String identity, final Subscriber<List<Track>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Track>() {
+                    @Override
+                    public void call(Subscriber<? super Track> subscriber) {
+                        getAlbumTracks(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
+                .subscribe(subscriber);
+    }
+
     protected void queryArtistsInternal(final String library, final Subscriber<List<Artist>> subscriber, final Bundle args) {
         Observable.create(
                 new Observable.OnSubscribe<Artist>() {
@@ -310,6 +354,32 @@ public abstract class LibraryProvider extends ContentProvider {
                 .subscribeOn(scheduler)
                 .first()
                 .compose(new BundleableListTransformer<Artist>(null))
+                .subscribe(subscriber);
+    }
+
+    protected void getArtistAlbumsInternal(final String library, final String identity, final Subscriber<List<Album>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Album>() {
+                    @Override
+                    public void call(Subscriber<? super Album> subscriber) {
+                        getArtistAlbums(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(Extras.SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void getArtistTracksInternal(final String library, final String identity, final Subscriber<List<Track>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Track>() {
+                    @Override
+                    public void call(Subscriber<? super Track> subscriber) {
+                        getArtistTracks(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
                 .subscribe(subscriber);
     }
 
@@ -340,6 +410,32 @@ public abstract class LibraryProvider extends ContentProvider {
                 .subscribe(subscriber);
     }
 
+    protected void getGenreAlbumsInternal(final String library, final String identity, final Subscriber<List<Album>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Album>() {
+                    @Override
+                    public void call(Subscriber<? super Album> subscriber) {
+                        getGenreAlbums(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(Extras.SORTORDER))))
+                .subscribe(subscriber);
+    }
+
+    protected void getGenreTracksInternal(final String library, final String identity, final Subscriber<List<Track>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Track>() {
+                    @Override
+                    public void call(Subscriber<? super Track> subscriber) {
+                        getGenreTracks(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
+                .subscribe(subscriber);
+    }
+
     protected void queryPlaylistsInternal(final String library, final Subscriber<List<Playlist>> subscriber, final Bundle args) {
         Observable.create(
                 new Observable.OnSubscribe<Playlist>() {
@@ -364,6 +460,19 @@ public abstract class LibraryProvider extends ContentProvider {
                 .subscribeOn(scheduler)
                 .first()
                 .compose(new BundleableListTransformer<Playlist>(null))
+                .subscribe(subscriber);
+    }
+
+    protected void getPlaylistTracksInternal(final String library, final String identity, final Subscriber<List<Track>> subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Track>() {
+                    @Override
+                    public void call(Subscriber<? super Track> subscriber) {
+                        getPlaylistTracks(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .compose(new BundleableListTransformer<Track>(null))//No sort
                 .subscribe(subscriber);
     }
 
@@ -415,11 +524,23 @@ public abstract class LibraryProvider extends ContentProvider {
         subscriber.onError(new UnsupportedOperationException());
     }
 
+    protected void getAlbumTracks(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
     protected void queryArtists(String library, Subscriber<? super Artist> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
     protected void getArtist(String library, String identity, Subscriber<? super Artist> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected void getArtistAlbums(String library, String identity, Subscriber<? super Album> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected void getArtistTracks(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
@@ -431,11 +552,23 @@ public abstract class LibraryProvider extends ContentProvider {
         subscriber.onError(new UnsupportedOperationException());
     }
 
+    protected void getGenreAlbums(String library, String identity, Subscriber<? super Album> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected void getGenreTracks(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
     protected void queryPlaylists(String library, Subscriber<? super Playlist> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
     protected void getPlaylist(String library, String identity, Subscriber<? super Playlist> subscriber, Bundle args) {
+        subscriber.onError(new UnsupportedOperationException());
+    }
+
+    protected void getPlaylistTracks(String library, String identity, Subscriber<? super Track> subscriber, Bundle args) {
         subscriber.onError(new UnsupportedOperationException());
     }
 
