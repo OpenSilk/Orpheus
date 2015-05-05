@@ -37,6 +37,7 @@ import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Artist;

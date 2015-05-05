@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.common;
+package org.opensilk.music.loader;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -91,7 +91,7 @@ public class BundleableLoader implements RxLoader<Bundleable> {
     public BundleableLoader(
             @ForApplication Context context,
             @Named("loader_uri") Uri uri,
-            @Named("loader_sortorder")String sortOrder
+            @Named("loader_sortorder") String sortOrder
     ) {
         this.context = context;
         this.uri = uri;
