@@ -64,7 +64,7 @@ import static org.opensilk.music.library.mediastore.util.CursorHelpers.appendId;
  * Created by drew on 4/26/15.
  */
 public class MediaStoreLibraryProvider extends LibraryProvider {
-    private static final boolean TESTING = true;
+    private static final boolean TESTING = false; //for when the tester app doesnt use mortar
 
     @Inject @Named("mediaStoreLibraryBaseAuthority") String mBaseAuthority;
     @Inject Provider<AlbumsLoader> mAlbumsLoaderProvider;
