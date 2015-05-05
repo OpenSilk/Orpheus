@@ -32,6 +32,7 @@ import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.albums.AlbumsScreenFragment;
+import org.opensilk.music.ui3.artists.ArtistsScreenFragment;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.folders.FoldersScreenFragment;
 import org.opensilk.music.ui3.library.LandingScreenViewAdapter.ViewItem;
@@ -164,7 +165,10 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
             fm.replaceMainContent(f, FoldersScreenFragment.NAME, true);
         } else if (item == ViewItem.ALBUMS) {
             AlbumsScreenFragment f = AlbumsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, FoldersScreenFragment.NAME, true);
+            fm.replaceMainContent(f, AlbumsScreenFragment.NAME, true);
+        } else if (item == ViewItem.ARTISTS) {
+            ArtistsScreenFragment f = ArtistsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
+            fm.replaceMainContent(f, ArtistsScreenFragment.NAME, true);
         }
     }
 }

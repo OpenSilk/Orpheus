@@ -45,7 +45,8 @@ public class AlbumsScreen extends BundleableScreen {
     public static class Factory extends ComponentFactory<AlbumsScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, AlbumsScreen screen) {
-            return AlbumsScreenComponent.FACTORY.call(DaggerService.<MusicActivityComponent>getDaggerComponent(parentScope), screen);
+            MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
+            return AlbumsScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }
 }

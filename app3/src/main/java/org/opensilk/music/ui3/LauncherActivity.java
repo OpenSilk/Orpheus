@@ -55,13 +55,14 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
 
     @Override
     protected void onCreateScope(MortarScope.Builder builder) {
-        builder.withService(DaggerService.DAGGER_SERVICE, LauncherActivityComponent.FACTORY.call(
-                DaggerService.<AppComponent>getDaggerComponent(getApplicationContext())));
+        AppComponent appComponent = DaggerService.getDaggerComponent(getApplicationContext());
+        builder.withService(DaggerService.DAGGER_SERVICE, LauncherActivityComponent.FACTORY.call(appComponent));
     }
 
     @Override
     protected void performInjection() {
-        DaggerService.<LauncherActivityComponent>getDaggerComponent(this).inject(this);
+        LauncherActivityComponent activityComponent = DaggerService.getDaggerComponent(this);
+        activityComponent.inject(this);
     }
 
     @Override
