@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.folders;
+package org.opensilk.music.ui3.albums;
 
 import android.content.Context;
 import android.net.Uri;
@@ -24,10 +24,12 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.library.sort.AlbumSortOrder;
 import org.opensilk.music.library.sort.FolderSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.folders.FoldersScreenFragment;
 
 import javax.inject.Named;
 
@@ -35,29 +37,29 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Created by drew on 5/2/15.
+ * Created by drew on 5/5/15.
  */
 @Module
-public class FoldersScreenModule {
-    final FoldersScreen screen;
+public class AlbumsScreenModule {
+    final AlbumsScreen screen;
 
-    public FoldersScreenModule(FoldersScreen screen) {
+    public AlbumsScreenModule(AlbumsScreen screen) {
         this.screen = screen;
     }
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return LibraryUris.folders(screen.libraryConfig.authority, screen.libraryInfo.libraryId, screen.libraryInfo.folderId);
+        return LibraryUris.albums(screen.libraryConfig.authority, screen.libraryInfo.libraryId);
     }
 
     @Provides @Named("loader_sortorder")
     public String provideLoaderSortOrder(AppPreferences preferences) {
-        return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig, AppPreferences.FOLDER_SORT_ORDER), FolderSortOrder.A_Z);
+        return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig, AppPreferences.ALBUM_SORT_ORDER), AlbumSortOrder.A_Z);
     }
 
     @Provides @Named("presenter_wantGrid")
-    public Boolean provideWantGrid() {
-        return false; //Only lists
+    public Boolean provideWantGrid(AppPreferences preferences) {
+        return preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig, AppPreferences.ALBUM_LAYOUT), AppPreferences.GRID);
     }
 
     @Provides @ScreenScope
@@ -65,9 +67,7 @@ public class FoldersScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
-                LibraryInfo info = screen.libraryInfo.buildUpon(item.getIdentity(), item.getName());
-                FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, info);
-                presenter.getFm().replaceMainContent(f, FoldersScreenFragment.NAME + "-" + info.folderId, true);
+                //TODO
             }
         };
     }

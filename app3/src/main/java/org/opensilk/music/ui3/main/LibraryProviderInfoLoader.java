@@ -117,7 +117,9 @@ public class LibraryProviderInfoLoader {
         }).filter(new Func1<ProviderInfo, Boolean>() {
             @Override
             public Boolean call(ProviderInfo providerInfo) {
-                return StringUtils.startsWith(providerInfo.authority, LibraryProvider.AUTHORITY_PFX);
+                return StringUtils.startsWith(providerInfo.authority, LibraryProvider.AUTHORITY_PFX)
+                        //Ignore non exported providers unless they're ours
+                        && (StringUtils.equals(providerInfo.packageName, context.getPackageName()) || providerInfo.exported);
             }
         }).map(new Func1<ProviderInfo, LibraryProviderInfo>() {
             @Override

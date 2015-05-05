@@ -46,11 +46,11 @@ import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.widgets.GridTileDescription;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -188,8 +188,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         holder.title.setText(playlist.name);
         Context context = holder.itemView.getContext();
         holder.subtitle.setText(Utils.makeLabel(context, R.plurals.Nsongs, playlist.trackUris.size()));
-        if (gridStyle && (playlist.albumUris.size() > 0 || playlist.artInfos.size() > 0)) {
-            loadMultiArtwork(holder, playlist.albumUris, playlist.artInfos, false);
+        if (gridStyle && (playlist.artInfos.size() > 0)) {
+            loadMultiArtwork(holder, Collections.<Uri>emptyList(), playlist.artInfos, false);
         } else {
             setLetterTileDrawable(holder, playlist.name);
         }
@@ -247,11 +247,14 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
 
     protected boolean wantsMultiArtwork(int position) {
         Bundleable item = getItem(position);
-        if (item instanceof TrackCollection) {
-            TrackCollection c = (TrackCollection) item;
-            return c.artInfos.size() > 1 || c.albumUris.size() > 1;
+        if (item instanceof Genre) {
+            Genre g = (Genre) item;
+            return g.artInfos.size() > 1 || g.albumUris.size() > 1;
+        } else if (item instanceof Playlist) {
+            return ((Playlist) item).artInfos.size() > 1;
+        } else {
+            return false;
         }
-        return false;
     }
 
     void loadMultiArtwork(ViewHolder holder, List<Uri> albumUris, List<ArtInfo> artInfos, boolean try2) {
@@ -409,7 +412,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         @InjectView(R.id.grid_description) @Optional GridTileDescription descriptionContainer;
         @InjectView(R.id.tile_title) TextView title;
         @InjectView(R.id.tile_subtitle) TextView subtitle;
-        @InjectView(R.id.tile_info) TextView extraInfo;
+        @InjectView(R.id.tile_info) @Optional TextView extraInfo;
         @InjectView(R.id.tile_overflow) ImageButton overflow;
 
         final CompositeSubscription subscriptions;
@@ -428,7 +431,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             if (artwork3 != null) artwork3.setImageBitmap(null);
             if (artwork4 != null) artwork4.setImageBitmap(null);
             if (descriptionContainer != null) descriptionContainer.resetBackground();
-            if (extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
+            if (extraInfo != null && extraInfo.getVisibility() != View.GONE) extraInfo.setVisibility(View.GONE);
         }
     }
 

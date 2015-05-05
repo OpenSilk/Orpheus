@@ -15,12 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.albums;
+package org.opensilk.music.ui3.common;
 
-import android.support.v4.app.Fragment;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 
 /**
- * Created by drew on 4/30/15.
+ * Created by drew on 5/5/15.
  */
-public class AlbumsFragment extends Fragment {
+public class BundleableScreen {
+
+    public final LibraryConfig libraryConfig;
+    public final LibraryInfo libraryInfo;
+
+    public BundleableScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
+        this.libraryConfig = libraryConfig;
+        this.libraryInfo = libraryInfo;
+    }
+
 }

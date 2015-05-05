@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.folders;
+package org.opensilk.music.ui3.albums;
 
 import android.content.res.Resources;
 
@@ -32,20 +32,20 @@ import org.opensilk.music.ui3.common.BundleableScreen;
 import mortar.MortarScope;
 
 /**
- * Created by drew on 5/2/15.
+ * Created by drew on 5/5/15.
  */
 @Layout(R.layout.bundleable_recycler)
-@WithComponentFactory(FoldersScreen.Factory.class)
-public class FoldersScreen extends BundleableScreen {
+@WithComponentFactory(AlbumsScreen.Factory.class)
+public class AlbumsScreen extends BundleableScreen {
 
-    public FoldersScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
+    public AlbumsScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
         super(libraryConfig, libraryInfo);
     }
 
-    public static class Factory extends ComponentFactory<FoldersScreen> {
+    public static class Factory extends ComponentFactory<AlbumsScreen> {
         @Override
-        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, FoldersScreen screen) {
-            return FoldersScreenComponent.FACTORY.call(DaggerService.<MusicActivityComponent>getDaggerComponent(parentScope), screen);
+        protected Object createDaggerComponent(Resources resources, MortarScope parentScope, AlbumsScreen screen) {
+            return AlbumsScreenComponent.FACTORY.call(DaggerService.<MusicActivityComponent>getDaggerComponent(parentScope), screen);
         }
     }
 }

@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.app.PreferencesWrapper;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.LibraryConfig;
@@ -304,6 +305,14 @@ public class AppPreferences extends PreferencesWrapper {
 
     public String makePluginPrefKey(LibraryConfig libraryConfig, String key) {
         return libraryConfig.authority+"."+key;
+    }
+
+    /*
+     * Layouts
+     */
+
+    public boolean isGrid(String key, String def) {
+        return StringUtils.equals(getPrefs().getString(key, def), GRID);
     }
 
     /*

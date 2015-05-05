@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.folders;
+package org.opensilk.music.ui3.albums;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -25,12 +25,12 @@ import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**
- * Created by drew on 5/2/15.
+ * Created by drew on 5/5/15.
  */
-public class FoldersScreenFragment extends BundleableFragment {
-    public static final String NAME = FoldersScreenFragment.class.getName();
+public class AlbumsScreenFragment extends BundleableFragment {
+    public static final String NAME = AlbumsScreenFragment.class.getName();
 
-    public static FoldersScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
+    public static AlbumsScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
         Bundle args = makeCommonArgsBundle(config, info);
         return factory(context, NAME, args);
     }
@@ -38,12 +38,6 @@ public class FoldersScreenFragment extends BundleableFragment {
     @Override
     protected Object getScreen() {
         extractCommonArgs();
-        return new FoldersScreen(mLibraryConfig, mLibraryInfo);
+        return new AlbumsScreen(mLibraryConfig, mLibraryInfo);
     }
-
-    @Override
-    protected String getScopeName() {
-        return super.getScopeName() + "-" + mLibraryInfo.folderId;
-    }
-
 }

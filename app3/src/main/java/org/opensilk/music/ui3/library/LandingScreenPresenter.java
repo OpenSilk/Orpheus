@@ -31,6 +31,7 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.ui3.albums.AlbumsScreenFragment;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.folders.FoldersScreenFragment;
 import org.opensilk.music.ui3.library.LandingScreenViewAdapter.ViewItem;
@@ -101,14 +102,14 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
 
     void createCategories() {
         List<ViewItem> items = new ArrayList<>();
+        if (screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS)) {
+            items.add(ViewItem.FOLDERS);
+        }
         if (screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
             items.add(ViewItem.ALBUMS);
         }
         if (screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
             items.add(ViewItem.ARTISTS);
-        }
-        if (screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS)) {
-            items.add(ViewItem.FOLDERS);
         }
         if (screen.libraryConfig.hasAbility(LibraryCapability.GENRES)) {
             items.add(ViewItem.GENRES);
@@ -159,8 +160,11 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
 
     void onItemClicked(Context context, ViewItem item) {
         if (item == ViewItem.FOLDERS) {
-            FoldersScreenFragment f = FoldersScreenFragment.newInstance(screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, FoldersScreenFragment.TAG, true);
+            FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, currentSelection);
+            fm.replaceMainContent(f, FoldersScreenFragment.NAME, true);
+        } else if (item == ViewItem.ALBUMS) {
+            AlbumsScreenFragment f = AlbumsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
+            fm.replaceMainContent(f, FoldersScreenFragment.NAME, true);
         }
     }
 }
