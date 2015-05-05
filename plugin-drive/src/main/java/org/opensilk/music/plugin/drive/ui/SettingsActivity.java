@@ -18,9 +18,12 @@
 package org.opensilk.music.plugin.drive.ui;
 
 import android.app.Fragment;
+import android.os.Bundle;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.plugin.common.AbsSettingsActivity;
+import org.opensilk.music.plugin.drive.BuildConfig;
 import org.opensilk.music.plugin.drive.GlobalComponent;
 
 import mortar.MortarScope;
@@ -31,9 +34,17 @@ import mortar.MortarScope;
 public class SettingsActivity extends AbsSettingsActivity {
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        if (BuildConfig.DEBUG) { //Incase i forget to remove this. TODO remove
+            getIntent().putExtra(LibraryConstants.EXTRA_LIBRARY_ID, "dr3wsuth3rland@gmail.com");
+        }
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     protected void onCreateScope(MortarScope.Builder builder) {
-        builder.withService(DaggerService.DAGGER_SERVICE, ActivityComponent.FACTORY.call(
-                DaggerService.<GlobalComponent>getDaggerComponent(getApplicationContext())));
+//        builder.withService(DaggerService.DAGGER_SERVICE, ActivityComponent.FACTORY.call(
+//                DaggerService.<GlobalComponent>getDaggerComponent(getApplicationContext())));
     }
 
     @Override

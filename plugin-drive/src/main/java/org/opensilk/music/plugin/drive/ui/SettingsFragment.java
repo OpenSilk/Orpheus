@@ -26,9 +26,12 @@ import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.music.library.LibraryConstants;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.plugin.common.AbsSettingsActivity;
 import org.opensilk.music.plugin.common.FolderPickerActivity;
 import org.opensilk.music.plugin.common.LibraryPreferences;
+import org.opensilk.music.plugin.drive.GlobalComponent;
 import org.opensilk.music.plugin.drive.R;
 import org.opensilk.music.plugin.drive.provider.DriveLibraryProvider;
 
@@ -56,7 +59,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        DaggerService.<ActivityComponent>getDaggerComponent(activity).inject(this);
+//        DaggerService.<ActivityComponent>getDaggerComponent(activity).inject(this);
     }
 
     @Override
@@ -86,13 +89,12 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 44) {
             if (resultCode == Activity.RESULT_OK) {
-                String pickedFolder = data.getStringExtra(FolderPickerActivity.PICKED_FOLDER_IDENTITY);
-                String pickedFolderTitle = data.getStringExtra(FolderPickerActivity.PICKED_FOLDER_TITLE);
-                if (!StringUtils.isEmpty(pickedFolder)) {
+                LibraryInfo libraryInfo = data.getParcelableExtra(LibraryConstants.EXTRA_LIBRARY_INFO);
+                if (libraryInfo != null && !StringUtils.isEmpty(libraryInfo.folderId)) {
                     getPreferenceManager().getSharedPreferences().edit()
-                            .putString(ROOT_FOLDER, pickedFolder)
-                            .putString(ROOT_FOLDER_NAME, pickedFolderTitle).apply();
-                    findPreference(ROOT_FOLDER).setSummary(pickedFolderTitle);
+                            .putString(ROOT_FOLDER, libraryInfo.folderId)
+                            .putString(ROOT_FOLDER_NAME, libraryInfo.folderName).apply();
+                    findPreference(ROOT_FOLDER).setSummary(libraryInfo.folderName);
                 }
             }
         } else {
@@ -105,8 +107,13 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         if (findPreference(ROOT_FOLDER) == preference) {
             getPreferenceManager().getSharedPreferences().edit().remove(ROOT_FOLDER).remove(ROOT_FOLDER_NAME).apply();
             findPreference(ROOT_FOLDER).setSummary(null);
-            startActivityForResult(FolderPickerActivity.buildIntent(getActivity().getIntent(), getActivity(),
-                    DriveLibraryProvider.AUTHORITY, mLibraryId, null), 44);
+
+            final Intent parentIntent = getActivity().getIntent();
+            final String authority = DriveLibraryProvider.AUTHORITY_PFX+
+                    DaggerService.<GlobalComponent>getDaggerComponent(getActivity().getApplicationContext()).baseAuthority();
+            final LibraryInfo libraryInfo = new LibraryInfo(mLibraryId, null, null, null);
+
+            startActivityForResult(FolderPickerActivity.buildIntent(parentIntent, getActivity(), authority, libraryInfo), 44);
             return true;
         } else if (findPreference(CLEAR_CACHE) == preference) {
             //TODO

@@ -26,5 +26,6 @@
     <!-- Folder Picker -->
     <string name="toast_how_to_pick">Long click folder to select</string>
     <string name="err_song_click">Selection must be folder</string>
+    <string name="err_loading">Error loading items</string>
     <string name="no_results">No results</string>
 </resources>

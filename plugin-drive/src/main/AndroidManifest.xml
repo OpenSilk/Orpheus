@@ -49,18 +49,6 @@
                        android:value="org.opensilk.music.plugin.drive.ui.SettingsActivity"/>
         </activity>
 
-        <!-- RemoteLibrary implementation
-             all items here required for Orpheus to populate the PluginInfo -->
-        <service android:name=".DriveLibraryService"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/plugin_name"
-            android:description="@string/plugin_description"
-            android:permission="org.opensilk.music.api.permission.BIND_LIBRARY_SERVICE">
-            <intent-filter>
-                <action android:name="org.opensilk.music.plugin.LIBRARY_SERVICE" />
-            </intent-filter>
-         </service>
-
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 

@@ -26,27 +26,22 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 
 import org.opensilk.music.library.LibraryConstants;
+import org.opensilk.music.library.LibraryInfo;
 
 /**
  * Created by drew on 7/18/14.
  */
 public class FolderPickerActivity extends AppCompatActivity {
 
-    public static final String STARTING_FOLDER = "starting_folder";
-    public static final String PICKED_FOLDER_IDENTITY = "picked_folder_identity";
-    public static final String PICKED_FOLDER_TITLE = "picked_folder_title";
-
     private String mAuthority;
-    private String mLibraryId;
-    private String mStartingFolder;
+    private LibraryInfo mLibraryInfo;
 
     public static Intent buildIntent(Intent parent, Context context,
-                                     String authority, String libraryId, String startFolder) {
+                                     String authority, LibraryInfo libraryInfo) {
         return new Intent(context, FolderPickerActivity.class)
                 .putExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, parent.getBooleanExtra(LibraryConstants.EXTRA_WANT_LIGHT_THEME, false))
                 .putExtra(LibraryConstants.EXTRA_LIBRARY_AUTHORITY, authority)
-                .putExtra(LibraryConstants.EXTRA_LIBRARY_ID, libraryId)
-                .putExtra(FolderPickerActivity.STARTING_FOLDER, startFolder);
+                .putExtra(LibraryConstants.EXTRA_LIBRARY_INFO, libraryInfo);
     }
 
     @Override
@@ -68,13 +63,12 @@ public class FolderPickerActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mAuthority = getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_AUTHORITY);
-        mLibraryId = getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
-        mStartingFolder = getIntent().getStringExtra(STARTING_FOLDER);
+        mLibraryInfo = getIntent().getParcelableExtra(LibraryConstants.EXTRA_LIBRARY_INFO);
 
         setResult(RESULT_CANCELED, null);
 
         if (savedInstanceState == null) {
-            pushFolder(mAuthority, mLibraryId, mStartingFolder);
+            pushFolder(mAuthority, mLibraryInfo);
         }
     }
 
@@ -83,18 +77,18 @@ public class FolderPickerActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    void pushFolder(String authority, String libraryid, String folderid) {
+    void pushFolder(String authority, LibraryInfo libraryInfo) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main, FolderPickerFragment.newInstance(authority, libraryid, folderid));
-        if (!TextUtils.isEmpty(folderid) && !TextUtils.equals(folderid, mStartingFolder)) {
-            ft.addToBackStack(folderid);
+                .replace(R.id.main, FolderPickerFragment.newInstance(authority, libraryInfo));
+        if (!TextUtils.isEmpty(libraryInfo.folderId) && !TextUtils.equals(libraryInfo.folderId, mLibraryInfo.folderId)) {
+            ft.addToBackStack(libraryInfo.folderId);
         }
         ft.commit();
     }
 
-    void onFolderSelected(String identity, String title) {
-        setResult(RESULT_OK, getIntent().putExtra(PICKED_FOLDER_IDENTITY, identity)
-                .putExtra(PICKED_FOLDER_TITLE, title));
+    void onFolderSelected(LibraryInfo libraryInfo) {
+        Intent i = new Intent().putExtra(LibraryConstants.EXTRA_LIBRARY_INFO, libraryInfo);
+        setResult(RESULT_OK, i);
         finish();
     }
 }

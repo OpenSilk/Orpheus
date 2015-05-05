@@ -40,5 +40,5 @@ public interface ActivityComponent {
         }
     };
     void inject(AuthTestFragment fragment);
-    void inject(SettingsFragment fragment);
+//    void inject(SettingsFragment fragment);
 }

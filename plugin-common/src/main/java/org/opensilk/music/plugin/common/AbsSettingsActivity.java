@@ -52,7 +52,7 @@ public abstract class AbsSettingsActivity extends MortarActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        String libraryId = "dr3wsuth3rland@gmail.com";// getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
+        String libraryId = getIntent().getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()

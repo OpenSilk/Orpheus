@@ -18,46 +18,50 @@
 package org.opensilk.music.plugin.common;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import org.opensilk.music.library.proj.FolderTrackProj;
+import org.opensilk.music.library.LibraryConstants;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.library.sort.FolderTrackSortOrder;
-import org.opensilk.music.library.util.CursorUtil;
+import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
+import org.opensilk.music.model.Genre;
+import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.spi.Bundleable;
+
+import java.util.List;
+
+import rx.Subscription;
+import rx.android.observables.AndroidObservable;
+import rx.functions.Action1;
 
 /**
  * Created by drew on 4/29/15.
  */
 public class FolderPickerFragment extends ListFragment implements
         AdapterView.OnItemClickListener,
-        AdapterView.OnItemLongClickListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        AdapterView.OnItemLongClickListener {
 
     private FolderPickerActivity mActivity;
     private String mAuthority;
-    private String mSourceIdentity;
-    private String mFolderIdentity;
+    private LibraryInfo mLibraryInfo;
     private ArrayAdapter<Bundleable> mAdapter;
+    private BundleableLoader mLoader;
+    private Subscription mLoaderSubscription;
 
-    public static FolderPickerFragment newInstance(String authority, String identity, String folderId) {
+    public static FolderPickerFragment newInstance(String authority, LibraryInfo libraryInfo) {
         FolderPickerFragment f = new FolderPickerFragment();
         Bundle b = new Bundle();
         b.putString("__a", authority);
-        b.putString("__id", identity);
-        b.putString("__fid", folderId);
+        b.putParcelable(LibraryConstants.EXTRA_LIBRARY_INFO, libraryInfo);
         f.setArguments(b);
         return f;
     }
@@ -78,9 +82,13 @@ public class FolderPickerFragment extends ListFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuthority = getArguments().getString("__a");
-        mSourceIdentity = getArguments().getString("__id");
-        mFolderIdentity = getArguments().getString("__fid");
+        mLibraryInfo = getArguments().getParcelable(LibraryConstants.EXTRA_LIBRARY_INFO);
         mAdapter = new ArrayAdapter<Bundleable>(getActivity(), android.R.layout.simple_list_item_1);
+        mLoader = new BundleableLoader(
+                getActivity().getApplicationContext(),
+                LibraryUris.folderFolders(mAuthority, mLibraryInfo.libraryId, mLibraryInfo.folderId),
+                BundleableSortOrder.A_Z
+        );
     }
 
     @Override
@@ -99,15 +107,41 @@ public class FolderPickerFragment extends ListFragment implements
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         Toast.makeText(mActivity, R.string.toast_how_to_pick, Toast.LENGTH_LONG).show();
+        mLoaderSubscription = AndroidObservable.bindFragment(this, mLoader.getListObservable())
+                .subscribe(new Action1<List<Bundleable>>() {
+                    @Override
+                    public void call(List<Bundleable> bundleables) {
+                        if (!isResumed()) return;
+                        mAdapter.clear();
+                        if (!bundleables.isEmpty()) {
+                            mAdapter.addAll(bundleables);
+                            setListAdapter(mAdapter);
+                        } else {
+                            setListAdapter(null);
+                            setListShown(false);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        if (!isResumed()) return;
+                        mAdapter.clear();
+                        setListAdapter(null);
+                        setListShown(false);
+                        Toast.makeText(getActivity(), R.string.err_loading, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mLoaderSubscription != null) {
+            mLoaderSubscription.unsubscribe();
+        }
     }
 
     @Override
@@ -115,8 +149,10 @@ public class FolderPickerFragment extends ListFragment implements
         Bundleable item = (Bundleable) mAdapter.getItem(position);
         if ((item instanceof Folder)
                 || (item instanceof Album)
-                || (item instanceof Artist)) {
-            mActivity.pushFolder(mAuthority, mSourceIdentity, item.getIdentity());
+                || (item instanceof Artist)
+                || (item instanceof Genre)
+                || (item instanceof Playlist)) {
+            mActivity.pushFolder(mAuthority, mLibraryInfo.buildUpon(item.getIdentity(), item.getName()));
         } else {
             Toast.makeText(mActivity, R.string.err_song_click, Toast.LENGTH_SHORT).show();
         }
@@ -128,7 +164,7 @@ public class FolderPickerFragment extends ListFragment implements
         if ((item instanceof Folder)
                 || (item instanceof Album)
                 || (item instanceof Artist)) {
-            mActivity.onFolderSelected(item.getIdentity(), item.getName());
+            mActivity.onFolderSelected(mLibraryInfo.buildUpon(item.getIdentity(), item.getName()));
             return true;
         } else {
             Toast.makeText(mActivity, R.string.err_song_click, Toast.LENGTH_SHORT).show();
@@ -136,35 +172,4 @@ public class FolderPickerFragment extends ListFragment implements
         }
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(
-                mActivity,
-                LibraryUris.folders(mAuthority, mSourceIdentity, mFolderIdentity),
-                FolderTrackProj.ALL,
-                null,
-                null,
-                FolderTrackSortOrder.A_Z
-        );
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data != null) {
-            mAdapter.clear();
-            data.moveToFirst();
-            while (!data.isAfterLast()) {
-                mAdapter.add(CursorUtil.fromFolderTrackCursor(data));
-                data.moveToNext();
-            }
-            setListAdapter(mAdapter);
-        } else {
-            setListShown(true);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
-    }
 }

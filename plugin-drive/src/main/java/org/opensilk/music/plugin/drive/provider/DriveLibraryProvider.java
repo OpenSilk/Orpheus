@@ -31,7 +31,7 @@ import org.apache.commons.lang3.builder.RecursiveToStringStyle;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.ex.ParcelableException;
+import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import rx.Observable;
@@ -57,9 +58,9 @@ import timber.log.Timber;
 import static org.opensilk.music.library.LibraryCapability.FOLDERSTRACKS;
 import static org.opensilk.music.library.LibraryCapability.SETTINGS;
 import static org.opensilk.music.library.LibraryCapability.TRACKS;
-import static org.opensilk.music.library.ex.ParcelableException.AUTH_FAILURE;
-import static org.opensilk.music.library.ex.ParcelableException.NETWORK;
-import static org.opensilk.music.library.ex.ParcelableException.UNKNOWN;
+import static org.opensilk.music.library.internal.LibraryException.Kind.AUTH_FAILURE;
+import static org.opensilk.music.library.internal.LibraryException.Kind.NETWORK;
+import static org.opensilk.music.library.internal.LibraryException.Kind.UNKNOWN;
 import static org.opensilk.music.plugin.drive.Constants.BASE_FOLDERS_TRACKS_QUERY;
 import static org.opensilk.music.plugin.drive.Constants.DEFAULT_ROOT_FOLDER;
 import static org.opensilk.music.plugin.drive.Constants.IS_AUDIO;
@@ -71,10 +72,9 @@ import static org.opensilk.music.plugin.drive.Constants.TRACKS_QUERY;
  */
 public class DriveLibraryProvider extends LibraryProvider {
 
-    public static final String AUTHORITY = AUTHORITY_PFX+BuildConfig.APPLICATION_ID;
-
     @Inject SessionFactory mSessionFactory;
     @Inject LibraryPreferences mLibraryPrefs;
+    @Inject @Named("baseauthority") String mBaseAuthority;
 
     @Override
     public boolean onCreate() {
@@ -92,18 +92,18 @@ public class DriveLibraryProvider extends LibraryProvider {
                         getContext().getResources().getString(R.string.menu_change_source))
                 .setSettingsComponent(new ComponentName(getContext(), SettingsActivity.class),
                         getContext().getResources().getString(R.string.menu_library_settings))
-                .setAuthority(AUTHORITY)
+                .setAuthority(mAuthority)
                 .build();
     }
 
     @Override
     protected String getBaseAuthority() {
-        return BuildConfig.APPLICATION_ID;
+        return mBaseAuthority;
     }
 
     @DebugLog
     @Override
-    protected void getFoldersTracks(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
+    protected void browseFolders(String library, String identity, Subscriber<? super Bundleable> subscriber, Bundle args) {
         final SessionFactory.Session session;
         try {
             session = mSessionFactory.getSession(library);
@@ -241,11 +241,11 @@ public class DriveLibraryProvider extends LibraryProvider {
             return;
         }
         if (e instanceof GoogleAuthException || e instanceof UserRecoverableAuthIOException) {
-            subscriber.onError(new ParcelableException(AUTH_FAILURE, e));
+            subscriber.onError(new LibraryException(AUTH_FAILURE, e));
         } else if (e instanceof IOException) {
-            subscriber.onError(new ParcelableException(NETWORK, e));
+            subscriber.onError(new LibraryException(NETWORK, e));
         } else {
-            subscriber.onError(new ParcelableException(UNKNOWN, e));
+            subscriber.onError(new LibraryException(UNKNOWN, e));
         }
     }
 

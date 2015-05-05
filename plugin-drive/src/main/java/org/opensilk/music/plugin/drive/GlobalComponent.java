@@ -23,6 +23,7 @@ import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.plugin.drive.provider.DriveLibraryProvider;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -33,7 +34,10 @@ import rx.functions.Func1;
  */
 @Singleton
 @Component(
-        modules = AppContextModule.class
+        modules = {
+                AppContextModule.class,
+                GlobalModule.class
+        }
 )
 public interface GlobalComponent extends AppContextComponent {
         Func1<Context, GlobalComponent> FACTORY = new Func1<Context, GlobalComponent>() {
@@ -46,4 +50,5 @@ public interface GlobalComponent extends AppContextComponent {
         };
         void inject(DriveLibraryProvider provider);
         SessionFactory sessionFactory();
+        @Named("baseauthority") String baseAuthority();
 }
