@@ -171,7 +171,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
             final File f = files.get(i);
             final String path = f.getAbsolutePath();
             pathMap.put(path, f); //Add file to map while where iterating
-            selection.append("'").append(path).append("'");
+            selection.append("'").append(StringUtils.replace(path, "'", "''")).append("'");//TODO it would probably be better to use selectionArgs
             if (i < size - 1) {
                 selection.append(",");
             }
@@ -233,7 +233,7 @@ public class FoldersLibraryProvider extends LibraryProvider {
                 final File f = audioFiles.get(i);
                 final String path = f.getAbsolutePath();
                 pathMap.put(path, f); //Add file to map while where iterating
-                selection.append("'").append(path).append("'");
+                selection.append("'").append(StringUtils.replace(path, "'", "''")).append("'");
                 if (i < size - 1) {
                     selection.append(",");
                 }

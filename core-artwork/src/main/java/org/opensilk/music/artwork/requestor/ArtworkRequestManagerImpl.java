@@ -30,7 +30,6 @@ import android.text.TextUtils;
 
 import com.google.gson.Gson;
 
-import org.apache.commons.io.IOUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.artwork.shared.ArtworkPreferences;
@@ -410,7 +409,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     if (subscriber.isUnsubscribed()) return;
                     subscriber.onError(e);
                 } finally {
-                    IOUtils.closeQuietly(pfd);
+                    if (pfd != null) {
+                        //ICS at least is not a Closeable
+                        try { pfd.close(); } catch (Exception ignored) {}
+                    }
                 }
             }
         });

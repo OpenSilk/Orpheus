@@ -24,6 +24,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.opensilk.music.library.BuildConfig;
 import org.opensilk.music.model.ex.BadBundleableException;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.model.util.BundleableUtil;
@@ -45,7 +46,8 @@ import java.util.List;
  */
 public class BundleableListSlice<T extends Bundleable> implements Parcelable {
     private static String TAG = "BundleableListSlice";
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = BuildConfig.DEBUG;
+    private static boolean LOGVV = BuildConfig.DEBUG;
 
     /*
      * TODO get this number from somewhere else. For now set it to a quarter of
@@ -82,7 +84,7 @@ public class BundleableListSlice<T extends Bundleable> implements Parcelable {
                 Log.e(TAG, "Unable to materialize bundle", e);
             }
 
-            if (DEBUG) Log.d(TAG, "Read inline #" + i + ": " + mList.get(mList.size()-1));
+            if (LOGVV) Log.v(TAG, "Read inline #" + i + ": " + mList.get(mList.size() - 1));
             i++;
         }
         if (i >= N) {
@@ -109,7 +111,7 @@ public class BundleableListSlice<T extends Bundleable> implements Parcelable {
                     Log.e(TAG, "Unable to materialize bundle", e);
                 }
 
-                if (DEBUG) Log.d(TAG, "Read extra #" + i + ": " + mList.get(mList.size()-1));
+                if (LOGVV) Log.v(TAG, "Read extra #" + i + ": " + mList.get(mList.size() - 1));
                 i++;
             }
             reply.recycle();
@@ -144,7 +146,7 @@ public class BundleableListSlice<T extends Bundleable> implements Parcelable {
                 final T bundleable = mList.get(i);
                 dest.writeBundle(bundleable.toBundle());
 
-                if (DEBUG) Log.d(TAG, "Wrote inline #" + i + ": " + mList.get(i));
+                if (LOGVV) Log.v(TAG, "Wrote inline #" + i + ": " + mList.get(i));
                 i++;
             }
             if (i < N) {
@@ -164,7 +166,7 @@ public class BundleableListSlice<T extends Bundleable> implements Parcelable {
                             final T bundleable = mList.get(i);
                             reply.writeBundle(bundleable.toBundle());
 
-                            if (DEBUG) Log.d(TAG, "Wrote extra #" + i + ": " + mList.get(i));
+                            if (LOGVV) Log.v(TAG, "Wrote extra #" + i + ": " + mList.get(i));
                             i++;
                         }
                         if (i < N) {
