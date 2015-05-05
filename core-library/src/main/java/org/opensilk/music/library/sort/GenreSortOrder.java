@@ -20,6 +20,6 @@ package org.opensilk.music.library.sort;
 /**
  * Created by drew on 5/3/15.
  */
-public interface GenreSortOrder extends TrackCollectionSortOrder {
+public interface GenreSortOrder extends BundleableSortOrder {
 
 }

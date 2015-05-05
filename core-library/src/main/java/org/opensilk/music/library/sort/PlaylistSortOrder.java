@@ -20,5 +20,5 @@ package org.opensilk.music.library.sort;
 /**
  * Created by drew on 5/4/15.
  */
-public interface PlaylistSortOrder extends TrackCollectionSortOrder {
+public interface PlaylistSortOrder extends BundleableSortOrder {
 }
