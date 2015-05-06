@@ -37,6 +37,8 @@ import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.folders.FoldersScreenFragment;
 import org.opensilk.music.ui3.gallery.GalleryPage;
 import org.opensilk.music.ui3.gallery.GalleryScreenFragment;
+import org.opensilk.music.ui3.genres.GenresScreen;
+import org.opensilk.music.ui3.genres.GenresScreenFragment;
 import org.opensilk.music.ui3.library.LandingScreenViewAdapter.ViewItem;
 
 import java.util.ArrayList;
@@ -174,6 +176,9 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         } else if (item == ViewItem.ARTISTS) {
             ArtistsScreenFragment f = ArtistsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
             fm.replaceMainContent(f, ArtistsScreenFragment.NAME, true);
+        } else if (item == ViewItem.GENRES) {
+            GenresScreenFragment f = GenresScreenFragment.ni(context, screen.libraryConfig, currentSelection);
+            fm.replaceMainContent(f, GenresScreenFragment.NAME, true);
         } else if (item == ViewItem.GALLERY) {
             List<GalleryPage> pages = new ArrayList<>();
 //            if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {

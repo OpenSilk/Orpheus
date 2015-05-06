@@ -71,8 +71,9 @@ public class AppPreferences extends PreferencesWrapper {
     //profile sort orders
     public static final String ALBUM_TRACK_SORT_ORDER = "album_track_sort_order";
     public static final String ARTIST_ALBUM_SORT_ORDER = "artist_album_sort_order";
+    public static final String ARTIST_TRACK_SORT_ORDER = "argtist_track_sort_order";
     public static final String GENRE_ALBUM_SORT_ORDER = "genre_album_sort_order";
-    public static final String TRACK_COLLECTION_SORT_ORDER = "track_collection_sort_order";
+    public static final String GENRE_TRACK_SORT_ORDER = "genre_track_sort_order";
 
     //Gallery list styles
     public static final String ARTIST_LAYOUT = "artist_layout";
@@ -82,6 +83,10 @@ public class AppPreferences extends PreferencesWrapper {
     // values for list styles
     public static final String SIMPLE = "simple";
     public static final String GRID = "grid";
+
+    //profile list styles
+    public static final String ARTIST_ALBUM_LAYOUT = "artist_album_layout";
+    public static final String GENRE_ALBUM_LAYOUT = "genre_album_layout";
 
     //Theme
     public static final String WANT_DARK_THEME = "pref_dark_theme";
@@ -192,7 +197,7 @@ public class AppPreferences extends PreferencesWrapper {
                     .remove(PLAYLIST_SORT_ORDER)
                     .remove(ARTIST_ALBUM_SORT_ORDER)
                     .remove("album_song_sort_order")
-                    .remove(TRACK_COLLECTION_SORT_ORDER)
+                    .remove("track_collection_sort_order")
                     .remove("song_collection_sort_order")
                     .remove(ARTIST_LAYOUT)
                     .remove(ALBUM_LAYOUT)
