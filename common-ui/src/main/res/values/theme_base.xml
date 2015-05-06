@@ -18,32 +18,42 @@
 <resources>
 
     <!--Common styles for light theme-->
-    <style name="Theme.LightConfig" parent="Theme.AppCompat.Light.NoActionBar">
+
+    <!-- Top level theme directly inherits from appcompat parent-->
+    <style name="Theme.LightParent" parent="Theme.AppCompat.Light.NoActionBar">
 
     </style>
 
+    <!-- Middleware theme override this in project to set custom styles and such-->
+    <style name="Theme.LightOverlay" parent="Theme.LightParent">
+
+    </style>
+
+    <!-- Secondary middleware override this in the values-* dirs to change values for different configs-->
+    <style name="Theme.LightConfig" parent="Theme.LightParent">
+
+    </style>
+
+    <!-- Base theme all variations descend from -->
     <style name="Theme.LightBase" parent="Theme.LightConfig">
-        <!--TODO cant have both light toolbar style and dark
-            toolbarstyle, need to fix tinting action icons
-            so it only tints if the actionbar is light
-            right now,
-            without tinting light toolbar gets white icons
-            with tinting dark toolbar gets dark icons
-            also the tabstrip needs dark text for light toolbar-->
-        <!--<item name="toolbarStyle">@style/Toolbar.Light</item>-->
         <item name="toolbarStyle">@style/Toolbar.Dark.WhiteOverflow</item>
     </style>
 
+    <!-- Default theme -->
     <style name="Theme.Light" parent="Theme.LightBase">
-
-        <item name="colorPrimary">@color/green_500</item>
-        <item name="colorPrimaryDark">@color/green_700</item>
-        <item name="colorAccent">@color/amber_A400</item>
 
     </style>
 
     <!--Common styles for dark theme-->
-    <style name="Theme.DarkConfig" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.DarkParent" parent="Theme.AppCompat.NoActionBar">
+
+    </style>
+
+    <style name="Theme.DarkOverlay" parent="Theme.DarkParent">
+
+    </style>
+
+    <style name="Theme.DarkConfig" parent="Theme.DarkOverlay">
 
     </style>
 
@@ -79,18 +89,6 @@
     </style>
 
     <!-- end base dialog themes -->
-
-    <!-- Settings themes -->
-
-    <style name="Theme.Settings.Light" parent="Theme.Dialog.LightBase">
-
-    </style>
-
-    <style name="Theme.Settings.Dark" parent="Theme.Dialog.DarkBase">
-
-    </style>
-
-    <!-- end settings themes -->
 
     <!--Toolbar Styles -->
 

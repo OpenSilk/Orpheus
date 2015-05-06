@@ -27,6 +27,8 @@
     <!-- navigation drawers -->
     <dimen name="drawer_width">240dp</dimen>
 
+    <dimen name="action_bar_double_height">112dp</dimen>
+
     <!--unused-->
     <item name="dialog_fixed_height_major2" type="dimen">80%</item>
     <item name="dialog_fixed_height_minor2" type="dimen">100%</item>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <!--Common styles for light theme-->
+    <style name="Theme.LightOverlay." parent="Theme.AppCompat.Light.NoActionBar">
+
+        <item name="fabPlayStyle">@style/fabLight.Play</item>
+        <item name="fabNextStyle">@style/fabLight.Next</item>
+        <item name="fabPrevStyle">@style/fabLight.Prev</item>
+        <item name="fabShuffleStyle">@style/fabLight.Shuffle</item>
+        <item name="fabRepeatStyle">@style/fabLight.Repeat</item>
+
+        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionLight</item>
+        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Light</item>
+        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Light</item>
+
+        <item name="nowPlayingPlayStyle">@style/nowPlayingActionLight.Play</item>
+        <item name="nowPlayingNextStyle">@style/nowPlayingActionLight.Next</item>
+        <item name="nowPlayingPrevStyle">@style/nowPlayingActionLight.Prev</item>
+        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionLight.Shuffle</item>
+        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
+
+    </style>
+
+    <style name="Theme.Lightconfig" parent="Theme.LightOverlay">
+        <!--<item name="mainContentTopMargin">?actionBarSize</item>-->
+    </style>
+
+    <style name="Theme.Light" parent="Theme.LightBase">
+
+        <item name="colorPrimary">@color/green_500</item>
+        <item name="colorPrimaryDark">@color/green_700</item>
+        <item name="colorAccent">@color/amber_A400</item>
+
+    </style>
+
+    <!--Common styles for dark theme-->
+
+    <style name="Theme.DarkOverlay" parent="Theme.DarkParent">
+
+        <item name="fabPlayStyle">@style/fabDark.Play</item>
+        <item name="fabNextStyle">@style/fabDark.Next</item>
+        <item name="fabPrevStyle">@style/fabDark.Prev</item>
+        <item name="fabShuffleStyle">@style/fabDark.Shuffle</item>
+        <item name="fabRepeatStyle">@style/fabDark.Repeat</item>
+
+        <item name="gridTileDescriptionStyle">@style/GridTileDescriptionDark</item>
+        <item name="gridTileDescriptionTitleStyle">@style/GridTileDescriptionTitle.Dark</item>
+        <item name="gridTileDescriptionSubTitleStyle">@style/GridTileDescriptionSubTitle.Dark</item>
+
+        <item name="nowPlayingPlayStyle">@style/nowPlayingActionDark.Play</item>
+        <item name="nowPlayingNextStyle">@style/nowPlayingActionDark.Next</item>
+        <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
+        <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
+        <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
+
+    </style>
+
+    <style name="Theme.DarkConfig" parent="Theme.AppCompat.NoActionBar">
+        <item name="mainContentTopMargin">?actionBarSize</item>
+    </style>
+
+    <style name="Theme.Dark" parent="Theme.DarkBase">
+
+    </style>
+
+    <!-- End common themes -->
+
+    <!-- Settings themes -->
+
+    <style name="Theme.Settings.Light" parent="Theme.Dialog.LightBase">
+
+    </style>
+
+    <style name="Theme.Settings.Dark" parent="Theme.Dialog.DarkBase">
+
+    </style>
+
+    <!-- end settings themes -->
+
+</resources>

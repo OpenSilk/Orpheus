@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="ThemeStyleables">
-        <attr name="toolbarTheme" format="reference"/>
+    <declare-styleable name="OrpheusStyleables">
         <attr name="fabPlayStyle" format="reference"/>
         <attr name="fabNextStyle" format="reference"/>
         <attr name="fabPrevStyle" format="reference"/>

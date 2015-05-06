@@ -17,5 +17,5 @@
   -->
 
 <resources>
-    <dimen name="drawer_width">264dp</dimen>
+    <dimen name="action_bar_double_height">96dp</dimen>
 </resources>

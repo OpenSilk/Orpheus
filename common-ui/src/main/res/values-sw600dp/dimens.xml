@@ -18,4 +18,6 @@
 <resources>
   <!-- navigation drawers -->
   <dimen name="drawer_width">400dp</dimen>
+
+  <dimen name="action_bar_double_height">128dp</dimen>
 </resources>

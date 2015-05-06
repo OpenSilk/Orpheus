@@ -24,15 +24,9 @@
     <!--Daydream-->
     <dimen name="dream_art_size">300dp</dimen>
 
-    <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
-     https://developer.android.com/design/patterns/navigation-drawer.html -->
-    <dimen name="drawer_width">240dp</dimen>
-
     <integer name="profile_grid_cols_vertical">2</integer>
     <integer name="profile_grid_cols_horizontal">2</integer>
     <integer name="grid_columns">2</integer>
-
-    <dimen name="action_bar_double_height">112dp</dimen>
 
     <!--Fab-->
     <dimen name="fab_margin_end">32dp</dimen>

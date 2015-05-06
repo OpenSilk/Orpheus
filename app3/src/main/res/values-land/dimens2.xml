@@ -15,19 +15,12 @@
   ~ limitations under the License.
   -->
 
-<!--Nexus 7-->
 <resources>
     <!-- Daydream -->
-    <dimen name="dream_art_size">400dp</dimen>
+    <dimen name="dream_art_size">200dp</dimen>
 
-    <dimen name="drawer_width">400dp</dimen>
-
-    <integer name="profile_grid_cols_vertical">3</integer>
-    <integer name="profile_grid_cols_horizontal">3</integer>
-    <integer name="grid_columns">3</integer>
-
-    <dimen name="action_bar_double_height">128dp</dimen>
+    <integer name="grid_columns">4</integer>
 
     <!--now playing-->
-    <dimen name="now_playing_button_padding">12dp</dimen>
+    <dimen name="now_playing_button_padding">4dp</dimen>
 </resources>
