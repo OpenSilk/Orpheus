@@ -192,7 +192,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
                 l.setSelection(Selections.LOCAL_ALBUMS(ids));
                 return l.createObservable();
             }
-        });
+        }).subscribe(subscriber);
     }
 
     @Override
