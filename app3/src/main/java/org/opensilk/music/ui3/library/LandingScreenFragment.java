@@ -28,14 +28,23 @@ import org.opensilk.music.library.LibraryConfig;
 public class LandingScreenFragment extends MortarFragment {
     public static final String TAG = LandingScreenFragment.class.getName();
 
-    public static LandingScreenFragment newInstance(LibraryConfig config) {
+    public static LandingScreenFragment ni(Bundle config) {
         LandingScreenFragment f = new LandingScreenFragment();
-        f.setArguments(config.dematerialize());
+        f.setArguments(config);
         return f;
+    }
+
+    public static LandingScreenFragment ni(LibraryConfig config) {
+        return ni(config.dematerialize());
     }
 
     @Override
     protected Object newScreen() {
         return new LandingScreen(LibraryConfig.materialize(getArguments()));
+    }
+
+    @Override
+    protected String getScopeName() {
+        return TAG + "-" + ((LandingScreen) getScreen()).libraryConfig.authority;
     }
 }

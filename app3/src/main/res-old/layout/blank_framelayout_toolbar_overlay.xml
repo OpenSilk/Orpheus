@@ -32,6 +32,6 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:layout_gravity="top"
-        style="?toolbarTheme"/>
+        style="?toolbarStyle"/>
 
 </FrameLayout>

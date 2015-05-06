@@ -18,7 +18,7 @@
 
 <resources>
     <!--Common styles for light theme-->
-    <style name="Theme.LightOverlay." parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.LightOverlay" parent="Theme.LightParent">
 
         <item name="fabPlayStyle">@style/fabLight.Play</item>
         <item name="fabNextStyle">@style/fabLight.Next</item>
@@ -39,7 +39,7 @@
     </style>
 
     <style name="Theme.Lightconfig" parent="Theme.LightOverlay">
-        <!--<item name="mainContentTopMargin">?actionBarSize</item>-->
+        <item name="mainContentTopMargin">?actionBarSize</item>
     </style>
 
     <style name="Theme.Light" parent="Theme.LightBase">
@@ -72,7 +72,7 @@
 
     </style>
 
-    <style name="Theme.DarkConfig" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.DarkConfig" parent="Theme.DarkOverlay">
         <item name="mainContentTopMargin">?actionBarSize</item>
     </style>
 

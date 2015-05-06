@@ -42,4 +42,6 @@
 
     <!--now playing-->
     <dimen name="now_playing_button_padding">8dp</dimen>
+
+    <dimen name="profile_stickheader_bottom_padding">4dp</dimen>
 </resources>

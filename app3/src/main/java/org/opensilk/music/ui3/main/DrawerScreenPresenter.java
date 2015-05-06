@@ -108,15 +108,15 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
 
     @DebugLog
     void onItemClick(LibraryProviderInfo item) {
-        Bundle b = appContext.getContentResolver().call(LibraryUris.call(item.authority), LIBRARYCONF, null, null);
-        if (b == null) {
+        Bundle config = appContext.getContentResolver().call(LibraryUris.call(item.authority), LIBRARYCONF, null, null);
+        if (config == null) {
             //TODO toast
             return;
         }
-        LibraryConfig lc = LibraryConfig.materialize(b);//TODO roundabout
         currentSelection = item;
-        LandingScreenFragment lsf = LandingScreenFragment.newInstance(lc);
-        fm.replaceMainContent(lsf, LandingScreenFragment.TAG, false);
+        LandingScreenFragment lsf = LandingScreenFragment.ni(config);
+        fm.killBackstack();
+        fm.replaceMainContent(lsf, LandingScreenFragment.TAG+currentSelection.authority, false);
         drawerOwner.closeDrawer();
     }
 }

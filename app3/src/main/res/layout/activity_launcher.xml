@@ -24,7 +24,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/main"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/main_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            style="?toolbarStyle"/>
+
+        <include layout="@layout/main"/>
+
+    </LinearLayout>
+
 
     <fragment
         android:id="@+id/drawer_container"

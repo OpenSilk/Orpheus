@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~ Copyright (c) 2014 OpenSilk Productions LLC
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -16,14 +16,17 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui3.common.BundleableRecyclerView
+<org.opensilk.music.ui3.profile.ProfileHeroView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/bundleable_recycler_frame"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
 
-    <include layout="@layout/recycler_list_frame_base"/>
+    <org.opensilk.common.ui.widget.SquareImageView
+        android:id="@id/hero_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center" />
 
-</org.opensilk.music.ui3.common.BundleableRecyclerView>
+</org.opensilk.music.ui3.profile.ProfileHeroView>
+

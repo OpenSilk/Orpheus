@@ -151,13 +151,6 @@ public class AppPreferences extends PreferencesWrapper {
         return prefs;
     }
 
-    public static final String ONLY_ON_WIFI = "only_on_wifi";
-    public static final String DOWNLOAD_MISSING_ARTWORK = "download_missing_artwork";
-    public static final String PREFER_DOWNLOAD_ARTWORK = "prefer_download_artwork";
-    public static final String DOWNLOAD_MISSING_ARTIST_IMAGES = "download_missing_artist_images";
-    public static final String IMAGE_DISK_CACHE_SIZE = "pref_cache_size";
-    public static final String WANT_LOW_RESOLUTION_ART = "pref_low_resolution";
-
     private void checkSchemaVersion() {
         int schema = getInt(VERSION, 0);
         //I only started versioning in 3.0 so fresh installs will just have to deal.

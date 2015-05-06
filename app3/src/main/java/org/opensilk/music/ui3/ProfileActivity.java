@@ -25,6 +25,9 @@ import android.support.v7.widget.Toolbar;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
+import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.ActionBarOwnerDelegate;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.profile.ProfileScreen;
@@ -37,8 +40,6 @@ import mortar.MortarScope;
  * Created by drew on 5/5/15.
  */
 public class ProfileActivity extends MusicActivity {
-
-    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
 
     public static void startSelf(Context context, ProfileScreen screen) {
         Intent i = new Intent(context, ProfileActivity.class)
@@ -64,16 +65,24 @@ public class ProfileActivity extends MusicActivity {
     }
 
     @Override
+    protected void setupContentView() {
+        setContentView(R.layout.activity_profile);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-        ButterKnife.inject(this);
 
-        setSupportActionBar(mToolbar);
-        setTitle("");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBarConfig config = ActionBarConfig.builder()
+                .setUpButtonEnabled(true)
+                .setTitle("")
+                .setSubtitle("")
+                .setTransparentBackground(!getResources().getBoolean(R.bool.in_landscape))
+                .build();
+        mActionBarOwner.setConfig(config);
 
         ProfileScreen screen = getIntent().getParcelableExtra("screen");
         mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), screen.getTag(), false);
     }
+
 }

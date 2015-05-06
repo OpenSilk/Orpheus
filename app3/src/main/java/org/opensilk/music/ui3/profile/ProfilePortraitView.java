@@ -37,8 +37,11 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.recycler.HeaderRecyclerAdapter;
 import org.opensilk.common.ui.util.ThemeUtils;
+import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
@@ -50,12 +53,11 @@ import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import mortar.MortarScope;
 
 /**
  * Created by drew on 11/18/14.
  */
-public class ProfilePortraitView extends BundleableRecyclerView implements ProfileView {
+public class ProfilePortraitView extends BundleableRecyclerView {
 
     @Inject @Named("profile_heros") Boolean wantMultiHeros;
     @Inject @Named("profile_title") String mTitleText;
@@ -64,7 +66,7 @@ public class ProfilePortraitView extends BundleableRecyclerView implements Profi
     @InjectView(R.id.sticky_header) ViewGroup mStickyHeader;
     @InjectView(R.id.info_title) TextView mTitle;
     @InjectView(R.id.info_subtitle) TextView mSubtitle;
-    View mListHeader;
+    ViewGroup mListHeader;
     FrameLayout mHeroContainer;
 
     boolean mLightTheme;
@@ -85,8 +87,8 @@ public class ProfilePortraitView extends BundleableRecyclerView implements Profi
     protected void initRecyclerView() {
         ButterKnife.inject(this);
         int headerlayout = wantMultiHeros ? R.layout.profile_hero4 : R.layout.profile_hero;
-        mListHeader = LayoutInflater.from(getContext()).inflate(headerlayout, null);
-        mHeroContainer = ButterKnife.findById(mListHeader, R.id.hero_container);
+        mListHeader = ViewUtils.inflate(getContext(), headerlayout, null);
+        mHeroContainer = (FrameLayout) mListHeader.getChildAt(0);
 
         HeaderRecyclerAdapter<BundleableRecyclerAdapter.ViewHolder> headerAdapter = new HeaderRecyclerAdapter<>(mAdapter);
         headerAdapter.addHeader(mListHeader);
@@ -100,7 +102,7 @@ public class ProfilePortraitView extends BundleableRecyclerView implements Profi
         mTitle.setText(mTitleText);
         mSubtitle.setText(mSubTitleText);
 
-        prepareRefresh();
+        notifyAdapterResetIncoming();
     }
 
     @Override
@@ -124,22 +126,7 @@ public class ProfilePortraitView extends BundleableRecyclerView implements Profi
     }
 
     @Override
-    public MortarScope getScope() {
-        return MortarScope.getScope(getContext());
-    }
-
-    @Override
-    public BundleableRecyclerAdapter getAdapter() {
-        return super.getAdapter();
-    }
-
-    @Override
-    public boolean isLandscape() {
-        return false;
-    }
-
-    @Override
-    public void prepareRefresh() {
+    protected void notifyAdapterResetIncoming() {
         getListView().getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
@@ -155,11 +142,6 @@ public class ProfilePortraitView extends BundleableRecyclerView implements Profi
                 return true;
             }
         });
-    }
-
-    @Override
-    protected void notifyAdapterResetIncoming() {
-        prepareRefresh();
     }
 
     @Override

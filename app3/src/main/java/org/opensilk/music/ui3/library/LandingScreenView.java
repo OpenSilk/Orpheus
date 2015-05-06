@@ -36,7 +36,8 @@ public class LandingScreenView extends RecyclerListFrame {
 
     public LandingScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        DaggerService.<LandingScreenComponent>getDaggerComponent(context).inject(this);
+        LandingScreenComponent component = DaggerService.getDaggerComponent(getContext());
+        component.inject(this);
     }
 
     @Override

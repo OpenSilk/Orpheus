@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.DrawerOwnerActivity;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
@@ -47,7 +48,7 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
 
     @Inject DrawerOwner mDrawerOwner;
 
-    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
+//    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @InjectView(R.id.drawer_container) ViewGroup mDrawer;
 
@@ -71,13 +72,19 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void setupContentView() {
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
+    }
 
-        setSupportActionBar(mToolbar);
-        setTitle("");
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ActionBarConfig config = ActionBarConfig.builder()
+                .setTitle("")
+                .build();
+        mActionBarOwner.setConfig(config);
 
         if (mDrawerLayout != null) {
             mDrawerToggle = new Toggle(this, mDrawerLayout, mToolbar);
@@ -107,6 +114,15 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isDrawerOpen()) {
+            closeDrawer();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     /*

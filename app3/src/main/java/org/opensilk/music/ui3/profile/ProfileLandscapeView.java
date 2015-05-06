@@ -18,105 +18,59 @@
 package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.util.ThemeUtils;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.Optional;
-import mortar.MortarScope;
 
 /**
  * Created by drew on 11/21/14.
  */
-public class ProfileLandscapeView extends LinearLayout implements ProfileView {
+public class ProfileLandscapeView extends RelativeLayout {
 
-//    @Inject ProfilePresenter presenter;
-
-    @InjectView(android.R.id.list) RecyclerView mList;
+    @Inject @Named("profile_heros") Boolean wantMultiHeros;
+    @Inject @Named("profile_title") String mTitleText;
+    @Inject @Named("profile_subtitle") String mSubTitleText;
+    @Inject ActionBarOwner mActionBarOwner;
 
     boolean mLightTheme;
 
-    BundleableRecyclerAdapter mAdapter;
-
     public ProfileLandscapeView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        ProfileComponent component = DaggerService.getDaggerComponent(getContext());
+        component.inject(this);
         mLightTheme = ThemeUtils.isLightTheme(getContext());
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-//        LayoutInflater.from(getContext()).inflate(
-//                (presenter.getNumArtwork() >= 2) ?  R.layout.profile_hero4 : R.layout.profile_hero,
-//                ButterKnife.<ViewGroup>findById(this, R.id.hero_holder),
-//                true
-//        );
-        ButterKnife.inject(this);
-//        mAdapter = presenter.makeAdapter(getContext());
-        mList.setAdapter(mAdapter);
-        mList.setLayoutManager(getLayoutManager(getContext()));
+        LayoutInflater.from(getContext()).inflate(
+                wantMultiHeros ? R.layout.profile_hero4 : R.layout.profile_hero,
+                ButterKnife.<ViewGroup>findById(this, R.id.hero_holder),
+                true
+        );
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-//        presenter.takeView(this);
+        ActionBarConfig c = mActionBarOwner.getConfig().buildUpon()
+                .setTitle(mTitleText)
+                .setSubtitle(mSubTitleText)
+                .build();
+        mActionBarOwner.setConfig(c);
     }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-//        presenter.takeView(this);
-    }
-
-    @Override
-    public MortarScope getScope() {
-        return MortarScope.getScope(getContext());
-    }
-
-    @Override
-    public BundleableRecyclerAdapter getAdapter() {
-        return mAdapter;
-    }
-
-    @Override
-    public boolean isLandscape() {
-        return true;
-    }
-
-    @Override
-    public void prepareRefresh() {
-
-    }
-
-    RecyclerView.LayoutManager getLayoutManager(Context context) {
-//        if (presenter.isGrid()) {
-            return makeGridLayoutManager(context);
-//        } else {
-//            return makeListLayoutManager(context);
-//        }
-    }
-
-    RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
-        final int numCols = context.getResources().getInteger(R.integer.profile_grid_cols_horizontal);
-        return new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
-    }
-
-    RecyclerView.LayoutManager makeListLayoutManager(Context context) {
-        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-    }
-
 }

@@ -20,6 +20,7 @@ package org.opensilk.music.ui3;
 import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
 import org.opensilk.music.AppPreferences;
@@ -35,4 +36,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     AppPreferences appPreferences();
     ActivityResultsController activityResultsController();
     ArtworkRequestManager artworkRequestor();
+    ActionBarOwner actionBarOwner();
 }
