@@ -36,10 +36,10 @@ public interface GenresProfileScreenComponent extends BundleableComponent {
     Func2<MusicActivityComponent, GenresProfileScreen, GenresProfileScreenComponent> FACTORY =
             new Func2<MusicActivityComponent, GenresProfileScreen, GenresProfileScreenComponent>() {
                 @Override
-                public GenresProfileScreenComponent call(MusicActivityComponent musicActivityComponent, GenresProfileScreen artistsScreen) {
+                public GenresProfileScreenComponent call(MusicActivityComponent musicActivityComponent, GenresProfileScreen screen) {
                     return DaggerGenresProfileScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .genresProfileScreenModule(new GenresProfileScreenModule(artistsScreen))
+                            .genresProfileScreenModule(new GenresProfileScreenModule(screen))
                             .build();
                 }
             };

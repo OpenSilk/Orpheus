@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.genres;
+package org.opensilk.music.ui3.playlistsprofile;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
@@ -30,16 +30,16 @@ import rx.functions.Func2;
 @ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
-        modules = GenresScreenModule.class
+        modules = PlaylistsProfileScreenModule.class
 )
-public interface GenresScreenComponent extends BundleableComponent {
-    Func2<MusicActivityComponent,GenresScreen, GenresScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, GenresScreen, GenresScreenComponent>() {
+public interface PlaylistsProfileScreenComponent extends BundleableComponent {
+    Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent> FACTORY =
+            new Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent>() {
                 @Override
-                public GenresScreenComponent call(MusicActivityComponent musicActivityComponent, GenresScreen screen) {
-                    return DaggerGenresScreenComponent.builder()
+                public PlaylistsProfileScreenComponent call(MusicActivityComponent musicActivityComponent, PlaylistsProfileScreen screen) {
+                    return DaggerPlaylistsProfileScreenComponent.builder()
                             .musicActivityComponent(musicActivityComponent)
-                            .genresScreenModule(new GenresScreenModule(screen))
+                            .playlistsProfileScreenModule(new PlaylistsProfileScreenModule(screen))
                             .build();
                 }
             };
