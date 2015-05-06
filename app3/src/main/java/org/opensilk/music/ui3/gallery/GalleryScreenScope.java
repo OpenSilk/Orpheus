@@ -15,25 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.common.ui.mortar;
+package org.opensilk.music.ui3.gallery;
 
-import org.opensilk.common.core.mortar.HasScope;
+import javax.inject.Scope;
 
 /**
- * Created by drew on 4/30/15.
+ * Created by drew on 5/5/15.
  */
-public interface ActionBarOwnerActivity extends HasScope {
-    void setUpButtonEnabled(boolean enabled);
-
-    void setTitle(int titleRes);
-
-    void setTitle(CharSequence title);
-
-    void setSubtitle(int subTitleRes);
-
-    void setSubtitle(CharSequence title);
-
-    void setMenu(ActionBarMenuConfig menuConfig);
-
-    void setTransparentActionbar(boolean yes);
+@Scope
+public @interface GalleryScreenScope {
 }

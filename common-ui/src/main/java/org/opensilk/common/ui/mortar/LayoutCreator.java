@@ -1,4 +1,4 @@
-package org.opensilk.common.ui.mortarfragment;
+package org.opensilk.common.ui.mortar;
 
 import org.opensilk.common.core.util.ObjectUtils;
 import org.opensilk.common.core.util.Preconditions;
@@ -14,7 +14,7 @@ public class LayoutCreator {
 
     private final Map<Class, Integer> layoutCache = new LinkedHashMap<>();
 
-    protected int getLayout(Object screen) {
+    public int getLayout(Object screen) {
         Class<Object> pathType = ObjectUtils.getClass(screen);
         Integer layoutResId = layoutCache.get(pathType);
         if (layoutResId == null) {

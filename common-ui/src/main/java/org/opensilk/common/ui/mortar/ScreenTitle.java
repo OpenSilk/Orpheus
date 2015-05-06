@@ -17,23 +17,15 @@
 
 package org.opensilk.common.ui.mortar;
 
-import org.opensilk.common.core.mortar.HasScope;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Created by drew on 4/30/15.
+ * Created by drew on 5/5/15.
  */
-public interface ActionBarOwnerActivity extends HasScope {
-    void setUpButtonEnabled(boolean enabled);
-
-    void setTitle(int titleRes);
-
-    void setTitle(CharSequence title);
-
-    void setSubtitle(int subTitleRes);
-
-    void setSubtitle(CharSequence title);
-
-    void setMenu(ActionBarMenuConfig menuConfig);
-
-    void setTransparentActionbar(boolean yes);
+@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
+public @interface ScreenTitle {
+    int value();
 }

@@ -107,6 +107,7 @@ public class LandingScreenViewAdapter extends
         public static final ViewItem GENRES = new ViewItem("Genres");
         public static final ViewItem PLAYLISTS = new ViewItem("Playlists");
         public static final ViewItem TRACKS = new ViewItem("Tracks");
+        public static final ViewItem GALLERY = new ViewItem("Gallery");
         final String text;
 
         public ViewItem(String text) {

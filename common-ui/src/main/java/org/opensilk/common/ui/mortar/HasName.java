@@ -17,23 +17,9 @@
 
 package org.opensilk.common.ui.mortar;
 
-import org.opensilk.common.core.mortar.HasScope;
-
 /**
- * Created by drew on 4/30/15.
+ * Created by drew on 5/5/15.
  */
-public interface ActionBarOwnerActivity extends HasScope {
-    void setUpButtonEnabled(boolean enabled);
-
-    void setTitle(int titleRes);
-
-    void setTitle(CharSequence title);
-
-    void setSubtitle(int subTitleRes);
-
-    void setSubtitle(CharSequence title);
-
-    void setMenu(ActionBarMenuConfig menuConfig);
-
-    void setTransparentActionbar(boolean yes);
+public interface HasName {
+    String getName();
 }

@@ -24,7 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.opensilk.common.ui.mortarfragment.Layout;
+import org.opensilk.common.ui.mortar.Layout;
 
 /**
  * Created by drew on 10/9/14.

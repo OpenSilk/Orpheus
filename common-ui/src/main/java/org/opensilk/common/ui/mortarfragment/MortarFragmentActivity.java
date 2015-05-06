@@ -19,6 +19,7 @@ package org.opensilk.common.ui.mortarfragment;
 import android.os.Bundle;
 
 import org.opensilk.common.core.mortar.MortarActivity;
+import org.opensilk.common.ui.mortar.LayoutCreator;
 import org.opensilk.common.ui.mortar.ScreenScoper;
 
 import javax.inject.Inject;

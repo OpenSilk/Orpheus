@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.opensilk.common.ui.mortar.LayoutCreator;
 import org.opensilk.common.ui.mortar.ScreenScoper;
 
 import mortar.MortarScope;

@@ -35,7 +35,8 @@ public class BundleableRecyclerView extends RecyclerListFrame {
 
     public BundleableRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        DaggerService.<BundleableComponent>getDaggerComponent(context).inject(this);
+        BundleableComponent component = DaggerService.getDaggerComponent(context);
+        component.inject(this);
     }
 
     @Override
@@ -54,5 +55,9 @@ public class BundleableRecyclerView extends RecyclerListFrame {
 
     public BundleableRecyclerAdapter getAdapter() {
         return mAdapter;
+    }
+
+    public BundleablePresenter getPresenter() {
+        return mPresenter;
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.common.ui.mortarfragment;
+package org.opensilk.common.ui.mortar;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
