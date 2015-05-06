@@ -23,6 +23,9 @@ import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.albums.AlbumsScreen;
 import org.opensilk.music.ui3.artists.ArtistsScreen;
 import org.opensilk.music.ui3.common.BundleableScreen;
+import org.opensilk.music.ui3.genres.GenresScreen;
+import org.opensilk.music.ui3.playlists.PlaylistsScreen;
+import org.opensilk.music.ui3.tracks.TracksScreen;
 
 import rx.functions.Func2;
 
@@ -30,7 +33,12 @@ import rx.functions.Func2;
  * Created by drew on 10/3/14.
  */
 public enum GalleryPage {
-//    PLAYLIST(new PlaylistsScreen()),
+    PLAYLIST(R.string.page_playlists, new Func2<LibraryConfig, LibraryInfo, BundleableScreen>() {
+        @Override
+        public BundleableScreen call(LibraryConfig config, LibraryInfo libraryInfo) {
+            return new PlaylistsScreen(config, libraryInfo);
+        }
+    }),
     ARTIST(R.string.page_artists, new Func2<LibraryConfig, LibraryInfo, BundleableScreen>() {
         @Override
         public BundleableScreen call(LibraryConfig config, LibraryInfo libraryInfo) {
@@ -43,9 +51,18 @@ public enum GalleryPage {
             return new AlbumsScreen(config, libraryInfo);
         }
     }),
-//    SONG(new SongsScreen()),
-//    GENRE(new GenresScreen()),
-    ;
+    SONG(R.string.page_songs, new Func2<LibraryConfig, LibraryInfo, BundleableScreen>() {
+        @Override
+        public BundleableScreen call(LibraryConfig config, LibraryInfo libraryInfo) {
+            return new TracksScreen(config, libraryInfo);
+        }
+    }),
+    GENRE(R.string.page_genres, new Func2<LibraryConfig, LibraryInfo, BundleableScreen>() {
+        @Override
+        public BundleableScreen call(LibraryConfig config, LibraryInfo libraryInfo) {
+            return new GenresScreen(config, libraryInfo);
+        }
+    });
 
     public final int titleRes;
     public final Func2<LibraryConfig, LibraryInfo, BundleableScreen> FACTORY;

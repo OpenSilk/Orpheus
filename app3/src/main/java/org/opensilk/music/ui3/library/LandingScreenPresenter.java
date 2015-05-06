@@ -41,6 +41,7 @@ import org.opensilk.music.ui3.genres.GenresScreen;
 import org.opensilk.music.ui3.genres.GenresScreenFragment;
 import org.opensilk.music.ui3.library.LandingScreenViewAdapter.ViewItem;
 import org.opensilk.music.ui3.playlists.PlaylistsScreenFragment;
+import org.opensilk.music.ui3.tracks.TracksScreenFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -183,36 +184,37 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         } else if (item == ViewItem.PLAYLISTS) {
             PlaylistsScreenFragment f = PlaylistsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
             fm.replaceMainContent(f, PlaylistsScreenFragment.NAME, true);
+        } else if (item == ViewItem.TRACKS) {
+            TracksScreenFragment f = TracksScreenFragment.ni(context, screen.libraryConfig, currentSelection);
+            fm.replaceMainContent(f, TracksScreenFragment.NAME, true);
         } else if (item == ViewItem.GALLERY) {
             List<GalleryPage> pages = new ArrayList<>();
-//            if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
-//                items.add(ViewItem.PLAYLISTS);
-//            }
+            if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
+                pages.add(GalleryPage.PLAYLIST);
+            }
             if (screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
                 pages.add(GalleryPage.ARTIST);
             }
             if (screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
                 pages.add(GalleryPage.ALBUM);
             }
-//            if (screen.libraryConfig.hasAbility(LibraryCapability.GENRES)) {
-//                items.add(ViewItem.GENRES);
-//            }
-//            if (screen.libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
-//                items.add(ViewItem.TRACKS);
-//            }
+            if (screen.libraryConfig.hasAbility(LibraryCapability.GENRES)) {
+                pages.add(GalleryPage.GENRE);
+            }
+            if (screen.libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
+                pages.add(GalleryPage.SONG);
+            }
             GalleryScreenFragment f = GalleryScreenFragment.ni(context, screen.libraryConfig, currentSelection, pages);
             fm.replaceMainContent(f, GalleryScreenFragment.NAME, true);
         }
     }
 
     boolean isGalleryEligible() {
-        boolean no = false;
-        no |= screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS);
+        boolean no = screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS);
         if (no) {
             return false;
         }
-        boolean yes = false;
-        yes |= screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS);
+        boolean yes = screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS);
         yes |= screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS);
         yes |= screen.libraryConfig.hasAbility(LibraryCapability.GENRES);
         yes |= screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS);
