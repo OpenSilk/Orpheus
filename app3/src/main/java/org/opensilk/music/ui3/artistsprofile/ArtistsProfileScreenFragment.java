@@ -39,7 +39,7 @@ public class ArtistsProfileScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         Artist artist = Artist.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("artist"));
         return new ArtistsProfileScreen(mLibraryConfig, mLibraryInfo, artist);

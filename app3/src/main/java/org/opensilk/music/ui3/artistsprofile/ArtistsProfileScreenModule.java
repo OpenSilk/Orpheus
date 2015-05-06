@@ -74,7 +74,7 @@ public class ArtistsProfileScreenModule {
 
     @Provides @Named("profile_heros")
     public List<ArtInfo> provideHeroArtinfos() {
-        return Collections.singletonList(new ArtInfo(screen.artist.name, null, null));
+        return Collections.singletonList(ArtInfo.forArtist(screen.artist.name, null));
     }
 
     @Provides @Named("profile_title")

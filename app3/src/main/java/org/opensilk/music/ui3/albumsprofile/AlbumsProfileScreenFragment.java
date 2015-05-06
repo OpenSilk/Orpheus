@@ -39,7 +39,7 @@ public class AlbumsProfileScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         Album album = Album.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("album"));
         return new AlbumsProfileScreen(mLibraryConfig, mLibraryInfo, album);

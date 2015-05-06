@@ -36,7 +36,7 @@ public class GenresScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         return new GenresScreen(mLibraryConfig, mLibraryInfo);
     }

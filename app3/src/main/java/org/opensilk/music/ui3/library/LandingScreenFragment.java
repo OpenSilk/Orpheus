@@ -35,7 +35,7 @@ public class LandingScreenFragment extends MortarFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         return new LandingScreen(LibraryConfig.materialize(getArguments()));
     }
 }

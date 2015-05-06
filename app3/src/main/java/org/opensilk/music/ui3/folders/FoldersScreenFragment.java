@@ -30,20 +30,25 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class FoldersScreenFragment extends BundleableFragment {
     public static final String NAME = FoldersScreenFragment.class.getName();
 
+    private String mScopeName;
+
     public static FoldersScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
         Bundle args = makeCommonArgsBundle(config, info);
         return factory(context, NAME, args);
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         return new FoldersScreen(mLibraryConfig, mLibraryInfo);
     }
 
     @Override
     protected String getScopeName() {
-        return super.getScopeName() + "-" + mLibraryInfo.folderId;
+        if (mScopeName == null) {
+            mScopeName = super.getScopeName() + "-" + ((FoldersScreen) getScreen()).libraryInfo.folderId;
+        }
+        return mScopeName;
     }
 
 }

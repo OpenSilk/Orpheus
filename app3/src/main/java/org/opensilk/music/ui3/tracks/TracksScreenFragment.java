@@ -36,7 +36,7 @@ public class TracksScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         return new TracksScreen(mLibraryConfig, mLibraryInfo);
     }

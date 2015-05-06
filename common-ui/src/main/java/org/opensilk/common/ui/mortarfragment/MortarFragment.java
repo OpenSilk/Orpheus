@@ -38,7 +38,7 @@ public abstract class MortarFragment extends Fragment {
     boolean mHitSavedInstanceState = false;
     Object mScreen;
 
-    protected abstract Object getScreen();
+    protected abstract Object newScreen();
 
     protected String getScopeName() {
         return getClass().getName();
@@ -87,9 +87,9 @@ public abstract class MortarFragment extends Fragment {
         return scope;
     }
 
-    void ensureScreen() {
+    protected void ensureScreen() {
         if (mScreen == null) {
-            mScreen = getScreen();
+            mScreen = newScreen();
         }
     }
 
@@ -100,5 +100,10 @@ public abstract class MortarFragment extends Fragment {
 
     public MortarScope getScope() {
         return mScope;
+    }
+
+    public Object getScreen() {
+        ensureScreen();
+        return mScreen;
     }
 }

@@ -106,14 +106,14 @@ public class UtilsCommon {
         final int num = artInfos.size();
         if (artwork != null) {
             if (num >= 1) {
-                cs.add(requestor.newAlbumRequest(artwork, null, artInfos.get(0), artworkType));
+                cs.add(requestor.newRequest(artwork, null, artInfos.get(0), artworkType));
             } else {
                 artwork.setDefaultImage(R.drawable.default_artwork);
             }
         }
         if (artwork2 != null) {
             if (num >= 2) {
-                cs.add(requestor.newAlbumRequest(artwork2, null, artInfos.get(1), artworkType));
+                cs.add(requestor.newRequest(artwork2, null, artInfos.get(1), artworkType));
             } else {
                 // never get here
                 artwork2.setDefaultImage(R.drawable.default_artwork);
@@ -121,10 +121,10 @@ public class UtilsCommon {
         }
         if (artwork3 != null) {
             if (num >= 3) {
-                cs.add(requestor.newAlbumRequest(artwork3, null, artInfos.get(2), artworkType));
+                cs.add(requestor.newRequest(artwork3, null, artInfos.get(2), artworkType));
             } else if (num >= 2) {
                 //put the second image here, first image will be put in 4th spot to crisscross
-                cs.add(requestor.newAlbumRequest(artwork3, null, artInfos.get(1), artworkType));
+                cs.add(requestor.newRequest(artwork3, null, artInfos.get(1), artworkType));
             } else {
                 // never get here
                 artwork3.setDefaultImage(R.drawable.default_artwork);
@@ -132,10 +132,10 @@ public class UtilsCommon {
         }
         if (artwork4 != null) {
             if (num >= 4) {
-                cs.add(requestor.newAlbumRequest(artwork4, null, artInfos.get(3), artworkType));
+                cs.add(requestor.newRequest(artwork4, null, artInfos.get(3), artworkType));
             } else if (num >= 2) {
                 //3 -> loopback, 2 -> put the first image here for crisscross
-                cs.add(requestor.newAlbumRequest(artwork4, null, artInfos.get(0), artworkType));
+                cs.add(requestor.newRequest(artwork4, null, artInfos.get(0), artworkType));
             } else {
                 //never get here
                 artwork4.setDefaultImage(R.drawable.default_artwork);

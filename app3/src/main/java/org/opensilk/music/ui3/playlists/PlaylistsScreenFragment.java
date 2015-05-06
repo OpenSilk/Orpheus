@@ -36,7 +36,7 @@ public class PlaylistsScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         return new PlaylistsScreen(mLibraryConfig, mLibraryInfo);
     }

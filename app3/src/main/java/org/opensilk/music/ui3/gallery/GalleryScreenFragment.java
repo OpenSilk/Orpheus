@@ -49,7 +49,7 @@ public class GalleryScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         String[] v = getArguments().getStringArray("pages");
         List<GalleryPage> pages = new ArrayList<>(v.length);

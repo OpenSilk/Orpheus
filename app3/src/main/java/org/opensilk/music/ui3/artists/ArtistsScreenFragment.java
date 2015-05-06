@@ -36,7 +36,7 @@ public class ArtistsScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         extractCommonArgs();
         return new ArtistsScreen(mLibraryConfig, mLibraryInfo);
     }

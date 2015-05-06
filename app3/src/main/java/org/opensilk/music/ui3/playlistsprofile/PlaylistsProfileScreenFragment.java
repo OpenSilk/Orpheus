@@ -37,7 +37,7 @@ public class PlaylistsProfileScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         getArguments().setClassLoader(getClass().getClassLoader());
         return getArguments().<PlaylistsProfileScreen>getParcelable("screen");
     }

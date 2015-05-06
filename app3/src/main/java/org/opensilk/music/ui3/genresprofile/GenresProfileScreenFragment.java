@@ -38,7 +38,7 @@ public class GenresProfileScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         getArguments().setClassLoader(getClass().getClassLoader());
         return getArguments().<GenresProfileScreen>getParcelable("screen");
     }

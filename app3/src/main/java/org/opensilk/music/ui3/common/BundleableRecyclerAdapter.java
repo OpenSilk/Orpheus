@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -48,7 +47,6 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.widgets.GridTileDescription;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -123,13 +121,13 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             PaletteObserver paletteObserver = holder.descriptionContainer != null
                     ? holder.descriptionContainer.getPaletteObserver() : null;
-            holder.subscriptions.add(presenter.getRequestor().newAlbumRequest(holder.artwork,
+            holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
                     paletteObserver, artInfo, ArtworkType.THUMBNAIL));
         }
     }
 
     void bindArtist(ViewHolder holder, Artist artist) {
-        ArtInfo artInfo = new ArtInfo(artist.name, null, null);
+        ArtInfo artInfo = ArtInfo.forArtist(artist.name, null);
         holder.title.setText(artist.name);
         Context context = holder.itemView.getContext();
         String subtitle = "";
@@ -146,7 +144,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             PaletteObserver paletteObserver = holder.descriptionContainer != null
                     ? holder.descriptionContainer.getPaletteObserver() : null;
-            holder.subscriptions.add(presenter.getRequestor().newArtistRequest(holder.artwork,
+            holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
                     paletteObserver, artInfo, ArtworkType.THUMBNAIL));
         }
     }
@@ -201,7 +199,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         if (artInfo == ArtInfo.NULLINSTANCE) {
             setLetterTileDrawable(holder, track.name);
         } else {
-            holder.subscriptions.add(presenter.getRequestor().newAlbumRequest(holder.artwork,
+            holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
                     null, artInfo, ArtworkType.THUMBNAIL));
         }
     }

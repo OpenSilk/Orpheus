@@ -24,7 +24,7 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
  */
 public class DrawerScreenFragment extends MortarFragment {
     @Override
-    protected Object getScreen() {
+    protected Object newScreen() {
         return new DrawerScreen();
     }
 }
