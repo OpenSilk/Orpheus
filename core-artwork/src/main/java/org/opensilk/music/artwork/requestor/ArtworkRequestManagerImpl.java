@@ -351,20 +351,11 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
      */
 
     @Override
-    public Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                                        ArtInfo artInfo, ArtworkType artworkType) {
+    public Subscription newRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
+                                   ArtInfo artInfo, ArtworkType artworkType) {
         ImageContainer c = new ImageContainer(imageView, paletteObserver);
         RequestKey k = new RequestKey(artInfo, artworkType);
-        queueRequest(c, k, true);
-        return c;
-    }
-
-    @Override
-    public Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                                         ArtInfo artInfo, ArtworkType artworkType) {
-        ImageContainer c = new ImageContainer(imageView, paletteObserver);
-        RequestKey k = new RequestKey(artInfo, artworkType);
-        queueRequest(c, k, false);
+        queueRequest(c, k);
         return c;
     }
 
@@ -377,10 +368,10 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
      * End IMPL
      */
 
-    void queueRequest(ImageContainer c, RequestKey k, boolean isAlbum) {
+    void queueRequest(ImageContainer c, RequestKey k) {
         IArtworkRequest r = mActiveRequests.get(k);
         if (r == null) {
-            r = isAlbum ? new AlbumArtworkRequest(k) : new ArtistArtworkRequest(k);
+            r = !k.artInfo.forArtist ? new AlbumArtworkRequest(k) : new ArtistArtworkRequest(k);
             mActiveRequests.put(k, r);
         } else {
             Timber.d("Attaching recipient to running request %s", k.artInfo);

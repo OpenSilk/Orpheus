@@ -22,6 +22,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 /**
+ * Contains all the info the ArtworkFetcher needs to locate artwork
+ *
  * Created by drew on 6/21/14.
  */
 public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
@@ -30,32 +32,72 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
     public final String artistName;
     public final String albumName;
     public final Uri artworkUri;
+    //This is only used for sanity so the fetcher can be sure we really want an artist
+    public final boolean forArtist;
 
+    /**
+     * Creates a new album request
+     * Implied contract artistName and albumName must both be non null OR artworkUri must be non null,
+     * ideally all three are non null
+     *
+     * @param artistName album artist name
+     * @param albumName album name
+     * @param artworkUri fallback uri
+     */
+    public static ArtInfo forAlbum(String artistName, String albumName, Uri artworkUri) {
+        if (artistName == null && albumName == null && artworkUri == null) {
+            return NULLINSTANCE;
+        } else {
+            return new ArtInfo(artistName, albumName, artworkUri, false);
+        }
+    }
+
+    /**
+     * Creates a new artist request
+     *
+     * @param artistName artist name
+     * @param artworkUri currently unused
+     */
+    public static ArtInfo forArtist(String artistName, Uri artworkUri) {
+        if (artistName == null && artworkUri == null) {
+            return NULLINSTANCE;
+        } else {
+            return new ArtInfo(artistName, null, artworkUri, true);
+        }
+    }
+
+    @Deprecated
     public ArtInfo(String artistName, String albumName, Uri artworkUri) {
+        this(artistName, albumName, artworkUri, false);
+    }
+
+    private ArtInfo(String artistName, String albumName, Uri artworkUri, boolean forArtist) {
         this.artistName = artistName;
         this.albumName = albumName;
         this.artworkUri = (artworkUri != null) ? artworkUri : Uri.EMPTY;
+        this.forArtist = forArtist;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArtInfo artInfo = (ArtInfo) o;
+        if (forArtist != artInfo.forArtist) return false;
+        if (artistName != null ? !artistName.equals(artInfo.artistName) : artInfo.artistName != null)
+            return false;
+        if (albumName != null ? !albumName.equals(artInfo.albumName) : artInfo.albumName != null)
+            return false;
+        return !(artworkUri != null ? !artworkUri.equals(artInfo.artworkUri) : artInfo.artworkUri != null);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (artistName == null ? 0 : artistName.hashCode());
-        result = prime * result + (albumName == null ? 0 : albumName.hashCode());
-        result = prime * result + artworkUri.hashCode();
+        int result = artistName != null ? artistName.hashCode() : 0;
+        result = 31 * result + (albumName != null ? albumName.hashCode() : 0);
+        result = 31 * result + (artworkUri != null ? artworkUri.hashCode() : 0);
+        result = 31 * result + (forArtist ? 1 : 0);
         return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == this) return true;
-        if (obj == null || !(obj instanceof ArtInfo)) return false;
-        ArtInfo o = (ArtInfo)obj;
-        if(!TextUtils.equals(o.artistName, this.artistName)) return false;
-        if (!TextUtils.equals(o.albumName, this.albumName)) return false;
-        if (!o.artworkUri.equals(this.artworkUri)) return false;
-        return true;
     }
 
     @Override
@@ -65,7 +107,9 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
 
     @Override
     public int compareTo(ArtInfo another) {
-        //Idk just be consistent, and this way i don't have to do null checks'
+        //Idk just be consistent, and this way i don't have to do null checks
+        //we only need this so libraries can add them in any order and we can be
+        //sure we always display the same ones in the same order
         return toString().compareTo(another.toString());
     }
 
@@ -79,20 +123,18 @@ public class ArtInfo implements Parcelable, Comparable<ArtInfo> {
         dest.writeString(artistName);
         dest.writeString(albumName);
         artworkUri.writeToParcel(dest, flags);
-    }
-
-    private static ArtInfo readParcel(Parcel in) {
-        return new ArtInfo(
-                in.readString(),
-                in.readString(),
-                Uri.CREATOR.createFromParcel(in)
-        );
+        dest.writeInt(forArtist ? 1 : 0);
     }
 
     public static final Creator<ArtInfo> CREATOR = new Creator<ArtInfo>() {
         @Override
-        public ArtInfo createFromParcel(Parcel source) {
-            return readParcel(source);
+        public ArtInfo createFromParcel(Parcel in) {
+            return new ArtInfo(
+                    in.readString(),
+                    in.readString(),
+                    Uri.CREATOR.createFromParcel(in),
+                    in.readInt() == 1
+            );
         }
 
         @Override

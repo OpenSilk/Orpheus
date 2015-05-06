@@ -29,8 +29,7 @@ import rx.Subscription;
  */
 public interface ArtworkRequestManager {
 
-    Subscription newAlbumRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
-    Subscription newArtistRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
+    Subscription newRequest(AnimatedImageView imageView, PaletteObserver paletteObserver, ArtInfo artInfo, ArtworkType artworkType);
 
     void evictL1();
 

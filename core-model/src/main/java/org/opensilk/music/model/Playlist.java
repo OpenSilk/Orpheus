@@ -125,6 +125,7 @@ public class Playlist implements Bundleable {
     public static final BundleCreator<Playlist> BUNDLE_CREATOR = new BundleCreator<Playlist>() {
         @Override
         public Playlist fromBundle(Bundle b) throws IllegalArgumentException {
+            b.setClassLoader(getClass().getClassLoader());
             return Playlist.fromBundle(b);
         }
     };

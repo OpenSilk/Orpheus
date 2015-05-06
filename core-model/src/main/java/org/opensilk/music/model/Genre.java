@@ -132,6 +132,7 @@ public class Genre implements Bundleable {
     public static final BundleCreator<Genre> BUNDLE_CREATOR = new BundleCreator<Genre>() {
         @Override
         public Genre fromBundle(Bundle b) throws IllegalArgumentException {
+            b.setClassLoader(getClass().getClassLoader());
             return Genre.fromBundle(b);
         }
     };
