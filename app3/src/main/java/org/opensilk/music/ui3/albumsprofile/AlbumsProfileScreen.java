@@ -51,6 +51,11 @@ public class AlbumsProfileScreen extends BundleableScreen implements ProfileScre
     }
 
     @Override
+    public String getName() {
+        return super.getName() + "-" + album.identity;
+    }
+
+    @Override
     public Fragment getFragment(Context context) {
         return AlbumsProfileScreenFragment.ni(context, libraryConfig, libraryInfo, album);
     }

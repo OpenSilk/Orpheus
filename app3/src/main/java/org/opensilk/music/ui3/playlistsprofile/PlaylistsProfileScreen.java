@@ -51,6 +51,11 @@ public class PlaylistsProfileScreen extends BundleableScreen implements ProfileS
     }
 
     @Override
+    public String getName() {
+        return super.getName() + "-" + playlist.identity;
+    }
+
+    @Override
     public Fragment getFragment(Context context) {
         return PlaylistsProfileScreenFragment.ni(context, this);
     }

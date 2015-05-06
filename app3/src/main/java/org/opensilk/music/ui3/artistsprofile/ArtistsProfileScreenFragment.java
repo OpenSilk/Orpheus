@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.artistsprofile;
 import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.model.Artist;
@@ -39,7 +40,7 @@ public class ArtistsProfileScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object newScreen() {
+    protected Screen newScreen() {
         extractCommonArgs();
         Artist artist = Artist.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("artist"));
         return new ArtistsProfileScreen(mLibraryConfig, mLibraryInfo, artist);

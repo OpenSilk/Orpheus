@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.playlists;
 import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.common.BundleableFragment;
@@ -36,7 +37,7 @@ public class PlaylistsScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object newScreen() {
+    protected Screen newScreen() {
         extractCommonArgs();
         return new PlaylistsScreen(mLibraryConfig, mLibraryInfo);
     }

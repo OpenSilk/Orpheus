@@ -51,6 +51,11 @@ public class GenresProfileScreen extends BundleableScreen implements ProfileScre
     }
 
     @Override
+    public String getName() {
+        return super.getName() + "-" + genre.identity;
+    }
+
+    @Override
     public Fragment getFragment(Context context) {
         return GenresProfileScreenFragment.ni(context, this);
     }

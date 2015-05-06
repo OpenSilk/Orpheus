@@ -27,6 +27,8 @@ import static org.opensilk.common.core.mortar.DaggerService.DAGGER_SERVICE;
  * the component dependencies are assumed to be a single component that can be fetched with
  * {@link mortar.dagger2support.DaggerService#getDaggerComponent(android.content.Context)}
  * from the parent context.
+ *
+ * TODO remove @WithComponent, @WithComponentFactory is more flexible and uses way less reflection.
  */
 public class ScreenScoper {
     public static final String SERVICE_NAME = ScreenScoper.class.getName();
@@ -38,6 +40,17 @@ public class ScreenScoper {
     };
 
     private final Map<Class, ComponentFactory> moduleFactoryCache = new LinkedHashMap<>();
+
+    public static ScreenScoper getService(Context context) {
+        return (ScreenScoper) context.getSystemService(SERVICE_NAME);
+    }
+
+    public static ScreenScoper getService(MortarScope scope) {
+        if (scope.hasService(SERVICE_NAME)) {
+            return scope.getService(SERVICE_NAME);
+        }
+        throw new IllegalArgumentException(String.format("No ScreenScoper service in scope %s", scope.getName()));
+    }
 
     public MortarScope getScreenScope(Context context, String name, Object screen) {
         MortarScope parentScope = MortarScope.getScope(context);

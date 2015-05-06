@@ -51,6 +51,11 @@ public class ArtistsProfileScreen extends BundleableScreen implements ProfileScr
     }
 
     @Override
+    public String getName() {
+        return super.getName() + "-" + artist.identity;
+    }
+
+    @Override
     public Fragment getFragment(Context context) {
         return ArtistsProfileScreenFragment.ni(context, this);
     }

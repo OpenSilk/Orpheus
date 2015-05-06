@@ -17,6 +17,7 @@
 package org.opensilk.common.ui.mortarfragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import org.opensilk.common.core.mortar.MortarActivity;
 import org.opensilk.common.ui.mortar.LayoutCreator;
@@ -25,6 +26,7 @@ import org.opensilk.common.ui.mortar.ScreenScoper;
 import javax.inject.Inject;
 
 import mortar.MortarScope;
+import timber.log.Timber;
 
 /**
  * Created by drew on 3/10/15.
@@ -49,9 +51,27 @@ public abstract class MortarFragmentActivity extends MortarActivity implements F
     }
 
     @Override
-    protected void onDestroy() {
-        mFragmentManagerOwner.dropView(this);
-        super.onDestroy();
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mFragmentManagerOwner.takeView(this);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mFragmentManagerOwner.dropView(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mFragmentManagerOwner.dropView(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!mFragmentManagerOwner.goBack()){
+            super.onBackPressed();
+        }
+    }
 }

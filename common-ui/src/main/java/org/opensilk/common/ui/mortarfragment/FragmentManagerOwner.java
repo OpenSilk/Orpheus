@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.transition.Explode;
 import android.transition.Slide;
@@ -63,6 +64,10 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         return ft.commit();
     }
 
+    public int replaceMainContent(MortarFragment frag, boolean addToBackStack) {
+        return replaceMainContent(frag, frag.getScopeName(), addToBackStack);
+    }
+
     @SuppressLint("RtlHardcoded")
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public int replaceMainContent(Fragment frag, String tag, boolean addToBackstack) {
@@ -85,4 +90,11 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         }
         return false;
     }
+
+    public void killBackStack() {
+        if (hasView() && getView().getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getView().getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+    }
+
 }

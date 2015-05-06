@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.genresprofile;
 import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.model.Genre;
@@ -38,7 +39,7 @@ public class GenresProfileScreenFragment extends BundleableFragment {
     }
 
     @Override
-    protected Object newScreen() {
+    protected Screen newScreen() {
         getArguments().setClassLoader(getClass().getClassLoader());
         return getArguments().<GenresProfileScreen>getParcelable("screen");
     }

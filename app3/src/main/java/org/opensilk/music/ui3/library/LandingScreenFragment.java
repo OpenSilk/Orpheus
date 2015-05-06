@@ -19,6 +19,7 @@ package org.opensilk.music.ui3.library;
 
 import android.os.Bundle;
 
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.library.LibraryConfig;
 
@@ -39,12 +40,8 @@ public class LandingScreenFragment extends MortarFragment {
     }
 
     @Override
-    protected Object newScreen() {
+    protected Screen newScreen() {
         return new LandingScreen(LibraryConfig.materialize(getArguments()));
     }
 
-    @Override
-    protected String getScopeName() {
-        return TAG + "-" + ((LandingScreen) getScreen()).libraryConfig.authority;
-    }
 }

@@ -18,6 +18,8 @@
 package org.opensilk.common.ui.mortarfragment;
 
 /**
+ * Base component all subclass components of {@link MortarFragmentActivity} must extend
+ *
  * Created by drew on 5/1/15.
  */
 public interface MortarFragmentActivityComponent {

@@ -12,8 +12,11 @@ import mortar.MortarScope;
  * to instantiate via reflection. The module must be a static type with a default
  * constructor. For more flexibility, use {@link WithComponentFactory}.
  *
+ * @deprecated Use {@link WithComponentFactory} from now on.
+ *
  * @see org.opensilk.common.mortar.ScreenScoper
  */
+@Deprecated
 @Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
 public @interface WithComponent {
   Class<?> value();

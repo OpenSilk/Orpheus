@@ -19,23 +19,16 @@ package org.opensilk.music.ui3.main;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.artwork.ArtworkUris;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryProviderInfo;
-import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.ui3.library.LandingScreen;
 import org.opensilk.music.ui3.library.LandingScreenFragment;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -115,7 +108,7 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
         }
         currentSelection = item;
         LandingScreenFragment lsf = LandingScreenFragment.ni(config);
-        fm.killBackstack();
+        fm.killBackStack();
         fm.replaceMainContent(lsf, LandingScreenFragment.TAG+currentSelection.authority, false);
         drawerOwner.closeDrawer();
     }

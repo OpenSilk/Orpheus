@@ -30,7 +30,7 @@ public class DaggerService {
         if (scope.hasService(DaggerService.DAGGER_SERVICE)) {
             return (T) scope.getService(DaggerService.DAGGER_SERVICE);
         }
-        throw new IllegalArgumentException(format("No dagger service found in scope " + scope.getName()));
+        throw new IllegalArgumentException(format("No dagger service found in scope %s", scope.getName()));
     }
 
     /**

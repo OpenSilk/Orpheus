@@ -21,6 +21,7 @@ import android.content.res.Resources;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.music.R;
@@ -34,11 +35,16 @@ import mortar.MortarScope;
  */
 @Layout(R.layout.screen_library_landing)
 @WithComponentFactory(LandingScreen.Factory.class)
-public class LandingScreen {
+public class LandingScreen extends Screen {
     final LibraryConfig libraryConfig;
 
     public LandingScreen(LibraryConfig libraryConfig) {
         this.libraryConfig = libraryConfig;
+    }
+
+    @Override
+    public String getName() {
+        return getClass().getName() + libraryConfig.authority;
     }
 
     public static class Factory extends ComponentFactory<LandingScreen> {

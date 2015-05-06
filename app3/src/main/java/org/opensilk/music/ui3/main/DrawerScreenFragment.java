@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui3.main;
 
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 
 /**
@@ -24,7 +25,7 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
  */
 public class DrawerScreenFragment extends MortarFragment {
     @Override
-    protected Object newScreen() {
+    protected Screen newScreen() {
         return new DrawerScreen();
     }
 }

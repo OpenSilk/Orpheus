@@ -40,7 +40,7 @@ import java.util.Map;
  *
  * Created by drew on 11/16/14.
  */
-public class MortarPagerAdapter<S extends HasName, V extends View> extends PagerAdapter {
+public class MortarPagerAdapter<S extends Screen, V extends View> extends PagerAdapter {
 
     protected final class Page {
         public final S screen;

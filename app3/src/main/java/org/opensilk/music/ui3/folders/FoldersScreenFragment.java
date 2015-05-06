@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.folders;
 import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.common.BundleableFragment;
@@ -30,25 +31,15 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class FoldersScreenFragment extends BundleableFragment {
     public static final String NAME = FoldersScreenFragment.class.getName();
 
-    private String mScopeName;
-
     public static FoldersScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
         Bundle args = makeCommonArgsBundle(config, info);
         return factory(context, NAME, args);
     }
 
     @Override
-    protected Object newScreen() {
+    protected Screen newScreen() {
         extractCommonArgs();
         return new FoldersScreen(mLibraryConfig, mLibraryInfo);
-    }
-
-    @Override
-    protected String getScopeName() {
-        if (mScopeName == null) {
-            mScopeName = super.getScopeName() + "-" + ((FoldersScreen) getScreen()).libraryInfo.folderId;
-        }
-        return mScopeName;
     }
 
 }

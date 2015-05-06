@@ -42,6 +42,11 @@ public class FoldersScreen extends BundleableScreen {
         super(libraryConfig, libraryInfo);
     }
 
+    @Override
+    public String getName() {
+        return super.getName() + "-" + libraryInfo.folderId;
+    }
+
     public static class Factory extends ComponentFactory<FoldersScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, FoldersScreen screen) {

@@ -21,6 +21,7 @@ import android.content.res.Resources;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
+import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.music.R;
@@ -33,7 +34,7 @@ import mortar.MortarScope;
  */
 @Layout(R.layout.screen_drawer)
 @WithComponentFactory(DrawerScreen.Factory.class)
-public class DrawerScreen {
+public class DrawerScreen extends Screen {
     public static class Factory extends ComponentFactory<DrawerScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, DrawerScreen screen) {
