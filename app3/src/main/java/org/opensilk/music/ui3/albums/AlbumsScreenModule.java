@@ -24,6 +24,7 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.AlbumSortOrder;
+import org.opensilk.music.model.Album;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.albumsprofile.AlbumsProfileScreen;
@@ -67,7 +68,7 @@ public class AlbumsScreenModule {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
                 ProfileActivity.startSelf(context, new AlbumsProfileScreen(screen.libraryConfig,
-                        screen.libraryInfo.buildUpon(item.getIdentity(), item.getName())));
+                        screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Album)item));
             }
         };
     }

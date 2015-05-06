@@ -20,13 +20,20 @@ package org.opensilk.music.ui3.common;
 import android.content.Context;
 import android.net.Uri;
 
+import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
+import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
+
+import java.util.List;
+
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by drew on 5/2/15.
  */
-public class Utils {
+public class UtilsCommon {
     /**
      * Used to make number of labels for the number of artists, albums, songs,
      * genres, and playlists.
@@ -85,4 +92,55 @@ public class Utils {
             }
         }
     }
+
+    public static void loadMultiArtwork(
+            ArtworkRequestManager requestor,
+            CompositeSubscription cs,
+            AnimatedImageView artwork,
+            AnimatedImageView artwork2,
+            AnimatedImageView artwork3,
+            AnimatedImageView artwork4,
+            List<ArtInfo> artInfos,
+            ArtworkType artworkType
+    ) {
+        final int num = artInfos.size();
+        if (artwork != null) {
+            if (num >= 1) {
+                cs.add(requestor.newAlbumRequest(artwork, null, artInfos.get(0), artworkType));
+            } else {
+                artwork.setDefaultImage(R.drawable.default_artwork);
+            }
+        }
+        if (artwork2 != null) {
+            if (num >= 2) {
+                cs.add(requestor.newAlbumRequest(artwork2, null, artInfos.get(1), artworkType));
+            } else {
+                // never get here
+                artwork2.setDefaultImage(R.drawable.default_artwork);
+            }
+        }
+        if (artwork3 != null) {
+            if (num >= 3) {
+                cs.add(requestor.newAlbumRequest(artwork3, null, artInfos.get(2), artworkType));
+            } else if (num >= 2) {
+                //put the second image here, first image will be put in 4th spot to crisscross
+                cs.add(requestor.newAlbumRequest(artwork3, null, artInfos.get(1), artworkType));
+            } else {
+                // never get here
+                artwork3.setDefaultImage(R.drawable.default_artwork);
+            }
+        }
+        if (artwork4 != null) {
+            if (num >= 4) {
+                cs.add(requestor.newAlbumRequest(artwork4, null, artInfos.get(3), artworkType));
+            } else if (num >= 2) {
+                //3 -> loopback, 2 -> put the first image here for crisscross
+                cs.add(requestor.newAlbumRequest(artwork4, null, artInfos.get(0), artworkType));
+            } else {
+                //never get here
+                artwork4.setDefaultImage(R.drawable.default_artwork);
+            }
+        }
+    }
+
 }

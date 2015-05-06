@@ -24,13 +24,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:colorBackground"/>
+    <include layout="@layout/recycler_list_frame_base"/>
 
-    <include
-        layout="@layout/profile_sticky_header"/>
+    <include layout="@layout/profile_sticky_header"/>
 
 </org.opensilk.music.ui3.profile.ProfilePortraitView>

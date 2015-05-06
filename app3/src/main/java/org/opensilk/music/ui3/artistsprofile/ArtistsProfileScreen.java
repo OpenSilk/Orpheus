@@ -29,6 +29,7 @@ import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.model.Artist;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableScreen;
 import org.opensilk.music.ui3.profile.ProfileScreen;
@@ -38,17 +39,20 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/5/15.
  */
-@Layout(R.layout.bundleable_recycler)
+@Layout(R.layout.profile_recycler)
 @WithComponentFactory(ArtistsProfileScreen.Factory.class)
 public class ArtistsProfileScreen extends BundleableScreen implements ProfileScreen {
 
-    public ArtistsProfileScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
+    final Artist artist;
+
+    public ArtistsProfileScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo, Artist artist) {
         super(libraryConfig, libraryInfo);
+        this.artist = artist;
     }
 
     @Override
     public Fragment getFragment(Context context) {
-        return ArtistsProfileScreenFragment.ni(context, libraryConfig, libraryInfo);
+        return ArtistsProfileScreenFragment.ni(context, this);
     }
 
     @Override
@@ -65,6 +69,7 @@ public class ArtistsProfileScreen extends BundleableScreen implements ProfileScr
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(libraryConfig.dematerialize());
         dest.writeParcelable(libraryInfo, flags);
+        dest.writeBundle(artist.toBundle());
     }
 
     public static final Creator<ArtistsProfileScreen> CREATOR = new Creator<ArtistsProfileScreen>() {
@@ -72,7 +77,8 @@ public class ArtistsProfileScreen extends BundleableScreen implements ProfileScr
         public ArtistsProfileScreen createFromParcel(Parcel source) {
             return new ArtistsProfileScreen(
                     LibraryConfig.materialize(source.readBundle()),
-                    source.<LibraryInfo>readParcelable(getClass().getClassLoader())
+                    source.<LibraryInfo>readParcelable(getClass().getClassLoader()),
+                    Artist.BUNDLE_CREATOR.fromBundle(source.readBundle())
             );
         }
 

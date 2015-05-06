@@ -16,17 +16,18 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.opensilk.music.ui3.profile.ProfileHeroView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <org.opensilk.common.widget.SquareFrameLayout
+    <org.opensilk.common.ui.widget.SquareFrameLayout
         android:id="@+id/hero_container"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:layout_marginBottom="?actionBarSize">
 
-        <org.opensilk.common.widget.HalfSizeSquareImageView
+        <org.opensilk.common.ui.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -34,7 +35,7 @@
             android:layout_marginBottom="1dp"
             android:layout_marginRight="1dp"/>
 
-        <org.opensilk.common.widget.HalfSizeSquareImageView
+        <org.opensilk.common.ui.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -42,7 +43,7 @@
             android:layout_marginBottom="1dp"
             android:layout_marginLeft="1dp"/>
 
-        <org.opensilk.common.widget.HalfSizeSquareImageView
+        <org.opensilk.common.ui.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image3"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -50,7 +51,7 @@
             android:layout_marginTop="1dp"
             android:layout_marginRight="1dp"/>
 
-        <org.opensilk.common.widget.HalfSizeSquareImageView
+        <org.opensilk.common.ui.widget.HalfSizeSquareImageView
             android:id="@+id/hero_image4"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -58,6 +59,6 @@
             android:layout_marginTop="1dp"
             android:layout_marginLeft="1dp"/>
 
-    </org.opensilk.common.widget.SquareFrameLayout>
+    </org.opensilk.common.ui.widget.SquareFrameLayout>
 
-</FrameLayout>
+</org.opensilk.music.ui3.profile.ProfileHeroView>

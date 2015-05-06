@@ -22,6 +22,7 @@ import android.os.Bundle;
 
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.model.Genre;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**
@@ -30,14 +31,15 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class GenresProfileScreenFragment extends BundleableFragment {
     public static final String NAME = GenresProfileScreenFragment.class.getName();
 
-    public static GenresProfileScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
-        Bundle args = makeCommonArgsBundle(config, info);
+    public static GenresProfileScreenFragment ni(Context context, GenresProfileScreen screen) {
+        Bundle args = new Bundle();
+        args.putParcelable("screen", screen);
         return factory(context, NAME, args);
     }
 
     @Override
     protected Object getScreen() {
-        extractCommonArgs();
-        return new GenresProfileScreen(mLibraryConfig, mLibraryInfo);
+        getArguments().setClassLoader(getClass().getClassLoader());
+        return getArguments().<GenresProfileScreen>getParcelable("screen");
     }
 }

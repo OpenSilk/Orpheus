@@ -94,13 +94,13 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         setupRecyclerView(false);
-        if (savedInstanceState != null) {
-            addAll(BundleableUtil.unflatten(savedInstanceState));
-            getView().setListShown(true, false);
-            adapterIsDirty = true;
-        } else {
+//        if (savedInstanceState != null) {
+//            addAll(BundleableUtil.unflatten(savedInstanceState));
+//            getView().setListShown(true, false);
+//            adapterIsDirty = true;
+//        } else {
             getView().setLoading(true);
-        }
+//        }
         if (notSubscribed(subscription)) {
             load();
         }
@@ -110,9 +110,9 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
     @DebugLog
     protected void onSave(Bundle outState) {
         super.onSave(outState);
-        if (hasView()) {
-            BundleableUtil.flatten(outState, getView().getAdapter().getItems());
-        }
+//        if (hasView()) {
+//            BundleableUtil.flatten(outState, getView().getAdapter().getItems());
+//        }
     }
 
     @Override
@@ -124,10 +124,7 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
 
     protected void setupRecyclerView(boolean clear) {
         if (hasView()) {
-            BundleableRecyclerAdapter adapter = getView().getAdapter();
-            adapter.setGridStyle(isGrid());
-            RecyclerView v = getView().getListView();
-            v.setLayoutManager(getLayoutManager(v.getContext()));
+            getView().setupRecyclerView();
             if (clear) {
                 load();
             }
@@ -190,6 +187,7 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
         if (hasView()) {
             if (adapterIsDirty) {
                 adapterIsDirty = false;
+                getView().notifyAdapterResetIncoming();
                 getView().getAdapter().replaceAll(collection);
             } else {
                 getView().getAdapter().addAll(collection);
@@ -202,6 +200,7 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
         if (hasView()) {
             if (adapterIsDirty) {
                 adapterIsDirty = false;
+                getView().notifyAdapterResetIncoming();
                 getView().getAdapter().clear();
             }
             getView().getAdapter().addItem(item);
@@ -213,25 +212,8 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
         wantGrid = yes;
     }
 
-    protected boolean isGrid() {
+    public boolean isGrid() {
         return wantGrid;
-    }
-
-    protected RecyclerView.LayoutManager getLayoutManager(Context context) {
-        if (isGrid()) {
-            return makeGridLayoutManager(context);
-        } else {
-            return makeListLayoutManager(context);
-        }
-    }
-
-    protected RecyclerView.LayoutManager makeGridLayoutManager(Context context) {
-        int numCols = context.getResources().getInteger(R.integer.grid_columns);
-        return new GridLayoutManager(context, numCols, GridLayoutManager.VERTICAL, false);
-    }
-
-    protected RecyclerView.LayoutManager makeListLayoutManager(Context context) {
-        return new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
     }
 
     public void onItemClicked(Context context, Bundleable item) {

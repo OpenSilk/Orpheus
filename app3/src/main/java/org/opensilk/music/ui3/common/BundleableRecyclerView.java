@@ -18,10 +18,14 @@
 package org.opensilk.music.ui3.common;
 
 import android.content.Context;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.recycler.RecyclerListFrame;
+import org.opensilk.music.R;
 
 import javax.inject.Inject;
 
@@ -30,20 +34,23 @@ import javax.inject.Inject;
  */
 public class BundleableRecyclerView extends RecyclerListFrame {
 
-    @Inject BundleablePresenter mPresenter;
-    @Inject BundleableRecyclerAdapter mAdapter;
+    @Inject protected BundleablePresenter mPresenter;
+    @Inject protected BundleableRecyclerAdapter mAdapter;
 
     public BundleableRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        BundleableComponent component = DaggerService.getDaggerComponent(context);
+        doInject();
+    }
+
+    protected void doInject() {
+        BundleableComponent component = DaggerService.getDaggerComponent(getContext());
         component.inject(this);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        getListView().setHasFixedSize(true);
-        getListView().setAdapter(mAdapter);
+        initRecyclerView();
         mPresenter.takeView(this);
     }
 
@@ -51,6 +58,37 @@ public class BundleableRecyclerView extends RecyclerListFrame {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mPresenter.dropView(this);
+    }
+
+    protected void initRecyclerView() {
+        getListView().setHasFixedSize(true);
+        getListView().setAdapter(mAdapter);
+    }
+
+    protected void setupRecyclerView() {
+        mAdapter.setGridStyle(mPresenter.isGrid());
+        getListView().setLayoutManager(getLayoutManager());
+    }
+
+    protected void notifyAdapterResetIncoming() {
+
+    }
+
+    protected RecyclerView.LayoutManager getLayoutManager() {
+        if (mPresenter.isGrid()) {
+            return makeGridLayoutManager();
+        } else {
+            return makeListLayoutManager();
+        }
+    }
+
+    protected RecyclerView.LayoutManager makeGridLayoutManager() {
+        int numCols = getContext().getResources().getInteger(R.integer.grid_columns);
+        return new GridLayoutManager(getContext(), numCols, GridLayoutManager.VERTICAL, false);
+    }
+
+    protected RecyclerView.LayoutManager makeListLayoutManager() {
+        return new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
     }
 
     public BundleableRecyclerAdapter getAdapter() {

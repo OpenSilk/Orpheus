@@ -19,14 +19,22 @@ package org.opensilk.music.ui3.artistsprofile;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.TextUtils;
 
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.AlbumSortOrder;
+import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.common.UtilsCommon;
+
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -57,6 +65,34 @@ public class ArtistsProfileScreenModule {
     @Provides @Named("presenter_wantGrid")
     public Boolean provideWantGrid(AppPreferences preferences) {
         return preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig, AppPreferences.ALBUM_LAYOUT), AppPreferences.GRID);
+    }
+
+    @Provides @Named("profile_heros")
+    public Boolean provideWantMultiHeros() {
+        return false;
+    }
+
+    @Provides @Named("profile_heros")
+    public List<ArtInfo> provideHeroArtinfos() {
+        return Collections.singletonList(new ArtInfo(screen.artist.name, null, null));
+    }
+
+    @Provides @Named("profile_title")
+    public String provideProfileTitle() {
+        return screen.artist.name;
+    }
+
+    @Provides @Named("profile_subtitle")
+    public String provideProfileSubTitle(@ForApplication Context context) {
+        String subtitle = "";
+        if (screen.artist.albumCount > 0) {
+            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nalbums, screen.artist.albumCount);
+        }
+        if (screen.artist.trackCount > 0) {
+            if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
+            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.artist.trackCount);
+        }
+        return subtitle;
     }
 
     @Provides @ScreenScope

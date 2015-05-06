@@ -22,6 +22,8 @@ import android.os.Bundle;
 
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.model.Artist;
+import org.opensilk.music.ui3.artists.ArtistsScreen;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**
@@ -30,14 +32,16 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class ArtistsProfileScreenFragment extends BundleableFragment {
     public static final String NAME = ArtistsProfileScreenFragment.class.getName();
 
-    public static ArtistsProfileScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
-        Bundle args = makeCommonArgsBundle(config, info);
+    public static ArtistsProfileScreenFragment ni(Context context, ArtistsProfileScreen screen) {
+        Bundle args = makeCommonArgsBundle(screen.libraryConfig, screen.libraryInfo);
+        args.putBundle("artist", screen.artist.toBundle());
         return factory(context, NAME, args);
     }
 
     @Override
     protected Object getScreen() {
         extractCommonArgs();
-        return new ArtistsProfileScreen(mLibraryConfig, mLibraryInfo);
+        Artist artist = Artist.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("artist"));
+        return new ArtistsProfileScreen(mLibraryConfig, mLibraryInfo, artist);
     }
 }

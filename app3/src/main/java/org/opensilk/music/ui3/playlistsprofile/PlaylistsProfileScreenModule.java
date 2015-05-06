@@ -22,9 +22,13 @@ import android.net.Uri;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.ItemClickListener;
+
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -56,6 +60,26 @@ public class PlaylistsProfileScreenModule {
     @Provides @Named("presenter_wantGrid")
     public Boolean provideWantGrid() {
         return false;
+    }
+
+    @Provides @Named("profile_heros")
+    public Boolean provideWantMultiHeros() {
+        return false;
+    }
+
+    @Provides @Named("profile_heros")
+    public List<ArtInfo> provideHeroArtinfos() {
+        return Collections.emptyList();
+    }
+
+    @Provides @Named("profile_title")
+    public String provideProfileTitle() {
+        return "";
+    }
+
+    @Provides @Named("profile_subtitle")
+    public String provideProfileSubTitle() {
+        return "";
     }
 
     @Provides @ScreenScope

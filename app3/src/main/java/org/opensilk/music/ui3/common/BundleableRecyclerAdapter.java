@@ -37,7 +37,6 @@ import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Artist;
@@ -49,7 +48,6 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.widgets.GridTileDescription;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -60,13 +58,10 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.Optional;
-import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.ViewObservable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
@@ -120,7 +115,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     void bindAlbum(ViewHolder holder, Album album) {
-        ArtInfo artInfo = Utils.makeBestfitArtInfo(album.artistName, null, album.name, album.artworkUri);
+        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(album.artistName, null, album.name, album.artworkUri);
         holder.title.setText(album.name);
         holder.subtitle.setText(album.artistName);
         if (artInfo == ArtInfo.NULLINSTANCE) {
@@ -139,11 +134,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         Context context = holder.itemView.getContext();
         String subtitle = "";
         if (artist.albumCount > 0) {
-            subtitle += Utils.makeLabel(context, R.plurals.Nalbums, artist.albumCount);
+            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nalbums, artist.albumCount);
         }
         if (artist.trackCount > 0) {
             if (!TextUtils.isEmpty(subtitle)) subtitle += ", ";
-            subtitle += Utils.makeLabel(context, R.plurals.Nsongs, artist.trackCount);
+            subtitle += UtilsCommon.makeLabel(context, R.plurals.Nsongs, artist.trackCount);
         }
         holder.subtitle.setText(subtitle);
         if (artInfo == ArtInfo.NULLINSTANCE) {
@@ -160,7 +155,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         holder.title.setText(folder.name);
         Context context = holder.itemView.getContext();
         if (folder.childCount > 0) {
-            holder.subtitle.setText(Utils.makeLabel(context, R.plurals.Nitems, folder.childCount));
+            holder.subtitle.setText(UtilsCommon.makeLabel(context, R.plurals.Nitems, folder.childCount));
         } else {
             holder.subtitle.setText(" ");
         }
@@ -174,11 +169,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     void bindGenre(ViewHolder holder, Genre genre) {
         holder.title.setText(genre.name);
         Context context = holder.itemView.getContext();
-        String l2 = Utils.makeLabel(context, R.plurals.Nalbums, genre.albumUris.size())
-                + ", " + Utils.makeLabel(context, R.plurals.Nsongs, genre.trackUris.size());
+        String l2 = UtilsCommon.makeLabel(context, R.plurals.Nalbums, genre.albumUris.size())
+                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, genre.trackUris.size());
         holder.subtitle.setText(l2);
         if (gridStyle && (genre.albumUris.size() > 0 || genre.artInfos.size() > 0)) {
-            loadMultiArtwork(holder, genre.albumUris, genre.artInfos, false);
+            loadMultiArtwork(holder, genre.artInfos);
         } else {
             setLetterTileDrawable(holder, genre.name);
         }
@@ -187,20 +182,20 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     void bindPlaylist(ViewHolder holder, Playlist playlist) {
         holder.title.setText(playlist.name);
         Context context = holder.itemView.getContext();
-        holder.subtitle.setText(Utils.makeLabel(context, R.plurals.Nsongs, playlist.trackUris.size()));
+        holder.subtitle.setText(UtilsCommon.makeLabel(context, R.plurals.Nsongs, playlist.trackUris.size()));
         if (gridStyle && (playlist.artInfos.size() > 0)) {
-            loadMultiArtwork(holder, Collections.<Uri>emptyList(), playlist.artInfos, false);
+            loadMultiArtwork(holder, playlist.artInfos);
         } else {
             setLetterTileDrawable(holder, playlist.name);
         }
     }
 
     void bindTrack(ViewHolder holder, Track track) {
-        ArtInfo artInfo = Utils.makeBestfitArtInfo(track.albumArtistName, track.artistName, track.albumName, track.artworkUri);
+        ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(track.albumArtistName, track.artistName, track.albumName, track.artworkUri);
         holder.title.setText(track.name);
         holder.subtitle.setText(track.artistName);
         if (holder.extraInfo != null && track.duration > 0) {
-            holder.extraInfo.setText(Utils.makeTimeString(holder.itemView.getContext(), track.duration));
+            holder.extraInfo.setText(UtilsCommon.makeTimeString(holder.itemView.getContext(), track.duration));
             holder.extraInfo.setVisibility(View.VISIBLE);
         }
         if (artInfo == ArtInfo.NULLINSTANCE) {
@@ -257,101 +252,15 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         }
     }
 
-    void loadMultiArtwork(ViewHolder holder, List<Uri> albumUris, List<ArtInfo> artInfos, boolean try2) {
-
+    void loadMultiArtwork(ViewHolder holder, List<ArtInfo> artInfos) {
+        ArtworkRequestManager requestor = presenter.getRequestor();
         CompositeSubscription cs = holder.subscriptions;
-
-        if (artInfos.size() > 0) {
-            ArtworkRequestManager requestor = presenter.getRequestor();
-            AnimatedImageView artwork = holder.artwork;
-            AnimatedImageView artwork2 = holder.artwork2;
-            AnimatedImageView artwork3 = holder.artwork3;
-            AnimatedImageView artwork4 = holder.artwork4;
-
-            final int num = artInfos.size();
-            if (artwork != null) {
-                if (num >= 1) {
-                    cs.add(requestor.newAlbumRequest(artwork, null, artInfos.get(0), ArtworkType.THUMBNAIL));
-                } else {
-                    artwork.setDefaultImage(R.drawable.default_artwork);
-                }
-            }
-            if (artwork2 != null) {
-                if (num >= 2) {
-                    cs.add(requestor.newAlbumRequest(artwork2, null, artInfos.get(1), ArtworkType.THUMBNAIL));
-                } else {
-                    // never get here
-                    artwork2.setDefaultImage(R.drawable.default_artwork);
-                }
-            }
-            if (artwork3 != null) {
-                if (num >= 3) {
-                    cs.add(requestor.newAlbumRequest(artwork3, null, artInfos.get(2), ArtworkType.THUMBNAIL));
-                } else if (num >= 2) {
-                    //put the second image here, first image will be put in 4th spot to crisscross
-                    cs.add(requestor.newAlbumRequest(artwork3, null, artInfos.get(1), ArtworkType.THUMBNAIL));
-                } else {
-                    // never get here
-                    artwork3.setDefaultImage(R.drawable.default_artwork);
-                }
-            }
-            if (artwork4 != null) {
-                if (num >= 4) {
-                    cs.add(requestor.newAlbumRequest(artwork4, null, artInfos.get(3), ArtworkType.THUMBNAIL));
-                } else if (num >= 2) {
-                    //3 -> loopback, 2 -> put the first image here for crisscross
-                    cs.add(requestor.newAlbumRequest(artwork4, null, artInfos.get(0), ArtworkType.THUMBNAIL));
-                } else {
-                    //never get here
-                    artwork4.setDefaultImage(R.drawable.default_artwork);
-                }
-            }
-        } else if (!try2) {
-            //We gotta go get the artinfo ourselves, sigh
-            final List<Uri> trunkAlbumUris;
-            if (albumUris.size() > 4) {
-                trunkAlbumUris = albumUris.subList(0, 3);
-            } else {
-                trunkAlbumUris = albumUris;
-            }
-            Observable<ArtInfo> o = null;
-            Context context = holder.itemView.getContext().getApplicationContext();
-            for (Uri u : trunkAlbumUris) {
-                BundleableLoader l = new BundleableLoader(context, u, null);
-                Observable<ArtInfo> ao = l.createObservable()
-                        .flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
-                            @Override
-                            public Observable<Bundleable> call(List<Bundleable> bundleables) {
-                                return Observable.from(bundleables);
-                            }
-                        })
-                        .first()
-                        .cast(Album.class)
-                        .map(new Func1<Album, ArtInfo>() {
-                            @Override
-                            public ArtInfo call(Album album) {
-                                return Utils.makeBestfitArtInfo(album.artistName, null, album.name, album.artworkUri);
-                            }
-                        });
-                if (o == null) {
-                    o = ao;
-                } else {
-                    o.mergeWith(ao);
-                }
-            }
-            if (o == null) return;
-            final WeakReference<ViewHolder> wHolder = new WeakReference<ViewHolder>(holder);
-            cs.add(o.toSortedList().subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new SimpleObserver<List<ArtInfo>>() {
-                        @Override
-                        public void onNext(List<ArtInfo> artInfos) {
-                            ViewHolder h = wHolder.get();
-                            if (h != null) {
-                                loadMultiArtwork(h, trunkAlbumUris, artInfos, true);
-                            }
-                        }
-                    }));
-        }
+        AnimatedImageView artwork = holder.artwork;
+        AnimatedImageView artwork2 = holder.artwork2;
+        AnimatedImageView artwork3 = holder.artwork3;
+        AnimatedImageView artwork4 = holder.artwork4;
+        ArtworkType artworkType = ArtworkType.THUMBNAIL;
+        UtilsCommon.loadMultiArtwork(requestor, cs, artwork, artwork2, artwork3, artwork4, artInfos, artworkType);
     }
 
     final Observer<OnClickEvent> itemClickObserver = new SimpleObserver<OnClickEvent>() {

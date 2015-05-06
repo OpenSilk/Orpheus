@@ -16,24 +16,25 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.opensilk.music.ui3.profile.ProfileHeroView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <!-- Need nested frame so image doesnt bleed into grid on parallax -->
-    <org.opensilk.common.widget.SquareFrameLayout
+    <org.opensilk.common.ui.widget.SquareFrameLayout
         android:id="@+id/hero_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="?actionBarSize">
 
-        <org.opensilk.common.widget.SquareImageView
+        <org.opensilk.common.ui.widget.SquareImageView
             android:id="@+id/hero_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:gravity="center" />
 
-    </org.opensilk.common.widget.SquareFrameLayout>
+    </org.opensilk.common.ui.widget.SquareFrameLayout>
 
-</FrameLayout>
+</org.opensilk.music.ui3.profile.ProfileHeroView>
