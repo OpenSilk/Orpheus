@@ -123,7 +123,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             this.key = key;
             this.artInfo = key.artInfo;
             this.artworkType = key.artworkType;
-            addBreadcrumb(Util.getCacheKey(artInfo, artworkType));
+            addBreadcrumb("Requestor: %s", Util.getCacheKey(artInfo, artworkType));
         }
 
         @Override
@@ -190,7 +190,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         void onResponse(Artwork artwork, boolean fromCache, boolean shouldAnimate) {
-            addBreadcrumb("onResponse(%s)", fromCache);
+            addBreadcrumb("onResponse(fromCache=%s)", fromCache);
             if (unsubscribed) return;
             for (ImageContainer c : recipients) {
                 c.setImageBitmap(artwork.bitmap, shouldAnimate);
@@ -242,7 +242,8 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            addBreadcrumb("tryForProvider(%s) miss", secondTry);
+                            Timber.d("tryForProvider onError(%s)", throwable.getMessage());
+                            addBreadcrumb("tryForProvider(secondTry=%s) miss", secondTry);
                             if (throwable instanceof FileNotFoundException && !secondTry) {
                                 onProviderMiss(uri);
                             } else {
@@ -271,7 +272,6 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
         }
 
         void unregisterContentObserver() {
-            addBreadcrumb("unregisterContentObserver()");
             try {
                 mContext.getContentResolver().unregisterContentObserver(contentObserver);
             } catch (Exception ignored) {/*safety i dont think anything is thrown*/}
@@ -286,7 +286,18 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     subscription.unsubscribe();
                 }
                 unregisterContentObserver();
-                tryForProvider(true);
+                //Delay slightly before hitting the provider again
+                //XXX this is a bad solution. but it seems that the
+                //diskcache insnt always in sync when we are notified
+                //TODO find root cause.
+                subscription = Observable.timer(1000, TimeUnit.MILLISECONDS)
+                        .observeOn(oScheduler)
+                        .subscribe(new Action1<Long>() {
+                            @Override
+                            public void call(Long aLong) {
+                                tryForProvider(true);
+                            }
+                        });
             }
         };
 

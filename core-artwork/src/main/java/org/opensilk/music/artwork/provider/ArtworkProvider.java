@@ -181,7 +181,7 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     private ParcelFileDescriptor pullSnapshot(String cacheKey) {
-        Timber.d("Checking DiskCache for " + cacheKey);
+        Timber.v("Checking DiskCache for " + cacheKey);
         try {
             if (mL2Cache == null) {
                 throw new IOException("Unable to obtain cache instance");

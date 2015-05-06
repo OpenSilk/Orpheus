@@ -144,7 +144,7 @@ public class ArtworkFetcherManager {
             this.artInfo = key.artInfo;
             this.artworkType = key.artworkType;
             this.listener = listener;
-            addBreadcrumb(Util.getCacheKey(artInfo, artworkType));
+            addBreadcrumb("Fetcher: %s", Util.getCacheKey(artInfo, artworkType));
         }
 
         @Override
@@ -223,7 +223,7 @@ public class ArtworkFetcherManager {
 
         @Override
         void onStart() {
-            addBreadcrumb("onCacheMiss");
+            addBreadcrumb("onStart");
             boolean isOnline = isOnline(mPreferences.getBoolean(ArtworkPreferences.ONLY_ON_WIFI, true));
             boolean wantArtistImages = mPreferences.getBoolean(ArtworkPreferences.DOWNLOAD_MISSING_ARTIST_IMAGES, true);
             if (isOnline && wantArtistImages) {
@@ -272,7 +272,7 @@ public class ArtworkFetcherManager {
 
         @Override
         void onStart() {
-            addBreadcrumb("onCacheMiss");
+            addBreadcrumb("onStart");
             //check if we have everything we need to download artwork
             boolean hasAlbumArtist = !TextUtils.isEmpty(artInfo.albumName) && !TextUtils.isEmpty(artInfo.artistName);
             boolean hasUri = artInfo.artworkUri != null && !artInfo.artworkUri.equals(Uri.EMPTY);
