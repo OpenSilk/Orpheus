@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.gallery;
 
 import android.os.Bundle;
 
-import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;

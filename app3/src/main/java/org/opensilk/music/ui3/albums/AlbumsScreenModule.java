@@ -22,16 +22,13 @@ import android.net.Uri;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.AlbumSortOrder;
-import org.opensilk.music.library.sort.FolderSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.albumsprofile.AlbumsProfileScreen;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.folders.FoldersScreenFragment;
 
 import javax.inject.Named;
 

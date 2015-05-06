@@ -21,8 +21,8 @@ import android.content.res.Resources;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
-import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.common.ui.mortar.Layout;
+import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;

@@ -18,10 +18,8 @@
 package org.opensilk.music.ui3.albums;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.music.ui3.MusicActivity;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
-import org.opensilk.music.ui3.folders.FoldersScreenModule;
 
 import dagger.Component;
 import rx.functions.Func2;
