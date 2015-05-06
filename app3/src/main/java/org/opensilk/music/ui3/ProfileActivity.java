@@ -82,7 +82,7 @@ public class ProfileActivity extends MusicActivity {
         mActionBarOwner.setConfig(config);
 
         ProfileScreen screen = getIntent().getParcelableExtra("screen");
-        mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), screen.getTag(), false);
+        mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), false);
     }
 
 }

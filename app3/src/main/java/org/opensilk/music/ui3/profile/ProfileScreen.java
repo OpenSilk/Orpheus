@@ -21,10 +21,11 @@ import android.content.Context;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 
+import org.opensilk.common.ui.mortarfragment.MortarFragment;
+
 /**
  * Created by drew on 5/5/15.
  */
 public interface ProfileScreen extends Parcelable {
-    Fragment getFragment(Context context);
-    String getTag();
+    MortarFragment getFragment(Context context);
 }

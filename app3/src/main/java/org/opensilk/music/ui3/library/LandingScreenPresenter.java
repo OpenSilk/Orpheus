@@ -171,22 +171,22 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     void onItemClicked(Context context, ViewItem item) {
         if (item == ViewItem.FOLDERS) {
             FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, FoldersScreenFragment.NAME, true);
+            fm.replaceMainContent(f, true);
         } else if (item == ViewItem.ALBUMS) {
             AlbumsScreenFragment f = AlbumsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, AlbumsScreenFragment.NAME, true);
+            fm.replaceMainContent(f, true);
         } else if (item == ViewItem.ARTISTS) {
             ArtistsScreenFragment f = ArtistsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, ArtistsScreenFragment.NAME, true);
+            fm.replaceMainContent(f, true);
         } else if (item == ViewItem.GENRES) {
             GenresScreenFragment f = GenresScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, GenresScreenFragment.NAME, true);
+            fm.replaceMainContent(f, true);
         } else if (item == ViewItem.PLAYLISTS) {
             PlaylistsScreenFragment f = PlaylistsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, PlaylistsScreenFragment.NAME, true);
+            fm.replaceMainContent(f, true);
         } else if (item == ViewItem.TRACKS) {
             TracksScreenFragment f = TracksScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, TracksScreenFragment.NAME, true);
+            fm.replaceMainContent(f, true);
         } else if (item == ViewItem.GALLERY) {
             List<GalleryPage> pages = new ArrayList<>();
             if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
@@ -205,7 +205,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
                 pages.add(GalleryPage.SONG);
             }
             GalleryScreenFragment f = GalleryScreenFragment.ni(context, screen.libraryConfig, currentSelection, pages);
-            fm.replaceMainContent(f, GalleryScreenFragment.NAME, true);
+            fm.replaceMainContent(f, true);
         }
     }
 

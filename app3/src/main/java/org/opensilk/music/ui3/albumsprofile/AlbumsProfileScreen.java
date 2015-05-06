@@ -26,6 +26,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
 import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
+import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
@@ -56,13 +57,8 @@ public class AlbumsProfileScreen extends BundleableScreen implements ProfileScre
     }
 
     @Override
-    public Fragment getFragment(Context context) {
+    public MortarFragment getFragment(Context context) {
         return AlbumsProfileScreenFragment.ni(context, libraryConfig, libraryInfo, album);
-    }
-
-    @Override
-    public String getTag() {
-        return AlbumsProfileScreenFragment.NAME;
     }
 
     @Override

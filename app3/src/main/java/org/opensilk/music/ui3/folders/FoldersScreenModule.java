@@ -67,7 +67,7 @@ public class FoldersScreenModule {
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
                 LibraryInfo info = screen.libraryInfo.buildUpon(item.getIdentity(), item.getName());
                 FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, info);
-                presenter.getFm().replaceMainContent(f, FoldersScreenFragment.NAME + "-" + info.folderId, true);
+                presenter.getFm().replaceMainContent(f, true);
             }
         };
     }

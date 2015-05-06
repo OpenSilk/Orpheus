@@ -109,7 +109,7 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
         currentSelection = item;
         LandingScreenFragment lsf = LandingScreenFragment.ni(config);
         fm.killBackStack();
-        fm.replaceMainContent(lsf, LandingScreenFragment.TAG+currentSelection.authority, false);
+        fm.replaceMainContent(lsf, false);
         drawerOwner.closeDrawer();
     }
 }
