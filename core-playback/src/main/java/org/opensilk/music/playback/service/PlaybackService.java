@@ -17,8 +17,10 @@
 
 package org.opensilk.music.playback.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.media.MediaMetadata;
 import android.media.Rating;
 import android.media.session.MediaSession;
 import android.net.Uri;
@@ -32,13 +34,19 @@ import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.AlarmManagerHelper;
 import org.opensilk.music.playback.AudioManagerHelper;
 import org.opensilk.music.playback.BundleHelper;
+import org.opensilk.music.playback.LibraryHelper;
+import org.opensilk.music.playback.MediaMetadataHelper;
+import org.opensilk.music.playback.NavUtils;
 import org.opensilk.music.playback.NotificationHelper;
 
 import javax.inject.Inject;
 
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
+import org.opensilk.music.playback.PlaybackConstants.EVENT;
+import org.opensilk.music.playback.PlaybackConstants.EXTRA;
 import org.opensilk.music.playback.PlaybackQueue;
+import org.opensilk.music.playback.PlaybackStateHelper;
 import org.opensilk.music.playback.PlaybackStatus;
 import org.opensilk.music.playback.mediaplayer.MultiPlayer;
 import org.opensilk.music.playback.player.IPlayer;
@@ -72,6 +80,9 @@ public class PlaybackService extends Service {
     @Inject HandlerThread mHandlerThread;
     @Inject MediaSession mMediaSession;
     @Inject PlaybackStatus mPlaybackStatus;
+    @Inject PlaybackStateHelper mPlaybackStateHelper;
+    @Inject MediaMetadataHelper mMediaMetaHelper;
+    @Inject LibraryHelper mLibraryHelper;
 
     private Handler mHandler;
     private IPlayer mPlayer;
@@ -88,30 +99,27 @@ public class PlaybackService extends Service {
         mHandler = new Handler(mHandlerThread.getLooper());
 
         //tell everyone about ourselves
-        mNotificationHelper.setService(this);
+        mNotificationHelper.setService(this, mHandler);
         mAudioManagerHelper.setChangeListener(mAudioFocusChangeListener, mHandler);
         mQueue.setListener(mQueueChangeListener, mHandler);
         mMediaSession.setCallback(mMediaSessionCallback, mHandler);
+        mMediaMetaHelper.setMediaSession(mMediaSession, mHandler);
 
+        //init default player
         mPlayer = new MultiPlayer(this, mAudioManagerHelper.getAudioSessionId());
         mPlayer.setCallback(mPlayerCallback, mHandler);
+
+        mHandler.post(mLoadQueueRunnable);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
         mMediaSession.release();
-
         mNotificationHelper.killNotification();
-        mNotificationHelper.setService(null);
-
         mAlarmManagerHelper.cancelDelayedShutdown();
-
         mAudioManagerHelper.abandonFocus();
-
-        mQueue.save(); //Todo async
-
+        mQueue.save();
         mHandler.removeCallbacksAndMessages(null);
         mHandlerThread.getLooper().quit();
     }
@@ -138,6 +146,21 @@ public class PlaybackService extends Service {
         return START_STICKY;
     }
 
+    private void updateMeta() {
+        mMediaMetaHelper.updateMeta(mPlaybackStatus.getCurrentTrack());
+        updateNotification();
+    }
+
+    private void updateNotification() {
+        mNotificationHelper.buildNotification(mPlaybackStatus.getCurrentTrack(),
+                mPlaybackStatus.isSupposedToBePlaying(), mMediaSession.getSessionToken());
+    }
+
+    private void updatePlaybackState() {
+        mNotificationHelper.updatePlayState(mPlaybackStateHelper.isActive());
+        mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
+    }
+
     final MediaSession.Callback mMediaSessionCallback = new MediaSession.Callback() {
         @Override
         public void onCommand(String command, Bundle args, ResultReceiver cb) {
@@ -157,15 +180,14 @@ public class PlaybackService extends Service {
                     Timber.e("onPlay called while isSupposedToBePlaying");
                 }
                 if (mAudioManagerHelper.requestFocus()) {
-                    Timber.i("Audio focus granted. Starting playback");
                     mPlaybackStatus.setIsSupposedToBePlaying(true);
                     mPlayer.play();
-                    //TODO update playstate
+                    mPlaybackStateHelper.gotoPlaying();
+                    updatePlaybackState();
                 }
                 //update always
                 mAlarmManagerHelper.cancelDelayedShutdown();
-                mNotificationHelper.buildNotification(mPlaybackStatus.getCurrentTrack(),
-                        mPlaybackStatus.isSupposedToBePlaying(), mMediaSession.getSessionToken());
+                updateNotification();
             } else if (mPlaybackStatus.isPlayerLoading()) {
                 Timber.d("Player is loading. Ignoring play request");
             } else if (mQueue.notEmpty()) {
@@ -178,8 +200,6 @@ public class PlaybackService extends Service {
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            //TODO make sure its a track uri
-            mQueue.addNext(Collections.singletonList(Uri.parse(mediaId)));
             super.onPlayFromMediaId(mediaId, extras);
         }
 
@@ -197,12 +217,13 @@ public class PlaybackService extends Service {
         @DebugLog
         public void onPause() {
             if (!mPlaybackStatus.isSupposedToBePlaying()) {
-                Timber.e("onStop called when !isSupposedToBePlaying");
+                Timber.e("onPause called when !isSupposedToBePlaying");
             }
             mPlaybackStatus.setIsSupposedToBePlaying(false);
             mAudioManagerHelper.abandonFocus();
             mPlayer.pause();
-            //TODO update playstate
+            mPlaybackStateHelper.gotoPaused();
+            updatePlaybackState();
         }
 
         @Override
@@ -210,11 +231,15 @@ public class PlaybackService extends Service {
         public void onSkipToNext() {
             //Will callback to WENT_TO_NEXT
             mPlayer.skipToNext();
+            mPlaybackStateHelper.gotoSkippingNext();
+            updatePlaybackState();
         }
 
         @Override
         public void onSkipToPrevious() {
             mQueue.goToItem(mQueue.getPrevious());
+            mPlaybackStateHelper.gotoSkippingPrevious();
+            updatePlaybackState();
         }
 
         @Override
@@ -234,10 +259,11 @@ public class PlaybackService extends Service {
                 Timber.e("onStop called when !isSupposedToBePlaying");
             }
             mPlaybackStatus.setIsSupposedToBePlaying(false);
-            mAudioManagerHelper.abandonFocus();
             mPlayer.stop();
+            mAudioManagerHelper.abandonFocus();
+            mPlaybackStateHelper.gotoStopped();
+            updatePlaybackState();
             mAlarmManagerHelper.scheduleDelayedShutdown();
-            //TODO update playstate
         }
 
         @Override
@@ -273,7 +299,7 @@ public class PlaybackService extends Service {
                     Uri uri = BundleHelper.getUri(extras);
                     String sort = BundleHelper.getString(extras);
                     int where = BundleHelper.getInt(extras);
-                    List<Uri> list = getTracks(uri, sort);
+                    List<Uri> list = mLibraryHelper.getTracks(uri, sort);
                     if (where == PlaybackConstants.ENQUEUE_LAST) {
                         mQueue.addEnd(list);
                     } else if (where == PlaybackConstants.ENQUEUE_NEXT) {
@@ -292,7 +318,7 @@ public class PlaybackService extends Service {
                     Uri uri = BundleHelper.getUri(extras);
                     String sort = BundleHelper.getString(extras);
                     int startpos = BundleHelper.getInt(extras);
-                    List<Uri> list = getTracks(uri, sort);
+                    List<Uri> list = mLibraryHelper.getTracks(uri, sort);
                     mQueue.replace(list, startpos);
                     mPlaybackStatus.setPlayWhenReady(true);
                     break;
@@ -329,6 +355,7 @@ public class PlaybackService extends Service {
             new AudioManagerHelper.OnFocusChangedListener() {
                 @Override
                 public void onFocusLost() {
+                    mPlaybackStatus.setPausedByTransientLossOfFocus(false);
                     mMediaSessionCallback.onPause();
                 }
 
@@ -360,27 +387,31 @@ public class PlaybackService extends Service {
                 @DebugLog
                 public void onCurrentPosChanged() {
                     if (mQueue.notEmpty()) {
+                        mHandler.removeCallbacks(mProgressCheckRunnable);
                         if (mPlaybackStatus.getCurrentQueuePos() == mQueue.getCurrentPos()) {
-                            Timber.w("Our position matches queue position. what should i do?");
+                            Timber.w("Current position matches queue");
                         }
                         Uri uri = mQueue.getCurrentUri();
-                        Track track = getTrack(uri);
+                        Track track = mLibraryHelper.getTrack(uri);
                         if (track == null) {
                             //will callback in here
                             mPlaybackStatus.setCurrentQueuePos(-2);
                             mQueue.remove(mQueue.getCurrentPos());
                         } else {
+                            if (track.equals(mPlaybackStatus.getCurrentTrack())) {
+                                Timber.w("Current track matches queue");
+                            }
                             mPlaybackStatus.setCurrentTrack(track);
                             mPlaybackStatus.setCurrentQueuePos(mQueue.getCurrentPos());
                             if (mPlaybackStatus.isSupposedToBePlaying()) {
                                 mPlaybackStatus.setPlayWhenReady(true);
                             }
+                            mPlaybackStatus.setIsSupposedToBePlaying(false);
                             mPlayer.setDataSource(track.dataUri);
-                            //TODO update notificaiton
+                            updateMeta();
                         }
                     } else if (mPlaybackStatus.isSupposedToBePlaying()) {
-                        Timber.i("Queue is gone. stopping playback");
-                        mMediaSessionCallback.onStop();
+                        stopAndResetState();
                     }
                 }
 
@@ -388,34 +419,41 @@ public class PlaybackService extends Service {
                 @DebugLog
                 public void onQueueChanged() {
                     if (mQueue.notEmpty()) {
-                        Uri uri = mQueue.getNextUri();
-                        Track track = getTrack(uri);
-                        if (track == null) {
-                            //Will callback in here
-                            mQueue.remove(mQueue.getNextPos());
-                        } else if (!track.equals(mPlaybackStatus.getNextTrack())) {
-                            mPlaybackStatus.setNextTrack(track);
-                            mPlayer.setNextDataSource(track.dataUri);
-                        } //else nothing. we should be good
+                        setNextTrack();
                     } else if (mPlaybackStatus.isSupposedToBePlaying()) {
-                        Timber.i("Queue is gone. stopping playback");
-                        mMediaSessionCallback.onStop();
+                        Timber.e("Got onQueueChanged with empty queue");
+                        stopAndResetState();
                     }
-
                 }
 
                 @Override
                 @DebugLog
                 public void wentToNext() {
+                    mPlaybackStatus.setNextTrackToCurrent();
+                    mPlaybackStatus.setIsSupposedToBePlaying(true);
+                    setNextTrack();
+                    updateMeta();
+                }
+
+                private void setNextTrack() {
                     Uri uri = mQueue.getNextUri();
-                    Track track = getTrack(uri);
+                    Track track = mLibraryHelper.getTrack(uri);
                     if (track == null) {
                         //will callback into onQueueChanged
                         mQueue.remove(mQueue.getNextPos());
-                    } else {
+                    } else if (!track.equals(mPlaybackStatus.getNextTrack())) {
                         mPlaybackStatus.setNextTrack(track);
                         mPlayer.setNextDataSource(track.dataUri);
+                    } else {
+                        Timber.i("Next track is still up to date");
                     }
+                }
+
+                private void stopAndResetState() {
+                    Timber.i("Queue is gone. stopping playback");
+                    mMediaSessionCallback.onStop();
+                    mPlaybackStatus.reset();
+                    mNotificationHelper.killNotification();
                 }
             };
 
@@ -437,14 +475,14 @@ public class PlaybackService extends Service {
                 case PlayerEvent.DURATION: {
                     if (mPlaybackStatus.getCurrentDuration() != event.getLongExtra()) {
                         mPlaybackStatus.setCurrentDuration(event.getLongExtra());
-                        //TODO notify
+                        notifyProgress();
                     }
                     break;
                 }
                 case PlayerEvent.POSITION: {
                     if (mPlaybackStatus.getCurrentSeekPos() != event.getLongExtra()) {
                         mPlaybackStatus.setCurrentSeekPos(event.getLongExtra());
-                        //TODO notify
+                        notifyProgress();
                     }
                     break;
                 }
@@ -461,7 +499,8 @@ public class PlaybackService extends Service {
                 }
                 case PlayerStatus.LOADING: {
                     Timber.i("Player moved to loading");
-                    //TODO notify
+                    mPlaybackStateHelper.gotoBuffering();
+                    updatePlaybackState();
                     break;
                 }
                 case PlayerStatus.READY: {
@@ -469,6 +508,8 @@ public class PlaybackService extends Service {
                         mPlaybackStatus.setPlayWhenReady(false);
                         mMediaSessionCallback.onPlay();
                     }
+                    //will kickoff progress subscription
+                    mPlayer.getDuration();
                     //Will load the next track
                     mQueueChangeListener.onQueueChanged();
                     break;
@@ -501,42 +542,30 @@ public class PlaybackService extends Service {
                 }
             }
         }
+
+        private void notifyProgress() {
+            mPlaybackStateHelper.updatePosition(mPlaybackStatus.getCurrentSeekPos());
+            mPlaybackStateHelper.updateDuration(mPlaybackStatus.getCurrentDuration());
+            updatePlaybackState();
+            mHandler.removeCallbacks(mProgressCheckRunnable);
+            mHandler.postDelayed(mProgressCheckRunnable, 2000);
+        }
     };
 
-    Track getTrack(Uri uri) {
-        try {
-            return new BundleableLoader(PlaybackService.this, uri, null)
-                    .createObservable().flatMap(new Func1<List<Bundleable>, Observable<? extends Bundleable>>() {
-                        @Override
-                        public Observable<? extends Bundleable> call(List<Bundleable> bundleables) {
-                            return Observable.from(bundleables);
-                        }
-                    }).cast(Track.class).toBlocking().first();
-        } catch (Exception e) {
-            Timber.e(e, "getTrack");
-            return null;
+    final Runnable mLoadQueueRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mQueue.load();
+            mQueueChangeListener.onCurrentPosChanged();
+            mMediaSession.setActive(true);
         }
-    }
+    };
 
-    List<Uri> getTracks(final Uri uri, String sortorder) {
-        try {
-            final String authority = uri.getAuthority();
-            final String library = uri.getPathSegments().get(0);
-            return new BundleableLoader(PlaybackService.this, uri, sortorder)
-                    .createObservable().flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
-                        @Override
-                        public Observable<Bundleable> call(List<Bundleable> bundleables) {
-                            return Observable.from(bundleables);
-                        }
-                    }).collect(new ArrayList<Uri>(), new Action2<ArrayList<Uri>, Bundleable>() {
-                        @Override
-                        public void call(ArrayList<Uri> uris, Bundleable bundleable) {
-                            uris.add(LibraryUris.track(authority, library, bundleable.getIdentity()));
-                        }
-                    }).toBlocking().first();
-        } catch (Exception e) {
-            Timber.e(e, "getTracks");
-            return Collections.emptyList();
+    final Runnable mProgressCheckRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mPlayer.getPosition();
         }
-    }
+    };
+
 }

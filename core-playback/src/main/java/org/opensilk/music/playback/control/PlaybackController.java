@@ -57,8 +57,11 @@ import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
 import rx.Scheduler;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.subjects.BehaviorSubject;
 import timber.log.Timber;
 
 /**
@@ -250,6 +253,20 @@ public class PlaybackController {
      * End custom commands
      */
 
+    /*
+     * Subscriptions
+     */
+
+    final BehaviorSubject<Bundle> progressSubject = BehaviorSubject.create();
+
+    public Subscription subscribeProgressUpdates(Action1<Bundle> onNext) {
+        return progressSubject.subscribe(onNext);
+    }
+
+    /*
+     * end subscriptions
+     */
+
     final MediaController.Callback mCallback = new MediaController.Callback() {
         @Override
         public void onSessionDestroyed() {
@@ -310,7 +327,6 @@ public class PlaybackController {
         return mTransportControls;
     }
 
-    @DebugLog
     public void connect() {
         if (mMediaController != null || mWaitingForService) {
             return;
@@ -318,6 +334,10 @@ public class PlaybackController {
         mWaitingForService = true;
         mAppContext.startService(new Intent(mAppContext, PlaybackService.class));
         mAppContext.bindService(new Intent(mAppContext, PlaybackService.class), mServiceConnection, Context.BIND_IMPORTANT);
+    }
+
+    public void disconnect() {
+        mAppContext.unbindService(mServiceConnection);
     }
 
     void onDisconnect() {
@@ -335,8 +355,9 @@ public class PlaybackController {
                 mMediaController = new MediaController(mAppContext, mPlaybackService.getToken());
                 mMediaController.registerCallback(mCallback, mCallbackHandler);
                 mTransportControls = mMediaController.getTransportControls();
+                mPlaybackState = mMediaController.getPlaybackState();
             } catch (RemoteException e) {
-                Timber.w(e, "Bind service");
+                Timber.e(e, "Bind service");
                 mMediaController = null;
                 mTransportControls = null;
             } finally {

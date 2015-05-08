@@ -30,12 +30,19 @@ import java.util.List;
  */
 public class BundleHelper {
     public static final String INT_ARG = "intarg";
+    public static final String INT_ARG2 = "intarg2";
     public static final String LIST_ART = "listarg";
     public static final String URI_ARG = "uriarg";
     public static final String STRING_ARG = "stringarg";
+    public static final String LONG_ARG = "longarg";
+    public static final String LONG_ARG2 = "longarg2";
 
     public static int getInt(Bundle b) {
         return b.getInt(INT_ARG);
+    }
+
+    public static int getInt2(Bundle b) {
+        return b.getInt(INT_ARG2);
     }
 
     public static <T extends Parcelable> List<T> getList(Bundle b) {
@@ -50,6 +57,14 @@ public class BundleHelper {
 
     public static String getString(Bundle b) {
         return b.getString(STRING_ARG);
+    }
+
+    public static long getLong(Bundle b) {
+        return b.getInt(LONG_ARG);
+    }
+
+    public static long getLong2(Bundle b) {
+        return b.getInt(LONG_ARG2);
     }
 
     public static BundleHelper.Builder builder() {
@@ -71,6 +86,11 @@ public class BundleHelper {
             return this;
         }
 
+        public Builder putInt2(int val) {
+            b.putInt(INT_ARG2, val);
+            return this;
+        }
+
         public <T extends Parcelable> Builder putList(List<T> list) {
             b.putParcelableArrayList(LIST_ART, new ArrayList<Parcelable>(list));
             return this;
@@ -83,6 +103,16 @@ public class BundleHelper {
 
         public Builder putString(String string) {
             b.putString(STRING_ARG, string);
+            return this;
+        }
+
+        public Builder putLong(long val) {
+            b.putLong(LONG_ARG, val);
+            return this;
+        }
+
+        public Builder putLong2(long val) {
+            b.putLong(LONG_ARG2, val);
             return this;
         }
 

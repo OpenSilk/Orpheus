@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.session.MediaSession;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
 
@@ -37,9 +38,12 @@ import java.lang.ref.WeakReference;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import rx.Scheduler;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 /**
@@ -82,10 +86,21 @@ public class NotificationHelper {
      */
     private RemoteViews mExpandedView;
 
+    final CurrentInfo mCurrentInfo = new CurrentInfo();
+    final Scheduler mScheduler = Schedulers.computation();
     Subscription mArtworkSubscription;
-    CurrentInfo mCurrentInfo;
-
+    Scheduler oScheduler;
     Service mService;
+
+    static class CurrentInfo {
+        Track track;
+        ArtInfo artInfo;
+        Bitmap bitmap;
+        boolean isPlaying;
+        boolean hasAnyNull() {
+            return track == null || artInfo == null || bitmap == null;
+        }
+    }
 
     @Inject
     public NotificationHelper(
@@ -98,62 +113,53 @@ public class NotificationHelper {
         mArtworkHelper = artworkHelper;
     }
 
-    private static class CurrentInfo {
-        final Track track;
-        final boolean isPlaying;
-        final ArtInfo artInfo;
-        final Bitmap bitmap;
-
-        public CurrentInfo(Track track, boolean isPlaying, ArtInfo artInfo, Bitmap bitmap) {
-            this.track = track;
-            this.artInfo = artInfo;
-            this.isPlaying = isPlaying;
-            this.bitmap = bitmap;
-        }
-
-        public CurrentInfo withIsPlaying(boolean isPlaying) {
-            return new CurrentInfo(track, isPlaying, artInfo, bitmap);
-        }
-
-        public CurrentInfo withBitmap(Bitmap bitmap) {
-            return new CurrentInfo(track, isPlaying, artInfo, bitmap);
-        }
-    }
-
-    public void setService(Service service) {
+    public void setService(Service service, Handler handler) {
         mService = service;
+        oScheduler = AndroidSchedulers.handlerThread(handler);
     }
 
     /**
      * Call this to build the {@link Notification}.
      */
     public void buildNotification(Track track, boolean isPlaying, MediaSession.Token mediaToken) {
+        if (mService == null || oScheduler == null) {
+            Timber.e("must setService");
+            return;
+        }
+
+        if (track.equals(mCurrentInfo.track) && isPlaying == mCurrentInfo.isPlaying) {
+            return;
+        }
+
+        mCurrentInfo.track = track;
+        mCurrentInfo.isPlaying = isPlaying;
 
         final ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.albumArtistName,
                 track.artistName, track.albumName, track.artworkUri);
 
-        if (mCurrentInfo != null && artInfo.equals(mCurrentInfo.artInfo)) {
-            mCurrentInfo = new CurrentInfo(track, isPlaying, mCurrentInfo.artInfo, mCurrentInfo.bitmap);
+        if (artInfo.equals(mCurrentInfo.artInfo)) {
             if (mCurrentInfo.bitmap != null) {
                 buildNotificationInternal();
-            }
+            } //else wait for artwork
         } else {
-            mCurrentInfo = new CurrentInfo(track, isPlaying, artInfo, null);
+            mCurrentInfo.artInfo = artInfo;
             if (mArtworkSubscription != null) {
                 mArtworkSubscription.unsubscribe();
             }
             mArtworkSubscription = mArtworkHelper.getArtwork(artInfo, ArtworkType.THUMBNAIL)
+                    .subscribeOn(mScheduler)
+                    .observeOn(oScheduler)
                     .subscribe(new Action1<Bitmap>() {
                         @Override
                         public void call(Bitmap bitmap) {
-                            mCurrentInfo = mCurrentInfo.withBitmap(bitmap);
+                            mCurrentInfo.bitmap = bitmap;
                             buildNotificationInternal();
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            Timber.w(throwable, "artworkSubscription");
-                            mCurrentInfo = null;
+                            Timber.w(throwable, "getArtwork");
+                            mArtworkSubscription = null;
                         }
                     }, new Action0() {
                         @Override
@@ -165,6 +171,9 @@ public class NotificationHelper {
     }
 
     private void buildNotificationInternal() {
+        if (mCurrentInfo.hasAnyNull() || mService == null) {
+            return;
+        }
         // Default notfication layout
         mNotificationTemplate = new RemoteViews(mContext.getPackageName(),
                 R.layout.notification_template_base);
@@ -197,9 +206,7 @@ public class NotificationHelper {
         }
 
         mNotification.flags |= Notification.FLAG_ONGOING_EVENT;
-        if (mService != null) {
-            mService.startForeground(APOLLO_MUSIC_SERVICE, mNotification);
-        }
+        mService.startForeground(APOLLO_MUSIC_SERVICE, mNotification);
     }
 
     /**
@@ -210,6 +217,9 @@ public class NotificationHelper {
             mService.stopForeground(true);
         }
         mNotification = null;
+        if (mArtworkSubscription != null) {
+            mArtworkSubscription.unsubscribe();
+        }
     }
 
     /**
@@ -221,7 +231,7 @@ public class NotificationHelper {
         if (mCurrentInfo.isPlaying == isPlaying) {
             return;
         }
-        mCurrentInfo = mCurrentInfo.withIsPlaying(isPlaying);
+        mCurrentInfo.isPlaying = isPlaying;
 
         if (mNotification == null || mNotificationManager == null) {
             return;

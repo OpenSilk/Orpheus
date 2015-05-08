@@ -58,6 +58,10 @@ public class PlayerEvent {
                 return "WENT_TO_NEXT";
             case OPEN_NEXT_FAILED:
                 return "OPEN_NEXT_FAILED";
+            case POSITION:
+                return "POSITION";
+            case DURATION:
+                return "DURATION";
             default:
                 return "";
         }

@@ -17,6 +17,7 @@
 
 package org.opensilk.music.playback.service;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.media.session.MediaSession;
 import android.os.*;
@@ -26,6 +27,7 @@ import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.artwork.service.ArtworkProviderHelperModule;
+import org.opensilk.music.playback.NavUtils;
 import org.opensilk.music.playback.SystemServicesModule;
 
 import dagger.Module;
@@ -45,6 +47,21 @@ public class PlaybackServiceModule {
     }
     @Provides
     public MediaSession provideMediaSession(@ForApplication Context context) {
-        return new MediaSession(context, PlaybackService.NAME);
+        MediaSession mMediaSession = new MediaSession(context, PlaybackService.NAME);
+        mMediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS
+                | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+//        mMediaSession.setMediaButtonReceiver(PendingIntent.getBroadcast(
+//                this,
+//                1,
+//                new Intent(this, MediaButtonIntentReceiver.class),
+//                PendingIntent.FLAG_UPDATE_CURRENT
+//        ));
+        mMediaSession.setSessionActivity(PendingIntent.getActivity(
+                context,
+                2,
+                NavUtils.makeLauncherIntent(context),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        ));
+        return mMediaSession;
     }
 }

@@ -28,6 +28,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import hugo.weaving.DebugLog;
+
 /**
  * Created by drew on 5/7/15.
  */
@@ -47,6 +49,7 @@ public class PlaybackQueue {
         this.mSettings = mSettings;
     }
 
+    @DebugLog
     public void load() {
         mQueue.clear();
         mQueue.addAll(mSettings.getQueue());
@@ -62,6 +65,7 @@ public class PlaybackQueue {
         //Use async to avoid making new thread
         new AsyncTask<Void, Void, Void>() {
             @Override
+            @DebugLog
             protected Void doInBackground(Void... params) {
                 mSettings.saveQueue(mQueue);
                 if (mCurrentPos != -1) {
@@ -105,7 +109,7 @@ public class PlaybackQueue {
         } else {
             mQueue.addAll(list);
             if (startpos == -1) {
-                mCurrentPos = 0;
+                mCurrentPos = -1;
                 shuffle();
             } else {
                 mCurrentPos = clamp(startpos);
@@ -232,15 +236,21 @@ public class PlaybackQueue {
     }
 
     public void shuffle() {
-        Uri current = mQueue.get(mCurrentPos);
-        Collections.shuffle(mQueue);
-        int idx = mQueue.indexOf(current);
-        //Make sure we dont change the current position
-        if (idx != mCurrentPos) {
-            mQueue.remove(idx);
-            mQueue.add(mCurrentPos, current);
+        if (mCurrentPos == -1) {
+            Collections.shuffle(mQueue);
+            mCurrentPos = 0;
+            notifyCurrentPosChanged();
+        } else {
+            Uri current = mQueue.get(mCurrentPos);
+            Collections.shuffle(mQueue);
+            int idx = mQueue.indexOf(current);
+            //Make sure we dont change the current position
+            if (idx != mCurrentPos) {
+                mQueue.remove(idx);
+                mQueue.add(mCurrentPos, current);
+            }
+            notifyQueueChanged();
         }
-        notifyQueueChanged();
     }
 
     public boolean notEmpty() {

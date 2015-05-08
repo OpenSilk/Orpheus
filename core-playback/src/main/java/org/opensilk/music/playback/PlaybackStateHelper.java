@@ -18,6 +18,7 @@
 package org.opensilk.music.playback;
 
 import android.media.session.PlaybackState;
+import android.os.Bundle;
 import android.os.SystemClock;
 
 import javax.inject.Inject;
@@ -29,7 +30,6 @@ import static android.media.session.PlaybackState.*;
 /**
  * Created by drew on 4/23/15.
  */
-@Singleton
 public class PlaybackStateHelper {
 
     private int mState;
@@ -39,6 +39,8 @@ public class PlaybackStateHelper {
     private long mActions;
     private CharSequence mErrorMessage;
     private long mUpdateTime;
+    private Bundle mExtras;
+    private long mQueuePos;
 
     public static final float PLAYBACK_SPEED = 1.0f;
 
@@ -49,14 +51,17 @@ public class PlaybackStateHelper {
         mSpeed = PLAYBACK_SPEED;
         mBufferedPosition = PLAYBACK_POSITION_UNKNOWN;
         mActions = ACTION_PLAY
-                    | ACTION_PAUSE
-                    | ACTION_PLAY_PAUSE
-                    | ACTION_STOP
-                    | ACTION_SEEK_TO
-                    | ACTION_SKIP_TO_NEXT
-                    | ACTION_SKIP_TO_PREVIOUS;
+                | ACTION_PAUSE
+                | ACTION_PLAY_PAUSE
+                | ACTION_STOP
+                | ACTION_SEEK_TO
+                | ACTION_SKIP_TO_NEXT
+                | ACTION_SKIP_TO_PREVIOUS
+                | ACTION_SKIP_TO_QUEUE_ITEM;
         mErrorMessage = "";
         mUpdateTime = 0;
+        mExtras = new Bundle();
+        mQueuePos = -1;
     }
 
     public PlaybackState getState() {
@@ -65,13 +70,24 @@ public class PlaybackStateHelper {
                 .setState(mState, mPosition, mSpeed, mUpdateTime)
                 .setErrorMessage(mErrorMessage)
                 .setBufferedPosition(mBufferedPosition)
+                .setActiveQueueItemId(mQueuePos)
+                //.setExtras(mExtras)
                 .build();
     }
 
     public void updatePosition(long position) {
         mPosition = position;
-        mBufferedPosition = position;
+        //mBufferedPosition = position;
         mUpdateTime = SystemClock.elapsedRealtime();
+    }
+
+    public void updateDuration(long duration) {
+        //mExtras.putLong(PlaybackConstants.EXTRA.DURATION, duration);
+        mBufferedPosition = duration;
+    }
+
+    public void updateQueuePos(int pos) {
+        mQueuePos = pos;
     }
 
     public void gotoStopped() {

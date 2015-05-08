@@ -229,4 +229,12 @@ public interface PlaybackConstants {
         String PLAY_TRACKS_FROM = "cmd.playtracksfrom";
     }
 
+    interface EVENT {
+        String PROGRESS_UPDATE = "event.progressupdate";
+    }
+
+    interface EXTRA {
+        String DURATION = "duration";
+    }
+
 }

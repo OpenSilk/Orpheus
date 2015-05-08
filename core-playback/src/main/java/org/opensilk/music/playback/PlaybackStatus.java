@@ -27,11 +27,11 @@ import javax.inject.Inject;
  */
 public class PlaybackStatus {
     //last known seek position
-    long currentSeekPos;
+    long currentSeekPos = -1;
     //last know duration
-    long currentDuration;
+    long currentDuration = -1;
     //last known queu position
-    int currentQueuePos;
+    int currentQueuePos = -1;
     //
     boolean repeatOn;
     //currently playing track
@@ -45,11 +45,23 @@ public class PlaybackStatus {
     //true if we should start playing when loading finishes
     boolean playWhenReady;
     //PlaybackStatus.* things
-    int playerState;
+    int playerState = PlayerStatus.NONE;
 
     @Inject
     public PlaybackStatus() {
 
+    }
+
+    public void reset() {
+        currentSeekPos = -1;
+        currentDuration = -1;
+        currentQueuePos = -1;
+        currentTrack = null;
+        nextTrack = null;
+        supposedToBePlaying = false;
+        pausedByTransientLossOfFocus = false;
+        playWhenReady = false;
+        playerState = PlayerStatus.NONE;
     }
 
     public void setCurrentSeekPos(long currentSeekPos) {
@@ -82,6 +94,11 @@ public class PlaybackStatus {
 
     public Track getNextTrack() {
         return nextTrack;
+    }
+
+    public void setNextTrackToCurrent() {
+        currentTrack = nextTrack;
+        nextTrack = null;
     }
 
     public int getCurrentQueuePos() {
