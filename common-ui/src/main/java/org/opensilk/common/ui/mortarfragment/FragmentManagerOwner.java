@@ -70,6 +70,7 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
 
     @SuppressLint("RtlHardcoded")
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Deprecated
     public int replaceMainContent(Fragment frag, String tag, boolean addToBackstack) {
         if (!hasView()) return -1;
         FragmentTransaction ft = getView().getSupportFragmentManager().beginTransaction();

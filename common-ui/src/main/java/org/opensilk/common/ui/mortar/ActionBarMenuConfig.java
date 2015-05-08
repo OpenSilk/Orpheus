@@ -17,6 +17,7 @@
 
 package org.opensilk.common.ui.mortar;
 
+import android.content.Context;
 import android.view.Menu;
 
 import org.opensilk.common.core.util.Preconditions;
@@ -24,17 +25,18 @@ import org.opensilk.common.core.util.Preconditions;
 import java.util.Arrays;
 
 import rx.functions.Func1;
+import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
  */
 public class ActionBarMenuConfig {
-    public final Func1<Integer, Boolean> actionHandler;
+    public final Func2<Context, Integer, Boolean> actionHandler;
     public final Integer[] menus;
     public final CustomMenuItem[] customMenus;
 
     private ActionBarMenuConfig(
-            Func1<Integer, Boolean> actionHandler,
+            Func2<Context, Integer, Boolean> actionHandler,
             Integer[] menus,
             CustomMenuItem[] customMenus
     ) {
@@ -72,14 +74,14 @@ public class ActionBarMenuConfig {
     }
 
     public static class Builder {
-        public Func1<Integer, Boolean> actionHandler;
+        public Func2<Context, Integer, Boolean> actionHandler;
         public Integer[] menus = new Integer[0];
         public CustomMenuItem[] customMenus = new CustomMenuItem[0];
 
         private Builder() {
         }
 
-        public Builder setActionHandler(Func1<Integer, Boolean> actionHandler) {
+        public Builder setActionHandler(Func2<Context, Integer, Boolean> actionHandler) {
             this.actionHandler = actionHandler;
             return this;
         }

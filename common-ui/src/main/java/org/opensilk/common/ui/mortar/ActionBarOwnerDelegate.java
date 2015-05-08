@@ -83,7 +83,7 @@ public class ActionBarOwnerDelegate<A extends AppCompatActivity & HasScope> impl
     public boolean onOptionsItemSelected(MenuItem item) {
         return currentMenu != null
                 && currentMenu.actionHandler != null
-                && currentMenu.actionHandler.call(item.getItemId());
+                && currentMenu.actionHandler.call(activity, item.getItemId());
     }
 
     /*

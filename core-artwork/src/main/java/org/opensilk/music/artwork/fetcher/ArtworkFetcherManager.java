@@ -42,7 +42,7 @@ import org.opensilk.music.artwork.Constants;
 import org.opensilk.music.artwork.CoverArtJsonRequest;
 import org.opensilk.music.artwork.CrumbTrail;
 import org.opensilk.music.artwork.RequestKey;
-import org.opensilk.music.artwork.Util;
+import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.model.ArtInfo;
 
@@ -144,7 +144,7 @@ public class ArtworkFetcherManager {
             this.artInfo = key.artInfo;
             this.artworkType = key.artworkType;
             this.listener = listener;
-            addBreadcrumb("Fetcher: %s", Util.getCacheKey(artInfo, artworkType));
+            addBreadcrumb("Fetcher: %s", UtilsArt.getCacheKey(artInfo, artworkType));
         }
 
         @Override
@@ -643,7 +643,7 @@ public class ArtworkFetcherManager {
                     @Override
                     public void onResponse(Bitmap bitmap) {
                         // always add to cache
-                        String cacheKey = Util.getCacheKey(artInfo, artworkType);
+                        String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
                         writeToL2(cacheKey, bitmap);
                         if (subscriber.isUnsubscribed()) return;
                         //subscriber.onNext(bitmap);
@@ -671,7 +671,7 @@ public class ArtworkFetcherManager {
             }
             @Override
             public void onResponse(Bitmap bitmap) {
-                writeToL2(Util.getCacheKey(artInfo, artworkType), bitmap);
+                writeToL2(UtilsArt.getCacheKey(artInfo, artworkType), bitmap);
             }
         };
         mVolleyQueue.add(new ArtworkRequest2(mContext, url, artworkType, listener).setTag(artInfo));
@@ -698,12 +698,12 @@ public class ArtworkFetcherManager {
                     Response<Bitmap> result2 = request2.parseNetworkResponse(response);
                     // add to cache first so we dont return before its added
                     if (result2.isSuccess()) {
-                        String cacheKey = Util.getCacheKey(artInfo, artworkType2);
+                        String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType2);
                         writeToL2(cacheKey, result2.result);
                     }
                     if (result.isSuccess()) {
                         //always add to cache
-                        String cacheKey = Util.getCacheKey(artInfo, artworkType);
+                        String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
                         writeToL2(cacheKey, result.result);
                         if (subscriber.isUnsubscribed()) return;
                         subscriber.onNext(result.result);

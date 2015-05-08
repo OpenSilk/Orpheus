@@ -21,7 +21,7 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.artwork.shared.ArtworkAuthorityModule;
-import org.opensilk.music.artwork.Util;
+import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.ArtworkCache;
 import org.opensilk.music.artwork.cache.ArtworkLruCache;
 
@@ -39,7 +39,7 @@ import dagger.Provides;
 public class ArtworkRequestorModule {
     @Provides @Singleton
     public ArtworkCache provideArtworkLruCache(@ForApplication Context context) {
-        return new ArtworkLruCache(Util.calculateL1CacheSize(context, false));
+        return new ArtworkLruCache(UtilsArt.calculateL1CacheSize(context, false));
     }
     @Provides @Singleton
     public ArtworkRequestManager provideArtworkRequestManager(ArtworkRequestManagerImpl iml) {

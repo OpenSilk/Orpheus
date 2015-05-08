@@ -26,7 +26,7 @@ import org.opensilk.music.artwork.shared.GsonModule;
 import org.opensilk.music.model.ArtInfo;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.opensilk.music.artwork.Util.*;
+import static org.opensilk.music.artwork.UtilsArt.*;
 
 /**
  * Created by drew on 11/11/14.

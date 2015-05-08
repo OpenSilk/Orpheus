@@ -19,6 +19,7 @@ package org.opensilk.music.artwork;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.net.Uri;
 import android.util.Base64;
 
 import com.google.gson.Gson;
@@ -39,7 +40,7 @@ import static org.opensilk.music.artwork.Constants.*;
 /**
  * Created by drew on 4/30/15.
  */
-public class Util {
+public class UtilsArt {
     /**
      * Creates a cache key for use with the L1 cache.
      *
@@ -84,5 +85,29 @@ public class Util {
         final ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         final int memClass = (forceLarge || !BaseApp.isLowEndHardware(context)) ? am.getLargeMemoryClass() : am.getMemoryClass();
         return Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
+    }
+
+    public static ArtInfo makeBestfitArtInfo(String artist, String altArtist, String album, Uri uri) {
+        if (uri != null) {
+            if (artist == null || album == null) {
+                // we need both to make a query but we have uri so just use that,
+                // note this will prevent cache from returning artist images when album is null
+                return new ArtInfo(null, null, uri);
+            } else {
+                return new ArtInfo(artist, album, uri);
+            }
+        } else {
+            if (artist == null && altArtist != null) {
+                // cant fallback to uri so best guess the artist
+                // note this is a problem because the song artist may not be the
+                // album artist but we have no choice here, also note the service
+                // does the same thing so at least it will be consistent
+                return new ArtInfo(altArtist, album, null);
+            } else {
+                // if everything is null the artworkmanager will set the default image
+                // so no further validation is needed here.
+                return ArtInfo.NULLINSTANCE;
+            }
+        }
     }
 }

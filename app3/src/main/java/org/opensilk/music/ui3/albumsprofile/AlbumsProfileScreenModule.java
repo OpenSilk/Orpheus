@@ -19,15 +19,23 @@ package org.opensilk.music.ui3.albumsprofile;
 
 import android.content.Context;
 import android.net.Uri;
+import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
+import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
+import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
+import org.opensilk.music.ui3.common.OverflowAction;
+import org.opensilk.music.ui3.common.OverflowClickListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,17 +58,30 @@ public class AlbumsProfileScreenModule {
 
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return LibraryUris.albumTracks(screen.libraryConfig.authority, screen.libraryInfo.libraryId, screen.libraryInfo.folderId);
+        return LibraryUris.albumTracks(screen.libraryConfig.authority,
+                screen.libraryInfo.libraryId, screen.libraryInfo.folderId);
     }
 
     @Provides @Named("loader_sortorder")
-    public String provideLoaderSortOrder(AppPreferences preferences) {//TODO proper sort orders
-        return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig, AppPreferences.ALBUM_TRACK_SORT_ORDER), TrackSortOrder.A_Z);
+    public String provideLoaderSortOrder(AppPreferences preferences) {
+        return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig,
+                AppPreferences.ALBUM_TRACK_SORT_ORDER), TrackSortOrder.PLAYORDER);
     }
 
-    @Provides @Named("presenter_wantGrid")
-    public Boolean provideWantGrid() {
-        return false;
+    @Provides @ScreenScope
+    public BundleablePresenterConfig providePresenterConfig(
+            AppPreferences preferences,
+            ItemClickListener itemClickListener,
+            OverflowClickListener overflowClickListener,
+            ActionBarMenuConfig menuConfig
+    ) {
+
+        return BundleablePresenterConfig.builder()
+                .setWantsGrid(false)
+                .setItemClickListener(itemClickListener)
+                .setOverflowClickListener(overflowClickListener)
+                .setMenuConfig(menuConfig)
+                .build();
     }
 
     @Provides @Named("profile_heros")
@@ -83,6 +104,7 @@ public class AlbumsProfileScreenModule {
         return screen.album.artistName;
     }
 
+
     @Provides @ScreenScope
     public ItemClickListener provideItemClickListener() {
         return new ItemClickListener() {
@@ -92,4 +114,30 @@ public class AlbumsProfileScreenModule {
             }
         };
     }
+
+    @Provides @ScreenScope
+    public OverflowClickListener provideOverflowClickListener() {
+        return new OverflowClickListener() {
+            @Override
+            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
+
+            }
+
+            @Override
+            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
+                BundleableComponent component = DaggerService.getDaggerComponent(context);
+                PlaybackController playbackController = component.playbackController();
+                AppPreferences appPreferences = component.appPreferences();
+                return false;
+            }
+        };
+    }
+
+    @Provides @ScreenScope
+    public ActionBarMenuConfig provideMenuConfig() {
+        return ActionBarMenuConfig.builder()
+                .build();
+    }
+
+
 }

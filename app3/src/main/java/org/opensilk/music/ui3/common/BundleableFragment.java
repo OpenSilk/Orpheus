@@ -19,11 +19,17 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.Menu;
+import android.view.MenuInflater;
 
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.ui3.MusicActivityComponent;
 
 /**
  * Created by drew on 5/5/15.
@@ -53,4 +59,17 @@ public abstract class BundleableFragment extends MortarFragment {
         return (T) Fragment.instantiate(context, name, args);
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setupActionBar();
+    }
+
+    protected void setupActionBar() {
+        MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
+        ActionBarOwner actionBarOwner = component.actionBarOwner();
+        BundleableComponent component1 = DaggerService.getDaggerComponent(getScope());
+        BundleablePresenter presenter = component1.presenter();
+        actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon().setMenuConfig(presenter.getMenuConfig()).build());
+    }
 }

@@ -32,6 +32,7 @@ import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConstants;
+import org.opensilk.music.playback.control.PlaybackController;
 
 import javax.inject.Inject;
 
@@ -45,6 +46,7 @@ public abstract class MusicActivity extends MortarFragmentActivity implements Ac
 
     @Inject protected ActivityResultsOwner mActivityResultsOwner;
     @Inject protected ActionBarOwner mActionBarOwner;
+    @Inject protected PlaybackController mPlaybackController;
 
     /*@InjectView(R.id.main_toolbar)*/ protected Toolbar mToolbar;
 
@@ -62,6 +64,8 @@ public abstract class MusicActivity extends MortarFragmentActivity implements Ac
         mActionBarDelegate.onCreate();
 
         mActivityResultsOwner.takeView(this);
+
+        mPlaybackController.connect();
     }
 
     @Override

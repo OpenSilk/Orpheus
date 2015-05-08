@@ -23,6 +23,7 @@ import android.net.Uri;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 
@@ -70,27 +71,7 @@ public class UtilsCommon {
     }
 
     public static ArtInfo makeBestfitArtInfo(String artist, String altArtist, String album, Uri uri) {
-        if (uri != null) {
-            if (artist == null || album == null) {
-                // we need both to make a query but we have uri so just use that,
-                // note this will prevent cache from returning artist images when album is null
-                return new ArtInfo(null, null, uri);
-            } else {
-                return new ArtInfo(artist, album, uri);
-            }
-        } else {
-            if (artist == null && altArtist != null) {
-                // cant fallback to uri so best guess the artist
-                // note this is a problem because the song artist may not be the
-                // album artist but we have no choice here, also note the service
-                // does the same thing so at least it will be consistent
-                return new ArtInfo(altArtist, album, null);
-            } else {
-                // if everything is null the artworkmanager will set the default image
-                // so no further validation is needed here.
-                return ArtInfo.NULLINSTANCE;
-            }
-        }
+        return UtilsArt.makeBestfitArtInfo(artist, altArtist, album, uri);
     }
 
     public static void loadMultiArtwork(

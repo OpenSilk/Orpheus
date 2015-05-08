@@ -24,4 +24,5 @@ public interface TrackSortOrder extends BundleableSortOrder {
     String ARTIST = "artistName";
     String ALBUM = "albumName";
     String LONGEST = "duration DESC";
+    String PLAYORDER = "playorder";
 }

@@ -147,6 +147,8 @@ dependencies {
     compile project(':core-library')
     compile project(':core-loader')
     compile project(':core-artwork')
+    compile project(':core-playback')
+    compile project(':core-translations')
     compile project(':common-core')
     compile project(':common-ui')
     compile project(':library-mediastore')

@@ -35,7 +35,7 @@ import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.artwork.shared.ArtworkPreferences;
 import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.CrumbTrail;
-import org.opensilk.music.artwork.Util;
+import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.Artwork;
 import org.opensilk.music.artwork.ArtworkType;
@@ -123,7 +123,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
             this.key = key;
             this.artInfo = key.artInfo;
             this.artworkType = key.artworkType;
-            addBreadcrumb("Requestor: %s", Util.getCacheKey(artInfo, artworkType));
+            addBreadcrumb("Requestor: %s", UtilsArt.getCacheKey(artInfo, artworkType));
         }
 
         @Override
@@ -206,7 +206,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                 onComplete();
                 return;
             }
-            final String cacheKey = Util.getCacheKey(artInfo, artworkType);
+            final String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
             Artwork artwork = mL1Cache.getArtwork(cacheKey);
             if (artwork != null) {
                 addBreadcrumb("tryForCache hit");
@@ -228,7 +228,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         void tryForProvider(final boolean secondTry) {
             final Uri uri = getUri();
-            final String cacheKey = Util.getCacheKey(artInfo, artworkType);
+            final String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
             subscription = createArtworkProviderObservable(uri, cacheKey)
                     .subscribeOn(scheduler)
                     .observeOn(oScheduler)
@@ -335,7 +335,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         @Override
         Uri getUri() {
-            return ArtworkUris.createArtistReq(mAuthority, Util.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
+            return ArtworkUris.createArtistReq(mAuthority, UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
         }
     }
 
@@ -353,7 +353,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
 
         @Override
         Uri getUri() {
-            return ArtworkUris.createAlbumReq(mAuthority, Util.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
+            return ArtworkUris.createAlbumReq(mAuthority, UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
         }
     }
 

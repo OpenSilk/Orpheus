@@ -27,6 +27,8 @@ import android.widget.PopupMenu;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.SimpleObserver;
+import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.HasOptionsMenu;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -53,13 +55,16 @@ import static org.opensilk.common.core.rx.RxUtils.notSubscribed;
  * Created by drew on 5/2/15.
  */
 @ScreenScope
-public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> implements RxLoader.ContentChangedListener {
+public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
+        implements RxLoader.ContentChangedListener, HasOptionsMenu {
 
     protected final AppPreferences preferences;
     protected final ArtworkRequestManager requestor;
     protected final BundleableLoader loader;
     protected final FragmentManagerOwner fm;
     protected final ItemClickListener itemClickListener;
+    protected final OverflowClickListener overflowClickListener;
+    protected final ActionBarMenuConfig menuConfig;
 
     protected Boolean wantGrid;
 
@@ -71,16 +76,17 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
             AppPreferences preferences,
             ArtworkRequestManager requestor,
             BundleableLoader loader,
-            @Named("presenter_wantGrid") Boolean wantGrid,
             FragmentManagerOwner fm,
-            ItemClickListener itemClickListener
+            BundleablePresenterConfig config
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
         this.loader = loader;
-        this.wantGrid = wantGrid;
         this.fm = fm;
-        this.itemClickListener = itemClickListener;
+        this.wantGrid = config.wantsGrid;
+        this.itemClickListener = config.itemClickListener;
+        this.overflowClickListener = config.overflowClickListener;
+        this.menuConfig = config.menuConfig;
     }
 
     @Override
@@ -132,7 +138,7 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
     }
 
     // reset the recyclerview for eg layoutmanager change
-    protected void resetRecyclerView() {
+    public void resetRecyclerView() {
         setupRecyclerView(true);
     }
 
@@ -216,16 +222,25 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView> i
         return wantGrid;
     }
 
+    public BundleableLoader getLoader() {
+        return loader;
+    }
+
     public void onItemClicked(Context context, Bundleable item) {
         itemClickListener.onItemClicked(this, context, item);
     }
 
     public void onOverflowClicked(Context context, PopupMenu m, Bundleable item) {
-
+        overflowClickListener.onBuildMenu(context, m, item);
     }
 
     public boolean onOverflowActionClicked(Context context, OverflowAction action, Bundleable item) {
-        return false;
+        return overflowClickListener.onItemClicked(context, action, item);
+    }
+
+    @Override
+    public ActionBarMenuConfig getMenuConfig() {
+        return menuConfig;
     }
 
     public ArtworkRequestManager getRequestor() {

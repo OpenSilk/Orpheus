@@ -28,6 +28,7 @@ import org.opensilk.common.core.app.SimpleComponentCallbacks;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.playback.service.PlaybackServiceComponent;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class App extends BaseApp {
         } else if (isProviderProcess()) {
             return ProviderComponent.FACTORY.call(this);
         } else if (isServiceProcess()) {
-            throw new NotImplementedException("No component for service process");
+            return PlaybackServiceComponent.FACTORY.call(this);
         } else {
             throw new RuntimeException("Unable to determine our process");
         }

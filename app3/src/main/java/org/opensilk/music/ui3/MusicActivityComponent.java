@@ -25,6 +25,7 @@ import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.playback.control.PlaybackController;
 
 /**
  * Requires ActivityResultsOwnerModule
@@ -37,4 +38,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     ActivityResultsController activityResultsController();
     ArtworkRequestManager artworkRequestor();
     ActionBarOwner actionBarOwner();
+    PlaybackController playbackController();
 }

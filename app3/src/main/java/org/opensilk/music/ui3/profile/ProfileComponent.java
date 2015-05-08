@@ -17,10 +17,12 @@
 
 package org.opensilk.music.ui3.profile;
 
+import org.opensilk.music.ui3.common.BundleableComponent;
+
 /**
  * Created by drew on 5/5/15.
  */
-public interface ProfileComponent {
+public interface ProfileComponent extends BundleableComponent {
     void inject(ProfilePortraitView view);
     void inject(ProfileHeroView view);
     void inject(ProfileLandscapeView view);

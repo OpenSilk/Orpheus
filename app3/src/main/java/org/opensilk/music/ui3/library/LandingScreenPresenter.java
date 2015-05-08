@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.ActivityResultsListener;
@@ -62,6 +63,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     final LandingScreen screen;
     final ActivityResultsController activityResultsController;
     final FragmentManagerOwner fm;
+    final Context appContext;
 
     LibraryInfo currentSelection;
 
@@ -70,12 +72,14 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
             AppPreferences settings,
             LandingScreen screen,
             ActivityResultsController activityResultsController,
-            FragmentManagerOwner fm
+            FragmentManagerOwner fm,
+            @ForApplication Context appContext
     ) {
         this.settings = settings;
         this.screen = screen;
         this.activityResultsController = activityResultsController;
         this.fm = fm;
+        this.appContext = appContext;
     }
 
     @Override
@@ -130,7 +134,9 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         if (isGalleryEligible()) {
             items.add(ViewItem.GALLERY);
         }
-        if (hasView()) {
+        if (items.size() == 1) {
+            openScreen(items.get(0), false);
+        } else if (hasView()) {
             getView().getAdapter().replaceAll(items);
             getView().setListShown(true, true);
         }
@@ -169,44 +175,76 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     }
 
     void onItemClicked(Context context, ViewItem item) {
+        openScreen(item, true);
+    }
+
+    void openScreen(ViewItem item, boolean bs) {
         if (item == ViewItem.FOLDERS) {
-            FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, true);
+            openFolders(bs);
         } else if (item == ViewItem.ALBUMS) {
-            AlbumsScreenFragment f = AlbumsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, true);
+            openAlbums(bs);
         } else if (item == ViewItem.ARTISTS) {
-            ArtistsScreenFragment f = ArtistsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, true);
+            openArtists(bs);
         } else if (item == ViewItem.GENRES) {
-            GenresScreenFragment f = GenresScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, true);
+            openGenres(bs);
         } else if (item == ViewItem.PLAYLISTS) {
-            PlaylistsScreenFragment f = PlaylistsScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, true);
+            openPlaylists(bs);
         } else if (item == ViewItem.TRACKS) {
-            TracksScreenFragment f = TracksScreenFragment.ni(context, screen.libraryConfig, currentSelection);
-            fm.replaceMainContent(f, true);
+            openTracks(bs);
         } else if (item == ViewItem.GALLERY) {
-            List<GalleryPage> pages = new ArrayList<>();
-            if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
-                pages.add(GalleryPage.PLAYLIST);
-            }
-            if (screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
-                pages.add(GalleryPage.ARTIST);
-            }
-            if (screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
-                pages.add(GalleryPage.ALBUM);
-            }
-            if (screen.libraryConfig.hasAbility(LibraryCapability.GENRES)) {
-                pages.add(GalleryPage.GENRE);
-            }
-            if (screen.libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
-                pages.add(GalleryPage.SONG);
-            }
-            GalleryScreenFragment f = GalleryScreenFragment.ni(context, screen.libraryConfig, currentSelection, pages);
-            fm.replaceMainContent(f, true);
+            openGallery(bs);
         }
+    }
+
+    void openFolders(boolean bs) {
+        FoldersScreenFragment f = FoldersScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
+        fm.replaceMainContent(f, bs);
+    }
+
+    void openAlbums(boolean bs) {
+        AlbumsScreenFragment f = AlbumsScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
+        fm.replaceMainContent(f, bs);
+    }
+
+    void openArtists(boolean bs) {
+        ArtistsScreenFragment f = ArtistsScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
+        fm.replaceMainContent(f, bs);
+    }
+
+    void openGenres(boolean bs) {
+        GenresScreenFragment f = GenresScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
+        fm.replaceMainContent(f, bs);
+    }
+
+    void openPlaylists(boolean bs) {
+        PlaylistsScreenFragment f = PlaylistsScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
+        fm.replaceMainContent(f, bs);
+    }
+
+    void openTracks(boolean bs) {
+        TracksScreenFragment f = TracksScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
+        fm.replaceMainContent(f, bs);
+    }
+
+    void openGallery(boolean bs) {
+        List<GalleryPage> pages = new ArrayList<>();
+        if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
+            pages.add(GalleryPage.PLAYLIST);
+        }
+        if (screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
+            pages.add(GalleryPage.ARTIST);
+        }
+        if (screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
+            pages.add(GalleryPage.ALBUM);
+        }
+        if (screen.libraryConfig.hasAbility(LibraryCapability.GENRES)) {
+            pages.add(GalleryPage.GENRE);
+        }
+        if (screen.libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
+            pages.add(GalleryPage.SONG);
+        }
+        GalleryScreenFragment f = GalleryScreenFragment.ni(appContext, screen.libraryConfig, currentSelection, pages);
+        fm.replaceMainContent(f, bs);
     }
 
     boolean isGalleryEligible() {

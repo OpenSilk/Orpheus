@@ -22,6 +22,7 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestorComponent;
 import org.opensilk.music.artwork.requestor.ArtworkRequestorModule;
 import org.opensilk.music.artwork.shared.GsonComponent;
 import org.opensilk.music.artwork.shared.GsonModule;
+import org.opensilk.music.playback.control.PlaybackController;
 
 import javax.inject.Singleton;
 
@@ -50,4 +51,5 @@ public interface AppComponent extends AppContextComponent, ArtworkRequestorCompo
     };
     void inject(App app);
     AppPreferences appPreferences();
+    PlaybackController playbackController();
 }

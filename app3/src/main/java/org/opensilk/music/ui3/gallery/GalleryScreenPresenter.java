@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui3.gallery;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
@@ -28,6 +29,7 @@ import javax.inject.Inject;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import timber.log.Timber;
 
 /**
@@ -109,22 +111,22 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
 //                .build());
     }
 
-    class DelegateActionHandler implements Func1<Integer, Boolean> {
+    class DelegateActionHandler implements Func2<Context, Integer, Boolean> {
 
-        Func1<Integer, Boolean> delegate;
+        Func2<Context, Integer, Boolean> delegate;
 
-        void setDelegate(Func1<Integer, Boolean> delegate) {
+        void setDelegate(Func2<Context, Integer, Boolean> delegate) {
             this.delegate = delegate;
         }
 
         @Override
-        public Boolean call(Integer integer) {
+        public Boolean call(Context context, Integer integer) {
             switch (integer) {
                 case R.id.menu_shuffle:
 //                    musicService.startPartyShuffle();
                     return true;
                 default:
-                    return delegate != null && delegate.call(integer);
+                    return delegate != null && delegate.call(context, integer);
             }
         }
     }

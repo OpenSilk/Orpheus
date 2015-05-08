@@ -18,7 +18,6 @@ package org.opensilk.music.artwork.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
@@ -33,7 +32,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.ArtworkUris;
 import org.opensilk.music.artwork.Constants;
-import org.opensilk.music.artwork.Util;
+import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.BitmapDiskCache;
 import org.opensilk.music.artwork.fetcher.ArtworkFetcherService;
 import org.opensilk.music.model.ArtInfo;
@@ -140,7 +139,7 @@ public class ArtworkProvider extends ContentProvider {
                   final String q = uri.getQueryParameter("q");
                   final String t = uri.getQueryParameter("t");
                   if (q != null) {
-                    final ArtInfo artInfo = Util.artInfoFromBase64EncodedJson(mGson, q);
+                    final ArtInfo artInfo = UtilsArt.artInfoFromBase64EncodedJson(mGson, q);
                     ArtworkType artworkType = ArtworkType.THUMBNAIL;
                     if (t != null) {
                         artworkType = ArtworkType.valueOf(t);
@@ -165,7 +164,7 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     public ParcelFileDescriptor getArtwork(Uri uri, ArtInfo artInfo) {
-        final String cacheKey = Util.getCacheKey(artInfo, ArtworkType.LARGE);
+        final String cacheKey = UtilsArt.getCacheKey(artInfo, ArtworkType.LARGE);
         ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         // Create request so it will be there next time
         if (pfd == null) ArtworkFetcherService.newTask(getContext(), uri, artInfo, ArtworkType.LARGE);
@@ -173,7 +172,7 @@ public class ArtworkProvider extends ContentProvider {
     }
 
     public ParcelFileDescriptor getArtworkThumbnail(Uri uri, ArtInfo artInfo) {
-        final String cacheKey = Util.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
+        final String cacheKey = UtilsArt.getCacheKey(artInfo, ArtworkType.THUMBNAIL);
         ParcelFileDescriptor pfd = pullSnapshot(cacheKey);
         // Create request so it will be there next time
         if (pfd == null) ArtworkFetcherService.newTask(getContext(), uri, artInfo, ArtworkType.THUMBNAIL);

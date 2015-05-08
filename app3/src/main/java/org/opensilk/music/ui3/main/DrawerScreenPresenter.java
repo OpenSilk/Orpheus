@@ -19,6 +19,7 @@ package org.opensilk.music.ui3.main;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -103,13 +104,13 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
     void onItemClick(LibraryProviderInfo item) {
         Bundle config = appContext.getContentResolver().call(LibraryUris.call(item.authority), LIBRARYCONF, null, null);
         if (config == null) {
+            Timber.e("Got null config");
             //TODO toast
             return;
         }
         currentSelection = item;
-        LandingScreenFragment lsf = LandingScreenFragment.ni(config);
         fm.killBackStack();
-        fm.replaceMainContent(lsf, false);
+        fm.replaceMainContent(LandingScreenFragment.ni(config), false);
         drawerOwner.closeDrawer();
     }
 }
