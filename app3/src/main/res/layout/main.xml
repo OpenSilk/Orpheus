@@ -18,14 +18,24 @@
 
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainview"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <fragment
+        android:id="@+id/footer_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/footer_height"
+        android:layout_alignParentBottom="true"
+        android:name="org.opensilk.music.ui3.main.FooterScreenFragment"
+        tools:layout="@layout/screen_footer"/>
+
     <FrameLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_above="@id/footer_fragment"/>
 
     <include layout="@layout/floating_action_buttons"/>
 

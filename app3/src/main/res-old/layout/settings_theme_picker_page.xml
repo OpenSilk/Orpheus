@@ -39,7 +39,7 @@
         android:textAppearance="?android:textAppearanceMedium"
         android:text="@string/settings_theme_picker_help"/>
 
-    <include layout="@layout/footer"
+    <include layout="@layout/screen_footer"
              android:layout_width="match_parent"
              android:layout_height="@dimen/footer_height"
              android:layout_alignParentBottom="true"/>

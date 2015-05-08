@@ -17,8 +17,30 @@
 
 package org.opensilk.music.ui3.main;
 
+import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.music.ui3.MusicActivityComponent;
+
+import dagger.Component;
+import rx.functions.Func1;
+import rx.functions.Func2;
+
 /**
  * Created by drew on 5/6/15.
  */
-public class FooterScreenComponent {
+@ScreenScope
+@Component(
+        dependencies = MusicActivityComponent.class
+)
+public interface FooterScreenComponent {
+    Func1<MusicActivityComponent, FooterScreenComponent> FACTORY =
+            new Func1<MusicActivityComponent, FooterScreenComponent>() {
+                @Override
+                public FooterScreenComponent call(MusicActivityComponent musicActivityComponent) {
+                    return DaggerFooterScreenComponent.builder()
+                            .musicActivityComponent(musicActivityComponent)
+                            .build();
+                }
+            };
+    void inject(FooterScreenView view);
+    void inject(FooterScreenFragment fragment);
 }

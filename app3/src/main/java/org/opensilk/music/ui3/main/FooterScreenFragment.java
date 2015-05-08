@@ -17,8 +17,17 @@
 
 package org.opensilk.music.ui3.main;
 
+import org.opensilk.common.ui.mortar.Screen;
+import org.opensilk.common.ui.mortarfragment.MortarFragment;
+
 /**
  * Created by drew on 5/6/15.
  */
-public class FooterScreenFragment {
+public class FooterScreenFragment extends MortarFragment {
+
+    @Override
+    protected Screen newScreen() {
+        return new FooterScreen();
+    }
+
 }

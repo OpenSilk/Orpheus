@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<org.opensilk.music.ui3.main.FooterView
+<org.opensilk.music.ui3.main.FooterScreenView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -25,7 +25,7 @@
     android:layout_height="@dimen/footer_height"
     android:background="?android:selectableItemBackground">
 
-    <org.opensilk.common.widget.SquareImageView
+    <org.opensilk.common.ui.widget.SquareImageView
         android:id="@+id/footer_thumbnail"
         android:layout_height="match_parent"
         android:layout_width="wrap_content"/>
@@ -69,4 +69,4 @@
         android:fontFamily="sans-serif-condensed"
         style="@style/SingleLineTextView"/>
 
-</org.opensilk.music.ui3.main.FooterView>
+</org.opensilk.music.ui3.main.FooterScreenView>

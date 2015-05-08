@@ -38,7 +38,8 @@ public class DrawerScreen extends Screen {
     public static class Factory extends ComponentFactory<DrawerScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, DrawerScreen screen) {
-            return DrawerScreenComponent.FACTORY.call(DaggerService.<LauncherActivityComponent>getDaggerComponent(parentScope));
+            LauncherActivityComponent component = DaggerService.getDaggerComponent(parentScope);
+            return DrawerScreenComponent.FACTORY.call(component);
         }
     }
 }

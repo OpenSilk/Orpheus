@@ -61,7 +61,7 @@
             <include
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/footer_height"
-                layout="@layout/footer"/>
+                layout="@layout/screen_footer"/>
 
         </LinearLayout>
 
