@@ -21,6 +21,8 @@ import android.support.annotation.NonNull;
 
 import org.opensilk.common.core.mortar.MortarActivity;
 import org.opensilk.common.ui.mortar.LayoutCreator;
+import org.opensilk.common.ui.mortar.PauseAndResumeActivity;
+import org.opensilk.common.ui.mortar.PauseAndResumePresenter;
 import org.opensilk.common.ui.mortar.ScreenScoper;
 
 import javax.inject.Inject;
@@ -31,9 +33,11 @@ import timber.log.Timber;
 /**
  * Created by drew on 3/10/15.
  */
-public abstract class MortarFragmentActivity extends MortarActivity implements FragmentManagerOwnerActivity {
+public abstract class MortarFragmentActivity extends MortarActivity
+        implements FragmentManagerOwnerActivity, PauseAndResumeActivity {
 
     @Inject protected FragmentManagerOwner mFragmentManagerOwner;
+    @Inject protected PauseAndResumePresenter mPausesAndResumesPresenter;
 
     protected abstract void performInjection();
 
@@ -48,12 +52,25 @@ public abstract class MortarFragmentActivity extends MortarActivity implements F
         super.onCreate(savedInstanceState);
         performInjection();
         mFragmentManagerOwner.takeView(this);
+        mPausesAndResumesPresenter.takeView(this);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mFragmentManagerOwner.takeView(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPausesAndResumesPresenter.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPausesAndResumesPresenter.activityPaused();
     }
 
     @Override
@@ -66,6 +83,7 @@ public abstract class MortarFragmentActivity extends MortarActivity implements F
     protected void onDestroy() {
         super.onDestroy();
         mFragmentManagerOwner.dropView(this);
+        mPausesAndResumesPresenter.dropView(this);
     }
 
     @Override
@@ -73,5 +91,10 @@ public abstract class MortarFragmentActivity extends MortarActivity implements F
         if (!mFragmentManagerOwner.goBack()){
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return mIsResumed;
     }
 }

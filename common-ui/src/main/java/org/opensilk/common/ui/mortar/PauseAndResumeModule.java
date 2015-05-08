@@ -15,16 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.common.ui.mortarfragment;
+package org.opensilk.common.ui.mortar;
 
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
+import org.opensilk.common.core.dagger2.ActivityScope;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Base component all subclass components of {@link MortarFragmentActivity} must extend
- *
- * Created by drew on 5/1/15.
+ * Created by drew on 10/15/14.
  */
-public interface MortarFragmentActivityComponent {
-    FragmentManagerOwner fragmentnManagerOwner();
-    PauseAndResumeRegistrar pauseAndResumeRegistrar();
+@Module
+public class PauseAndResumeModule {
+    @Provides @ActivityScope
+    PauseAndResumeRegistrar providePauseAndResumeRegistar(PauseAndResumePresenter presenter) { return presenter; }
 }
