@@ -214,6 +214,20 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
         }
     }
 
+    public int getItemPosition(Bundleable item) {
+        if (hasView()) {
+            return getView().getAdapter().indexOf(item);
+        }
+        return -1;
+    }
+
+    public List<Bundleable> getItems() {
+        if (hasView()) {
+            return getView().getAdapter().getItems();
+        }
+        return null;
+    }
+
     public void setWantsGrid(boolean yes) {
         wantGrid = yes;
     }

@@ -42,5 +42,4 @@ public interface FooterScreenComponent {
                 }
             };
     void inject(FooterScreenView view);
-    void inject(FooterScreenFragment fragment);
 }

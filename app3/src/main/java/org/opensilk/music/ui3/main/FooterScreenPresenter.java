@@ -18,14 +18,21 @@
 package org.opensilk.music.ui3.main;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
+import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.PaletteObserver;
@@ -36,7 +43,6 @@ import org.opensilk.music.playback.control.PlaybackController;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
@@ -46,22 +52,19 @@ import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.functions.Func2;
-import rx.observers.Observers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
-import static org.opensilk.common.core.rx.RxUtils.notSubscribed;
-import static org.opensilk.common.core.rx.RxUtils.observeOnMain;
+import static android.support.v4.media.MediaMetadataCompat.*;
+import static android.support.v4.media.session.PlaybackStateCompat.*;
+
 
 /**
  * Created by drew on 4/20/15.
  */
 @ScreenScope
-public class FooterScreenPresenter extends ViewPresenter<FooterScreenView>
-        implements PausesAndResumes {
+public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> implements PausesAndResumes {
 
     final Context appContext;
     final PlaybackController playbackController;
@@ -69,24 +72,18 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView>
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final AppPreferences settings;
 
+    final CurrentInfo currentInfo = new CurrentInfo();
+
+    static class CurrentInfo {
+        String trackName;
+        String artistName;
+        Bitmap albumArt;
+        long position;
+        long duration;
+        boolean positionSynced;
+    }
+
     CompositeSubscription broadcastSubscriptions;
-    //These are separate since they query the service
-    //and need error handling
-    Subscription artworkSubscription;
-    Subscription progressSubscription;
-
-    Observable<Boolean> playStateObservable;
-    Observable<String[]> metaObservable;
-    Observable<ArtInfo> artworkObservable;
-    Observable<Long> currentPositionObservable;
-    Observable<Long> progressObservable;
-
-    Observer<Boolean> playStateObserver;
-    Observer<String[]> metaObserver;
-    Observer<ArtInfo> artworkObserver;
-    Observer<Long> progressObserver;
-
-    PaletteObserver paletteObserver;
 
     @Inject
     public FooterScreenPresenter(
@@ -108,8 +105,6 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView>
         Timber.v("onEnterScope()");
         super.onEnterScope(scope);
         pauseAndResumeRegistrar.register(scope, this);
-        setupObserables();
-        setupObservers();
     }
 
     @Override
@@ -124,7 +119,6 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView>
         if (pauseAndResumeRegistrar.isRunning()) {
             Timber.v("missed onResume()");
             subscribeBroadcasts();
-            //playstate will kick off progress subscription
         }
     }
 
@@ -132,58 +126,61 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView>
     protected void onSave(Bundle outState) {
         Timber.v("onSave()");
         super.onSave(outState);
-        if (getView() == null
-                && pauseAndResumeRegistrar.isRunning()) {
+        if (!hasView() && pauseAndResumeRegistrar.isRunning()) {
             Timber.v("missed onPause()");
             unsubscribeBroadcasts();
-            unsubscribeProgress();
         }
     }
 
     @Override
     public void onResume() {
         Timber.v("onResume()");
-        if (getView() == null) return;
-        subscribeBroadcasts();
-        //playstate will kick off progress subscription
+        if (hasView()) {
+            subscribeBroadcasts();
+        }
     }
 
     @Override
     public void onPause() {
         Timber.v("onPause");
         unsubscribeBroadcasts();
-        unsubscribeProgress();
     }
 
     void setTrackName(String s) {
-        if (hasView()) {
-            getView().trackTitle.setText(s);
+        if (!StringUtils.equals(currentInfo.trackName, s)) {
+            currentInfo.trackName = s;
+            if (hasView()) {
+                getView().trackTitle.setText(s);
+            }
         }
     }
 
     void setArtistName(String s) {
-        if (hasView()) {
-            getView().artistName.setText(s);
+        if (!StringUtils.equals(currentInfo.artistName, s)) {
+            currentInfo.artistName = s;
+            if (hasView()) {
+                getView().artistName.setText(s);
+            }
         }
     }
 
     void setProgress(int progress) {
         if (hasView()) {
+            getView().progressBar.setIndeterminate(progress == -1);
             getView().progressBar.setProgress(progress);
         }
     }
 
-    void updateArtwork(ArtInfo artInfo) {
-        if (hasView()) {
-            AnimatedImageView av = getView().artworkThumbnail;
-            av.addSubscription(artworkReqestor.newRequest(av,
-                /*paletteObserver*/ null, artInfo, ArtworkType.THUMBNAIL));
-        }
-    }
-
-    void updateBackground(PaletteResponse paletteResponse) {
-        if (hasView()) {
-            getView().updateBackground(paletteResponse);
+    void updateArtwork(Bitmap bitmap) {
+        if (bitmap != null) {
+            if (!bitmap.sameAs(currentInfo.albumArt)) {
+                currentInfo.albumArt = bitmap;
+                if (hasView()) {
+                    getView().artworkThumbnail.setImageBitmap(bitmap, true);
+                }
+            }
+        } else if (hasView()) {
+            getView().artworkThumbnail.setDefaultImage(R.drawable.default_artwork);
         }
     }
 
@@ -218,183 +215,72 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView>
         }
     }
 
-    void setupObserables() {
-        /*
-        playStateObservable = BroadcastObservables.playStateChanged(appContext);
-        metaObservable = observeOnMain(Observable.zip(
-                BroadcastObservables.trackChanged(appContext),
-                BroadcastObservables.artistChanged(appContext),
-                new Func2<String, String, String[]>() {
-                    @Override
-                    public String[] call(String trackName, String artistName) {
-                        Timber.v("metaObservable(zip) called on %s", Thread.currentThread().getName());
-                        return new String[]{trackName, artistName};
-                    }
-                }
-        ));
-        artworkObservable = observeOnMain(BroadcastObservables.artworkChanged(appContext, musicService));
-        currentPositionObservable = Observable.zip(
-                musicService.getPosition(),
-                musicService.getDuration(),
-                new Func2<Long, Long, Long>() {
-                    @Override
-                    public Long call(Long position, Long duration) {
-//                            Timber.v("currentPositionObservable(%d, %d) %s", position, duration, Thread.currentThread().getName());
-                        if (position > 0 && duration > 0) {
-                            return (1000 * position / duration);
-                        } else {
-                            return (long) 1000;
-                        }
-                    }
-                }
-        );
-        progressObservable = observeOnMain(
-                // construct an Observable than repeats every .5s,
-                Observable.interval(500, TimeUnit.MILLISECONDS)
-                        // we then fetch the progress as a percentage,
-                        .flatMap(new Func1<Long, Observable<Long>>() {
-                            @Override
-                            public Observable<Long> call(Long aLong) {
-//                            Timber.v("progressObservable(flatMap) %s", Thread.currentThread().getName());
-                                return currentPositionObservable;
-                            }
-                        })
-        );
-        */
-    }
-
-    void setupObservers() {
-        /*
-        playStateObserver = Observers.create(
-                new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean playing) {
-                        Timber.v("playStateObserver(result) %s", Thread.currentThread().getName());
-                        if (playing) {
-                            subscribeProgress();
-                        } else {
-                            unsubscribeProgress();
-                            // update the current position
-                            currentPositionObservable
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new Action1<Long>() {
-                                        @Override
-                                        public void call(Long progress) {
-                                            setProgress(progress.intValue());
-                                        }
-                                    }, new Action1<Throwable>() {
-                                        @Override
-                                        public void call(Throwable throwable) {
-                                            //ignore
-                                        }
-                                    });
-                        }
-                    }
-                }
-        );
-        metaObserver = Observers.create(
-                new Action1<String[]>() {
-                    @Override
-                    public void call(String[] strings) {
-                        Timber.v("metaObserver(result) %s", Thread.currentThread().getName());
-                        if (strings.length == 2) {
-                            setTrackName(strings[0]);
-                            setArtistName(strings[1]);
-                        }
-                    }
-                }
-        );
-        artworkObserver = Observers.create(
-                new Action1<ArtInfo>() {
-                    @Override
-                    public void call(ArtInfo artInfo) {
-                        updateArtwork(artInfo);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        unsubscribeArtwork();
-                        subscribeArtwork();
-                    }
-                }
-        );
-        progressObserver = Observers.create(
-                new Action1<Long>() {
-                    @Override
-                    public void call(Long progress) {
-//                    Timber.d("progressObserver(result) %s", Thread.currentThread().getName());
-                        setProgress(progress.intValue());
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Timber.i("progressObserver(error) resubscribing");
-                        unsubscribeProgress();
-                        Observable.timer(2, TimeUnit.SECONDS).subscribe(new Action1<Long>() {
-                            @Override
-                            public void call(Long aLong) {
-                                subscribeProgress();
-                            }
-                        });
-                    }
-                }
-        );
-        paletteObserver = new PaletteObserver() {
-            @Override
-            public void onNext(PaletteResponse paletteResponse) {
-                updateBackground(paletteResponse);
-            }
-        };
-        */
-    }
-
     void subscribeBroadcasts() {
-        /*
-        if (notSubscribed(broadcastSubscriptions)) {
-            broadcastSubscriptions = new CompositeSubscription(
-                    playStateObservable.subscribe(playStateObserver),
-                    metaObservable.subscribe(metaObserver)
-            );
+        if (isSubscribed(broadcastSubscriptions)) {
+            return;
         }
-        subscribeArtwork();
-        */
+        Subscription s = playbackController.subscribePlayStateChanges(
+                new Action1<PlaybackStateCompat>() {
+                    @Override
+                    public void call(PlaybackStateCompat playbackState) {
+                        final int state = playbackState.getState();
+                        if (state == STATE_BUFFERING || state == STATE_CONNECTING) {
+                            setProgress(-1);
+                        } else {
+                            long position = playbackState.getPosition();
+                            long duration = playbackState.getBufferedPosition();
+                            if (position < 0 || duration <= 0) {
+                                setProgress(1000);
+                            } else {
+                                setProgress((int) (1000 * position / duration));
+                            }
+                            Timber.v("Position discrepancy = %d", currentInfo.position - position);
+                            currentInfo.position = position;
+                            currentInfo.duration = duration;
+                            currentInfo.positionSynced = true;
+                        }
+
+                    }
+                }
+        );
+        Subscription s2 = playbackController.subscribeMetaChanges(
+                new Action1<MediaMetadataCompat>() {
+                    @Override
+                    public void call(MediaMetadataCompat mediaMetadata) {
+                        setTrackName(mediaMetadata.getString(METADATA_KEY_TITLE));
+                        setArtistName(mediaMetadata.getString(METADATA_KEY_ARTIST));
+                        updateArtwork(mediaMetadata.getBitmap(METADATA_KEY_ALBUM_ART));
+                    }
+                }
+        );
+        final long interval = 250;
+        Subscription s3 = Observable.interval(interval, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Long>() {
+                    @Override
+                    public void call(Long aLong) {
+                        long position = currentInfo.position;
+                        if (currentInfo.positionSynced) {
+                            currentInfo.positionSynced = false;
+                        } else {
+                            position += interval + 10;
+                            currentInfo.position = position;
+                        }
+                        long duration = currentInfo.duration;
+                        if (position < 0 || duration <= 0) {
+                            setProgress(1000);
+                        } else {
+                            setProgress((int) (1000 * position / duration));
+                        }
+                    }
+                });
+        broadcastSubscriptions = new CompositeSubscription(s, s2, s3);
     }
 
     void unsubscribeBroadcasts() {
         if (isSubscribed(broadcastSubscriptions)) {
             broadcastSubscriptions.unsubscribe();
             broadcastSubscriptions = null;
-        }
-        unsubscribeArtwork();
-    }
-
-    void subscribeArtwork() {
-        /*
-        if (notSubscribed(artworkSubscription)) {
-            artworkSubscription = artworkObservable.subscribe(artworkObserver);
-        }
-        */
-    }
-
-    void unsubscribeArtwork() {
-        if (isSubscribed(artworkSubscription)) {
-            artworkSubscription.unsubscribe();
-            artworkSubscription = null;
-        }
-    }
-
-    void subscribeProgress() {
-        /*
-        if (notSubscribed(progressSubscription)) {
-            progressSubscription = progressObservable.subscribe(progressObserver);
-        }
-        */
-    }
-
-    void unsubscribeProgress() {
-        if (isSubscribed(progressSubscription)) {
-            progressSubscription.unsubscribe();
-            progressSubscription = null;
         }
     }
 

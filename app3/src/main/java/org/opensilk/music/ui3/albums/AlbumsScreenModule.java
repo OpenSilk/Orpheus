@@ -105,19 +105,21 @@ public class AlbumsScreenModule {
         };
     }
 
+    static final int[] MENUS = new int[]{
+            R.menu.popup_play_all,
+            R.menu.popup_shuffle_all,
+            R.menu.popup_add_to_queue,
+//                                R.menu.popup_add_to_playlist,
+//                                R.menu.popup_more_by_artist,
+//                                R.menu.popup_delete,
+    };
+
     @Provides @ScreenScope
     public OverflowClickListener provideOverflowClickListener() {
         return new OverflowClickListener() {
             @Override
             public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-                final int[] MENUS = new int[]{
-                        R.menu.popup_play_all,
-                        R.menu.popup_shuffle_all,
-                        R.menu.popup_add_to_queue,
-//                                R.menu.popup_add_to_playlist,
-//                                R.menu.popup_more_by_artist,
-//                                R.menu.popup_delete,
-                };
+
                 for (int ii : MENUS) {
                     m.inflate(ii);
                 }

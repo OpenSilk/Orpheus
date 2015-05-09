@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<RelativeLayout
+<org.opensilk.music.ui3.main.MainView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainview"
@@ -39,4 +39,4 @@
 
     <include layout="@layout/floating_action_buttons"/>
 
-</RelativeLayout>
+</org.opensilk.music.ui3.main.MainView>
