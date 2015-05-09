@@ -21,7 +21,7 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.os.Handler;
-import android.text.TextUtils;
+import android.support.v4.media.MediaMetadataCompat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.artwork.ArtworkType;
@@ -39,6 +39,8 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
+
+import static android.support.v4.media.MediaMetadataCompat.*;
 
 /**
  * Created by drew on 5/8/15.
@@ -128,16 +130,21 @@ public class MediaMetadataHelper {
         }
         final Track t = currentInfo.track;
         final Bitmap b = currentInfo.bitmap;
-        MediaMetadata m = new MediaMetadata.Builder()
-                .putString(MediaMetadata.METADATA_KEY_ARTIST, t.artistName)
-                .putString(MediaMetadata.METADATA_KEY_ALBUM_ARTIST,
+        final long duration = mediaSession.getController().getPlaybackState().getBufferedPosition();
+        MediaMetadataCompat m = new MediaMetadataCompat.Builder()
+                .putString(METADATA_KEY_TITLE, t.name)
+                .putString(METADATA_KEY_DISPLAY_TITLE, t.name)
+                .putString(METADATA_KEY_ARTIST, t.artistName)
+                .putString(METADATA_KEY_DISPLAY_SUBTITLE, t.artistName)
+                //.putString(METADATA_KEY_DISPLAY_DESCRIPTION, TODO)
+                .putString(METADATA_KEY_ALBUM_ARTIST,
                         StringUtils.isEmpty(t.albumArtistName) ? t.artistName : t.albumArtistName)
-                .putString(MediaMetadata.METADATA_KEY_ALBUM, t.albumName)
-                .putString(MediaMetadata.METADATA_KEY_TITLE, t.name)
-                .putLong(MediaMetadata.METADATA_KEY_DURATION,
-                        mediaSession.getController().getPlaybackState().getBufferedPosition())
-                .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, b)
+                .putString(METADATA_KEY_ALBUM, t.albumName)
+                .putLong(METADATA_KEY_DURATION, duration)
+                .putBitmap(METADATA_KEY_ALBUM_ART, b)
+                //.putString(METADATA_KEY_ALBUM_ART_URI, TODO)
+                //.putString(METADATA_KEY_MEDIA_ID, TODO)
                 .build();
-        mediaSession.setMetadata(m);
+        mediaSession.setMetadata((MediaMetadata)m.getMediaMetadata());
     }
 }

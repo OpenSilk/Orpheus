@@ -28,19 +28,15 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.core.rx.SingleThreadScheduler;
 import org.opensilk.music.playback.BundleHelper;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.PlaybackConstants.CMD;
@@ -55,11 +51,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import hugo.weaving.DebugLog;
-import rx.Scheduler;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.subjects.BehaviorSubject;
 import timber.log.Timber;
@@ -78,9 +70,6 @@ public class PlaybackController {
     IPlaybackService mPlaybackService;
     MediaController mMediaController;
     MediaController.TransportControls mTransportControls;
-
-    PlaybackState mPlaybackState;
-    MediaMetadata mMediaMetadata;
 
     @Inject
     public PlaybackController(@ForApplication Context mAppContext) {
@@ -183,6 +172,10 @@ public class PlaybackController {
      * Custom commands
      */
 
+    public void playorPause() {
+        sendCustomAction(CMD.TOGGLE_PLAYBACK, null);
+    }
+
     public void cycleRepeateMode() {
         sendCustomAction(CMD.CYCLE_REPEAT, null);
     }
@@ -257,10 +250,16 @@ public class PlaybackController {
      * Subscriptions
      */
 
-    final BehaviorSubject<Bundle> progressSubject = BehaviorSubject.create();
+    final BehaviorSubject<PlaybackStateCompat> mPlayStateSubject = BehaviorSubject.create();
 
-    public Subscription subscribeProgressUpdates(Action1<Bundle> onNext) {
-        return progressSubject.subscribe(onNext);
+    public Subscription subscribePlayStateChanges(Action1<PlaybackStateCompat> onNext) {
+        return mPlayStateSubject.asObservable().subscribe(onNext);
+    }
+
+    final BehaviorSubject<MediaMetadataCompat> mMetaSubject = BehaviorSubject.create();
+
+    public Subscription subscribeMetaChanges(Action1<MediaMetadataCompat> onNext) {
+        return mMetaSubject.asObservable().subscribe(onNext);
     }
 
     /*
@@ -280,12 +279,12 @@ public class PlaybackController {
 
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
-            mPlaybackState = state;
+            mPlayStateSubject.onNext(PlaybackStateCompat.fromPlaybackState(state));
         }
 
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
-            mMediaMetadata = metadata;
+            mMetaSubject.onNext(MediaMetadataCompat.fromMediaMetadata(metadata));
         }
 
         @Override
@@ -338,6 +337,7 @@ public class PlaybackController {
 
     public void disconnect() {
         mAppContext.unbindService(mServiceConnection);
+        onDisconnect();
     }
 
     void onDisconnect() {
@@ -355,7 +355,24 @@ public class PlaybackController {
                 mMediaController = new MediaController(mAppContext, mPlaybackService.getToken());
                 mMediaController.registerCallback(mCallback, mCallbackHandler);
                 mTransportControls = mMediaController.getTransportControls();
-                mPlaybackState = mMediaController.getPlaybackState();
+                final PlaybackState state = mMediaController.getPlaybackState();
+                if (state != null) {
+                    mCallbackHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCallback.onPlaybackStateChanged(state);
+                        }
+                    });
+                }
+                final MediaMetadata meta = mMediaController.getMetadata();
+                if (meta != null) {
+                    mCallbackHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCallback.onMetadataChanged(meta);
+                        }
+                    });
+                }
             } catch (RemoteException e) {
                 Timber.e(e, "Bind service");
                 mMediaController = null;

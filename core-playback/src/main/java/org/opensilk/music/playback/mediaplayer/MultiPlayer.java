@@ -337,7 +337,20 @@ public class MultiPlayer implements
                     }
                     return;
                 } case E.SKIPTONEXT: {
-                    player.onCompletion(player.mCurrentMediaPlayer);
+                    if (player.isInitialized()) {
+                        synchronized (player.mLock) {
+                            if (player.mNextMediaPlayer != null) {
+                                player.mCurrentMediaPlayer.stop();
+                                player.mNextMediaPlayer.start();
+                                player.onCompletion(player.mCurrentMediaPlayer);
+                            } else {
+                                player.stop();
+                                player.mCallback.onPlayerStatus(PlayerStatus.error("Next player not set"));
+                            }
+                        }
+                    } else {
+                        player.mCallback.onPlayerStatus(PlayerStatus.error("Not initialized"));
+                    }
                     return;
                 } case E.FADEDOWN: {
                     mCurrentVolume -= 0.1f;

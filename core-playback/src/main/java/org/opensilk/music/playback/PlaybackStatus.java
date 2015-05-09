@@ -138,7 +138,8 @@ public class PlaybackStatus {
     }
 
     public boolean isPlayerReady() {
-        return playerState == PlayerStatus.READY;
+        return playerState == PlayerStatus.READY
+                || playerState == PlayerStatus.PAUSED;
     }
 
     public boolean isPlayerLoading() {

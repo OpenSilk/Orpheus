@@ -120,6 +120,7 @@ public class PlaybackService extends Service {
         mAlarmManagerHelper.cancelDelayedShutdown();
         mAudioManagerHelper.abandonFocus();
         mQueue.save();
+        mPlayer.release();
         mHandler.removeCallbacksAndMessages(null);
         mHandlerThread.getLooper().quit();
     }
@@ -149,6 +150,7 @@ public class PlaybackService extends Service {
     private void updateMeta() {
         mMediaMetaHelper.updateMeta(mPlaybackStatus.getCurrentTrack());
         updateNotification();
+        mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
     }
 
     private void updateNotification() {
@@ -184,12 +186,15 @@ public class PlaybackService extends Service {
                     mPlayer.play();
                     mPlaybackStateHelper.gotoPlaying();
                     updatePlaybackState();
+                    mHandler.removeCallbacks(mProgressCheckRunnable);
+                    mHandler.post(mProgressCheckRunnable);
                 }
                 //update always
                 mAlarmManagerHelper.cancelDelayedShutdown();
                 updateNotification();
             } else if (mPlaybackStatus.isPlayerLoading()) {
-                Timber.d("Player is loading. Ignoring play request");
+                Timber.d("Player is loading. Request ignored and play when loading set");
+                mPlaybackStatus.setPlayWhenReady(true);
             } else if (mQueue.notEmpty()) {
                 Timber.e("In a bad state, nobody loaded the current queue item");
             } else {
@@ -222,13 +227,20 @@ public class PlaybackService extends Service {
             mPlaybackStatus.setIsSupposedToBePlaying(false);
             mAudioManagerHelper.abandonFocus();
             mPlayer.pause();
+            mHandler.removeCallbacks(mProgressCheckRunnable);
             mPlaybackStateHelper.gotoPaused();
             updatePlaybackState();
+            mQueue.save();
         }
 
         @Override
         @DebugLog
         public void onSkipToNext() {
+            if (mPlaybackStateHelper.isSkippingNext() ||
+                    mPlaybackStateHelper.isSkippingPrevious()) {
+                Timber.w("Ignoring skipToNext while still skipping");
+                return;
+            }
             //Will callback to WENT_TO_NEXT
             mPlayer.skipToNext();
             mPlaybackStateHelper.gotoSkippingNext();
@@ -237,6 +249,12 @@ public class PlaybackService extends Service {
 
         @Override
         public void onSkipToPrevious() {
+            if (mPlaybackStateHelper.isSkippingNext() ||
+                    mPlaybackStateHelper.isSkippingPrevious()) {
+                Timber.w("Ignoring skipToPrevious while still skipping");
+                return;
+            }
+            //will callback to onCurrentPosChanged
             mQueue.goToItem(mQueue.getPrevious());
             mPlaybackStateHelper.gotoSkippingPrevious();
             updatePlaybackState();
@@ -264,6 +282,7 @@ public class PlaybackService extends Service {
             mPlaybackStateHelper.gotoStopped();
             updatePlaybackState();
             mAlarmManagerHelper.scheduleDelayedShutdown();
+            mQueue.save();
         }
 
         @Override
@@ -345,6 +364,14 @@ public class PlaybackService extends Service {
                     Uri uri = BundleHelper.getUri(extras);
                     int pos = BundleHelper.getInt(extras);
                     mQueue.moveItem(uri, pos);
+                    break;
+                }
+                case CMD.TOGGLE_PLAYBACK: {
+                    if (mPlaybackStatus.isSupposedToBePlaying()) {
+                        onPause();
+                    } else {
+                        onPlay();
+                    }
                     break;
                 }
             }
@@ -431,6 +458,7 @@ public class PlaybackService extends Service {
                 public void wentToNext() {
                     mPlaybackStatus.setNextTrackToCurrent();
                     mPlaybackStatus.setIsSupposedToBePlaying(true);
+                    mPlaybackStateHelper.gotoPlaying();
                     setNextTrack();
                     updateMeta();
                 }
@@ -473,17 +501,13 @@ public class PlaybackService extends Service {
                     break;
                 }
                 case PlayerEvent.DURATION: {
-                    if (mPlaybackStatus.getCurrentDuration() != event.getLongExtra()) {
-                        mPlaybackStatus.setCurrentDuration(event.getLongExtra());
-                        notifyProgress();
-                    }
+                    mPlaybackStateHelper.updateDuration(event.getLongExtra());
+                    notifyProgress();
                     break;
                 }
                 case PlayerEvent.POSITION: {
-                    if (mPlaybackStatus.getCurrentSeekPos() != event.getLongExtra()) {
-                        mPlaybackStatus.setCurrentSeekPos(event.getLongExtra());
-                        notifyProgress();
-                    }
+                    mPlaybackStateHelper.updatePosition(event.getLongExtra());
+                    notifyProgress();
                     break;
                 }
             }
@@ -498,7 +522,6 @@ public class PlaybackService extends Service {
                     break;
                 }
                 case PlayerStatus.LOADING: {
-                    Timber.i("Player moved to loading");
                     mPlaybackStateHelper.gotoBuffering();
                     updatePlaybackState();
                     break;
@@ -537,18 +560,25 @@ public class PlaybackService extends Service {
                 }
                 case PlayerStatus.ERROR: {
                     Timber.e("Player error %s", status.getErrorMsg());
-                    //TODO
+                    if (mPlaybackStateHelper.isSkippingNext()) {
+                        //player failed to go next, manually move it
+                        mQueue.goToItem(mQueue.getNextPos());
+                    } else {
+                        mPlaybackStateHelper.gotoError(status.getErrorMsg());
+                        updatePlaybackState();
+                        //TODO more
+                    }
                     break;
                 }
             }
         }
 
         private void notifyProgress() {
-            mPlaybackStateHelper.updatePosition(mPlaybackStatus.getCurrentSeekPos());
-            mPlaybackStateHelper.updateDuration(mPlaybackStatus.getCurrentDuration());
             updatePlaybackState();
             mHandler.removeCallbacks(mProgressCheckRunnable);
-            mHandler.postDelayed(mProgressCheckRunnable, 2000);
+            if (mPlaybackStatus.isSupposedToBePlaying()) {
+                mHandler.postDelayed(mProgressCheckRunnable, 2000);
+            }
         }
     };
 

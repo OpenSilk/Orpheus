@@ -227,6 +227,7 @@ public interface PlaybackConstants {
         String ENQUEUE_TRACKS_FROM = "cmd.enqueuetracksfrom";
         String PLAY_ALL = "cmd.playall";
         String PLAY_TRACKS_FROM = "cmd.playtracksfrom";
+        String TOGGLE_PLAYBACK = "cmd.toggleplayback";
     }
 
     interface EVENT {

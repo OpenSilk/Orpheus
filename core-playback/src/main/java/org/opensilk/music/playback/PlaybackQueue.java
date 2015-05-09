@@ -62,14 +62,16 @@ public class PlaybackQueue {
     }
 
     public void save() {
+        final List<Uri> q = new ArrayList<>(mQueue);
+        final int pos = mCurrentPos;
         //Use async to avoid making new thread
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Object, Void, Void>() {
             @Override
             @DebugLog
-            protected Void doInBackground(Void... params) {
-                mSettings.saveQueue(mQueue);
-                if (mCurrentPos != -1) {
-                    mSettings.putInt(PlaybackPreferences.CURRENT_POS, mCurrentPos);
+            protected Void doInBackground(Object... params) {
+                mSettings.saveQueue(q);
+                if (pos != -1) {
+                    mSettings.putInt(PlaybackPreferences.CURRENT_POS, pos);
                 }
                 return null;
             }
