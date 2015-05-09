@@ -41,7 +41,7 @@ public class ModelUtil {
         List<ParentReference> parents = f.getParents();
         final String parentId = parents.size() > 0 ? parents.get(0).getId() : null;
         final String date = formatDate(f.getModifiedDate().getValue());
-        return new Folder.Builder()
+        return Folder.builder()
                 .setIdentity(id)
                 .setName(title)
                 .setParentIdentity(parentId)
@@ -53,8 +53,8 @@ public class ModelUtil {
         final String id = f.getId();
         final String title = f.getTitle();
         final String mimeType = f.getMimeType();
-        final Uri data = Uri.parse(f.getDownloadUrl());// buildDownloadUri(f.getDownloadUrl(), authToken);
-        return new Track.Builder()
+        final Uri data = buildDownloadUri(f.getDownloadUrl(), authToken);
+        return Track.builder()
                 .setIdentity(id)
                 .setName(title)
                 .setDataUri(data)
