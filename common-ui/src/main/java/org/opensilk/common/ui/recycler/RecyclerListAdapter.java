@@ -103,6 +103,10 @@ public abstract class RecyclerListAdapter<T, VH extends RecyclerView.ViewHolder>
         return item;
     }
 
+    public int indexOf(T item) {
+        return items.indexOf(item);
+    }
+
     public void clear() {
         items.clear();
         notifyDataSetChanged();
