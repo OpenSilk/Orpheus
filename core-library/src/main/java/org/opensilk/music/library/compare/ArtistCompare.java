@@ -17,9 +17,8 @@
 
 package org.opensilk.music.library.compare;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.opensilk.music.model.Artist;
 import org.opensilk.music.library.sort.ArtistSortOrder;
+import org.opensilk.music.model.Artist;
 
 import java.util.Comparator;
 
@@ -48,7 +47,7 @@ public class ArtistCompare {
                         //reversed
                         int c = rhs.trackCount - lhs.trackCount;
                         if (c == 0) {
-                            return ObjectUtils.compare(lhs.name, rhs.name);
+                            return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
@@ -60,7 +59,7 @@ public class ArtistCompare {
                         //reversed
                         int c = rhs.albumCount - lhs.albumCount;
                         if (c == 0) {
-                            return ObjectUtils.compare(lhs.name, rhs.name);
+                            return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }

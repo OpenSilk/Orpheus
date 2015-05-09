@@ -51,8 +51,10 @@ public class FolderTrackCompare {
                     return ct.compare((Track) lhs, (Track) rhs);
                 } else if (lhs instanceof Folder) {
                     return -1; //Folders higher
-                } else {
+                } else if (rhs instanceof Track) {
                     return 1;
+                } else {
+                    return 0;
                 }
             }
         };

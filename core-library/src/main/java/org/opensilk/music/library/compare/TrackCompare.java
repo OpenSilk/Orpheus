@@ -17,9 +17,8 @@
 
 package org.opensilk.music.library.compare;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.opensilk.music.model.Track;
 import org.opensilk.music.library.sort.TrackSortOrder;
+import org.opensilk.music.model.Track;
 
 import java.util.Comparator;
 
@@ -45,10 +44,10 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        int c = ObjectUtils.compare(lhs.artistName, rhs.artistName);
+                        int c = BundleableCompare.compareAZ(lhs.artistName, rhs.artistName);
                         //TODO throw albumArtist into the mix?
                         if (c == 0) {
-                            return ObjectUtils.compare(lhs.name, rhs.name);
+                            return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
@@ -57,9 +56,10 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        int c = ObjectUtils.compare(lhs.albumName, rhs.albumName);
+                        int c = BundleableCompare.compareAZ(lhs.albumName, rhs.albumName);
                         if (c == 0) {
-                            return ObjectUtils.compare(lhs.name, rhs.name);
+                            //use natural order instead
+                            //return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
@@ -71,9 +71,16 @@ public class TrackCompare {
                         //reversed
                         int c = rhs.duration - lhs.duration;
                         if (c == 0) {
-                            return ObjectUtils.compare(lhs.name, rhs.name);
+                            return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
+                    }
+                };
+            case TrackSortOrder.PLAYORDER:
+                return new Comparator<Track>() {
+                    @Override
+                    public int compare(Track lhs, Track rhs) {
+                        return 0; //no sort
                     }
                 };
             default:

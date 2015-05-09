@@ -17,9 +17,8 @@
 
 package org.opensilk.music.library.compare;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.opensilk.music.model.Folder;
 import org.opensilk.music.library.sort.FolderSortOrder;
+import org.opensilk.music.model.Folder;
 
 import java.util.Comparator;
 
@@ -47,7 +46,7 @@ public class FolderCompare {
                         //Reversed
                         int c = rhs.childCount - lhs.childCount;
                         if (c == 0) {
-                            return ObjectUtils.compare(lhs.name, rhs.name);
+                            return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }
@@ -56,10 +55,10 @@ public class FolderCompare {
                 return new Comparator<Folder>() {
                     @Override
                     public int compare(Folder lhs, Folder rhs) {
-                        //Reversed
-                        int c = ObjectUtils.compare(rhs.date, lhs.date);
+                        //Z-A
+                        int c = BundleableCompare.compareZA(lhs.date, rhs.date);
                         if (c == 0) {
-                            return ObjectUtils.compare(lhs.name, rhs.name);
+                            return BundleableCompare.compareNameAZ(lhs, rhs);
                         }
                         return c;
                     }

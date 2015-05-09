@@ -17,9 +17,8 @@
 
 package org.opensilk.music.library.compare;
 
-import org.apache.commons.lang3.ObjectUtils;
-import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.library.sort.BundleableSortOrder;
+import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.Comparator;
 
@@ -41,22 +40,46 @@ public class BundleableCompare {
 
     public static <T extends Bundleable> Comparator<T> comparator(String sort) {
         switch (sort) {
+            case BundleableSortOrder.A_Z:
+                return new Comparator<T>() {
+                    @Override
+                    public int compare(T lhs, T rhs) {
+                        return compareNameAZ(lhs, rhs);
+                    }
+                };
             case BundleableSortOrder.Z_A:
                 return new Comparator<T>() {
                     @Override
                     public int compare(T lhs, T rhs) {
-                        //reversed;
-                        return ObjectUtils.compare(rhs.getName(), lhs.getName());
+                        return compareNameZA(lhs, rhs);
                     }
                 };
-            case BundleableSortOrder.A_Z:
             default:
                 return new Comparator<T>() {
                     @Override
                     public int compare(T lhs, T rhs) {
-                        return ObjectUtils.compare(lhs.getName(), rhs.getName());
+                        return 0; //NoSort
                     }
                 };
         }
+    }
+
+    private static final AlphanumComparator sComparator = new AlphanumComparator();
+
+    public static <T extends Bundleable> int compareNameAZ(T lhs, T rhs) {
+        return compareAZ(lhs.getName(), rhs.getName());
+    }
+
+    public static int compareAZ(String lhs, String rhs) {
+        return sComparator.compare(lhs, rhs);
+    }
+
+    public static <T extends Bundleable> int compareNameZA(T lhs, T rhs) {
+        return compareZA(lhs.getName(), rhs.getName());
+    }
+
+    public static int compareZA(String lhs, String rhs) {
+        //reversed
+        return sComparator.compare(rhs, lhs);
     }
 }
