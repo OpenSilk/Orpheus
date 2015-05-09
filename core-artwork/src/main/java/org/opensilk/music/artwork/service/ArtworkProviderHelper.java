@@ -36,6 +36,7 @@ import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.cache.BitmapLruCache;
 import org.opensilk.music.model.ArtInfo;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -86,8 +87,7 @@ public class ArtworkProviderHelper {
                     subscriber.onNext(getDefaultArt());
                 }
                 final String cacheKey = UtilsArt.getCacheKey(artInfo, artworkType);
-                final Uri artworkUri = ArtworkUris.createAlbumReq(mAuthority,
-                        UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
+                final Uri artworkUri = makeUri(artInfo, artworkType);
                 Bitmap bitmap = queryArtworkProvider(artworkUri, cacheKey);
                 if (bitmap == null && artworkType == ArtworkType.LARGE) {
                     // Fullscreen not available try the thumbnail for a temp fix
@@ -113,6 +113,11 @@ public class ArtworkProviderHelper {
         });
     }
 
+    public Uri makeUri(ArtInfo artInfo, ArtworkType artworkType) {
+        return ArtworkUris.createAlbumReq(mAuthority,
+                UtilsArt.base64EncodedJsonArtInfo(mGson, artInfo), artworkType);
+    }
+
     /**
      * Queries ArtworkProvider for given uri, first checking local cache
      * @return Decoded bitmap
@@ -135,8 +140,10 @@ public class ArtworkProviderHelper {
                         mL1Cache.putBitmap(cacheKey, bitmap);
                     }
                 }
+            } catch (FileNotFoundException ignored) {
+                Timber.i("queryArtworkProvider(%s) provider miss", cacheKey);
             } catch (Exception e) {
-                Timber.w(e, "queryArtworkProvider()");
+                Timber.w(e, "queryArtworkProvider(%s) error", cacheKey);
                 bitmap = null;
             } finally {
                 if (pfd != null) {
