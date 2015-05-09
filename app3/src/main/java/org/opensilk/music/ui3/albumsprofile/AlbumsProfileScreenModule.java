@@ -19,23 +19,29 @@ package org.opensilk.music.ui3.albumsprofile;
 
 import android.content.Context;
 import android.net.Uri;
-import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.albums.AlbumsOverflowHandler;
+import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
+import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
+import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
+import org.opensilk.music.ui3.tracks.TracksOverflowHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +50,8 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import mortar.MortarScope;
+import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -56,6 +64,16 @@ public class AlbumsProfileScreenModule {
         this.screen = screen;
     }
 
+    @Provides
+    public LibraryConfig provideLibraryConfig() {
+        return screen.libraryConfig;
+    }
+
+    @Provides
+    public LibraryInfo provideLibraryInfo() {
+        return screen.libraryInfo;
+    }
+
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
         return LibraryUris.albumTracks(screen.libraryConfig.authority,
@@ -66,22 +84,6 @@ public class AlbumsProfileScreenModule {
     public String provideLoaderSortOrder(AppPreferences preferences) {
         return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig,
                 AppPreferences.ALBUM_TRACK_SORT_ORDER), TrackSortOrder.PLAYORDER);
-    }
-
-    @Provides @ScreenScope
-    public BundleablePresenterConfig providePresenterConfig(
-            AppPreferences preferences,
-            ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
-            ActionBarMenuConfig menuConfig
-    ) {
-
-        return BundleablePresenterConfig.builder()
-                .setWantsGrid(false)
-                .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
-                .setMenuConfig(menuConfig)
-                .build();
     }
 
     @Provides @Named("profile_heros")
@@ -104,40 +106,86 @@ public class AlbumsProfileScreenModule {
         return screen.album.artistName;
     }
 
-
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener() {
-        return new ItemClickListener() {
-            @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
-                //TODO
-            }
-        };
-    }
-
-    @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener() {
-        return new OverflowClickListener() {
-            @Override
-            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-
-            }
-
-            @Override
-            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                BundleableComponent component = DaggerService.getDaggerComponent(context);
-                PlaybackController playbackController = component.playbackController();
-                AppPreferences appPreferences = component.appPreferences();
-                return false;
-            }
-        };
-    }
-
-    @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig() {
-        return ActionBarMenuConfig.builder()
+    public BundleablePresenterConfig providePresenterConfig(
+            ItemClickListener itemClickListener,
+            OverflowClickListener overflowClickListener,
+            ActionBarMenuConfig menuConfig
+    ) {
+        return BundleablePresenterConfig.builder()
+                .setWantsGrid(false)
+                .setItemClickListener(itemClickListener)
+                .setOverflowClickListener(overflowClickListener)
+                .setMenuConfig(menuConfig)
                 .build();
     }
 
+    @Provides @ScreenScope
+    public ItemClickListener provideItemClickListener(final ItemClickDelegate delegate) {
+        return new ItemClickListener() {
+            @Override
+            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+                delegate.playAllItems(context, presenter.getItems(), item);
+            }
+        };
+    }
+
+    @Provides @ScreenScope
+    public OverflowClickListener provideOverflowClickListener(TracksOverflowHandler delegate) {
+        return delegate;
+    }
+
+    @Provides @ScreenScope
+    public ActionBarMenuConfig provideMenuConfig(
+            AppPreferences preferences,
+            ActionBarMenuConfigWrapper wrapper,
+            final AlbumsOverflowHandler albumsOverflowHandler
+    ) {
+
+    Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
+            screen.libraryConfig,
+            screen.libraryInfo,
+            AppPreferences.ALBUM_TRACK_SORT_ORDER,
+            null,
+            preferences
+    ) {
+        @Override
+        public Boolean call(Context context, Integer integer) {
+            MortarScope scope = MortarScope.findChild(context, screen.getName());
+            BundleableComponent component = DaggerService.getDaggerComponent(scope);
+            BundleablePresenter presenter = component.presenter();
+            switch (integer) {
+                case R.id.menu_sort_by_track_list:
+                    setNewSortOrder(presenter, TrackSortOrder.PLAYORDER);
+                    return true;
+                case R.id.menu_sort_by_az:
+                    setNewSortOrder(presenter, TrackSortOrder.A_Z);
+                    return true;
+                case R.id.menu_sort_by_za:
+                    setNewSortOrder(presenter, TrackSortOrder.Z_A);
+                    return true;
+                case R.id.menu_sort_by_duration:
+                    setNewSortOrder(presenter, TrackSortOrder.LONGEST);
+                    return true;
+                case R.id.menu_sort_by_artist:
+                    setNewSortOrder(presenter, TrackSortOrder.ARTIST);
+                    return true;
+                default:
+                    try {
+                        return albumsOverflowHandler.onItemClicked(context,
+                                OverflowAction.valueOf(integer), screen.album);
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+            }
+        }
+    };
+
+    return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
+            .withMenu(R.menu.album_song_sort_by)
+            .withMenus(ActionBarMenuConfig.toObject(AlbumsOverflowHandler.MENUS))
+            .setActionHandler(handler)
+            .build());
+    }
 
 }

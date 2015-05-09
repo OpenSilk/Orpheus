@@ -67,6 +67,7 @@ public class BundleableRecyclerView extends RecyclerListFrame {
 
     protected void setupRecyclerView() {
         mAdapter.setGridStyle(mPresenter.isGrid());
+        getListView().getRecycledViewPool().clear();
         getListView().setLayoutManager(getLayoutManager());
     }
 

@@ -19,16 +19,16 @@ package org.opensilk.music.ui3.albums;
 
 import android.content.Context;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.widget.PopupMenu;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.AlbumSortOrder;
 import org.opensilk.music.library.sort.TrackSortOrder;
@@ -38,6 +38,8 @@ import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.albumsprofile.AlbumsProfileScreen;
+import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
+import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -50,8 +52,6 @@ import javax.inject.Named;
 import dagger.Module;
 import dagger.Provides;
 import mortar.MortarScope;
-import rx.functions.Func0;
-import rx.functions.Func1;
 import rx.functions.Func2;
 
 /**
@@ -63,6 +63,16 @@ public class AlbumsScreenModule {
 
     public AlbumsScreenModule(AlbumsScreen screen) {
         this.screen = screen;
+    }
+
+    @Provides
+    public LibraryConfig provideLibraryConfig() {
+        return screen.libraryConfig;
+    }
+
+    @Provides
+    public LibraryInfo provideLibraryInfo() {
+        return screen.libraryInfo;
     }
 
     @Provides @Named("loader_uri")
@@ -105,115 +115,62 @@ public class AlbumsScreenModule {
         };
     }
 
-    static final int[] MENUS = new int[]{
-            R.menu.popup_play_all,
-            R.menu.popup_shuffle_all,
-            R.menu.popup_add_to_queue,
-//                                R.menu.popup_add_to_playlist,
-//                                R.menu.popup_more_by_artist,
-//                                R.menu.popup_delete,
-    };
-
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener() {
-        return new OverflowClickListener() {
-            @Override
-            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-
-                for (int ii : MENUS) {
-                    m.inflate(ii);
-                }
-            }
-
-            @Override
-            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                BundleableComponent component = DaggerService.getDaggerComponent(context);
-                PlaybackController playbackController = component.playbackController();
-                AppPreferences appPreferences = component.appPreferences();
-                Uri uri = LibraryUris.albumTracks(screen.libraryConfig.authority, screen.libraryInfo.libraryId, item.getIdentity());
-                String sortOrder = appPreferences.getString(appPreferences.makePluginPrefKey(screen.libraryConfig,
-                        AppPreferences.ALBUM_TRACK_SORT_ORDER), TrackSortOrder.PLAYORDER);
-                switch (action) {
-                    case PLAY_ALL:
-                        playbackController.playTracksFrom(uri, 0, sortOrder);
-                        return true;
-                    case SHUFFLE_ALL:
-                        playbackController.shuffleTracksFrom(uri);
-                        return true;
-                    case ADD_TO_QUEUE:
-                        playbackController.addTracksToQueueFrom(uri, sortOrder);
-                        return true;
-                    case ADD_TO_PLAYLIST:
-                        //TODO
-                        return true;
-                    case MORE_BY_ARTIST:
-                        //TODO
-                        return true;
-                    case DELETE:
-                        //TODO
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        };
+    public OverflowClickListener provideOverflowClickListener(AlbumsOverflowHandler handler) {
+        return handler;
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig() {
+    public ActionBarMenuConfig provideMenuConfig(
+            AppPreferences preferences,
+            ActionBarMenuConfigWrapper wrapper
+    ) {
 
-        Func2<Context, Integer, Boolean> actionHandler = new Func2<Context, Integer, Boolean>() {
+        Func2<Context, Integer, Boolean> actionHandler = new ActionBarMenuBaseHandler(
+                screen.libraryConfig,
+                screen.libraryInfo,
+                AppPreferences.ALBUM_SORT_ORDER,
+                AppPreferences.ALBUM_LAYOUT,
+                preferences
+        ) {
             @Override
             public Boolean call(Context context, Integer integer) {
-                MusicActivityComponent component = DaggerService.getDaggerComponent(context);
-                AppPreferences appPreferences = component.appPreferences();
                 MortarScope scope = MortarScope.findChild(context, screen.getName());
-                BundleableComponent component1 = DaggerService.getDaggerComponent(scope);
-                BundleablePresenter presenter = component1.presenter();
+                BundleableComponent component = DaggerService.getDaggerComponent(scope);
+                BundleablePresenter presenter = component.presenter();
                 switch (integer) {
                     case R.id.menu_sort_by_az:
-                        setNewSortOrder(AlbumSortOrder.A_Z, appPreferences, presenter);
+                        setNewSortOrder(presenter, AlbumSortOrder.A_Z);
                         return true;
                     case R.id.menu_sort_by_za:
-                        setNewSortOrder(AlbumSortOrder.Z_A, appPreferences, presenter);
+                        setNewSortOrder(presenter, AlbumSortOrder.Z_A);
                         return true;
                     case R.id.menu_sort_by_artist:
-                        setNewSortOrder(AlbumSortOrder.ARTIST, appPreferences, presenter);
+                        setNewSortOrder(presenter, AlbumSortOrder.ARTIST);
                         return true;
                     case R.id.menu_sort_by_year:
-                        setNewSortOrder(AlbumSortOrder.NEWEST, appPreferences, presenter);
+                        setNewSortOrder(presenter, AlbumSortOrder.NEWEST);
                         return true;
                     case R.id.menu_sort_by_number_of_songs:
-                        setNewSortOrder(AlbumSortOrder.MOST_TRACKS, appPreferences, presenter);
+                        setNewSortOrder(presenter, AlbumSortOrder.MOST_TRACKS);
                         return true;
                     case R.id.menu_view_as_simple:
-                        updateLayout(AppPreferences.SIMPLE, appPreferences, presenter);
+                        updateLayout(presenter, AppPreferences.SIMPLE);
                         return true;
                     case R.id.menu_view_as_grid:
-                        updateLayout(AppPreferences.GRID, appPreferences, presenter);
+                        updateLayout(presenter, AppPreferences.GRID);
                         return true;
                     default:
                         return false;
                 }
             }
-
-            void setNewSortOrder(String sortorder, AppPreferences settings, BundleablePresenter presenter) {
-                settings.putString(settings.makePluginPrefKey(screen.libraryConfig, AppPreferences.ALBUM_SORT_ORDER), sortorder);
-                presenter.getLoader().setSortOrder(sortorder);
-                presenter.reload();
-            }
-
-            void updateLayout(String kind, AppPreferences settings, BundleablePresenter presenter) {
-                settings.putString(settings.makePluginPrefKey(screen.libraryConfig, AppPreferences.ALBUM_LAYOUT), kind);
-                presenter.setWantsGrid(StringUtils.equals(kind, AppPreferences.GRID));
-                presenter.resetRecyclerView();
-            }
         };
 
-        return ActionBarMenuConfig.builder()
+        return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
                 .withMenu(R.menu.album_sort_by)
                 .withMenu(R.menu.view_as)
                 .setActionHandler(actionHandler)
-                .build();
+                .build());
     }
+
 }

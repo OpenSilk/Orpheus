@@ -27,11 +27,19 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.AlbumSortOrder;
+import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.albums.AlbumsOverflowHandler;
+import org.opensilk.music.ui3.albumsprofile.AlbumsProfileScreen;
+import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
+import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -39,6 +47,7 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.genres.GenresOverflowHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +56,8 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import mortar.MortarScope;
+import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -59,6 +70,16 @@ public class GenresProfileScreenModule {
         this.screen = screen;
     }
 
+    @Provides
+    public LibraryConfig provideLibraryConfig() {
+        return screen.libraryConfig;
+    }
+
+    @Provides
+    public LibraryInfo provideLibraryInfo() {
+        return screen.libraryInfo;
+    }
+
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
         return LibraryUris.genreAlbums(screen.libraryConfig.authority,
@@ -69,23 +90,6 @@ public class GenresProfileScreenModule {
     public String provideLoaderSortOrder(AppPreferences preferences) {
         return preferences.getString(preferences.makePluginPrefKey(screen.libraryConfig,
                 AppPreferences.GENRE_ALBUM_SORT_ORDER), AlbumSortOrder.A_Z);
-    }
-
-    @Provides @ScreenScope
-    public BundleablePresenterConfig providePresenterConfig(
-            AppPreferences preferences,
-            ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
-            ActionBarMenuConfig menuConfig
-    ) {
-        boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
-                AppPreferences.GENRE_ALBUM_LAYOUT), AppPreferences.GRID);
-        return BundleablePresenterConfig.builder()
-                .setWantsGrid(grid)
-                .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
-                .setMenuConfig(menuConfig)
-                .build();
     }
 
     @Provides @Named("profile_heros")
@@ -110,36 +114,112 @@ public class GenresProfileScreenModule {
     }
 
     @Provides @ScreenScope
+    public BundleablePresenterConfig providePresenterConfig(
+            AppPreferences preferences,
+            ItemClickListener itemClickListener,
+            OverflowClickListener overflowClickListener,
+            ActionBarMenuConfig menuConfig
+    ) {
+        boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
+                AppPreferences.GENRE_ALBUM_LAYOUT), AppPreferences.GRID);
+        return BundleablePresenterConfig.builder()
+                .setWantsGrid(grid)
+                .setItemClickListener(itemClickListener)
+                .setOverflowClickListener(overflowClickListener)
+                .setMenuConfig(menuConfig)
+                .build();
+    }
+
+    @Provides @ScreenScope
     public ItemClickListener provideItemClickListener() {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
-                //TODO
+                if (item instanceof Album) {
+                    ProfileActivity.startSelf(context, new AlbumsProfileScreen(screen.libraryConfig,
+                            screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Album) item));
+                }
             }
         };
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener() {
+    public OverflowClickListener provideOverflowClickListener(
+            final AlbumsOverflowHandler albumsOverflowHandler
+    ) {
         return new OverflowClickListener() {
             @Override
             public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-
+                if (item instanceof Album) {
+                    albumsOverflowHandler.onBuildMenu(context, m, item);
+                }
             }
 
             @Override
             public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                BundleableComponent component = DaggerService.getDaggerComponent(context);
-                PlaybackController playbackController = component.playbackController();
-                AppPreferences appPreferences = component.appPreferences();
-                return false;
+                if (item instanceof Album) {
+                    return albumsOverflowHandler.onItemClicked(context, action, item);
+                } else {
+                    return false;
+                }
             }
         };
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig() {
-        return ActionBarMenuConfig.builder()
-                .build();
+    public ActionBarMenuConfig provideMenuConfig(
+            AppPreferences appPreferences,
+            ActionBarMenuConfigWrapper wrapper,
+            final GenresOverflowHandler genresOverflowHandler
+    ) {
+
+        Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
+                screen.libraryConfig,
+                screen.libraryInfo,
+                AppPreferences.GENRE_ALBUM_SORT_ORDER,
+                AppPreferences.GENRE_ALBUM_LAYOUT,
+                appPreferences
+        ) {
+            @Override
+            public Boolean call(Context context, Integer integer) {
+                MortarScope scope = MortarScope.findChild(context, screen.getName());
+                BundleableComponent component = DaggerService.getDaggerComponent(scope);
+                BundleablePresenter presenter = component.presenter();
+                switch (integer) {
+                    case R.id.menu_sort_by_az:
+                        setNewSortOrder(presenter, AlbumSortOrder.A_Z);
+                        return true;
+                    case R.id.menu_sort_by_za:
+                        setNewSortOrder(presenter, AlbumSortOrder.Z_A);
+                        return true;
+                    case R.id.menu_sort_by_year:
+                        setNewSortOrder(presenter, AlbumSortOrder.NEWEST);
+                        return true;
+                    case R.id.menu_sort_by_number_of_songs:
+                        setNewSortOrder(presenter, AlbumSortOrder.MOST_TRACKS);
+                        return true;
+                    case R.id.menu_view_as_simple:
+                        updateLayout(presenter, AppPreferences.SIMPLE);
+                        return true;
+                    case R.id.menu_view_as_grid:
+                        updateLayout(presenter, AppPreferences.GRID);
+                        return true;
+                    default:
+                        try {
+                            return genresOverflowHandler.onItemClicked(context,
+                                    OverflowAction.valueOf(integer), screen.genre);
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
+                }
+            }
+        };
+
+        return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
+                .withMenu(R.menu.genre_album_sort_by)
+                .withMenu(R.menu.view_as)
+                .withMenus(ActionBarMenuConfig.toObject(GenresOverflowHandler.MENUS))
+                .setActionHandler(handler)
+                .build());
     }
 }

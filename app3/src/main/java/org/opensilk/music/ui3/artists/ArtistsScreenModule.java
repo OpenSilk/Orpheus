@@ -25,7 +25,10 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
 import org.opensilk.music.artwork.Artwork;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.ArtistSortOrder;
 import org.opensilk.music.model.Album;
@@ -34,6 +37,8 @@ import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.artistsprofile.ArtistsProfileScreen;
+import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
+import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -45,6 +50,9 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import mortar.MortarScope;
+import rx.functions.Func0;
+import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -58,7 +66,16 @@ public class ArtistsScreenModule {
     }
 
     @Provides
-    @Named("loader_uri")
+    public LibraryConfig provideLibraryConfig() {
+        return screen.libraryConfig;
+    }
+
+    @Provides
+    public LibraryInfo provideLibraryInfo() {
+        return screen.libraryInfo;
+    }
+
+    @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
         return LibraryUris.artists(screen.libraryConfig.authority,
                 screen.libraryInfo.libraryId);
@@ -80,7 +97,7 @@ public class ArtistsScreenModule {
         boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
                 AppPreferences.ARTIST_LAYOUT), AppPreferences.GRID);
         return BundleablePresenterConfig.builder()
-                .setWantsGrid(false)
+                .setWantsGrid(grid)
                 .setItemClickListener(itemClickListener)
                 .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
@@ -99,26 +116,57 @@ public class ArtistsScreenModule {
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener() {
-        return new OverflowClickListener() {
-            @Override
-            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-
-            }
-
-            @Override
-            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                BundleableComponent component = DaggerService.getDaggerComponent(context);
-                PlaybackController playbackController = component.playbackController();
-                AppPreferences appPreferences = component.appPreferences();
-                return false;
-            }
-        };
+    public OverflowClickListener provideOverflowClickListener(ArtistsOverflowHandler delegate) {
+        return delegate;
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig() {
-        return ActionBarMenuConfig.builder()
-                .build();
+    public ActionBarMenuConfig provideMenuConfig(
+            AppPreferences appPreferences,
+            ActionBarMenuConfigWrapper wrapper
+    ) {
+
+        Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
+                screen.libraryConfig,
+                screen.libraryInfo,
+                AppPreferences.ARTIST_SORT_ORDER,
+                AppPreferences.ARTIST_LAYOUT,
+                appPreferences
+        ) {
+            @Override
+            public Boolean call(Context context, Integer integer) {
+                MortarScope scope = MortarScope.findChild(context, screen.getName());
+                BundleableComponent component = DaggerService.getDaggerComponent(scope);
+                BundleablePresenter presenter = component.presenter();
+                switch (integer) {
+                    case R.id.menu_sort_by_az:
+                        setNewSortOrder(presenter, ArtistSortOrder.A_Z);
+                        return true;
+                    case R.id.menu_sort_by_za:
+                        setNewSortOrder(presenter, ArtistSortOrder.Z_A);
+                        return true;
+                    case R.id.menu_sort_by_number_of_songs:
+                        setNewSortOrder(presenter, ArtistSortOrder.MOST_TRACKS);
+                        return true;
+                    case R.id.menu_sort_by_number_of_albums:
+                        setNewSortOrder(presenter, ArtistSortOrder.MOST_ALBUMS);
+                        return true;
+                    case R.id.menu_view_as_simple:
+                        updateLayout(presenter, AppPreferences.SIMPLE);
+                        return true;
+                    case R.id.menu_view_as_grid:
+                        updateLayout(presenter, AppPreferences.GRID);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        };
+
+        return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
+                .withMenu(R.menu.artist_sort_by)
+                .withMenu(R.menu.view_as)
+                .setActionHandler(handler)
+                .build());
     }
 }

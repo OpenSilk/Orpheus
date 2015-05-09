@@ -22,4 +22,5 @@ package org.opensilk.music.ui3.common;
  */
 public interface ActivityRequestCodes {
     int LIBRARY_PICKER = 1001;
+    int LIBRARY_SETTINGS = 1002;
 }

@@ -20,17 +20,24 @@ package org.opensilk.music.ui3.playlists;
 import android.content.Context;
 import android.net.Uri;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.music.App;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.PlaylistSortOrder;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
+import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -43,6 +50,8 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import mortar.MortarScope;
+import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -56,7 +65,16 @@ public class PlaylistsScreenModule {
     }
 
     @Provides
-    @Named("loader_uri")
+    public LibraryConfig provideLibraryConfig() {
+        return screen.libraryConfig;
+    }
+
+    @Provides
+    public LibraryInfo provideLibraryInfo() {
+        return screen.libraryInfo;
+    }
+
+    @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
         return LibraryUris.playlists(screen.libraryConfig.authority,
                 screen.libraryInfo.libraryId);
@@ -97,26 +115,55 @@ public class PlaylistsScreenModule {
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener() {
-        return new OverflowClickListener() {
-            @Override
-            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-
-            }
-
-            @Override
-            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                BundleableComponent component = DaggerService.getDaggerComponent(context);
-                PlaybackController playbackController = component.playbackController();
-                AppPreferences appPreferences = component.appPreferences();
-                return false;
-            }
-        };
+    public OverflowClickListener provideOverflowClickListener(PlaylistsOverflowHandler handler) {
+        return handler;
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig() {
-        return ActionBarMenuConfig.builder()
-                .build();
+    public ActionBarMenuConfig provideMenuConfig(
+            AppPreferences appPreferences,
+            ActionBarMenuConfigWrapper wrapper
+    ) {
+
+        Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
+                screen.libraryConfig,
+                screen.libraryInfo,
+                AppPreferences.PLAYLIST_SORT_ORDER,
+                AppPreferences.PLAYLIST_LAYOUT,
+                appPreferences
+        ) {
+            @Override
+            public Boolean call(Context context, Integer integer) {
+                MortarScope scope = MortarScope.findChild(context, screen.getName());
+                BundleableComponent component = DaggerService.getDaggerComponent(scope);
+                BundleablePresenter presenter = component.presenter();
+                switch (integer) {
+                    case R.id.menu_sort_by_az:
+                        setNewSortOrder(presenter, PlaylistSortOrder.A_Z);
+                        return true;
+                    case R.id.menu_sort_by_za:
+                        setNewSortOrder(presenter, PlaylistSortOrder.Z_A);
+                        return true;
+                    case R.id.menu_sort_by_date_added:
+                        Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_LONG).show();
+                        //TODO
+                        return true;
+                    case R.id.menu_view_as_simple:
+                        updateLayout(presenter, AppPreferences.SIMPLE);
+                        return true;
+                    case R.id.menu_view_as_grid:
+                        updateLayout(presenter, AppPreferences.GRID);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        };
+
+        return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
+                .withMenu(R.menu.playlist_sort_by)
+                .withMenu(R.menu.view_as)
+                .setActionHandler(handler)
+                .build());
     }
 }

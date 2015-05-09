@@ -132,6 +132,10 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
         if (hasView()) {
             getView().setupRecyclerView();
             if (clear) {
+                if (isSubscribed(subscription)) {
+                    subscription.unsubscribe();
+                }
+                adapterIsDirty = true;
                 load();
             }
         }
@@ -183,7 +187,9 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
     // cancels any ongoing load and starts a new one
     @DebugLog
     public void reload() {
-        if (isSubscribed(subscription)) subscription.unsubscribe();
+        if (isSubscribed(subscription)) {
+            subscription.unsubscribe();
+        }
         adapterIsDirty = true;
         loader.reset();
         load();
@@ -212,13 +218,6 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
             getView().getAdapter().addItem(item);
             showRecyclerView();
         }
-    }
-
-    public int getItemPosition(Bundleable item) {
-        if (hasView()) {
-            return getView().getAdapter().indexOf(item);
-        }
-        return -1;
     }
 
     public List<Bundleable> getItems() {

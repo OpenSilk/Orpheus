@@ -25,12 +25,17 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.R;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.GenreSortOrder;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
+import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
@@ -43,6 +48,8 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import mortar.MortarScope;
+import rx.functions.Func2;
 
 /**
  * Created by drew on 5/5/15.
@@ -53,6 +60,16 @@ public class GenresScreenModule {
 
     public GenresScreenModule(GenresScreen screen) {
         this.screen = screen;
+    }
+
+    @Provides
+    public LibraryConfig provideLibraryConfig() {
+        return screen.libraryConfig;
+    }
+
+    @Provides
+    public LibraryInfo provideLibraryInfo() {
+        return screen.libraryInfo;
     }
 
     @Provides @Named("loader_uri")
@@ -101,26 +118,51 @@ public class GenresScreenModule {
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener() {
-        return new OverflowClickListener() {
-            @Override
-            public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
-
-            }
-
-            @Override
-            public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
-                BundleableComponent component = DaggerService.getDaggerComponent(context);
-                PlaybackController playbackController = component.playbackController();
-                AppPreferences appPreferences = component.appPreferences();
-                return false;
-            }
-        };
+    public OverflowClickListener provideOverflowClickListener(GenresOverflowHandler handler) {
+        return handler;
     }
 
     @Provides @ScreenScope
-    public ActionBarMenuConfig provideMenuConfig() {
-        return ActionBarMenuConfig.builder()
-                .build();
+    public ActionBarMenuConfig provideMenuConfig(
+            AppPreferences appPreferences,
+            ActionBarMenuConfigWrapper wrapper
+    ) {
+
+        Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
+                screen.libraryConfig,
+                screen.libraryInfo,
+                AppPreferences.GENRE_SORT_ORDER,
+                AppPreferences.GENRE_LAYOUT,
+                appPreferences
+        ) {
+            @Override
+            public Boolean call(Context context, Integer integer) {
+                MortarScope scope = MortarScope.findChild(context, screen.getName());
+                BundleableComponent component = DaggerService.getDaggerComponent(scope);
+                BundleablePresenter presenter = component.presenter();
+                switch (integer) {
+                    case R.id.menu_sort_by_az:
+                        setNewSortOrder(presenter, GenreSortOrder.A_Z);
+                        return true;
+                    case R.id.menu_sort_by_za:
+                        setNewSortOrder(presenter, GenreSortOrder.Z_A);
+                        return true;
+                    case R.id.menu_view_as_simple:
+                        updateLayout(presenter, AppPreferences.SIMPLE);
+                        return true;
+                    case R.id.menu_view_as_grid:
+                        updateLayout(presenter, AppPreferences.GRID);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        };
+
+        return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
+                .withMenu(R.menu.genre_sort_by)
+                .withMenu(R.menu.view_as)
+                .setActionHandler(handler)
+                .build());
     }
 }
