@@ -20,7 +20,10 @@ package org.opensilk.music.ui3.gallery;
 import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ActionBarOwnerActivity;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
@@ -40,17 +43,19 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
 
     final AppPreferences preferences;
     final GalleryScreen screen;
+    final ActionBarOwner actionBarOwner;
 
     DelegateActionHandler delegateActionHandler;
 
     @Inject
     public GalleryScreenPresenter(
             AppPreferences preferences,
-            GalleryScreen screen
+            GalleryScreen screen,
+            ActionBarOwner actionBarOwner
     ) {
-        Timber.v("new GalleryScreen.Presenter()");
         this.preferences = preferences;
         this.screen = screen;
+        this.actionBarOwner = actionBarOwner;
     }
 
     @Override
@@ -94,24 +99,26 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         ActionBarMenuConfig.Builder builder = ActionBarMenuConfig.builder();
 
         builder.setActionHandler(delegateActionHandler);
-        builder.withMenu(R.menu.shuffle);
 
         if (menuConfig != null) {
             delegateActionHandler.setDelegate(menuConfig.actionHandler);
-            if (menuConfig.menus.length > 0) {
+            if (menuConfig.menus != null && menuConfig.menus.length > 0) {
                 builder.withMenus(menuConfig.menus);
+            }
+            if (menuConfig.customMenus != null && menuConfig.customMenus.length > 0) {
+                builder.withMenus(menuConfig.customMenus);
             }
         } else {
             delegateActionHandler.setDelegate(null);
         }
 
-//        actionBarOwner.setConfig(new ActionBarOwner.Config.Builder()
-//                .setTitle(R.string.my_library)
-//                .setMenuConfig(builder.build())
-//                .build());
+        actionBarOwner.setConfig(ActionBarConfig.builder()
+                .setTitle(R.string.my_library)
+                .setMenuConfig(builder.build())
+                .build());
     }
 
-    class DelegateActionHandler implements Func2<Context, Integer, Boolean> {
+    static class DelegateActionHandler implements Func2<Context, Integer, Boolean> {
 
         Func2<Context, Integer, Boolean> delegate;
 
@@ -122,9 +129,6 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         @Override
         public Boolean call(Context context, Integer integer) {
             switch (integer) {
-                case R.id.menu_shuffle:
-//                    musicService.startPartyShuffle();
-                    return true;
                 default:
                     return delegate != null && delegate.call(context, integer);
             }

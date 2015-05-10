@@ -130,6 +130,14 @@
                        android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
         </activity>
 
+        <activity
+            android:name=".ui3.NowPlayingActivity"
+            android:theme="@style/Theme.Dark"
+            android:process=":ui">
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                       android:value="org.opensilk.music.ui.activities.HomeSlidingActivity"/>
+        </activity>
+
         <!-- Artwork provider -->
         <provider
             android:authorities="${applicationId}.provider.artwork"

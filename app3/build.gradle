@@ -139,6 +139,8 @@ dependencies {
 
     compile(group: 'com.google.android.exoplayer', name: 'exoplayer', version: 'r1.2.4', ext: 'aar')
 
+    compile 'com.sothree.slidinguppanel:library:3.0.0'
+
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
     compile 'com.triggertrap:seekarc:1.1-SNAPSHOT@aar'

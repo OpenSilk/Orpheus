@@ -36,6 +36,7 @@
         <item name="nowPlayingShuffleStyle">@style/nowPlayingActionLight.Shuffle</item>
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
 
+        <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
     </style>
 
     <style name="Theme.Lightconfig" parent="Theme.LightOverlay">

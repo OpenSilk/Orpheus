@@ -22,23 +22,17 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.UtilsArt;
-import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.NowPlayingActivity;
 
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +42,6 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
-import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -72,18 +65,15 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
     final AppPreferences settings;
 
-    final CurrentInfo currentInfo = new CurrentInfo();
-
-    static class CurrentInfo {
-        String trackName;
-        String artistName;
-        Bitmap albumArt;
-        long position;
-        long duration;
-        boolean positionSynced;
-    }
+    String lastTrackName;
+    String lastArtistName;
+    Bitmap lastAlbumARt;
+    long lastPosition;
+    long lastDuration;
+    boolean lastPosSynced;
 
     CompositeSubscription broadcastSubscriptions;
+    Subscription progressSubscription;
 
     @Inject
     public FooterScreenPresenter(
@@ -129,6 +119,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         if (!hasView() && pauseAndResumeRegistrar.isRunning()) {
             Timber.v("missed onPause()");
             unsubscribeBroadcasts();
+            unsubscribeProgress();
         }
     }
 
@@ -144,11 +135,12 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     public void onPause() {
         Timber.v("onPause");
         unsubscribeBroadcasts();
+        unsubscribeProgress();
     }
 
     void setTrackName(String s) {
-        if (!StringUtils.equals(currentInfo.trackName, s)) {
-            currentInfo.trackName = s;
+        if (!StringUtils.equals(lastTrackName, s)) {
+            lastTrackName = s;
             if (hasView()) {
                 getView().trackTitle.setText(s);
             }
@@ -156,8 +148,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     }
 
     void setArtistName(String s) {
-        if (!StringUtils.equals(currentInfo.artistName, s)) {
-            currentInfo.artistName = s;
+        if (!StringUtils.equals(lastArtistName, s)) {
+            lastArtistName = s;
             if (hasView()) {
                 getView().artistName.setText(s);
             }
@@ -173,8 +165,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
 
     void updateArtwork(Bitmap bitmap) {
         if (bitmap != null) {
-            if (!bitmap.sameAs(currentInfo.albumArt)) {
-                currentInfo.albumArt = bitmap;
+            if (!bitmap.sameAs(lastAlbumARt)) {
+                lastAlbumARt = bitmap;
                 if (hasView()) {
                     getView().artworkThumbnail.setImageBitmap(bitmap, true);
                 }
@@ -204,10 +196,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     boolean handleClick(String action, Context context) {
         switch (action) {
             case AppPreferences.ACTION_OPEN_QUEUE:
-                //QueueScreen.toggleQueue(context);
-                return true;
             case AppPreferences.ACTION_OPEN_NOW_PLAYING:
-                //NowPlayingScreen.toggleNowPlaying(context);
+                NowPlayingActivity.startSelf(context);
                 return true;
             case AppPreferences.ACTION_NONE:
             default:
@@ -234,10 +224,11 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                             } else {
                                 setProgress((int) (1000 * position / duration));
                             }
-                            Timber.v("Position discrepancy = %d", currentInfo.position - position);
-                            currentInfo.position = position;
-                            currentInfo.duration = duration;
-                            currentInfo.positionSynced = true;
+                            Timber.v("Position discrepancy = %d", lastPosition - position);
+                            lastPosition = position;
+                            lastDuration = duration;
+                            lastPosSynced = true;
+                            subscribeProgress(MainPresenter.isActive(playbackState));
                         }
 
                     }
@@ -253,20 +244,38 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                     }
                 }
         );
+
+        broadcastSubscriptions = new CompositeSubscription(s, s2);
+    }
+
+    void unsubscribeBroadcasts() {
+        if (isSubscribed(broadcastSubscriptions)) {
+            broadcastSubscriptions.unsubscribe();
+            broadcastSubscriptions = null;
+        }
+    }
+
+    void subscribeProgress(boolean playing) {
+        if (isSubscribed(progressSubscription))  {
+            if (!playing) {
+                unsubscribeProgress();
+            }
+            return;
+        }
         final long interval = 250;
-        Subscription s3 = Observable.interval(interval, TimeUnit.MILLISECONDS)
+        progressSubscription = Observable.interval(interval, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
                     public void call(Long aLong) {
-                        long position = currentInfo.position;
-                        if (currentInfo.positionSynced) {
-                            currentInfo.positionSynced = false;
+                        long position = lastPosition;
+                        if (lastPosSynced) {
+                            lastPosSynced = false;
                         } else {
                             position += interval + 10;
-                            currentInfo.position = position;
+                            lastPosition = position;
                         }
-                        long duration = currentInfo.duration;
+                        long duration = lastDuration;
                         if (position < 0 || duration <= 0) {
                             setProgress(1000);
                         } else {
@@ -274,13 +283,12 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                         }
                     }
                 });
-        broadcastSubscriptions = new CompositeSubscription(s, s2, s3);
     }
 
-    void unsubscribeBroadcasts() {
-        if (isSubscribed(broadcastSubscriptions)) {
-            broadcastSubscriptions.unsubscribe();
-            broadcastSubscriptions = null;
+    void unsubscribeProgress() {
+        if (isSubscribed(progressSubscription)) {
+            progressSubscription.unsubscribe();
+            progressSubscription = null;
         }
     }
 
