@@ -56,14 +56,9 @@ public abstract class MortarFragmentActivity extends MortarActivity
     }
 
     @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mFragmentManagerOwner.takeView(this);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
+        mFragmentManagerOwner.takeView(this);
         mPausesAndResumesPresenter.activityResumed();
     }
 
