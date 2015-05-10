@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.audiofx.AudioEffect;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -245,6 +246,20 @@ public class PlaybackController {
     /*
      * End custom commands
      */
+
+    /*
+     * Misc
+     */
+
+    public int getAudioSessionId() {
+        if (hasController()) {
+            try {
+                return mPlaybackService.getAudioSessionId();
+            } catch (RemoteException e) {
+            }
+        }
+        return AudioEffect.ERROR_BAD_VALUE;
+    }
 
     /*
      * Subscriptions

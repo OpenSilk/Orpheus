@@ -34,6 +34,11 @@ public class PlaybackServiceBinder extends IPlaybackService.Stub {
 
     @Override
     public MediaSession.Token getToken() throws RemoteException {
-        return mService.get().mMediaSession.getSessionToken();
+        return mService.get().getMediaSession().getSessionToken();
+    }
+
+    @Override
+    public int getAudioSessionId() throws RemoteException {
+        return mService.get().getAudioSessionId();
     }
 }

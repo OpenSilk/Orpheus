@@ -238,4 +238,8 @@ public interface PlaybackConstants {
         String DURATION = "duration";
     }
 
+    interface META {
+        String TRACK_ARTWORK_URI = "meta.trackartworkuri";
+    }
+
 }

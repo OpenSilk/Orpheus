@@ -20,6 +20,7 @@ package org.opensilk.music.playback;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.media.MediaMetadataCompat;
 
@@ -59,8 +60,9 @@ public class MediaMetadataHelper {
         Track track;
         ArtInfo artInfo;
         Bitmap bitmap;
+        Uri uri;
         boolean hasAnyNull() {
-            return track == null || artInfo == null || bitmap == null;
+            return track == null || artInfo == null || bitmap == null || uri == null;
         }
     }
 
@@ -97,6 +99,7 @@ public class MediaMetadataHelper {
         }
 
         currentInfo.artInfo = artInfo;
+        currentInfo.uri = providerHelper.makeUri(artInfo, ArtworkType.THUMBNAIL);
 
         if (currentSubcription != null) {
             currentSubcription.unsubscribe();
@@ -144,6 +147,13 @@ public class MediaMetadataHelper {
                 .putBitmap(METADATA_KEY_ALBUM_ART, b)
                 //.putString(METADATA_KEY_ALBUM_ART_URI, TODO)
                 //.putString(METADATA_KEY_MEDIA_ID, TODO)
+                //Dispaly uri is prefered over arturi, we only set arturi for internal
+                //purposes and cant use a custom key cause of the conversion compat does
+                //strips away custom keys, so we set a display uri to avoid anyone
+                //using the art uri. even though we also set a bitmap
+                .putString(METADATA_KEY_DISPLAY_ICON_URI, currentInfo.uri.toString())
+                .putString(METADATA_KEY_ART_URI, //used by now playing
+                        t.artworkUri != null ? t.artworkUri.toString() : null)
                 .build();
         mediaSession.setMetadata((MediaMetadata)m.getMediaMetadata());
     }

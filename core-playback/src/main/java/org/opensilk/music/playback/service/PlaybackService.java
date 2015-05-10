@@ -84,6 +84,7 @@ public class PlaybackService extends Service {
     @Inject MediaMetadataHelper mMediaMetaHelper;
     @Inject LibraryHelper mLibraryHelper;
 
+    private int mAudioSessionId;
     private Handler mHandler;
     private IPlayer mPlayer;
 
@@ -105,8 +106,9 @@ public class PlaybackService extends Service {
         mMediaSession.setCallback(mMediaSessionCallback, mHandler);
         mMediaMetaHelper.setMediaSession(mMediaSession, mHandler);
 
+        mAudioSessionId = mAudioManagerHelper.getAudioSessionId();
         //init default player
-        mPlayer = new MultiPlayer(this, mAudioManagerHelper.getAudioSessionId());
+        mPlayer = new MultiPlayer(this, mAudioSessionId);
         mPlayer.setCallback(mPlayerCallback, mHandler);
 
         mHandler.post(mLoadQueueRunnable);
@@ -161,6 +163,14 @@ public class PlaybackService extends Service {
     private void updatePlaybackState() {
         mNotificationHelper.updatePlayState(mPlaybackStateHelper.isActive());
         mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
+    }
+
+    public MediaSession getMediaSession() {
+        return mMediaSession;
+    }
+
+    public int getAudioSessionId() {
+        return mAudioSessionId;
     }
 
     final MediaSession.Callback mMediaSessionCallback = new MediaSession.Callback() {
