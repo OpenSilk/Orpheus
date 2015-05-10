@@ -87,27 +87,35 @@ public class UtilsArt {
         return Math.round(THUMB_MEM_CACHE_DIVIDER * memClass * 1024 * 1024);
     }
 
+    /**
+     * This function is used universally by the app to maintain consistent art and cache keys
+     * This is only for album artwork
+     *
+     * @param artist The album artist
+     * @param altArtist The track artist
+     * @param album The album
+     * @param uri Fallback uri
+     * @return Bestfitted artinfo.
+     */
     public static ArtInfo makeBestfitArtInfo(String artist, String altArtist, String album, Uri uri) {
-        if (uri != null) {
-            if (artist == null || album == null) {
-                // we need both to make a query but we have uri so just use that,
-                // note this will prevent cache from returning artist images when album is null
-                return new ArtInfo(null, null, uri);
-            } else {
-                return new ArtInfo(artist, album, uri);
-            }
+        if (artist != null && album != null && uri != null) {
+            // we have everything yay.
+            return ArtInfo.forAlbum(artist, album, uri);
+        } else if (artist != null && album != null) {
+            // second best fit
+            return ArtInfo.forAlbum(artist, album, null);
+        } else if (uri != null) {
+            // we need both artist and album to make a query but we have uri so just use that,
+            // this will prevent cache from returning artist images when album is null
+            return ArtInfo.forAlbum(null, null, uri);
+        } else if (artist == null && altArtist != null && album != null) {
+            // cant fallback to uri so best guess the artist
+            // note this is a problem because the song artist may not be the
+            // album artist but we have no choice here
+            return ArtInfo.forAlbum(altArtist, album, null);
         } else {
-            if (artist == null && altArtist != null) {
-                // cant fallback to uri so best guess the artist
-                // note this is a problem because the song artist may not be the
-                // album artist but we have no choice here, also note the service
-                // does the same thing so at least it will be consistent
-                return new ArtInfo(altArtist, album, null);
-            } else {
-                // if everything is null the artworkmanager will set the default image
-                // so no further validation is needed here.
-                return ArtInfo.NULLINSTANCE;
-            }
+            // Not enough info. Force the default image
+            return ArtInfo.NULLINSTANCE;
         }
     }
 }
