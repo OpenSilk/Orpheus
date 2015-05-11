@@ -138,7 +138,10 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
 
     @Override
     public void onResume() {
-        setup();
+        if (hasView()) {
+            Timber.v("missed onLoad()");
+            setup();
+        }
     }
 
     @Override
