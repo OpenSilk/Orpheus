@@ -28,12 +28,12 @@ assert(versionPatch < 100) // Double digits
 assert(versionBuild < 100) // Double digits
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        targetSdkVersion 21
         versionCode versionMajor * 1000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
         versionName String.format("%d.%d.%d-SNAPSHOT", versionMajor, versionMinor, versionPatch)
     }
@@ -53,7 +53,7 @@ robolectric {
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:22.0.0'
+    compile 'com.android.support:support-annotations:21.0.3'
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {
