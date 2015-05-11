@@ -18,7 +18,9 @@
 package org.opensilk.music.playback.service;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.media.session.MediaSession;
 import android.os.*;
 import android.os.Process;
@@ -56,12 +58,15 @@ public class PlaybackServiceModule {
 //                new Intent(this, MediaButtonIntentReceiver.class),
 //                PendingIntent.FLAG_UPDATE_CURRENT
 //        ));
-        mMediaSession.setSessionActivity(PendingIntent.getActivity(
-                context,
-                2,
-                NavUtils.makeLauncherIntent(context),
-                PendingIntent.FLAG_UPDATE_CURRENT
-        ));
+        mMediaSession.setSessionActivity(PendingIntent.getActivity(context,
+                2, NavUtils.makeLauncherIntent(context), PendingIntent.FLAG_UPDATE_CURRENT));
+        final ComponentName mediaButtonReceiverComponent
+                = new ComponentName(context, MediaButtonIntentReceiver.class);
+        final Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON)
+                .setComponent(mediaButtonReceiverComponent);
+        final PendingIntent mediaButtonReceiverIntent = PendingIntent.getBroadcast(context,
+                0, mediaButtonIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        mMediaSession.setMediaButtonReceiver(mediaButtonReceiverIntent);
         return mMediaSession;
     }
 }

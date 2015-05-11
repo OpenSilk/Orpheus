@@ -22,9 +22,12 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.Rating;
+import android.media.session.MediaController;
 import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.*;
+import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 
@@ -66,6 +69,8 @@ import rx.Observable;
 import rx.functions.Action2;
 import rx.functions.Func1;
 import timber.log.Timber;
+
+import static org.opensilk.music.playback.PlaybackConstants.*;
 
 /**
  * Created by drew on 5/6/15.
@@ -148,11 +153,51 @@ public class PlaybackService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
             String action = intent.getAction();
-            if (action != null) {
-
+            if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
+                mMediaSession.getController().dispatchMediaButtonEvent(intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT));
+            } else {
+                handleIntentCommand(intent);
+            }
+            if (intent.getBooleanExtra(FROM_MEDIA_BUTTON, false)) {
+                MediaButtonIntentReceiver.completeWakefulIntent(intent);
             }
         }
         return START_STICKY;
+    }
+
+    void handleIntentCommand(@NonNull Intent intent) {
+        final String action = intent.getAction();
+        final String command = SERVICECMD.equals(action) ? intent.getStringExtra(CMDNAME) : null;
+        Timber.v("handleIntentCommand: action = %s, command = %s", action, command);
+        MediaController controller = mMediaSession.getController();
+        MediaController.TransportControls controls = controller.getTransportControls();
+        PlaybackState state = controller.getPlaybackState();
+        if (CMDNEXT.equals(command) || NEXT_ACTION.equals(action)) {
+            controls.skipToNext();
+        } else if (CMDPREVIOUS.equals(command) || PREVIOUS_ACTION.equals(action)) {
+            if (state == null || state.getPosition() < REWIND_INSTEAD_PREVIOUS_THRESHOLD) {
+                controls.skipToPrevious();
+            } else {
+                controls.seekTo(0);
+                //TODO might need play
+            }
+        } else if (CMDTOGGLEPAUSE.equals(command) || TOGGLEPAUSE_ACTION.equals(action)) {
+            if (state == null || state.getState() != PlaybackState.STATE_PLAYING) {
+                controls.pause();
+            } else {
+                controls.play();
+            }
+        } else if (CMDPAUSE.equals(command) || PAUSE_ACTION.equals(action)) {
+            controls.pause();
+        } else if (CMDPLAY.equals(command)) {
+            controls.play();
+        } else if (CMDSTOP.equals(command) || STOP_ACTION.equals(action)) {
+            controls.stop();
+        } else if (REPEAT_ACTION.equals(action)) {
+            controls.sendCustomAction(CMD.CYCLE_REPEAT, null);
+        } else if (SHUFFLE_ACTION.equals(action)) {
+            controls.sendCustomAction(CMD.SHUFFLE_QUEUE, null);
+        }
     }
 
     private void updateMeta() {
