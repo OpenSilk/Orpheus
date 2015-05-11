@@ -1,5 +1,13 @@
 ## Orpheus, the offspring of Apollo
 
+Orpheus is in the middle of a ground up rewrite for 3.0. If your stumbling upon here you will likely
+want to checkout the latest tag. Though there is still a buildable version 2 in the `app` module.
+With dependencies in `api`, `common`, and `iab*` module. They are there for reference and will be removed
+once all applicable code has been copied.
+Orpheus 3 is in `app3` with dependencies in the `core-*`, `common-*`, `library-*`, and `plugin-*` modules.
+Its also noteworthy that app3 will only work on L+ until the support lib is fixed or I make a custom
+MediaSessionCompat
+
 ### Building
 
 OpenSilk projects are managed by repo
