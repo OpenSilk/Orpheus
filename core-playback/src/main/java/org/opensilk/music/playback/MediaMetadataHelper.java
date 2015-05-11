@@ -17,19 +17,26 @@
 
 package org.opensilk.music.playback;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.UtilsArt;
 import org.opensilk.music.artwork.service.ArtworkProviderHelper;
+import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Track;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -48,6 +55,7 @@ import static android.support.v4.media.MediaMetadataCompat.*;
  */
 public class MediaMetadataHelper {
 
+    final LibraryHelper libraryHelper;
     final ArtworkProviderHelper providerHelper;
     final Scheduler scheduler = Schedulers.computation();
 
@@ -58,16 +66,20 @@ public class MediaMetadataHelper {
 
     static class CurrentInfo {
         Track track;
+        Uri trackUri;
         ArtInfo artInfo;
         Bitmap bitmap;
-        Uri uri;
+        Uri artUri;
         boolean hasAnyNull() {
-            return track == null || artInfo == null || bitmap == null || uri == null;
+            return track == null || trackUri == null
+                    || artInfo == null || bitmap == null
+                    || artUri == null;
         }
     }
 
     @Inject
-    public MediaMetadataHelper(ArtworkProviderHelper providerHelper) {
+    public MediaMetadataHelper(LibraryHelper libraryHelper, ArtworkProviderHelper providerHelper) {
+        this.libraryHelper = libraryHelper;
         this.providerHelper = providerHelper;
     }
 
@@ -76,7 +88,7 @@ public class MediaMetadataHelper {
         this.oScheduler = AndroidSchedulers.handlerThread(handler);
     }
 
-    public void updateMeta(Track track) {
+    public void updateMeta(Track track, Uri trackUri) {
         if (mediaSession == null || oScheduler == null) {
             Timber.e("Must setMediaSession");
             return;
@@ -87,6 +99,7 @@ public class MediaMetadataHelper {
         }
 
         currentInfo.track = track;
+        currentInfo.trackUri = trackUri;
 
         final ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.albumArtistName,
                 track.artistName, track.albumName, track.artworkUri);
@@ -99,7 +112,7 @@ public class MediaMetadataHelper {
         }
 
         currentInfo.artInfo = artInfo;
-        currentInfo.uri = providerHelper.makeUri(artInfo, ArtworkType.THUMBNAIL);
+        currentInfo.artUri = providerHelper.makeUri(artInfo, ArtworkType.THUMBNAIL);
 
         if (currentSubcription != null) {
             currentSubcription.unsubscribe();
@@ -132,7 +145,9 @@ public class MediaMetadataHelper {
             return;
         }
         final Track t = currentInfo.track;
+        final Uri trackUri = currentInfo.trackUri;
         final Bitmap b = currentInfo.bitmap;
+        final Uri artUri = currentInfo.artUri;
         final long duration = mediaSession.getController().getPlaybackState().getBufferedPosition();
         MediaMetadataCompat m = new MediaMetadataCompat.Builder()
                 .putString(METADATA_KEY_TITLE, t.name)
@@ -146,15 +161,32 @@ public class MediaMetadataHelper {
                 .putLong(METADATA_KEY_DURATION, duration)
                 .putBitmap(METADATA_KEY_ALBUM_ART, b)
                 //.putString(METADATA_KEY_ALBUM_ART_URI, TODO)
-                //.putString(METADATA_KEY_MEDIA_ID, TODO)
+                .putString(METADATA_KEY_MEDIA_ID, trackUri.toString())
                 //Dispaly uri is prefered over arturi, we only set arturi for internal
                 //purposes and cant use a custom key cause of the conversion compat does
                 //strips away custom keys, so we set a display uri to avoid anyone
                 //using the art uri. even though we also set a bitmap
-                .putString(METADATA_KEY_DISPLAY_ICON_URI, currentInfo.uri.toString())
+                .putString(METADATA_KEY_DISPLAY_ICON_URI, artUri.toString())
                 .putString(METADATA_KEY_ART_URI, //used by now playing
                         t.artworkUri != null ? t.artworkUri.toString() : null)
                 .build();
         mediaSession.setMetadata((MediaMetadata)m.getMediaMetadata());
+    }
+
+    public MediaSession.QueueItem buildQueueItem(Uri uri, int pos) {
+        Track track = libraryHelper.getTrack(uri);
+        if (track == null) {
+            return null;
+        }
+        ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.albumArtistName,
+                track.artistName, track.albumName, track.artworkUri);
+        MediaDescription desc = new MediaDescription.Builder()
+                .setTitle(track.name)
+                .setSubtitle(track.artistName)
+                .setMediaId(uri.toString())
+                .setExtras(BundleHelper.builder().putParcleable(artInfo).get())
+                //.setIconUri(providerHelper.makeUri(artInfo, ArtworkType.THUMBNAIL))
+                .build();
+        return new MediaSession.QueueItem(desc, pos);
     }
 }

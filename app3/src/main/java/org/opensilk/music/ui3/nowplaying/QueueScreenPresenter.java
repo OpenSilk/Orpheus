@@ -17,19 +17,134 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
+import android.os.Bundle;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
+
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
+import org.opensilk.common.ui.mortar.PausesAndResumes;
+import org.opensilk.music.R;
+import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
+import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.main.MainPresenter;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
+import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
+
+import static android.support.v4.media.MediaMetadataCompat.*;
+import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 
 /**
  * Created by drew on 5/9/15.
  */
 @ScreenScope
-public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> {
+public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> implements PausesAndResumes {
+
+    final PlaybackController playbackController;
+    final ArtworkRequestManager requestor;
+    final PauseAndResumeRegistrar pauseAndResumeRegistrar;
+
+    CompositeSubscription broadcastSubscriptions;
 
     @Inject
-    public QueueScreenPresenter() {
+    public QueueScreenPresenter(
+            PlaybackController playbackController,
+            ArtworkRequestManager requestor,
+            PauseAndResumeRegistrar pauseAndResumeRegistrar
+    ) {
+        this.playbackController = playbackController;
+        this.requestor = requestor;
+        this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
     }
+
+    @Override
+    protected void onEnterScope(MortarScope scope) {
+        super.onEnterScope(scope);
+        pauseAndResumeRegistrar.register(scope, this);
+    }
+
+    @Override
+    protected void onLoad(Bundle savedInstanceState) {
+        super.onLoad(savedInstanceState);
+        if (pauseAndResumeRegistrar.isRunning()) {
+            subscribeBroadcasts();
+        }
+    }
+
+    @Override
+    protected void onSave(Bundle outState) {
+        super.onSave(outState);
+        if (pauseAndResumeRegistrar.isRunning()) {
+            unsubscribeBroadcasts();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        subscribeBroadcasts();
+    }
+
+    @Override
+    public void onPause() {
+        unsubscribeBroadcasts();
+    }
+
+    void subscribeBroadcasts() {
+        if (isSubscribed(broadcastSubscriptions)) {
+            return;
+        }
+        Subscription s = playbackController.subscribeMetaChanges(
+                new Action1<MediaMetadataCompat>() {
+                    @Override
+                    public void call(MediaMetadataCompat mediaMetadata) {
+                        String track = mediaMetadata.getString(METADATA_KEY_TITLE);
+                        String artist = mediaMetadata.getString(METADATA_KEY_ARTIST);
+                        String id = mediaMetadata.getString(METADATA_KEY_MEDIA_ID);
+                        if (hasView()) {
+                            getView().mTitle.setText(track);
+                            getView().mSubTitle.setText(artist);
+                            getView().getAdapter().setActiveItem(id);
+                        }
+                    }
+                }
+        );
+        Subscription s1 = playbackController.subscribePlayStateChanges(
+                new Action1<PlaybackStateCompat>() {
+                    @Override
+                    public void call(PlaybackStateCompat playbackState) {
+                        if (hasView()) {
+                            getView().getAdapter().setPlaying(MainPresenter.isPlaying(playbackState));
+                        }
+                    }
+                }
+        );
+        Subscription s2 = playbackController.subscribeQueueChanges(
+                new Action1<List<MediaSessionCompat.QueueItem>>() {
+                    @Override
+                    public void call(List<MediaSessionCompat.QueueItem> queueItems) {
+                        if (hasView()) {
+                            getView().getAdapter().replaceAll(queueItems);
+                        }
+                    }
+                }
+        );
+        broadcastSubscriptions = new CompositeSubscription(s, s1, s2);
+    }
+
+    void unsubscribeBroadcasts() {
+        if (isSubscribed(broadcastSubscriptions)) {
+            broadcastSubscriptions.unsubscribe();
+            broadcastSubscriptions = null;
+        }
+    }
+
 }

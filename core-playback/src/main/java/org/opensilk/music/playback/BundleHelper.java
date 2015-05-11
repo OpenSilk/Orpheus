@@ -19,7 +19,6 @@ package org.opensilk.music.playback;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
@@ -36,6 +35,7 @@ public class BundleHelper {
     public static final String STRING_ARG = "stringarg";
     public static final String LONG_ARG = "longarg";
     public static final String LONG_ARG2 = "longarg2";
+    public static final String PARCELABLE_ARG = "parcelablearg";
 
     public static int getInt(Bundle b) {
         return b.getInt(INT_ARG);
@@ -65,6 +65,11 @@ public class BundleHelper {
 
     public static long getLong2(Bundle b) {
         return b.getInt(LONG_ARG2);
+    }
+
+    public static <T extends Parcelable> T getParcelable(Bundle b) {
+        b.setClassLoader(BundleHelper.class.getClassLoader());
+        return b.<T>getParcelable(PARCELABLE_ARG);
     }
 
     public static BundleHelper.Builder builder() {
@@ -113,6 +118,11 @@ public class BundleHelper {
 
         public Builder putLong2(long val) {
             b.putLong(LONG_ARG2, val);
+            return this;
+        }
+
+        public Builder putParcleable(Parcelable p) {
+            b.putParcelable(PARCELABLE_ARG, p);
             return this;
         }
 

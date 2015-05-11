@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import org.opensilk.common.core.dagger2.ForApplication;
@@ -45,6 +46,7 @@ import org.opensilk.music.playback.service.IPlaybackService;
 import org.opensilk.music.playback.service.PlaybackService;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -277,6 +279,12 @@ public class PlaybackController {
         return mMetaSubject.asObservable().subscribe(onNext);
     }
 
+    final BehaviorSubject<List<MediaSessionCompat.QueueItem>> mQueueSubject = BehaviorSubject.create();
+
+    public Subscription subscribeQueueChanges(Action1<List<MediaSessionCompat.QueueItem>> onNext) {
+        return mQueueSubject.asObservable().subscribe(onNext);
+    }
+
     /*
      * end subscriptions
      */
@@ -304,7 +312,11 @@ public class PlaybackController {
 
         @Override
         public void onQueueChanged(List<MediaSession.QueueItem> queue) {
-            super.onQueueChanged(queue);
+            List<MediaSessionCompat.QueueItem> list = new ArrayList<>(queue.size());
+            for (MediaSession.QueueItem item : queue) {
+                list.add(MediaSessionCompat.QueueItem.obtain(item));
+            }
+            mQueueSubject.onNext(list);
         }
 
         @Override
@@ -385,6 +397,15 @@ public class PlaybackController {
                         @Override
                         public void run() {
                             mCallback.onMetadataChanged(meta);
+                        }
+                    });
+                }
+                final List<MediaSession.QueueItem> queue = mMediaController.getQueue();
+                if (queue != null) {
+                    mCallbackHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mCallback.onQueueChanged(queue);
                         }
                     });
                 }

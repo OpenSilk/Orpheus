@@ -39,7 +39,6 @@ public class PlaybackStateHelper {
     private long mActions;
     private CharSequence mErrorMessage;
     private long mUpdateTime;
-    private Bundle mExtras;
     private long mQueuePos;
 
     public static final float PLAYBACK_SPEED = 1.0f;
@@ -60,7 +59,6 @@ public class PlaybackStateHelper {
                 | ACTION_SKIP_TO_QUEUE_ITEM;
         mErrorMessage = "";
         mUpdateTime = 0;
-        mExtras = new Bundle();
         mQueuePos = -1;
     }
 

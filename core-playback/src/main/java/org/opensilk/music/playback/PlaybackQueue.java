@@ -17,6 +17,7 @@
 
 package org.opensilk.music.playback;
 
+import android.media.session.MediaSession.QueueItem;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -24,9 +25,9 @@ import android.os.Handler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import hugo.weaving.DebugLog;
 
@@ -36,7 +37,9 @@ import hugo.weaving.DebugLog;
 public class PlaybackQueue {
 
     final PlaybackPreferences mSettings;
+    final MediaMetadataHelper mMetaHelper;
     final List<Uri> mQueue = new ArrayList<>();
+    List<QueueItem> mQueueMeta;
 
     int mCurrentPos = -1;
     QueueChangeListener mListener;
@@ -44,9 +47,11 @@ public class PlaybackQueue {
 
     @Inject
     public PlaybackQueue(
-            PlaybackPreferences mSettings
+            PlaybackPreferences mSettings,
+            MediaMetadataHelper mMetaHelper
     ) {
         this.mSettings = mSettings;
+        this.mMetaHelper = mMetaHelper;
     }
 
     @DebugLog
@@ -59,6 +64,7 @@ public class PlaybackQueue {
         } else if (mCurrentPos >= mQueue.size()) {
             mCurrentPos = 0; //just start over
         }
+        updateQueueMeta();
     }
 
     public void save() {
@@ -219,7 +225,9 @@ public class PlaybackQueue {
     }
 
     public int getNextPos() {
-        if (mCurrentPos + 1 >= mQueue.size()) {
+        if (mRepeatCurrent) {
+            return mCurrentPos;
+        } else if (mCurrentPos + 1 >= mQueue.size()) {
             return 0;
         } else {
             return mCurrentPos + 1;
@@ -227,14 +235,21 @@ public class PlaybackQueue {
     }
 
     public int getPrevious() {
-        if (mCurrentPos - 1 < 0) {
+        if (mRepeatCurrent) {
+            return mCurrentPos;
+        } else if (mCurrentPos - 1 < 0) {
             return mQueue.size() - 1;
+        } else {
+            return mCurrentPos - 1;
         }
-        return mCurrentPos - 1;
     }
 
     public int getCurrentPos() {
         return mCurrentPos;
+    }
+
+    public List<Uri> get() {
+        return new ArrayList<>(mQueue);
     }
 
     public void shuffle() {
@@ -267,11 +282,71 @@ public class PlaybackQueue {
         return mQueue.get(getNextPos());
     }
 
+    boolean mRepeatCurrent;
+
+    public void toggleRepeat() {
+        mRepeatCurrent = !mRepeatCurrent;
+        //TODO notify
+    }
+
     int clamp(int pos) {
         return (pos < 0) ? 0 : (pos >= mQueue.size()) ? (mQueue.size() - 1) : pos;
     }
 
+    public List<QueueItem> getQueueItems() {
+        if (mQueueMeta == null) {
+            return Collections.emptyList();
+        } else {
+            return new ArrayList<>(mQueueMeta);
+        }
+    }
+
+    void updateQueueMeta() {
+        List<QueueItem> qm;
+        if (mQueueMeta == null) {
+            qm = new ArrayList<>(mQueue.size());
+        } else if (mQueue.size() < mQueueMeta.size()) {
+            qm = mQueueMeta.subList(0, mQueue.size() - 1);
+        } else {
+            qm = new ArrayList<>(mQueueMeta);
+        }
+        ListIterator<Uri> qi = mQueue.listIterator();
+        ListIterator<QueueItem> qmi = qm.listIterator();
+        boolean endofsame = false;
+        while (qi.hasNext() && qmi.hasNext()) {
+            final Uri uri = qi.next();
+            final QueueItem item = qmi.next();
+            if (uri.toString().equals(item.getDescription().getMediaId())) {
+                if (endofsame) {
+                    qmi.set(new QueueItem(item.getDescription(), qi.previousIndex()));
+                }
+            } else {
+                if (!endofsame) {
+                    endofsame = true;
+                }
+                boolean found = false;
+                if (mQueueMeta != null) {
+                    for (QueueItem item2 : mQueueMeta) {
+                        if (uri.toString().equals(item2.getDescription().getMediaId())) {
+                            found = true;
+                            qmi.set(new QueueItem(item2.getDescription(), qi.previousIndex()));
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    qmi.set(mMetaHelper.buildQueueItem(uri, qi.previousIndex()));
+                }
+            }
+        }
+        while (qi.hasNext()) {
+            qmi.add(mMetaHelper.buildQueueItem(qi.next(), qi.previousIndex()));
+        }
+        mQueueMeta = qm;
+    }
+
     void notifyCurrentPosChanged() {
+        updateQueueMeta();
         if (mListener != null) {
             if (mCallbackHandler != null) {
                 final QueueChangeListener l = mListener;
@@ -288,6 +363,7 @@ public class PlaybackQueue {
     }
 
     void notifyQueueChanged() {
+        updateQueueMeta();
         if (mListener != null) {
             if (mCallbackHandler != null) {
                 final QueueChangeListener l = mListener;

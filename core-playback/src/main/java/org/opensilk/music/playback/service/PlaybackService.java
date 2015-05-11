@@ -25,6 +25,8 @@ import android.media.Rating;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.*;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.provider.LibraryUris;
@@ -57,6 +59,7 @@ import org.opensilk.music.playback.player.PlayerStatus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 import hugo.weaving.DebugLog;
 import rx.Observable;
@@ -87,6 +90,7 @@ public class PlaybackService extends Service {
     private int mAudioSessionId;
     private Handler mHandler;
     private IPlayer mPlayer;
+    private List<MediaSessionCompat.QueueItem> mQueueMeta = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -104,6 +108,8 @@ public class PlaybackService extends Service {
         mAudioManagerHelper.setChangeListener(mAudioFocusChangeListener, mHandler);
         mQueue.setListener(mQueueChangeListener, mHandler);
         mMediaSession.setCallback(mMediaSessionCallback, mHandler);
+        mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
+
         mMediaMetaHelper.setMediaSession(mMediaSession, mHandler);
 
         mAudioSessionId = mAudioManagerHelper.getAudioSessionId();
@@ -150,7 +156,7 @@ public class PlaybackService extends Service {
     }
 
     private void updateMeta() {
-        mMediaMetaHelper.updateMeta(mPlaybackStatus.getCurrentTrack());
+        mMediaMetaHelper.updateMeta(mPlaybackStatus.getCurrentTrack(), mPlaybackStatus.getCurrentUri());
         updateNotification();
         mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
     }
@@ -164,6 +170,8 @@ public class PlaybackService extends Service {
         mNotificationHelper.updatePlayState(mPlaybackStateHelper.isActive());
         mMediaSession.setPlaybackState(mPlaybackStateHelper.getState());
     }
+
+
 
     public MediaSession getMediaSession() {
         return mMediaSession;
@@ -311,7 +319,7 @@ public class PlaybackService extends Service {
             if (action == null) return;
             switch (action) {
                 case CMD.CYCLE_REPEAT: {
-                    //TODO
+                    mQueue.toggleRepeat();
                     break;
                 }
                 case CMD.ENQUEUE: {
@@ -337,6 +345,8 @@ public class PlaybackService extends Service {
                     break;
                 }
                 case CMD.PLAY_ALL: {
+                    mPlaybackStateHelper.gotoConnecting();
+                    updatePlaybackState();
                     List<Uri> list = BundleHelper.getList(extras);
                     int startpos = BundleHelper.getInt(extras);
                     mQueue.replace(list, startpos);
@@ -344,6 +354,8 @@ public class PlaybackService extends Service {
                     break;
                 }
                 case CMD.PLAY_TRACKS_FROM: {
+                    mPlaybackStateHelper.gotoConnecting();
+                    updatePlaybackState();
                     Uri uri = BundleHelper.getUri(extras);
                     String sort = BundleHelper.getString(extras);
                     int startpos = BundleHelper.getInt(extras);
@@ -354,6 +366,7 @@ public class PlaybackService extends Service {
                 }
                 case CMD.SHUFFLE_QUEUE: {
                     mQueue.shuffle();
+                    mMediaSession.sendSessionEvent(EVENT.QUEUE_SHUFFLED, null);
                     break;
                 }
                 case CMD.REMOVE_QUEUE_ITEM: {
@@ -432,19 +445,22 @@ public class PlaybackService extends Service {
                         Track track = mLibraryHelper.getTrack(uri);
                         if (track == null) {
                             //will callback in here
-                            mPlaybackStatus.setCurrentQueuePos(-2);
+                            mPlaybackStatus.setCurrentQueuePos(-1);
                             mQueue.remove(mQueue.getCurrentPos());
                         } else {
                             if (track.equals(mPlaybackStatus.getCurrentTrack())) {
                                 Timber.w("Current track matches queue");
                             }
                             mPlaybackStatus.setCurrentTrack(track);
+                            mPlaybackStatus.setCurrentUri(uri);
                             mPlaybackStatus.setCurrentQueuePos(mQueue.getCurrentPos());
                             if (mPlaybackStatus.isSupposedToBePlaying()) {
                                 mPlaybackStatus.setPlayWhenReady(true);
                             }
                             mPlaybackStatus.setIsSupposedToBePlaying(false);
+                            mPlaybackStateHelper.gotoConnecting();
                             mPlayer.setDataSource(track.dataUri);
+                            mMediaSession.setQueue(mQueue.getQueueItems());
                             updateMeta();
                         }
                     } else if (mPlaybackStatus.isSupposedToBePlaying()) {
@@ -457,6 +473,7 @@ public class PlaybackService extends Service {
                 public void onQueueChanged() {
                     if (mQueue.notEmpty()) {
                         setNextTrack();
+                        mMediaSession.setQueue(mQueue.getQueueItems());
                     } else if (mPlaybackStatus.isSupposedToBePlaying()) {
                         Timber.e("Got onQueueChanged with empty queue");
                         stopAndResetState();
@@ -481,6 +498,7 @@ public class PlaybackService extends Service {
                         mQueue.remove(mQueue.getNextPos());
                     } else if (!track.equals(mPlaybackStatus.getNextTrack())) {
                         mPlaybackStatus.setNextTrack(track);
+                        mPlaybackStatus.setNextUri(uri);
                         mPlayer.setNextDataSource(track.dataUri);
                     } else {
                         Timber.i("Next track is still up to date");

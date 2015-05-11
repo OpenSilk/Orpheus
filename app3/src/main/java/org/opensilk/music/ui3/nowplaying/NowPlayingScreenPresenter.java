@@ -170,9 +170,9 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
-                        boolean playing = MainPresenter.isActive(playbackState);
+                        boolean playing = MainPresenter.isPlaying(playbackState);
                         if (hasView()) {
-                            getView().play.setChecked(playing);
+                            getView().play.setChecked(MainPresenter.isActive(playbackState));
                             getView().setVisualizerEnabled(playing);
                         }
                         isPlaying = playing;

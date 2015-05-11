@@ -18,12 +18,19 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.music.R;
 
 import javax.inject.Inject;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
  * Created by drew on 5/9/15.
@@ -31,6 +38,11 @@ import javax.inject.Inject;
 public class QueueScreenView extends RelativeLayout {
 
     @Inject QueueScreenPresenter mPresenter;
+    @Inject QueueScreenViewAdapter mAdapter;
+
+    @InjectView(R.id.title) TextView mTitle;
+    @InjectView(R.id.subtitle) TextView mSubTitle;
+    @InjectView(android.R.id.list) RecyclerView mList;
 
     public QueueScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,6 +53,10 @@ public class QueueScreenView extends RelativeLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        ButterKnife.inject(this);
+        mList.setLayoutManager(new LinearLayoutManager(getContext()));
+        mList.setAdapter(mAdapter);
+        mList.setHasFixedSize(true);
         mPresenter.takeView(this);
     }
 
@@ -48,6 +64,10 @@ public class QueueScreenView extends RelativeLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mPresenter.dropView(this);
+    }
+
+    public QueueScreenViewAdapter getAdapter() {
+        return mAdapter;
     }
 
 }

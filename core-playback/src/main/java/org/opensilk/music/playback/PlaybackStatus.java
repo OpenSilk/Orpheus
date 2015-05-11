@@ -17,6 +17,8 @@
 
 package org.opensilk.music.playback;
 
+import android.net.Uri;
+
 import org.opensilk.music.model.Track;
 import org.opensilk.music.playback.player.PlayerStatus;
 
@@ -26,18 +28,14 @@ import javax.inject.Inject;
  * Created by drew on 5/7/15.
  */
 public class PlaybackStatus {
-    //last known seek position
-    long currentSeekPos = -1;
-    //last know duration
-    long currentDuration = -1;
     //last known queu position
     int currentQueuePos = -1;
-    //
-    boolean repeatOn;
     //currently playing track
     Track currentTrack;
+    Uri currentUri;
     //next track to load
     Track nextTrack;
+    Uri nextUri;
     //trou if we should be playing
     boolean supposedToBePlaying;
     //trou if we should start playing again when we regain audio focus
@@ -53,8 +51,6 @@ public class PlaybackStatus {
     }
 
     public void reset() {
-        currentSeekPos = -1;
-        currentDuration = -1;
         currentQueuePos = -1;
         currentTrack = null;
         nextTrack = null;
@@ -62,22 +58,6 @@ public class PlaybackStatus {
         pausedByTransientLossOfFocus = false;
         playWhenReady = false;
         playerState = PlayerStatus.NONE;
-    }
-
-    public void setCurrentSeekPos(long currentSeekPos) {
-        this.currentSeekPos = currentSeekPos;
-    }
-
-    public long getCurrentSeekPos() {
-        return currentSeekPos;
-    }
-
-    public void setCurrentDuration(long currentDuration) {
-        this.currentDuration = currentDuration;
-    }
-
-    public long getCurrentDuration() {
-        return currentDuration;
     }
 
     public void setCurrentTrack(Track currentTrack) {
@@ -88,6 +68,14 @@ public class PlaybackStatus {
         return currentTrack;
     }
 
+    public void setCurrentUri(Uri currentUri) {
+        this.currentUri = currentUri;
+    }
+
+    public Uri getCurrentUri() {
+        return currentUri;
+    }
+
     public void setNextTrack(Track nextTrack) {
         this.nextTrack = nextTrack;
     }
@@ -96,9 +84,19 @@ public class PlaybackStatus {
         return nextTrack;
     }
 
+    public void setNextUri(Uri nextUri) {
+        this.nextUri = nextUri;
+    }
+
+    public Uri getNextUri() {
+        return nextUri;
+    }
+
     public void setNextTrackToCurrent() {
         currentTrack = nextTrack;
+        currentUri = nextUri;
         nextTrack = null;
+        nextUri = null;
     }
 
     public int getCurrentQueuePos() {

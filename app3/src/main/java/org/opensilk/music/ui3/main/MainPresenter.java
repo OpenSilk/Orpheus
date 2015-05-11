@@ -220,4 +220,18 @@ public class MainPresenter extends ViewPresenter<MainView> implements PausesAndR
         return false;
     }
 
+    public static boolean isPlaying(PlaybackStateCompat state) {
+        switch (state.getState()) {
+//            case STATE_FAST_FORWARDING:
+//            case STATE_REWINDING:
+//            case STATE_SKIPPING_TO_PREVIOUS:
+//            case STATE_SKIPPING_TO_NEXT:
+//            case STATE_BUFFERING:
+//            case STATE_CONNECTING:
+            case STATE_PLAYING:
+                return true;
+        }
+        return false;
+    }
+
 }

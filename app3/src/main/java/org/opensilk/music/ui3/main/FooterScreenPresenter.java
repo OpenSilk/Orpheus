@@ -228,7 +228,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                             lastPosition = position;
                             lastDuration = duration;
                             lastPosSynced = true;
-                            subscribeProgress(MainPresenter.isActive(playbackState));
+                            subscribeProgress(MainPresenter.isPlaying(playbackState));
                         }
 
                     }

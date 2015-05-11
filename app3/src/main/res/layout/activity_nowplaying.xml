@@ -25,7 +25,10 @@
     android:gravity="bottom"
     app:umanoPanelHeight="?actionBarSize"
     app:umanoShadowHeight="4dp"
-    app:umanoParalaxOffset="100dp">
+    app:umanoParalaxOffset="100dp"
+    app:umanoAnchorPoint="0.3"
+    app:umanoInitialState="anchored"
+    app:umanoDragView="@+id/queue_header">
 
     <fragment
         android:id="@+id/nowplaying_fragment"

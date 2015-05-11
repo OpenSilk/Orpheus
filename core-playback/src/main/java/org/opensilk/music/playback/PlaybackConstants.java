@@ -231,7 +231,7 @@ public interface PlaybackConstants {
     }
 
     interface EVENT {
-        String PROGRESS_UPDATE = "event.progressupdate";
+        String QUEUE_SHUFFLED = "event.queueshuffled";
     }
 
     interface EXTRA {
