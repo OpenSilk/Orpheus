@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 apply plugin: 'com.android.application'
-apply plugin: 'com.jakewharton.hugo'
+apply plugin: 'hugo'
 apply plugin: 'org.robolectric'
 
 // Versioning
@@ -154,8 +154,6 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     //acra
     compile 'ch.acra:acra:4.6.2-SNAPSHOT'
-
-    compile(group: 'com.google.android.exoplayer', name: 'exoplayer', version: 'r1.2.4', ext: 'aar')
 
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
