@@ -32,13 +32,16 @@ public class FoldersScreenFragment extends BundleableFragment {
     public static final String NAME = FoldersScreenFragment.class.getName();
 
     public static FoldersScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
-        Bundle args = makeCommonArgsBundle(config, info);
+        Bundle args = makeCommonArgsBundle(config, info, info.folderName);
         return factory(context, NAME, args);
     }
 
     @Override
     protected Screen newScreen() {
         extractCommonArgs();
+        if (mLibraryInfo.folderId == null) {
+            //TODO get from plugin
+        }
         return new FoldersScreen(mLibraryConfig, mLibraryInfo);
     }
 

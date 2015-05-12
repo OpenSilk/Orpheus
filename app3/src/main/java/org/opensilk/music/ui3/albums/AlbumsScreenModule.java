@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.widget.PopupMenu;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;

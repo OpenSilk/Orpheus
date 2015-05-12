@@ -33,16 +33,15 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class AlbumsProfileScreenFragment extends BundleableFragment {
     public static final String NAME = AlbumsProfileScreenFragment.class.getName();
 
-    public static AlbumsProfileScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info, Album album) {
-        Bundle args = makeCommonArgsBundle(config, info);
-        args.putBundle("album", album.toBundle());
+    public static AlbumsProfileScreenFragment ni(Context context, AlbumsProfileScreen screen) {
+        Bundle args = new Bundle();
+        args.putParcelable("screen", screen);
         return factory(context, NAME, args);
     }
 
     @Override
     protected Screen newScreen() {
-        extractCommonArgs();
-        Album album = Album.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("album"));
-        return new AlbumsProfileScreen(mLibraryConfig, mLibraryInfo, album);
+        getArguments().setClassLoader(getClass().getClassLoader());
+        return getArguments().<AlbumsProfileScreen>getParcelable("screen");
     }
 }

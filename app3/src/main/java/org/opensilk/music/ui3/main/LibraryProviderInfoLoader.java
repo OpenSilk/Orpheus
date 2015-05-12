@@ -101,6 +101,7 @@ public class LibraryProviderInfoLoader {
     }
 
     public Observable<LibraryProviderInfo> makeObservable() {
+        final List<String> disabledPlugins = settings.readDisabledPlugins();
         return Observable.create(new Observable.OnSubscribe<List<ProviderInfo>>() {
             @Override
             public void call(Subscriber<? super List<ProviderInfo>> subscriber) {
@@ -139,7 +140,7 @@ public class LibraryProviderInfoLoader {
                 }
                 final LibraryProviderInfo lpi = new LibraryProviderInfo(title.toString(), description.toString(), authority);
                 lpi.icon = icon;
-                for (String a : settings.readDisabledPlugins()) {
+                for (String a : disabledPlugins) {
                     if (a.equals(lpi.authority)) {
                         lpi.isActive = false;
                         break;

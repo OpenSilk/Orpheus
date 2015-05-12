@@ -19,8 +19,8 @@ package org.opensilk.music.ui3.main;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.DrawerOwner;
@@ -33,6 +33,7 @@ import org.opensilk.music.ui3.library.LandingScreenFragment;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import mortar.ViewPresenter;
@@ -52,6 +53,7 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
     final AppPreferences settings;
     final FragmentManagerOwner fm;
     final DrawerOwner drawerOwner;
+    final String mediaStoreAuthority;
 
     LibraryProviderInfo currentSelection;
 
@@ -61,21 +63,20 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
             LibraryProviderInfoLoader loader,
             AppPreferences settings,
             FragmentManagerOwner fm,
-            DrawerOwner drawerOwner
+            DrawerOwner drawerOwner,
+            @Named("mediaStoreLibraryAuthority") String mediaStoreAuthority
     ) {
         this.appContext = context;
         this.loader = loader;
         this.settings = settings;
         this.fm = fm;
         this.drawerOwner = drawerOwner;
+        this.mediaStoreAuthority = mediaStoreAuthority;
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        if (savedInstanceState != null) {
-            currentSelection = savedInstanceState.getParcelable("lastselection");
-        }
         //Note this happens synchronously
         loader.getActivePlugins().subscribe(new Action1<List<LibraryProviderInfo>>() {
             @Override
@@ -90,25 +91,48 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
                 Timber.e(throwable, "onLoad");
             }
         });
-        if (currentSelection != null) {
+        if (savedInstanceState != null) {
+            currentSelection = savedInstanceState.getParcelable("lastselection");
+        } else {
+            String lastAuthority = settings.getString(AppPreferences.LAST_PLUGIN_AUTHORITY, null);
+            if (lastAuthority == null) {
+                lastAuthority = mediaStoreAuthority;
+            }
+            for (LibraryProviderInfo info : getView().getAdapter().getItems()) {
+                if (StringUtils.equals(info.authority, lastAuthority)) {
+                    currentSelection = info;
+                    break;
+                }
+            }
+            if (currentSelection != null) {
+                goToCurrent();
+            }
         }
     }
 
     @Override
     protected void onSave(Bundle outState) {
         super.onSave(outState);
-        outState.putParcelable("lastselection", currentSelection);
+        if (currentSelection != null) {
+            outState.putParcelable("lastselection", currentSelection);
+            settings.putString(AppPreferences.LAST_PLUGIN_AUTHORITY, currentSelection.authority);
+        }
     }
 
     @DebugLog
     void onItemClick(LibraryProviderInfo item) {
-        Bundle config = appContext.getContentResolver().call(LibraryUris.call(item.authority), LIBRARYCONF, null, null);
+        currentSelection = item;
+        goToCurrent();
+    }
+
+    void goToCurrent() {
+        Bundle config = appContext.getContentResolver().call(
+                LibraryUris.call(currentSelection.authority), LIBRARYCONF, null, null);
         if (config == null) {
             Timber.e("Got null config");
             //TODO toast
             return;
         }
-        currentSelection = item;
         fm.killBackStack();
         fm.replaceMainContent(LandingScreenFragment.ni(config), false);
         drawerOwner.closeDrawer();

@@ -30,9 +30,11 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.theme.OrpheusTheme;
+import org.opensilk.music.ui3.gallery.GalleryPage;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -57,8 +59,8 @@ public class AppPreferences extends PreferencesWrapper {
 
     //Gallery pages
     public static final int DEFAULT_PAGE = 2;
-    public static final String START_PAGE = "start_page";
-    public static final String HOME_PAGES = "pref_home_pages";
+    public static final String GALLERY_START_PAGE = "gallery_start_page";
+    public static final String GALLERY_HOME_PAGES = "gallery_home_pages";
 
     //Gallery sort orders
     public static final String ALBUM_SORT_ORDER = "album_sort_order";
@@ -134,6 +136,8 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String DISABLED_PLUGINS = "disabled_plugins";
     public static final String DEFAULT_LIBRARY = "default_library";
 
+    public static final String LAST_PLUGIN_AUTHORITY = "last_used_plugin";
+
     private final Context appContext;
     private final SharedPreferences prefs;
     private final Gson gson;
@@ -196,6 +200,8 @@ public class AppPreferences extends PreferencesWrapper {
                     .remove(ALBUM_LAYOUT)
                     .remove(GENRE_LAYOUT)
                     .remove(PLAYLIST_LAYOUT)
+                    .remove("start_page")
+                    .remove("pref_home_pages")
                     .apply();
         }
         if (schema < MY_VERSION) {
@@ -207,27 +213,27 @@ public class AppPreferences extends PreferencesWrapper {
      * Home pages
      */
 
-//    public final void saveGalleryPages(List<GalleryPage> pages) {
-//        try {
-//            Type type = new TypeToken<List<GalleryPage>>() {}.getType();
-//            putString(HOME_PAGES, gson.toJson(pages, type));
-//        } catch (Exception e) {
-//            remove(HOME_PAGES);
-//        }
-//    }
+    public final void saveGalleryPages(List<GalleryPage> pages) {
+        try {
+            Type type = new TypeToken<List<GalleryPage>>() {}.getType();
+            putString(GALLERY_HOME_PAGES, gson.toJson(pages, type));
+        } catch (Exception e) {
+            remove(GALLERY_HOME_PAGES);
+        }
+    }
 
-//    public final List<GalleryPage> getGalleryPages() {
-//        String pgs = getString(HOME_PAGES, null);
-//        if (pgs != null) {
-//            try {
-//                Type type = new TypeToken<List<GalleryPage>>() {}.getType();
-//                return gson.fromJson(pgs, type);
-//            } catch (Exception ignored) {
-//                remove(HOME_PAGES);
-//            }
-//        }
-//        return Arrays.asList(GalleryPage.values());
-//    }
+    public final List<GalleryPage> getGalleryPages() {
+        String pgs = getString(GALLERY_HOME_PAGES, null);
+        if (pgs != null) {
+            try {
+                Type type = new TypeToken<List<GalleryPage>>() {}.getType();
+                return gson.fromJson(pgs, type);
+            } catch (Exception ignored) {
+                remove(GALLERY_HOME_PAGES);
+            }
+        }
+        return Arrays.asList(GalleryPage.values());
+    }
 
     /*
      * Plugins
@@ -279,26 +285,26 @@ public class AppPreferences extends PreferencesWrapper {
         }
     }
 
-    public LibraryInfo getDefaultLibraryInfo(LibraryConfig pluginInfo) {
-        String json = getString(makePluginPrefKey(pluginInfo, DEFAULT_LIBRARY), null);
+    public LibraryInfo getLibraryInfo(LibraryConfig pluginInfo, String pref) {
+        String json = getString(makePluginPrefKey(pluginInfo, pref), null);
         if (json == null) return null;
         try {
             return gson.fromJson(json, LibraryInfo.class);
         } catch (Exception e) {
-            removeDefaultLibraryInfo(pluginInfo);
+            removeLibraryInfo(pluginInfo, pref);
             return null;
         }
     }
 
-    public void setDefaultLibraryInfo(LibraryConfig pluginInfo, LibraryInfo libraryInfo) {
+    public void setLibraryInfo(LibraryConfig pluginInfo, String pref, LibraryInfo libraryInfo) {
         String json = gson.toJson(libraryInfo);
         if (json != null) {
-            putString(makePluginPrefKey(pluginInfo, DEFAULT_LIBRARY), json);
+            putString(makePluginPrefKey(pluginInfo, pref), json);
         }
     }
 
-    public void removeDefaultLibraryInfo(LibraryConfig pluginInfo) {
-        remove(makePluginPrefKey(pluginInfo, DEFAULT_LIBRARY));
+    public void removeLibraryInfo(LibraryConfig pluginInfo, String pref) {
+        remove(makePluginPrefKey(pluginInfo, pref));
     }
 
     public String makePluginPrefKey(LibraryConfig libraryConfig, String key) {

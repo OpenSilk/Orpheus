@@ -183,6 +183,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
         TracksLoader l = mTracksLoaderProvider.get();
         l.setSelection(Selections.LOCAL_ALBUM_SONGS);
         l.setSelectionArgs(SelectionArgs.LOCAL_ALBUM_SONGS(identity));
+        l.setSortOrder(MediaStore.Audio.AudioColumns.TRACK);
         l.createObservable()
                 .doOnNext(new Action1<Track>() {
                     @Override

@@ -27,6 +27,7 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryCapability;
@@ -36,6 +37,7 @@ import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.library.LandingScreenFragment;
 
 import javax.inject.Inject;
 
@@ -50,11 +52,17 @@ public class ActionBarMenuConfigWrapper {
 
     final LibraryConfig libraryConfig;
     final LibraryInfo libraryInfo;
+    final FragmentManagerOwner fm;
 
     @Inject
-    public ActionBarMenuConfigWrapper(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
+    public ActionBarMenuConfigWrapper(
+            LibraryConfig libraryConfig,
+            LibraryInfo libraryInfo,
+            FragmentManagerOwner fm
+    ) {
         this.libraryConfig = libraryConfig;
         this.libraryInfo = libraryInfo;
+        this.fm = fm;
     }
 
     public ActionBarMenuConfig injectCommonItems(ActionBarMenuConfig originalConfig) {
@@ -97,8 +105,9 @@ public class ActionBarMenuConfigWrapper {
                 if (!handled) {
                     switch (integer) {
                         case R.id.menu_change_source:
-                            appPreferences.removeDefaultLibraryInfo(libraryConfig);
-                            //TODO
+                            appPreferences.removeLibraryInfo(libraryConfig, AppPreferences.DEFAULT_LIBRARY);
+                            fm.killBackStack();
+                            fm.replaceMainContent(LandingScreenFragment.ni(libraryConfig), false);
                             handled = true;
                             break;
                         case R.id.menu_library_settings:

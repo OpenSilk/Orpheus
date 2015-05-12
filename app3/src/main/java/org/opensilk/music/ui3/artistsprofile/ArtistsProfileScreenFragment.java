@@ -34,15 +34,14 @@ public class ArtistsProfileScreenFragment extends BundleableFragment {
     public static final String NAME = ArtistsProfileScreenFragment.class.getName();
 
     public static ArtistsProfileScreenFragment ni(Context context, ArtistsProfileScreen screen) {
-        Bundle args = makeCommonArgsBundle(screen.libraryConfig, screen.libraryInfo);
-        args.putBundle("artist", screen.artist.toBundle());
+        Bundle args = new Bundle();
+        args.putParcelable("screen", screen);
         return factory(context, NAME, args);
     }
 
     @Override
     protected Screen newScreen() {
-        extractCommonArgs();
-        Artist artist = Artist.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("artist"));
-        return new ArtistsProfileScreen(mLibraryConfig, mLibraryInfo, artist);
+        getArguments().setClassLoader(getClass().getClassLoader());
+        return getArguments().<ArtistsProfileScreen>getParcelable("screen");
     }
 }

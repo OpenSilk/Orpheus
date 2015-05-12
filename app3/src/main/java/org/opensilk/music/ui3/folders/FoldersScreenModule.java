@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.folders;
 import android.content.Context;
 import android.net.Uri;
 
+import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
@@ -88,7 +89,6 @@ public class FoldersScreenModule {
             OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
-
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)

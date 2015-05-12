@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.Screen;
+import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.common.BundleableFragment;
@@ -32,7 +33,7 @@ public class PlaylistsScreenFragment extends BundleableFragment {
     public static final String NAME = PlaylistsScreenFragment.class.getName();
 
     public static PlaylistsScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
-        Bundle args = makeCommonArgsBundle(config, info);
+        Bundle args = makeCommonArgsBundle(config, info, context.getString(R.string.page_playlists));
         return factory(context, NAME, args);
     }
 

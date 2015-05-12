@@ -26,6 +26,8 @@ import javax.inject.Named;
 import dagger.Module;
 import dagger.Provides;
 
+import static org.opensilk.music.library.provider.LibraryProvider.AUTHORITY_PFX;
+
 /**
  * Created by drew on 5/5/15.
  */
@@ -34,5 +36,9 @@ public class MediaStoreLibraryAuthorityModule {
     @Provides @Named("mediaStoreLibraryBaseAuthority")
     public String provideMediaStoreLibraryBaseAuthority(@ForApplication Context context) {
         return context.getPackageName() + ".provider.mediaStoreLibrary";
+    }
+    @Provides @Named("mediaStoreLibraryAuthority")
+    public String provideMediaStoreLibraryAuthority(@Named("mediaStoreLibraryBaseAuthority") String baseAuthority) {
+        return AUTHORITY_PFX + baseAuthority;
     }
 }

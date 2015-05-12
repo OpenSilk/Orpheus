@@ -38,15 +38,17 @@ public abstract class BundleableFragment extends MortarFragment {
 
     protected LibraryConfig mLibraryConfig;
     protected LibraryInfo mLibraryInfo;
+    protected String mTitle;
 
-    protected static Bundle makeCommonArgsBundle(LibraryConfig config, LibraryInfo info) {
-        return makeCommonArgsBundle(config.dematerialize(), info);
+    protected static Bundle makeCommonArgsBundle(LibraryConfig config, LibraryInfo info, String title) {
+        return makeCommonArgsBundle(config.dematerialize(), info, title);
     }
 
-    protected static Bundle makeCommonArgsBundle(Bundle config, LibraryInfo info) {
+    protected static Bundle makeCommonArgsBundle(Bundle config, LibraryInfo info, String title) {
         Bundle b = new Bundle();
         b.putBundle("config", config);
         b.putParcelable("info", info);
+        b.putString("title", title);
         return b;
     }
 
@@ -66,10 +68,13 @@ public abstract class BundleableFragment extends MortarFragment {
     }
 
     protected void setupActionBar() {
+        mTitle = getArguments().getString("title");
         MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
         ActionBarOwner actionBarOwner = component.actionBarOwner();
         BundleableComponent component1 = DaggerService.getDaggerComponent(getScope());
         BundleablePresenter presenter = component1.presenter();
-        actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon().setMenuConfig(presenter.getMenuConfig()).build());
+        actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon()
+                .setTitle(mTitle)
+                .setMenuConfig(presenter.getMenuConfig()).build());
     }
 }

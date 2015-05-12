@@ -101,17 +101,21 @@ public class LandingScreenViewAdapter extends
     }
 
     public static class ViewItem {
-        public static final ViewItem ALBUMS = new ViewItem("Albums");
-        public static final ViewItem ARTISTS = new ViewItem("Artists");
-        public static final ViewItem FOLDERS = new ViewItem("Folders");
-        public static final ViewItem GENRES = new ViewItem("Genres");
-        public static final ViewItem PLAYLISTS = new ViewItem("Playlists");
-        public static final ViewItem TRACKS = new ViewItem("Tracks");
-        public static final ViewItem GALLERY = new ViewItem("Gallery");
-        final String text;
 
-        public ViewItem(String text) {
+        public static final ViewItem ALBUMS = new ViewItem("Albums", 1);
+        public static final ViewItem ARTISTS = new ViewItem("Artists", 2);
+        public static final ViewItem FOLDERS = new ViewItem("Folders", 3);
+        public static final ViewItem GALLERY = new ViewItem("Gallery", 4);
+        public static final ViewItem GENRES = new ViewItem("Genres", 5);
+        public static final ViewItem PLAYLISTS = new ViewItem("Playlists", 6);
+        public static final ViewItem TRACKS = new ViewItem("Tracks", 7);
+
+        final String text;
+        final int val;
+
+        public ViewItem(String text, int val) {
             this.text = text;
+            this.val = val;
         }
     }
 

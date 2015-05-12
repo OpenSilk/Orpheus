@@ -40,7 +40,7 @@ public class GalleryScreenFragment extends BundleableFragment {
             LibraryInfo libraryInfo,
             List<GalleryPage> pages
     ) {
-        Bundle args = makeCommonArgsBundle(config, libraryInfo);
+        Bundle args = makeCommonArgsBundle(config, libraryInfo, null);
         String[] v = new String[pages.size()];
         for (int ii=0; ii<pages.size(); ii++) {
             v[ii] = pages.get(ii).toString();

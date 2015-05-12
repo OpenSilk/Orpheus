@@ -23,7 +23,6 @@ import android.os.Bundle;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.ActionBarOwner;
-import org.opensilk.common.ui.mortar.ActionBarOwnerActivity;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
@@ -31,9 +30,7 @@ import javax.inject.Inject;
 
 import mortar.MortarScope;
 import mortar.ViewPresenter;
-import rx.functions.Func1;
 import rx.functions.Func2;
-import timber.log.Timber;
 
 /**
  * Created by drew on 4/20/15.
@@ -59,36 +56,24 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
     }
 
     @Override
-    protected void onEnterScope(MortarScope scope) {
-//            Timber.v("onEnterScope()");
-        super.onEnterScope(scope);
-    }
-
-    @Override
-    protected void onExitScope() {
-//            Timber.v("onExitScope()");
-        super.onExitScope();
-    }
-
-    @Override
     protected void onLoad(Bundle savedInstanceState) {
-//            Timber.v("onLoad(%s)", savedInstanceState);
         super.onLoad(savedInstanceState);
         // init acitonbar
         updateActionBarWithChildMenuConfig(null);
         // init pager
 //        List<GalleryPage> galleryPages = preferences.getGalleryPages();
-//        int startPage = preferences.getInt(AppPreferences.START_PAGE, AppPreferences.DEFAULT_PAGE);
-//        getView().setup(galleryPages, startPage);
-        getView().setup(screen.pages, 0);
+        int startPage = preferences.getInt(preferences.makePluginPrefKey(
+                screen.libraryConfig, AppPreferences.GALLERY_START_PAGE), AppPreferences.DEFAULT_PAGE);
+        getView().setup(screen.pages, startPage);
     }
 
     @Override
     protected void onSave(Bundle outState) {
-//            Timber.v("onSave(%s)", outState);
         super.onSave(outState);
-        if (getView() != null) {
-//            preferences.putInt(AppPreferences.START_PAGE, getView().mViewPager.getCurrentItem());
+        if (hasView()) {
+            int pos = getView().mViewPager.getCurrentItem();
+            preferences.putInt(preferences.makePluginPrefKey(
+                    screen.libraryConfig, AppPreferences.GALLERY_START_PAGE), pos);
         }
     }
 

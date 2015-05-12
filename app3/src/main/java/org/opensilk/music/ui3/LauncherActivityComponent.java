@@ -23,6 +23,8 @@ import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 import org.opensilk.music.AppComponent;
 
+import javax.inject.Named;
+
 import dagger.Component;
 import rx.functions.Func1;
 
@@ -49,4 +51,5 @@ public interface LauncherActivityComponent extends MusicActivityComponent {
             };
     void inject(LauncherActivity activity);
     DrawerOwner drawerOwner();
+    @Named("mediaStoreLibraryAuthority") String mediaStoreLibraryAuthority();
 }

@@ -58,7 +58,7 @@ public class AlbumsProfileScreen extends BundleableScreen implements ProfileScre
 
     @Override
     public MortarFragment getFragment(Context context) {
-        return AlbumsProfileScreenFragment.ni(context, libraryConfig, libraryInfo, album);
+        return AlbumsProfileScreenFragment.ni(context, this);
     }
 
     @Override

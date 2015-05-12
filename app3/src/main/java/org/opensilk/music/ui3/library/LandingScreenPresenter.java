@@ -49,6 +49,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import timber.log.Timber;
@@ -66,6 +67,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     final Context appContext;
 
     LibraryInfo currentSelection;
+    int lastval;
 
     @Inject
     public LandingScreenPresenter(
@@ -89,15 +91,18 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     }
 
     @Override
+    @DebugLog
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         if (savedInstanceState != null) {
             currentSelection = savedInstanceState.getParcelable("selection");
+            lastval = savedInstanceState.getInt("lastval");
         }
         if (currentSelection == null) {
-            currentSelection = settings.getDefaultLibraryInfo(screen.libraryConfig);
+            currentSelection = settings.getLibraryInfo(screen.libraryConfig, AppPreferences.DEFAULT_LIBRARY);
         }
         if (currentSelection == null) {
+            lastval = 0;
             Intent i = new Intent().setComponent(screen.libraryConfig.pickerComponent);
             activityResultsController.startActivityForResult(i, ActivityRequestCodes.LIBRARY_PICKER, null);
         } else {
@@ -109,6 +114,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     protected void onSave(Bundle outState) {
         super.onSave(outState);
         outState.putParcelable("selection", currentSelection);
+        outState.putInt("lastval", lastval);
     }
 
     void createCategories() {
@@ -136,6 +142,13 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         }
         if (items.size() == 1) {
             openScreen(items.get(0), false);
+//        } else if (lastval > 0) {
+//            for (ViewItem item : items) {
+//                if (item.val == lastval) {
+//                    openScreen(item, true);
+//                    break;
+//                }
+//            }
         } else if (hasView()) {
             getView().getAdapter().replaceAll(items);
             getView().setListShown(true, true);
@@ -162,7 +175,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
                         Timber.w("Please stop setting folderId and folderName in the returned LibraryInfo");
                         currentSelection = currentSelection.buildUpon(null, null);
                     }
-                    settings.setDefaultLibraryInfo(screen.libraryConfig, currentSelection);
+                    settings.setLibraryInfo(screen.libraryConfig, AppPreferences.DEFAULT_LIBRARY, currentSelection);
                     createCategories();
                 } else {
                     Timber.e("Activity returned bad result");
@@ -179,19 +192,20 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     }
 
     void openScreen(ViewItem item, boolean bs) {
-        if (item == ViewItem.FOLDERS) {
+        lastval = item.val;
+        if (item.val == ViewItem.FOLDERS.val) {
             openFolders(bs);
-        } else if (item == ViewItem.ALBUMS) {
+        } else if (item.val == ViewItem.ALBUMS.val) {
             openAlbums(bs);
-        } else if (item == ViewItem.ARTISTS) {
+        } else if (item.val == ViewItem.ARTISTS.val) {
             openArtists(bs);
-        } else if (item == ViewItem.GENRES) {
+        } else if (item.val == ViewItem.GENRES.val) {
             openGenres(bs);
-        } else if (item == ViewItem.PLAYLISTS) {
+        } else if (item.val == ViewItem.PLAYLISTS.val) {
             openPlaylists(bs);
-        } else if (item == ViewItem.TRACKS) {
+        } else if (item.val == ViewItem.TRACKS.val) {
             openTracks(bs);
-        } else if (item == ViewItem.GALLERY) {
+        } else if (item.val == ViewItem.GALLERY.val) {
             openGallery(bs);
         }
     }
