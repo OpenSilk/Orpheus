@@ -103,7 +103,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
                 .build());
     }
 
-    static class DelegateActionHandler implements Func2<Context, Integer, Boolean> {
+    class DelegateActionHandler implements Func2<Context, Integer, Boolean> {
 
         Func2<Context, Integer, Boolean> delegate;
 
@@ -115,7 +115,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
         public Boolean call(Context context, Integer integer) {
             switch (integer) {
                 default:
-                    return delegate != null && delegate.call(context, integer);
+                    return delegate != null && hasView() && delegate.call(getView().getContext(), integer);
             }
         }
     }
