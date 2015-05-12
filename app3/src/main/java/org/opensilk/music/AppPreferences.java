@@ -73,7 +73,7 @@ public class AppPreferences extends PreferencesWrapper {
     //profile sort orders
     public static final String ALBUM_TRACK_SORT_ORDER = "album_track_sort_order";
     public static final String ARTIST_ALBUM_SORT_ORDER = "artist_album_sort_order";
-    public static final String ARTIST_TRACK_SORT_ORDER = "argtist_track_sort_order";
+    public static final String ARTIST_TRACK_SORT_ORDER = "artist_track_sort_order";
     public static final String GENRE_ALBUM_SORT_ORDER = "genre_album_sort_order";
     public static final String GENRE_TRACK_SORT_ORDER = "genre_track_sort_order";
 

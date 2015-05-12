@@ -44,6 +44,7 @@ import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.artwork.ArtworkType;
+import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.widgets.GridTileDescription;
 
@@ -103,6 +104,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             bindPlaylist(viewHolder, (Playlist)b);
         } else if (b instanceof Track) {
             bindTrack(viewHolder, (Track) b);
+        } else if (b instanceof TrackCollection) {
+            bindTrackCollection(viewHolder, (TrackCollection) b);
         } else {
             Timber.e("Somehow an invalid Bundleable slipped through.");
         }
@@ -170,7 +173,7 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         String l2 = UtilsCommon.makeLabel(context, R.plurals.Nalbums, genre.albumUris.size())
                 + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, genre.trackUris.size());
         holder.subtitle.setText(l2);
-        if (gridStyle && (genre.albumUris.size() > 0 || genre.artInfos.size() > 0)) {
+        if (gridStyle && genre.artInfos.size() > 0) {
             loadMultiArtwork(holder, genre.artInfos);
         } else {
             setLetterTileDrawable(holder, genre.name);
@@ -201,6 +204,19 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
         } else {
             holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
                     null, artInfo, ArtworkType.THUMBNAIL));
+        }
+    }
+
+    void bindTrackCollection(ViewHolder holder, TrackCollection collection) {
+        holder.title.setText(collection.name);
+        Context context = holder.itemView.getContext();
+        String l2 = UtilsCommon.makeLabel(context, R.plurals.Nalbums, collection.albumCount)
+                + ", " + UtilsCommon.makeLabel(context, R.plurals.Nsongs, collection.trackCount);
+        holder.subtitle.setText(l2);
+        if (gridStyle && collection.artInfos.size() > 0) {
+            loadMultiArtwork(holder, collection.artInfos);
+        } else {
+            setLetterTileDrawable(holder, collection.name);
         }
     }
 
@@ -250,6 +266,8 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
             return g.artInfos.size() > 1 || g.albumUris.size() > 1;
         } else if (item instanceof Playlist) {
             return ((Playlist) item).artInfos.size() > 1;
+        } else if (item instanceof TrackCollection) {
+            return ((TrackCollection) item).artInfos.size() > 1;
         } else {
             return false;
         }

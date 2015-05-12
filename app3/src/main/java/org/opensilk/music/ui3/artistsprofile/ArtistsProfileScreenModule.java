@@ -35,6 +35,8 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.AlbumSortOrder;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Track;
+import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.ProfileActivity;
 import org.opensilk.music.ui3.albums.AlbumsOverflowHandler;
@@ -49,6 +51,8 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.tracksprofile.TrackCollectionOverflowHandler;
+import org.opensilk.music.ui3.tracksprofile.TracksProfileScreen;
 
 import java.util.Collections;
 import java.util.List;
@@ -93,6 +97,11 @@ public class ArtistsProfileScreenModule {
                 AppPreferences.ARTIST_ALBUM_SORT_ORDER), AlbumSortOrder.A_Z);
     }
 
+    @Provides @Named("trackcollection_sortorderpref")
+    public String provideTrackCollectionSortOrderPref() {
+        return AppPreferences.ARTIST_TRACK_SORT_ORDER;
+    }
+
     @Provides @Named("profile_heros")
     public Boolean provideWantMultiHeros() {
         return false;
@@ -123,6 +132,7 @@ public class ArtistsProfileScreenModule {
 
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
+            @ForApplication Context context,
             AppPreferences preferences,
             ItemClickListener itemClickListener,
             OverflowClickListener overflowClickListener,
@@ -130,11 +140,20 @@ public class ArtistsProfileScreenModule {
     ) {
         boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
                 AppPreferences.ALBUM_LAYOUT), AppPreferences.GRID);
+        TrackCollection allTracks = TrackCollection.builder()
+                .setName(context.getString(R.string.title_all_songs))
+                .setTracksUri(LibraryUris.artistTracks(screen.libraryConfig.authority,
+                        screen.libraryInfo.libraryId, screen.artist.identity))
+                .setTrackCount(screen.artist.trackCount)
+                .setAlbumCount(screen.artist.albumCount)
+                .addArtInfo(ArtInfo.forArtist(screen.artist.name, null))
+                .build();
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(grid)
                 .setItemClickListener(itemClickListener)
                 .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
+                .addLoaderSeed(allTracks)
                 .build();
     }
 
@@ -146,6 +165,10 @@ public class ArtistsProfileScreenModule {
                 if (item instanceof Album) {
                     ProfileActivity.startSelf(context, new AlbumsProfileScreen(screen.libraryConfig,
                             screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Album) item));
+                } else if (item instanceof TrackCollection) {
+                    ProfileActivity.startSelf(context, new TracksProfileScreen(screen.libraryConfig,
+                            screen.libraryInfo.buildUpon(null, null), (TrackCollection) item,
+                            AppPreferences.ARTIST_TRACK_SORT_ORDER));
                 }
             }
         };
@@ -153,13 +176,16 @@ public class ArtistsProfileScreenModule {
 
     @Provides @ScreenScope
     public OverflowClickListener provideOverflowClickListener(
-            final AlbumsOverflowHandler albumsOverflowHandler
+            final AlbumsOverflowHandler albumsOverflowHandler,
+            final TrackCollectionOverflowHandler trackCollectionOverflowHandler
     ) {
         return new OverflowClickListener() {
             @Override
             public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
                 if (item instanceof Album) {
                     albumsOverflowHandler.onBuildMenu(context, m, item);
+                } else if (item instanceof TrackCollection) {
+                    trackCollectionOverflowHandler.onBuildMenu(context, m, item);
                 }
             }
 
@@ -167,6 +193,8 @@ public class ArtistsProfileScreenModule {
             public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
                 if (item instanceof Album) {
                     return albumsOverflowHandler.onItemClicked(context, action, item);
+                } else if (item instanceof TrackCollection) {
+                    return trackCollectionOverflowHandler.onItemClicked(context, action, item);
                 } else {
                     return false;
                 }

@@ -37,6 +37,7 @@ import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.model.util.BundleableUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
     protected final ItemClickListener itemClickListener;
     protected final OverflowClickListener overflowClickListener;
     protected final ActionBarMenuConfig menuConfig;
+    protected final List<Bundleable> loaderSeed;
 
     protected Boolean wantGrid;
 
@@ -87,6 +89,7 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
         this.itemClickListener = config.itemClickListener;
         this.overflowClickListener = config.overflowClickListener;
         this.menuConfig = config.menuConfig;
+        this.loaderSeed = config.loaderSeed;
     }
 
     @Override
@@ -172,7 +175,14 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
             @Override
             @DebugLog
             public void onNext(List<Bundleable> bundleables) {
-                addAll(bundleables);
+                if (!loaderSeed.isEmpty()) {
+                    List<Bundleable> toadd = new ArrayList<>(loaderSeed.size() + bundleables.size());
+                    toadd.addAll(loaderSeed);
+                    toadd.addAll(bundleables);
+                    addAll(toadd);
+                } else {
+                    addAll(bundleables);
+                }
             }
 
             @Override

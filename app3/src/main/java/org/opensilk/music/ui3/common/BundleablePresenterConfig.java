@@ -18,6 +18,11 @@
 package org.opensilk.music.ui3.common;
 
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.music.model.spi.Bundleable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by drew on 5/6/15.
@@ -27,17 +32,20 @@ public class BundleablePresenterConfig {
     public final ItemClickListener itemClickListener;
     public final OverflowClickListener overflowClickListener;
     public final ActionBarMenuConfig menuConfig;
+    public final List<Bundleable> loaderSeed;
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
             ItemClickListener itemClickListener,
             OverflowClickListener overflowClickListener,
-            ActionBarMenuConfig menuConfig
+            ActionBarMenuConfig menuConfig,
+            List<Bundleable> loaderSeed
     ) {
         this.wantsGrid = wantsGrid;
         this.itemClickListener = itemClickListener;
         this.overflowClickListener = overflowClickListener;
         this.menuConfig = menuConfig;
+        this.loaderSeed = loaderSeed;
     }
 
     public static Builder builder() {
@@ -49,6 +57,7 @@ public class BundleablePresenterConfig {
         ItemClickListener itemClickListener;
         OverflowClickListener overflowClickListener;
         ActionBarMenuConfig menuConfig;
+        List<Bundleable> loaderSeed = new ArrayList<>();
 
         public Builder setWantsGrid(boolean wantsGrid) {
             this.wantsGrid = wantsGrid;
@@ -70,8 +79,19 @@ public class BundleablePresenterConfig {
             return this;
         }
 
+        public Builder addLoaderSeed(Bundleable bundleable) {
+            loaderSeed.add(bundleable);
+            return this;
+        }
+
+        public Builder addLoaderSeed(Collection<Bundleable> bundleables) {
+            loaderSeed.addAll(bundleables);
+            return this;
+        }
+
+
         public BundleablePresenterConfig build() {
-            return new BundleablePresenterConfig(wantsGrid, itemClickListener, overflowClickListener, menuConfig);
+            return new BundleablePresenterConfig(wantsGrid, itemClickListener, overflowClickListener, menuConfig, loaderSeed);
         }
     }
 }
