@@ -30,6 +30,7 @@ import android.os.*;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.view.KeyEvent;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.provider.LibraryUris;
@@ -154,7 +155,7 @@ public class PlaybackService extends Service {
         if (intent != null) {
             String action = intent.getAction();
             if (Intent.ACTION_MEDIA_BUTTON.equals(action)) {
-                mMediaSession.getController().dispatchMediaButtonEvent(intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT));
+                mMediaSession.getController().dispatchMediaButtonEvent(intent.<KeyEvent>getParcelableExtra(Intent.EXTRA_KEY_EVENT));
             } else {
                 handleIntentCommand(intent);
             }
