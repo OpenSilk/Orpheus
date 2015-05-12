@@ -248,10 +248,10 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     }
 
     boolean isGalleryEligible() {
-        boolean no = screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS);
-        if (no) {
-            return false;
-        }
+//        boolean no = screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS);
+//        if (no) {
+//            return false;
+//        }
         boolean yes = screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS);
         yes |= screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS);
         yes |= screen.libraryConfig.hasAbility(LibraryCapability.GENRES);

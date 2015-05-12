@@ -20,10 +20,9 @@
 
     <application>
 
-        <activity
-            android:name=".ui.FakeStorageActivity"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:process=":ui"/>
+        <activity android:name=".ui.StoragePickerActivity"
+                  android:theme="@style/FoldersThemeTranslucentDark"
+                  android:process=":ui"/>
 
         <provider
             android:authorities="override_me"

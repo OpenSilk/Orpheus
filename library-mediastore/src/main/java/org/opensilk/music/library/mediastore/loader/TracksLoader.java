@@ -54,11 +54,11 @@ public class TracksLoader extends RxCursorLoader<Track> {
     }
 
     @Override
-    protected Track makeFromCursor(Cursor c) {
+    protected Track makeFromCursor(Cursor c) throws Exception {
         // Copy the song Id
         final String id = c.getString(c.getColumnIndexOrThrow(BaseColumns._ID));
         // Copy the song name
-        final String songName = getStringOrEmpty(c, MediaStore.Audio.AudioColumns.TITLE);
+        final String songName = getStringOrNull(c, MediaStore.Audio.AudioColumns.TITLE);
         // Copy the artist name
         final String artist = getStringOrNull(c, MediaStore.Audio.AudioColumns.ARTIST);
         // Copy the album name

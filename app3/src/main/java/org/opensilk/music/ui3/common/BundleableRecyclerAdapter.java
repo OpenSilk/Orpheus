@@ -224,6 +224,11 @@ public class BundleableRecyclerAdapter extends RecyclerListAdapter<Bundleable, B
     }
 
     @Override
+    public long getItemId(int position) {
+        return getItem(position).hashCode();
+    }
+
+    @Override
     public int getItemViewType(int position) {
         if (!gridStyle) {
             return R.layout.gallery_list_item_artwork;

@@ -19,6 +19,7 @@ package org.opensilk.music.library.mediastore;
 
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.music.library.mediastore.provider.MediaStoreLibraryProvider;
+import org.opensilk.music.library.mediastore.ui.StoragePickerActivity;
 
 import dagger.Component;
 import rx.functions.Func1;
@@ -44,4 +45,5 @@ public interface MediaStoreLibraryComponent extends AppContextComponent {
                 }
             };
     void inject(MediaStoreLibraryProvider provider);
+    void inject(StoragePickerActivity activity);
 }

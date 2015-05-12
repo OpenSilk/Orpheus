@@ -44,6 +44,9 @@ public class SelectionArgs {
     public static final String[] LOCAL_ARTIST;
     public static final String[] PLAYLIST;
     public static final String[] GENRE_SONGS;
+    public static String[] LOCAL_SONG_PATH(String path) {
+        return new String[]{"1", "''", path+"*"};
+    }
 
     static {
         ONE_AND_EMPTY = new String[]{"1","''"};
