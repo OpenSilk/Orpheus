@@ -79,6 +79,10 @@ public class PlaybackStateHelper {
         mUpdateTime = SystemClock.elapsedRealtime();
     }
 
+    public long getPosition() {
+        return mPosition;
+    }
+
     public void updateDuration(long duration) {
         //mExtras.putLong(PlaybackConstants.EXTRA.DURATION, duration);
         mBufferedPosition = duration;
@@ -183,8 +187,46 @@ public class PlaybackStateHelper {
             case STATE_CONNECTING:
             case STATE_PLAYING:
                 return true;
+            default:
+                return false;
         }
-        return false;
+    }
+
+
+    public boolean isLoading() {
+        switch (mState) {
+            case STATE_CONNECTING:
+            case STATE_BUFFERING:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean isLoadingOrSkipping() {
+        switch (mState) {
+            case STATE_SKIPPING_TO_NEXT:
+            case STATE_SKIPPING_TO_PREVIOUS:
+            case STATE_SKIPPING_TO_QUEUE_ITEM:
+            case STATE_CONNECTING:
+            case STATE_BUFFERING:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public boolean shouldShowPauseButton() {
+        switch (mState) {
+            case STATE_FAST_FORWARDING:
+            case STATE_REWINDING:
+            case STATE_SKIPPING_TO_PREVIOUS:
+            case STATE_SKIPPING_TO_NEXT:
+            case STATE_PLAYING:
+                return true;
+            default:
+                return false;
+        }
     }
 
 }

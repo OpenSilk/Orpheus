@@ -67,21 +67,17 @@ public class PlaybackQueue {
         updateQueueMeta();
     }
 
-    public void save() {
-        final List<Uri> q = new ArrayList<>(mQueue);
-        final int pos = mCurrentPos;
-        //Use async to avoid making new thread
-        new AsyncTask<Object, Void, Void>() {
-            @Override
-            @DebugLog
-            protected Void doInBackground(Object... params) {
-                mSettings.saveQueue(q);
-                if (pos != -1) {
-                    mSettings.putInt(PlaybackPreferences.CURRENT_POS, pos);
-                }
-                return null;
-            }
-        }.execute();
+    public static class Snapshot {
+        public final List<Uri> q;
+        public final int pos;
+        public Snapshot(List<Uri> q, int pos) {
+            this.q = new ArrayList<>(q);
+            this.pos = pos;
+        }
+    }
+
+    public Snapshot snapshot() {
+        return new Snapshot(mQueue, mCurrentPos);
     }
 
     public void addNext(List<Uri> list) {

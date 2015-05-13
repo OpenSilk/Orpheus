@@ -18,16 +18,12 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.graphics.Palette;
 import android.view.View;
 
 import com.triggertrap.seekarc.SeekArc;
@@ -37,9 +33,6 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.AppPreferences;
-import org.opensilk.music.R;
-import org.opensilk.music.artwork.PaletteObserver;
-import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.artwork.ArtworkType;
@@ -55,7 +48,6 @@ import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -64,7 +56,7 @@ import timber.log.Timber;
 
 import static android.support.v4.media.MediaMetadataCompat.*;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
-import static org.opensilk.music.playback.PlaybackConstants.META.TRACK_ARTWORK_URI;
+import static android.support.v4.media.session.PlaybackStateCompat.*;
 
 /**
  * Created by drew on 4/20/15.
@@ -173,10 +165,11 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                 new Action1<PlaybackStateCompat>() {
                     @Override
                     public void call(PlaybackStateCompat playbackState) {
-                        boolean playing = MainPresenter.isPlaying(playbackState);
+                        boolean playing = playbackState.getState() == STATE_PLAYING;
                         if (hasView()) {
-                            getView().play.setChecked(MainPresenter.isActive(playbackState));
+                            getView().play.setChecked(MainPresenter.isPlayingOrSimilar(playbackState));
                             getView().setVisualizerEnabled(playing);
+                            //TODO shuffle/repeat
                         }
                         isPlaying = playing;
                         long position = playbackState.getPosition();
@@ -189,7 +182,6 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                         lastPosition = position;
                         lastDuration = duration;
                         lastPosSynced = true;
-                        //TODO shuffle/repeat
                     }
                 }
         );
@@ -282,7 +274,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     void updateProgress(long position, long duration) {
         if (position < 0 || duration <= 0) {
             setProgress(1000);
-            setCurrentTimeText(position);
+            setCurrentTimeText(-1);
         } else {
             if (!fromTouch) {
                 setCurrentTimeText(position);

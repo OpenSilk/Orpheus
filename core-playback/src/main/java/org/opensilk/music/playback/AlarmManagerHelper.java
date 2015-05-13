@@ -67,4 +67,12 @@ public class AlarmManagerHelper {
         }
         mShutdownScheduled = false;
     }
+
+    public boolean isShutdownScheduled() {
+        return mShutdownScheduled;
+    }
+
+    public void onRecievedShutdownIntent() {
+        mShutdownScheduled = false;
+    }
 }

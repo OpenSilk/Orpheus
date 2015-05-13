@@ -191,7 +191,7 @@ public class MainPresenter extends ViewPresenter<MainView> implements PausesAndR
                     new Action1<PlaybackStateCompat>() {
                         @Override
                         public void call(PlaybackStateCompat playbackState) {
-                            updateFabPlay(isActive(playbackState));
+                            updateFabPlay(isPlayingOrSimilar(playbackState));
                             //TODO repeat/shuffle
                         }
                     }
@@ -220,18 +220,20 @@ public class MainPresenter extends ViewPresenter<MainView> implements PausesAndR
         return false;
     }
 
-    public static boolean isPlaying(PlaybackStateCompat state) {
+    public static boolean isPlayingOrSimilar(PlaybackStateCompat state) {
         switch (state.getState()) {
-//            case STATE_FAST_FORWARDING:
-//            case STATE_REWINDING:
-//            case STATE_SKIPPING_TO_PREVIOUS:
-//            case STATE_SKIPPING_TO_NEXT:
-//            case STATE_BUFFERING:
-//            case STATE_CONNECTING:
+            case STATE_FAST_FORWARDING:
+            case STATE_REWINDING:
+            case STATE_SKIPPING_TO_PREVIOUS:
+            case STATE_SKIPPING_TO_NEXT:
             case STATE_PLAYING:
                 return true;
         }
         return false;
+    }
+
+    public static boolean isPlaying(PlaybackStateCompat state) {
+        return state.getState() == STATE_PLAYING;
     }
 
 }

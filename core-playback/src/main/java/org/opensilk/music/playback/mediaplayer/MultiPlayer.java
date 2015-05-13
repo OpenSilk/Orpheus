@@ -3,33 +3,26 @@ package org.opensilk.music.playback.mediaplayer;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.*;
+import android.os.Process;
 
 import org.opensilk.music.playback.player.IPlayer;
-import org.opensilk.music.playback.player.PlayerCallback;
-import org.opensilk.music.playback.player.PlayerCallbackHelper;
-import org.opensilk.music.playback.player.PlayerEvent;
-import org.opensilk.music.playback.player.PlayerStatus;
-
-import org.opensilk.common.core.util.ObjectUtils;
+import org.opensilk.music.playback.player.IPlayerCallback;
+import org.opensilk.music.playback.player.IPlayerCallbackDelegate;
 
 import java.lang.ref.WeakReference;
 
 import timber.log.Timber;
 
 public class MultiPlayer implements
-        IPlayer,
-        MediaPlayer.OnErrorListener,
-        MediaPlayer.OnCompletionListener {
+        IPlayer, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
 
     private final Context mContext;
     private final int mAudioSessionId;
-    private final PlayerCallbackHelper mCallback;
+    private final IPlayerCallbackDelegate mCallback;
 
     private final HandlerThread mHandlerThread;
     private final MultiHandler mHandler;
@@ -38,30 +31,28 @@ public class MultiPlayer implements
 
     private CompatMediaPlayer mCurrentMediaPlayer;
     private CompatMediaPlayer mNextMediaPlayer;
-    private boolean mIsInitialized = false;
-
 
     public MultiPlayer(Context context, int audioSessionId) {
         mContext = context;
         mAudioSessionId = audioSessionId;
-        mCallback = new PlayerCallbackHelper();
-        mHandlerThread = new HandlerThread("MultiPlayer", android.os.Process.THREAD_PRIORITY_AUDIO);
+        mCallback = new IPlayerCallbackDelegate();
+        mHandlerThread = new HandlerThread("MultiPlayer", Process.THREAD_PRIORITY_DEFAULT);
         mHandlerThread.start();
         mHandler = new MultiHandler(mHandlerThread.getLooper(), this);
     }
 
     @Override
     public void play() {
+        mHandler.removeMessages(E.FADEDOWN);
+        mHandler.sendEmptyMessage(E.FADEUP);
         synchronized (mLock) {
-            if (isInitialized()) {
+            if (isInitializedLocked()) {
                 try {
-                    mHandler.removeMessages(E.FADEDOWN);
-                    mHandler.sendEmptyMessage(E.FADEUP);
                     mCurrentMediaPlayer.start();
-                    mCallback.onPlayerStatus(PlayerStatus.playing());
+                    mCallback.onPlaying();
                 } catch (IllegalStateException e) {
-                    mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
-                    setInitializedLocked(false);
+                    Timber.e(e, "play()");
+                    releaseCurrentLocked();
                 }
             }
         }
@@ -69,15 +60,15 @@ public class MultiPlayer implements
 
     @Override
     public void pause() {
+        mHandler.removeMessages(E.FADEUP);
         synchronized (mLock) {
-            if (isInitialized()) {
+            if (isInitializedLocked()) {
                 try {
-                    mHandler.removeMessages(E.FADEUP);
                     mCurrentMediaPlayer.pause();
-                    mCallback.onPlayerStatus(PlayerStatus.paused());
+                    mCallback.onPaused();
                 } catch (IllegalStateException e) {
-                    mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
-                    setInitializedLocked(false);
+                    Timber.e(e, "pause()");
+                    releaseCurrentLocked();
                 }
             }
         }
@@ -85,27 +76,30 @@ public class MultiPlayer implements
 
     @Override
     public void stop() {
+        mHandler.removeCallbacksAndMessages(null);
         synchronized (mLock) {
-            if (isInitialized()) {
+            if (isInitializedLocked()) {
                 mCurrentMediaPlayer.reset();
-                setInitializedLocked(false);
-                mCallback.onPlayerStatus(PlayerStatus.stopped());
             }
+            releaseCurrentLocked();
+            mCallback.onStopped();
         }
     }
 
     @Override
-    public void seekTo(long pos) {
+    public boolean seekTo(long pos) {
         synchronized (mLock) {
-            if (isInitialized()) {
+            if (isInitializedLocked()) {
                 try {
                     mCurrentMediaPlayer.seekTo((int) pos);
+                    return true;
                 } catch (IllegalStateException e) {
-                    mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
-                    setInitializedLocked(false);
+                    Timber.e(e, "seekTo()");
+                    releaseCurrentLocked();
                 }
             }
         }
+        return false;
     }
 
     @Override
@@ -114,42 +108,37 @@ public class MultiPlayer implements
     }
 
     @Override
-    public void getPosition() {
-        long pos = -1;
+    public long getPosition() {
         synchronized (mLock) {
-            if (isInitialized()) {
+            if (isInitializedLocked()) {
                 try {
-                    pos = mCurrentMediaPlayer.getCurrentPosition();
+                    return mCurrentMediaPlayer.getCurrentPosition();
                 } catch (IllegalStateException e) {
-                    mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
-                    setInitializedLocked(false);
-                    return;
+                    Timber.e(e, "getPosition()");
+                    releaseCurrentLocked();
                 }
             }
         }
-        mCallback.onPlayerEvent(PlayerEvent.position(pos));
+        return -1;
     }
 
     @Override
-    public void getDuration() {
-        long dur = -1;
+    public long getDuration() {
         synchronized (mLock) {
-            if (isInitialized()) {
+            if (isInitializedLocked()) {
                 try {
-                    dur = mCurrentMediaPlayer.getDuration();
+                    return mCurrentMediaPlayer.getDuration();
                 } catch (IllegalStateException e) {
-                    mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
-                    setInitializedLocked(false);
-                    return;
+                    Timber.e(e, "getDuration()");
+                    releaseCurrentLocked();
                 }
             }
         }
-        mCallback.onPlayerEvent(PlayerEvent.duration(dur));
+        return -1;
     }
 
     @Override
     public void setDataSource(Uri uri) {
-        mCallback.onPlayerStatus(PlayerStatus.loading());
         mHandler.obtainMessage(E.SETDATASOURCE, uri).sendToTarget();
     }
 
@@ -166,7 +155,6 @@ public class MultiPlayer implements
     @Override
     public void release() {
         synchronized (mLock) {
-            setInitializedLocked(false);
             releaseCurrentLocked();
             releaseNextLocked();
         }
@@ -175,31 +163,25 @@ public class MultiPlayer implements
     }
 
     @Override
-    public void setCallback(PlayerCallback callback, Handler handler) {
+    public void setCallback(IPlayerCallback callback, Handler handler) {
         mCallback.setCallback(callback, handler);
     }
 
     void setVolume(float vol) {
         synchronized (mLock) {
-            if (isInitialized()) {
+            if (isInitializedLocked()) {
                 try {
                     mCurrentMediaPlayer.setVolume(vol, vol);
                 } catch (IllegalStateException e) {
-                    mCallback.onPlayerStatus(PlayerStatus.error(e.getMessage()));
-                    setInitializedLocked(false);
+                    Timber.e(e, "setVolume");
+                    releaseCurrentLocked();
                 }
             }
         }
     }
 
-    boolean isInitialized() {
-        synchronized (mLock) {
-            return mIsInitialized && mCurrentMediaPlayer != null;
-        }
-    }
-
-    void setInitializedLocked(boolean initialized) {
-        mIsInitialized = initialized;
+    boolean isInitializedLocked() {
+        return mCurrentMediaPlayer != null;
     }
 
     void releaseCurrentLocked() {
@@ -209,6 +191,10 @@ public class MultiPlayer implements
         }
     }
 
+    boolean isNextInitializedLocked() {
+        return mNextMediaPlayer != null;
+    }
+
     void releaseNextLocked() {
         if (mNextMediaPlayer != null) {
             mNextMediaPlayer.release();
@@ -216,16 +202,19 @@ public class MultiPlayer implements
         }
     }
 
-    boolean setDataSourceInternal(MediaPlayer player, Uri uri) {
+    boolean setDataSourceInternal(MediaPlayer player, Uri uri, boolean notify) {
         try {
             player.reset();
             player.setWakeMode(mContext, PowerManager.PARTIAL_WAKE_LOCK);
             player.setAudioSessionId(mAudioSessionId);
             player.setDataSource(mContext, uri);
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            if (notify) {
+                mCallback.onLoading();
+            }
             player.prepare();
         } catch (Exception e) {
-            Timber.w(e, "setDataSourceInternal");
+            Timber.e(e, "setDataSourceInternal");
             return false;
         }
         player.setOnCompletionListener(this);
@@ -238,10 +227,9 @@ public class MultiPlayer implements
         switch (what) {
             case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
                 synchronized (mLock) {
-                    setInitializedLocked(false);
                     releaseCurrentLocked();
                 }
-                mCallback.onPlayerStatus(PlayerStatus.error("Media Server Died"));
+                mCallback.onStopped();
                 return true;
             default:
                 break;
@@ -256,9 +244,9 @@ public class MultiPlayer implements
                 releaseCurrentLocked();
                 mCurrentMediaPlayer = mNextMediaPlayer;
                 mNextMediaPlayer = null;
-                mCallback.onPlayerEvent(PlayerEvent.wentToNext());
+                mCallback.onWentToNext();
             } else {
-                mCallback.onPlayerStatus(PlayerStatus.stopped());
+                mCallback.onStopped();
             }
         }
     }
@@ -278,7 +266,7 @@ public class MultiPlayer implements
 
         public MultiHandler(Looper looper, MultiPlayer mPlayer) {
             super(looper);
-            this.mPlayer = new WeakReference<MultiPlayer>(mPlayer);
+            this.mPlayer = new WeakReference<>(mPlayer);
         }
 
         @Override
@@ -290,66 +278,76 @@ public class MultiPlayer implements
             switch (msg.what) {
                 case E.SETDATASOURCE: {
                     synchronized (player.mLock) {
-                        player.setInitializedLocked(false);
                         player.releaseCurrentLocked();
+                        player.releaseNextLocked();
                     }
                     final CompatMediaPlayer mp = new CompatMediaPlayer();
-                    if (player.setDataSourceInternal(mp, (Uri)msg.obj)) {
+                    if (player.setDataSourceInternal(mp, (Uri)msg.obj, true)) {
                         synchronized (player.mLock) {
                             player.mCurrentMediaPlayer = mp;
-                            player.setInitializedLocked(true);
-                            player.releaseNextLocked();
-                            player.mCallback.onPlayerStatus(PlayerStatus.ready());
+                            player.mCallback.onReady();
                         }
                     } else {
-                        player.mCallback.onPlayerStatus(PlayerStatus.error("Unable to open media"));
+                        player.mCallback.onErrorOpenCurrentFailed("Unable to open media");
                     }
                     return;
                 } case E.SETNEXTDATASOURCE: {
                     synchronized (player.mLock) {
-                        if (player.mCurrentMediaPlayer != null) {
+                        player.releaseNextLocked();
+                        if (player.isInitializedLocked()) {
                             try {
                                 player.mCurrentMediaPlayer.setNextMediaPlayer(null);
                             } catch (IllegalArgumentException e) {
                                 Timber.i("Next media player is current one, continuing");
                             } catch (IllegalStateException e) {
                                 Timber.w(e, "Media player not initialized!");
-                                player.mCallback.onPlayerEvent(PlayerEvent.openNextFailed());
+                                player.stop();
                                 return;
                             }
+                        } else {
+                            player.stop();
+                            return;
                         }
-                        player.releaseNextLocked();
                     }
                     final CompatMediaPlayer mp = new CompatMediaPlayer();
-                    if (player.setDataSourceInternal(mp, (Uri) msg.obj)) {
+                    if (player.setDataSourceInternal(mp, (Uri) msg.obj, false)) {
                         synchronized (player.mLock) {
-                            try {
-                                player.mNextMediaPlayer = mp;
-                                player.mCurrentMediaPlayer.setNextMediaPlayer(mp);
-                            } catch (IllegalArgumentException | IllegalStateException e) {
-                                Timber.w(e, "setNextDataSource: setNextMediaPlayer()");
-                                player.releaseNextLocked();
-                                player.mCallback.onPlayerEvent(PlayerEvent.openNextFailed());
+                            if (player.isInitializedLocked()) {
+                                try {
+                                    player.mNextMediaPlayer = mp;
+                                    player.mCurrentMediaPlayer.setNextMediaPlayer(mp);
+                                    return;
+                                } catch (IllegalArgumentException | IllegalStateException e) {
+                                    Timber.w(e, "setNextDataSource: setNextMediaPlayer()");
+                                    player.releaseNextLocked();
+                                    player.mCallback.onErrorOpenNextFailed("Unable to open media");
+                                }
+                            } else {
+                                mp.release();
+                                player.stop();
                             }
                         }
                     } else {
-                        player.mCallback.onPlayerEvent(PlayerEvent.openNextFailed());
+                        player.mCallback.onErrorOpenNextFailed("Unable to open media");
                     }
                     return;
                 } case E.SKIPTONEXT: {
-                    if (player.isInitialized()) {
-                        synchronized (player.mLock) {
-                            if (player.mNextMediaPlayer != null) {
+                    synchronized (player.mLock) {
+                        if (player.isInitializedLocked() && player.isNextInitializedLocked()) {
+                            try {
                                 player.mCurrentMediaPlayer.stop();
                                 player.mNextMediaPlayer.start();
                                 player.onCompletion(player.mCurrentMediaPlayer);
-                            } else {
-                                player.stop();
-                                player.mCallback.onPlayerStatus(PlayerStatus.error("Next player not set"));
+                                return;
+                            } catch (IllegalStateException e) {
+                                Timber.e(e, "Skipping to next");
+                                player.releaseCurrentLocked();
+                                player.releaseNextLocked();
+                                player.mCallback.onStopped();
                             }
+                        } else {
+                            player.stop();
                         }
-                    } else {
-                        player.mCallback.onPlayerStatus(PlayerStatus.error("Not initialized"));
                     }
                     return;
                 } case E.FADEDOWN: {

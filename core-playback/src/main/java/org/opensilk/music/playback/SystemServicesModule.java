@@ -21,6 +21,7 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.PowerManager;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 
@@ -45,5 +46,9 @@ public class SystemServicesModule {
     @Provides @Singleton
     public AudioManager provideAudioManager(@ForApplication Context context) {
         return (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+    }
+    @Provides @Singleton
+    public PowerManager providePowerManager(@ForApplication Context context) {
+        return (PowerManager) context.getSystemService(Context.POWER_SERVICE);
     }
 }

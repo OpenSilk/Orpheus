@@ -228,9 +228,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                             lastPosition = position;
                             lastDuration = duration;
                             lastPosSynced = true;
-                            subscribeProgress(MainPresenter.isPlaying(playbackState));
+                            subscribeProgress(state == STATE_PLAYING);
                         }
-
                     }
                 }
         );
@@ -256,10 +255,10 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     }
 
     void subscribeProgress(boolean playing) {
-        if (isSubscribed(progressSubscription))  {
-            if (!playing) {
-                unsubscribeProgress();
-            }
+        if (!playing) {
+            unsubscribeProgress();
+            return;
+        } else if (isSubscribed(progressSubscription))  {
             return;
         }
         final long interval = 250;

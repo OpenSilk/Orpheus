@@ -69,4 +69,10 @@ public class PlaybackServiceModule {
         mMediaSession.setMediaButtonReceiver(mediaButtonReceiverIntent);
         return mMediaSession;
     }
+    @Provides
+    public PowerManager.WakeLock provideWakeLock(PowerManager powerManager) {
+        PowerManager.WakeLock w = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, PlaybackService.NAME);
+        w.setReferenceCounted(false);
+        return w;
+    }
 }

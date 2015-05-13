@@ -17,28 +17,22 @@
 
 package org.opensilk.music.playback.player;
 
-import android.media.session.PlaybackState;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 
 /**
  * Created by drew on 4/24/15.
  */
 public interface IPlayer {
-    //Transport controls
+
     void play();
     void pause();
     void stop();
-    void seekTo(long pos);
-    //void fastForward();
+    boolean seekTo(long pos);
     void skipToNext();
-    //void rewind();
-    //void skipToPrevious();
-    //void setRating(Rating rating)
 
-    void getPosition();
-    void getDuration();
+    long getPosition();
+    long getDuration();
 
     void setDataSource(Uri uri);
     void setNextDataSource(Uri uri);
@@ -47,5 +41,5 @@ public interface IPlayer {
 
     void release();
 
-    void setCallback(PlayerCallback callback, Handler handler);
+    void setCallback(IPlayerCallback callback, Handler handler);
 }
