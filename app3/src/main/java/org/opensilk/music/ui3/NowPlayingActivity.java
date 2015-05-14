@@ -30,6 +30,7 @@ import org.opensilk.common.ui.mortar.PauseAndResumePresenter;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.R;
+import org.opensilk.music.playback.control.PlaybackController;
 
 import javax.inject.Inject;
 
@@ -39,6 +40,8 @@ import mortar.MortarScope;
  * Created by drew on 5/9/15.
  */
 public class NowPlayingActivity extends MortarFragmentActivity {
+
+    @Inject protected PlaybackController mPlaybackController;
 
     public static void startSelf(Context context) {
         Intent i = new Intent(context, NowPlayingActivity.class);
@@ -60,12 +63,25 @@ public class NowPlayingActivity extends MortarFragmentActivity {
 
     @Override
     public int getContainerViewId() {
-        return 0;//unsuported
+        return 0;//unsupported
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nowplaying);
+        mPlaybackController.connect();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mPlaybackController.notifyForegroundStateChanged(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mPlaybackController.notifyForegroundStateChanged(false);
     }
 }

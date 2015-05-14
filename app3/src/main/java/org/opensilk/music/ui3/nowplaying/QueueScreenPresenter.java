@@ -128,8 +128,8 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
                         String artist = mediaMetadata.getString(METADATA_KEY_ARTIST);
                         String id = mediaMetadata.getString(METADATA_KEY_MEDIA_ID);
                         if (hasView()) {
-                            getView().mTitle.setText(track);
-                            getView().mSubTitle.setText(artist);
+                            getView().setTitle(track);
+                            getView().setSubTitle(artist);
                             getView().getAdapter().setActiveItem(id);
                         }
                     }

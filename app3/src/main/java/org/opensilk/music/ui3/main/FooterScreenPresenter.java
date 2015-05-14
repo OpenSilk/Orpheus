@@ -108,7 +108,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         super.onLoad(savedInstanceState);
         if (pauseAndResumeRegistrar.isRunning()) {
             Timber.v("missed onResume()");
-            subscribeBroadcasts();
+            init();
         }
     }
 
@@ -116,7 +116,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     protected void onSave(Bundle outState) {
         Timber.v("onSave()");
         super.onSave(outState);
-        if (!hasView() && pauseAndResumeRegistrar.isRunning()) {
+        if (pauseAndResumeRegistrar.isRunning()) {
             Timber.v("missed onPause()");
             unsubscribeBroadcasts();
             unsubscribeProgress();
@@ -127,7 +127,7 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
     public void onResume() {
         Timber.v("onResume()");
         if (hasView()) {
-            subscribeBroadcasts();
+            init();
         }
     }
 
@@ -136,6 +136,20 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         Timber.v("onPause");
         unsubscribeBroadcasts();
         unsubscribeProgress();
+    }
+
+    void init() {
+        if (!StringUtils.isEmpty(lastTrackName)) {
+            getView().trackTitle.setText(lastTrackName);
+        }
+        if (!StringUtils.isEmpty(lastArtistName)) {
+            getView().artistName.setText(lastArtistName);
+        }
+        if (lastAlbumARt != null) {
+            getView().artworkThumbnail.setImageBitmap(lastAlbumARt, false);
+        }
+        //progress is always updated
+        subscribeBroadcasts();
     }
 
     void setTrackName(String s) {
@@ -243,7 +257,6 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
                     }
                 }
         );
-
         broadcastSubscriptions = new CompositeSubscription(s, s2);
     }
 

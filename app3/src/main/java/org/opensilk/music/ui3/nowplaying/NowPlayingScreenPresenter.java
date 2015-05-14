@@ -144,10 +144,12 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     @DebugLog
     void setup() {
         sessionId = playbackController.getAudioSessionId();
-        if (hasView()) {
-            getView().attachVisualizer(sessionId);
-            getView().setEnabled(isPlaying);
+        getView().attachVisualizer(sessionId);
+        if (lastArtInfo != null) {
+            loadArtwork(lastArtInfo);
         }
+        setCurrentTimeText(lastPosition);
+        setTotalTimeText(lastDuration);
         subscribeBroadcasts();
     }
 
@@ -159,8 +161,16 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         unsubscribeBroadcasts();
     }
 
+    void loadArtwork(ArtInfo artInfo) {
+        if (hasView() && getView().artwork != null) {
+            requestor.newRequest(getView().artwork, getView().paletteObserver, artInfo, ArtworkType.LARGE);
+        }
+    }
+
     void subscribeBroadcasts() {
-        if (isSubscribed(broadcastSubscription)) return;
+        if (isSubscribed(broadcastSubscription)){
+            return;
+        }
         Subscription s1 = playbackController.subscribePlayStateChanges(
                 new Action1<PlaybackStateCompat>() {
                     @Override
@@ -201,9 +211,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                         Timber.d(artInfo.toString());
                         if (!artInfo.equals(lastArtInfo)) {
                             lastArtInfo = artInfo;
-                            if (hasView() && getView().artwork != null) {
-                                requestor.newRequest(getView().artwork, getView().paletteObserver, artInfo, ArtworkType.LARGE);
-                            }
+                            loadArtwork(artInfo);
                         }
                         //Todo update display
                     }

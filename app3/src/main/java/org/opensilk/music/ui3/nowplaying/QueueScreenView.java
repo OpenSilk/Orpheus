@@ -18,7 +18,9 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
+import android.support.v7.internal.view.menu.MenuBuilder;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -40,8 +42,7 @@ public class QueueScreenView extends RelativeLayout {
     @Inject QueueScreenPresenter mPresenter;
     @Inject QueueScreenViewAdapter mAdapter;
 
-    @InjectView(R.id.title) TextView mTitle;
-    @InjectView(R.id.subtitle) TextView mSubTitle;
+    @InjectView(R.id.queue_toolbar) Toolbar mToolbar;
     @InjectView(R.id.recyclerview) DragSwipeRecyclerView mList;
 
     public QueueScreenView(Context context, AttributeSet attrs) {
@@ -67,6 +68,14 @@ public class QueueScreenView extends RelativeLayout {
 
     public QueueScreenViewAdapter getAdapter() {
         return mAdapter;
+    }
+
+    public void setTitle(CharSequence title) {
+        mToolbar.setTitle(title);
+    }
+
+    public void setSubTitle(CharSequence title) {
+        mToolbar.setSubtitle(title);
     }
 
 }

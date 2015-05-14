@@ -26,7 +26,7 @@
     app:umanoPanelHeight="?actionBarSize"
     app:umanoShadowHeight="4dp"
     app:umanoParalaxOffset="100dp"
-    app:umanoDragView="@+id/queue_header">
+    app:umanoDragView="@+id/queue_toolbar">
 
     <fragment
         android:id="@+id/nowplaying_fragment"

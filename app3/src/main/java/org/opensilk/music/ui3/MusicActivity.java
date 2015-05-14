@@ -75,6 +75,18 @@ public abstract class MusicActivity extends MortarFragmentActivity implements Ac
         mActionBarDelegate.onDestroy();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mPlaybackController.notifyForegroundStateChanged(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mPlaybackController.notifyForegroundStateChanged(false);
+    }
+
     /*
      * Action bar owner
      */

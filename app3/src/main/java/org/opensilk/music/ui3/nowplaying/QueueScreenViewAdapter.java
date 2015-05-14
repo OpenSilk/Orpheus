@@ -25,6 +25,7 @@ import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.BundleHelper;
+import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.dragswipe.BaseDragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.common.OverflowAction;
@@ -39,6 +40,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Map;
 import java.util.Random;
@@ -54,6 +56,7 @@ import rx.Subscription;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.ViewObservable;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 /**
  * Created by drew on 5/10/15.
@@ -62,6 +65,7 @@ public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueIt
 
     final ArtworkRequestManager requestor;
     final QueueScreenPresenter presenter;
+    final PlaybackController playbackController;
 
     String activeId;
     boolean isPlaying;
@@ -69,16 +73,19 @@ public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueIt
     @Inject
     public QueueScreenViewAdapter(
             ArtworkRequestManager requestor,
-            QueueScreenPresenter presenter
+            QueueScreenPresenter presenter,
+            PlaybackController playbackController
     ) {
         super();
         this.requestor = requestor;
         this.presenter = presenter;
+        this.playbackController = playbackController;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         QueueItem item = getItem(position);
+        holder.reset();
         holder.title.setText(item.getDescription().getTitle());
         holder.subtitle.setText(item.getDescription().getSubtitle());
         ArtInfo artInfo = BundleHelper.getParcelable(item.getDescription().getExtras());
@@ -104,9 +111,23 @@ public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueIt
         return new Random(position).nextLong();
     }
 
+    @Override
+    public void onMoveItem(int fromPosition, int toPosition) {
+        super.onMoveItem(fromPosition, toPosition);
+        if (fromPosition != toPosition) {
+            playbackController.moveQueueItem(fromPosition, toPosition);
+        }
+    }
+
+    @Override
+    protected void onItemRemoved(Context context, int position, QueueItem item) {
+        playbackController.removeQueueItemAt(position);
+    }
+
     public void setActiveItem(String id) {
         if (!StringUtils.equals(activeId, id)) {
             activeId = id;
+            Timber.v("Active item updated %s", id);
             notifyItemRangeChanged(0, getItemCount());
         }
     }
@@ -114,27 +135,46 @@ public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueIt
     public void setPlaying(boolean playing) {
         if (isPlaying != playing) {
             isPlaying = playing;
+            Timber.v("Playing updated playing=%s", playing);
             notifyItemRangeChanged(0, getItemCount());
         }
     }
 
     @Override
     protected void onItemClicked(Context context, QueueItem item) {
-
+        playbackController.skipToQueueItem(item.getQueueId());
     }
 
     @Override
     protected void onOverflowClicked(Context context, PopupMenu menu, QueueItem item) {
-
+        menu.inflate(R.menu.popup_play_next);
+        menu.inflate(R.menu.popup_add_to_playlist);
+        menu.inflate(R.menu.popup_more_by_artist);
+        menu.inflate(R.menu.popup_set_ringtone);
+        menu.inflate(R.menu.popup_delete);
     }
 
     @Override
     protected boolean onOverflowActionClicked(Context context, OverflowAction action, QueueItem item) {
-        return false;
+        switch (action) {
+            case PLAY_NEXT:
+                playbackController.moveQueueItemToNext((int)item.getQueueId());
+                return true;
+            case ADD_TO_PLAYLIST:
+                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
+                return true;
+            case MORE_BY_ARTIST:
+                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
+                return true;
+            case SET_RINGTONE:
+                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
+                return true;
+            case DELETE:
+                Toast.makeText(context, R.string.err_unimplemented, Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return false;
+        }
     }
 
-    @Override
-    protected void onItemRemoved(Context context, int position, QueueItem item) {
-
-    }
 }
