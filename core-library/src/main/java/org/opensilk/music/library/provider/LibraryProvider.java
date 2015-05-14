@@ -103,8 +103,8 @@ public abstract class LibraryProvider extends ContentProvider {
     @Override
     public final Bundle call(String method, String arg, Bundle extras) {
 
-        final Bundle ok = new Bundle();
-        ok.putBoolean(Extras.OK, true);
+        final LibraryExtras.Builder ok = LibraryExtras.b();
+        ok.putOk(true);
 
         if (method == null) method = "";
         switch (method) {
@@ -117,19 +117,19 @@ public abstract class LibraryProvider extends ContentProvider {
                     //sending them a reason is moot. but we check the binder here
                     //so we dont have to do it 50 times below and we can be pretty
                     //sure the linkToDeath will succeed
-                    ok.putBoolean(Extras.OK, false);
-                    writeCause(ok, new LibraryException(BAD_BINDER, null));
-                    return ok;
+                    ok.putOk(false);
+                    ok.putCause(new LibraryException(BAD_BINDER, null));
+                    return ok.get();
                 }
 
                 final Uri uri = extras.getParcelable(Extras.URI);
                 final List<String> pathSegments = uri.getPathSegments();
                 if (pathSegments.size() < 3 || pathSegments.size() > 5) {
                     Log.e(TAG, "Wrong number of path segments: uri=" + uri);
-                    ok.putBoolean(Extras.OK, false);
-                    writeCause(ok, new LibraryException(ILLEGAL_URI,
+                    ok.putOk(false);
+                    ok.putCause(new LibraryException(ILLEGAL_URI,
                             new IllegalArgumentException(uri.toString())));
-                    return ok;
+                    return ok.get();
                 }
 
                 final String library = pathSegments.get(0);
@@ -140,10 +140,11 @@ public abstract class LibraryProvider extends ContentProvider {
                     identity = null;
                 }
 
-                final Bundle args = new Bundle();
-                args.putParcelable(Extras.URI, uri);
                 String sortOrder = extras.getString(Extras.SORTORDER);
-                args.putString(Extras.SORTORDER, sortOrder != null ? sortOrder : BundleableSortOrder.A_Z);
+                final Bundle args = LibraryExtras.b()
+                        .putUri(uri)
+                        .putSortOrder(sortOrder != null ? sortOrder : BundleableSortOrder.A_Z)
+                        .get();
 
                 switch (mMatcher.match(uri)) {
                     case M_ALBUMS: {
@@ -233,20 +234,20 @@ public abstract class LibraryProvider extends ContentProvider {
                         break;
                     }
                     default: {
-                        ok.putBoolean(Extras.OK, false);
-                        writeCause(ok, new LibraryException(ILLEGAL_URI,
+                        ok.putOk(false);
+                        ok.putCause(new LibraryException(ILLEGAL_URI,
                                 new IllegalArgumentException(uri.toString())));
                     }
                 }
-                return ok;
+                return ok.get();
             }
             case LibraryMethods.LIBRARYCONF:
                 return getLibraryConfig().dematerialize();
             default:
                 Log.e(TAG, "Unknown method " + method);
-                ok.putBoolean(Extras.OK, false);
-                writeCause(ok, new LibraryException(METHOD_NOT_IMPLEMENTED, new UnsupportedOperationException(method)));
-                return ok;
+                ok.putOk(false);
+                ok.putCause(new LibraryException(METHOD_NOT_IMPLEMENTED, new UnsupportedOperationException(method)));
+                return ok.get();
         }
     }
 
@@ -286,7 +287,7 @@ public abstract class LibraryProvider extends ContentProvider {
                 }
             });
         }
-        o.compose(new BundleableListTransformer<Bundleable>(FolderTrackCompare.func(args.getString(Extras.SORTORDER))))
+        o.compose(new BundleableListTransformer<Bundleable>(FolderTrackCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -299,7 +300,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -326,7 +327,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -339,7 +340,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Artist>(ArtistCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Artist>(ArtistCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -366,7 +367,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -379,7 +380,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -392,7 +393,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Genre>(BundleableCompare.<Genre>func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Genre>(BundleableCompare.<Genre>func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -419,7 +420,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Album>(AlbumCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -432,7 +433,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -445,7 +446,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Playlist>(BundleableCompare.<Playlist>func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Playlist>(BundleableCompare.<Playlist>func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -485,7 +486,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler)
-                .compose(new BundleableListTransformer<Track>(TrackCompare.func(args.getString(Extras.SORTORDER))))
+                .compose(new BundleableListTransformer<Track>(TrackCompare.func(LibraryExtras.getSortOrder(args))))
                 .subscribe(subscriber);
     }
 
@@ -626,16 +627,6 @@ public abstract class LibraryProvider extends ContentProvider {
             }
         }
         return e;
-    }
-
-    private void writeCause(Bundle ok, LibraryException cause) {
-        //HAX since the bundle is returned (i guess)
-        //the system classloader remarshals the bundle before we
-        //can set our classloader...causing ClassNotFoundException.
-        //To remedy nest the cause in another bundle.
-        Bundle b = new Bundle();
-        b.putParcelable(Extras.CAUSE, cause);
-        ok.putBundle(Extras.CAUSE, b);
     }
 
     private Method _getIBinder = null;
