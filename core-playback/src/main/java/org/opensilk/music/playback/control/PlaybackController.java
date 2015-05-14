@@ -38,6 +38,9 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.playback.BundleHelper;
 import org.opensilk.music.playback.PlaybackConstants;
@@ -69,6 +72,7 @@ public class PlaybackController {
     final Context mAppContext;
     final Handler mCallbackHandler = new Handler(Looper.getMainLooper());
 
+    int mForegroundActivities = 0;
     boolean mWaitingForService = false;
     IPlaybackService mPlaybackService;
     MediaController mMediaController;
@@ -77,6 +81,28 @@ public class PlaybackController {
     @Inject
     public PlaybackController(@ForApplication Context mAppContext) {
         this.mAppContext = new ContextWrapper(mAppContext);
+    }
+
+    public void notifyForegroundStateChanged(boolean inForeground) {
+        int old = mForegroundActivities;
+        if (inForeground) {
+            mForegroundActivities++;
+        } else {
+            mForegroundActivities--;
+        }
+
+        if (old == 0 || mForegroundActivities == 0) {
+            final Intent intent = new Intent(mAppContext, PlaybackService.class);
+            intent.setAction(PlaybackConstants.FOREGROUND_STATE_CHANGED);
+            intent.putExtra(PlaybackConstants.NOW_IN_FOREGROUND, mForegroundActivities != 0);
+            mAppContext.startService(intent);
+        }
+
+        if (old == 0) {
+            connect();
+        } else if (mForegroundActivities == 0) {
+            disconnect();
+        }
     }
 
     /*
@@ -245,6 +271,14 @@ public class PlaybackController {
         sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO, BundleHelper.builder().putUri(uri).putInt(newPos).get());
     }
 
+    public void moveQueueItem(int from, int to) {
+        sendCustomAction(CMD.MOVE_QUEUE_ITEM, BundleHelper.builder().putInt(from).putInt2(to).get());
+    }
+
+    public void moveQueueItemToNext(int pos) {
+        sendCustomAction(CMD.MOVE_QUEUE_ITEM_TO_NEXT, BundleHelper.builder().putInt(pos).get());
+    }
+
     /*
      * End custom commands
      */
@@ -314,7 +348,8 @@ public class PlaybackController {
         public void onQueueChanged(List<MediaSession.QueueItem> queue) {
             List<MediaSessionCompat.QueueItem> list = new ArrayList<>(queue.size());
             for (MediaSession.QueueItem item : queue) {
-                list.add(MediaSessionCompat.QueueItem.obtain(item));
+                MediaSessionCompat.QueueItem qi = MediaSessionCompat.QueueItem.obtain(item);
+                list.add(qi);
             }
             mQueueSubject.onNext(list);
         }

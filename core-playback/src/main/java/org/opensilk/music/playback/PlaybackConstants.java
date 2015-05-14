@@ -224,6 +224,8 @@ public interface PlaybackConstants {
         String REMOVE_QUEUE_ITEM_AT = "cmd.removequeueitemat";
         String CLEAR_QUEUE = "cmd.clearqueue";
         String MOVE_QUEUE_ITEM_TO = "cmd.movequeueitemto";
+        String MOVE_QUEUE_ITEM = "cmd.movequeueitem";
+        String MOVE_QUEUE_ITEM_TO_NEXT = "cmd.movequeueitemtonext";
         String ENQUEUE_TRACKS_FROM = "cmd.enqueuetracksfrom";
         String PLAY_ALL = "cmd.playall";
         String PLAY_TRACKS_FROM = "cmd.playtracksfrom";

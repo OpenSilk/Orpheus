@@ -182,6 +182,7 @@ public class PlaybackService extends Service {
         super.onTrimMemory(level);
         if (level >= TRIM_MEMORY_COMPLETE) {
             mArtworkProviderHelper.evictL1();
+            saveState();
         }
     }
 
@@ -375,7 +376,16 @@ public class PlaybackService extends Service {
                 Timber.w("Ignoring onSkipToQueueItem while loading/skipping");
                 return;
             }
-            mQueue.goToItem((int)id);
+            int qid = (int) id;
+            if (mQueue.getCurrentPos() != qid) {
+                if (mQueue.getNextPos() == qid) {
+                    onSkipToNext();
+                } else {
+                    onPause();
+                    mPlayWhenReady = true;
+                    mQueue.goToItem(qid);
+                }
+            }
         }
 
         @Override
@@ -544,6 +554,17 @@ public class PlaybackService extends Service {
                     mQueue.moveItem(uri, pos);
                     break;
                 }
+                case CMD.MOVE_QUEUE_ITEM: {
+                    int from = BundleHelper.getInt(extras);
+                    int to = BundleHelper.getInt2(extras);
+                    mQueue.moveItem(from, to);
+                    break;
+                }
+                case CMD.MOVE_QUEUE_ITEM_TO_NEXT: {
+                    int pos = BundleHelper.getInt(extras);
+                    mQueue.moveItem(pos, mQueue.getNextPos());
+                    break;
+                }
                 case CMD.TOGGLE_PLAYBACK: {
                     if (mPlaybackStateHelper.isPlaying()) {
                         onPause();
@@ -690,13 +711,13 @@ public class PlaybackService extends Service {
                     mPlayer.seekTo(pos);//TODO what to do on failure?
                 }
             }
+            mPlaybackStateHelper.gotoPaused();
             if (mPlayWhenReady) {
                 mPlayWhenReady = false;
                 mMediaSessionCallback.onPlay();
             } else {
-                mPlaybackStateHelper.gotoPaused();
+                updatePlaybackState();
             }
-            updatePlaybackState();
             //Will load the next track
             mQueueChangeListener.onQueueChanged();
         }
