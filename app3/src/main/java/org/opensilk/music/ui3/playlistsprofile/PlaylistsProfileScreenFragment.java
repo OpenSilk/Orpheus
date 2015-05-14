@@ -20,10 +20,19 @@ package org.opensilk.music.ui3.playlistsprofile;
 import android.content.Context;
 import android.os.Bundle;
 
+import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortar.Screen;
+import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleableFragment;
+import org.opensilk.music.ui3.common.BundleablePresenter;
+import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.dragswipe.TracksDragSwipeComponent;
+import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenter;
 
 /**
  * Created by drew on 5/5/15.
@@ -41,5 +50,19 @@ public class PlaylistsProfileScreenFragment extends BundleableFragment {
     protected Screen newScreen() {
         getArguments().setClassLoader(getClass().getClassLoader());
         return getArguments().<PlaylistsProfileScreen>getParcelable("screen");
+    }
+
+    @Override
+    protected void setupActionBar() {
+        PlaylistsProfileScreen s = (PlaylistsProfileScreen) getScreen();
+        MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
+        ActionBarOwner actionBarOwner = component.actionBarOwner();
+        TracksDragSwipeComponent component1 = DaggerService.getDaggerComponent(getScope());
+        TracksDragSwipePresenter presenter = component1.presenter();
+        actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon()
+                .setTitle(s.playlist.name)
+                .setSubtitle(UtilsCommon.makeLabel(getActivity(),
+                        R.plurals.Nsongs, s.playlist.trackUris.size()))
+                .setMenuConfig(presenter.getMenuConfig()).build());
     }
 }

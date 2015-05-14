@@ -23,31 +23,31 @@ import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
+import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
-import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
+import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
+import org.opensilk.music.ui3.dragswipe.TrackDragSwipeEventListener;
+import org.opensilk.music.ui3.dragswipe.TrackItemClickListener;
+import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenter;
+import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenterConfig;
 import org.opensilk.music.ui3.playlists.PlaylistsOverflowHandler;
 import org.opensilk.music.ui3.tracks.TracksOverflowHandler;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Named;
@@ -109,24 +109,25 @@ public class PlaylistsProfileScreenModule {
     }
 
     @Provides @ScreenScope
-    public BundleablePresenterConfig providePresenterConfig(
-            ItemClickListener itemClickListener,
+    public TracksDragSwipePresenterConfig providePresenterConfig(
+            TrackItemClickListener itemClickListener,
             OverflowClickListener overflowClickListener,
-            ActionBarMenuConfig menuConfig
+            ActionBarMenuConfig menuConfig,
+            TrackDragSwipeEventListener eventListener
     ) {
-        return BundleablePresenterConfig.builder()
-                .setWantsGrid(false)
+        return TracksDragSwipePresenterConfig.builder()
                 .setItemClickListener(itemClickListener)
                 .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
+                .setDragSwipeEventListener(eventListener)
                 .build();
     }
 
     @Provides @ScreenScope
-    public ItemClickListener provideItemClickListener(final ItemClickDelegate delegate) {
-        return new ItemClickListener() {
+    public TrackItemClickListener provideItemClickListener(final ItemClickDelegate delegate) {
+        return new TrackItemClickListener() {
             @Override
-            public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
+            public void onItemClicked(TracksDragSwipePresenter presenter, Context context, Bundleable item) {
                 delegate.playAllItems(context, presenter.getItems(), item);
             }
         };
@@ -170,5 +171,15 @@ public class PlaylistsProfileScreenModule {
                 .withMenus(ActionBarMenuConfig.toObject(PlaylistsOverflowHandler.MENUS))
                 .setActionHandler(handler)
                 .build());
+    }
+
+    @Provides @ScreenScope
+    public TrackDragSwipeEventListener provideDragSwipeEventListener() {
+        return new TrackDragSwipeEventListener() {
+            @Override
+            public void onItemRemoved(Context context, Track track) {
+
+            }
+        };
     }
 }

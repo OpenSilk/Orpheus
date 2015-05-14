@@ -36,6 +36,7 @@ import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.TracksDragSwipeActivity;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
@@ -108,8 +109,8 @@ public class PlaylistsScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
-                ProfileActivity.startSelf(context, new PlaylistsProfileScreen(screen.libraryConfig,
-                        screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Playlist)item));
+                TracksDragSwipeActivity.startSelf(context, new PlaylistsProfileScreen(screen.libraryConfig,
+                        screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Playlist) item));
             }
         };
     }

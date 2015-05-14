@@ -40,7 +40,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/5/15.
  */
-@Layout(R.layout.profile_recycler)
+@Layout(R.layout.bundleable_recycler_tracksdragswipe)
 @WithComponentFactory(PlaylistsProfileScreen.Factory.class)
 public class PlaylistsProfileScreen extends BundleableScreen implements ProfileScreen {
 

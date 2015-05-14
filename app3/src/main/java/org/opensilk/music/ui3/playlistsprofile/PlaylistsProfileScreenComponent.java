@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.playlistsprofile;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
+import org.opensilk.music.ui3.dragswipe.TracksDragSwipeComponent;
 import org.opensilk.music.ui3.profile.ProfileComponent;
 
 import dagger.Component;
@@ -33,7 +34,7 @@ import rx.functions.Func2;
         dependencies = MusicActivityComponent.class,
         modules = PlaylistsProfileScreenModule.class
 )
-public interface PlaylistsProfileScreenComponent extends ProfileComponent {
+public interface PlaylistsProfileScreenComponent extends TracksDragSwipeComponent {
     Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent> FACTORY =
             new Func2<MusicActivityComponent, PlaylistsProfileScreen, PlaylistsProfileScreenComponent>() {
                 @Override

@@ -16,31 +16,14 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<com.sothree.slidinguppanel.SlidingUpPanelLayout
+<org.opensilk.music.ui3.dragswipe.TracksDragSwipeRecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bundleable_recycler_frame"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="bottom"
-    app:umanoPanelHeight="?actionBarSize"
-    app:umanoShadowHeight="4dp"
-    app:umanoParalaxOffset="100dp"
-    app:umanoDragView="@+id/queue_header">
+    android:layout_height="match_parent">
 
-    <fragment
-        android:id="@+id/nowplaying_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="org.opensilk.music.ui3.nowplaying.NowPlayingScreenFragment"
-        tools:layout="@layout/screen_nowplaying"/>
+    <include layout="@layout/recycler_list_frame_base_dragswipe"/>
 
-    <fragment
-        android:id="@+id/queue_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="true"
-        android:name="org.opensilk.music.ui3.nowplaying.QueueScreenFragment"
-        tools:layout="@layout/screen_nowplaying"/>
-
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+</org.opensilk.music.ui3.dragswipe.TracksDragSwipeRecyclerView>

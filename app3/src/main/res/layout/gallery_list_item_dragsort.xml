@@ -23,24 +23,24 @@
     android:layout_width="match_parent"
     android:layout_height="72dp">
 
-    <ImageView
-        android:id="@+id/drag_handle"
-        android:layout_gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingLeft="16dp"
-        android:paddingEnd="16dp"
-        android:paddingRight="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:scaleType="center"
-        android:src="@drawable/card_drag"/>
-
     <org.opensilk.common.ui.widget.ForegroundLinearLayout
         android:id="@+id/tile_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:foreground="?selectableItemBackground">
+
+        <ImageView
+            android:id="@+id/drag_handle"
+            android:layout_gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingLeft="16dp"
+            android:paddingEnd="16dp"
+            android:paddingRight="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:scaleType="center"
+            android:src="@drawable/card_drag"/>
 
         <org.opensilk.common.ui.widget.CircleImageView
             android:id="@+id/artwork_thumb"

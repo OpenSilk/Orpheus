@@ -17,23 +17,27 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.common.ui.mortar.PausesAndResumes;
-import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
+import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.main.MainPresenter;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Subscription;
@@ -47,7 +51,8 @@ import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
  * Created by drew on 5/9/15.
  */
 @ScreenScope
-public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> implements PausesAndResumes {
+public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
+        implements PausesAndResumes {
 
     final PlaybackController playbackController;
     final ArtworkRequestManager requestor;
@@ -90,12 +95,25 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> impleme
 
     @Override
     public void onResume() {
-        subscribeBroadcasts();
+        if (hasView()) {
+            subscribeBroadcasts();
+        }
     }
 
     @Override
     public void onPause() {
         unsubscribeBroadcasts();
+    }
+
+    @DebugLog
+    public void onItemClicked(Context context, QueueItem item) {
+    }
+
+    public void onOverflowClicked(Context context, PopupMenu m, QueueItem item) {
+    }
+
+    public boolean onOverflowActionClicked(Context context, OverflowAction action, QueueItem item) {
+        return false;
     }
 
     void subscribeBroadcasts() {
@@ -128,9 +146,9 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView> impleme
                 }
         );
         Subscription s2 = playbackController.subscribeQueueChanges(
-                new Action1<List<MediaSessionCompat.QueueItem>>() {
+                new Action1<List<QueueItem>>() {
                     @Override
-                    public void call(List<MediaSessionCompat.QueueItem> queueItems) {
+                    public void call(List<QueueItem> queueItems) {
                         if (hasView()) {
                             getView().getAdapter().replaceAll(queueItems);
                         }

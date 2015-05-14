@@ -37,6 +37,7 @@
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
 
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="Theme.Lightconfig" parent="Theme.LightOverlay">
@@ -71,6 +72,8 @@
         <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
 
+        <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="Theme.DarkConfig" parent="Theme.DarkOverlay">

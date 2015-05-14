@@ -28,6 +28,7 @@
         android:id="@+id/queue_header"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
+        android:gravity="center_vertical"
         android:orientation="vertical">
 
         <TextView
@@ -42,8 +43,8 @@
 
     </LinearLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
+    <org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerView
+        android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/queue_header"/>

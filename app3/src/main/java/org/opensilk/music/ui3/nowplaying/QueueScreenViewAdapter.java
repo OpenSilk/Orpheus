@@ -18,65 +18,76 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opensilk.common.ui.recycler.RecyclerListAdapter;
+import org.opensilk.common.core.rx.SimpleObserver;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.library.mediastore.util.Uris;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.BundleHelper;
+import org.opensilk.music.ui3.dragswipe.BaseDragSwipeRecyclerAdapter;
+import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
+import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.widgets.PlayingIndicator;
 
-import android.net.Uri;
+import android.content.Context;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
-import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
+import java.util.Map;
+import java.util.Random;
+import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import hugo.weaving.DebugLog;
+import rx.Observer;
+import rx.Subscription;
+import rx.android.events.OnClickEvent;
+import rx.android.observables.ViewObservable;
 import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by drew on 5/10/15.
  */
-public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, QueueScreenViewAdapter.ViewHolder> {
+public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueItem> {
 
     final ArtworkRequestManager requestor;
+    final QueueScreenPresenter presenter;
 
     String activeId;
     boolean isPlaying;
 
     @Inject
-    public QueueScreenViewAdapter(ArtworkRequestManager requestor) {
+    public QueueScreenViewAdapter(
+            ArtworkRequestManager requestor,
+            QueueScreenPresenter presenter
+    ) {
+        super();
         this.requestor = requestor;
-        setHasStableIds(true);
-    }
-
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(inflate(parent, R.layout.gallery_list_item_dragsort));
+        this.presenter = presenter;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.reset();
         QueueItem item = getItem(position);
         holder.title.setText(item.getDescription().getTitle());
         holder.subtitle.setText(item.getDescription().getSubtitle());
-        holder.subscriptions.add(
-                requestor.newRequest(holder.artwork, null,
-                        BundleHelper.<ArtInfo>getParcelable(item.getDescription().getExtras()),
-                        ArtworkType.THUMBNAIL
-                )
-        );
+        ArtInfo artInfo = BundleHelper.getParcelable(item.getDescription().getExtras());
+        if (artInfo == null || artInfo.equals(ArtInfo.NULLINSTANCE)) {
+            setLetterTileDrawable(holder, item.getDescription().getTitle().toString());
+        } else {
+            holder.subscriptions.add(
+                    requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL));
+        }
         if (StringUtils.equals(activeId, item.getDescription().getMediaId())) {
             if (isPlaying) {
                 holder.playingIndicator.startAnimating();
@@ -84,17 +95,13 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
                 holder.playingIndicator.setVisibility(View.VISIBLE);
             }
         }
+        bindClickListeners(holder, position);
+        super.onBindViewHolder(holder, position);
     }
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).getDescription().getMediaId().hashCode();
-    }
-
-    @Override
-    public void onViewRecycled(ViewHolder holder) {
-        super.onViewRecycled(holder);
-        holder.reset();
+        return new Random(position).nextLong();
     }
 
     public void setActiveItem(String id) {
@@ -111,31 +118,23 @@ public class QueueScreenViewAdapter extends RecyclerListAdapter<QueueItem, Queue
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        @InjectView(R.id.artwork_thumb) AnimatedImageView artwork;
-        @InjectView(R.id.tile_title) TextView title;
-        @InjectView(R.id.tile_subtitle) TextView subtitle;
-        @InjectView(R.id.playing_indicator) PlayingIndicator playingIndicator;
-        @InjectView(R.id.tile_overflow) ImageButton overflow;
-        @InjectView(R.id.tile_content) View clickableContent;
+    @Override
+    protected void onItemClicked(Context context, QueueItem item) {
 
-        final CompositeSubscription subscriptions;
+    }
 
-        public ViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.inject(this, itemView);
-            subscriptions = new CompositeSubscription();
-        }
+    @Override
+    protected void onOverflowClicked(Context context, PopupMenu menu, QueueItem item) {
 
-        public void reset() {
-//            Timber.v("Reset title=%s", title.getText());
-            if (artwork != null) artwork.setImageBitmap(null);
-            subscriptions.clear();
-            if (playingIndicator.isAnimating()) {
-                playingIndicator.stopAnimating(); //stopAnimating sets GONE
-            } else {
-                playingIndicator.setVisibility(View.GONE);
-            }
-        }
+    }
+
+    @Override
+    protected boolean onOverflowActionClicked(Context context, OverflowAction action, QueueItem item) {
+        return false;
+    }
+
+    @Override
+    protected void onItemRemoved(Context context, int position, QueueItem item) {
+
     }
 }
