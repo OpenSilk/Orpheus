@@ -27,6 +27,7 @@ import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.playback.BundleHelper;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.dragswipe.BaseDragSwipeRecyclerAdapter;
+import org.opensilk.music.ui3.dragswipe.BaseSwipeableRecyclerAdapter;
 import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.widgets.PlayingIndicator;
@@ -42,6 +43,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
@@ -61,7 +63,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 5/10/15.
  */
-public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueItem> {
+public class QueueScreenViewAdapter extends BaseSwipeableRecyclerAdapter<QueueScreenItem> {
 
     final ArtworkRequestManager requestor;
     final QueueScreenPresenter presenter;
@@ -84,43 +86,52 @@ public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueIt
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        QueueItem item = getItem(position);
+        QueueScreenItem item = getItem(position);
         holder.reset();
-        holder.title.setText(item.getDescription().getTitle());
-        holder.subtitle.setText(item.getDescription().getSubtitle());
-        ArtInfo artInfo = BundleHelper.getParcelable(item.getDescription().getExtras());
+        holder.title.setText(item.title);
+        holder.subtitle.setText(item.subtitle);
+        ArtInfo artInfo = item.artInfo;
         if (artInfo == null || artInfo.equals(ArtInfo.NULLINSTANCE)) {
-            setLetterTileDrawable(holder, item.getDescription().getTitle().toString());
+            setLetterTileDrawable(holder, item.title);
         } else {
             holder.subscriptions.add(
                     requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL));
         }
-        if (StringUtils.equals(activeId, item.getDescription().getMediaId())) {
+        if (StringUtils.equals(activeId, item.mediaId)) {
             if (isPlaying) {
                 holder.playingIndicator.startAnimating();
             } else {
                 holder.playingIndicator.setVisibility(View.VISIBLE);
             }
         }
+//        holder.title.setText(item.getDescription().getTitle());
+//        holder.subtitle.setText(item.getDescription().getSubtitle());
+//        ArtInfo artInfo = BundleHelper.getParcelable(item.getDescription().getExtras());
+//        if (artInfo == null || artInfo.equals(ArtInfo.NULLINSTANCE)) {
+//            setLetterTileDrawable(holder, item.getDescription().getTitle().toString());
+//        } else {
+//            holder.subscriptions.add(
+//                    requestor.newRequest(holder.artwork, null, artInfo, ArtworkType.THUMBNAIL));
+//        }
+//        if (StringUtils.equals(activeId, item.getDescription().getMediaId())) {
+//            if (isPlaying) {
+//                holder.playingIndicator.startAnimating();
+//            } else {
+//                holder.playingIndicator.setVisibility(View.VISIBLE);
+//            }
+//        }
         bindClickListeners(holder, position);
         super.onBindViewHolder(holder, position);
     }
 
     @Override
     public long getItemId(int position) {
-        return new Random(position).nextLong();
+        QueueScreenItem item = getItem(position);
+        return item.hashCode();// item.getDescription().getMediaId().hashCode() + (31 * item.getQueueId());
     }
 
     @Override
-    public void onMoveItem(int fromPosition, int toPosition) {
-        super.onMoveItem(fromPosition, toPosition);
-        if (fromPosition != toPosition) {
-            playbackController.moveQueueItem(fromPosition, toPosition);
-        }
-    }
-
-    @Override
-    protected void onItemRemoved(Context context, int position, QueueItem item) {
+    protected void onItemRemoved(Context context, int position, QueueScreenItem item) {
         playbackController.removeQueueItemAt(position);
     }
 
@@ -141,12 +152,12 @@ public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueIt
     }
 
     @Override
-    protected void onItemClicked(Context context, QueueItem item) {
+    protected void onItemClicked(Context context, QueueScreenItem item) {
         playbackController.skipToQueueItem(item.getQueueId());
     }
 
     @Override
-    protected void onOverflowClicked(Context context, PopupMenu menu, QueueItem item) {
+    protected void onOverflowClicked(Context context, PopupMenu menu, QueueScreenItem item) {
         menu.inflate(R.menu.popup_play_next);
         menu.inflate(R.menu.popup_add_to_playlist);
         menu.inflate(R.menu.popup_more_by_artist);
@@ -155,7 +166,7 @@ public class QueueScreenViewAdapter extends BaseDragSwipeRecyclerAdapter<QueueIt
     }
 
     @Override
-    protected boolean onOverflowActionClicked(Context context, OverflowAction action, QueueItem item) {
+    protected boolean onOverflowActionClicked(Context context, OverflowAction action, QueueScreenItem item) {
         switch (action) {
             case PLAY_NEXT:
                 playbackController.moveQueueItemToNext((int)item.getQueueId());

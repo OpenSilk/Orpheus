@@ -43,6 +43,6 @@
         android:clickable="true"
         android:focusable="false"
         android:name="org.opensilk.music.ui3.nowplaying.QueueScreenFragment"
-        tools:layout="@layout/screen_nowplaying"/>
+        tools:layout="@layout/screen_queue"/>
 
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

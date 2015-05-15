@@ -18,15 +18,16 @@
 package org.opensilk.music.ui3.dragswipe;
 
 import android.content.Context;
-import android.support.v4.view.ViewCompat;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
-import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
-import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter;
-import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
+import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractSwipeableItemViewHolder;
+import com.h6ah4i.android.widget.advrecyclerview.utils.RecyclerViewAdapterUtils;
 
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 
@@ -35,21 +36,20 @@ import java.util.List;
 import timber.log.Timber;
 
 /**
- * Created by drew on 5/13/15.
+ * Created by drew on 5/15/15.
  */
-public abstract class DragSwipeRecyclerAdapter<T, VH extends DragSwipeRecyclerAdapter.ViewHolder>
-        extends RecyclerListAdapter<T, VH> implements DraggableItemAdapter<VH>, SwipeableItemAdapter<VH> {
+public abstract class SwipeableRecyclerAdapter<T, VH extends SwipeableRecyclerAdapter.ViewHolder>
+        extends RecyclerListAdapter<T, VH> implements SwipeableItemAdapter<VH> {
 
-    public DragSwipeRecyclerAdapter() {
-        super();
-        // DraggableItemAdapter and SwipeableItemAdapter require stable ID, and also
+    public SwipeableRecyclerAdapter() {
+        // SwipeableItemAdapter requires stable ID, and also
         // have to implement the getItemId() method appropriately.
         setHasStableIds(true);
     }
 
-    public DragSwipeRecyclerAdapter(List<T> items) {
+    public SwipeableRecyclerAdapter(List<T> items) {
         super(items);
-        // DraggableItemAdapter and SwipeableItemAdapter require stable ID, and also
+        // SwipeableItemAdapter requires stable ID, and also
         // have to implement the getItemId() method appropriately.
         setHasStableIds(true);
     }
@@ -60,26 +60,20 @@ public abstract class DragSwipeRecyclerAdapter<T, VH extends DragSwipeRecyclerAd
     public void onBindViewHolder(VH holder, int position) {
 
         // set background resource (target view ID: container)
-        final int dragState = holder.getDragStateFlags();
         final int swipeState = holder.getSwipeStateFlags();
 
-//        if (((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) ||
-//                ((swipeState & RecyclerViewSwipeManager.STATE_FLAG_IS_UPDATED) != 0)) {
+//        if ((swipeState & RecyclerViewSwipeManager.STATE_FLAG_IS_UPDATED) != 0) {
 //            int bgResId;
-
-//            if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
-//                bgResId = R.drawable.bg_item_dragging_active_state;
-//            } else if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_DRAGGING) != 0) {
-//                bgResId = R.drawable.bg_item_dragging_state;
-//            } else if ((swipeState & RecyclerViewSwipeManager.STATE_FLAG_IS_ACTIVE) != 0) {
+//
+//            if ((swipeState & RecyclerViewSwipeManager.STATE_FLAG_IS_ACTIVE) != 0) {
 //                bgResId = R.drawable.bg_item_swiping_active_state;
 //            } else if ((swipeState & RecyclerViewSwipeManager.STATE_FLAG_SWIPING) != 0) {
 //                bgResId = R.drawable.bg_item_swiping_state;
 //            } else {
 //                bgResId = R.drawable.bg_item_normal_state;
 //            }
-
-//            holder.getContainerView().setBackgroundResource(bgResId);
+//
+//            holder.getSwipeableContainerView().setBackgroundResource(bgResId);
 //        }
 
         // set swiping properties
@@ -87,41 +81,8 @@ public abstract class DragSwipeRecyclerAdapter<T, VH extends DragSwipeRecyclerAd
     }
 
     @Override
-    public void onMoveItem(int fromPosition, int toPosition) {
-        Timber.v("onMoveItem(fromPosition = %d , toPosition = %d)", fromPosition, toPosition);
-        if (fromPosition == toPosition) {
-            return;
-        }
-        T item = removeItem(fromPosition);
-        addItem(toPosition, item);
-        notifyItemMoved(fromPosition, toPosition);
-    }
-
-    @Override
-    public boolean onCheckCanStartDrag(VH holder, int position, int x, int y) {
-        // x, y --- relative from the itemView's top-left
-        final View containerView = holder.getSwipeableContainerView();
-        final View dragHandleView = holder.getDragHandle();
-
-        final int offsetX = containerView.getLeft() + (int) (ViewCompat.getTranslationX(containerView) + 0.5f);
-        final int offsetY = containerView.getTop() + (int) (ViewCompat.getTranslationY(containerView) + 0.5f);
-
-        return hitTest(dragHandleView, x - offsetX, y - offsetY);
-    }
-
-    @Override
-    public ItemDraggableRange onGetItemDraggableRange(VH holder, int position) {
-        // no drag-sortable range specified
-        return null;
-    }
-
-    @Override
     public int onGetSwipeReactionType(VH holder, int position, int x, int y) {
-        if (onCheckCanStartDrag(holder, position, x, y)) {
-            return RecyclerViewSwipeManager.REACTION_CAN_NOT_SWIPE_BOTH;
-        } else {
-            return RecyclerViewSwipeManager.REACTION_CAN_SWIPE_BOTH;
-        }
+        return RecyclerViewSwipeManager.REACTION_CAN_SWIPE_BOTH;
     }
 
     @Override
@@ -138,6 +99,7 @@ public abstract class DragSwipeRecyclerAdapter<T, VH extends DragSwipeRecyclerAd
 //                bgRes = R.drawable.bg_swipe_item_right;
 //                break;
 //        }
+//
 //        holder.itemView.setBackgroundResource(bgRes);
     }
 
@@ -156,7 +118,7 @@ public abstract class DragSwipeRecyclerAdapter<T, VH extends DragSwipeRecyclerAd
 
     @Override
     public void onPerformAfterSwipeReaction(VH holder, int position, int result, int reaction) {
-        Timber.v("onPerformAfterSwipeReaction(result = %d, reaction = %d)", result, reaction);
+        Timber.v("onPerformAfterSwipeReaction(position = %d, result = %d, reaction = %d)", position, result, reaction);
         if (reaction == RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM) {
             T item = removeItem(position);
             notifyItemRemoved(position);
@@ -164,20 +126,9 @@ public abstract class DragSwipeRecyclerAdapter<T, VH extends DragSwipeRecyclerAd
         }
     }
 
-    public static boolean hitTest(View v, int x, int y) {
-        final int tx = (int) (ViewCompat.getTranslationX(v) + 0.5f);
-        final int ty = (int) (ViewCompat.getTranslationY(v) + 0.5f);
-        final int left = v.getLeft() + tx;
-        final int right = v.getRight() + tx;
-        final int top = v.getTop() + ty;
-        final int bottom = v.getBottom() + ty;
-        return (x >= left) && (x <= right) && (y >= top) && (y <= bottom);
-    }
-
-    public abstract static class ViewHolder extends AbstractDraggableSwipeableItemViewHolder {
-        public ViewHolder(View itemView) {
-            super(itemView);
+    public abstract static class ViewHolder extends AbstractSwipeableItemViewHolder {
+        public ViewHolder(View v) {
+            super(v);
         }
-        public abstract View getDragHandle();
     }
 }

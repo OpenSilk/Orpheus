@@ -111,6 +111,8 @@ public class TracksDragSwipeRecyclerAdapter extends BaseDragSwipeRecyclerAdapter
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
         super.onMoveItem(fromPosition, toPosition);
-        presenter.startActionMode();
+        if (fromPosition != toPosition) {
+            presenter.startActionMode();
+        }
     }
 }

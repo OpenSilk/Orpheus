@@ -28,6 +28,7 @@ import android.widget.TextView;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerView;
+import org.opensilk.music.ui3.dragswipe.SwipeableRecyclerView;
 
 import javax.inject.Inject;
 
@@ -43,7 +44,7 @@ public class QueueScreenView extends RelativeLayout {
     @Inject QueueScreenViewAdapter mAdapter;
 
     @InjectView(R.id.queue_toolbar) Toolbar mToolbar;
-    @InjectView(R.id.recyclerview) DragSwipeRecyclerView mList;
+    @InjectView(R.id.recyclerview) SwipeableRecyclerView mList;
 
     public QueueScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);

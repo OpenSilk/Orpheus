@@ -33,6 +33,7 @@ import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.main.MainPresenter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -105,17 +106,6 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
         unsubscribeBroadcasts();
     }
 
-    @DebugLog
-    public void onItemClicked(Context context, QueueItem item) {
-    }
-
-    public void onOverflowClicked(Context context, PopupMenu m, QueueItem item) {
-    }
-
-    public boolean onOverflowActionClicked(Context context, OverflowAction action, QueueItem item) {
-        return false;
-    }
-
     void subscribeBroadcasts() {
         if (isSubscribed(broadcastSubscriptions)) {
             return;
@@ -148,9 +138,14 @@ public class QueueScreenPresenter extends ViewPresenter<QueueScreenView>
         Subscription s2 = playbackController.subscribeQueueChanges(
                 new Action1<List<QueueItem>>() {
                     @Override
+                    @DebugLog
                     public void call(List<QueueItem> queueItems) {
                         if (hasView()) {
-                            getView().getAdapter().replaceAll(queueItems);
+                            List<QueueScreenItem> list = new ArrayList<>(queueItems.size());
+                            for (QueueItem item : queueItems) {
+                                list.add(QueueScreenItem.fromQueueItem(item));
+                            }
+                            getView().getAdapter().replaceAll(list);
                         }
                     }
                 }
