@@ -27,6 +27,10 @@ public interface Projections {
     String[] ID_ONLY = new String[] {
                 BaseColumns._ID,
         };
+    String[] ID_DATA = new String[] {
+            BaseColumns._ID,
+            MediaStore.Audio.AudioColumns.DATA
+    };
     String[] LOCAL_SONG = new String[] {
                 BaseColumns._ID,
                 MediaStore.Audio.AudioColumns.TITLE,

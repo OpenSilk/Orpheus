@@ -34,6 +34,7 @@ import org.opensilk.common.core.util.Preconditions;
 import org.opensilk.music.library.internal.BundleableListSlice;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.lang.reflect.Method;
@@ -154,15 +155,15 @@ public class BundleableLoader implements RxLoader<Bundleable> {
                     }
                 };
 
-                final Bundle extras = new Bundle();
-                putBinderInBundle(extras, o.asBinder());
-                extras.putParcelable(Extras.URI, uri);
-                extras.putString(Extras.SORTORDER, sortOrder);
+                final Bundle extras = LibraryExtras.b()
+                        .putUri(uri)
+                        .putSortOrder(sortOrder)
+                        .putBundleableObserverCallback(o)
+                        .get();
 
                 Bundle ok = context.getContentResolver().call(uri, QUERY, null, extras);
-                if (!ok.getBoolean(Extras.OK)) {
-                    ok.setClassLoader(getClass().getClassLoader());
-                    subscriber.onError(readCause(ok));
+                if (!LibraryExtras.getOk(ok)) {
+                    subscriber.onError(LibraryExtras.getCause(ok));
                 }
             }
         });
@@ -204,30 +205,6 @@ public class BundleableLoader implements RxLoader<Bundleable> {
     protected void dump(Throwable throwable) {
         Timber.e(throwable, "BundleableLoader(\nuri=%s\nsortOrder=%s\n) ex=",
                 uri, sortOrder);
-    }
-
-    LibraryException readCause(Bundle ok) {
-        Bundle b = ok.getBundle(Extras.CAUSE);
-        b.setClassLoader(getClass().getClassLoader());
-        return b.getParcelable(Extras.CAUSE);
-    }
-
-    Method _putIBinder = null;
-    void putBinderInBundle(Bundle b, IBinder binder) {
-        if (Build.VERSION.SDK_INT >= 18) {
-            b.putBinder(Extras.CALLBACK, binder);
-        } else {
-            try {
-                synchronized (this) {
-                    if (_putIBinder == null) {
-                        _putIBinder = Bundle.class.getDeclaredMethod("putIBinder", String.class, IBinder.class);
-                    }
-                    _putIBinder.invoke(b, Extras.CALLBACK, binder);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
 }

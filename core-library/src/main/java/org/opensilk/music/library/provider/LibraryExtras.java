@@ -21,18 +21,52 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 
+import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.internal.ResultReceiver;
 import org.opensilk.music.library.sort.BundleableSortOrder;
 
 import java.lang.reflect.Method;
-
-import static org.opensilk.music.library.provider.LibraryMethods.Extras.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by drew on 5/14/15.
  */
 public class LibraryExtras {
+
+    /**
+     * Request uri: always built with {@link LibraryUris}, never null
+     */
+    public static final String URI = "uri";
+    /**
+     * Sortorder: one of the strings in the sort package. never null for {@link LibraryMethods#QUERY}
+     */
+    public static final String SORTORDER = "sortorder";
+    /**
+     *
+     */
+    public static final String URI_LIST = "uri_list";
+    /**
+     * Internal use: {@link org.opensilk.music.library.internal.IBundleableObserver}, never null
+     */
+    public static final String BUNDLE_SUBSCRIBER_CALLBACK = "bundle_sub_cb";
+    /**
+     * Internal use: argument in returned bundle if not true. {@link #CAUSE} must be set
+     */
+    public static final String OK = "ok";
+    /**
+     * Internal use: argument in returned bundle containing {@link LibraryException}
+     * when {@link #OK} is false.
+     */
+    public static final String CAUSE = "cause";
+    private static final String WRAPPEDCAUSE = "wrappedcause";
+    /**
+     * Internel use:
+     */
+    public static final String RESULT_RECEIVER_CALLBACK = "result_receiver_cb";
 
     public static Uri getUri(Bundle extras) {
         return extras.getParcelable(URI);
@@ -42,14 +76,63 @@ public class LibraryExtras {
         return extras.getString(SORTORDER, BundleableSortOrder.A_Z);
     }
 
+    public static List<Uri> getUriList(Bundle extras) {
+        return extras.<Uri>getParcelableArrayList(URI_LIST);
+    }
+
     public static boolean getOk(Bundle extras) {
         return extras.getBoolean(OK);
     }
 
     public static LibraryException getCause(Bundle extras) {
-        Bundle b = extras.getBundle("wrappedcause");
+        Bundle b = extras.getBundle(WRAPPEDCAUSE);
         b.setClassLoader(LibraryException.class.getClassLoader());
         return b.getParcelable(CAUSE);
+    }
+
+    private static Method _getIBinder = null;
+    public static IBinder getBundleableObserverBinder(Bundle extras) {
+        if (Build.VERSION.SDK_INT >= 18) {
+            return extras.getBinder(BUNDLE_SUBSCRIBER_CALLBACK);
+        } else {
+            try {
+                if (_getIBinder == null) {
+                    synchronized (LibraryExtras.class) {
+                        if (_getIBinder == null) {
+                            _getIBinder = Bundle.class.getDeclaredMethod("getIBinder", String.class);
+                        }
+                    }
+                }
+                return (IBinder) _getIBinder.invoke(extras, BUNDLE_SUBSCRIBER_CALLBACK);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private static Method _putIBinder = null;
+    private static void putBundleableObserverBinder(Bundle extras, IBinder binder) {
+        if (Build.VERSION.SDK_INT >= 18) {
+            extras.putBinder(BUNDLE_SUBSCRIBER_CALLBACK, binder);
+        } else {
+            try {
+                if (_putIBinder == null) {
+                    synchronized (LibraryExtras.class) {
+                        if (_putIBinder == null) {
+                            _putIBinder = Bundle.class.getDeclaredMethod("putIBinder", String.class, IBinder.class);
+                        }
+                    }
+                }
+                _putIBinder.invoke(extras, BUNDLE_SUBSCRIBER_CALLBACK, binder);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static ResultReceiver getResultReciever(Bundle extras) {
+        extras.setClassLoader(ResultReceiver.class.getClassLoader());
+        return extras.<ResultReceiver>getParcelable(RESULT_RECEIVER_CALLBACK);
     }
 
     public static Builder b() {
@@ -72,6 +155,11 @@ public class LibraryExtras {
             return this;
         }
 
+        public Builder putUriList(List<Uri> uris) {
+            b.putParcelableArrayList(URI_LIST, new ArrayList<Parcelable>(uris));
+            return this;
+        }
+
         public Builder putOk(boolean ok) {
             b.putBoolean(OK, ok);
             return this;
@@ -84,26 +172,18 @@ public class LibraryExtras {
             //To remedy nest the cause in another bundle.
             Bundle b2 = new Bundle();
             b2.putParcelable(CAUSE, e);
-            b.putBundle("wrappedcause", b2);
+            b.putBundle(WRAPPEDCAUSE, b2);
             return this;
         }
 
-        private Method _getIBinder = null;
-        private IBinder getBinderCallbackFromBundle(Bundle b) {
-            if (Build.VERSION.SDK_INT >= 18) {
-                return b.getBinder(LibraryMethods.Extras.CALLBACK);
-            } else {
-                try {
-                    synchronized (this) {
-                        if (_getIBinder == null) {
-                            _getIBinder = Bundle.class.getDeclaredMethod("getIBinder", String.class);
-                        }
-                    }
-                    return (IBinder) _getIBinder.invoke(b, LibraryMethods.Extras.CALLBACK);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        public Builder putBundleableObserverCallback(IBundleableObserver o) {
+            putBundleableObserverBinder(b, o.asBinder());
+            return this;
+        }
+
+        public Builder putResultReceiver(ResultReceiver r) {
+            b.putParcelable(RESULT_RECEIVER_CALLBACK, r);
+            return this;
         }
 
         public Bundle get() {

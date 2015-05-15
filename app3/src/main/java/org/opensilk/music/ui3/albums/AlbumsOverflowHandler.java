@@ -22,7 +22,7 @@ import android.net.Uri;
 import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
@@ -31,9 +31,9 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
+import org.opensilk.music.ui3.delete.DeleteScreenFragment;
 
 import javax.inject.Inject;
 
@@ -49,25 +49,28 @@ public class AlbumsOverflowHandler implements OverflowClickListener {
             R.menu.popup_add_to_queue,
 //                                R.menu.popup_add_to_playlist,
 //                                R.menu.popup_more_by_artist,
-//                                R.menu.popup_delete,
+            R.menu.popup_delete,
     };
 
     final LibraryConfig libraryConfig;
     final LibraryInfo libraryInfo;
     final PlaybackController playbackController;
     final AppPreferences appPreferences;
+    final FragmentManagerOwner fm;
 
     @Inject
     public AlbumsOverflowHandler(
             LibraryConfig libraryConfig,
             LibraryInfo libraryInfo,
             PlaybackController playbackController,
-            AppPreferences appPreferences
+            AppPreferences appPreferences,
+            FragmentManagerOwner fm
     ) {
         this.libraryConfig = libraryConfig;
         this.libraryInfo = libraryInfo;
         this.playbackController = playbackController;
         this.appPreferences = appPreferences;
+        this.fm =fm;
     }
 
     @Override
@@ -100,7 +103,8 @@ public class AlbumsOverflowHandler implements OverflowClickListener {
                 //TODO
                 return true;
             case DELETE:
-                //TODO
+                DeleteScreenFragment f = DeleteScreenFragment.ni(context, libraryConfig, libraryInfo, item);
+                fm.showDialog(f);
                 return true;
             default:
                 return false;

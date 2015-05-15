@@ -22,7 +22,6 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -36,9 +35,10 @@ import org.opensilk.music.library.compare.TrackCompare;
 import org.opensilk.music.library.internal.BundleableListTransformer;
 import org.opensilk.music.library.internal.BundleableSubscriber;
 import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.internal.DeleteSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
+import org.opensilk.music.library.internal.ResultReceiver;
 import org.opensilk.music.library.sort.BundleableSortOrder;
-import org.opensilk.music.library.provider.LibraryMethods.Extras;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
@@ -47,7 +47,6 @@ import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
@@ -111,7 +110,7 @@ public abstract class LibraryProvider extends ContentProvider {
             case LibraryMethods.QUERY: {
                 extras.setClassLoader(getClass().getClassLoader());
 
-                final IBinder binder = getBinderCallbackFromBundle(extras);
+                final IBinder binder = LibraryExtras.getBundleableObserverBinder(extras);
                 if (binder == null || !binder.isBinderAlive()) {
                     //this is mostly for the null, if the binder is dead then
                     //sending them a reason is moot. but we check the binder here
@@ -122,7 +121,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     return ok.get();
                 }
 
-                final Uri uri = extras.getParcelable(Extras.URI);
+                final Uri uri = LibraryExtras.getUri(extras);
                 final List<String> pathSegments = uri.getPathSegments();
                 if (pathSegments.size() < 3 || pathSegments.size() > 5) {
                     Log.e(TAG, "Wrong number of path segments: uri=" + uri);
@@ -140,7 +139,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     identity = null;
                 }
 
-                String sortOrder = extras.getString(Extras.SORTORDER);
+                String sortOrder = extras.getString(LibraryExtras.SORTORDER);
                 final Bundle args = LibraryExtras.b()
                         .putUri(uri)
                         .putSortOrder(sortOrder != null ? sortOrder : BundleableSortOrder.A_Z)
@@ -241,12 +240,66 @@ public abstract class LibraryProvider extends ContentProvider {
                 }
                 return ok.get();
             }
+            case LibraryMethods.UPDATE: {
+                return ok.get();
+            }
+            case LibraryMethods.DELETE: {
+
+                final ResultReceiver resultReceiver = LibraryExtras.getResultReciever(extras);
+                if (resultReceiver == null) {
+                    ok.putOk(false).putCause(new LibraryException(BAD_BINDER, null));
+                    return ok.get();
+                }
+
+                final Uri uri = LibraryExtras.getUri(extras);
+                final List<String> pathSegments = uri.getPathSegments();
+                if (pathSegments.size() < 3 || pathSegments.size() > 4) {
+                    Log.e(TAG, "Wrong number of path segments: uri=" + uri);
+                    ok.putOk(false).putCause(new LibraryException(ILLEGAL_URI,
+                            new IllegalArgumentException(uri.toString())));
+                    return ok.get();
+                }
+
+                final String library = pathSegments.get(0);
+                final String identity;
+                if (pathSegments.size() > 3) {
+                    identity = pathSegments.get(3);
+                } else {
+                    identity = null;
+                }
+
+                final DeleteSubscriber subscriber = new DeleteSubscriber(resultReceiver);
+
+                final Bundle args = LibraryExtras.b()
+                        .putUriList(LibraryExtras.getUriList(extras))
+                        .get();
+
+                switch (mMatcher.match(uri)) {
+                    case M_FOLDER: {
+                        deleteFolderInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_PLAYLIST: {
+                        deletePlaylistInternal(library, identity, subscriber, args);
+                        break;
+                    }
+                    case M_TRACK: {
+                        deleteTrackInternal(library, subscriber, args);
+                        break;
+                    }
+                    default: {
+                        ok.putOk(false).putCause(new LibraryException(ILLEGAL_URI,
+                                new IllegalArgumentException(uri.toString())));
+                    }
+                }
+                return ok.get();
+            }
             case LibraryMethods.LIBRARYCONF:
                 return getLibraryConfig().dematerialize();
             default:
                 Log.e(TAG, "Unknown method " + method);
-                ok.putOk(false);
-                ok.putCause(new LibraryException(METHOD_NOT_IMPLEMENTED, new UnsupportedOperationException(method)));
+                ok.putOk(false).putCause(new LibraryException(METHOD_NOT_IMPLEMENTED,
+                        new UnsupportedOperationException(method)));
                 return ok.get();
         }
     }
@@ -271,7 +324,7 @@ public abstract class LibraryProvider extends ContentProvider {
                     }
                 })
                 .subscribeOn(scheduler);
-        final String q = args.<Uri>getParcelable(Extras.URI).getQueryParameter(Q.Q);
+        final String q = LibraryExtras.getUri(args).getQueryParameter(Q.Q);
         if (StringUtils.equals(q, Q.FOLDERS_ONLY)) {
             o = o.filter(new Func1<Bundleable, Boolean>() {
                 @Override
@@ -586,6 +639,74 @@ public abstract class LibraryProvider extends ContentProvider {
      */
 
     /*
+     * Start internal delete methods
+     */
+
+    protected void deleteFolderInternal(final String library, final String identity, final DeleteSubscriber subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Boolean>() {
+                    @Override
+                    public void call(Subscriber<? super Boolean> subscriber) {
+                        deleteFolder(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .subscribe(subscriber);
+    }
+
+    protected void deletePlaylistInternal(final String library, final String identity, final DeleteSubscriber subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Boolean>() {
+                    @Override
+                    public void call(Subscriber<? super Boolean> subscriber) {
+                        deletePlaylist(library, identity, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .subscribe(subscriber);
+    }
+
+    protected void deleteTrackInternal(final String library, final DeleteSubscriber subscriber, final Bundle args) {
+        Observable.create(
+                new Observable.OnSubscribe<Boolean>() {
+                    @Override
+                    public void call(Subscriber<? super Boolean> subscriber) {
+                        deleteTracks(library, subscriber, args);
+                    }
+                })
+                .subscribeOn(scheduler)
+                .first()
+                .subscribe(subscriber);
+    }
+
+    /*
+     * End internal delete methods
+     */
+
+    /*
+     * Start delete stubs
+     */
+
+    protected void deleteFolder(final String library, final String identity, final Subscriber<? super Boolean> subscriber, final Bundle args) {
+        throw new UnsupportedOperationException();
+    }
+
+    protected void deletePlaylist(final String library, final String identity, final Subscriber<? super Boolean> subscriber, final Bundle args) {
+        throw new UnsupportedOperationException();
+    }
+
+    //args will have list of track uris
+    protected void deleteTracks(final String library, final Subscriber<? super Boolean> subscriber, final Bundle args) {
+        throw new UnsupportedOperationException();
+    }
+
+    /*
+     * End delete stubs
+     */
+
+    /*
      * Start abstract methods, we are 100% out-of-band and do not support any of these
      */
 
@@ -629,21 +750,4 @@ public abstract class LibraryProvider extends ContentProvider {
         return e;
     }
 
-    private Method _getIBinder = null;
-    private IBinder getBinderCallbackFromBundle(Bundle b) {
-        if (Build.VERSION.SDK_INT >= 18) {
-            return b.getBinder(Extras.CALLBACK);
-        } else {
-            try {
-                synchronized (this) {
-                    if (_getIBinder == null) {
-                        _getIBinder = Bundle.class.getDeclaredMethod("getIBinder", String.class);
-                    }
-                }
-                return (IBinder) _getIBinder.invoke(b, Extras.CALLBACK);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 }

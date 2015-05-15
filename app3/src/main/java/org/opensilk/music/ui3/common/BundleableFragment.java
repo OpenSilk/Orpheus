@@ -57,10 +57,6 @@ public abstract class BundleableFragment extends MortarFragment {
         mLibraryInfo = getArguments().getParcelable("info");
     }
 
-    public static <T extends BundleableFragment> T factory(Context context, String name, Bundle args) {
-        return (T) Fragment.instantiate(context, name, args);
-    }
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);

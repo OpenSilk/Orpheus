@@ -17,8 +17,15 @@
 package org.opensilk.music.library.mediastore.util;
 
 import android.content.ContentUris;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Looper;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
+import android.util.Log;
+
+import java.io.File;
 
 import timber.log.Timber;
 
@@ -94,5 +101,105 @@ public class CursorHelpers {
             return 0;
         }
     }
+
+    public static long[] getSongIdsForAlbum(Context context, String albumid) {
+        Cursor cursor = context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                Projections.ID_ONLY,
+                Selections.LOCAL_ALBUM_SONGS,
+                SelectionArgs.LOCAL_ALBUM_SONGS(albumid),
+                null);
+        if (cursor != null) {
+            try {
+                return getSongIdsForCursor(cursor);
+            } finally {
+                cursor.close();
+            }
+        }
+        return sEmptyList;
+    }
+
+    public static long[] getSongIdsForArtist(Context context, String artistId) {
+        Cursor cursor = context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                Projections.ID_ONLY,
+                Selections.LOCAL_ARTIST_SONGS,
+                SelectionArgs.LOCAL_ARTIST_SONGS(artistId),
+                null);
+        if (cursor != null) {
+            try {
+                return getSongIdsForCursor(cursor);
+            } finally {
+                cursor.close();
+            }
+        }
+        return sEmptyList;
+    }
+
+    public static long[] getSongIdsForCursor(final Cursor c) {
+        if (c != null && c.moveToFirst()) {
+            int colidx = c.getColumnIndexOrThrow(BaseColumns._ID);
+            long[] list = new long[c.getCount()];
+            int ii = 0;
+            do {
+                list[ii++] = c.getLong(colidx);
+            } while (c.moveToNext());
+            return list;
+        } else {
+            return sEmptyList;
+        }
+    }
+
+    public static int deleteTracks(final Context context, final long[] list) {
+        int numremoved = 0;
+        final StringBuilder selection = new StringBuilder();
+        selection.append(BaseColumns._ID + " IN (");
+        for (int i = 0; i < list.length; i++) {
+            selection.append(list[i]);
+            if (i < list.length - 1) {
+                selection.append(",");
+            }
+        }
+        selection.append(")");
+        final Cursor c = context.getContentResolver().query(
+                Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                Projections.ID_DATA,
+                selection.toString(),
+                null, null);
+        if (c != null) {
+            // Remove selected tracks from the database
+            context.getContentResolver().delete(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    selection.toString(),
+                    null);
+
+            // Remove files from card
+            if (c.moveToFirst()) {
+                do {
+                    final String name = c.getString(1);
+                    final File f = new File(name);
+                    try { // File.delete can throw a security exception
+                        if (!f.delete()) {
+                            // I'm not sure if we'd ever get here (deletion would
+                            // have to fail, but no exception thrown)
+                            Timber.e("Failed to delete file %s", name);
+                        } else {
+                            numremoved++;
+                        }
+                    } catch (final SecurityException ex) {
+                    }
+                } while (c.moveToNext());
+            }
+            c.close();
+        } else {
+            return 0;
+        }
+        // We deleted a number of tracks, which could affect any number of
+        // things
+        // in the media content domain, so update everything.
+        context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+        return numremoved;
+    }
+
 
 }

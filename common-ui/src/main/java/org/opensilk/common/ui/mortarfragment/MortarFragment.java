@@ -120,4 +120,8 @@ public abstract class MortarFragment extends Fragment {
         }
         return mScreen;
     }
+
+    public static <T extends MortarFragment> T factory(Context context, String name, Bundle args) {
+        return (T) Fragment.instantiate(context, name, args);
+    }
 }

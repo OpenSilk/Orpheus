@@ -120,7 +120,8 @@ public class NowPlayingScreenView extends RelativeLayout {
         super.onFinishInflate();
         ButterKnife.inject(this);
         placeholder.removeAllViews();
-        String pickedview = settings.getString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_ARTWORK);
+//        String pickedview = settings.getString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_ARTWORK);
+        String pickedview = NOW_PLAYING_VIEW_VIS_CIRCLE_BAR;
         switch (pickedview) {
             case NOW_PLAYING_VIEW_VIS_CIRCLE:
             case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR:

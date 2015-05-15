@@ -23,9 +23,12 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.ObjectUtils;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryComponent;
 import org.opensilk.music.library.mediastore.R;
@@ -35,12 +38,14 @@ import org.opensilk.music.library.mediastore.loader.GenresLoader;
 import org.opensilk.music.library.mediastore.loader.PlaylistsLoader;
 import org.opensilk.music.library.mediastore.loader.TracksLoader;
 import org.opensilk.music.library.mediastore.ui.StoragePickerActivity;
+import org.opensilk.music.library.mediastore.util.CursorHelpers;
 import org.opensilk.music.library.mediastore.util.FilesUtil;
 import org.opensilk.music.library.mediastore.util.Projections;
 import org.opensilk.music.library.mediastore.util.SelectionArgs;
 import org.opensilk.music.library.mediastore.util.Selections;
 import org.opensilk.music.library.mediastore.util.StorageLookup;
 import org.opensilk.music.library.mediastore.util.Uris;
+import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryProvider;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
@@ -50,6 +55,7 @@ import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +76,6 @@ import static org.opensilk.music.library.LibraryCapability.GENRES;
 import static org.opensilk.music.library.LibraryCapability.PLAYLISTS;
 import static org.opensilk.music.library.LibraryCapability.TRACKS;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.appendId;
-import static org.opensilk.music.library.provider.LibraryMethods.Extras.URI;
 import static org.opensilk.music.library.provider.LibraryUris.Q.FOLDERS_ONLY;
 import static org.opensilk.music.library.provider.LibraryUris.Q.Q;
 import static org.opensilk.music.library.provider.LibraryUris.Q.TRACKS_ONLY;
@@ -127,7 +132,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
             return;
         }
 
-        final String q = args.<Uri>getParcelable(URI).getQueryParameter(Q);
+        final String q = LibraryExtras.getUri(args).getQueryParameter(Q);
         final boolean dirsOnly = StringUtils.equals(q, FOLDERS_ONLY);
         final boolean tracksOnly = StringUtils.equals(q, TRACKS_ONLY);
 
@@ -250,7 +255,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
                 //Extract the albumuris and load them
                 AlbumsLoader l = mAlbumsLoaderProvider.get();
                 String[] ids = new String[genre.albumUris.size()];
-                for (int ii=0; ii<genre.albumUris.size(); ii++) {
+                for (int ii = 0; ii < genre.albumUris.size(); ii++) {
                     ids[ii] = genre.albumUris.get(ii).getLastPathSegment();
                 }
                 l.setSelection(Selections.LOCAL_ALBUMS(ids));
@@ -345,4 +350,73 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
         }
     }
 
+    @Override
+    protected void deleteFolder(String library, String identity, Subscriber<? super Boolean> subscriber, Bundle args) {
+        final File rootDir = mStorageLookup.getStorageFile(library);
+        if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
+            Timber.e("Can't access path %s", rootDir.getPath());
+            subscriber.onError(new IllegalArgumentException("Can't access path " + rootDir.getPath()));
+            return;
+        }
+        boolean success = false;
+        final File dir = new File(rootDir, identity);
+        if (dir.exists() && dir.isDirectory() && dir.canWrite()) {
+            try {
+                FileUtils.deleteDirectory(dir);
+                success = true;
+            } catch (IOException e) {
+                subscriber.onError(e);
+                return;
+            }
+        }
+        if (!subscriber.isUnsubscribed()) {
+            subscriber.onNext(success);
+            subscriber.onCompleted();
+        }
+    }
+
+    @Override
+    protected void deletePlaylist(String library, String identity, Subscriber<? super Boolean> subscriber, Bundle args) {
+        Uri uri = Uri.withAppendedPath(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, identity);
+        int count = getContext().getContentResolver().delete(uri, null, null);
+        if (count > 0) {
+            getContext().getContentResolver().notifyChange(Uris.EXTERNAL_MEDIASTORE_PLAYLISTS, null);
+        }
+        if (!subscriber.isUnsubscribed()) {
+            subscriber.onNext(count > 0);
+            subscriber.onCompleted();
+        }
+    }
+
+    @Override
+    protected void deleteTracks(String library, Subscriber<? super Boolean> subscriber, Bundle args) {
+        List<Uri> uris = LibraryExtras.getUriList(args);
+        List<Long> ids = new ArrayList<>(uris.size());
+        List<String> names = new ArrayList<>(uris.size());
+        for (Uri uri : uris) {
+            String id = uri.getLastPathSegment();
+            if (StringUtils.isNumeric(id)) {
+                ids.add(Long.parseLong(id));
+            } else {
+                names.add(id);
+            }
+        }
+        int numremoved = 0;
+        if (!ids.isEmpty()) {
+            numremoved += CursorHelpers.deleteTracks(getContext(), ArrayUtils.toPrimitive(ids.toArray(new Long[ids.size()])));
+        }
+        if (!names.isEmpty()) {
+            final File rootDir = mStorageLookup.getStorageFile(library);
+            if (!rootDir.exists() || !rootDir.isDirectory() || !rootDir.canRead()) {
+                Timber.e("Can't access path %s", rootDir.getPath());
+                subscriber.onError(new IllegalArgumentException("Can't access path " + rootDir.getPath()));
+                return;
+            }
+            numremoved += FilesUtil.deleteFiles(rootDir, names);
+        }
+        if (!subscriber.isUnsubscribed()) {
+            subscriber.onNext(numremoved == uris.size());
+            subscriber.onCompleted();
+        }
+    }
 }

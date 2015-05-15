@@ -20,6 +20,8 @@ package org.opensilk.music.library.internal;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.opensilk.music.library.provider.LibraryExtras;
+
 /**
  * Specialized execption capable of being sent across ipc. All exceptions
  * sent back to orpheus *must* be wrapped by this.
@@ -48,21 +50,21 @@ public class LibraryException extends Exception implements Parcelable {
          */
         int NETWORK = 3;
         /**
-         * Internal use: argument for {@link org.opensilk.music.library.provider.LibraryMethods.Extras#CAUSE}
+         * Internal use: argument for {@link LibraryExtras#CAUSE}
          * in returned bundle from {@link org.opensilk.music.library.provider.LibraryProvider#call}
          * when invalid method is requested
          */
         int METHOD_NOT_IMPLEMENTED = 4;
         /**
-         * Internal use: argument for {@link org.opensilk.music.library.provider.LibraryMethods.Extras#CAUSE}
+         * Internal use: argument for {@link LibraryExtras#CAUSE}
          * in returned bundle from {@link org.opensilk.music.library.provider.LibraryProvider#call}
          * when requested uri is malformed or unknown
          */
         int ILLEGAL_URI = 5;
         /**
-         * Internal use: argument for {@link org.opensilk.music.library.provider.LibraryMethods.Extras#CAUSE}
+         * Internal use: argument for {@link LibraryExtras#CAUSE}
          * in returned bundle from {@link org.opensilk.music.library.provider.LibraryProvider#call}
-         * when {@link org.opensilk.music.library.provider.LibraryMethods.Extras#CALLBACK} is missing from
+         * when {@link LibraryExtras#BUNDLE_SUBSCRIBER_CALLBACK} is missing from
          * the Extras bundle passed to the call or when the binder is already dead when we received the call
          */
         int BAD_BINDER = 6;

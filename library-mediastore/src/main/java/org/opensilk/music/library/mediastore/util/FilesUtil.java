@@ -25,12 +25,14 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.webkit.MimeTypeMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.library.mediastore.BuildConfig;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Track;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -127,6 +129,24 @@ public class FilesUtil {
                 .setMimeType(guessMimeType(f))
                 .setDataUri(Uri.fromFile(f))
                 .build();
+    }
+
+    public static int deleteFiles(File base, List<String> relPaths) {
+        int numdeleted = 0;
+        for (String name : relPaths) {
+            try {
+                final File f = new File(base, name);
+                if (f.exists() && f.isFile() && f.canWrite()) {
+                    if (!f.delete()) {
+                        Timber.w("Unable to delete file %s", f.getName());
+                    } else {
+                        numdeleted++;
+                    }
+                }
+            } catch (SecurityException e) {
+            }
+        }
+        return numdeleted;
     }
 
     @NonNull

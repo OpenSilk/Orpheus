@@ -23,6 +23,8 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.FragmentActivity;
 
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.mortar.MortarActivity;
 import org.opensilk.common.ui.mortar.PauseAndResumeActivity;
@@ -34,6 +36,9 @@ import org.opensilk.music.playback.control.PlaybackController;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.Optional;
 import mortar.MortarScope;
 
 /**
@@ -42,6 +47,8 @@ import mortar.MortarScope;
 public class NowPlayingActivity extends MortarFragmentActivity {
 
     @Inject protected PlaybackController mPlaybackController;
+
+    @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanel;
 
     public static void startSelf(Context context) {
         Intent i = new Intent(context, NowPlayingActivity.class);
@@ -70,6 +77,7 @@ public class NowPlayingActivity extends MortarFragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nowplaying);
+        ButterKnife.inject(this);
         mPlaybackController.connect();
     }
 
@@ -83,5 +91,14 @@ public class NowPlayingActivity extends MortarFragmentActivity {
     protected void onStop() {
         super.onStop();
         mPlaybackController.notifyForegroundStateChanged(false);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSlidingPanel != null && mSlidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        } else {
+            super.onBackPressed();
+        }
     }
 }

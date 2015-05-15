@@ -33,6 +33,7 @@ import javax.inject.Inject;
 
 import mortar.Presenter;
 import mortar.bundler.BundleService;
+import timber.log.Timber;
 
 /**
  * Created by drew on 3/10/15.
@@ -47,6 +48,19 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
     @Override
     protected BundleService extractBundleService(FragmentManagerOwnerActivity view) {
         return BundleService.getBundleService(view.getScope());
+    }
+
+    public FragmentTransaction newTrasaction() {
+        if (hasView()) {
+            return getView().getSupportFragmentManager().beginTransaction();
+        }
+        throw new IllegalStateException("No view");
+    }
+
+    public void showDialog(MortarDialogFragment f) {
+        if (hasView()) {
+            f.show(getView().getSupportFragmentManager(), f.getScopeName());
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

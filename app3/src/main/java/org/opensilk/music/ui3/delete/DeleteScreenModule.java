@@ -15,30 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.library.provider;
+package org.opensilk.music.ui3.delete;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
- * Method parameters sent to the call
- *
- * Created by drew on 5/3/15.
+ * Created by drew on 5/14/15.
  */
-public interface LibraryMethods {
-    /**
-     * Request plugin config
-     * returned bundle from the call is the dematerialized {@link org.opensilk.music.library.LibraryConfig}
-     */
-    String LIBRARYCONF = "conf";
-    /**
-     * Query the library
-     */
-    String QUERY = "query";
-    /**
-     * Delete item
-     */
-    String DELETE = "delete";
-    /**
-     * Update item
-     */
-    String UPDATE = "update";
+@Module
+public class DeleteScreenModule {
+    final DeleteScreen screen;
 
+    public DeleteScreenModule(DeleteScreen screen) {
+        this.screen = screen;
+    }
+
+    @Provides
+    public DeleteScreen provideScreen() {
+        return screen;
+    }
 }
