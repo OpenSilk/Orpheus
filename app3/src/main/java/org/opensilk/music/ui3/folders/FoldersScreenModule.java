@@ -42,6 +42,7 @@ import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
+import org.opensilk.music.ui3.common.OverflowHandler;
 
 import javax.inject.Named;
 
@@ -86,13 +87,11 @@ public class FoldersScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -114,22 +113,17 @@ public class FoldersScreenModule {
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(FoldersOverflowHandler handler) {
-        return handler;
-    }
-
-    @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
             AppPreferences appPreferences,
             ActionBarMenuConfigWrapper wrapper,
-            final FoldersOverflowHandler foldersOverflowHandler
+            final OverflowHandler foldersOverflowHandler
     ) {
 
         ActionBarMenuConfig.Builder builder = ActionBarMenuConfig.builder();
 
         builder.withMenu(R.menu.folder_sort_by);
         if (screen.libraryInfo.folderId != null) {
-            builder.withMenus(ActionBarMenuConfig.toObject(FoldersOverflowHandler.MENUS_FOLDER));
+            builder.withMenus(ActionBarMenuConfig.toObject(OverflowHandler.FOLDERS));
         }
 
         Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(

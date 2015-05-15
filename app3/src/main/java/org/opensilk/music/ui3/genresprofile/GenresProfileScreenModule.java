@@ -35,9 +35,7 @@ import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.ProfileActivity;
-import org.opensilk.music.ui3.albums.AlbumsOverflowHandler;
 import org.opensilk.music.ui3.albumsprofile.AlbumsProfileScreen;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
@@ -47,12 +45,11 @@ import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
+import org.opensilk.music.ui3.common.OverflowHandler;
 import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.genres.GenresOverflowHandler;
 import org.opensilk.music.ui3.tracksprofile.TrackCollectionOverflowHandler;
 import org.opensilk.music.ui3.tracksprofile.TracksProfileScreen;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Named;
@@ -167,7 +164,7 @@ public class GenresProfileScreenModule {
 
     @Provides @ScreenScope
     public OverflowClickListener provideOverflowClickListener(
-            final AlbumsOverflowHandler albumsOverflowHandler,
+            final OverflowHandler albumsOverflowHandler,
             final TrackCollectionOverflowHandler trackCollectionOverflowHandler
     ) {
         return new OverflowClickListener() {
@@ -197,7 +194,7 @@ public class GenresProfileScreenModule {
     public ActionBarMenuConfig provideMenuConfig(
             AppPreferences appPreferences,
             ActionBarMenuConfigWrapper wrapper,
-            final GenresOverflowHandler genresOverflowHandler
+            final OverflowHandler genresOverflowHandler
     ) {
 
         Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
@@ -245,7 +242,7 @@ public class GenresProfileScreenModule {
         return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
                 .withMenu(R.menu.genre_album_sort_by)
                 .withMenu(R.menu.view_as)
-                .withMenus(ActionBarMenuConfig.toObject(GenresOverflowHandler.MENUS))
+                .withMenus(ActionBarMenuConfig.toObject(OverflowHandler.GENRES))
                 .setActionHandler(handler)
                 .build());
     }

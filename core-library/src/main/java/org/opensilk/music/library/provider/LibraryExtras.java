@@ -42,6 +42,10 @@ public class LibraryExtras {
      */
     public static final String URI = "uri";
     /**
+     *
+     */
+    public static final String NOTIFY_URI = "notify_uri";
+    /**
      * Sortorder: one of the strings in the sort package. never null for {@link LibraryMethods#QUERY}
      */
     public static final String SORTORDER = "sortorder";
@@ -70,6 +74,10 @@ public class LibraryExtras {
 
     public static Uri getUri(Bundle extras) {
         return extras.getParcelable(URI);
+    }
+
+    public static Uri getNotifyUri(Bundle extras) {
+        return extras.getParcelable(NOTIFY_URI);
     }
 
     public static String getSortOrder(Bundle extras) {
@@ -150,13 +158,18 @@ public class LibraryExtras {
             return this;
         }
 
+        public Builder putNotifyUri(Uri uri) {
+            b.putParcelable(NOTIFY_URI, uri);
+            return this;
+        }
+
         public Builder putSortOrder(String sortorder) {
             b.putString(SORTORDER, sortorder);
             return this;
         }
 
         public Builder putUriList(List<Uri> uris) {
-            b.putParcelableArrayList(URI_LIST, new ArrayList<Parcelable>(uris));
+            b.putParcelableArrayList(URI_LIST, uris != null ? new ArrayList<Parcelable>(uris) : null);
             return this;
         }
 

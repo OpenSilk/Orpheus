@@ -21,6 +21,8 @@ import android.content.UriMatcher;
 import android.net.Uri;
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Created by drew on 4/26/15.
  */
@@ -60,7 +62,7 @@ public class LibraryUris {
     }
 
     public static Uri album(String authority, String library, String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return modelBase(authority, library).appendPath(albums).build();
         }
         return modelBase(authority, library).appendPath(album).appendPath(id).build();
@@ -75,7 +77,7 @@ public class LibraryUris {
     }
 
     public static Uri artist(String authority, String library, String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return modelBase(authority, library).appendPath(artists).build();
         }
         return modelBase(authority, library).appendPath(artist).appendPath(id).build();
@@ -94,7 +96,7 @@ public class LibraryUris {
     }
 
     public static Uri folders(String authority, String library, String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return modelBase(authority, library).appendPath(folders).build();
         }
         return modelBase(authority, library).appendPath(folder).appendPath(id).build();
@@ -119,7 +121,7 @@ public class LibraryUris {
     }
 
     public static Uri genre(String authority, String library, String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return modelBase(authority, library).appendPath(genres).build();
         }
         return modelBase(authority, library).appendPath(genre).appendPath(id).build();
@@ -138,7 +140,7 @@ public class LibraryUris {
     }
 
     public static Uri playlist(String authority, String library, String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return modelBase(authority, library).appendPath(playlists).build();
         }
         return modelBase(authority, library).appendPath(playlist).appendPath(id).build();
@@ -153,7 +155,7 @@ public class LibraryUris {
     }
 
     public static Uri track(String authority, String library, String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return modelBase(authority, library).appendPath(tracks).build();
         }
         return modelBase(authority, library).appendPath(track).appendPath(id).build();

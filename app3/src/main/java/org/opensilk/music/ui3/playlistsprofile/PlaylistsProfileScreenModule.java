@@ -35,6 +35,7 @@ import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
+import org.opensilk.music.ui3.common.OverflowHandler;
 import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
@@ -45,8 +46,6 @@ import org.opensilk.music.ui3.dragswipe.TrackDragSwipeEventListener;
 import org.opensilk.music.ui3.dragswipe.TrackItemClickListener;
 import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenter;
 import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenterConfig;
-import org.opensilk.music.ui3.playlists.PlaylistsOverflowHandler;
-import org.opensilk.music.ui3.tracks.TracksOverflowHandler;
 
 import java.util.List;
 
@@ -88,26 +87,6 @@ public class PlaylistsProfileScreenModule {
         return TrackSortOrder.PLAYORDER;
     }
 
-    @Provides @Named("profile_heros")
-    public Boolean provideWantMultiHeros() {
-        return screen.playlist.artInfos.size() > 1;
-    }
-
-    @Provides @Named("profile_heros")
-    public List<ArtInfo> provideHeroArtinfos() {
-        return screen.playlist.artInfos;
-    }
-
-    @Provides @Named("profile_title")
-    public String provideProfileTitle() {
-        return screen.playlist.name;
-    }
-
-    @Provides @Named("profile_subtitle")
-    public String provideProfileSubTitle(@ForApplication Context context) {
-        return UtilsCommon.makeLabel(context, R.plurals.Nsongs, screen.playlist.trackUris.size());
-    }
-
     @Provides @ScreenScope
     public TracksDragSwipePresenterConfig providePresenterConfig(
             TrackItemClickListener itemClickListener,
@@ -134,7 +113,7 @@ public class PlaylistsProfileScreenModule {
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(final TracksOverflowHandler delegate) {
+    public OverflowClickListener provideOverflowClickListener(final OverflowHandler delegate) {
         return new OverflowClickListener() {
             @Override
             public void onBuildMenu(Context context, PopupMenu m, Bundleable item) {
@@ -152,7 +131,7 @@ public class PlaylistsProfileScreenModule {
     @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
             ActionBarMenuConfigWrapper wrapper,
-            final PlaylistsOverflowHandler playlistsOverflowHandler
+            final OverflowHandler playlistsOverflowHandler
     ) {
 
         Func2<Context, Integer, Boolean> handler = new Func2<Context, Integer, Boolean>() {
@@ -168,7 +147,7 @@ public class PlaylistsProfileScreenModule {
         };
 
         return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
-                .withMenus(ActionBarMenuConfig.toObject(PlaylistsOverflowHandler.MENUS))
+                .withMenus(ActionBarMenuConfig.toObject(OverflowHandler.PLAYLISTS))
                 .setActionHandler(handler)
                 .build());
     }

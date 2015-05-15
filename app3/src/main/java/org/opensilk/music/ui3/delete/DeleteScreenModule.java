@@ -32,7 +32,7 @@ public class DeleteScreenModule {
     }
 
     @Provides
-    public DeleteScreen provideScreen() {
-        return screen;
+    public DeleteRequest provideDeleteRequest() {
+        return screen.request;
     }
 }

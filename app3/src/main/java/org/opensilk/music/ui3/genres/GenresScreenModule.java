@@ -88,7 +88,6 @@ public class GenresScreenModule {
     public BundleablePresenterConfig providePresenterConfig(
             AppPreferences preferences,
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
@@ -96,7 +95,6 @@ public class GenresScreenModule {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(grid)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -115,11 +113,6 @@ public class GenresScreenModule {
                         screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Genre)item));
             }
         };
-    }
-
-    @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(GenresOverflowHandler handler) {
-        return handler;
     }
 
     @Provides @ScreenScope

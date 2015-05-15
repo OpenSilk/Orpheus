@@ -63,6 +63,10 @@ public class FragmentManagerOwner extends Presenter<FragmentManagerOwnerActivity
         }
     }
 
+    public int addFragment(MortarFragment f , boolean addToBackstack) {
+        return addFragment(f, f.getScopeName(), addToBackstack);
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public int addFragment(Fragment frag, String tag, boolean addToBackstack) {
         if (!hasView()) return -1;

@@ -17,15 +17,18 @@
 
 package org.opensilk.music.ui3.common;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import org.opensilk.common.ui.widget.AnimatedImageView;
@@ -129,6 +132,16 @@ public class UtilsCommon {
                 //never get here
                 artwork4.setDefaultImage(R.drawable.default_artwork);
             }
+        }
+    }
+
+    public static AppCompatActivity findActivity(Context context) {
+        if (context instanceof Activity) {
+            return (AppCompatActivity) context;
+        } else if (context instanceof ContextWrapper) {
+            return findActivity(((ContextWrapper)context).getBaseContext());
+        } else {
+            throw new IllegalArgumentException("Unable to find activty in context");
         }
     }
 

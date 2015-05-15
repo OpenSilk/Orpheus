@@ -107,15 +107,17 @@ public class FilesUtil {
      */
     @NonNull
     public static String toRelativePath(File base, File f) {
-        String p = f.getAbsolutePath().replace(base.getAbsolutePath(), "");
+        String p = StringUtils.replace(f.getAbsolutePath(), base.getAbsolutePath(), "", 1);
         return !p.startsWith("/") ? p : p.substring(1);
     }
 
     @NonNull
     public static Folder makeFolder(File base, File dir) {
         final String[] children = dir.list();
+        final File parent = dir.getParentFile();
         return Folder.builder()
                 .setIdentity(toRelativePath(base, dir))
+                .setParentIdentity(parent != null ? toRelativePath(base, parent) : null)
                 .setName(dir.getName())
                 .setChildCount(children != null ? children.length : 0)
                 .setDate(formatDate(dir.lastModified()))

@@ -39,9 +39,7 @@ import org.opensilk.music.model.Track;
 import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.ProfileActivity;
-import org.opensilk.music.ui3.albums.AlbumsOverflowHandler;
 import org.opensilk.music.ui3.albumsprofile.AlbumsProfileScreen;
-import org.opensilk.music.ui3.artists.ArtistsOverflowHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
@@ -50,6 +48,7 @@ import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
+import org.opensilk.music.ui3.common.OverflowHandler;
 import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.tracksprofile.TrackCollectionOverflowHandler;
 import org.opensilk.music.ui3.tracksprofile.TracksProfileScreen;
@@ -176,7 +175,7 @@ public class ArtistsProfileScreenModule {
 
     @Provides @ScreenScope
     public OverflowClickListener provideOverflowClickListener(
-            final AlbumsOverflowHandler albumsOverflowHandler,
+            final OverflowHandler albumsOverflowHandler,
             final TrackCollectionOverflowHandler trackCollectionOverflowHandler
     ) {
         return new OverflowClickListener() {
@@ -206,7 +205,7 @@ public class ArtistsProfileScreenModule {
     public ActionBarMenuConfig provideMenuConfig(
             final AppPreferences appPreferences,
             final ActionBarMenuConfigWrapper wrapper,
-            final ArtistsOverflowHandler artistsOverflowHandler
+            final OverflowHandler artistsOverflowHandler
     ) {
 
         Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
@@ -255,7 +254,7 @@ public class ArtistsProfileScreenModule {
         return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
                 .withMenu(R.menu.artist_album_sort_by)
                 .withMenu(R.menu.view_as)
-                .withMenus(ActionBarMenuConfig.toObject(ArtistsOverflowHandler.MENUS))
+                .withMenus(ActionBarMenuConfig.toObject(OverflowHandler.ARTISTS))
                 .setActionHandler(handler)
                 .build());
     }

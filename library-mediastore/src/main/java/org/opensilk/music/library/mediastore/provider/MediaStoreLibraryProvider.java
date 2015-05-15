@@ -63,6 +63,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
+import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -71,6 +72,7 @@ import timber.log.Timber;
 
 import static org.opensilk.music.library.LibraryCapability.ALBUMS;
 import static org.opensilk.music.library.LibraryCapability.ARTISTS;
+import static org.opensilk.music.library.LibraryCapability.DELETE;
 import static org.opensilk.music.library.LibraryCapability.FOLDERSTRACKS;
 import static org.opensilk.music.library.LibraryCapability.GENRES;
 import static org.opensilk.music.library.LibraryCapability.PLAYLISTS;
@@ -110,7 +112,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
     @Override
     protected LibraryConfig getLibraryConfig() {
         return LibraryConfig.builder()
-                .setCapabilities(FOLDERSTRACKS|ALBUMS|ARTISTS|GENRES|PLAYLISTS|TRACKS)
+                .setCapabilities(FOLDERSTRACKS|ALBUMS|ARTISTS|GENRES | PLAYLISTS | TRACKS | DELETE)
                 .setPickerComponent(new ComponentName(getContext(), StoragePickerActivity.class),
                         getContext().getString(R.string.folders_picker_title))
                 .setAuthority(mAuthority)
@@ -389,6 +391,7 @@ public class MediaStoreLibraryProvider extends LibraryProvider {
     }
 
     @Override
+    @DebugLog
     protected void deleteTracks(String library, Subscriber<? super Boolean> subscriber, Bundle args) {
         List<Uri> uris = LibraryExtras.getUriList(args);
         List<Long> ids = new ArrayList<>(uris.size());

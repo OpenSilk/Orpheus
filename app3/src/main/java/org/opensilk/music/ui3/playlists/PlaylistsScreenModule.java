@@ -91,7 +91,6 @@ public class PlaylistsScreenModule {
     public BundleablePresenterConfig providePresenterConfig(
             AppPreferences preferences,
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
@@ -99,7 +98,6 @@ public class PlaylistsScreenModule {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(grid)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -113,11 +111,6 @@ public class PlaylistsScreenModule {
                         screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Playlist) item));
             }
         };
-    }
-
-    @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(PlaylistsOverflowHandler handler) {
-        return handler;
     }
 
     @Provides @ScreenScope

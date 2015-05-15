@@ -17,12 +17,13 @@
 
 package org.opensilk.music.ui3.delete;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.opensilk.common.core.mortar.DaggerService;
@@ -31,8 +32,6 @@ import org.opensilk.music.R;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnClick;
 import hugo.weaving.DebugLog;
 
 /**
@@ -42,10 +41,7 @@ public class DeleteScreenView extends FrameLayout {
 
     @Inject DeleteScreenPresenter mPresenter;
 
-    @InjectView(R.id.title) TextView mTitle;
-    @InjectView(R.id.message) TextView mMessage;
-    @InjectView(R.id.message_container) ViewGroup mMessageContainer;
-    @InjectView(R.id.loading_progress) ProgressBar mProgress;
+    Dialog mDialog;
 
     public DeleteScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -64,39 +60,78 @@ public class DeleteScreenView extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mPresenter.dropView(this);
-    }
-
-    void setTitle(String title) {
-        mTitle.setText(getResources().getString(R.string.delete_dialog_title, title));
+        dismissDialog();
     }
 
     void gotoLoading() {
-        mMessageContainer.setVisibility(GONE);
-        mProgress.setVisibility(VISIBLE);
+        showProgress();
     }
 
-    void showSuccess() {
-        Toast.makeText(getContext(), "Success", Toast.LENGTH_LONG).show();
-        mPresenter.dismissSelf();
+    void showDelete(String title) {
+        dismissDialog();
+        mDialog = new AlertDialog.Builder(getContext())
+                .setTitle(getResources().getString(R.string.delete_dialog_title, title))
+                .setMessage(R.string.cannot_be_undone)
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    @DebugLog
+                    public void onCancel(DialogInterface dialog) {
+                        mPresenter.dismissSelf();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mPresenter.dismissSelf();
+                    }
+                })
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mPresenter.doDelete();
+                        showProgress();
+                    }
+                })
+                .show();
+    }
+
+    void showProgress() {
+        dismissDialog();
+        mDialog = new ProgressDialog(getContext());
+        mDialog.setCancelable(false);
+        mDialog.show();
     }
 
     void showError(String msg) {
-        if (msg == null) {
-            Toast.makeText(getContext(), R.string.err_generic, Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(getContext(), msg, Toast.LENGTH_LONG).show();
+        dismissDialog();
+        mDialog = new AlertDialog.Builder(getContext())
+                .setTitle(R.string.err_generic)
+                .setMessage(msg)
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    @DebugLog
+                    public void onCancel(DialogInterface dialog) {
+                        mPresenter.dismissSelf();
+                    }
+                })
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mPresenter.dismissSelf();
+                    }
+                })
+                .show();
+    }
+
+    void dismissDialog() {
+        if (mDialog != null) {
+            mDialog.dismiss();
         }
-        mPresenter.dismissSelf();
     }
 
-    @OnClick(R.id.btn_negative)
-    public void onCancel() {
+    void showSuccess() {
+        dismissDialog();
+        Toast.makeText(getContext(), "Success", Toast.LENGTH_LONG).show();
         mPresenter.dismissSelf();
-    }
-
-    @OnClick(R.id.btn_positive)
-    public void onOk() {
-        gotoLoading();
-        mPresenter.doDelete();
     }
 }

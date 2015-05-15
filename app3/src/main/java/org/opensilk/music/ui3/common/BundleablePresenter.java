@@ -79,7 +79,8 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
             ArtworkRequestManager requestor,
             BundleableLoader loader,
             FragmentManagerOwner fm,
-            BundleablePresenterConfig config
+            BundleablePresenterConfig config,
+            OverflowHandler defaultOverflowHandler
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
@@ -87,7 +88,8 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
         this.fm = fm;
         this.wantGrid = config.wantsGrid;
         this.itemClickListener = config.itemClickListener;
-        this.overflowClickListener = config.overflowClickListener;
+        this.overflowClickListener = config.overflowClickListener != null ?
+                config.overflowClickListener : defaultOverflowHandler;
         this.menuConfig = config.menuConfig;
         this.loaderSeed = config.loaderSeed;
     }

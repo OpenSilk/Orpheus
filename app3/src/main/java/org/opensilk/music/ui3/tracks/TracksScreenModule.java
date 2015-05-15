@@ -88,13 +88,11 @@ public class TracksScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -107,11 +105,6 @@ public class TracksScreenModule {
                 delegate.playAllItems(context, presenter.getItems(), item);
             }
         };
-    }
-
-    @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(TracksOverflowHandler handler) {
-        return handler;
     }
 
     @Provides @ScreenScope

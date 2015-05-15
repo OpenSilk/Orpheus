@@ -43,7 +43,6 @@ import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.common.UtilsCommon;
-import org.opensilk.music.ui3.tracks.TracksOverflowHandler;
 
 import java.util.List;
 
@@ -115,13 +114,11 @@ public class TracksProfileScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -134,11 +131,6 @@ public class TracksProfileScreenModule {
                 delegate.playAllItems(context, presenter.getItems(), item);
             }
         };
-    }
-
-    @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(final TracksOverflowHandler delegate) {
-        return delegate;
     }
 
     @Provides @ScreenScope
@@ -200,10 +192,10 @@ public class TracksProfileScreenModule {
         };
 
         return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
+                .withMenu(R.menu.song_sort_by)
                 .withMenu(R.menu.popup_play_all)
                 .withMenu(R.menu.popup_shuffle_all)
                 .withMenu(R.menu.popup_add_to_queue)
-                .withMenu(R.menu.song_sort_by)
                 .setActionHandler(handler)
                 .build());
     }

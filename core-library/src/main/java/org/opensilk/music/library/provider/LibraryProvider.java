@@ -53,6 +53,7 @@ import hugo.weaving.DebugLog;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
+import rx.functions.Action0;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -272,6 +273,7 @@ public abstract class LibraryProvider extends ContentProvider {
 
                 final Bundle args = LibraryExtras.b()
                         .putUriList(LibraryExtras.getUriList(extras))
+                        .putNotifyUri(LibraryExtras.getNotifyUri(extras))
                         .get();
 
                 switch (mMatcher.match(uri)) {
@@ -283,7 +285,7 @@ public abstract class LibraryProvider extends ContentProvider {
                         deletePlaylistInternal(library, identity, subscriber, args);
                         break;
                     }
-                    case M_TRACK: {
+                    case M_TRACKS: {
                         deleteTrackInternal(library, subscriber, args);
                         break;
                     }
@@ -652,6 +654,15 @@ public abstract class LibraryProvider extends ContentProvider {
                 })
                 .subscribeOn(scheduler)
                 .first()
+                .doOnCompleted(new Action0() {
+                    @Override
+                    public void call() {
+                        Uri u = LibraryExtras.getNotifyUri(args);
+                        if (u != null) {
+                            getContext().getContentResolver().notifyChange(u, null);
+                        }
+                    }
+                })
                 .subscribe(subscriber);
     }
 
@@ -665,6 +676,15 @@ public abstract class LibraryProvider extends ContentProvider {
                 })
                 .subscribeOn(scheduler)
                 .first()
+                .doOnCompleted(new Action0() {
+                    @Override
+                    public void call() {
+                        Uri u = LibraryExtras.getNotifyUri(args);
+                        if (u != null) {
+                            getContext().getContentResolver().notifyChange(u, null);
+                        }
+                    }
+                })
                 .subscribe(subscriber);
     }
 
@@ -678,6 +698,15 @@ public abstract class LibraryProvider extends ContentProvider {
                 })
                 .subscribeOn(scheduler)
                 .first()
+                .doOnCompleted(new Action0() {
+                    @Override
+                    public void call() {
+                        Uri u = LibraryExtras.getNotifyUri(args);
+                        if (u != null) {
+                            getContext().getContentResolver().notifyChange(u, null);
+                        }
+                    }
+                })
                 .subscribe(subscriber);
     }
 

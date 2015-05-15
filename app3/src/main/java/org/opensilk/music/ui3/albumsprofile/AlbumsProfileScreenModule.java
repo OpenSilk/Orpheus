@@ -20,7 +20,6 @@ package org.opensilk.music.ui3.albumsprofile;
 import android.content.Context;
 import android.net.Uri;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
@@ -32,7 +31,6 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.TrackSortOrder;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.albums.AlbumsOverflowHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
@@ -41,8 +39,7 @@ import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
-import org.opensilk.music.ui3.tracks.TracksOverflowHandler;
+import org.opensilk.music.ui3.common.OverflowHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -110,13 +107,11 @@ public class AlbumsProfileScreenModule {
     @Provides @ScreenScope
     public BundleablePresenterConfig providePresenterConfig(
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(false)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -132,15 +127,10 @@ public class AlbumsProfileScreenModule {
     }
 
     @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(TracksOverflowHandler delegate) {
-        return delegate;
-    }
-
-    @Provides @ScreenScope
     public ActionBarMenuConfig provideMenuConfig(
             AppPreferences preferences,
             ActionBarMenuConfigWrapper wrapper,
-            final AlbumsOverflowHandler albumsOverflowHandler
+            final OverflowHandler albumsOverflowHandler
     ) {
 
     Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
@@ -173,8 +163,9 @@ public class AlbumsProfileScreenModule {
                     return true;
                 default:
                     try {
-                        return albumsOverflowHandler.onItemClicked(context,
-                                OverflowAction.valueOf(integer), screen.album);
+                        OverflowAction action = OverflowAction.valueOf(integer);
+                        boolean handled = albumsOverflowHandler.onItemClicked(context, action, screen.album);
+                        return handled;
                     } catch (IllegalArgumentException e) {
                         return false;
                     }
@@ -184,7 +175,7 @@ public class AlbumsProfileScreenModule {
 
     return wrapper.injectCommonItems(ActionBarMenuConfig.builder()
             .withMenu(R.menu.album_song_sort_by)
-            .withMenus(ActionBarMenuConfig.toObject(AlbumsOverflowHandler.MENUS))
+            .withMenus(ActionBarMenuConfig.toObject(OverflowHandler.ALBUMS))
             .setActionHandler(handler)
             .build());
     }

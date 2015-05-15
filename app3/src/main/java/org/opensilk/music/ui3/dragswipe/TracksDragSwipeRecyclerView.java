@@ -37,6 +37,7 @@ import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
 import org.opensilk.music.ui3.common.BundleableRecyclerView;
+import org.opensilk.music.ui3.common.UtilsCommon;
 
 import javax.inject.Inject;
 
@@ -94,7 +95,7 @@ public class TracksDragSwipeRecyclerView extends RecyclerListFrame {
 
     protected void startActionMode() {
         if (mActionMode == null) {
-            mActionMode = findActivity(getContext()).startSupportActionMode(mActionModeCallback);
+            mActionMode = UtilsCommon.findActivity(getContext()).startSupportActionMode(mActionModeCallback);
         }
     }
 
@@ -112,16 +113,6 @@ public class TracksDragSwipeRecyclerView extends RecyclerListFrame {
 
     public TracksDragSwipePresenter getPresenter() {
         return mPresenter;
-    }
-
-    static AppCompatActivity findActivity(Context context) {
-        if (context instanceof Activity) {
-            return (AppCompatActivity) context;
-        } else if (context instanceof ContextWrapper) {
-            return findActivity(((ContextWrapper)context).getBaseContext());
-        } else {
-            throw new IllegalArgumentException("Unable to find activty in context");
-        }
     }
 
     final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {

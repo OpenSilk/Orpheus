@@ -92,7 +92,6 @@ public class ArtistsScreenModule {
     public BundleablePresenterConfig providePresenterConfig(
             AppPreferences preferences,
             ItemClickListener itemClickListener,
-            OverflowClickListener overflowClickListener,
             ActionBarMenuConfig menuConfig
     ) {
         boolean grid = preferences.isGrid(preferences.makePluginPrefKey(screen.libraryConfig,
@@ -100,7 +99,6 @@ public class ArtistsScreenModule {
         return BundleablePresenterConfig.builder()
                 .setWantsGrid(grid)
                 .setItemClickListener(itemClickListener)
-                .setOverflowClickListener(overflowClickListener)
                 .setMenuConfig(menuConfig)
                 .build();
     }
@@ -114,11 +112,6 @@ public class ArtistsScreenModule {
                         screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Artist)item));
             }
         };
-    }
-
-    @Provides @ScreenScope
-    public OverflowClickListener provideOverflowClickListener(ArtistsOverflowHandler delegate) {
-        return delegate;
     }
 
     @Provides @ScreenScope

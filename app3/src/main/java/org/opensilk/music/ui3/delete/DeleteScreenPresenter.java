@@ -21,12 +21,11 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
-import android.widget.Toast;
+import android.os.Looper;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.music.R;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.library.internal.DeleteSubscriber;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
@@ -34,16 +33,9 @@ import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.BundleableLoader;
-import org.opensilk.music.model.Album;
-import org.opensilk.music.model.Artist;
-import org.opensilk.music.model.Folder;
-import org.opensilk.music.model.Playlist;
-import org.opensilk.music.model.Track;
-import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -51,9 +43,12 @@ import javax.inject.Inject;
 import mortar.ViewPresenter;
 import rx.Observable;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Action2;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 
@@ -64,11 +59,8 @@ import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
 
     final Context appContext;
-    final DeleteScreen screen;
-    final DeleteScreenFragmentPresenter fragmentPresenter;
-
-    final String authority;
-    final String libraryId;
+    final DeleteRequest request;
+    final FragmentManagerOwner fm;
 
     boolean inprogress = false;
     boolean complete = false;
@@ -79,24 +71,18 @@ public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
     @Inject
     public DeleteScreenPresenter(
             @ForApplication Context appContext,
-            DeleteScreen screen,
-            DeleteScreenFragmentPresenter fragmentPresenter
+            DeleteRequest request,
+            FragmentManagerOwner fm
     ) {
         this.appContext = appContext;
-        this.screen = screen;
-        this.fragmentPresenter = fragmentPresenter;
-        this.authority = screen.libraryConfig.authority;
-        this.libraryId = screen.libraryInfo.libraryId;
+        this.request = request;
+        this.fm = fm;
     }
 
     @Override
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        if (screen.bundleable != null) {
-            getView().setTitle(screen.bundleable.getName());
-        } else if (screen.what != null) {
-            getView().setTitle(screen.what);
-        } //else todo
+        getView().showDelete(request.name);
         if (complete) {
             if (success) {
                 getView().showSuccess();
@@ -108,8 +94,14 @@ public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
         }
     }
 
+    boolean dismisscalled = false;
     void dismissSelf() {
-        fragmentPresenter.dismiss();
+        if (!dismisscalled) {
+            dismisscalled = true;
+            fm.goBack();
+        } else {
+            Timber.e("Dismiss called more than once");
+        }
     }
 
     void notifySuccess() {
@@ -133,61 +125,32 @@ public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
 
     void doDelete() {
         inprogress = true;
-        if (screen.trackUris != null) {
-            deleteTracks(screen.trackUris);
-        } else if (screen.bundleable != null) {
-            Bundleable b = screen.bundleable;
-            if (b instanceof Album) {
-                deleteAlbum((Album)b);
-            } else if (b instanceof Artist) {
-                deleteArtist((Artist)b);
-            } else if (b instanceof Folder) {
-                deleteFolder((Folder)b);
-            } else if (b instanceof Playlist) {
-                deletePlaylist((Playlist) b);
-            } else if (b instanceof Track) {
-                deleteTrack((Track)b);
-            } // else TODO
-        } // else TODO
+        if (request.tracksUri != null) {
+            deleteTracks(request.tracksUri, request.notifyUri);
+        } else if (request.trackUrisList != null) {
+            deleteTracks(request.trackUrisList, request.notifyUri);
+        } else if (request.callUri != null) {
+            delete(request.callUri, request.notifyUri);
+        } //else todo
     }
 
-    void deleteAlbum(Album album) {
-        Uri uri = LibraryUris.albumTracks(authority, libraryId, album.identity);
-        deleteTracks(uri);
-    }
-
-    void deleteArtist(Artist artist) {
-        Uri uri = LibraryUris.artistTracks(authority, libraryId, artist.identity);
-        deleteTracks(uri);
-    }
-
-    void deleteFolder(Folder folder) {
-        Uri uri = LibraryUris.folders(authority, libraryId, folder.identity);
-        delete(uri);
-    }
-
-    void deletePlaylist(Playlist playlist) {
-        Uri uri = LibraryUris.playlist(authority, libraryId, playlist.identity);
-        delete(uri);
-    }
-
-    void deleteTrack(Track track) {
-        Uri uri =LibraryUris.track(authority, libraryId, track.identity);
-        deleteTracks(Collections.singletonList(uri));
-    }
-
-    void delete(Uri uri) {
+    //For folders and playlists
+    void delete(Uri uri, Uri notiyUri) {
         Bundle extras = LibraryExtras.b()
                 .putUri(uri)
+                .putNotifyUri(notiyUri)
                 .putResultReceiver(makeResultReceiver())
                 .get();
         appContext.getContentResolver().call(uri, LibraryMethods.DELETE, null, extras);
     }
 
-    void deleteTracks(Uri uri) {
+    //for albums and artists
+    void deleteTracks(Uri uri, final Uri notifyUri) {
         if (isSubscribed(loaderSubscription)) {
             return;
         }
+        final String authority = uri.getAuthority();
+        final String libraryId = uri.getPathSegments().get(0);
         loaderSubscription = new BundleableLoader(appContext, uri, null).createObservable()
                 .flatMap(new Func1<List<Bundleable>, Observable<Bundleable>>() {
                     @Override
@@ -198,14 +161,15 @@ public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
                 .collect(new ArrayList<Uri>(), new Action2<ArrayList<Uri>, Bundleable>() {
                     @Override
                     public void call(ArrayList<Uri> uris, Bundleable track) {
-                        Uri uri = LibraryUris.track(authority, libraryId, track.getIdentity());
-                        uris.add(uri);
+                        uris.add(LibraryUris.track(authority, libraryId, track.getIdentity()));
                     }
                 })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<ArrayList<Uri>>() {
                     @Override
                     public void call(ArrayList<Uri> uris) {
-                        deleteTracks(uris);
+                        deleteTracks(uris, notifyUri);
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -215,10 +179,12 @@ public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
                 });
     }
 
-    void deleteTracks(List<Uri> trackUris) {
-        final Uri uri = LibraryUris.tracks(authority, libraryId);
+    //usually for single tracks
+    void deleteTracks(List<Uri> trackUris, Uri notifyUri) {
+        final Uri uri = LibraryUris.tracks(notifyUri.getAuthority(), notifyUri.getPathSegments().get(0));
         Bundle extras = LibraryExtras.b()
                 .putUri(uri)
+                .putNotifyUri(notifyUri)
                 .putResultReceiver(makeResultReceiver())
                 .putUriList(trackUris)
                 .get();
@@ -229,7 +195,7 @@ public class DeleteScreenPresenter extends ViewPresenter<DeleteScreenView> {
     }
 
     ResultReceiver makeResultReceiver() {
-        return new ResultReceiver(new Handler()) {
+        return new ResultReceiver(new Handler(Looper.getMainLooper())) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 if (resultCode == DeleteSubscriber.RESULT) {
