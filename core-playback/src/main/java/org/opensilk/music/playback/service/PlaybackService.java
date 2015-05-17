@@ -189,6 +189,7 @@ public class PlaybackService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
+            acquireWakeLock();
 
             String action = intent.getAction();
 
@@ -261,9 +262,13 @@ public class PlaybackService extends Service {
     }
 
     void updateNotification() {
-        if (mPlaybackStateHelper.isActive() || !mAnyActivityInForeground) {
+        //we show notification when playing even if activity is showing
+        //this is for lockscreen so it doesnt disappear when whe turn on the screen
+        if (!mAnyActivityInForeground || mPlaybackStateHelper.isPlaying()) {
             mNotificationHelper.buildNotification(mCurrentTrack,
                     mPlaybackStateHelper.shouldShowPauseButton(), mMediaSession.getSessionToken());
+        } else {
+            mNotificationHelper.killNotification();
         }
     }
 
