@@ -86,8 +86,8 @@ public class VisualizerView extends View {
       throw new NullPointerException("Cannot link to null MediaPlayer");
     }
 
-      // Create the Visualizer object and attach it to our media player.
-      link(player.getAudioSessionId());
+    // Create the Visualizer object and attach it to our media player.
+    link(player.getAudioSessionId());
 
     // Enabled Visualizer and disable when we're done with the stream
     setEnabled(true);
@@ -101,38 +101,41 @@ public class VisualizerView extends View {
     });
   }
 
-    public void link(int sessionId) {
-        try {
-            mVisualizer = new Visualizer(sessionId);
-        } catch (RuntimeException e) {
-            Toast.makeText(getContext(), R.string.err_no_visualizations_foru, Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-
-        // Pass through Visualizer data to VisualizerView
-        Visualizer.OnDataCaptureListener captureListener = new Visualizer.OnDataCaptureListener()
-        {
-            @Override
-            public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes,
-                                              int samplingRate)
-            {
-                updateVisualizer(bytes);
-            }
-
-            @Override
-            public void onFftDataCapture(Visualizer visualizer, byte[] bytes,
-                                         int samplingRate)
-            {
-                updateVisualizerFFT(bytes);
-            }
-        };
-
-        mVisualizer.setDataCaptureListener(captureListener,
-                Visualizer.getMaxCaptureRate() / 2, true, true);
-
+  public void link(int sessionId) {
+    try {
+      mVisualizer = new Visualizer(sessionId);
+    } catch (RuntimeException e) {
+      Toast.makeText(getContext(), R.string.err_no_visualizations_foru, Toast.LENGTH_LONG).show();
+      return;
     }
+
+    mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+
+    // Pass through Visualizer data to VisualizerView
+    Visualizer.OnDataCaptureListener captureListener = new Visualizer.OnDataCaptureListener()
+    {
+      @Override
+      public void onWaveFormDataCapture(Visualizer visualizer, byte[] bytes,
+                                        int samplingRate)
+      {
+        updateVisualizer(bytes);
+      }
+
+      @Override
+      public void onFftDataCapture(Visualizer visualizer, byte[] bytes,
+                                   int samplingRate)
+      {
+        updateVisualizerFFT(bytes);
+      }
+    };
+
+    mVisualizer.setDataCaptureListener(captureListener,
+            Visualizer.getMaxCaptureRate() / 2, true, true);
+  }
+
+  public boolean isLinked() {
+    return mVisualizer != null;
+  }
 
   public void addRenderer(Renderer renderer)
   {
@@ -154,16 +157,16 @@ public class VisualizerView extends View {
   public void release()
   {
     if (mVisualizer != null) {
-        mVisualizer.release();
-        mVisualizer = null;
+      mVisualizer.release();
+      mVisualizer = null;
     }
   }
 
-    public void setEnabled(boolean enabled) {
-        if (mVisualizer != null && mVisualizer.getEnabled() != enabled) {
-            mVisualizer.setEnabled(enabled);
-        }
+  public void setEnabled(boolean enabled) {
+    if (mVisualizer != null && mVisualizer.getEnabled() != enabled) {
+      mVisualizer.setEnabled(enabled);
     }
+  }
 
   /**
    * Pass data to the visualizer. Typically this will be obtained from the
@@ -200,7 +203,6 @@ public class VisualizerView extends View {
 
   Bitmap mCanvasBitmap;
   Canvas mCanvas;
-
 
   @Override
   protected void onDraw(Canvas canvas) {

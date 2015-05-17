@@ -200,7 +200,7 @@ public class NowPlayingScreenView extends RelativeLayout {
                 break;
             }
         }
-        attachVisualizer(presenter.sessionId);
+//        attachVisualizer(presenter.sessionId);
     }
 
     @DebugLog
@@ -209,7 +209,7 @@ public class NowPlayingScreenView extends RelativeLayout {
         if (id == AudioEffect.ERROR_BAD_VALUE) return;
         if (visualizerView == null) return;
         visualizerView.link(id);
-        setVisualizerEnabled(presenter.isPlaying);
+//        setVisualizerEnabled(presenter.isPlaying);
     }
 
     @DebugLog
@@ -221,7 +221,9 @@ public class NowPlayingScreenView extends RelativeLayout {
     @DebugLog
     void setVisualizerEnabled(boolean enabled) {
         if (visualizerView == null) return;
-        visualizerView.setEnabled(enabled);
+        if (visualizerView.isLinked()) {
+            visualizerView.setEnabled(enabled);
+        }
     }
 
     void initArtwork() {

@@ -143,8 +143,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
 
     @DebugLog
     void setup() {
-        sessionId = playbackController.getAudioSessionId();
-        getView().attachVisualizer(sessionId);
+        getSessionId();
         if (lastArtInfo != null) {
             loadArtwork(lastArtInfo);
         }
@@ -337,6 +336,25 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         if (hasView()) {
             boolean visible = getView().currentTime.getVisibility() == View.VISIBLE;
             getView().currentTime.setVisibility(visible ? View.INVISIBLE : View.VISIBLE);
+        }
+    }
+
+    void getSessionId() {
+        sessionId = playbackController.getAudioSessionId();
+        if (sessionId == AudioEffect.ERROR_BAD_VALUE) {
+            Observable.timer(500, TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Long>() {
+                        @Override
+                        public void call(Long aLong) {
+                            getSessionId();
+                        }
+                    });
+        } else if (hasView()) {
+            getView().attachVisualizer(sessionId);
+            if (isPlaying) {
+                getView().setVisualizerEnabled(true);
+            }
         }
     }
 

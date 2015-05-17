@@ -146,7 +146,8 @@ dependencies {
 
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'
-    compile 'com.triggertrap:seekarc:1.1-SNAPSHOT@aar'
+    compile 'com.triggertrap:seekarc:1.1.1-SNAPSHOT@aar'
+//    compile project(':../../apps/SeekArc/SeekArc_library')
 
     compile project(':core-model')
     compile project(':core-library')
