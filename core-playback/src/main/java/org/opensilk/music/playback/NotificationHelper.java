@@ -127,7 +127,7 @@ public class NotificationHelper {
             return;
         }
 
-        if (track.equals(mCurrentInfo.track) && isPlaying == mCurrentInfo.isPlaying) {
+        if (track == null || track.equals(mCurrentInfo.track) && isPlaying == mCurrentInfo.isPlaying) {
             return;
         }
 

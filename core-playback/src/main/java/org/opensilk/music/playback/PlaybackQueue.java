@@ -22,6 +22,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +33,7 @@ import java.util.ListIterator;
 import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 /**
  * Created by drew on 5/7/15.
@@ -297,7 +301,7 @@ public class PlaybackQueue {
         }
     }
 
-    void updateQueueMeta() {
+    public void updateQueueMeta() {
         List<QueueItem> qm;
         if (mQueueMeta == null) {
             qm = new ArrayList<>(mQueue.size());
@@ -308,37 +312,63 @@ public class PlaybackQueue {
         }
         ListIterator<Uri> qi = mQueue.listIterator();
         ListIterator<QueueItem> qmi = qm.listIterator();
-        boolean endofsame = false;
+        //if this was a change towards the end the start of the lists will be the same
         while (qi.hasNext() && qmi.hasNext()) {
             final Uri uri = qi.next();
             final QueueItem item = qmi.next();
-            if (uri.toString().equals(item.getDescription().getMediaId())) {
-                if (endofsame) {
-                    qmi.set(new QueueItem(item.getDescription(), qi.previousIndex()));
-                }
-            } else {
-                if (!endofsame) {
-                    endofsame = true;
-                }
-                boolean found = false;
-                if (mQueueMeta != null) {
-                    for (QueueItem item2 : mQueueMeta) {
-                        if (uri.toString().equals(item2.getDescription().getMediaId())) {
-                            found = true;
-                            qmi.set(new QueueItem(item2.getDescription(), qi.previousIndex()));
-                            break;
-                        }
+            if (!StringUtils.equals(uri.toString(), item.getDescription().getMediaId())) {
+                //rewind
+                qi.previous();
+                qmi.previous();
+                break;
+            }
+        }
+        //loop the remaining queue and update meta to match
+        while (qi.hasNext()) {
+            final Uri uri = qi.next();
+            QueueItem queueItem = null;
+            if (mQueueMeta != null) {
+                //check if item exits in another position.
+                for (QueueItem item2 : mQueueMeta) {
+                    if (uri.toString().equals(item2.getDescription().getMediaId())) {
+                        queueItem = new QueueItem(item2.getDescription(), qi.previousIndex());
+                        break;
                     }
                 }
-                if (!found) {
-                    qmi.set(mMetaHelper.buildQueueItem(uri, qi.previousIndex()));
+            }
+            if (queueItem == null) {
+                //new item, fetch the meta from the provider
+                //todo it would be great to fetch all at once
+                queueItem = mMetaHelper.buildQueueItem(uri, qi.previousIndex());
+            }
+            if (queueItem == null) {
+                //item was removed externally todo this might fuckup currentpos
+                qi.remove();
+            } else {
+                if (qmi.hasNext()) {
+                    //replace next with the new value
+                    qmi.next();
+                    qmi.set(queueItem);
+                } else {
+                    //add new value
+                    qmi.add(queueItem);
                 }
             }
         }
-        while (qi.hasNext()) {
-            qmi.add(mMetaHelper.buildQueueItem(qi.next(), qi.previousIndex()));
-        }
+        mCurrentPos = clamp(mCurrentPos); //safety, todo check proper
         mQueueMeta = qm;
+
+        if (mQueue.size() != mQueueMeta.size()) {
+            Timber.e("Queues don't match");
+        }
+        qi = mQueue.listIterator();
+        qmi = mQueueMeta.listIterator();
+        int ii=0;
+        while (qi.hasNext() && qmi.hasNext()) {
+            Uri uri = qi.next();
+            QueueItem queueItem = qmi.next();
+            Timber.v("%d -> %s\n%d -> %s", ii++, uri, queueItem.getQueueId(), queueItem.getDescription().getMediaId());
+        }
     }
 
     void notifyCurrentPosChanged() {
