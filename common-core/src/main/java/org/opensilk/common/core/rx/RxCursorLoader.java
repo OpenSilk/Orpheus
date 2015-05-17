@@ -27,6 +27,7 @@ import android.os.Looper;
 import org.opensilk.common.core.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import rx.Observable;
@@ -160,6 +161,9 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                             if (subscriber.isUnsubscribed()) return;
                             subscriber.onNext(item);
                         } while (c.moveToNext());
+                    } else {
+                        emmitError(new UnsupportedOperationException("Unable to move cursor"), subscriber);
+                        return;
                     }
                     if (!subscriber.isUnsubscribed()) {
                         subscriber.onCompleted();
@@ -238,6 +242,10 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
 
     protected void dump(Throwable throwable) {
         Timber.e(throwable, "RxCursorLoader(uri=%s\nprojection=%s\nselection=%s\nselectionArgs=%s\nsortOrder=%s",
-                uri, projection, selection, selectionArgs, sortOrder);
+                uri,
+                projection != null ? Arrays.toString(projection) : null,
+                selection,
+                selectionArgs != null ? Arrays.toString(selectionArgs) : null,
+                sortOrder);
     }
 }
