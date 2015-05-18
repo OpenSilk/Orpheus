@@ -31,6 +31,8 @@ import org.opensilk.music.library.mediastore.MediaStoreLibraryComponent;
 import org.opensilk.music.library.mediastore.R;
 import org.opensilk.music.library.mediastore.util.StorageLookup;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import mortar.MortarScope;
@@ -66,17 +68,10 @@ public class StoragePickerActivity extends MortarActivity {
 
         setResult(RESULT_CANCELED, new Intent());
 
-        final String[] storagePaths = mStorageLookup.getStoragePaths();
-        final String[] storageLocations;
-        if (storagePaths.length == 2) {
-            storageLocations = new String[] {
-                    getString(R.string.folders_storage_primary),
-                    getString(R.string.folders_storage_secondary)
-            };
-        } else {
-            storageLocations = new String[] {
-                    getString(R.string.folders_storage_primary)
-            };
+        final List<StorageLookup.StorageVolume> volumes = mStorageLookup.getStorageVolumes();
+        final String[] storageLocations = new String[volumes.size()];
+        for (int ii=0; ii<volumes.size(); ii++) {
+            storageLocations[ii] = volumes.get(ii).description;
         }
 
         mDialog = new AlertDialog.Builder(this)
@@ -84,7 +79,8 @@ public class StoragePickerActivity extends MortarActivity {
                 .setItems(storageLocations, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        LibraryInfo libraryInfo = new LibraryInfo(String.valueOf(which), storageLocations[which], null, null);
+                        LibraryInfo libraryInfo = new LibraryInfo(String.valueOf(volumes.get(which).id),
+                                String.valueOf(volumes.get(which).description), null, null);
                         Intent i = new Intent().putExtra(LibraryConstants.EXTRA_LIBRARY_INFO, libraryInfo);
                         setResult(RESULT_OK, i);
                         dialog.dismiss();

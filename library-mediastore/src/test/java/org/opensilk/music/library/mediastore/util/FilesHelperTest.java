@@ -25,14 +25,14 @@ import org.robolectric.annotation.Config;
 import java.io.File;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.opensilk.music.library.mediastore.util.FilesUtil.*;
+import static org.opensilk.music.library.mediastore.util.FilesHelper.*;
 
 /**
  * Created by drew on 11/11/14.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config( manifest = Config.NONE)
-public class FilesUtilTest {
+public class FilesHelperTest {
 
     @Test
     public void testGetFileExtension() {

@@ -41,4 +41,12 @@ public class MediaStoreLibraryAuthorityModule {
     public String provideMediaStoreLibraryAuthority(@Named("mediaStoreLibraryBaseAuthority") String baseAuthority) {
         return AUTHORITY_PFX + baseAuthority;
     }
+    @Provides @Named("foldersLibraryBaseAuthority")
+    public String provideFoldersLibraryBaseAuthority(@ForApplication Context context) {
+        return context.getPackageName() + ".provider.foldersLibrary";
+    }
+    @Provides @Named("foldersLibraryAuthority")
+    public String provideFoldersLibraryAuthority(@Named("foldersLibraryBaseAuthority") String baseAuthority) {
+        return AUTHORITY_PFX + baseAuthority;
+    }
 }

@@ -41,7 +41,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import timber.log.Timber;
 
@@ -53,7 +52,7 @@ import static org.opensilk.music.library.mediastore.util.CursorHelpers.getString
 /**
  * Created by drew on 4/28/15.
  */
-public class FilesUtil {
+public class FilesHelper {
     public static final boolean DUMPSTACKS = BuildConfig.DEBUG;
 
     private static final DateFormat sDateFormat;
@@ -65,7 +64,7 @@ public class FilesUtil {
     public static String getFileExtension(String name) {
         String ext;
         int lastDot = name.lastIndexOf('.');
-        int secondLastDot = name.lastIndexOf('.', lastDot-1);
+        int secondLastDot = name.lastIndexOf('.', lastDot - 1);
         if (secondLastDot > 0 ) { // Double extension
             ext = name.substring(secondLastDot + 1);
             if (!ext.startsWith("tar")) {
@@ -151,6 +150,52 @@ public class FilesUtil {
         return numdeleted;
     }
 
+    public static boolean deleteDirectory(Context context, File dir) {
+        boolean success = false;
+        if (dir.exists() && dir.isDirectory() && dir.canWrite()) {
+            Cursor c = null;
+            try {
+                 c = context.getContentResolver().query(
+                        Uris.EXTERNAL_MEDIASTORE_FILES,
+                        Projections.ID_DATA,
+                        MediaStore.Files.FileColumns.DATA + " GLOB ?",
+                        new String[]{dir.getAbsolutePath()+"*"},
+                        null
+                );
+                if (c != null && c.moveToFirst()) {
+                    StringBuilder selection = new StringBuilder(100);
+                    selection.append(BaseColumns._ID + " IN (");
+                    while (true) {
+                        selection.append(c.getLong(0));
+                        Timber.d("Adding %s", c.getString(1));
+                        if (!c.moveToNext()) {
+                            break;
+                        }
+                        selection.append(",");
+                    }
+                    selection.append(")");
+                    Timber.d("Removing %s", selection.toString());
+                    //remove from mediastore
+                    context.getContentResolver().delete(
+                            Uris.EXTERNAL_MEDIASTORE_FILES,
+                            selection.toString(), null);
+                }
+            } finally {
+                closeQuietly(c);
+            }
+            try {
+                Timber.d("Deleting dir %s", dir.getPath());
+                FileUtils.deleteDirectory(dir);
+                success = true;
+            } catch (IOException e) {
+                success = false;
+            }
+            //notify on everything
+            context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
+        }
+        return success;
+    }
+
     @NonNull
     public static List<File> filterAudioFiles(Context context, List<File> files) {
         if (files.size() == 0) {
@@ -179,7 +224,7 @@ public class FilesUtil {
         Cursor c = null;
         try {
             c = context.getContentResolver().query(
-                    MediaStore.Files.getContentUri("external"),
+                    Uris.EXTERNAL_MEDIASTORE_FILES,
                     Projections.MEDIA_TYPE_PROJECTION,
                     selection.toString(),
                     null,
@@ -205,7 +250,7 @@ public class FilesUtil {
                 }
             }
         } catch (Exception e) {
-            if (FilesUtil.DUMPSTACKS) Timber.e(e, "filterAudioFiles");
+            if (FilesHelper.DUMPSTACKS) Timber.e(e, "filterAudioFiles");
         } finally {
             closeQuietly(c);
         }

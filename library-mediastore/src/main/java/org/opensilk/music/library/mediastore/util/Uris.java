@@ -38,4 +38,5 @@ public class Uris {
     public static Uri GENRE_MEMBERS(String genreId) {
         return MediaStore.Audio.Genres.Members.getContentUri("external", Long.valueOf(genreId));
     }
+    public static final Uri EXTERNAL_MEDIASTORE_FILES = MediaStore.Files.getContentUri("external");
 }

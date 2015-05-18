@@ -23,13 +23,19 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryScope;
+import org.opensilk.music.library.mediastore.R;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -45,35 +51,145 @@ public class StorageLookup {
     public static final String PRIMARY_STORAGE_ID = "0";
     public static final String SECONDARY_STORAGE_ID = "1";
 
+    public static final int DEFAULT_PRIMARY_STORAGE_ID = 0;
+
     private static final boolean DUMPSTACKS = true;
 
     final Context appContext;
 
     private String[] storagePaths;
+    private List<StorageVolume> storageVolumes;
 
     @Inject
     public StorageLookup(@ForApplication Context appContext) {
         this.appContext = appContext;
     }
 
-    public File getStorageFile(String id) {
-        String[] storages = getStoragePaths();
-        switch (id) {
-            case SECONDARY_STORAGE_ID:
-                if (storages.length > 1) {
-                    return new File(storages[1]);
-                }
-                //fall
-            case PRIMARY_STORAGE_ID:
-            default:
-                return new File(storages[0]);
+    public static class StorageVolume {
+        public final String path;
+        public final String description;
+        public final int id;
+        public StorageVolume(String path, String description, int id) {
+            this.path = path;
+            this.description = description;
+            this.id = id;
+        }
+
+        @Override
+        public String toString() {
+            return "Volume{id="+id+", desc="+description+", path="+path+"}";
         }
     }
 
+    List<StorageVolume> lookupStorageVolumes() {
+        try {
+            StorageManager sm = (StorageManager) appContext.getSystemService(Context.STORAGE_SERVICE);
+            Method getVolumeList = StorageManager.class.getDeclaredMethod("getVolumeList");
+            Class<?> volume = Class.forName("android.os.storage.StorageVolume");
+            Method getPath =  volume.getDeclaredMethod("getPath");
+            Method getDescription;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                getDescription = volume.getDeclaredMethod("getDescription", Context.class);
+            }  else {
+                getDescription = volume.getDeclaredMethod("getDescription");
+            }
+            Method getStorageId = volume.getDeclaredMethod("getStorageId");
+            Object[] volumes = (Object[]) getVolumeList.invoke(sm);
+            List<StorageVolume> storages = new ArrayList<>(volumes.length);
+            for (Object v : volumes) {
+                StorageVolume storageVolume;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    storageVolume = new StorageVolume((String) getPath.invoke(v),
+                            (String) getDescription.invoke(v, appContext),
+                            (Integer) getStorageId.invoke(v));
+                } else {
+                    storageVolume = new StorageVolume((String) getPath.invoke(v),
+                            (String) getDescription.invoke(v),
+                            (Integer) getStorageId.invoke(v));
+                }
+                Timber.d("Found volume %s", storageVolume);
+                storages.add(storageVolume);
+            }
+            return storages;
+        } catch (Exception e) {
+            if (DUMPSTACKS) Timber.e(e, "lookupStorageVolumes");
+        }
+        Timber.w("Failed to get storage paths via reflection");
+        return Collections.emptyList();
+    }
+
+    List<StorageVolume> getStorageVolumesInternal() {
+        List<StorageVolume> volumes = lookupStorageVolumes();
+        if (!volumes.isEmpty()) {
+            for (StorageVolume v : volumes) {
+                if (StringUtils.equals(v.path, getPrimaryStoragePath())){
+                    //has primary all good.
+                    return volumes;
+                }
+            }
+            Timber.w("Primary storage not found in volumes...");
+        }
+        return Collections.singletonList(
+                new StorageVolume(getPrimaryStoragePath(),
+                        appContext.getString(R.string.folders_storage_primary),
+                        DEFAULT_PRIMARY_STORAGE_ID
+                )
+        );
+    }
+
+    public List<StorageVolume> getStorageVolumes() {
+        if (storageVolumes == null) {
+            synchronized (this) {
+                if (storageVolumes == null) {
+                    storageVolumes = getStorageVolumesInternal();
+                }
+            }
+        }
+        return storageVolumes;
+    }
+
+    public File getStorageFile(String id) {
+        int sid = Integer.valueOf(id);
+        List<StorageVolume> storages = getStorageVolumes();
+        for (StorageVolume v : storages) {
+            if (v.id == sid) {
+                return new File(v.path);
+            }
+        }
+        throw new IllegalArgumentException("Unknown id "+sid);
+    }
+
+    public LibraryInfo getStorageInfo(String id) {
+        int sid = Integer.valueOf(id);
+        List<StorageVolume> storages = getStorageVolumes();
+        for (StorageVolume v : storages) {
+            if (v.id == sid) {
+                return new LibraryInfo(id, null, "", v.description);
+            }
+        }
+        throw new IllegalArgumentException("Unknown id "+sid);
+    }
+
+//    public File getStorageFile(String id) {
+//        String[] storages = getStoragePaths();
+//        switch (id) {
+//            case SECONDARY_STORAGE_ID:
+//                if (storages.length > 1) {
+//                    return new File(storages[1]);
+//                }
+//                //fall
+//            case PRIMARY_STORAGE_ID:
+//            default:
+//                return new File(storages[0]);
+//        }
+//    }
+
     public String[] getStoragePaths() {
-        synchronized (this) {
-            if (storagePaths == null) {
-                storagePaths = lookupStoragePaths();
+        if (storagePaths == null) {
+            synchronized (this) {
+                if (storagePaths == null) {
+                    storagePaths = lookupStoragePaths();
+                }
             }
         }
         return storagePaths;

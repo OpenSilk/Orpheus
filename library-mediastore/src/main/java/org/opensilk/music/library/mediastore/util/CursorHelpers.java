@@ -26,6 +26,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -47,7 +49,7 @@ public class CursorHelpers {
     }
 
     public static Uri appendId(Uri base, String id) {
-        return ContentUris.withAppendedId(base, Long.valueOf(id));
+        return ContentUris.withAppendedId(base, Long.parseLong(id));
     }
 
     public static Uri generateDataUri(long songId) {
@@ -150,52 +152,59 @@ public class CursorHelpers {
         }
     }
 
-    public static int deleteTracks(final Context context, final long[] list) {
+    public static int deleteTracks(final Context context, List<Long> list) {
         int numremoved = 0;
         final StringBuilder selection = new StringBuilder();
         selection.append(BaseColumns._ID + " IN (");
-        for (int i = 0; i < list.length; i++) {
-            selection.append(list[i]);
-            if (i < list.length - 1) {
+        Iterator<Long> ii = list.iterator();
+        if (ii.hasNext()) {
+            while (true) {
+                selection.append(ii.next());
+                if (!ii.hasNext()) {
+                    break;
+                }
                 selection.append(",");
             }
         }
         selection.append(")");
-        final Cursor c = context.getContentResolver().query(
-                Uris.EXTERNAL_MEDIASTORE_MEDIA,
-                Projections.ID_DATA,
-                selection.toString(),
-                null, null);
-        if (c != null) {
-            // Remove selected tracks from the database
-            context.getContentResolver().delete(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        Cursor c = null;
+        try {
+            c = context.getContentResolver().query(
+                    Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                    Projections.ID_DATA,
                     selection.toString(),
-                    null);
+                    null, null);
+            if (c != null) {
+                // Remove selected tracks from the database
+                context.getContentResolver().delete(
+                        Uris.EXTERNAL_MEDIASTORE_MEDIA,
+                        selection.toString(), null);
 
-            // Remove files from card
-            if (c.moveToFirst()) {
-                do {
-                    final String name = c.getString(1);
-                    final File f = new File(name);
-                    try { // File.delete can throw a security exception
-                        if (!f.delete()) {
-                            // I'm not sure if we'd ever get here (deletion would
-                            // have to fail, but no exception thrown)
-                            Timber.e("Failed to delete file %s", name);
-                        } else {
-                            numremoved++;
+                // Remove files from card
+                if (c.moveToFirst()) {
+                    do {
+                        final String name = c.getString(1);
+                        final File f = new File(name);
+                        try { // File.delete can throw a security exception
+                            if (!f.delete()) {
+                                // I'm not sure if we'd ever get here (deletion would
+                                // have to fail, but no exception thrown)
+                                Timber.e("Failed to delete file %s", name);
+                            } else {
+                                Timber.d("Deleted %s", name);
+                                numremoved++;
+                            }
+                        } catch (final SecurityException ex) {
                         }
-                    } catch (final SecurityException ex) {
-                    }
-                } while (c.moveToNext());
+                    } while (c.moveToNext());
+                }
+            } else {
+                return 0;
             }
-            c.close();
-        } else {
-            return 0;
+        } finally {
+            if (c != null) c.close();
         }
-        // We deleted a number of tracks, which could affect any number of
-        // things
+        // We deleted a number of tracks, which could affect any number of things
         // in the media content domain, so update everything.
         context.getContentResolver().notifyChange(Uri.parse("content://media"), null);
         return numremoved;
