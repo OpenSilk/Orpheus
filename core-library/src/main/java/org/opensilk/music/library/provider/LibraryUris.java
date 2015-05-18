@@ -165,6 +165,10 @@ public class LibraryUris {
         return new Uri.Builder().scheme(scheme).authority(authority).build();
     }
 
+    public static Uri call(String authority, String library) {
+        return new Uri.Builder().scheme(scheme).authority(authority).appendPath(library).build();
+    }
+
     public static final int M_ALBUMS = 1;
     public static final int M_ALBUM = 2;
     public static final int M_ARTISTS = 3;

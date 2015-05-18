@@ -40,5 +40,8 @@ public interface LibraryMethods {
      * Update item
      */
     String UPDATE = "update";
-
+    /**
+     * Request default folders {@link org.opensilk.music.library.LibraryInfo}
+     */
+    String DEFAULTFOLDER = "defaultfolder";
 }

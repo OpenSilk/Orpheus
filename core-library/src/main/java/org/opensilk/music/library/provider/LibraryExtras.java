@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
 
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.internal.IBundleableObserver;
 import org.opensilk.music.library.internal.LibraryException;
 import org.opensilk.music.library.internal.ResultReceiver;
@@ -71,6 +72,9 @@ public class LibraryExtras {
      * Internel use:
      */
     public static final String RESULT_RECEIVER_CALLBACK = "result_receiver_cb";
+
+    public static final String LIBRARY_INFO = "libraryinfo";
+    private static final String WRAPPED_LIBRARY_INFO = "wrappedlibraryinfo";
 
     public static Uri getUri(Bundle extras) {
         return extras.getParcelable(URI);
@@ -143,6 +147,12 @@ public class LibraryExtras {
         return extras.<ResultReceiver>getParcelable(RESULT_RECEIVER_CALLBACK);
     }
 
+    public static LibraryInfo getLibraryInfo(Bundle extras) {
+        Bundle b = extras.getBundle(WRAPPED_LIBRARY_INFO);
+        b.setClassLoader(LibraryInfo.class.getClassLoader());
+        return b.<LibraryInfo>getParcelable(LIBRARY_INFO);
+    }
+
     public static Builder b() {
         return new Builder();
     }
@@ -196,6 +206,14 @@ public class LibraryExtras {
 
         public Builder putResultReceiver(ResultReceiver r) {
             b.putParcelable(RESULT_RECEIVER_CALLBACK, r);
+            return this;
+        }
+
+        public Builder putLibraryInfo(LibraryInfo libraryInfo) {
+            //same reason as putCause
+            Bundle b2 = new Bundle();
+            b2.putParcelable(LIBRARY_INFO, libraryInfo);
+            b.putBundle(WRAPPED_LIBRARY_INFO, b2);
             return this;
         }
 

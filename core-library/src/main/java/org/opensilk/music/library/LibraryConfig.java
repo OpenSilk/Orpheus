@@ -37,7 +37,7 @@ public class LibraryConfig {
     /**
      * Bitmask of abilities listed above
      */
-    public final int capabilities;
+    public final long capabilities;
     /**
      * Component for activity to allow user to choose from available libraries.
      * The activity should be of Dialog Style, and should take care of everything needed
@@ -58,28 +58,36 @@ public class LibraryConfig {
      */
     public final Bundle meta;
     /**
-     * Librarys authority
+     * Library's authority
      */
     public final String authority;
+    /**
+     * Manifest label
+     */
+    public final String label;
 
-    public static final String META_MENU_NAME_PICKER = "menu_picker";
+    public static final String META_MENU_PICKER_NAME = "menu_picker_name";
+    public static final String META_MENU_PICKER_HIDE = "menu_picker_hide";
     public static final String META_SETTINGS_COMPONENT = "settingsComponent";
-    public static final String META_MENU_NAME_SETTINGS = "menu_settings";
+    public static final String META_MENU_NAME_SETTINGS = "menu_settings_name";
 
-    protected LibraryConfig(int apiVersion,
-                           int capabilities,
-                           @NonNull ComponentName pickerComponent,
-                           @NonNull Bundle meta,
-                            @NonNull String authority
+    protected LibraryConfig(
+            int apiVersion,
+            long capabilities,
+            @NonNull ComponentName pickerComponent,
+            @NonNull Bundle meta,
+            @NonNull String authority,
+            @NonNull String label
     ) {
         this.apiVersion = apiVersion;
         this.capabilities = capabilities;
         this.pickerComponent = pickerComponent;
         this.meta = meta;
         this.authority = authority;
+        this.label = label;
     }
 
-    public boolean hasAbility(int ability) {
+    public boolean hasAbility(long ability) {
         return (capabilities & ability) != 0;
     }
 
@@ -90,20 +98,22 @@ public class LibraryConfig {
     public Bundle dematerialize() {
         Bundle b = new Bundle(4);
         b.putInt("_1", apiVersion);
-        b.putInt("_2", capabilities);
+        b.putLong("_2", capabilities);
         b.putParcelable("_3", pickerComponent);
         b.putBundle("_4", meta);
         b.putString("_5", authority);
+        b.putString("_6", label);
         return b;
     }
 
     public static LibraryConfig materialize(Bundle b) {
         return new LibraryConfig(
                 b.getInt("_1"),
-                b.getInt("_2"),
+                b.getLong("_2"),
                 b.<ComponentName>getParcelable("_3"),
                 b.getBundle("_4"),
-                b.getString("_5")
+                b.getString("_5"),
+                b.getString("_6")
         );
     }
 
@@ -113,24 +123,35 @@ public class LibraryConfig {
 
     public static final class Builder {
         private int apiVersion = 1; //TODO
-        private int capabilities;
+        private long capabilities;
         private ComponentName pickerComponent;
         private Bundle meta = new Bundle();
         private String authority;
+        private String label;
 
-        public Builder setCapabilities(int capabilities) {
+        private Builder() {
+
+        }
+
+        public Builder setCapabilities(long capabilities) {
             this.capabilities = capabilities;
             return this;
         }
 
-        public Builder addAbility(int ability) {
+        public Builder addAbility(long ability) {
             capabilities |= ability;
             return this;
         }
 
         public Builder setPickerComponent(ComponentName pickerComponent, String menuName) {
             this.pickerComponent = pickerComponent;
-            meta.putString(META_MENU_NAME_PICKER, menuName);
+            meta.putString(META_MENU_PICKER_NAME, menuName);
+            return this;
+        }
+
+        public Builder setPickerComponentNoMenu(ComponentName pickerComponent) {
+            this.pickerComponent = pickerComponent;
+            meta.putBoolean(META_MENU_PICKER_HIDE, true);
             return this;
         }
 
@@ -155,6 +176,11 @@ public class LibraryConfig {
             return this;
         }
 
+        public Builder setLabel(String label) {
+            this.label = label;
+            return this;
+        }
+
         public LibraryConfig build() {
             if (pickerComponent == null) {
                 throw new IllegalArgumentException("pickerComponent must not be null");
@@ -165,7 +191,11 @@ public class LibraryConfig {
             if ((StringUtils.isEmpty(authority))) {
                 throw new IllegalArgumentException("Authority may not be null");
             }
-            return new LibraryConfig(apiVersion, capabilities, pickerComponent, meta, authority);
+            if (StringUtils.isEmpty(label)) {
+                throw new IllegalArgumentException("Lable may not be null");
+            }
+            return new LibraryConfig(apiVersion, capabilities,
+                    pickerComponent, meta, authority, label);
         }
 
     }

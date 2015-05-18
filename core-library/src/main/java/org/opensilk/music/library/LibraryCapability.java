@@ -17,21 +17,74 @@
 
 package org.opensilk.music.library;
 
+import android.os.Bundle;
+
+import rx.Subscriber;
+
 /**
  * Created by drew on 4/29/15.
  */
 public interface LibraryCapability {
-    int ALBUMS        = 1 << 1;
-    int ARTISTS       = 1 << 2;
-    int FOLDERSTRACKS = 1 << 3;
-    int FOLDERSALL    = 1 << 4;
-    int GENRES        = 1 << 5;
-    int PLAYLISTS     = 1 << 6;
-    int TRACKS        = 1 << 7;
+    /**
+     * Supports querying for albums
+     */
+    long ALBUMS        = 1 << 0;
+    /**
+     * Supports querying for artists
+     */
+    long ARTISTS       = 1 << 1;
+    /**
+     * Folders tracks is for 'dumb' libraries that don't know anything
+     * about meta. And {@link org.opensilk.music.library.provider.LibraryProvider#browseFolders(String, String, Subscriber, Bundle) browseFolders}
+     * will only return {@link org.opensilk.music.model.Folder}s and {@link org.opensilk.music.model.Track}s.
+     */
+    long FOLDERSTRACKS = 1 << 2;
+    /**
+     * Indicates we know about meta but can only browse the 'native'
+     * hierarchy. Thus {@link org.opensilk.music.library.provider.LibraryProvider#browseFolders(String, String, Subscriber, Bundle) browseFolders}
+     * may return any model object. Not just {@link org.opensilk.music.model.Folder}s and
+     * {@link org.opensilk.music.model.Track}s.
+     */
+    long FOLDERSANY    = 1 << 3;
+    /**
+     * Supports querying for genres
+     */
+    long GENRES        = 1 << 4;
+    /**
+     * Library supports playlists
+     */
+    long PLAYLISTS     = 1 << 5;
+    /**
+     * At a minimum all libraries must advertise this, the ability to pull track meta
+     * is essential to Orpheus' functionality
+     */
+    long TRACKS        = 1 << 6;
 
-    int SEARCHABLE = 1 << 8;
-    int SETTINGS   = 1 << 9;
-    int DELETE     = 1 << 10;
-    int RENAME     = 1 << 11;
-    int DOWNLOAD   = 1 << 12;
+    //11-20
+
+    /**
+     * Supports deleting albums, artists, folders, and tracks
+     * underneath this is really only delete folders and delete tracks
+     * for albums, and artists, the track list is fetched then sent back for removal
+     */
+    long DELETE = 1 << 11;
+    /**
+     * Library supports editing/deleting playlists
+     */
+    long EDIT_PLAYLISTS = 1 << 12;
+
+    //21-30
+
+    /**
+     * Library has a settings activity
+     */
+    long SETTINGS   = 1 << 21;
+
+    //31-40
+
+    /**
+     * Library should be displayed in gallery mode
+     * Library must not advertise {@link #FOLDERSTRACKS} or {@link #FOLDERSANY}
+     */
+    long GALLERY    = 1 << 31;
 }

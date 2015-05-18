@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
+import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.compare.AlbumCompare;
 import org.opensilk.music.library.compare.ArtistCompare;
 import org.opensilk.music.library.compare.BundleableCompare;
@@ -298,6 +299,17 @@ public abstract class LibraryProvider extends ContentProvider {
             }
             case LibraryMethods.LIBRARYCONF:
                 return getLibraryConfig().dematerialize();
+            case LibraryMethods.DEFAULTFOLDER: {
+                Uri uri = LibraryExtras.getUri(extras);
+                LibraryInfo libraryInfo = getDefaultFolder(uri.getPathSegments().get(0));
+                if (libraryInfo == null) {
+                    ok.putOk(false).putCause(new LibraryException(METHOD_NOT_IMPLEMENTED,
+                            new UnsupportedOperationException(method)));
+                } else {
+                    ok.putLibraryInfo(libraryInfo);
+                }
+                return ok.get();
+            }
             default:
                 Log.e(TAG, "Unknown method " + method);
                 ok.putOk(false).putCause(new LibraryException(METHOD_NOT_IMPLEMENTED,
@@ -733,6 +745,18 @@ public abstract class LibraryProvider extends ContentProvider {
 
     /*
      * End delete stubs
+     */
+
+    /*
+     * Misc methods
+     */
+
+    protected LibraryInfo getDefaultFolder(final String library) {
+        return null;
+    }
+
+    /*
+     * end misc methods
      */
 
     /*
