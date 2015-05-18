@@ -17,12 +17,14 @@
 
 package org.opensilk.music.ui3.library;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
+import org.opensilk.music.R;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -102,18 +104,17 @@ public class LandingScreenViewAdapter extends
 
     public static class ViewItem {
 
-        public static final ViewItem ALBUMS = new ViewItem("Albums", 1);
-        public static final ViewItem ARTISTS = new ViewItem("Artists", 2);
-        public static final ViewItem FOLDERS = new ViewItem("Folders", 3);
-        public static final ViewItem GALLERY = new ViewItem("Gallery", 4);
-        public static final ViewItem GENRES = new ViewItem("Genres", 5);
-        public static final ViewItem PLAYLISTS = new ViewItem("Playlists", 6);
-        public static final ViewItem TRACKS = new ViewItem("Tracks", 7);
+        public static final ViewItem ALBUMS = new ViewItem(R.string.page_albums, 1);
+        public static final ViewItem ARTISTS = new ViewItem(R.string.page_artists, 2);
+        public static final ViewItem FOLDERS = new ViewItem(R.string.folders, 3);
+        public static final ViewItem GENRES = new ViewItem(R.string.page_genres, 4);
+        public static final ViewItem PLAYLISTS = new ViewItem(R.string.page_playlists, 5);
+        public static final ViewItem TRACKS = new ViewItem(R.string.page_songs, 6);
 
-        final String text;
+        final int text;
         final int val;
 
-        public ViewItem(String text, int val) {
+        public ViewItem(int text, int val) {
             this.text = text;
             this.val = val;
         }

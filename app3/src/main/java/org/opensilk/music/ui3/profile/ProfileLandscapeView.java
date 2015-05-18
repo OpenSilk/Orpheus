@@ -68,6 +68,7 @@ public class ProfileLandscapeView extends RelativeLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         ActionBarConfig c = mActionBarOwner.getConfig().buildUpon()
+                .clearTitle()
                 .setTitle(mTitleText)
                 .setSubtitle(mSubTitleText)
                 .build();

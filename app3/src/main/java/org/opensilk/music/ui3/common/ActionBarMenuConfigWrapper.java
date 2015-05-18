@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.ActivityResultsActivity;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
@@ -53,35 +54,52 @@ public class ActionBarMenuConfigWrapper {
     final LibraryConfig libraryConfig;
     final LibraryInfo libraryInfo;
     final FragmentManagerOwner fm;
+    final AppPreferences settings;
+    final ActivityResultsController activityResultsController;
 
     @Inject
     public ActionBarMenuConfigWrapper(
             LibraryConfig libraryConfig,
             LibraryInfo libraryInfo,
-            FragmentManagerOwner fm
+            FragmentManagerOwner fm,
+            AppPreferences settings,
+            ActivityResultsController activityResultsController
     ) {
         this.libraryConfig = libraryConfig;
         this.libraryInfo = libraryInfo;
         this.fm = fm;
+        this.settings = settings;
+        this.activityResultsController = activityResultsController;
     }
 
     public ActionBarMenuConfig injectCommonItems(ActionBarMenuConfig originalConfig) {
         ActionBarMenuConfig.Builder builder = ActionBarMenuConfig.builder();
 
-        if (originalConfig.menus != null && originalConfig.menus.length > 0) {
+        if (originalConfig != null && originalConfig.menus != null && originalConfig.menus.length > 0) {
             builder.withMenus(originalConfig.menus);
         }
-        if (originalConfig.customMenus != null && originalConfig.customMenus.length > 0) {
+        if (originalConfig != null && originalConfig.customMenus != null && originalConfig.customMenus.length > 0) {
             builder.withMenus(originalConfig.customMenus);
         }
 
+        applyCommonItems(builder);
+
+        Func2<Context, Integer, Boolean> wrappedHandler =
+                originalConfig != null ? originalConfig.actionHandler : null;
+
+        return builder.setActionHandler(getDelegateHandler(wrappedHandler)).build();
+    }
+
+    public void applyCommonItems(ActionBarMenuConfig.Builder builder) {
         // device selection
-        String selectName = libraryConfig.getMeta(LibraryConfig.META_MENU_NAME_PICKER);
-        if (!TextUtils.isEmpty(selectName)) {
-            builder.withMenu(new ActionBarMenuConfig.CustomMenuItem(
-                    0, R.id.menu_change_source, 99, selectName, -1));
-        } else {
-            builder.withMenu(R.menu.library_change_source);
+        if (!libraryConfig.meta.getBoolean(LibraryConfig.META_MENU_PICKER_HIDE, false)) {
+            String selectName = libraryConfig.getMeta(LibraryConfig.META_MENU_PICKER_NAME);
+            if (!TextUtils.isEmpty(selectName)) {
+                builder.withMenu(new ActionBarMenuConfig.CustomMenuItem(
+                        0, R.id.menu_change_source, 99, selectName, -1));
+            } else {
+                builder.withMenu(R.menu.library_change_source);
+            }
         }
 
         // library settings
@@ -94,18 +112,17 @@ public class ActionBarMenuConfigWrapper {
                 builder.withMenu(R.menu.library_settings);
             }
         }
+    }
 
-        DelegateHandler handler = new DelegateHandler(originalConfig.actionHandler) {
+    public DelegateHandler getDelegateHandler(Func2<Context, Integer, Boolean> wrappedHandler) {
+        return new DelegateHandler(wrappedHandler) {
             @Override
             public Boolean call(Context context, Integer integer) {
-                MusicActivityComponent component = DaggerService.getDaggerComponent(context);
-                AppPreferences appPreferences = component.appPreferences();
-                ActivityResultsController activityResultsController = component.activityResultsController();
                 boolean handled = super.call(context, integer);
                 if (!handled) {
                     switch (integer) {
                         case R.id.menu_change_source:
-                            appPreferences.removeLibraryInfo(libraryConfig, AppPreferences.DEFAULT_LIBRARY);
+                            settings.removeLibraryInfo(libraryConfig, AppPreferences.DEFAULT_LIBRARY);
                             fm.killBackStack();
                             fm.replaceMainContent(LandingScreenFragment.ni(libraryConfig), false);
                             handled = true;
@@ -123,8 +140,6 @@ public class ActionBarMenuConfigWrapper {
                 return handled;
             }
         };
-
-        return builder.setActionHandler(handler).build();
     }
 
     public abstract static class DelegateHandler implements Func2<Context, Integer, Boolean> {

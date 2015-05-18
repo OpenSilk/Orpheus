@@ -18,6 +18,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="my_library">My Library</string>
 
+    <!-- ### categories -->
+    <string name="folders">Folders</string>
+
     <!-- ### SETTINGS ### -->
 
     <!-- Main settings screen -->

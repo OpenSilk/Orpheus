@@ -150,6 +150,9 @@ public class OverflowHandler implements OverflowClickListener {
             adddelete = false;
         } else if (item instanceof Playlist) {
             menus = PLAYLISTS;
+            if (!libraryConfig.hasAbility(LibraryCapability.EDIT_PLAYLISTS)) {
+                adddelete = false;
+            }
         } else if (item instanceof Track) {
             menus = TRACKS;
         } else {

@@ -60,6 +60,7 @@ public class PlaylistsProfileScreenFragment extends BundleableFragment {
         TracksDragSwipeComponent component1 = DaggerService.getDaggerComponent(getScope());
         TracksDragSwipePresenter presenter = component1.presenter();
         actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon()
+                .clearTitle()
                 .setTitle(s.playlist.name)
                 .setSubtitle(UtilsCommon.makeLabel(getActivity(),
                         R.plurals.Nsongs, s.playlist.trackUris.size()))

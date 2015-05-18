@@ -25,6 +25,9 @@ import android.text.TextUtils;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
+import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.ActivityResultsListener;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
@@ -34,6 +37,7 @@ import org.opensilk.music.library.LibraryConstants;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.albums.AlbumsScreenFragment;
 import org.opensilk.music.ui3.artists.ArtistsScreenFragment;
+import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.folders.FoldersScreenFragment;
 import org.opensilk.music.ui3.gallery.GalleryPage;
@@ -52,6 +56,7 @@ import javax.inject.Inject;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
+import rx.functions.Func2;
 import timber.log.Timber;
 
 /**
@@ -65,6 +70,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     final ActivityResultsController activityResultsController;
     final FragmentManagerOwner fm;
     final Context appContext;
+    final ActionBarOwner actionBarOwner;
 
     LibraryInfo currentSelection;
     int lastval;
@@ -75,13 +81,15 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
             LandingScreen screen,
             ActivityResultsController activityResultsController,
             FragmentManagerOwner fm,
-            @ForApplication Context appContext
+            @ForApplication Context appContext,
+            ActionBarOwner actionBarOwner
     ) {
         this.settings = settings;
         this.screen = screen;
         this.activityResultsController = activityResultsController;
         this.fm = fm;
         this.appContext = appContext;
+        this.actionBarOwner = actionBarOwner;
     }
 
     @Override
@@ -95,6 +103,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
         if (savedInstanceState != null) {
+            savedInstanceState.setClassLoader(getClass().getClassLoader());
             currentSelection = savedInstanceState.getParcelable("selection");
             lastval = savedInstanceState.getInt("lastval");
         }
@@ -108,6 +117,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         } else {
             createCategories();
         }
+        updateActionBar();
     }
 
     @Override
@@ -118,6 +128,11 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     }
 
     void createCategories() {
+        if (screen.libraryConfig.hasAbility(LibraryCapability.GALLERY)) {
+            openGallery(false);
+            return;
+        }
+
         List<ViewItem> items = new ArrayList<>();
         if (screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS)) {
             items.add(ViewItem.FOLDERS);
@@ -137,9 +152,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         if (screen.libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
             items.add(ViewItem.TRACKS);
         }
-        if (isGalleryEligible()) {
-            items.add(ViewItem.GALLERY);
-        }
+
         if (items.size() == 1) {
             openScreen(items.get(0), false);
 //        } else if (lastval > 0) {
@@ -176,6 +189,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
                         currentSelection = currentSelection.buildUpon(null, null);
                     }
                     settings.setLibraryInfo(screen.libraryConfig, AppPreferences.DEFAULT_LIBRARY, currentSelection);
+                    updateActionBar();
                     createCategories();
                 } else {
                     Timber.e("Activity returned bad result");
@@ -205,8 +219,6 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
             openPlaylists(bs);
         } else if (item.val == ViewItem.TRACKS.val) {
             openTracks(bs);
-        } else if (item.val == ViewItem.GALLERY.val) {
-            openGallery(bs);
         }
     }
 
@@ -273,4 +285,19 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         yes |= screen.libraryConfig.hasAbility(LibraryCapability.TRACKS);
         return yes;
     }
+
+    void updateActionBar() {
+        ActionBarConfig.Builder builder = ActionBarConfig.builder()
+                .setTitle(screen.libraryConfig.label);
+        if (currentSelection != null) {
+            ActionBarMenuConfig.Builder menuBuilder = ActionBarMenuConfig.builder();
+            ActionBarMenuConfigWrapper wrapper = new ActionBarMenuConfigWrapper(
+                    screen.libraryConfig, currentSelection, fm, settings, activityResultsController);
+            wrapper.applyCommonItems(menuBuilder);
+            menuBuilder.setActionHandler(wrapper.getDelegateHandler(null));
+            builder.setMenuConfig(menuBuilder.build());
+        }
+        actionBarOwner.setConfig(builder.build());
+    }
+
 }

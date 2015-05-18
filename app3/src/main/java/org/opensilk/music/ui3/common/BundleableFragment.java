@@ -25,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.library.LibraryConfig;
@@ -69,8 +70,10 @@ public abstract class BundleableFragment extends MortarFragment {
         ActionBarOwner actionBarOwner = component.actionBarOwner();
         BundleableComponent component1 = DaggerService.getDaggerComponent(getScope());
         BundleablePresenter presenter = component1.presenter();
-        actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon()
-                .setTitle(mTitle)
-                .setMenuConfig(presenter.getMenuConfig()).build());
+        ActionBarConfig config = actionBarOwner.getConfig().buildUpon()// ActionBarConfig.builder()
+                .clearTitle()
+                .setTitle(mTitle != null ? mTitle : "")
+                .setMenuConfig(presenter.getMenuConfig()).build();
+        actionBarOwner.setConfig(config);
     }
 }
