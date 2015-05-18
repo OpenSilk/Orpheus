@@ -102,6 +102,14 @@ public class ActionBarConfig {
             return this;
         }
 
+        public Builder clearTitle() {
+            title = null;
+            titleRes = -1;
+            subtitle = null;
+            subtitleRes = -1;
+            return this;
+        }
+
         public Builder setMenuConfig(ActionBarMenuConfig menuConfig) {
             this.menuConfig = menuConfig;
             return this;
