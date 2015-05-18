@@ -161,9 +161,6 @@ public abstract class RxCursorLoader<T> implements RxLoader<T> {
                             if (subscriber.isUnsubscribed()) return;
                             subscriber.onNext(item);
                         } while (c.moveToNext());
-                    } else {
-                        emmitError(new UnsupportedOperationException("Unable to move cursor"), subscriber);
-                        return;
                     }
                     if (!subscriber.isUnsubscribed()) {
                         subscriber.onCompleted();
