@@ -18,8 +18,6 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.NowPlayingActivityComponent;
 
 import dagger.Component;
 import rx.functions.Func1;

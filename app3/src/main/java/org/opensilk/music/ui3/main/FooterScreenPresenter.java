@@ -32,13 +32,12 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.NowPlayingActivity;
+import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
 
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.Observable;

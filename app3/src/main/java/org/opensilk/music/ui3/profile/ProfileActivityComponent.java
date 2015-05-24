@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
+package org.opensilk.music.ui3.profile;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
-import org.opensilk.common.ui.mortar.ActivityResultsOwnerModule;
-import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 import org.opensilk.music.AppComponent;
+import org.opensilk.music.ui3.MusicActivityModule;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 
 import dagger.Component;
 import rx.functions.Func1;

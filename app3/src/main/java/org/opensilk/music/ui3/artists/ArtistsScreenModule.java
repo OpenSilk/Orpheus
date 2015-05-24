@@ -19,24 +19,19 @@ package org.opensilk.music.ui3.artists;
 
 import android.content.Context;
 import android.net.Uri;
-import android.widget.PopupMenu;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.artwork.Artwork;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.ArtistSortOrder;
-import org.opensilk.music.model.Album;
 import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.profile.ProfileActivity;
 import org.opensilk.music.ui3.artistsprofile.ArtistsProfileScreen;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
@@ -44,15 +39,12 @@ import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
 
 import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
 import mortar.MortarScope;
-import rx.functions.Func0;
 import rx.functions.Func2;
 
 /**

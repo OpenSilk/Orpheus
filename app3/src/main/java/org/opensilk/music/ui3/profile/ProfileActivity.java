@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
+package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,17 +26,17 @@ import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.profile.ProfileScreen;
+import org.opensilk.music.ui3.MusicActivityToolbar;
 
 import mortar.MortarScope;
 
 /**
- * Created by drew on 5/13/15.
+ * Created by drew on 5/5/15.
  */
-public class TracksDragSwipeActivity extends MusicActivityToolbar {
+public class ProfileActivity extends MusicActivityToolbar {
 
     public static void startSelf(Context context, ProfileScreen screen) {
-        Intent i = new Intent(context, TracksDragSwipeActivity.class)
+        Intent i = new Intent(context, ProfileActivity.class)
                 .putExtra("screen", screen);
         context.startActivity(i);
     }
@@ -44,12 +44,12 @@ public class TracksDragSwipeActivity extends MusicActivityToolbar {
     @Override
     protected void onCreateScope(MortarScope.Builder builder) {
         AppComponent appComponent = DaggerService.getDaggerComponent(getApplicationContext());
-        builder.withService(DaggerService.DAGGER_SERVICE, TracksDragSwipeActivityComponent.FACTORY.call(appComponent));
+        builder.withService(DaggerService.DAGGER_SERVICE, ProfileActivityComponent.FACTORY.call(appComponent));
     }
 
     @Override
     protected void performInjection() {
-        TracksDragSwipeActivityComponent activityComponent = DaggerService.getDaggerComponent(this);
+        ProfileActivityComponent activityComponent = DaggerService.getDaggerComponent(this);
         activityComponent.inject(this);
     }
 
@@ -60,7 +60,7 @@ public class TracksDragSwipeActivity extends MusicActivityToolbar {
 
     @Override
     protected void setupContentView() {
-        setContentView(R.layout.activity_tracksdragswipe);
+        setContentView(R.layout.activity_profile);
     }
 
     @Override
@@ -76,11 +76,12 @@ public class TracksDragSwipeActivity extends MusicActivityToolbar {
                 .setUpButtonEnabled(true)
                 .setTitle("")
                 .setSubtitle("")
+                .setTransparentBackground(!getResources().getBoolean(R.bool.in_landscape))
                 .build();
         mActionBarOwner.setConfig(config);
 
         ProfileScreen screen = getIntent().getParcelableExtra("screen");
         mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), false);
-
     }
+
 }

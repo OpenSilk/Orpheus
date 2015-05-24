@@ -19,13 +19,11 @@ package org.opensilk.music.ui3.playlists;
 
 import android.content.Context;
 import android.net.Uri;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.music.App;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
@@ -34,17 +32,13 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.PlaylistSortOrder;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.ProfileActivity;
-import org.opensilk.music.ui3.TracksDragSwipeActivity;
+import org.opensilk.music.ui3.dragswipe.TracksDragSwipeActivity;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.playlistsprofile.PlaylistsProfileScreen;
 
 import javax.inject.Named;

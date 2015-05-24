@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.genres;
 
 import android.content.Context;
 import android.net.Uri;
-import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
@@ -32,16 +31,13 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.GenreSortOrder;
 import org.opensilk.music.model.Genre;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.profile.ProfileActivity;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickListener;
-import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.genresprofile.GenresProfileScreen;
 
 import javax.inject.Named;

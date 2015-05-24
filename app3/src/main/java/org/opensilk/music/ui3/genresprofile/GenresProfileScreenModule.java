@@ -35,7 +35,7 @@ import org.opensilk.music.model.Album;
 import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.ProfileActivity;
+import org.opensilk.music.ui3.profile.ProfileActivity;
 import org.opensilk.music.ui3.albumsprofile.AlbumsProfileScreen;
 import org.opensilk.music.ui3.common.ActionBarMenuBaseHandler;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;

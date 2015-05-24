@@ -123,7 +123,7 @@
         </activity-alias>
 
         <activity
-            android:name=".ui3.ProfileActivity"
+            android:name=".ui3.profile.ProfileActivity"
             android:theme="@style/Theme.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
@@ -131,7 +131,7 @@
         </activity>
 
         <activity
-            android:name=".ui3.NowPlayingActivity"
+            android:name=".ui3.nowplaying.NowPlayingActivity"
             android:theme="@style/Theme.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
@@ -139,7 +139,7 @@
         </activity>
 
         <activity
-            android:name=".ui3.TracksDragSwipeActivity"
+            android:name=".ui3.dragswipe.TracksDragSwipeActivity"
             android:theme="@style/Theme.Dark"
             android:process=":ui">
             <meta-data android:name="android.support.PARENT_ACTIVITY"

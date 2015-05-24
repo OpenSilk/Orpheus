@@ -15,22 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
+package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
-import org.opensilk.common.ui.mortar.ActivityResultsController;
-import org.opensilk.common.ui.mortar.ActivityResultsOwnerModule;
 import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.main.MainPresenter;
 
 import dagger.Component;
 import rx.functions.Func1;

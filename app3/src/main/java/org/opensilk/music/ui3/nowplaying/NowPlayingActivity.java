@@ -15,20 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
+package org.opensilk.music.ui3.nowplaying;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.v4.app.FragmentActivity;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.core.mortar.MortarActivity;
-import org.opensilk.common.ui.mortar.PauseAndResumeActivity;
-import org.opensilk.common.ui.mortar.PauseAndResumePresenter;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.R;
