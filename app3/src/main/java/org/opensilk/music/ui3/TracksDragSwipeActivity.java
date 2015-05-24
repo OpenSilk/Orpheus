@@ -20,11 +20,11 @@ package org.opensilk.music.ui3;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.widget.ActionMenuView;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.AppComponent;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 
@@ -33,7 +33,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/13/15.
  */
-public class TracksDragSwipeActivity extends MusicActivity {
+public class TracksDragSwipeActivity extends MusicActivityToolbar {
 
     public static void startSelf(Context context, ProfileScreen screen) {
         Intent i = new Intent(context, TracksDragSwipeActivity.class)
@@ -61,6 +61,11 @@ public class TracksDragSwipeActivity extends MusicActivity {
     @Override
     protected void setupContentView() {
         setContentView(R.layout.activity_tracksdragswipe);
+    }
+
+    @Override
+    protected void themeActivity(AppPreferences preferences) {
+
     }
 
     @Override

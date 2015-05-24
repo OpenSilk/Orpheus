@@ -19,6 +19,8 @@ package org.opensilk.music.ui3.albumsprofile;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbar;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.profile.ProfileComponent;
 
@@ -30,16 +32,16 @@ import rx.functions.Func2;
  */
 @ScreenScope
 @Component(
-        dependencies = MusicActivityComponent.class,
+        dependencies = MusicActivityToolbarComponent.class,
         modules = AlbumsProfileScreenModule.class
 )
 public interface AlbumsProfileScreenComponent extends ProfileComponent {
-    Func2<MusicActivityComponent, AlbumsProfileScreen, AlbumsProfileScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, AlbumsProfileScreen, AlbumsProfileScreenComponent>() {
+    Func2<MusicActivityToolbarComponent, AlbumsProfileScreen, AlbumsProfileScreenComponent> FACTORY =
+            new Func2<MusicActivityToolbarComponent, AlbumsProfileScreen, AlbumsProfileScreenComponent>() {
                 @Override
-                public AlbumsProfileScreenComponent call(MusicActivityComponent musicActivityComponent, AlbumsProfileScreen albumsScreen) {
+                public AlbumsProfileScreenComponent call(MusicActivityToolbarComponent musicActivityComponent, AlbumsProfileScreen albumsScreen) {
                     return DaggerAlbumsProfileScreenComponent.builder()
-                            .musicActivityComponent(musicActivityComponent)
+                            .musicActivityToolbarComponent(musicActivityComponent)
                             .albumsProfileScreenModule(new AlbumsProfileScreenModule(albumsScreen))
                             .build();
                 }

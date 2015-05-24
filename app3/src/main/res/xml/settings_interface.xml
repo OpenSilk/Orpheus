@@ -2,11 +2,11 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <CheckBoxPreference
-        android:key="keep_screen_on"
-        android:title="@string/settings_keep_screen_on"
-        android:summary="@string/settings_keep_screen_on_summary"
-        android:defaultValue="false"/>
+    <!--<CheckBoxPreference-->
+        <!--android:key="keep_screen_on"-->
+        <!--android:title="@string/settings_keep_screen_on"-->
+        <!--android:summary="@string/settings_keep_screen_on_summary"-->
+        <!--android:defaultValue="false"/>-->
 
     <PreferenceCategory
         android:title="@string/settings_theme_category">
@@ -23,21 +23,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/my_library">
-
-        <org.opensilk.music.ui.settings.HomePagesPreference
-            android:key="pref_home_pages"
-            android:title="@string/settings_pick_home_pages"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="@string/now_playing">
-
-        <CheckBoxPreference
-            android:key="now_playing_start_controls"
-            android:title="@string/settings_now_playing_start_controls"
-            android:defaultValue="false"/>
 
         <ListPreference
             android:key="now_playing_view"
@@ -87,38 +73,5 @@
             android:defaultValue="open_now_playing"/>
 
      </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/settings_footer">
-
-        <ListPreference
-            android:key="footer_click"
-            android:title="@string/settings_footer_click"
-            android:entries="@array/footer_actions"
-            android:entryValues="@array/footer_actions_values"
-            android:defaultValue="open_queue"/>
-
-        <ListPreference
-            android:key="footer_long_click"
-            android:title="@string/settings_footer_long_click"
-            android:entries="@array/footer_actions"
-            android:entryValues="@array/footer_actions_values"
-            android:defaultValue="none"/>
-
-        <ListPreference
-            android:key="footer_thumb_click"
-            android:title="@string/settings_footer_thumb_click"
-            android:entries="@array/footer_actions"
-            android:entryValues="@array/footer_actions_values"
-            android:defaultValue="open_now_playing"/>
-
-        <ListPreference
-            android:key="footer_thumb_long_click"
-            android:title="@string/settings_footer_thumb_long_click"
-            android:entries="@array/footer_actions"
-            android:entryValues="@array/footer_actions_values"
-            android:defaultValue="none"/>
-
-    </PreferenceCategory>
 
 </PreferenceScreen>

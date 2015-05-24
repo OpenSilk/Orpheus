@@ -42,20 +42,22 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:textSize">16sp</item>
         <item name="android:background">?android:selectableItemBackground</item>
-        <item name="android:textColor">@color/black_text</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
     </style>
 
-    <!--List item as textview with compound drawable-->
+    <!--List item as textview with compound drawable 24dp-->
     <style name="mtrl.SingleLineListItemTextView.Icon">
         <item name="android:layout_height">56dp</item>
         <item name="android:drawablePadding">16dp</item>
     </style>
 
-    <!--List item as textview with compound drawable-->
+    <!--List item as textview for header-->
     <style name="mtrl.SingleLineListItemTextView.Header">
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">@color/black_text_secondary</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
     </style>
 
     <!--list item as horizontal linear layout-->
@@ -92,11 +94,80 @@
         <item name="android:textSize">16sp</item>
         <!--<item name="android:paddingTop">20dp</item>-->
         <!--<item name="android:paddingBottom">24dp</item>-->
-        <item name="android:textColor">@color/black_text</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
     </style>
 
     <!--linear layout imagebutton on right 24dp-->
     <style name="mtrl.SingleLineListItemLinearInner.Icon">
+        <item name="android:padding">8dp</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <!--2 line-->
+    <style name="mtrl.TwoLineListItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">72dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="mtrl.TwoLineListItemInner">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
+    <!--2 line: imageview icon on left 24dp-->
+    <style name="mtrl.TwoLineListItemInner.IconLeft">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginRight">12dp</item>
+    </style>
+
+    <!--2 line: imageview avatar on left-->
+    <style name="mtrl.TwoLineListItemInner.Avatar">
+        <!--<item name="android:paddingTop">8dp</item>-->
+        <!--<item name="android:paddingBottom">8dp</item>-->
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <style name="mtrl.TwoLineListItemTextContainer">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginLeft">16dp</item>
+        <item name="android:layout_marginRight">16dp</item>
+    </style>
+
+    <!--2 line: textview first line-->
+    <style name="mtrl.TwoLineListItemInner.Text1">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textSize">16sp</item>
+        <!--<item name="android:paddingTop">20dp</item>-->
+        <!--<item name="android:paddingBottom">24dp</item>-->
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <!--2 line: textview second line-->
+    <style name="mtrl.TwoLineListItemInner.Text2">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textSize">14sp</item>
+        <!--<item name="android:paddingTop">20dp</item>-->
+        <!--<item name="android:paddingBottom">24dp</item>-->
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
+
+    <!--linear layout imagebutton on right 24dp-->
+    <style name="mtrl.TwoLineListItemInner.IconRight">
         <item name="android:padding">8dp</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>

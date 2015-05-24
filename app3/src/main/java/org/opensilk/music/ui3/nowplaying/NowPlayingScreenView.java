@@ -72,7 +72,6 @@ import rx.subscriptions.CompositeSubscription;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_FILL;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_SCALE;
-import static org.opensilk.music.AppPreferences.NOW_PLAYING_START_CONTROLS;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;

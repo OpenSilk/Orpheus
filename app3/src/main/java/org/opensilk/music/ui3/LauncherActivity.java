@@ -17,7 +17,6 @@
 
 package org.opensilk.music.ui3;
 
-import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -31,8 +30,8 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.DrawerOwnerActivity;
-import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
 import org.opensilk.music.AppComponent;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
@@ -44,7 +43,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 4/30/15.
  */
-public class LauncherActivity extends MusicActivity implements DrawerOwnerActivity {
+public class LauncherActivity extends MusicActivityToolbar implements DrawerOwnerActivity {
 
     @Inject DrawerOwner mDrawerOwner;
 
@@ -75,6 +74,11 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
     protected void setupContentView() {
         setContentView(R.layout.activity_launcher);
         ButterKnife.inject(this);
+    }
+
+    @Override
+    protected void themeActivity(AppPreferences preferences) {
+
     }
 
     @Override

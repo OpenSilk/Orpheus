@@ -50,6 +50,14 @@ public abstract class MortarActivity extends AppCompatActivity implements HasSco
     protected void onPreCreateScope(MortarScope.Builder buidler) {
     }
 
+    /**
+     * Called after scope is created but before super.onCreate()
+     * mostly useful for themeing
+     */
+    protected void onScopeCreated(MortarScope scope) {
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mActivityScope = MortarScope.findChild(getApplicationContext(), getScopeName());
@@ -63,6 +71,7 @@ public abstract class MortarActivity extends AppCompatActivity implements HasSco
         } else {
             Timber.d("Reusing old scope %s", mActivityScope.getName());
         }
+        onScopeCreated(mActivityScope);
         super.onCreate(savedInstanceState);
         BundleServiceRunner.getBundleServiceRunner(this).onCreate(savedInstanceState);
     }

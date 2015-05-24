@@ -19,6 +19,7 @@ package org.opensilk.music.ui3.genresprofile;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.profile.ProfileComponent;
 
@@ -30,16 +31,16 @@ import rx.functions.Func2;
  */
 @ScreenScope
 @Component(
-        dependencies = MusicActivityComponent.class,
+        dependencies = MusicActivityToolbarComponent.class,
         modules = GenresProfileScreenModule.class
 )
 public interface GenresProfileScreenComponent extends ProfileComponent {
-    Func2<MusicActivityComponent, GenresProfileScreen, GenresProfileScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, GenresProfileScreen, GenresProfileScreenComponent>() {
+    Func2<MusicActivityToolbarComponent, GenresProfileScreen, GenresProfileScreenComponent> FACTORY =
+            new Func2<MusicActivityToolbarComponent, GenresProfileScreen, GenresProfileScreenComponent>() {
                 @Override
-                public GenresProfileScreenComponent call(MusicActivityComponent musicActivityComponent, GenresProfileScreen screen) {
+                public GenresProfileScreenComponent call(MusicActivityToolbarComponent musicActivityComponent, GenresProfileScreen screen) {
                     return DaggerGenresProfileScreenComponent.builder()
-                            .musicActivityComponent(musicActivityComponent)
+                            .musicActivityToolbarComponent(musicActivityComponent)
                             .genresProfileScreenModule(new GenresProfileScreenModule(screen))
                             .build();
                 }

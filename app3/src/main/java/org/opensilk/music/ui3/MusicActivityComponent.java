@@ -39,7 +39,6 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     AppPreferences appPreferences();
     ActivityResultsController activityResultsController();
     ArtworkRequestManager artworkRequestor();
-    ActionBarOwner actionBarOwner();
     PlaybackController playbackController();
     MainPresenter mainPresenter();
 }

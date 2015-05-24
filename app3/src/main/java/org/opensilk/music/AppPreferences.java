@@ -35,6 +35,7 @@ import org.opensilk.music.ui3.gallery.GalleryPage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -95,8 +96,6 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String ORPHEUS_THEME = "orpheus_theme";
 
     //Now Playing
-    public static final String NOW_PLAYING_START_CONTROLS = "now_playing_start_controls";
-
     public static final String NOW_PLAYING_VIEW = "now_playing_view";
     //values must mirror array
     public static final String NOW_PLAYING_VIEW_ARTWORK = "artwork";
@@ -115,12 +114,6 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String FAB_LONG_CLICK = "fab_long_click";
     public static final String FAB_FLING = "fab_fling";
 
-    //footer actions
-    public static final String FOOTER_CLICK = "footer_click";
-    public static final String FOOTER_LONG_CLICK = "footer_long_click";
-    public static final String FOOTER_THUMB_CLICK = "footer_thumb_click";
-    public static final String FOOTER_THUMB_LONG_CLICK = "footer_thumb_long_click";
-
     //common actions
     public static final String ACTION_PLAYPAUSE = "play_pause";
     public static final String ACTION_QUICK_CONTROLS = "quick_controls";
@@ -129,7 +122,6 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String ACTION_NONE = "none";
 
     //Misc
-    public static final String AUTO_SHUFFLE_FOLDER = "auto_shuffle_directory";
     public static final String FIRST_RUN = "is_first_run";
 
     //library plugins
@@ -202,6 +194,13 @@ public class AppPreferences extends PreferencesWrapper {
                     .remove(PLAYLIST_LAYOUT)
                     .remove("start_page")
                     .remove("pref_home_pages")
+                    //only opens now playing now
+                    .remove("footer_click")
+                    .remove("footer_long_click")
+                    .remove("footer_thumb_click")
+                    .remove("footer_thumb_long_click")
+                    //new layout
+                    .remove("now_playing_start_controls")
                     .apply();
         }
         if (schema < MY_VERSION) {
@@ -240,7 +239,7 @@ public class AppPreferences extends PreferencesWrapper {
      */
 
     public void setPluginEnabled(String authority) {
-        List<String> disabledPlugins = readDisabledPlugins();
+        List<String> disabledPlugins = new ArrayList<>(readDisabledPlugins());
         Iterator<String> ii = disabledPlugins.iterator();
         while (ii.hasNext()) {
             if (authority.equals(ii.next())) {
@@ -251,7 +250,7 @@ public class AppPreferences extends PreferencesWrapper {
     }
 
     public void setPluginDisabled(String authority) {
-        List<String> disabledPlugins = readDisabledPlugins();
+        List<String> disabledPlugins = new ArrayList<>(readDisabledPlugins());
         for (String cn : disabledPlugins) {
             if (authority.equals(cn)) {
                 return;
@@ -317,34 +316,6 @@ public class AppPreferences extends PreferencesWrapper {
 
     public boolean isGrid(String key, String def) {
         return StringUtils.equals(getPrefs().getString(key, def), GRID);
-    }
-
-    /*
-     * Auto shuffle
-     */
-
-    /*
-     * This might not be the best way but since it is used in multiple processes
-     * im excluding it from the standard prefs in order to avoid MODE_MULTI_PROCESS
-     * since that doesnt cache values and we hit the SharedPrefs /a lot/
-     */
-    public static boolean writeAutoShuffleDirectory(Context context, String directory) {
-        try {
-            File f = new File(context.getFilesDir(), AUTO_SHUFFLE_FOLDER);
-            FileUtils.writeLines(f, Collections.singleton(directory));
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    public static String readAutoShuffleDirectory(Context context) {
-        try {
-            File f = new File(context.getFilesDir(), AUTO_SHUFFLE_FOLDER);
-            return FileUtils.readLines(f).get(0);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     /*

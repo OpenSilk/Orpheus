@@ -19,6 +19,7 @@ package org.opensilk.music.ui3.library;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -28,16 +29,16 @@ import rx.functions.Func2;
  */
 @ScreenScope
 @Component(
-        dependencies = MusicActivityComponent.class,
+        dependencies = MusicActivityToolbarComponent.class,
         modules = LandingScreenModule.class
 )
 public interface LandingScreenComponent {
-        Func2<MusicActivityComponent, LandingScreen, LandingScreenComponent> FACTORY =
-                new Func2<MusicActivityComponent, LandingScreen, LandingScreenComponent>() {
+        Func2<MusicActivityToolbarComponent, LandingScreen, LandingScreenComponent> FACTORY =
+                new Func2<MusicActivityToolbarComponent, LandingScreen, LandingScreenComponent>() {
                         @Override
-                        public LandingScreenComponent call(MusicActivityComponent musicActivityComponent, LandingScreen landingScreen) {
+                        public LandingScreenComponent call(MusicActivityToolbarComponent musicActivityComponent, LandingScreen landingScreen) {
                                 return DaggerLandingScreenComponent.builder()
-                                        .musicActivityComponent(musicActivityComponent)
+                                        .musicActivityToolbarComponent(musicActivityComponent)
                                         .landingScreenModule(new LandingScreenModule(landingScreen))
                                         .build();
                         }

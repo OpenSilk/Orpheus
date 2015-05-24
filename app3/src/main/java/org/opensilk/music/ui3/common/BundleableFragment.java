@@ -31,6 +31,8 @@ import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbar;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 
 /**
  * Created by drew on 5/5/15.
@@ -66,7 +68,7 @@ public abstract class BundleableFragment extends MortarFragment {
 
     protected void setupActionBar() {
         mTitle = getArguments().getString("title");
-        MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
+        MusicActivityToolbarComponent component = DaggerService.getDaggerComponent(getActivity());
         ActionBarOwner actionBarOwner = component.actionBarOwner();
         BundleableComponent component1 = DaggerService.getDaggerComponent(getScope());
         BundleablePresenter presenter = component1.presenter();

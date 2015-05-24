@@ -18,16 +18,20 @@
 package org.opensilk.music.ui3.main;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.settings.SettingsActivity;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.library.LandingScreenFragment;
 
 import java.util.List;
@@ -54,6 +58,7 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
     final FragmentManagerOwner fm;
     final DrawerOwner drawerOwner;
     final String mediaStoreAuthority;
+    final ActivityResultsController activityResultsController;
 
     LibraryProviderInfo currentSelection;
 
@@ -64,7 +69,8 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
             AppPreferences settings,
             FragmentManagerOwner fm,
             DrawerOwner drawerOwner,
-            @Named("mediaStoreLibraryAuthority") String mediaStoreAuthority
+            @Named("mediaStoreLibraryAuthority") String mediaStoreAuthority,
+            ActivityResultsController activityResultsController
     ) {
         this.appContext = context;
         this.loader = loader;
@@ -72,6 +78,7 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
         this.fm = fm;
         this.drawerOwner = drawerOwner;
         this.mediaStoreAuthority = mediaStoreAuthority;
+        this.activityResultsController = activityResultsController;
     }
 
     @Override
@@ -136,5 +143,10 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
         fm.killBackStack();
         fm.replaceMainContent(LandingScreenFragment.ni(config), false);
         drawerOwner.closeDrawer();
+    }
+
+    void openSettings() {
+        Intent i = new Intent(appContext, SettingsActivity.class);
+        activityResultsController.startActivityForResult(i, ActivityRequestCodes.APP_SETTINGS, null);
     }
 }

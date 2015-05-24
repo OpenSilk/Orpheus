@@ -27,6 +27,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleableFragment;
 import org.opensilk.music.ui3.common.BundleablePresenter;
@@ -55,7 +56,7 @@ public class PlaylistsProfileScreenFragment extends BundleableFragment {
     @Override
     protected void setupActionBar() {
         PlaylistsProfileScreen s = (PlaylistsProfileScreen) getScreen();
-        MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
+        MusicActivityToolbarComponent component = DaggerService.getDaggerComponent(getActivity());
         ActionBarOwner actionBarOwner = component.actionBarOwner();
         TracksDragSwipeComponent component1 = DaggerService.getDaggerComponent(getScope());
         TracksDragSwipePresenter presenter = component1.presenter();

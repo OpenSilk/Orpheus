@@ -17,6 +17,7 @@
 
 package org.opensilk.music.ui3.main;
 
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,13 +49,22 @@ public class DrawerScreenViewAdapter extends
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(inflate(parent, android.R.layout.simple_list_item_1));
+        return new ViewHolder(inflate(parent, R.layout.mtrl_list_item_oneline_icontext));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         final LibraryProviderInfo item = getItem(position);
-                ((TextView) holder.itemView).setText(item.title);
+        TextView tv = (TextView) holder.itemView;
+        tv.setText(item.title);
+        Drawable d = item.icon;
+//        item.icon = null; //free plugin reference
+        if (d == null) {
+            d = tv.getResources().getDrawable(R.drawable.ic_extension_grey600_24dp);
+        }
+        int bounds = (int) (24 * tv.getResources().getDisplayMetrics().density);
+        d.setBounds(0, 0, bounds, bounds);
+        tv.setCompoundDrawables(d, null, null, null);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

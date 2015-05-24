@@ -31,12 +31,9 @@ import rx.functions.Func1;
 @ActivityScope
 @Component(
         dependencies = AppComponent.class,
-        modules = {
-                ActivityResultsOwnerModule.class,
-                PauseAndResumeModule.class
-        }
+        modules = MusicActivityModule.class
 )
-public interface TracksDragSwipeActivityComponent extends MusicActivityComponent {
+public interface TracksDragSwipeActivityComponent extends MusicActivityToolbarComponent {
     Func1<AppComponent, TracksDragSwipeActivityComponent> FACTORY =
             new Func1<AppComponent, TracksDragSwipeActivityComponent>() {
                 @Override

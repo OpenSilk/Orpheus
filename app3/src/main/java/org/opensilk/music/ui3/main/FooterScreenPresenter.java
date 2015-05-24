@@ -190,33 +190,8 @@ public class FooterScreenPresenter extends ViewPresenter<FooterScreenView> imple
         }
     }
 
-    void onClick(Context context) {
-        handleClick(settings.getString(AppPreferences.FOOTER_CLICK, AppPreferences.ACTION_OPEN_QUEUE), context);
-    }
-
-    boolean onLongClick(Context context) {
-        return handleClick(settings.getString(AppPreferences.FOOTER_LONG_CLICK, AppPreferences.ACTION_NONE), context);
-    }
-
-    void onThumbClick(Context context) {
-        handleClick(settings.getString(AppPreferences.FOOTER_THUMB_CLICK, AppPreferences.ACTION_OPEN_NOW_PLAYING), context);
-    }
-
-    boolean onThumbLongClick(Context context) {
-        return handleClick(settings.getString(AppPreferences.FOOTER_THUMB_LONG_CLICK, AppPreferences.ACTION_NONE), context);
-    }
-
-    @DebugLog
-    boolean handleClick(String action, Context context) {
-        switch (action) {
-            case AppPreferences.ACTION_OPEN_QUEUE:
-            case AppPreferences.ACTION_OPEN_NOW_PLAYING:
-                NowPlayingActivity.startSelf(context);
-                return true;
-            case AppPreferences.ACTION_NONE:
-            default:
-                return false;
-        }
+    void handleClick(Context context) {
+        NowPlayingActivity.startSelf(context);
     }
 
     void subscribeBroadcasts() {

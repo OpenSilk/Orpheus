@@ -29,7 +29,7 @@
             android:defaultValue="true" />
 
         <CheckBoxPreference
-            android:key="pref_low_resolution"
+            android:key="want_low_resolution"
             android:title="@string/settings_low_resolution"
             android:summary="@string/settings_low_resolution_summary" />
 
@@ -39,7 +39,7 @@
         android:title="@string/settings_data_category">
 
         <ListPreference
-            android:key="pref_cache_size"
+            android:key="image_cache_size"
             android:title="@string/settings_cache_size"
             android:entries="@array/cache_size"
             android:entryValues="@array/cache_size_values"

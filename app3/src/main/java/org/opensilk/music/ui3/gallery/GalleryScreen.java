@@ -27,6 +27,7 @@ import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 import org.opensilk.music.ui3.common.BundleableScreen;
 
 import java.util.List;
@@ -50,7 +51,7 @@ public class GalleryScreen extends BundleableScreen {
     public static class Factory extends ComponentFactory<GalleryScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, GalleryScreen screen) {
-            MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
+            MusicActivityToolbarComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
             return GalleryScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }

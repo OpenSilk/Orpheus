@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.gallery;
 
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -27,16 +28,16 @@ import rx.functions.Func2;
  */
 @GalleryScreenScope
 @Component(
-        dependencies = MusicActivityComponent.class,
+        dependencies = MusicActivityToolbarComponent.class,
         modules = GalleryScreenModule.class
 )
 public interface GalleryScreenComponent extends MusicActivityComponent {
-    Func2<MusicActivityComponent, GalleryScreen, GalleryScreenComponent> FACTORY =
-            new Func2<MusicActivityComponent, GalleryScreen, GalleryScreenComponent>() {
+    Func2<MusicActivityToolbarComponent, GalleryScreen, GalleryScreenComponent> FACTORY =
+            new Func2<MusicActivityToolbarComponent, GalleryScreen, GalleryScreenComponent>() {
                 @Override
-                public GalleryScreenComponent call(MusicActivityComponent musicActivityComponent, GalleryScreen galleryScreen) {
+                public GalleryScreenComponent call(MusicActivityToolbarComponent musicActivityComponent, GalleryScreen galleryScreen) {
                     return DaggerGalleryScreenComponent.builder()
-                            .musicActivityComponent(musicActivityComponent)
+                            .musicActivityToolbarComponent(musicActivityComponent)
                             .galleryScreenModule(new GalleryScreenModule(galleryScreen))
                             .build();
                 }

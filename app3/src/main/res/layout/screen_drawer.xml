@@ -25,16 +25,26 @@
     android:layout_height="match_parent"
     android:background="?android:colorBackground">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/action_bar_double_height"
-        android:scaleType="fitXY"
-        android:src="@drawable/banner"/>
-
     <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/app_settings"
+            android:drawableLeft="@drawable/ic_settings_grey600_24dp"
+            android:text="@string/settings_title"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="?android:attr/textColorPrimary"
+            style="@style/mtrl.SingleLineListItemTextView.Icon"/>
+
+    </LinearLayout>
 
 </org.opensilk.music.ui3.main.DrawerScreenView>

@@ -32,6 +32,7 @@ import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.model.Album;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 import org.opensilk.music.ui3.common.BundleableScreen;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 
@@ -92,7 +93,7 @@ public class AlbumsProfileScreen extends BundleableScreen implements ProfileScre
     public static class Factory extends ComponentFactory<AlbumsProfileScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, AlbumsProfileScreen screen) {
-            MusicActivityComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
+            MusicActivityToolbarComponent activityComponent = DaggerService.getDaggerComponent(parentScope);
             return AlbumsProfileScreenComponent.FACTORY.call(activityComponent, screen);
         }
     }

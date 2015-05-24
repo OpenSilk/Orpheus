@@ -22,16 +22,21 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.recycler.DividerItemDecoration;
+import org.opensilk.common.ui.recycler.HeaderRecyclerAdapter;
+import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 /**
  * Created by drew on 5/1/15.
@@ -53,7 +58,11 @@ public class DrawerScreenView extends LinearLayout {
         super.onFinishInflate();
         ButterKnife.inject(this);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setAdapter(mAdapter);
+        HeaderRecyclerAdapter<DrawerScreenViewAdapter.ViewHolder> headerAdapter =
+                new HeaderRecyclerAdapter<>(mAdapter);
+        headerAdapter.addHeader(ViewUtils.inflate(getContext(), R.layout.drawer_banner, this, false));
+        mRecyclerView.setAdapter(headerAdapter);
+        mRecyclerView.setHasFixedSize(false);
         mPresenter.takeView(this);
     }
 
@@ -65,5 +74,10 @@ public class DrawerScreenView extends LinearLayout {
 
     public DrawerScreenViewAdapter getAdapter() {
         return mAdapter;
+    }
+
+    @OnClick(R.id.app_settings)
+    void openSettings() {
+        mPresenter.openSettings();
     }
 }
