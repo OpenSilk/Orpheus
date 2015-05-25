@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.widgets;
+package org.opensilk.music.ui.widget;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -40,10 +40,8 @@ import butterknife.InjectView;
  */
 public class GridTileDescription extends LinearLayout {
 
-    @InjectView(R.id.tile_title)
-    TextView mTitle;
-    @InjectView(R.id.tile_subtitle)
-    TextView mSubTitle;
+    @InjectView(R.id.tile_title) TextView mTitle;
+    @InjectView(R.id.tile_subtitle) TextView mSubTitle;
 
     final PaletteObserver paletteObserver;
     final boolean lightTheme;

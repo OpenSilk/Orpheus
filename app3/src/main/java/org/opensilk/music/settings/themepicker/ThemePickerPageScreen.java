@@ -25,7 +25,7 @@ import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
-import org.opensilk.music.theme.OrpheusTheme;
+import org.opensilk.music.ui.theme.OrpheusTheme;
 
 import mortar.MortarScope;
 

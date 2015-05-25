@@ -31,7 +31,7 @@ import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.LetterTileDrawable;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.widgets.PlayingIndicator;
+import org.opensilk.music.ui.widget.PlayingIndicator;
 
 import java.util.Map;
 import java.util.WeakHashMap;

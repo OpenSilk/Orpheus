@@ -18,46 +18,21 @@
 package org.opensilk.music.ui3.nowplaying;
 
 import org.apache.commons.lang3.StringUtils;
-import org.opensilk.common.core.rx.SimpleObserver;
-import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.playback.BundleHelper;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.dragswipe.BaseDragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.dragswipe.BaseSwipeableRecyclerAdapter;
-import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.widgets.PlayingIndicator;
 
 import android.content.Context;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.MediaSessionCompat.QueueItem;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.Random;
-import java.util.WeakHashMap;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import hugo.weaving.DebugLog;
-import rx.Observer;
-import rx.Subscription;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
-import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 /**

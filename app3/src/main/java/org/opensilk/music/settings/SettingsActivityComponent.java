@@ -18,8 +18,6 @@
 package org.opensilk.music.settings;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
-import org.opensilk.common.ui.mortar.ActivityResultsOwnerModule;
-import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.MusicActivityModule;

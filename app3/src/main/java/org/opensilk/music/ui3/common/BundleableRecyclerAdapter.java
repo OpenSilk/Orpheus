@@ -46,7 +46,7 @@ import org.opensilk.music.model.Track;
 import org.opensilk.music.artwork.ArtworkType;
 import org.opensilk.music.model.TrackCollection;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.widgets.GridTileDescription;
+import org.opensilk.music.ui.widget.GridTileDescription;
 
 import java.util.List;
 import java.util.Map;

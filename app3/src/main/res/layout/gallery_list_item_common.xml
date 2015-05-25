@@ -60,7 +60,7 @@
         android:visibility="gone"
         style="@style/SingleLineTextView"/>
 
-    <org.opensilk.music.widgets.PlayingIndicator
+    <org.opensilk.music.ui.widget.PlayingIndicator
         android:id="@+id/playing_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -27,15 +27,11 @@ import android.preference.Preference;
 import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
-import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.cache.CacheUtil;
-import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.artwork.shared.ArtworkPreferences;
 
 import java.util.Locale;
-
-import javax.inject.Inject;
 
 import static org.opensilk.music.artwork.Constants.DISK_CACHE_DIRECTORY;
 import static org.opensilk.music.artwork.fetcher.ArtworkFetcherService.*;

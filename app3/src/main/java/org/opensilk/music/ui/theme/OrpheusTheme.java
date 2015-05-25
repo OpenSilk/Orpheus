@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.theme;
+package org.opensilk.music.ui.theme;
 
 import org.opensilk.music.R;
 

@@ -17,9 +17,6 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -29,11 +26,7 @@ import android.graphics.PorterDuffXfermode;
 import android.media.audiofx.AudioEffect;
 import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -56,13 +49,12 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.PaletteObserver;
 import org.opensilk.music.artwork.PaletteResponse;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.theme.PlaybackDrawableTint;
+import org.opensilk.music.ui.theme.PlaybackDrawableTint;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import butterknife.Optional;
 import hugo.weaving.DebugLog;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.ViewObservable;
@@ -72,7 +64,6 @@ import rx.subscriptions.CompositeSubscription;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_FILL;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_SCALE;
-import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE_BAR;

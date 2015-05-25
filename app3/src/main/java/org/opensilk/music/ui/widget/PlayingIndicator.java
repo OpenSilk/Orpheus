@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.opensilk.music.widgets;
+package org.opensilk.music.ui.widget;
 
 import android.annotation.TargetApi;
 import android.content.Context;

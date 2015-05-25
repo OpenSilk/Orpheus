@@ -25,7 +25,7 @@ import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.theme.OrpheusTheme;
+import org.opensilk.music.ui.theme.OrpheusTheme;
 import org.opensilk.music.ui3.MusicActivity;
 
 import java.util.ArrayList;

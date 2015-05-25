@@ -35,10 +35,8 @@ import org.opensilk.common.ui.widget.FloatingActionButton;
 import org.opensilk.common.ui.widget.FloatingActionButtonCheckable;
 import org.opensilk.music.R;
 import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.theme.PlaybackDrawableTint;
+import org.opensilk.music.ui.theme.PlaybackDrawableTint;
 import org.opensilk.music.ui3.MusicActivityComponent;
-
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

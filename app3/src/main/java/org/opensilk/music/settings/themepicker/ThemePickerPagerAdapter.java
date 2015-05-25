@@ -22,7 +22,7 @@ import android.view.ContextThemeWrapper;
 import android.view.View;
 
 import org.opensilk.common.ui.mortar.MortarPagerAdapter;
-import org.opensilk.music.theme.OrpheusTheme;
+import org.opensilk.music.ui.theme.OrpheusTheme;
 
 import java.util.List;
 

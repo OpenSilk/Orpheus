@@ -24,7 +24,6 @@ import android.widget.TextView;
 
 import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 import org.opensilk.music.R;
-import org.opensilk.music.settings.plugin.SettingsPluginRecyclerAdapter;
 import org.opensilk.music.ui3.common.RecyclerAdapterItemClickDelegate;
 
 import java.util.Arrays;

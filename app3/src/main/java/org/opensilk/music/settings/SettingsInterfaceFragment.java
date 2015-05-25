@@ -30,7 +30,7 @@ import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.settings.themepicker.ThemePickerActivity;
-import org.opensilk.music.theme.OrpheusTheme;
+import org.opensilk.music.ui.theme.OrpheusTheme;
 
 import javax.inject.Inject;
 
