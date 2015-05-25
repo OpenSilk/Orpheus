@@ -29,12 +29,25 @@
     app:umanoParalaxOffset="100dp"
     app:umanoDragView="@+id/queue_toolbar">
 
-    <fragment
-        android:id="@+id/nowplaying_fragment"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="org.opensilk.music.ui3.nowplaying.NowPlayingScreenFragment"
-        tools:layout="@layout/screen_nowplaying"/>
+        android:layout_height="match_parent">
+
+        <fragment
+            android:id="@+id/nowplaying_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:name="org.opensilk.music.ui3.nowplaying.NowPlayingScreenFragment"
+            tools:layout="@layout/screen_nowplaying"/>
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/main_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_gravity="top"
+            style="?toolbarStyle"/>
+
+    </FrameLayout>
 
     <fragment
         android:id="@+id/queue_fragment"

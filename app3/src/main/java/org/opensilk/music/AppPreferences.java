@@ -50,7 +50,7 @@ import timber.log.Timber;
 public class AppPreferences extends PreferencesWrapper {
 
     private static final String VERSION = "__version__";
-    private static final int MY_VERSION = 300;
+    private static final int MY_VERSION = 301;
 
     //Interface
     public static final String KEEP_SCREEN_ON = "keep_screen_on";
@@ -93,6 +93,11 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String ORPHEUS_THEME = "orpheus_theme";
 
     //Now Playing
+    public static final String NOW_PLAYING_LAYOUT = "now_playing_layout";
+    //values must mirror array
+    public static final String NOW_PLAYING_DEFAULT = "default";
+    public static final String NOW_PLAYING_CLASSIC = "classic";
+
     public static final String NOW_PLAYING_VIEW = "now_playing_view";
     //values must mirror array
     public static final String NOW_PLAYING_VIEW_ARTWORK = "artwork";
@@ -110,6 +115,10 @@ public class AppPreferences extends PreferencesWrapper {
     public static final String FAB_DOUBLE_CLICK = "fab_double_click";
     public static final String FAB_LONG_CLICK = "fab_long_click";
     public static final String FAB_FLING = "fab_fling";
+
+    //footer actions
+    public static final String FOOTER_CLICK = "footer_click";
+    public static final String FOOTER_LONG_CLICK = "footer_long_click";
 
     //common actions
     public static final String ACTION_PLAYPAUSE = "play_pause";
@@ -191,9 +200,13 @@ public class AppPreferences extends PreferencesWrapper {
                     .remove(PLAYLIST_LAYOUT)
                     .remove("start_page")
                     .remove("pref_home_pages")
-                    //only opens now playing now
-                    .remove("footer_click")
-                    .remove("footer_long_click")
+                    .apply();
+        }
+        if (schema < 301) {
+            getPrefs().edit()
+                    //want to open now playing by default
+                    .remove(FOOTER_CLICK)
+                    //no longer clickable
                     .remove("footer_thumb_click")
                     .remove("footer_thumb_long_click")
                     //new layout

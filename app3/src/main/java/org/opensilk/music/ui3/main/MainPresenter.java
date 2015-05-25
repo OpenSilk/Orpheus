@@ -27,6 +27,7 @@ import org.opensilk.common.ui.mortar.PausesAndResumes;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.playback.PlaybackConstants;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.nowplaying.NowPlayingActivity;
 
 import javax.inject.Inject;
 
@@ -154,12 +155,12 @@ public class MainPresenter extends ViewPresenter<MainView> implements PausesAndR
                 break;
             case AppPreferences.ACTION_OPEN_NOW_PLAYING:
                 if (getView() != null) {
-//                    NowPlayingScreen.toggleNowPlaying(getView().getContext());
+                    NowPlayingActivity.startSelf(getView().getContext(), false);
                 }
                 break;
             case AppPreferences.ACTION_OPEN_QUEUE:
                 if (getView() != null) {
-//                    QueueScreen.toggleQueue(getView().getContext());
+                    NowPlayingActivity.startSelf(getView().getContext(), true);
                 }
                 break;
             case AppPreferences.ACTION_NONE:

@@ -20,10 +20,16 @@ package org.opensilk.music.ui3.nowplaying;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
+import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ActionBarOwnerDelegate;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.R;
@@ -42,11 +48,16 @@ import mortar.MortarScope;
 public class NowPlayingActivity extends MortarFragmentActivity {
 
     @Inject protected PlaybackController mPlaybackController;
+    @Inject ActionBarOwner mActionBarOwner;
 
+    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.sliding_panel) @Optional SlidingUpPanelLayout mSlidingPanel;
 
-    public static void startSelf(Context context) {
+    ActionBarOwnerDelegate<NowPlayingActivity> mActionBarDelegate;
+
+    public static void startSelf(Context context, boolean startQueue) {
         Intent i = new Intent(context, NowPlayingActivity.class);
+        i.putExtra("startqueue", startQueue);
         context.startActivity(i);
     }
 
@@ -73,7 +84,27 @@ public class NowPlayingActivity extends MortarFragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nowplaying);
         ButterKnife.inject(this);
+
+        if (getIntent().getBooleanExtra("startqueue", false)) {
+            mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+        }
+
+        mActionBarOwner.setConfig(ActionBarConfig.builder()
+                .setTitle("")
+                .setUpButtonEnabled(true)
+                .setTransparentBackground(true)
+                .build());
+        mActionBarDelegate = new ActionBarOwnerDelegate<>(this, mActionBarOwner, mToolbar);
+        mActionBarDelegate.onCreate();
+
         mPlaybackController.connect();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mActionBarDelegate.onDestroy();
     }
 
     @Override
@@ -86,6 +117,20 @@ public class NowPlayingActivity extends MortarFragmentActivity {
     protected void onStop() {
         super.onStop();
         mPlaybackController.notifyForegroundStateChanged(false);
+    }
+
+    /*
+     * Action bar owner
+     */
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return mActionBarDelegate.onCreateOptionsMenu(menu) || super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mActionBarDelegate.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override

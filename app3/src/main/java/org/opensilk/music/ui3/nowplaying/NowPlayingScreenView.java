@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.pheelicks.visualizer.VisualizerView;
@@ -43,6 +44,7 @@ import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.common.ui.widget.AnimatedImageView;
+import org.opensilk.common.ui.widget.CompatSeekBar;
 import org.opensilk.common.ui.widget.ImageButtonCheckable;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -55,6 +57,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.Optional;
 import hugo.weaving.DebugLog;
 import rx.android.events.OnClickEvent;
 import rx.android.observables.ViewObservable;
@@ -64,6 +67,7 @@ import rx.subscriptions.CompositeSubscription;
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_FILL;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_ARTWORK_SCALE;
+import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_ARTWORK;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE;
 import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_CIRCLE_BAR;
@@ -80,7 +84,8 @@ public class NowPlayingScreenView extends RelativeLayout {
 
     @InjectView(R.id.now_playing_something) ViewGroup placeholder;
     @InjectView(R.id.now_playing_actions_container) ViewGroup actionsContainer;
-    @InjectView(R.id.now_playing_seekprogress) SeekArc seekBar;
+    @InjectView(R.id.now_playing_seekprogress) @Optional SeekArc seekBar;
+    @InjectView(R.id.now_playing_seekbar) @Optional CompatSeekBar seekBarClassic;
     @InjectView(R.id.now_playing_current_time) TextView currentTime;
     @InjectView(R.id.now_playing_total_time) TextView totalTime;
     @InjectView(R.id.now_playing_shuffle) ImageButton shuffle;
@@ -110,8 +115,7 @@ public class NowPlayingScreenView extends RelativeLayout {
         super.onFinishInflate();
         ButterKnife.inject(this);
         placeholder.removeAllViews();
-//        String pickedview = settings.getString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_ARTWORK);
-        String pickedview = NOW_PLAYING_VIEW_VIS_CIRCLE_BAR;
+        String pickedview = settings.getString(NOW_PLAYING_VIEW, NOW_PLAYING_VIEW_ARTWORK);
         switch (pickedview) {
             case NOW_PLAYING_VIEW_VIS_CIRCLE:
             case NOW_PLAYING_VIEW_VIS_CIRCLE_BAR:
@@ -127,11 +131,8 @@ public class NowPlayingScreenView extends RelativeLayout {
                 initArtwork();
                 break;
         }
-        if (!VersionUtils.hasLollipop()) {
-            seekBar.getThumb().mutate().setColorFilter(
-                    ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
-            );
-        }
+        setupSeeker();
+
         PlaybackDrawableTint.repeatDrawable36(repeat);
         PlaybackDrawableTint.shuffleDrawable36(shuffle);
         if (!isInEditMode()) presenter.takeView(this);
@@ -140,7 +141,6 @@ public class NowPlayingScreenView extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        seekBar.setOnSeekArcChangeListener(presenter);
         if (!isInEditMode()) presenter.takeView(this);
         subscribeClicks();
     }
@@ -150,8 +150,63 @@ public class NowPlayingScreenView extends RelativeLayout {
         super.onDetachedFromWindow();
         unsubscribeClicks();
         presenter.dropView(this);
-        seekBar.setOnSeekArcChangeListener(null);
         destroyVisualizer();
+    }
+
+    void setupSeeker() {
+        if (seekBar != null) {
+            if (!VersionUtils.hasLollipop()) {
+                seekBar.getThumb().mutate().setColorFilter(
+                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
+                );
+            }
+            seekBar.setOnSeekArcChangeListener(new SeekArc.OnSeekArcChangeListener() {
+                @Override
+                public void onProgressChanged(SeekArc seekArc, int i, boolean b) {
+                    presenter.onProgressChanged(i, b);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekArc seekArc) {
+                    presenter.onStartTrackingTouch();
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekArc seekArc) {
+                    presenter.onStopTrackingTouch();
+                }
+            });
+        } else if (seekBarClassic != null) {
+            if (!VersionUtils.hasLollipop()) {
+                seekBarClassic.getThumb().mutate().setColorFilter(
+                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
+                );
+            }
+            seekBarClassic.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    presenter.onProgressChanged(progress, fromUser);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    presenter.onStartTrackingTouch();
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    presenter.onStopTrackingTouch();
+                }
+            });
+        }
+    }
+
+    void setProgress(int progress) {
+        if (seekBar != null) {
+            seekBar.setProgress(progress);
+        } else if (seekBarClassic != null) {
+            seekBarClassic.setProgress(progress);
+        }
     }
 
     void initVisualizer(String type) {

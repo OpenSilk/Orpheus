@@ -30,7 +30,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.core.rx.RxUtils;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.music.R;
@@ -40,10 +39,6 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import rx.Subscription;
-import rx.android.events.OnClickEvent;
-import rx.android.observables.ViewObservable;
-import rx.functions.Action1;
 
 /**
  * Created by drew on 10/15/14.
@@ -58,7 +53,6 @@ public class FooterScreenView extends RelativeLayout {
     @InjectView(R.id.footer_artist_name) TextView artistName;
 
     final boolean lightTheme;
-    Subscription clicksSubscription;
 
     public FooterScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -94,21 +88,23 @@ public class FooterScreenView extends RelativeLayout {
     }
 
     void subscribeClicks() {
-        clicksSubscription = ViewObservable.clicks(this).subscribe(
-                new Action1<OnClickEvent>() {
-                    @Override
-                    public void call(OnClickEvent onClickEvent) {
-                        presenter.handleClick(getContext());
-                    }
-                }
-        );
+        this.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.onClick(getContext());
+            }
+        });
+        this.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return presenter.onLongClick(getContext());
+            }
+        });
     }
 
     void unsubscribeClicks() {
-        if (RxUtils.isSubscribed(clicksSubscription)) {
-            clicksSubscription.unsubscribe();
-            clicksSubscription = null;
-        }
+        this.setOnClickListener(null);
+        this.setOnLongClickListener(null);
     }
 
     public void updateBackground(PaletteResponse paletteResponse) {

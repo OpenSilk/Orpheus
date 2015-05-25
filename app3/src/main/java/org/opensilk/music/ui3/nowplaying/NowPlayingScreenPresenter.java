@@ -62,9 +62,7 @@ import static android.support.v4.media.session.PlaybackStateCompat.*;
  * Created by drew on 4/20/15.
  */
 @ScreenScope
-public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenView> implements
-        PausesAndResumes,
-        SeekArc.OnSeekArcChangeListener {
+public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenView> implements PausesAndResumes {
 
     final Context appContext;
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
@@ -243,8 +241,8 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         }
     }
 
-    @Override
-    public void onProgressChanged(final SeekArc bar, final int progress, final boolean fromuser) {
+    /*seekbars*/
+    public void onProgressChanged(final int progress, final boolean fromuser) {
         if (!fromuser) {
             return;
         }
@@ -260,16 +258,14 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         }
     }
 
-    @Override
-    public void onStartTrackingTouch(final SeekArc bar) {
+    public void onStartTrackingTouch() {
         lastSeekEventTime = 0;
         posOverride = -1;
         fromTouch = true;
         setCurrentTimeVisibile();
     }
 
-    @Override
-    public void onStopTrackingTouch(final SeekArc bar) {
+    public void onStopTrackingTouch() {
         fromTouch = false;
         if (posOverride != -1) {
             playbackController.seekTo(posOverride);
@@ -277,6 +273,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         }
         posOverride = -1;
     }
+    /*end seekbars*/
 
     void updateProgress(long position, long duration) {
         if (position < 0 || duration <= 0) {
@@ -302,7 +299,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
 
     void setProgress(int progress) {
         if (hasView()) {
-            getView().seekBar.setProgress(progress);
+            getView().setProgress(progress);
         }
     }
 
@@ -342,6 +339,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     void getSessionId() {
         sessionId = playbackController.getAudioSessionId();
         if (sessionId == AudioEffect.ERROR_BAD_VALUE) {
+            //TODO stop doing this
             Observable.timer(500, TimeUnit.MILLISECONDS)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Long>() {

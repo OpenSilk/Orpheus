@@ -19,7 +19,6 @@
         <CheckBoxPreference
             android:key="prefer_download_artwork"
             android:title="@string/settings_prefer_download_art"
-            android:summary="@string/settings_prefer_download_art_summary"
             android:dependency="download_missing_artwork"
             android:defaultValue="false" />
 
@@ -31,7 +30,7 @@
         <CheckBoxPreference
             android:key="want_low_resolution"
             android:title="@string/settings_low_resolution"
-            android:summary="@string/settings_low_resolution_summary" />
+            android:defaultValue="false"/>
 
     </PreferenceCategory>
 

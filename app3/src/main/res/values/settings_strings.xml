@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <!-- Main settings screen -->
+    <string name="settings_title">Settings</string>
+    <!-- about NOTE some string in res/ -->
+    <string name="settings_created_by">Created by OpenSilk Productions LLC</string>
+    <!-- about version -->
+    <string name="settings_changes_dialog_title">What\'s new</string>
+    <!-- legal -->
+    <string name="settings_legal_category">Legal</string>
+    <!-- legal last.fm -->
+    <string name="settings_thanks_dialog_lfm" translatable="false">Last.fm</string>
+    <string name="settings_thanks_dialog_lfm_desc">Cover art and artist images</string>
+    <string name="settings_thanks_dialog_lfm_url">http://last.fm/</string><!--has localized domains-->
+    <!-- legal coverartarchive.org-->
+    <string name="settings_thanks_dialog_caa" translatable="false">coverartarchive.org</string>
+    <string name="settings_thanks_dialog_caa_desc">Cover art</string>
+    <string name="settings_thanks_dialog_caa_url" translatable="false">http://coverartarchive.org/</string>
+    <!-- lecal people -->
+    <string name="settings_thanks_dialog_an" translatable="false">Andrew Neal</string>
+    <string name="settings_thanks_dialog_an_desc" translatable="false">Apollo</string>
+    <string name="settings_thanks_dialog_mc" translatable="false">Matthew Carter</string>
+    <string name="settings_thanks_dialog_mc_desc">Banner and icon design</string>
+    <string name="settings_thanks_dialog_mc_url" translatable="false">https://plus.google.com/111519147913981849095/about</string>
+    <string name="settings_feedback">Send feedback</string>
+    <string name="settings_feedback_url" translatable="false">mailto:market.opensilk@gmail.com</string>
+    <string name="settings_feedback_email_subject" translatable="false">Feedback: Orpheus Music Player</string>
+    <!-- legal bugreports -->
+    <string name="settings_send_crash_reports">Send crash reports</string>
+    <string name="settings_send_crash_reports_summary">Crash reports are anonymous and secure</string>
+    <!-- interface -->
+    <string name="settings_keep_screen_on">Keep screen on</string>
+    <string name="settings_keep_screen_on_summary">While charging screen will not sleep</string>
+    <!-- interface theme -->
+    <string name="settings_theme_category">Theme</string>
+    <string name="settings_dark_theme">Use dark theme</string>
+    <string name="settings_pick_theme">Pick theme</string>
+    <!-- interface theme picker activity -->
+    <string name="settings_theme_preview">Theme Preview</string>
+    <string name="settings_theme_picker_help">Swipe to change</string>
+    <string name="settings_msg_restart_app">Orpheus will now restart to apply changes</string>
+    <!-- interface now playing -->
+    <string name="settings_now_playing_layout">Pick layout</string>
+    <string name="settings_now_playing_layout_default">Default</string>
+    <string name="settings_now_playing_layout_classic">Classic</string>
+    <string name="settings_now_playing_view">Pick view</string>
+    <string name="settings_now_playing_view_artwork">Artwork</string>
+    <string name="settings_now_playing_view_visualizer_circle">Visualization (circle lines)</string>
+    <string name="settings_now_playing_view_visualizer_circle_bars">Visualization (circle bars)</string>
+    <string name="settings_now_playing_view_visualizer_lines">Visualization (lines)</string>
+    <string name="settings_now_playing_artwork_scale">Artwork scale</string>
+    <string name="settings_now_playing_artwork_fill">Fill screen</string>
+    <string name="settings_now_playing_artwork_fit">Fit screen</string>
+    <!-- interface fab -->
+    <string name="settings_fab">Action button</string>
+    <string name="settings_fab_click">Click action</string>
+    <string name="settings_fab_double_click">Double click action</string>
+    <string name="settings_fab_long_click_action">Long click action</string>
+    <string name="settings_fab_fling_action">Fling action</string>
+    <!-- interface footer -->
+    <string name="settings_footer">Footer</string>
+    <string name="settings_footer_click">Click action</string>
+    <string name="settings_footer_long_click">Long click action</string>
+    <!-- interface actions dialog -->
+    <string name="settings_action_play_pause">Play/Pause</string>
+    <string name="settings_action_quick_controls">Toggle quick controls</string>
+    <string name="settings_action_open_now_playing">Open now playing</string>
+    <string name="settings_action_open_queue">Open queue</string>
+    <string name="settings_action_none">None</string>
+    <!-- data NOTE Some strings in res/-->
+    <!-- data download -->
+    <string name="settings_download_category">Download</string>
+    <string name="settings_prefer_download_art">Prefer downloading artwork</string>
+    <string name="settings_low_resolution">Use low resolution art work</string>
+    <!-- data storage -->
+    <string name="settings_cache_size">Set image cache limit</string>
+    <string name="settings_cache_size_20" translatable="false">20MB</string>
+    <string name="settings_cache_size_40" translatable="false">40MB</string>
+    <string name="settings_cache_size_60" translatable="false">60MB</string>
+    <string name="settings_cache_size_80" translatable="false">80MB</string>
+    <!-- audio NOTE Some strings in res/-->
+    <string name="settings_audio_category">Audio</string>
+    <!-- audio general -->
+    <string name="settings_general_category">General</string>
+    <string name="settings_equalizer_summary">Fine tune audio settings</string>
+    <string name="settings_equalizer_none">No equalizer found</string>
+    <string name="settings_err_no_audio_id">Could not get audio id. Please play a song and try again.</string>
+    <!-- plugins -->
+    <string name="settings_plugin_category">Plugins</string>
+    <string name="settings_get_plugins">Get plugins</string>
+    <string name="settings_get_plugins_summary">Search Play Store for Orpheus plugins</string>
+    <!-- donate -->
+    <string name="settings_donate_category">Donate</string>
+</resources>

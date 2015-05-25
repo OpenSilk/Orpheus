@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 OpenSilk Productions LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string-array name="cache_size" translatable="false">
+        <item>@string/settings_cache_size_20</item>
+        <item>@string/settings_cache_size_40</item>
+        <item>@string/settings_cache_size_60</item>
+        <item>@string/settings_cache_size_80</item>
+    </string-array>
+
+    <string-array name="cache_size_values" translatable="false">
+        <item>20</item>
+        <item>40</item>
+        <item>60</item>
+        <item>80</item>
+    </string-array>
+
+    <string-array name="now_playing_layout" translatable="false">
+        <item>@string/settings_now_playing_layout_default</item>
+        <item>@string/settings_now_playing_layout_classic</item>
+    </string-array>
+
+    <string-array name="now_playing_layout_values" translatable="false">
+        <item>default</item>
+        <item>classic</item>
+    </string-array>
+
+    <string-array name="now_playing_view" translatable="false">
+        <item>@string/settings_now_playing_view_artwork</item>
+        <item>@string/settings_now_playing_view_visualizer_circle</item>
+        <item>@string/settings_now_playing_view_visualizer_circle_bars</item>
+        <item>@string/settings_now_playing_view_visualizer_lines</item>
+    </string-array>
+
+    <string-array name="now_playing_view_values" translatable="false">
+        <item>artwork</item>
+        <item>vis_circle</item>
+        <item>vis_circle_bar</item>
+        <item>vis_lines</item>
+    </string-array>
+
+    <string-array name="now_playing_artwork_scale" translatable="false">
+        <item>@string/settings_now_playing_artwork_fill</item>
+        <item>@string/settings_now_playing_artwork_fit</item>
+    </string-array>
+
+    <string-array name="now_playing_artwork_scale_values" translatable="false">
+        <item>fill</item>
+        <item>fit</item>
+    </string-array>
+
+    <string-array name="fab_actions" translatable="false">
+        <item>@string/settings_action_play_pause</item>
+        <item>@string/settings_action_quick_controls</item>
+        <item>@string/settings_action_open_now_playing</item>
+        <item>@string/settings_action_open_queue</item>
+        <item>@string/settings_action_none</item>
+    </string-array>
+
+    <string-array name="fab_actions_values" translatable="false">
+        <item>play_pause</item>
+        <item>quick_controls</item>
+        <item>open_now_playing</item>
+        <item>open_queue</item>
+        <item>none</item>
+    </string-array>
+
+    <string-array name="footer_actions" translatable="false">
+        <item>@string/settings_action_open_queue</item>
+        <item>@string/settings_action_open_now_playing</item>
+        <item>@string/settings_action_none</item>
+    </string-array>
+
+    <string-array name="footer_actions_values" translatable="false">
+        <item>open_queue</item>
+        <item>open_now_playing</item>
+        <item>none</item>
+    </string-array>
+</resources>
