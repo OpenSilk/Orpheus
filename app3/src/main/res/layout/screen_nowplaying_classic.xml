@@ -26,9 +26,11 @@
     <LinearLayout
         android:id="@+id/now_playing_actions_container"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
+        android:paddingBottom="8dp"
+        android:paddingTop="24dp"
         android:gravity="center">
 
         <ImageButton

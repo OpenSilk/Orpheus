@@ -14,6 +14,9 @@
         <attr name="nowPlayingPrevStyle" format="reference"/>
         <attr name="nowPlayingShuffleStyle" format="reference"/>
         <attr name="nowPlayingRepeatStyle" format="reference"/>
+        <attr name="carModePlayStyle" format="reference"/>
+        <attr name="carModeNextStyle" format="reference"/>
+        <attr name="carModePrevStyle" format="reference"/>
         <attr name="mainContentTopMargin" format="reference"/>
     </declare-styleable>
 </resources>

@@ -37,12 +37,15 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/car_mode"
+            android:drawableLeft="@drawable/ic_directions_car_grey600_24dp"
+            android:text="@string/car_mode"
+            style="@style/mtrl.SingleLineListItemTextView.Icon" />
+
+        <TextView
             android:id="@+id/app_settings"
             android:drawableLeft="@drawable/ic_settings_grey600_24dp"
             android:text="@string/settings_title"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textColor="?android:attr/textColorPrimary"
             style="@style/mtrl.SingleLineListItemTextView.Icon"/>
 
     </LinearLayout>

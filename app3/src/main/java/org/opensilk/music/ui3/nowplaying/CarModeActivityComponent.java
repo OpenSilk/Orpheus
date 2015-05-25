@@ -17,23 +17,15 @@
 
 package org.opensilk.music.ui3.nowplaying;
 
-import android.content.Context;
-
 import org.opensilk.common.core.dagger2.ActivityScope;
-import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeModule;
-import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.music.AppComponent;
-import org.opensilk.music.AppPreferences;
-import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
-import org.opensilk.music.playback.control.PlaybackController;
 
 import dagger.Component;
 import rx.functions.Func1;
 
 /**
- * Created by drew on 5/9/15.
+ * Created by drew on 5/24/15.
  */
 @ActivityScope
 @Component(
@@ -42,21 +34,15 @@ import rx.functions.Func1;
                 PauseAndResumeModule.class,
         }
 )
-public interface NowPlayingActivityComponent {
-    Func1<AppComponent, NowPlayingActivityComponent> FACTORY =
-            new Func1<AppComponent, NowPlayingActivityComponent>() {
+public interface CarModeActivityComponent extends NowPlayingActivityComponent {
+    Func1<AppComponent, CarModeActivityComponent> FACTORY =
+            new Func1<AppComponent, CarModeActivityComponent>() {
                 @Override
-                public NowPlayingActivityComponent call(AppComponent appComponent) {
-                    return DaggerNowPlayingActivityComponent.builder()
+                public CarModeActivityComponent call(AppComponent appComponent) {
+                    return DaggerCarModeActivityComponent.builder()
                             .appComponent(appComponent)
                             .build();
                 }
             };
-    @ForApplication Context appContext();
-    AppPreferences appPreferences();
-    ArtworkRequestManager artworkRequestor();
-    ActionBarOwner actionBarOwner();
-    PlaybackController playbackController();
-    PauseAndResumeRegistrar pauseAndResumeRegistrar();
-    void inject(NowPlayingActivity activty);
+    void inject(CarModeActivity activity);
 }

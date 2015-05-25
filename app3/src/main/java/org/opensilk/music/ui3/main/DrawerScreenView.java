@@ -47,6 +47,7 @@ public class DrawerScreenView extends LinearLayout {
     @Inject DrawerScreenViewAdapter mAdapter;
 
     @InjectView(android.R.id.list) RecyclerView mRecyclerView;
+    @InjectView(R.id.car_mode) View mCarMode;
 
     public DrawerScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -78,6 +79,11 @@ public class DrawerScreenView extends LinearLayout {
 
     @OnClick(R.id.app_settings)
     void openSettings() {
-        mPresenter.openSettings();
+        mPresenter.openSettings(getContext());
+    }
+
+    @OnClick(R.id.car_mode)
+    void opencarMode() {
+        mPresenter.openCarMode(getContext());
     }
 }

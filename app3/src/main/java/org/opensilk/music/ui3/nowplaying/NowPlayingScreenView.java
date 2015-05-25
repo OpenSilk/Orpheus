@@ -76,9 +76,9 @@ import static org.opensilk.music.AppPreferences.NOW_PLAYING_VIEW_VIS_LINES;
 /**
  * Created by drew on 11/17/14.
  */
-public class NowPlayingScreenView extends RelativeLayout {
+public class NowPlayingScreenView extends RelativeLayout implements NowPlayingView {
 
-    @Inject NowPlayingScreenPresenter presenter;
+    @Inject NowPlayingViewPresenter presenter;
     @Inject AppPreferences settings;
     @Inject PlaybackController playbackController;
 
@@ -201,7 +201,7 @@ public class NowPlayingScreenView extends RelativeLayout {
         }
     }
 
-    void setProgress(int progress) {
+    public void setProgress(int progress) {
         if (seekBar != null) {
             seekBar.setProgress(progress);
         } else if (seekBarClassic != null) {
@@ -249,7 +249,7 @@ public class NowPlayingScreenView extends RelativeLayout {
     }
 
     @DebugLog
-    void attachVisualizer(int id) {
+    public void attachVisualizer(int id) {
         destroyVisualizer();
         if (id == AudioEffect.ERROR_BAD_VALUE) return;
         if (visualizerView == null) return;
@@ -258,13 +258,13 @@ public class NowPlayingScreenView extends RelativeLayout {
     }
 
     @DebugLog
-    void destroyVisualizer() {
+    public void destroyVisualizer() {
         if (visualizerView == null) return;
         visualizerView.release();
     }
 
     @DebugLog
-    void setVisualizerEnabled(boolean enabled) {
+    public void setVisualizerEnabled(boolean enabled) {
         if (visualizerView == null) return;
         if (visualizerView.isLinked()) {
             visualizerView.setEnabled(enabled);
@@ -278,6 +278,42 @@ public class NowPlayingScreenView extends RelativeLayout {
         } else {
             artwork.setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
+    }
+
+    public AnimatedImageView getArtwork() {
+        return artwork;
+    }
+
+    public void setTotalTime(CharSequence text) {
+        totalTime.setText(text);
+    }
+
+    public void setCurrentTime(CharSequence text) {
+        currentTime.setText(text);
+    }
+
+    public void setCurrentTimeVisibility(int visibility) {
+        currentTime.setVisibility(visibility);
+    }
+
+    public int getCurrentTimeVisibility() {
+        return currentTime.getVisibility();
+    }
+
+    public PaletteObserver getPaletteObserver() {
+        return paletteObserver;
+    }
+
+    public void setPlayChecked(boolean yes) {
+        play.setChecked(yes);
+    }
+
+    public void setCurrentTrack(CharSequence text) {
+
+    }
+
+    public void setCurrentArtist(CharSequence text) {
+
     }
 
     void subscribeClicks() {
@@ -322,7 +358,6 @@ public class NowPlayingScreenView extends RelativeLayout {
             clicks = null;
         }
     }
-
 
     final PaletteObserver paletteObserver = new PaletteObserver() {
         @Override

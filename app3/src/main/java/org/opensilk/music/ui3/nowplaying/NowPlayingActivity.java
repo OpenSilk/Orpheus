@@ -79,20 +79,24 @@ public class NowPlayingActivity extends MortarFragmentActivity {
         return 0;//unsupported
     }
 
+    protected void setupView() {
+        setContentView(R.layout.activity_nowplaying);
+        ButterKnife.inject(this);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nowplaying);
-        ButterKnife.inject(this);
+        setupView();
 
-        if (getIntent().getBooleanExtra("startqueue", false)) {
+        if (mSlidingPanel != null && getIntent().getBooleanExtra("startqueue", false)) {
             mSlidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
         }
 
         mActionBarOwner.setConfig(ActionBarConfig.builder()
                 .setTitle("")
                 .setUpButtonEnabled(true)
-                .setTransparentBackground(true)
+//                .setTransparentBackground(true)
                 .build());
         mActionBarDelegate = new ActionBarOwnerDelegate<>(this, mActionBarOwner, mToolbar);
         mActionBarDelegate.onCreate();

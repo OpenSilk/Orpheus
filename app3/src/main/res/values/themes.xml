@@ -36,6 +36,10 @@
         <item name="nowPlayingShuffleStyle">@style/nowPlayingActionLight.Shuffle</item>
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionLight.Repeat</item>
 
+        <item name="carModePlayStyle">@style/carModeActionLight.Play</item>
+        <item name="carModeNextStyle">@style/carModeActionLight.Next</item>
+        <item name="carModePrevStyle">@style/carModeActionLight.Prev</item>
+
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
@@ -71,6 +75,10 @@
         <item name="nowPlayingPrevStyle">@style/nowPlayingActionDark.Prev</item>
         <item name="nowPlayingShuffleStyle">@style/nowPlayingActionDark.Shuffle</item>
         <item name="nowPlayingRepeatStyle">@style/nowPlayingActionDark.Repeat</item>
+
+        <item name="carModePlayStyle">@style/carModeActionDark.Play</item>
+        <item name="carModeNextStyle">@style/carModeActionDark.Next</item>
+        <item name="carModePrevStyle">@style/carModeActionDark.Prev</item>
 
         <item name="seekArcStyle">@style/SeekArcNowPlaying</item>
         <item name="windowActionModeOverlay">true</item>

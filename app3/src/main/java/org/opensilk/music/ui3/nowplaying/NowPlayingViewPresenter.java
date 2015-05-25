@@ -28,6 +28,7 @@ import android.view.View;
 
 import com.triggertrap.seekarc.SeekArc;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
@@ -46,7 +47,9 @@ import javax.inject.Inject;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
+import mortar.Presenter;
 import mortar.ViewPresenter;
+import mortar.bundler.BundleService;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -62,7 +65,7 @@ import static android.support.v4.media.session.PlaybackStateCompat.*;
  * Created by drew on 4/20/15.
  */
 @ScreenScope
-public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenView> implements PausesAndResumes {
+public class NowPlayingViewPresenter extends Presenter<NowPlayingView> implements PausesAndResumes {
 
     final Context appContext;
     final PauseAndResumeRegistrar pauseAndResumeRegistrar;
@@ -83,15 +86,17 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     boolean lastPosSynced;
     ArtInfo lastArtInfo;
     long lastBlinkTime;
+    String lastTrack;
+    String lastArtist;
 
     @Inject
-    public NowPlayingScreenPresenter(
+    public NowPlayingViewPresenter(
             @ForApplication Context appContext,
-             PauseAndResumeRegistrar pauseAndResumeRegistrar,
-             PlaybackController playbackController,
-             ArtworkRequestManager requestor,
+            PauseAndResumeRegistrar pauseAndResumeRegistrar,
+            PlaybackController playbackController,
+            ArtworkRequestManager requestor,
 //             ActionBarOwner actionBarOwner,
-             AppPreferences settings
+            AppPreferences settings
     ) {
         this.appContext = appContext;
         this.pauseAndResumeRegistrar = pauseAndResumeRegistrar;
@@ -99,6 +104,10 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         this.requestor = requestor;
 //        this.actionBarOwner = actionBarOwner;
         this.settings = settings;
+    }
+
+    @Override protected final BundleService extractBundleService(NowPlayingView view) {
+        return BundleService.getBundleService(view.getContext());
     }
 
     @Override
@@ -147,6 +156,8 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
         }
         setCurrentTimeText(lastPosition);
         setTotalTimeText(lastDuration);
+        setCurrentTrack(lastTrack);
+        setCurrentArtist(lastArtist);
         subscribeBroadcasts();
     }
 
@@ -159,8 +170,8 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     }
 
     void loadArtwork(ArtInfo artInfo) {
-        if (hasView() && getView().artwork != null) {
-            requestor.newRequest(getView().artwork, getView().paletteObserver, artInfo, ArtworkType.LARGE);
+        if (hasView() && getView().getArtwork() != null) {
+            requestor.newRequest(getView().getArtwork(), getView().getPaletteObserver(), artInfo, ArtworkType.LARGE);
         }
     }
 
@@ -174,7 +185,7 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                     public void call(PlaybackStateCompat playbackState) {
                         boolean playing = playbackState.getState() == STATE_PLAYING;
                         if (hasView()) {
-                            getView().play.setChecked(MainPresenter.isPlayingOrSimilar(playbackState));
+                            getView().setPlayChecked(MainPresenter.isPlayingOrSimilar(playbackState));
                             getView().setVisualizerEnabled(playing);
                             //TODO shuffle/repeat
                         }
@@ -210,7 +221,10 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
                             lastArtInfo = artInfo;
                             loadArtwork(artInfo);
                         }
-                        //Todo update display
+                        lastTrack = track;
+                        setCurrentTrack(track);
+                        lastArtist = artist;
+                        setCurrentArtist(artist);
                     }
                 }
         );
@@ -306,9 +320,9 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     void setTotalTimeText(long duration) {
         if (hasView()) {
             if (duration > 0) {
-                getView().totalTime.setText(UtilsCommon.makeTimeString(getView().getContext(), duration / 1000));
+                getView().setTotalTime(UtilsCommon.makeTimeString(getView().getContext(), duration / 1000));
             } else {
-                getView().totalTime.setText("--:--");
+                getView().setTotalTime("--:--");
             }
         }
     }
@@ -316,23 +330,35 @@ public class NowPlayingScreenPresenter extends ViewPresenter<NowPlayingScreenVie
     void setCurrentTimeText(long pos) {
         if (hasView()) {
             if (pos >= 0) {
-                getView().currentTime.setText(UtilsCommon.makeTimeString(getView().getContext(), pos / 1000));
+                getView().setCurrentTime(UtilsCommon.makeTimeString(getView().getContext(), pos / 1000));
             } else {
-                getView().currentTime.setText("--:--");
+                getView().setCurrentTime("--:--");
             }
         }
     }
 
     void setCurrentTimeVisibile() {
         if (hasView()) {
-            getView().currentTime.setVisibility(View.VISIBLE);
+            getView().setCurrentTimeVisibility(View.VISIBLE);
         }
     }
 
     void toggleCurrentTimeVisiblility() {
         if (hasView()) {
-            boolean visible = getView().currentTime.getVisibility() == View.VISIBLE;
-            getView().currentTime.setVisibility(visible ? View.INVISIBLE : View.VISIBLE);
+            boolean visible = getView().getCurrentTimeVisibility() == View.VISIBLE;
+            getView().setCurrentTimeVisibility(visible ? View.INVISIBLE : View.VISIBLE);
+        }
+    }
+
+    void setCurrentTrack(CharSequence text) {
+        if (hasView()) {
+            getView().setCurrentTrack(text);
+        }
+    }
+
+    void setCurrentArtist(CharSequence text) {
+        if (hasView()) {
+            getView().setCurrentArtist(text);
         }
     }
 

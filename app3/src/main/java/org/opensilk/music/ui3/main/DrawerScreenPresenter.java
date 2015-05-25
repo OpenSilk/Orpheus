@@ -33,6 +33,7 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.library.LandingScreenFragment;
+import org.opensilk.music.ui3.nowplaying.CarModeActivity;
 
 import java.util.List;
 
@@ -145,8 +146,14 @@ public class DrawerScreenPresenter extends ViewPresenter<DrawerScreenView> {
         drawerOwner.closeDrawer();
     }
 
-    void openSettings() {
-        Intent i = new Intent(appContext, SettingsActivity.class);
+    void openSettings(Context context) {
+        drawerOwner.closeDrawer();
+        Intent i = new Intent(context, SettingsActivity.class);
         activityResultsController.startActivityForResult(i, ActivityRequestCodes.APP_SETTINGS, null);
+    }
+
+    void openCarMode(Context context) {
+        drawerOwner.closeDrawer();
+        CarModeActivity.startSelf(context);
     }
 }

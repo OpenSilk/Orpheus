@@ -245,4 +245,52 @@
 
     <!-- end now playing buttons -->
 
+    <!-- now playing buttons -->
+
+    <style name="carModeActionDark">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="carModeActionLight">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:padding">@dimen/now_playing_button_padding</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="carModeActionLight.Play">
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@drawable/action_playpause_circle_black_48dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="carModeActionDark.Play">
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:src">@drawable/action_playpause_circle_white_48dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="carModeActionLight.Next">
+        <item name="android:src">@drawable/ic_skip_next_black_48dp</item>
+        <item name="android:contentDescription">@string/accessibility_next</item>
+    </style>
+
+    <style name="carModeActionDark.Next">
+        <item name="android:src">@drawable/ic_skip_next_white_48dp</item>
+        <item name="android:contentDescription">@string/accessibility_next</item>
+    </style>
+
+    <style name="carModeActionLight.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_black_48dp</item>
+        <item name="android:contentDescription">@string/accessibility_prev</item>
+    </style>
+
+    <style name="carModeActionDark.Prev">
+        <item name="android:src">@drawable/ic_skip_previous_white_48dp</item>
+        <item name="android:contentDescription">@string/accessibility_prev</item>
+    </style>
+
+    <!-- end now playing buttons -->
+
 </resources>
