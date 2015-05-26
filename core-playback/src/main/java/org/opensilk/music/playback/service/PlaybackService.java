@@ -802,12 +802,12 @@ public class PlaybackService extends Service {
     final Runnable mProgressCheckRunnable = new Runnable() {
         @Override
         public void run() {
-            mHandler.removeCallbacks(mProgressCheckRunnable);
+            mHandler.removeCallbacks(this);
             long pos = mPlayer.getPosition();
             mPlaybackStateHelper.updatePosition(pos);
             updatePlaybackState();
             if (mPlaybackStateHelper.isPlaying()) {
-                mHandler.postDelayed(mProgressCheckRunnable, 2000);
+                mHandler.postDelayed(this, 2000);
             }
         }
     };

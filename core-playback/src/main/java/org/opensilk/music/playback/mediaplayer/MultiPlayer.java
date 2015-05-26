@@ -341,10 +341,11 @@ public class MultiPlayer implements
                     synchronized (player.mLock) {
                         if (player.isInitializedLocked() && player.isNextInitializedLocked()) {
                             try {
-                                player.mCurrentMediaPlayer.stop();
+                                player.releaseCurrentLocked();
                                 player.mNextMediaPlayer.start();
-                                player.onCompletion(player.mCurrentMediaPlayer);
-                                return;
+                                player.mCurrentMediaPlayer = player.mNextMediaPlayer;
+                                player.mNextMediaPlayer = null;
+                                player.mCallback.onWentToNext();
                             } catch (IllegalStateException e) {
                                 Timber.e(e, "Skipping to next");
                                 player.releaseCurrentLocked();
