@@ -23,4 +23,7 @@
 
     <!--now playing-->
     <dimen name="now_playing_button_padding">4dp</dimen>
+
+    <dimen name="carmode_bottom_margin">16dp</dimen>
+    <dimen name="carmode_seekbar_padding">8dp</dimen>
 </resources>

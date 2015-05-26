@@ -16,25 +16,34 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:gravity="center">
 
-    <fragment
-        android:id="@+id/carmode_fragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="org.opensilk.music.ui3.nowplaying.CarModeScreenFragment"
-        tools:layout="@layout/screen_carmode"/>
+    <ImageButton
+        android:id="@+id/now_playing_previous"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        tools:src="@drawable/ic_skip_previous_white_48dp"
+        style="?carModePrevStyle"/>
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/main_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_gravity="top"
-        android:background="@android:color/transparent"
-        style="?toolbarStyle"/>
+    <org.opensilk.common.ui.widget.ImageButtonCheckable
+        android:id="@+id/now_playing_play"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        tools:src="@drawable/ic_play_circle_fill_white_48dp"
+        style="?carModePlayStyle"/>
 
-</FrameLayout>
+    <ImageButton
+        android:id="@+id/now_playing_next"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        tools:src="@drawable/ic_skip_next_white_48dp"
+        style="?carModeNextStyle"/>
+
+</LinearLayout>

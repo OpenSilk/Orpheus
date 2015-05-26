@@ -178,9 +178,7 @@ public class NowPlayingScreenView extends RelativeLayout implements NowPlayingVi
             });
         } else if (seekBarClassic != null) {
             if (!VersionUtils.hasLollipop()) {
-                seekBarClassic.getThumb().mutate().setColorFilter(
-                        ThemeUtils.getColorAccent(getContext()), PorterDuff.Mode.SRC_IN
-                );
+                ThemeUtils.themeSeekBar(seekBarClassic, R.attr.colorAccent);
             }
             seekBarClassic.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override

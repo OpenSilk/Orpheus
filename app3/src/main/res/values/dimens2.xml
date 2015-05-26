@@ -44,4 +44,7 @@
     <dimen name="now_playing_button_padding">8dp</dimen>
 
     <dimen name="profile_stickheader_bottom_padding">4dp</dimen>
+
+    <dimen name="carmode_bottom_margin">32dp</dimen>
+    <dimen name="carmode_seekbar_padding">16dp</dimen>
 </resources>

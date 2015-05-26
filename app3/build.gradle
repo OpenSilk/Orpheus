@@ -141,8 +141,8 @@ dependencies {
 
     compile 'com.sothree.slidinguppanel:library:3.0.0'
 
-//    compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.7.0'
-    compile project(':../../apps/android-advancedrecyclerview/library')
+    compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.7.0'
+//    compile project(':../../apps/android-advancedrecyclerview/library')
 
     //local m2
     compile 'com.mobeta.android.dslv:library:0.6.1-SNAPSHOT@aar'

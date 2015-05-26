@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.view.WindowManager;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
@@ -54,6 +55,11 @@ public class CarModeActivity extends NowPlayingActivity {
         AppComponent appComponent = DaggerService.getDaggerComponent(getApplicationContext());
         builder.withService(DaggerService.DAGGER_SERVICE,
                 CarModeActivityComponent.FACTORY.call(appComponent));
+    }
+
+    @Override
+    protected void onScopeCreated(MortarScope scope) {
+
     }
 
     @Override

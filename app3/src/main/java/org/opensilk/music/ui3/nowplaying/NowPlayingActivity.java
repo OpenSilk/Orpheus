@@ -32,8 +32,10 @@ import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortar.ActionBarOwnerDelegate;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
 import org.opensilk.music.AppComponent;
+import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui.theme.OrpheusTheme;
 
 import javax.inject.Inject;
 
@@ -66,6 +68,14 @@ public class NowPlayingActivity extends MortarFragmentActivity {
         AppComponent appComponent = DaggerService.getDaggerComponent(getApplicationContext());
         builder.withService(DaggerService.DAGGER_SERVICE,
                 NowPlayingActivityComponent.FACTORY.call(appComponent));
+    }
+
+    @Override
+    protected void onScopeCreated(MortarScope scope) {
+        NowPlayingActivityComponent component = DaggerService.getDaggerComponent(scope);
+        AppPreferences settings = component.appPreferences();
+        OrpheusTheme theme = settings.getTheme();
+        setTheme(settings.isDarkTheme() ? theme.dark : theme.light);
     }
 
     @Override

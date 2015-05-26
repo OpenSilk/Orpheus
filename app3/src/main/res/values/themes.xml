@@ -106,4 +106,9 @@
 
     <!-- end settings themes -->
 
+    <!-- Carmode theme also in v21-->
+    <style name="Theme.Carmode" parent="Theme.DarkBase">
+        <item name="colorAccent">@color/white</item>
+    </style>
+
 </resources>

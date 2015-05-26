@@ -16,25 +16,34 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <fragment
-        android:id="@+id/carmode_fragment"
+    <TextView
+        android:id="@+id/now_playing_track"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="org.opensilk.music.ui3.nowplaying.CarModeScreenFragment"
-        tools:layout="@layout/screen_carmode"/>
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/white_text"
+        android:textSize="34sp"
+        tools:text="Trackname"
+        style="@style/SingleLineTextView"/>
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/main_toolbar"
+    <TextView
+        android:id="@+id/now_playing_artist"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:layout_gravity="top"
-        android:background="@android:color/transparent"
-        style="?toolbarStyle"/>
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/white_text_secondary"
+        android:textSize="24sp"
+        tools:text="Artistname"
+        style="@style/SingleLineTextView"/>
 
-</FrameLayout>
+</LinearLayout>

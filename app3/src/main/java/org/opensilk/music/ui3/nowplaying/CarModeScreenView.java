@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.widget.AnimatedImageView;
 import org.opensilk.common.ui.widget.CompatSeekBar;
@@ -88,6 +89,7 @@ public class CarModeScreenView extends RelativeLayout implements NowPlayingView 
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
+        setupSeekbar();
         subscribeClicks();
         if (!isInEditMode()) presenter.takeView(this);
     }
@@ -104,6 +106,12 @@ public class CarModeScreenView extends RelativeLayout implements NowPlayingView 
         super.onDetachedFromWindow();
         unsubscribeClicks();
         presenter.dropView(this);
+    }
+
+    void setupSeekbar() {
+        if (!VersionUtils.hasLollipop()) {
+            ThemeUtils.themeSeekBar(seekBarClassic, R.attr.colorAccent);
+        }
     }
 
     public void setProgress(int progress) {
@@ -205,9 +213,36 @@ public class CarModeScreenView extends RelativeLayout implements NowPlayingView 
         @Override
         public void onNext(PaletteResponse paletteResponse) {
             if (artwork != null) {
+//                Palette p = paletteResponse.palette;
+//                Palette.Swatch s1 = p.getVibrantSwatch();
+//                Palette.Swatch s2 = p.getDarkVibrantSwatch();
+//                int artworkOverlay;
+//                if (s1 != null && s2 != null) {
+//                    track.setTextColor(s1.getTitleTextColor());
+//                    artist.setTextColor(s1.getTitleTextColor());
+//                    currentTime.setTextColor(s1.getBodyTextColor());
+//                    totalTime.setTextColor(s1.getBodyTextColor());
+//                    artworkOverlay = s1.getRgb();
+//                    ThemeUtils.themeSeekBar2(seekBarClassic, s2.getRgb());
+//                } else {
+//                    int textPrimary = ThemeUtils.getThemeAttrColor(getContext(),
+//                            android.R.attr.textColorPrimary);
+//                    int textSecondary = ThemeUtils.getThemeAttrColor(getContext(),
+//                            android.R.attr.textColorSecondary);
+//                    track.setTextColor(textPrimary);
+//                    artist.setTextColor(textSecondary);
+//                    currentTime.setTextColor(textPrimary);
+//                    totalTime.setTextColor(textPrimary);
+//                    artworkOverlay = getResources().getColor(R.color.transparent_black);
+//                    ThemeUtils.themeSeekBar(seekBarClassic, R.attr.colorAccent);
+//                }
+//                artworkOverlay = ThemeUtils.setColorAlpha(artworkOverlay, 0x73 /*0x66*/);
+//                PorterDuffColorFilter cf = new PorterDuffColorFilter(artworkOverlay,
+//                        PorterDuff.Mode.SRC_ATOP);
+//                artwork.setColorFilter(cf);
                 Palette p = paletteResponse.palette;
                 int color = p.getDarkVibrantColor(getResources().getColor(R.color.transparent_black));
-                color = ThemeUtils.setColorAlpha(color, 0x66);
+                color = ThemeUtils.setColorAlpha(color, 0x73 /*0x66*/);
                 PorterDuffColorFilter cf = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP);
                 artwork.setColorFilter(cf);
             }
