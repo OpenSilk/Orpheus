@@ -37,7 +37,7 @@ public interface IPlayer {
     void setDataSource(Uri uri);
     void setNextDataSource(Uri uri);
 
-    void duck();
+    void duck(boolean down);
 
     void release();
 

@@ -603,7 +603,7 @@ public class PlaybackService extends Service {
                 @Override
                 public void onFocusLostDuck() {
                     if (mPlaybackStateHelper.isPlaying()) {
-                        mPlayer.duck();
+                        mPlayer.duck(true);
                     }
                 }
 
@@ -612,6 +612,8 @@ public class PlaybackService extends Service {
                     if (mPausedByTransientLossOfFocus) {
                         mPausedByTransientLossOfFocus = false;
                         mMediaSessionCallback.onPlay();
+                    } else {
+                        mPlayer.duck(false);
                     }
                 }
             };

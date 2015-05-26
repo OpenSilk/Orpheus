@@ -148,8 +148,14 @@ public class MultiPlayer implements
     }
 
     @Override
-    public void duck() {
-        mHandler.sendEmptyMessage(E.FADEDOWN);
+    public void duck(boolean down) {
+        if (down) {
+            mHandler.removeMessages(E.FADEUP);
+            mHandler.sendEmptyMessage(E.FADEDOWN);
+        } else {
+            mHandler.removeMessages(E.FADEDOWN);
+            mHandler.sendEmptyMessage(E.FADEUP);
+        }
     }
 
     @Override
