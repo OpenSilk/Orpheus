@@ -400,7 +400,7 @@ public class ArtworkRequestManagerImpl implements ArtworkRequestManager {
                     if (pfd == null) throw new FileNotFoundException("Null descriptor");
                     Bitmap bitmap = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
                     if (bitmap == null) throw new NullPointerException("Error decoding bitmap");
-                    Palette palette = new Palette.Builder(bitmap).generate();
+                    Palette palette = new Palette.Builder(bitmap).maximumColorCount(24).generate();
                     Artwork artwork = new Artwork(bitmap, palette);
                     //always add to cache
                     mL1Cache.putArtwork(cacheKey, artwork);
