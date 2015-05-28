@@ -40,6 +40,7 @@ public interface Projections {
                 "album_artist",
                 MediaStore.Audio.AudioColumns.DURATION,
                 MediaStore.Audio.AudioColumns.MIME_TYPE,
+                MediaStore.Audio.AudioColumns.TRACK,
         };
     String [] SONG_FILE = new String[] {
                 BaseColumns._ID,
@@ -51,6 +52,7 @@ public interface Projections {
                 MediaStore.Audio.AudioColumns.DURATION,
                 MediaStore.Audio.AudioColumns.MIME_TYPE,
                 MediaStore.Audio.AudioColumns.DATA,
+                MediaStore.Audio.AudioColumns.TRACK,
     };
     String[] LOCAL_ALBUM = new String[] {
                 BaseColumns._ID,
@@ -75,6 +77,7 @@ public interface Projections {
             "album_artist",
             MediaStore.Audio.AudioColumns.DURATION,
             MediaStore.Audio.AudioColumns.MIME_TYPE,
+            MediaStore.Audio.Playlists.Members.PLAY_ORDER + " AS " + MediaStore.Audio.AudioColumns.TRACK,
         };
     String[] GENRE_SONGS = new String[] {
             MediaStore.Audio.Genres.Members.AUDIO_ID + " AS " + BaseColumns._ID,
@@ -85,6 +88,7 @@ public interface Projections {
             "album_artist",
             MediaStore.Audio.AudioColumns.DURATION,
             MediaStore.Audio.AudioColumns.MIME_TYPE,
+            MediaStore.Audio.AudioColumns.TRACK,
         };
     String[] GENRE = new String[] {
                 BaseColumns._ID,

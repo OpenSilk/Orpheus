@@ -47,6 +47,7 @@ public class Track implements Bundleable {
     public final Uri artworkUri;
     public final String mimeType;
     private final String headers;
+    public final int index;
 
     protected Track(@NonNull String identity,
                     @NonNull String name,
@@ -58,7 +59,8 @@ public class Track implements Bundleable {
                     @NonNull Uri dataUri,
                     @Nullable Uri artworkUri,
                     @Nullable String mimeType,
-                    @Nullable String headers
+                    @Nullable String headers,
+                    int index
     ) {
         this.identity = identity;
         this.name = name;
@@ -71,6 +73,7 @@ public class Track implements Bundleable {
         this.artworkUri = artworkUri;
         this.mimeType = mimeType != null ? mimeType : DEFAULT_MIME_TYPE;
         this.headers = headers;
+        this.index = index;
     }
 
     @Override
@@ -114,6 +117,7 @@ public class Track implements Bundleable {
         b.putParcelable("_9", artworkUri);
         b.putString("_10", mimeType);
         b.putString("_11", headers);
+        b.putInt("_12", index);
         return b;
     }
 
@@ -133,6 +137,7 @@ public class Track implements Bundleable {
                 .setArtworkUri(b.<Uri>getParcelable("_9"))
                 .setMimeType(b.getString("_10"))
                 .setHeaders(b.getString("_11"))
+                .setIndex(b.getInt("_12"))
                 .build();
     }
 
@@ -160,7 +165,7 @@ public class Track implements Bundleable {
         if (name != null ? !name.equals(track.name) : track.name != null) return false;
         if (mimeType != null ? !mimeType.equals(track.mimeType) : track.name != null) return false;
         //ignoring headers
-
+        if (index != track.index) return false;
         return true;
     }
 
@@ -177,6 +182,7 @@ public class Track implements Bundleable {
         result = 31 * result + (artworkUri != null ? artworkUri.hashCode() : 0);
         result = 31 * result + (mimeType != null ? mimeType.hashCode() : 0);
         //ignoring headers
+        result = 31 * result + index;
         return result;
     }
 
@@ -212,6 +218,7 @@ public class Track implements Bundleable {
         private Uri artworkUri;
         private String mimeType = DEFAULT_MIME_TYPE;
         private String headers = "";
+        private int index;
 
         private Builder() {
         }
@@ -228,6 +235,7 @@ public class Track implements Bundleable {
             artworkUri = t.artworkUri;
             mimeType = t.mimeType;
             headers = t.headers;
+            index = t.index;
         }
 
         public Builder setIdentity(String identity) {
@@ -294,12 +302,17 @@ public class Track implements Bundleable {
             return this;
         }
 
+        public Builder setIndex(int index) {
+            this.index = index;
+            return this;
+        }
+
         public Track build() {
             if (identity == null || name == null || dataUri == null) {
                 throw new NullPointerException("identity, name, and dataUri are required");
             }
             return new Track(identity, name, albumName, artistName, albumArtistName,
-                    albumIdentity, duration, dataUri, artworkUri, mimeType, headers);
+                    albumIdentity, duration, dataUri, artworkUri, mimeType, headers, index);
         }
     }
 }

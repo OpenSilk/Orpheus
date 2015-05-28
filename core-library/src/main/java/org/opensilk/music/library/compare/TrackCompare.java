@@ -58,8 +58,7 @@ public class TrackCompare {
                     public int compare(Track lhs, Track rhs) {
                         int c = BundleableCompare.compareAZ(lhs.albumName, rhs.albumName);
                         if (c == 0) {
-                            //use natural order instead
-                            //return BundleableCompare.compareNameAZ(lhs, rhs);
+                            return lhs.index - rhs.index;
                         }
                         return c;
                     }
@@ -80,7 +79,7 @@ public class TrackCompare {
                 return new Comparator<Track>() {
                     @Override
                     public int compare(Track lhs, Track rhs) {
-                        return 0; //no sort
+                        return lhs.index - rhs.index;
                     }
                 };
             default:

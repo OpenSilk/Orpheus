@@ -46,6 +46,7 @@ import timber.log.Timber;
 
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateArtworkUri;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.generateDataUri;
+import static org.opensilk.music.library.mediastore.util.CursorHelpers.getIntOrZero;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getLongOrZero;
 import static org.opensilk.music.library.mediastore.util.CursorHelpers.getStringOrNull;
 
@@ -308,7 +309,9 @@ public class FilesHelper {
                                     .setMimeType(getStringOrNull(c, MediaStore.Audio.AudioColumns.MIME_TYPE))
                                     .setDataUri(generateDataUri(c.getString(c.getColumnIndexOrThrow(BaseColumns._ID))))
                                     .setArtworkUri(generateArtworkUri(
-                                            c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))));
+                                            c.getString(c.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))))
+                                    .setIndex(getIntOrZero(c, MediaStore.Audio.AudioColumns.TRACK))
+                                    ;
                             trackList.add(tb.build());
                         } catch (IllegalArgumentException ignored) {}
                     }
