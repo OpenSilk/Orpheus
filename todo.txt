@@ -1,0 +1,6 @@
+requests
+-blacklist feature
+-hide quick controls after timeout
+-android wear integration (album art)
+-option to disable lockscreen art
+-more flexible themeing
