@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 OpenSilk Productions LLC
+ * Copyright (c) 2015 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,23 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.requestor;
+package de.umass.lastfm;
 
-import org.opensilk.common.ui.widget.AnimatedImageView;
-import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
-
-import rx.Subscription;
+import com.android.volley.Response;
 
 /**
- * Created by drew on 10/22/14.
+ * Response listener for volley requests
+ *
+ * Created by drew on 3/23/14.
  */
-public interface ArtworkRequestManager {
-
-    Subscription newRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                            ArtInfo artInfo, ArtworkType artworkType);
-
-    void evictL1();
-
+public interface MusicEntryResponseCallback<T> extends Response.Listener<T>, Response.ErrorListener {
+    //All methods inherited
 }

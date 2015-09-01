@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 OpenSilk Productions LLC
+ * Copyright (c) 2015 OpenSilk Productions LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,23 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.requestor;
-
-import org.opensilk.common.ui.widget.AnimatedImageView;
-import org.opensilk.music.model.ArtInfo;
-import org.opensilk.music.artwork.ArtworkType;
-import org.opensilk.music.artwork.PaletteObserver;
-
-import rx.Subscription;
+package de.umass.lastfm;
 
 /**
- * Created by drew on 10/22/14.
+ * Lastfm artist request
+ *
+ * Created by drew on 3/12/14.
  */
-public interface ArtworkRequestManager {
+public class ArtistRequest extends MusicEntryRequest<Artist> {
 
-    Subscription newRequest(AnimatedImageView imageView, PaletteObserver paletteObserver,
-                            ArtInfo artInfo, ArtworkType artworkType);
+    public ArtistRequest(String url, MusicEntryResponseCallback<Artist> listener) {
+        super(url, listener);
+    }
 
-    void evictL1();
+    @Override
+    protected Artist buildEntry(Result result) {
+        return ResponseBuilder.buildItem(result, Artist.class);
+    }
 
 }

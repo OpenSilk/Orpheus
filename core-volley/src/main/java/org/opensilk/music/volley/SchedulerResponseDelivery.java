@@ -15,24 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork;
+package org.opensilk.music.volley;
+
+import com.android.volley.ExecutorDelivery;
+
+import java.util.concurrent.Executor;
 
 import rx.Scheduler;
-import rx.schedulers.Schedulers;
+import rx.functions.Action0;
 
 /**
  * Created by drew on 4/30/15.
  */
-public interface Constants {
-    /** Largest size of artwork */
-    int MAX_ARTWORK_SIZE_DP = 720;
-    /** Largest size of any thumbnail displayed */
-    int DEFAULT_THUMBNAIL_SIZE_DP = 200;
-
-    float THUMB_MEM_CACHE_DIVIDER = 0.15f;
-    String DISK_CACHE_DIRECTORY = "artworkcache";
-
-    String COVERART_API_ROOT = "http://coverartarchive.org/release/";
-
-    Scheduler ARTWORK_SCHEDULER = Schedulers.computation();
+public class SchedulerResponseDelivery extends ExecutorDelivery {
+    public SchedulerResponseDelivery() {
+        super(new Executor() {
+            @Override
+            public void execute(final Runnable command) {
+                final Scheduler.Worker worker = Constants.VOLLEY_SCHEDULER.createWorker();
+                worker.schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        command.run();
+                        worker.unsubscribe();
+                    }
+                });
+            }
+        });
+    }
 }

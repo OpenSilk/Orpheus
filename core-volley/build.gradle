@@ -17,7 +17,6 @@
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.jakewharton.hugo'
-apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
@@ -45,50 +44,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
-//    packagingOptions {
-//        exclude 'META-INF/services/javax.annotation.processing.Processor'
-//    }
-
-    if (file('../../KeyStore').exists()) {
-        def Properties otherProps = new Properties();
-        otherProps.load(new FileInputStream(file('../../KeyStore/orpheus.properties')))
-        defaultConfig.buildConfigField "String", "LASTFM_KEY", otherProps.lastfmKey
-    } else {
-        println "No KeyStore directory found! (You can ignore this warning if your name is not drew)"
-        defaultConfig.buildConfigField "String", "LASTFM_KEY", "null"
-    }
-
     defaultPublishConfig "debug"
 
 }
 
-robolectric {
-    include '**/*Test.class'
-    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-    afterTest {
-        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
-    }
-}
-
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
-    compile (group: 'com.android.support', name: 'palette-v7', version: rootProject.ext.supportLibVersion)
-    compile (group: 'com.google.code.gson', name: 'gson', version: rootProject.ext.gsonVersion)
-    compile (group: 'commons-io', name: 'commons-io', version: rootProject.ext.commonsIoVersion)
     compile project(':common-core')
-    compile project(':common-ui')
-    compile project(':core-model')
-    compile project(':core-lastfm')
-    compile project(':core-volley')
-    compile 'com.jakewharton:disklrucache:2.0.2'
-
-    androidTestCompile('com.squareup:fest-android:1.0.0')
-
-    testCompile('junit:junit:4.12')
-    testCompile('org.robolectric:robolectric:2.4') {
-        exclude module: 'commons-logging'
-        exclude module: 'httpclient'
-    }
-    testCompile('com.squareup:fest-android:1.0.0')
-    testCompile('org.mockito:mockito-core:1.10.0')
+    compile 'com.android.volley:volley:1.0-SNAPSHOT@aar'
 }

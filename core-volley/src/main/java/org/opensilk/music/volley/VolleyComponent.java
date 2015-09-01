@@ -15,48 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.artwork.provider;
+package org.opensilk.music.volley;
 
 import android.content.Context;
 
+import com.android.volley.RequestQueue;
+
+import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
-import org.opensilk.music.artwork.shared.ArtworkComponentCommon;
-import org.opensilk.music.artwork.cache.BitmapDiskCache;
-import org.opensilk.music.artwork.shared.GsonComponent;
-import org.opensilk.music.lastfm.LastFMComponent;
-import org.opensilk.music.volley.VolleyComponent;
-import org.opensilk.music.volley.VolleyModule;
 
 import javax.inject.Singleton;
 
 import dagger.Component;
-import de.umass.lastfm.LastFM;
 import rx.functions.Func1;
 
 /**
- * Root component for provider process, This isnt used directly but extended to allow
- * additional providers to be used. Annotations for documentation and clarity.
- *
- * Created by drew on 5/1/15.
+ * Created by drew on 9/1/15.
  */
 @Singleton
 @Component(
         modules = {
                 AppContextModule.class,
-                ArtworkModule.class,
                 VolleyModule.class
         }
 )
-public interface ArtworkComponent extends ArtworkComponentCommon, GsonComponent,
-        SystemServicesComponent, VolleyComponent, LastFMComponent {
-    Func1<Context, ArtworkComponent> FACTORY = new Func1<Context, ArtworkComponent>() {
+public interface VolleyComponent extends AppContextComponent {
+    Func1<Context, VolleyComponent> FACTORY = new Func1<Context, VolleyComponent>() {
         @Override
-        public ArtworkComponent call(Context context) {
-            return DaggerArtworkComponent.builder()
+        public VolleyComponent call(Context context) {
+            return DaggerVolleyComponent.builder()
                     .appContextModule(new AppContextModule(context))
                     .build();
         }
     };
-    void inject(ArtworkProvider provider);
-    BitmapDiskCache bitmapDiskCache();
+    RequestQueue requestQueue();
 }

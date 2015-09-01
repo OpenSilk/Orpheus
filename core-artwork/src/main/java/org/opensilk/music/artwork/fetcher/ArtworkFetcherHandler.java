@@ -91,7 +91,7 @@ public class ArtworkFetcherHandler extends Handler {
                 stopService(startId);
                 break;
             }case MSG.ON_LOW_MEM: {
-                mFetcherManager.clearVolleyQueue();
+                mFetcherManager.cancelAllRequests();
                 break;
             }
         }

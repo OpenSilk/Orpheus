@@ -60,10 +60,7 @@ import javax.inject.Named;
 
 import de.umass.lastfm.Album;
 import de.umass.lastfm.Artist;
-import de.umass.lastfm.ImageSize;
-import de.umass.lastfm.MusicEntry;
-import de.umass.lastfm.opensilk.Fetch;
-import de.umass.lastfm.opensilk.MusicEntryResponseCallback;
+import de.umass.lastfm.LastFM;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscriber;
@@ -86,6 +83,7 @@ public class ArtworkFetcherManager {
     final RequestQueue mVolleyQueue;
     final Gson mGson;
     final ConnectivityManager mConnectivityManager;
+    final LastFM mLastFM;
 
     final UriMatcher mUriMatcher;
     /*
@@ -102,14 +100,16 @@ public class ArtworkFetcherManager {
     final Map<RequestKey, Uri> mActiveRequests = new LinkedHashMap<>();
 
     @Inject
-    public ArtworkFetcherManager(@ForApplication Context mContext,
-                                 ArtworkPreferences mPreferences,
-                                 BitmapDiskCache mL2Cache,
-                                 RequestQueue mVolleyQueue,
-                                 Gson mGson,
-                                 ConnectivityManager mConnectivityManager,
-                                 UriMatcher mUriMatcher,
-                                 @Named("oScheduler") Scheduler oScheduler
+    public ArtworkFetcherManager(
+            @ForApplication Context mContext,
+            ArtworkPreferences mPreferences,
+            BitmapDiskCache mL2Cache,
+            RequestQueue mVolleyQueue,
+            Gson mGson,
+            ConnectivityManager mConnectivityManager,
+            UriMatcher mUriMatcher,
+            @Named("oScheduler") Scheduler oScheduler,
+            LastFM lastFM
     ) {
         this.mContext = mContext;
         this.mPreferences = mPreferences;
@@ -119,6 +119,7 @@ public class ArtworkFetcherManager {
         this.mConnectivityManager = mConnectivityManager;
         this.mUriMatcher = mUriMatcher;
         this.oScheduler = oScheduler;
+        this.mLastFM = lastFM;
     }
 
     interface CompletionListener {
@@ -473,12 +474,12 @@ public class ArtworkFetcherManager {
      * Clears the disk caches
      */
     public void clearCaches() {
-        clearVolleyQueue();
-        mVolleyQueue.getCache().clear();
+//        clearVolleyQueue();
+//        mVolleyQueue.getCache().clear();
         mL2Cache.clearCache();
     }
 
-    public void clearVolleyQueue() {
+    void clearVolleyQueue() {
         mVolleyQueue.cancelAll(new RequestQueue.RequestFilter() {
             @Override
             public boolean apply(Request<?> request) {
@@ -487,12 +488,16 @@ public class ArtworkFetcherManager {
         });
     }
 
+    public void cancelAllRequests() {
+        Timber.w("cancelAllRequests(): Not implemented"); //TODO
+    }
+
     public void onDestroy() {
-        mVolleyQueue.stop();
+//        mVolleyQueue.stop();
     }
 
     public Observable<Bitmap> createAlbumNetworkObservable(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return createAlbumLastFmApiRequestObservable(artInfo)
+        return mLastFM.newAlbumRequestObservable(artInfo.artistName, artInfo.albumName)
                 // remap the album info returned by last fm into a url where we can find an image
                 .flatMap(new Func1<Album, Observable<String>>() {
                     @Override
@@ -508,7 +513,7 @@ public class ArtworkFetcherManager {
                                         @Override
                                         public Observable<String> call(Throwable throwable) {
                                             Timber.v("CoverArtRequest failed %s, from %s", album.getName(), Thread.currentThread().getName());
-                                            String url = getBestImage(album, true);
+                                            String url = LastFM.getBestImage(album, true);
                                             if (!TextUtils.isEmpty(url)) {
                                                 return Observable.just(url);
                                             } else {
@@ -517,7 +522,7 @@ public class ArtworkFetcherManager {
                                         }
                                     });
                         } else { // user wants low res go straight for lastfm
-                            String url = getBestImage(album, false);
+                            String url = LastFM.getBestImage(album, false);
                             if (!TextUtils.isEmpty(url)) {
                                 return Observable.just(url);
                             } else {
@@ -536,11 +541,12 @@ public class ArtworkFetcherManager {
     }
 
     public Observable<Bitmap> createArtistNetworkRequest(final ArtInfo artInfo, final ArtworkType artworkType) {
-        return createArtistLastFmApiRequestObservable(artInfo)
+        return mLastFM.newArtistRequestObservable(artInfo.artistName)
                 .map(new Func1<Artist, String>() {
                     @Override
                     public String call(Artist artist) {
-                        String url = getBestImage(artist, !mPreferences.getBoolean(ArtworkPreferences.WANT_LOW_RESOLUTION_ART, false));
+                        String url = LastFM.getBestImage(artist,
+                                !mPreferences.getBoolean(ArtworkPreferences.WANT_LOW_RESOLUTION_ART, false));
                         if (!TextUtils.isEmpty(url)) {
                             return url;
                         }
@@ -554,56 +560,6 @@ public class ArtworkFetcherManager {
                         return createImageRequestObservable(s, artInfo, artworkType);
                     }
                 });
-    }
-
-    public Observable<Album> createAlbumLastFmApiRequestObservable(final ArtInfo artInfo) {
-        return Observable.create(new Observable.OnSubscribe<Album>() {
-            @Override
-            public void call(final Subscriber<? super Album> subscriber) {
-                MusicEntryResponseCallback<Album> listener = new MusicEntryResponseCallback<Album>() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onError(volleyError);
-                    }
-                    @Override
-                    public void onResponse(Album album) {
-                        if (subscriber.isUnsubscribed()) return;
-                        if (!TextUtils.isEmpty(album.getMbid())) {
-                            subscriber.onNext(album);
-                            subscriber.onCompleted();
-                        } else {
-                            Timber.w("Api response does not contain mbid for %s", album.getName());
-                            onErrorResponse(new VolleyError("Unknown mbid"));
-                        }
-                    }
-                };
-                mVolleyQueue.add(Fetch.albumInfo(artInfo.artistName, artInfo.albumName, listener, Request.Priority.HIGH));
-            }
-        });
-    }
-
-    public Observable<Artist> createArtistLastFmApiRequestObservable(final ArtInfo artInfo) {
-        return Observable.create(new Observable.OnSubscribe<Artist>() {
-            @Override
-            public void call(final Subscriber<? super Artist> subscriber) {
-                MusicEntryResponseCallback<Artist> listener = new MusicEntryResponseCallback<Artist>() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onError(volleyError);
-                    }
-
-                    @Override
-                    public void onResponse(Artist artist) {
-                        if (subscriber.isUnsubscribed()) return;
-                        subscriber.onNext(artist);
-                        subscriber.onCompleted();
-                    }
-                };
-                mVolleyQueue.add(Fetch.artistInfo(artInfo.artistName, listener, Request.Priority.HIGH));
-            }
-        });
     }
 
     public Observable<String> createAlbumCoverArtRequestObservable(final String mbid) {
@@ -758,23 +714,6 @@ public class ArtworkFetcherManager {
     void writeToL2(final String key, final Bitmap bitmap) {
         Timber.v("writeToL2(%s)", key);
         mL2Cache.putBitmap(key, bitmap);
-    }
-
-    /**
-     * @return url string for highest quality image available or null if none
-     */
-    public static String getBestImage(MusicEntry e, boolean wantHigResArt) {
-        for (ImageSize q : ImageSize.values()) {
-            if (q.equals(ImageSize.MEGA) && !wantHigResArt) {
-                continue;
-            }
-            String url = e.getImageURL(q);
-            if (!TextUtils.isEmpty(url)) {
-                Timber.v("Found " + q.toString() + " url for " + e.getName());
-                return url;
-            }
-        }
-        return null;
     }
 
     /**

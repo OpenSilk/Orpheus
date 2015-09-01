@@ -17,31 +17,18 @@
 
 package org.opensilk.music.artwork.fetcher;
 
-import android.content.Context;
 import android.content.UriMatcher;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.HurlStack;
-
-import org.opensilk.common.core.app.BaseApp;
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.artwork.ArtworkUris;
-import org.opensilk.music.artwork.SchedulerResponseDelivery;
-import org.opensilk.music.artwork.cache.CacheUtil;
 
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
 import rx.Scheduler;
 import rx.android.schedulers.AndroidSchedulers;
-
-import static org.opensilk.music.artwork.Constants.*;
 
 /**
  * Created by drew on 5/1/15.
@@ -58,19 +45,6 @@ public class ArtworkFetcherModule {
     @Provides @ArtworkFetcherScope
     public ArtworkFetcherService provideService() {
         return service;
-    }
-
-    @Provides @ArtworkFetcherScope
-    public RequestQueue provideRequestQueue(@ForApplication Context context) {
-        final int poolSize = BaseApp.isLowEndHardware(context) ? VOLLEY_POOL_SIZE_SMALL : VOLLEY_POOL_SIZE;
-        RequestQueue queue = new RequestQueue(
-                new DiskBasedCache(CacheUtil.getCacheDir(context, VOLLEY_CACHE_DIR), VOLLEY_CACHE_SIZE),
-                new BasicNetwork(new HurlStack()),
-                poolSize,
-                new SchedulerResponseDelivery()
-        );
-        queue.start();
-        return queue;
     }
 
     @Provides @ArtworkFetcherScope
