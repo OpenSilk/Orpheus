@@ -19,8 +19,8 @@ package org.opensilk.music.ui3.profile;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.music.AppComponent;
+import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.MusicActivityModule;
-import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 
 import dagger.Component;
 import rx.functions.Func1;
@@ -33,7 +33,7 @@ import rx.functions.Func1;
         dependencies = AppComponent.class,
         modules = MusicActivityModule.class
 )
-public interface ProfileActivityComponent extends MusicActivityToolbarComponent {
+public interface ProfileActivityComponent extends MusicActivityComponent {
     Func1<AppComponent, ProfileActivityComponent> FACTORY =
             new Func1<AppComponent, ProfileActivityComponent>() {
                 @Override

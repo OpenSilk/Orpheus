@@ -22,13 +22,12 @@ import android.os.Bundle;
 
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 
 import javax.inject.Inject;
 
-import mortar.MortarScope;
 import mortar.ViewPresenter;
 import rx.functions.Func2;
 
@@ -40,7 +39,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
 
     final AppPreferences preferences;
     final GalleryScreen screen;
-    final ActionBarOwner actionBarOwner;
+    final ToolbarOwner toolbarOwner;
 
     DelegateActionHandler delegateActionHandler;
 
@@ -48,11 +47,11 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
     public GalleryScreenPresenter(
             AppPreferences preferences,
             GalleryScreen screen,
-            ActionBarOwner actionBarOwner
+            ToolbarOwner toolbarOwner
     ) {
         this.preferences = preferences;
         this.screen = screen;
-        this.actionBarOwner = actionBarOwner;
+        this.toolbarOwner = toolbarOwner;
     }
 
     @Override
@@ -97,7 +96,7 @@ public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
             delegateActionHandler.setDelegate(null);
         }
 
-        actionBarOwner.setConfig(ActionBarConfig.builder()
+        toolbarOwner.setConfig(ActionBarConfig.builder()
                 .setTitle(R.string.my_library)
                 .setMenuConfig(builder.build())
                 .build());

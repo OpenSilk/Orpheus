@@ -30,7 +30,7 @@
     </style>
 
     <!-- Secondary middleware override this in the values-* dirs to change values for different configs-->
-    <style name="Theme.LightConfig" parent="Theme.LightParent">
+    <style name="Theme.LightConfig" parent="Theme.LightOverlay">
 
     </style>
 
@@ -58,7 +58,7 @@
     </style>
 
     <style name="Theme.DarkBase" parent="Theme.DarkConfig">
-        <item name="toolbarStyle">@style/Toolbar.Dark</item>
+        <!--<item name="toolbarStyle">@style/Toolbar.Dark</item>-->
     </style>
 
     <style name="Theme.Dark" parent="Theme.DarkBase">

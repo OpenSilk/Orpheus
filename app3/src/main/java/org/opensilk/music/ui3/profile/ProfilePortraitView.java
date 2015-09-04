@@ -29,16 +29,12 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarConfig;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.recycler.HeaderRecyclerAdapter;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.common.ui.util.ViewUtils;
@@ -126,7 +122,7 @@ public class ProfilePortraitView extends BundleableRecyclerView {
     }
 
     @Override
-    protected void notifyAdapterResetIncoming() {
+    public void notifyAdapterResetIncoming() {
         getListView().getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {

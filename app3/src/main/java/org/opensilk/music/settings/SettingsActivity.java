@@ -25,14 +25,14 @@ import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.settings.main.SettingsMainFragment;
-import org.opensilk.music.ui3.MusicActivityToolbar;
+import org.opensilk.music.ui3.MusicActivity;
 
 import mortar.MortarScope;
 
 /**
  * Created by andrew on 2/28/14.
  */
-public class SettingsActivity extends MusicActivityToolbar {
+public class SettingsActivity extends MusicActivity {
 
     @Override
     protected void setupContentView() {
@@ -66,7 +66,7 @@ public class SettingsActivity extends MusicActivityToolbar {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mActionBarDelegate.setUpButtonEnabled(true);
+//        mActionBarDelegate.setUpButtonEnabled(true);
 
         if (savedInstanceState == null) {
             //Load the main fragment

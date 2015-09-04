@@ -30,6 +30,7 @@ import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.loader.LibraryProviderInfoLoader;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.library.LandingScreenFragment;

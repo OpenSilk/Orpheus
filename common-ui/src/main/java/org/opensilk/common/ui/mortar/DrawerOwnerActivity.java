@@ -16,6 +16,8 @@
 
 package org.opensilk.common.ui.mortar;
 
+import android.support.v7.widget.Toolbar;
+
 import org.opensilk.common.core.mortar.HasScope;
 
 /**
@@ -26,4 +28,5 @@ public interface DrawerOwnerActivity extends HasScope {
     void closeDrawer();
     void disableDrawer(boolean hideIndicator);
     void enableDrawer();
+    void setToolbar(Toolbar toolbar);
 }

@@ -36,7 +36,7 @@ import rx.functions.Func1;
         dependencies = AppComponent.class,
         modules = MusicActivityModule.class
 )
-public interface LauncherActivityComponent extends MusicActivityToolbarComponent {
+public interface LauncherActivityComponent extends MusicActivityComponent {
     Func1<AppComponent, LauncherActivityComponent> FACTORY =
             new Func1<AppComponent, LauncherActivityComponent>() {
                 @Override

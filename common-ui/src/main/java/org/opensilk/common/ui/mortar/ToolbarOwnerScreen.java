@@ -22,7 +22,7 @@ import org.opensilk.common.core.mortar.HasScope;
 /**
  * Created by drew on 4/30/15.
  */
-public interface ActionBarOwnerActivity extends HasScope {
+public interface ToolbarOwnerScreen extends HasScope {
     void setUpButtonEnabled(boolean enabled);
 
     void setTitle(int titleRes);

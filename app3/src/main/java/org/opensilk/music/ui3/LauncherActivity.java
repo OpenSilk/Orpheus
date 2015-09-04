@@ -17,39 +17,63 @@
 
 package org.opensilk.music.ui3;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.DrawerOwnerActivity;
+import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
+import org.opensilk.music.library.LibraryCapability;
+import org.opensilk.music.library.LibraryConfig;
+import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.loader.LibraryProviderInfoLoader;
+import org.opensilk.music.settings.SettingsActivity;
+import org.opensilk.music.ui3.common.ActivityRequestCodes;
+import org.opensilk.music.ui3.gallery.GalleryPage;
+import org.opensilk.music.ui3.gallery.GalleryScreenFragment;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.MortarScope;
+import rx.functions.Action1;
+
+import static org.opensilk.music.library.provider.LibraryMethods.LIBRARYCONF;
 
 /**
  * Created by drew on 4/30/15.
  */
-public class LauncherActivity extends MusicActivityToolbar implements DrawerOwnerActivity {
+public class LauncherActivity extends MusicActivity implements DrawerOwnerActivity {
 
     @Inject DrawerOwner mDrawerOwner;
+    @Inject AppPreferences mSettings;
+    @Inject @Named("IndexProviderAuthority") String mIndexProviderAuthority;
+    @Inject @Named("mediaStoreLibraryAuthority") String mMediaStoreLibraryAuthority;
+    @Inject FragmentManagerOwner mFm;
+    @Inject LibraryProviderInfoLoader mLibraryProviderLoader;
 
 //    @InjectView(R.id.main_toolbar) Toolbar mToolbar;
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
-    @InjectView(R.id.drawer_container) ViewGroup mDrawer;
+    @InjectView(R.id.navigation) NavigationView mNavigation;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
@@ -85,15 +109,16 @@ public class LauncherActivity extends MusicActivityToolbar implements DrawerOwne
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActionBarConfig config = ActionBarConfig.builder()
-                .setTitle("")
-                .build();
-        mActionBarOwner.setConfig(config);
+//        ActionBarConfig config = ActionBarConfig.builder()
+//                .setTitle("")
+//                .build();
+//        mToolbarOwner.setConfig(config);
 
         if (mDrawerLayout != null) {
-            mDrawerToggle = new Toggle(this, mDrawerLayout, mToolbar);
-            mDrawerLayout.setDrawerListener(mDrawerToggle);
+            setToolbar(null);
             mDrawerOwner.takeView(this);
+            mNavigation.setNavigationItemSelectedListener(mNavigaitonClickListener);
+            mNavigaitonClickListener.onNavigationItemSelected(mNavigation.getMenu().getItem(0));
         }
     }
 
@@ -135,24 +160,32 @@ public class LauncherActivity extends MusicActivityToolbar implements DrawerOwne
 
     @Override
     public void openDrawer() {
-        if (!isDrawerOpen()) mDrawerLayout.openDrawer(mDrawer);
+        if (!isDrawerOpen()) mDrawerLayout.openDrawer(mNavigation);
     }
 
     public void closeDrawer() {
-        if (isDrawerOpen()) mDrawerLayout.closeDrawer(mDrawer);
+        if (isDrawerOpen()) mDrawerLayout.closeDrawer(mNavigation);
     }
 
     @Override
     public void disableDrawer(boolean hideIndicator) {
         if (mDrawerToggle != null) mDrawerToggle.setDrawerIndicatorEnabled(!hideIndicator);
         closeDrawer();
-        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mDrawer);
+        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, mNavigation);
     }
 
     @Override
     public void enableDrawer() {
         if (mDrawerToggle != null) mDrawerToggle.setDrawerIndicatorEnabled(true);
-        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mDrawer);
+        if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mNavigation);
+    }
+
+    @Override
+    public void setToolbar(Toolbar toolbar) {
+        if (mDrawerLayout != null) {
+            mDrawerToggle = new Toggle(this, mDrawerLayout, toolbar);
+            mDrawerLayout.setDrawerListener(mDrawerToggle);
+        }
     }
 
     /*
@@ -160,8 +193,62 @@ public class LauncherActivity extends MusicActivityToolbar implements DrawerOwne
      */
 
     private boolean isDrawerOpen() {
-        return mDrawer != null && mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mDrawer);
+        return mNavigation != null && mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mNavigation);
     }
+
+    final NavigationView.OnNavigationItemSelectedListener mNavigaitonClickListener =
+            new NavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.my_library: {
+                    menuItem.setChecked(true);
+                    Bundle config = getApplicationContext().getContentResolver().call(
+                            LibraryUris.call(mMediaStoreLibraryAuthority), LIBRARYCONF, null, null);
+                    if (config == null) {
+                        throw new RuntimeException("Got null config for index provider");
+                    }
+                    LibraryConfig libraryConfig = LibraryConfig.materialize(config);
+                    List<GalleryPage> pages = new ArrayList<>();
+                    if (libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
+                        pages.add(GalleryPage.PLAYLIST);
+                    }
+                    if (libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
+                        pages.add(GalleryPage.ARTIST);
+                    }
+                    if (libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
+                        pages.add(GalleryPage.ALBUM);
+                    }
+                    if (libraryConfig.hasAbility(LibraryCapability.GENRES)) {
+                        pages.add(GalleryPage.GENRE);
+                    }
+                    if (libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
+                        pages.add(GalleryPage.SONG);
+                    }
+                    LibraryInfo currentSelection = mSettings.getLibraryInfo(libraryConfig,
+                            AppPreferences.DEFAULT_LIBRARY);
+                    GalleryScreenFragment f = GalleryScreenFragment.ni(LauncherActivity.this,
+                            libraryConfig, currentSelection, pages);
+                    mFm.killBackStack();
+                    mFm.replaceMainContent(f, false);
+                    break;
+                }
+                case R.id.folders:
+                    menuItem.setChecked(true);
+                    break;
+                case R.id.settings: {
+                    Intent i = new Intent(LauncherActivity.this, SettingsActivity.class);
+                    startActivityForResult(i, ActivityRequestCodes.APP_SETTINGS, null);
+                    break;
+                }
+                default:
+                    return false;
+            }
+            closeDrawer();
+            return true;
+        }
+
+    };
 
     static class Toggle extends ActionBarDrawerToggle {
         final LauncherActivity activity;

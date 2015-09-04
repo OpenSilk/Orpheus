@@ -46,7 +46,9 @@ import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
+import mortar.Presenter;
 import mortar.ViewPresenter;
+import mortar.bundler.BundleService;
 import rx.Subscription;
 
 import static org.opensilk.common.core.rx.RxUtils.isSubscribed;
@@ -56,7 +58,7 @@ import static org.opensilk.common.core.rx.RxUtils.notSubscribed;
  * Created by drew on 5/2/15.
  */
 @ScreenScope
-public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
+public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         implements RxLoader.ContentChangedListener, HasOptionsMenu {
 
     protected final AppPreferences preferences;
@@ -92,6 +94,11 @@ public class BundleablePresenter extends ViewPresenter<BundleableRecyclerView>
                 config.overflowClickListener : defaultOverflowHandler;
         this.menuConfig = config.menuConfig;
         this.loaderSeed = config.loaderSeed;
+    }
+
+    @Override
+    protected BundleService extractBundleService(BundleableRecyclerView2 view) {
+        return BundleService.getBundleService(view.getContext());
     }
 
     @Override

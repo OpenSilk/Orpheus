@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.main;
+package org.opensilk.music.loader;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,6 +25,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.JsonWriter;
@@ -36,8 +37,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
+import org.opensilk.music.library.LibraryCapability;
+import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.library.provider.LibraryProvider;
+import org.opensilk.music.library.provider.LibraryUris;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -55,12 +59,12 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import timber.log.Timber;
 
+import static org.opensilk.music.library.provider.LibraryMethods.LIBRARYCONF;
+
 /**
  * Created by drew on 11/15/14.
  */
-@ScreenScope
 public class LibraryProviderInfoLoader {
-
 
     final Context context;
     final AppPreferences settings;
@@ -147,6 +151,30 @@ public class LibraryProviderInfoLoader {
                     }
                 }
                 return lpi;
+            }
+        });
+    }
+
+    public Observable<LibraryConfig> getActiveGalleryProviders() {
+        return getActivePlugins().flatMap(new Func1<List<LibraryProviderInfo>, Observable<LibraryConfig>>() {
+            @Override
+            public Observable<LibraryConfig> call(List<LibraryProviderInfo> libraryProviderInfos) {
+                List<LibraryConfig> configs = new ArrayList<LibraryConfig>(libraryProviderInfos.size());
+                for (LibraryProviderInfo libraryProviderInfo : libraryProviderInfos) {
+                    Bundle b = context.getContentResolver().call(
+                            LibraryUris.call(libraryProviderInfo.authority), LIBRARYCONF, null, null);
+                    if (b == null) {
+                        Timber.e("Got null config for %s", libraryProviderInfo.authority);
+                        continue;
+                    }
+                    configs.add(LibraryConfig.materialize(b));
+                }
+                return Observable.from(configs);
+            }
+        }).filter(new Func1<LibraryConfig, Boolean>() {
+            @Override
+            public Boolean call(LibraryConfig libraryConfig) {
+                return libraryConfig.hasAbility(LibraryCapability.GALLERY);
             }
         });
     }

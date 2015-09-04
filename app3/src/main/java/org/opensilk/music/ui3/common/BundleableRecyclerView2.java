@@ -15,13 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3;
+package org.opensilk.music.ui3.common;
 
-import org.opensilk.common.ui.mortar.ActionBarOwner;
+import android.content.Context;
+
+import org.opensilk.common.ui.recycler.RecyclerListAdapter;
 
 /**
- * Created by drew on 5/24/15.
+ * Created by drew on 9/3/15.
  */
-public interface MusicActivityToolbarComponent extends MusicActivityComponent {
-    ActionBarOwner actionBarOwner();
+public interface BundleableRecyclerView2 {
+    Context getContext();
+    void setLoading(boolean loading);
+    void setupRecyclerView();
+    void setListShown(boolean show, boolean animate);
+    void setListEmpty(boolean show, boolean animate);
+    void setEmptyText(int resId);
+    BundleableRecyclerAdapter getAdapter();
+    void notifyAdapterResetIncoming();
 }

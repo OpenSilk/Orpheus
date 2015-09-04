@@ -19,6 +19,7 @@ package org.opensilk.music.ui3.common;
 
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.playback.control.PlaybackController;
+import org.opensilk.music.ui3.profile.ProfilePortraitView2;
 
 /**
  * Created by drew on 5/2/15.

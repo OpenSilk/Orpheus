@@ -21,12 +21,11 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.music.R;
 
@@ -43,7 +42,7 @@ public class ProfileLandscapeView extends RelativeLayout {
     @Inject @Named("profile_heros") Boolean wantMultiHeros;
     @Inject @Named("profile_title") String mTitleText;
     @Inject @Named("profile_subtitle") String mSubTitleText;
-    @Inject ActionBarOwner mActionBarOwner;
+    @Inject ToolbarOwner mToolbarOwner;
 
     boolean mLightTheme;
 
@@ -67,11 +66,11 @@ public class ProfileLandscapeView extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        ActionBarConfig c = mActionBarOwner.getConfig().buildUpon()
+        ActionBarConfig c = mToolbarOwner.getConfig().buildUpon()
                 .clearTitle()
                 .setTitle(mTitleText)
                 .setSubtitle(mSubTitleText)
                 .build();
-        mActionBarOwner.setConfig(c);
+        mToolbarOwner.setConfig(c);
     }
 }

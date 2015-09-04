@@ -19,6 +19,8 @@ package org.opensilk.music.ui3.gallery;
 
 import android.content.Context;
 import android.os.Parcelable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
@@ -38,11 +40,11 @@ import timber.log.Timber;
 /**
  * Created by drew on 10/3/14.
  */
-public class GalleryScreenView extends LinearLayout {
+public class GalleryScreenView extends CoordinatorLayout {
 
     @Inject GalleryScreenPresenter mPresenter;
 
-    @InjectView(R.id.tab_bar) SlidingTabLayout mTabBar;
+    @InjectView(R.id.gallery_tab_bar) TabLayout mTabBar;
     @InjectView(R.id.pager) ViewPager mViewPager;
 
     public GalleryScreenView(Context context, AttributeSet attrs) {
@@ -61,7 +63,7 @@ public class GalleryScreenView extends LinearLayout {
     }
 
     @Override
-    protected void onDetachedFromWindow() {
+    public void onDetachedFromWindow() {
         Timber.v("onDetachedFromWindow()");
         super.onDetachedFromWindow();
         if (!isInEditMode()) {
@@ -84,7 +86,8 @@ public class GalleryScreenView extends LinearLayout {
     public void setup(List<GalleryPage> pages, int startPage) {
         GalleryScreenViewAdapter adapter = new GalleryScreenViewAdapter(getContext(), mPresenter, pages);
         mViewPager.setAdapter(adapter);
-        mTabBar.setViewPager(mViewPager);
+        mTabBar.setTabMode(TabLayout.MODE_SCROLLABLE);
+        mTabBar.setupWithViewPager(mViewPager);
         mViewPager.setCurrentItem(startPage);
     }
 

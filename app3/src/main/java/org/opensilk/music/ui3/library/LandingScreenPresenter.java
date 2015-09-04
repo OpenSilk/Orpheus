@@ -27,7 +27,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortar.ActivityResultsListener;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
@@ -42,7 +42,6 @@ import org.opensilk.music.ui3.common.ActivityRequestCodes;
 import org.opensilk.music.ui3.folders.FoldersScreenFragment;
 import org.opensilk.music.ui3.gallery.GalleryPage;
 import org.opensilk.music.ui3.gallery.GalleryScreenFragment;
-import org.opensilk.music.ui3.genres.GenresScreen;
 import org.opensilk.music.ui3.genres.GenresScreenFragment;
 import org.opensilk.music.ui3.library.LandingScreenViewAdapter.ViewItem;
 import org.opensilk.music.ui3.playlists.PlaylistsScreenFragment;
@@ -56,7 +55,6 @@ import javax.inject.Inject;
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.ViewPresenter;
-import rx.functions.Func2;
 import timber.log.Timber;
 
 /**
@@ -70,7 +68,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     final ActivityResultsController activityResultsController;
     final FragmentManagerOwner fm;
     final Context appContext;
-    final ActionBarOwner actionBarOwner;
+    final ToolbarOwner toolbarOwner;
 
     LibraryInfo currentSelection;
     int lastval;
@@ -82,14 +80,14 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
             ActivityResultsController activityResultsController,
             FragmentManagerOwner fm,
             @ForApplication Context appContext,
-            ActionBarOwner actionBarOwner
+            ToolbarOwner toolbarOwner
     ) {
         this.settings = settings;
         this.screen = screen;
         this.activityResultsController = activityResultsController;
         this.fm = fm;
         this.appContext = appContext;
-        this.actionBarOwner = actionBarOwner;
+        this.toolbarOwner = toolbarOwner;
     }
 
     @Override
@@ -297,7 +295,7 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
             menuBuilder.setActionHandler(wrapper.getDelegateHandler(null));
             builder.setMenuConfig(menuBuilder.build());
         }
-        actionBarOwner.setConfig(builder.build());
+        toolbarOwner.setConfig(builder.build());
     }
 
 }

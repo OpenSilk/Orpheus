@@ -44,7 +44,7 @@
         <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="Theme.Lightconfig" parent="Theme.LightOverlay">
+    <style name="Theme.LightConfig" parent="Theme.LightOverlay">
         <item name="mainContentTopMargin">?actionBarSize</item>
     </style>
 

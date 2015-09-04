@@ -21,22 +21,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/pager_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <!--<include layout="@layout/actionbar_background"/>-->
-
-    <org.opensilk.common.ui.widget.SlidingTabLayout
-        android:id="@+id/tab_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="2dp"
-        style="@style/GalleryTabs"/>
+    android:layout_height="match_parent">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/screen_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways"
+            style="?toolbarStyle"/>
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/gallery_tab_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/GalleryTabs"/>
+
+    </android.support.design.widget.AppBarLayout>
 
 </org.opensilk.music.ui3.gallery.GalleryScreenView>

@@ -24,12 +24,14 @@ import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.HasOptionsMenu;
 import org.opensilk.common.ui.mortar.MortarPagerAdapter;
 import org.opensilk.music.ui3.common.BundleableRecyclerView;
+import org.opensilk.music.ui3.common.BundleableRecyclerView2;
 import org.opensilk.music.ui3.common.BundleableScreen;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import mortar.Presenter;
 import mortar.ViewPresenter;
 
 /**
@@ -50,7 +52,7 @@ class GalleryScreenViewAdapter extends MortarPagerAdapter<BundleableScreen, Bund
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         if (object != mCurrentPrimaryItem) {
             Page currentPage = (Page) object;
-            ViewPresenter<BundleableRecyclerView> childPresenter = (currentPage.view).getPresenter();
+            Presenter<BundleableRecyclerView2> childPresenter = (currentPage.view).getPresenter();
             ActionBarMenuConfig menuConfig = null;
             if (childPresenter != null && childPresenter instanceof HasOptionsMenu) {
                 menuConfig = ((HasOptionsMenu) childPresenter).getMenuConfig();

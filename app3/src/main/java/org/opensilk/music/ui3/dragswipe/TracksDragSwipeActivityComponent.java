@@ -19,8 +19,8 @@ package org.opensilk.music.ui3.dragswipe;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.music.AppComponent;
+import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.MusicActivityModule;
-import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 
 import dagger.Component;
 import rx.functions.Func1;
@@ -33,7 +33,7 @@ import rx.functions.Func1;
         dependencies = AppComponent.class,
         modules = MusicActivityModule.class
 )
-public interface TracksDragSwipeActivityComponent extends MusicActivityToolbarComponent {
+public interface TracksDragSwipeActivityComponent extends MusicActivityComponent {
     Func1<AppComponent, TracksDragSwipeActivityComponent> FACTORY =
             new Func1<AppComponent, TracksDragSwipeActivityComponent>() {
                 @Override

@@ -16,9 +16,16 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"/>
+<resources>
+    <style name="Theme.LightConfig" parent="Theme.LightOverlay">
+        <item name="mainContentTopMargin">?actionBarSize</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.DarkConfig" parent="Theme.DarkOverlay">
+        <item name="mainContentTopMargin">?actionBarSize</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+</resources>

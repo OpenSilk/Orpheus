@@ -24,7 +24,7 @@ import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryProviderInfo;
 import org.opensilk.music.ui3.common.RecyclerAdapterItemClickDelegate;
-import org.opensilk.music.ui3.main.LibraryProviderInfoLoader;
+import org.opensilk.music.loader.LibraryProviderInfoLoader;
 
 import java.util.List;
 

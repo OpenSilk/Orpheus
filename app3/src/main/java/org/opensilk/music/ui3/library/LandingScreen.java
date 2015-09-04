@@ -27,7 +27,6 @@ import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.MusicActivityToolbarComponent;
 
 import mortar.MortarScope;
 
@@ -51,7 +50,7 @@ public class LandingScreen extends Screen {
     public static class Factory extends ComponentFactory<LandingScreen> {
         @Override
         protected Object createDaggerComponent(Resources resources, MortarScope parentScope, LandingScreen screen) {
-            MusicActivityToolbarComponent activityToolbarComponent = DaggerService.getDaggerComponent(parentScope);
+            MusicActivityComponent activityToolbarComponent = DaggerService.getDaggerComponent(parentScope);
             return LandingScreenComponent.FACTORY.call(activityToolbarComponent, screen);
         }
     }

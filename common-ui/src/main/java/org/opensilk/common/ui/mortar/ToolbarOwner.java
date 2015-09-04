@@ -19,7 +19,7 @@ package org.opensilk.common.ui.mortar;
 
 import android.os.Bundle;
 
-import org.opensilk.common.core.dagger2.ActivityScope;
+import org.opensilk.common.core.dagger2.ScreenScope;
 
 import javax.inject.Inject;
 
@@ -27,18 +27,18 @@ import mortar.Presenter;
 import mortar.bundler.BundleService;
 
 /** Allows shared configuration of the Android ActionBar. */
-@ActivityScope
-public class ActionBarOwner extends Presenter<ActionBarOwnerActivity> {
+//@ScreenScope
+public class ToolbarOwner extends Presenter<ToolbarOwnerScreen> {
 
     private ActionBarConfig config;
 
     @Inject
-    public ActionBarOwner() {
+    public ToolbarOwner() {
         super();
     }
 
     @Override
-    protected BundleService extractBundleService(ActionBarOwnerActivity view) {
+    protected BundleService extractBundleService(ToolbarOwnerScreen view) {
         return BundleService.getBundleService(view.getScope());
     }
 
@@ -62,7 +62,7 @@ public class ActionBarOwner extends Presenter<ActionBarOwnerActivity> {
     }
 
     private void update() {
-        ActionBarOwnerActivity view = getView();
+        ToolbarOwnerScreen view = getView();
         if (!hasView()) {
             return;
         }

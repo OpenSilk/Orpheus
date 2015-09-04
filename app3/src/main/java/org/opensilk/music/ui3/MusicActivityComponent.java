@@ -20,14 +20,12 @@ package org.opensilk.music.ui3;
 import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.main.MainPresenter;
-import org.opensilk.music.ui3.main.MainView;
 
 /**
  * Requires ActivityResultsOwnerModule

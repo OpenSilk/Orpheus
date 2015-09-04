@@ -21,16 +21,11 @@ import android.content.Context;
 import android.os.Bundle;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.R;
-import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.MusicActivityToolbarComponent;
-import org.opensilk.music.ui3.common.BundleableComponent;
 import org.opensilk.music.ui3.common.BundleableFragment;
-import org.opensilk.music.ui3.common.BundleablePresenter;
 import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.dragswipe.TracksDragSwipeComponent;
 import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenter;
@@ -56,15 +51,15 @@ public class PlaylistsProfileScreenFragment extends BundleableFragment {
     @Override
     protected void setupActionBar() {
         PlaylistsProfileScreen s = (PlaylistsProfileScreen) getScreen();
-        MusicActivityToolbarComponent component = DaggerService.getDaggerComponent(getActivity());
-        ActionBarOwner actionBarOwner = component.actionBarOwner();
-        TracksDragSwipeComponent component1 = DaggerService.getDaggerComponent(getScope());
-        TracksDragSwipePresenter presenter = component1.presenter();
-        actionBarOwner.setConfig(actionBarOwner.getConfig().buildUpon()
-                .clearTitle()
-                .setTitle(s.playlist.name)
-                .setSubtitle(UtilsCommon.makeLabel(getActivity(),
-                        R.plurals.Nsongs, s.playlist.trackUris.size()))
-                .setMenuConfig(presenter.getMenuConfig()).build());
+        MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
+//        ToolbarOwner toolbarOwner = component.actionBarOwner();
+//        TracksDragSwipeComponent component1 = DaggerService.getDaggerComponent(getScope());
+//        TracksDragSwipePresenter presenter = component1.presenter();
+//        toolbarOwner.setConfig(toolbarOwner.getConfig().buildUpon()
+//                .clearTitle()
+//                .setTitle(s.playlist.name)
+//                .setSubtitle(UtilsCommon.makeLabel(getActivity(),
+//                        R.plurals.Nsongs, s.playlist.trackUris.size()))
+//                .setMenuConfig(presenter.getMenuConfig()).build());
     }
 }

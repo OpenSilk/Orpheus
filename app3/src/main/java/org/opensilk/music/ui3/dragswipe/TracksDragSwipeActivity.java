@@ -26,7 +26,7 @@ import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.MusicActivityToolbar;
+import org.opensilk.music.ui3.MusicActivity;
 import org.opensilk.music.ui3.profile.ProfileScreen;
 
 import mortar.MortarScope;
@@ -34,7 +34,7 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/13/15.
  */
-public class TracksDragSwipeActivity extends MusicActivityToolbar {
+public class TracksDragSwipeActivity extends MusicActivity {
 
     public static void startSelf(Context context, ProfileScreen screen) {
         Intent i = new Intent(context, TracksDragSwipeActivity.class)
@@ -78,7 +78,7 @@ public class TracksDragSwipeActivity extends MusicActivityToolbar {
                 .setTitle("")
                 .setSubtitle("")
                 .build();
-        mActionBarOwner.setConfig(config);
+//        mToolbarOwner.setConfig(config);
 
         ProfileScreen screen = getIntent().getParcelableExtra("screen");
         mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), false);

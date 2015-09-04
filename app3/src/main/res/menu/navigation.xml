@@ -16,9 +16,20 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/my_library"
+            android:icon="@drawable/ic_my_library_music_grey600_24dp"
+            android:title="@string/my_library"/>
+        <item android:id="@+id/folders"
+            android:icon="@drawable/ic_folder_grey600_24dp"
+            android:title="@string/folders"/>
+    </group>
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_grey600_24dp"
+        android:title="@string/settings_title"/>
+
+</menu>

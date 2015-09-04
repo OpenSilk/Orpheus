@@ -26,14 +26,14 @@ import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.music.AppComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
-import org.opensilk.music.ui3.MusicActivityToolbar;
+import org.opensilk.music.ui3.MusicActivity;
 
 import mortar.MortarScope;
 
 /**
  * Created by drew on 5/5/15.
  */
-public class ProfileActivity extends MusicActivityToolbar {
+public class ProfileActivity extends MusicActivity {
 
     public static void startSelf(Context context, ProfileScreen screen) {
         Intent i = new Intent(context, ProfileActivity.class)
@@ -71,14 +71,6 @@ public class ProfileActivity extends MusicActivityToolbar {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        ActionBarConfig config = ActionBarConfig.builder()
-                .setUpButtonEnabled(true)
-                .setTitle("")
-                .setSubtitle("")
-                .setTransparentBackground(!getResources().getBoolean(R.bool.in_landscape))
-                .build();
-        mActionBarOwner.setConfig(config);
 
         ProfileScreen screen = getIntent().getParcelableExtra("screen");
         mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), false);

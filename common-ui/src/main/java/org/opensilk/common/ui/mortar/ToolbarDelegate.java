@@ -15,17 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.profile;
+package org.opensilk.common.ui.mortar;
 
-import org.opensilk.music.ui3.common.BundleableComponent;
+import android.support.v7.widget.Toolbar;
+
+import javax.inject.Inject;
 
 /**
- * Created by drew on 5/5/15.
+ * Created by drew on 9/3/15.
  */
-public interface ProfileComponent extends BundleableComponent {
-    void inject(ProfilePortraitView view);
-    void inject(ProfileHeroView view);
-    void inject(ProfileLandscapeView view);
-    void inject(ProfileLandscapeRecyclerView view);
-    void inject(ProfilePortraitView2 view);
+public class ToolbarDelegate {
+
+    Toolbar toolbar;
+    HasOptionsMenu presenter;
+
+    @Inject
+    public ToolbarDelegate() {
+    }
+
+    public void install(Toolbar toolbar, HasOptionsMenu hasOptionsMenu) {
+        hasOptionsMenu.getMenuConfig();
+    }
 }

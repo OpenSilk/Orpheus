@@ -17,22 +17,28 @@
 
 package org.opensilk.music.ui3.common;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.DrawerOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwnerDelegate;
+import org.opensilk.common.ui.mortar.ToolbarOwnerScreen;
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
+import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.ui3.LauncherActivityComponent;
 import org.opensilk.music.ui3.MusicActivityComponent;
-import org.opensilk.music.ui3.MusicActivityToolbar;
-import org.opensilk.music.ui3.MusicActivityToolbarComponent;
+
+import javax.inject.Inject;
+
+import butterknife.ButterKnife;
 
 /**
  * Created by drew on 5/5/15.
@@ -42,6 +48,10 @@ public abstract class BundleableFragment extends MortarFragment {
     protected LibraryConfig mLibraryConfig;
     protected LibraryInfo mLibraryInfo;
     protected String mTitle;
+
+    Toolbar mToolbar;
+    @Inject ToolbarOwner mToolbarOwner;
+    ToolbarOwnerDelegate<BundleableFragment> mToolbarOwnerDelegate;
 
     protected static Bundle makeCommonArgsBundle(LibraryConfig config, LibraryInfo info, String title) {
         return makeCommonArgsBundle(config.dematerialize(), info, title);
@@ -61,21 +71,58 @@ public abstract class BundleableFragment extends MortarFragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mToolbar = ButterKnife.findById(view, R.id.screen_toolbar);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setupActionBar();
+//        if (mToolbar != null) {
+//            mToolbarOwnerDelegate = new ToolbarOwnerDelegate<>(this, mToolbarOwner, mToolbar);
+//            mToolbarOwnerDelegate.onCreate();
+//            setupActionBar();
+//            //Do this after so it can override home botton
+//            notifyDrawerOfToolbarChange();
+//        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+//        if (mToolbar != null) {
+//            mToolbar = null;
+//            mToolbarOwnerDelegate.onDestroy();
+//            mToolbarOwnerDelegate = null;
+//            //Do last so mToolbar will pass as null
+//            notifyDrawerOfToolbarChange();
+//        }
+    }
+
+    private void notifyDrawerOfToolbarChange() {
+        MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
+        if (component instanceof LauncherActivityComponent) {
+            LauncherActivityComponent launcherActivityComponent = (LauncherActivityComponent)component;
+            DrawerOwner drawerOwner = launcherActivityComponent.drawerOwner();
+            if (drawerOwner != null) {
+                drawerOwner.setToolbar(mToolbar);
+            }
+        }
     }
 
     protected void setupActionBar() {
         mTitle = getArguments().getString("title");
-        MusicActivityToolbarComponent component = DaggerService.getDaggerComponent(getActivity());
-        ActionBarOwner actionBarOwner = component.actionBarOwner();
-        BundleableComponent component1 = DaggerService.getDaggerComponent(getScope());
-        BundleablePresenter presenter = component1.presenter();
-        ActionBarConfig config = actionBarOwner.getConfig().buildUpon()// ActionBarConfig.builder()
-                .clearTitle()
+        BundleableComponent component = DaggerService.getDaggerComponent(getScope());
+        BundleablePresenter presenter = component.presenter();
+        ActionBarConfig config = ActionBarConfig.builder()
                 .setTitle(mTitle != null ? mTitle : "")
                 .setMenuConfig(presenter.getMenuConfig()).build();
-        actionBarOwner.setConfig(config);
+        mToolbarOwner.setConfig(config);
     }
 }

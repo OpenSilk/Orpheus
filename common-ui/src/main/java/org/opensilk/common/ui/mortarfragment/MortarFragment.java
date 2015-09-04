@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.core.mortar.HasScope;
 import org.opensilk.common.ui.mortar.HasName;
 import org.opensilk.common.ui.mortar.LayoutCreator;
 import org.opensilk.common.ui.mortar.Screen;
@@ -40,7 +41,7 @@ import timber.log.Timber;
 /**
  * Created by drew on 3/10/15.
  */
-public abstract class MortarFragment extends Fragment {
+public abstract class MortarFragment extends Fragment implements HasScope {
     private static final boolean DEBUG_LIFECYCLE = true;
 
     private MortarScope mScope;
@@ -105,16 +106,15 @@ public abstract class MortarFragment extends Fragment {
         return getScreen().getName();
     }
 
-    @NonNull
-    public final MortarScope getScope() {
+    @Override
+    public final @NonNull MortarScope getScope() {
         if (mScope == null) {
             throw new IllegalStateException("Can't call getScope() before onCreate()");
         }
         return mScope;
     }
 
-    @NonNull
-    public final Screen getScreen() {
+    public final @NonNull Screen getScreen() {
         if (mScreen == null) {
             mScreen = newScreen();
         }

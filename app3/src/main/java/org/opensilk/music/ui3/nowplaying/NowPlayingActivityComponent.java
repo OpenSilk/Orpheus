@@ -21,7 +21,7 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ActivityScope;
 import org.opensilk.common.core.dagger2.ForApplication;
-import org.opensilk.common.ui.mortar.ActionBarOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortar.PauseAndResumeModule;
 import org.opensilk.common.ui.mortar.PauseAndResumeRegistrar;
 import org.opensilk.music.AppComponent;
@@ -55,7 +55,6 @@ public interface NowPlayingActivityComponent {
     @ForApplication Context appContext();
     AppPreferences appPreferences();
     ArtworkRequestManager artworkRequestor();
-    ActionBarOwner actionBarOwner();
     PlaybackController playbackController();
     PauseAndResumeRegistrar pauseAndResumeRegistrar();
     void inject(NowPlayingActivity activty);

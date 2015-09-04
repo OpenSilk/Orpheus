@@ -22,6 +22,7 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestorComponent;
 import org.opensilk.music.artwork.requestor.ArtworkRequestorModule;
 import org.opensilk.music.artwork.shared.GsonComponent;
 import org.opensilk.music.artwork.shared.GsonModule;
+import org.opensilk.music.index.IndexProviderAuthorityModule;
 import org.opensilk.music.library.mediastore.MediaStoreLibraryAuthorityModule;
 import org.opensilk.music.playback.control.PlaybackController;
 
@@ -40,7 +41,8 @@ import rx.functions.Func1;
                 AppModule.class,
                 ArtworkRequestorModule.class,
                 GsonModule.class,
-                MediaStoreLibraryAuthorityModule.class
+                MediaStoreLibraryAuthorityModule.class,
+                IndexProviderAuthorityModule.class
         }
 )
 public interface AppComponent extends AppContextComponent, ArtworkRequestorComponent, GsonComponent {
@@ -56,4 +58,5 @@ public interface AppComponent extends AppContextComponent, ArtworkRequestorCompo
     AppPreferences appPreferences();
     PlaybackController playbackController();
     @Named("mediaStoreLibraryAuthority") String mediaStoreLibraryAuthority();
+    @Named("IndexProviderAuthority") String indexProviderAuthority();
 }

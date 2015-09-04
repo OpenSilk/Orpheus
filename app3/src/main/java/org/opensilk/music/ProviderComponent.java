@@ -23,6 +23,8 @@ import org.opensilk.common.core.dagger2.AppContextComponent;
 import org.opensilk.common.core.dagger2.AppContextModule;
 import org.opensilk.music.artwork.provider.ArtworkComponent;
 import org.opensilk.music.artwork.provider.ArtworkModule;
+import org.opensilk.music.index.IndexComponent;
+import org.opensilk.music.index.IndexProviderAuthorityModule;
 
 import javax.inject.Singleton;
 

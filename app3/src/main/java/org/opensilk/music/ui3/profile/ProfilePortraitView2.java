@@ -15,47 +15,78 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.opensilk.music.ui3.common;
+package org.opensilk.music.ui3.profile;
 
 import android.content.Context;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.recycler.RecyclerListFrame;
+import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
+import org.opensilk.music.ui3.common.BundleableComponent;
+import org.opensilk.music.ui3.common.BundleablePresenter;
+import org.opensilk.music.ui3.common.BundleableRecyclerAdapter;
+import org.opensilk.music.ui3.common.BundleableRecyclerView;
+import org.opensilk.music.ui3.common.BundleableRecyclerView2;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
- * Created by drew on 5/2/15.
+ * Created by drew on 9/3/15.
  */
-public class BundleableRecyclerView extends RecyclerListFrame implements BundleableRecyclerView2 {
+public class ProfilePortraitView2 extends CoordinatorLayout implements BundleableRecyclerView2 {
 
+    @Inject @Named("profile_heros") Boolean wantMultiHeros;
+    @Inject @Named("profile_title") String mTitleText;
+    @Inject @Named("profile_subtitle") String mSubTitleText;
     @Inject protected BundleablePresenter mPresenter;
     @Inject protected BundleableRecyclerAdapter mAdapter;
 
-    public BundleableRecyclerView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        doInject();
-    }
+    @InjectView(R.id.toolbar) Toolbar mToolbar;
+//    @InjectView(R.id.backdrop) ImageView mBackdrop;
+    @InjectView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
+    @InjectView(R.id.recyclerview) RecyclerView mList;
 
-    protected void doInject() {
-        BundleableComponent component = DaggerService.getDaggerComponent(getContext());
-        component.inject(this);
+    public ProfilePortraitView2(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        if (!isInEditMode()) {
+            ProfileComponent component = DaggerService.getDaggerComponent(getContext());
+            component.inject(this);
+        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        ButterKnife.inject(this);
+        int headerlayout = wantMultiHeros ? R.layout.profile_hero4 : R.layout.profile_view2_hero;
+//        ViewUtils.inflate(getContext(), headerlayout, mCollapsingToolbar);
+//        mToolbar.bringToFront();
+        View hero = ViewUtils.inflate(getContext(), headerlayout, null);
+        mCollapsingToolbar.addView(hero, 0);
+        mCollapsingToolbar.setTitle(mTitleText);
         initRecyclerView();
         mPresenter.takeView(this);
     }
 
     @Override
-    protected void onDetachedFromWindow() {
+    public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mPresenter.dropView(this);
     }
@@ -98,5 +129,29 @@ public class BundleableRecyclerView extends RecyclerListFrame implements Bundlea
 
     public BundleablePresenter getPresenter() {
         return mPresenter;
+    }
+
+    RecyclerView getListView() {
+        return mList;
+    }
+
+    @Override
+    public void setLoading(boolean loading) {
+
+    }
+
+    @Override
+    public void setListShown(boolean show, boolean animate) {
+
+    }
+
+    @Override
+    public void setListEmpty(boolean show, boolean animate) {
+
+    }
+
+    @Override
+    public void setEmptyText(int resId) {
+
     }
 }
