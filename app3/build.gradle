@@ -15,7 +15,6 @@
  */
 apply plugin: 'com.android.application'
 apply plugin: 'com.jakewharton.hugo'
-apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 3
@@ -112,14 +111,6 @@ android {
 //    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 //}
 
-robolectric {
-    include '**/*Test.class'
-    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-    afterTest {
-        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
-    }
-}
-
 dependencies {
     //SDK
     compile (group: 'com.android.support', name: 'cardview-v7', version: rootProject.ext.supportLibVersion)
@@ -158,6 +149,7 @@ dependencies {
     compile project(':common-core')
     compile project(':common-ui')
     compile project(':library-mediastore')
+    compile project(':core-index')
 
     testCompile('junit:junit:4.12')
     testCompile('org.robolectric:robolectric:2.4') {

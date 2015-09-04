@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 apply plugin: 'com.android.library'
-apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
@@ -41,14 +40,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
-    }
-}
-
-robolectric {
-    include '**/*Test.class'
-    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-    afterTest {
-        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
     }
 }
 

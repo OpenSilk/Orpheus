@@ -16,7 +16,6 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
@@ -46,14 +45,6 @@ android {
 
     defaultPublishConfig "debug"
 
-}
-
-robolectric {
-    include '**/*Test.class'
-    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-    afterTest {
-        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
-    }
 }
 
 dependencies {

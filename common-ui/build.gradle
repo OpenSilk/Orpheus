@@ -16,7 +16,6 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'org.robolectric'
 
 // Versioning
 def versionMajor = 0
@@ -48,17 +47,10 @@ android {
 
 }
 
-robolectric {
-    include '**/*Test.class'
-    //jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-    afterTest {
-        descriptor, result -> println "Executing test for ${descriptor.name} with result: ${result.resultType}"
-    }
-}
-
 dependencies {
     provided(group: 'com.google.dagger', name:'dagger-compiler', version: rootProject.ext.dagger2Version)
     compile (group: 'com.android.support', name: 'recyclerview-v7', version: rootProject.ext.supportLibVersion)
+    compile (group: 'com.android.support', name: 'design', version: rootProject.ext.supportLibVersion)
     compile (group: 'com.jakewharton', name: 'butterknife', version: rootProject.ext.butterKnifeVersion)
     compile project(':common-core')
 }
