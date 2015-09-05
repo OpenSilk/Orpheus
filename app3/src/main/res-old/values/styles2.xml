@@ -181,12 +181,14 @@
 
     <!-- now playing buttons -->
 
+    <!--also in values-21-->
     <style name="nowPlayingActionDark">
         <item name="android:scaleType">centerInside</item>
         <item name="android:padding">@dimen/now_playing_button_padding</item>
         <item name="android:background">?android:selectableItemBackground</item>
     </style>
 
+    <!--also in values-21-->
     <style name="nowPlayingActionLight">
         <item name="android:scaleType">centerInside</item>
         <item name="android:padding">@dimen/now_playing_button_padding</item>
@@ -293,4 +295,30 @@
 
     <!-- end now playing buttons -->
 
+    <!-- footer buttons -->
+
+    <!--also in values-21-->
+    <style name="footerLight">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <!--also in values-21-->
+    <style name="footerDark">
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:background">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="footerLight.Play">
+        <item name="android:src">@drawable/action_playpause_black_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <style name="footerDark.Play">
+        <item name="fabColor">accent</item>
+        <item name="android:src">@drawable/action_playpause_white_36dp</item>
+        <item name="android:contentDescription">@string/accessibility_play</item>
+    </style>
+
+    <!-- end footer buttons -->
 </resources>

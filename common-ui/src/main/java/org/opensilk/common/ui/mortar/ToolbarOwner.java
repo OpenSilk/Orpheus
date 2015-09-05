@@ -17,68 +17,73 @@
 
 package org.opensilk.common.ui.mortar;
 
-import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
-import org.opensilk.common.core.dagger2.ScreenScope;
+import org.opensilk.common.core.dagger2.ActivityScope;
 
 import javax.inject.Inject;
 
 import mortar.Presenter;
 import mortar.bundler.BundleService;
+import timber.log.Timber;
 
 /** Allows shared configuration of the Android ActionBar. */
-//@ScreenScope
-public class ToolbarOwner extends Presenter<ToolbarOwnerScreen> {
+@ActivityScope
+public class ToolbarOwner extends Presenter<ToolbarOwnerActivity> {
 
-    private ActionBarConfig config;
+    private Toolbar toolbar;
 
     @Inject
     public ToolbarOwner() {
-        super();
     }
 
     @Override
-    protected BundleService extractBundleService(ToolbarOwnerScreen view) {
+    protected BundleService extractBundleService(ToolbarOwnerActivity view) {
         return BundleService.getBundleService(view.getScope());
     }
 
-    @Override public void onLoad(Bundle savedInstanceState) {
-        if (config != null) update();
+    public void attachToolbar(Toolbar toolbar) {
+        if (toolbar == null) {
+            throw new IllegalArgumentException("Toolbar may not be null");
+        }
+        if (this.toolbar != toolbar) {
+            if (this.toolbar != null) {
+                detachToolbar(this.toolbar);
+            }
+            this.toolbar = toolbar;
+            getView().setSupportActionBar(toolbar);
+            getView().onToolbarAttached(toolbar);
+        }
     }
 
-    @Override
-    protected void onExitScope() {
-        super.onExitScope();
-        config = null;
+    public void detachToolbar(Toolbar toolbar) {
+        if (toolbar == null) {
+            throw new IllegalArgumentException("Toolbar may not be null");
+        }
+        if (this.toolbar == toolbar) {
+            this.toolbar = null;
+//            getView().setSupportActionBar(null);
+            getView().onToolbarDetached(toolbar);
+        }
     }
 
     public void setConfig(ActionBarConfig config) {
-        this.config = config;
-        update();
-    }
-
-    public ActionBarConfig getConfig() {
-        return config;
-    }
-
-    private void update() {
-        ToolbarOwnerScreen view = getView();
         if (!hasView()) {
+            Timber.w("setConfig() called without view");
             return;
         }
-        view.setUpButtonEnabled(config.upButtonEnabled);
         if (config.titleRes >= 0) {
-            view.setTitle(config.titleRes);
+            toolbar.setTitle(config.titleRes);
         } else {
-            view.setTitle(config.title);
+            toolbar.setTitle(config.title);
         }
         if (config.subtitleRes >= 0) {
-            view.setSubtitle(config.subtitleRes);
+            toolbar.setSubtitle(config.subtitleRes);
         } else {
-            view.setSubtitle(config.subtitle);
+            toolbar.setSubtitle(config.subtitle);
         }
-        view.setMenu(config.menuConfig);
-        view.setTransparentActionbar(config.transparentBackground);
+        getView().setToolbarMenu(config.menuConfig);
     }
 
 }

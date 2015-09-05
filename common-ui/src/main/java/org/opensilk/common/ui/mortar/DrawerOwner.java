@@ -17,8 +17,6 @@
 package org.opensilk.common.ui.mortar;
 
 
-import android.support.v7.widget.Toolbar;
-
 import org.opensilk.common.core.dagger2.ActivityScope;
 
 import javax.inject.Inject;
@@ -64,18 +62,6 @@ public class DrawerOwner extends Presenter<DrawerOwnerActivity> {
         DrawerOwnerActivity v = getView();
         if (v == null) return;
         v.enableDrawer();
-    }
-
-    public void setToolbar(Toolbar toolbar) {
-        DrawerOwnerActivity v = getView();
-        if (v == null) return;
-        v.setToolbar(toolbar);
-    }
-
-    public void releaseToolbar() {
-        DrawerOwnerActivity v = getView();
-        if (v == null) return;
-        v.setToolbar(null);
     }
 
 }

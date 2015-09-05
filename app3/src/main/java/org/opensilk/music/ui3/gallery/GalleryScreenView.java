@@ -19,13 +19,17 @@ package org.opensilk.music.ui3.gallery;
 
 import android.content.Context;
 import android.os.Parcelable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.widget.SlidingTabLayout;
 import org.opensilk.music.R;
 
@@ -43,9 +47,14 @@ import timber.log.Timber;
 public class GalleryScreenView extends CoordinatorLayout {
 
     @Inject GalleryScreenPresenter mPresenter;
+    @Inject ToolbarOwner mToolbarOwner;
 
-    @InjectView(R.id.gallery_tab_bar) TabLayout mTabBar;
+    @InjectView(R.id.app_bar) AppBarLayout mAppBar;
+    @InjectView(R.id.toolbar) Toolbar mToolbar;
+    @InjectView(R.id.tab_bar) TabLayout mTabBar;
     @InjectView(R.id.pager) ViewPager mViewPager;
+    @InjectView(R.id.footer_playpause_btn) ImageView mFooterPlayBtn;
+
 
     public GalleryScreenView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,6 +67,8 @@ public class GalleryScreenView extends CoordinatorLayout {
         super.onFinishInflate();
         if (!isInEditMode()) {
             ButterKnife.inject(this);
+            mFooterPlayBtn.setVisibility(GONE);
+            mToolbarOwner.attachToolbar(mToolbar);
             mPresenter.takeView(this);
         }
     }
@@ -67,6 +78,7 @@ public class GalleryScreenView extends CoordinatorLayout {
         Timber.v("onDetachedFromWindow()");
         super.onDetachedFromWindow();
         if (!isInEditMode()) {
+            mToolbarOwner.detachToolbar(mToolbar);
             mPresenter.dropView(this);
         }
     }

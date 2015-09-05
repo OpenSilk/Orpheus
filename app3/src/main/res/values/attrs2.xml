@@ -18,5 +18,6 @@
         <attr name="carModeNextStyle" format="reference"/>
         <attr name="carModePrevStyle" format="reference"/>
         <attr name="mainContentTopMargin" format="reference"/>
+        <attr name="footerPlayStyle" format="reference"/>
     </declare-styleable>
 </resources>

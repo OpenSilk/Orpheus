@@ -35,4 +35,8 @@
             <enum name="black" value="2"/>
         </attr>
     </declare-styleable>
+    <declare-styleable name="AppBar">
+        <attr name="appBarTheme" format="reference"/>
+        <attr name="toolbarTheme" format="reference"/>
+    </declare-styleable>
 </resources>

@@ -19,11 +19,16 @@ package org.opensilk.music.ui3;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.core.util.VersionUtils;
 import org.opensilk.common.ui.mortar.ActivityResultsActivity;
 import org.opensilk.common.ui.mortar.ActivityResultsOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
+import org.opensilk.common.ui.mortar.ToolbarOwnerDelegate;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivity;
 import org.opensilk.common.ui.util.ThemeUtils;
 import org.opensilk.music.AppPreferences;
@@ -37,10 +42,14 @@ import mortar.MortarScope;
 /**
  * Created by drew on 5/1/15.
  */
-public abstract class MusicActivity extends MortarFragmentActivity implements ActivityResultsActivity {
+public abstract class MusicActivity extends MortarFragmentActivity
+        implements ActivityResultsActivity, ToolbarOwnerDelegate.Callback {
 
     @Inject protected ActivityResultsOwner mActivityResultsOwner;
     @Inject protected PlaybackController mPlaybackController;
+    @Inject protected ToolbarOwner mToolbarOwner;
+
+    protected ToolbarOwnerDelegate<MusicActivity> mToolbarOwnerDelegate;
 
     protected abstract void setupContentView();
     protected abstract void themeActivity(AppPreferences preferences);
@@ -57,12 +66,15 @@ public abstract class MusicActivity extends MortarFragmentActivity implements Ac
         setupContentView();
         mActivityResultsOwner.takeView(this);
         mPlaybackController.connect();
+        mToolbarOwnerDelegate = new ToolbarOwnerDelegate<MusicActivity>(this, mToolbarOwner, this);
+        mToolbarOwnerDelegate.onCreate();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mActivityResultsOwner.dropView(this);
+        mToolbarOwnerDelegate.onDestroy();
     }
 
     @Override
@@ -109,4 +121,27 @@ public abstract class MusicActivity extends MortarFragmentActivity implements Ac
         finish();
     }
 
+    /*
+     * Toolbar
+     */
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return mToolbarOwnerDelegate.onCreateOptionsMenu(menu) || super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mToolbarOwnerDelegate.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onToolbarAttached(Toolbar toolbar) {
+
+    }
+
+    @Override
+    public void onToolbarDetached(Toolbar toolbar) {
+
+    }
 }

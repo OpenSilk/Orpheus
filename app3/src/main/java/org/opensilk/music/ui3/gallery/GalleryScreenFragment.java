@@ -60,8 +60,4 @@ public class GalleryScreenFragment extends BundleableFragment {
         return new GalleryScreen(mLibraryConfig, mLibraryInfo, pages);
     }
 
-    @Override
-    protected void setupActionBar() {
-        //stub
-    }
 }

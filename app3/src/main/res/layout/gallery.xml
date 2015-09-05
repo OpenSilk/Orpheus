@@ -19,9 +19,31 @@
 <org.opensilk.music.ui3.gallery.GalleryScreenView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/pager_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="?appBarTheme">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            app:layout_scrollFlags="scroll|enterAlways"
+            style="?toolbarStyle"/>
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tab_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/GalleryTabs"/>
+
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
@@ -29,24 +51,24 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar"
+    <fragment
+        android:id="@+id/footer_fragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="@dimen/footer_height"
+        android:layout_gravity="bottom"
+        android:name="org.opensilk.music.ui3.main.FooterScreenFragment"
+        app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior"
+        tools:layout="@layout/screen_footer"/>
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/screen_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            app:layout_scrollFlags="scroll|enterAlways"
-            style="?toolbarStyle"/>
-
-        <android.support.design.widget.TabLayout
-            android:id="@+id/gallery_tab_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/GalleryTabs"/>
-
-    </android.support.design.widget.AppBarLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        app:layout_anchor="@id/footer_fragment"
+        app:layout_anchorGravity="top|right|end"
+        android:src="@drawable/ic_play_arrow_white_36dp"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:elevation="8dp"
+        app:layout_behavior="org.opensilk.music.ui3.main.FooterFabBehavior"/>
 
 </org.opensilk.music.ui3.gallery.GalleryScreenView>

@@ -20,6 +20,8 @@ package org.opensilk.music.ui3.gallery;
 import javax.inject.Scope;
 
 /**
+ * Intermediary scope between activity and screens
+ *
  * Created by drew on 5/5/15.
  */
 @Scope

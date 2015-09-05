@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<org.opensilk.music.ui3.profile.ProfilePortraitView2
+<org.opensilk.music.ui3.profile.ProfileView2Portrait
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -28,7 +28,7 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:theme="?appBarTheme"
         android:fitsSystemWindows="true">
 
         <android.support.design.widget.CollapsingToolbarLayout
@@ -45,8 +45,9 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:layout_collapseMode="pin"/>
+                app:layout_collapseMode="pin"
+                android:background="@null"
+                style="?toolbarStyle"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -59,14 +60,14 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         style="@style/mtrl.List"/>
 
-    <LinearLayout
+    <fragment
+        android:id="@+id/footer_fragment"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:background="?colorPrimary"
+        android:layout_height="@dimen/footer_height"
+        android:layout_gravity="bottom"
+        android:name="org.opensilk.music.ui3.main.FooterScreenFragment"
         app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior"
-        android:layout_gravity="bottom">
-
-    </LinearLayout>
+        tools:layout="@layout/screen_footer"/>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_height="wrap_content"
@@ -76,6 +77,6 @@
         android:src="@drawable/ic_play_arrow_white_36dp"
         android:layout_margin="16dp"
         android:clickable="true"
-        android:elevation="2dp"/>
+        android:elevation="8dp"/>
 
-</org.opensilk.music.ui3.profile.ProfilePortraitView2>
+</org.opensilk.music.ui3.profile.ProfileView2Portrait>

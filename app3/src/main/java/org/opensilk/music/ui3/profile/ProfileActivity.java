@@ -20,6 +20,7 @@ package org.opensilk.music.ui3.profile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
@@ -76,4 +77,12 @@ public class ProfileActivity extends MusicActivity {
         mFragmentManagerOwner.replaceMainContent(screen.getFragment(this), false);
     }
 
+    /*
+     * Toolbar
+     */
+
+    @Override
+    public void onToolbarAttached(Toolbar toolbar) {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 }

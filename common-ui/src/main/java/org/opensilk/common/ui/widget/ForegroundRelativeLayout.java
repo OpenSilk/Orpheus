@@ -29,11 +29,12 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import org.opensilk.common.ui.R;
 
 
-public class ForegroundLinearLayout extends LinearLayout {
+public class ForegroundRelativeLayout extends RelativeLayout {
 
     private Drawable mForeground;
 
@@ -46,15 +47,15 @@ public class ForegroundLinearLayout extends LinearLayout {
 
     boolean mForegroundBoundsChanged = false;
 
-    public ForegroundLinearLayout(Context context) {
+    public ForegroundRelativeLayout(Context context) {
         super(context);
     }
 
-    public ForegroundLinearLayout(Context context, AttributeSet attrs) {
+    public ForegroundRelativeLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ForegroundLinearLayout(Context context, AttributeSet attrs, int defStyle) {
+    public ForegroundRelativeLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
 

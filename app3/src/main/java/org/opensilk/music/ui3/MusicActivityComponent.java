@@ -21,6 +21,7 @@ import android.content.Context;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.mortarfragment.MortarFragmentActivityComponent;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
@@ -39,4 +40,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     ArtworkRequestManager artworkRequestor();
     PlaybackController playbackController();
     MainPresenter mainPresenter();
+    ToolbarOwner toolbarOwner();
 }

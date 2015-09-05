@@ -17,23 +17,19 @@
 
 package org.opensilk.common.ui.mortar;
 
+import android.support.v7.widget.Toolbar;
+
 import org.opensilk.common.core.mortar.HasScope;
 
 /**
  * Created by drew on 4/30/15.
  */
-public interface ToolbarOwnerScreen extends HasScope {
-    void setUpButtonEnabled(boolean enabled);
+public interface ToolbarOwnerActivity extends HasScope {
+    void setSupportActionBar(Toolbar toolbar);
 
-    void setTitle(int titleRes);
+    void setToolbarMenu(ActionBarMenuConfig menuConfig);
 
-    void setTitle(CharSequence title);
+    void onToolbarAttached(Toolbar toolbar);
 
-    void setSubtitle(int subTitleRes);
-
-    void setSubtitle(CharSequence title);
-
-    void setMenu(ActionBarMenuConfig menuConfig);
-
-    void setTransparentActionbar(boolean yes);
+    void onToolbarDetached(Toolbar toolbar);
 }

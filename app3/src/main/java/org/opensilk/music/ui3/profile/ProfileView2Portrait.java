@@ -33,6 +33,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.opensilk.common.core.mortar.DaggerService;
+import org.opensilk.common.ui.mortar.ActionBarConfig;
+import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.ToolbarOwner;
 import org.opensilk.common.ui.util.ViewUtils;
 import org.opensilk.music.R;
 import org.opensilk.music.ui3.common.BundleableComponent;
@@ -50,20 +53,20 @@ import butterknife.InjectView;
 /**
  * Created by drew on 9/3/15.
  */
-public class ProfilePortraitView2 extends CoordinatorLayout implements BundleableRecyclerView2 {
+public class ProfileView2Portrait extends CoordinatorLayout implements BundleableRecyclerView2 {
 
     @Inject @Named("profile_heros") Boolean wantMultiHeros;
     @Inject @Named("profile_title") String mTitleText;
     @Inject @Named("profile_subtitle") String mSubTitleText;
     @Inject protected BundleablePresenter mPresenter;
     @Inject protected BundleableRecyclerAdapter mAdapter;
+    @Inject ToolbarOwner mToolbarOwner;
 
     @InjectView(R.id.toolbar) Toolbar mToolbar;
-//    @InjectView(R.id.backdrop) ImageView mBackdrop;
     @InjectView(R.id.collapsing_toolbar) CollapsingToolbarLayout mCollapsingToolbar;
     @InjectView(R.id.recyclerview) RecyclerView mList;
 
-    public ProfilePortraitView2(Context context, AttributeSet attrs) {
+    public ProfileView2Portrait(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (!isInEditMode()) {
             ProfileComponent component = DaggerService.getDaggerComponent(getContext());
@@ -75,19 +78,24 @@ public class ProfilePortraitView2 extends CoordinatorLayout implements Bundleabl
     protected void onFinishInflate() {
         super.onFinishInflate();
         ButterKnife.inject(this);
-        int headerlayout = wantMultiHeros ? R.layout.profile_hero4 : R.layout.profile_view2_hero;
-//        ViewUtils.inflate(getContext(), headerlayout, mCollapsingToolbar);
-//        mToolbar.bringToFront();
-        View hero = ViewUtils.inflate(getContext(), headerlayout, null);
-        mCollapsingToolbar.addView(hero, 0);
+        int headerlayout = wantMultiHeros ? R.layout.profile_view2_hero_multi : R.layout.profile_view2_hero;
+        ViewUtils.inflate(getContext(), headerlayout, mCollapsingToolbar);
+        mCollapsingToolbar.bringChildToFront(mToolbar);
+//        View hero = ViewUtils.inflate(getContext(), headerlayout, null);
+//        mCollapsingToolbar.addView(hero, 0);
         mCollapsingToolbar.setTitle(mTitleText);
         initRecyclerView();
-        mPresenter.takeView(this);
+        if (!isInEditMode()) {
+            mToolbarOwner.attachToolbar(mToolbar);
+            mToolbarOwner.setConfig(ActionBarConfig.builder().setMenuConfig(mPresenter.getMenuConfig()).build());
+            mPresenter.takeView(this);
+        }
     }
 
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        mToolbarOwner.detachToolbar(mToolbar);
         mPresenter.dropView(this);
     }
 

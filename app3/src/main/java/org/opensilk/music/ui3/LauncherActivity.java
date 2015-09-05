@@ -180,17 +180,30 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
         if (mDrawerLayout != null) mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, mNavigation);
     }
 
+    /*
+     * Toolbar
+     */
+
     @Override
-    public void setToolbar(Toolbar toolbar) {
-        if (mDrawerLayout != null) {
-            mDrawerToggle = new Toggle(this, mDrawerLayout, toolbar);
-            mDrawerLayout.setDrawerListener(mDrawerToggle);
-        }
+    public void onToolbarAttached(Toolbar toolbar) {
+        setToolbar(toolbar);
+    }
+
+    @Override
+    public void onToolbarDetached(Toolbar toolbar) {
+        setToolbar(null);
     }
 
     /*
      * drawer helpers
      */
+
+    private void setToolbar(Toolbar toolbar) {
+        if (mDrawerLayout != null) {
+            mDrawerToggle = new Toggle(this, mDrawerLayout, toolbar);
+            mDrawerLayout.setDrawerListener(mDrawerToggle);
+        }
+    }
 
     private boolean isDrawerOpen() {
         return mNavigation != null && mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mNavigation);

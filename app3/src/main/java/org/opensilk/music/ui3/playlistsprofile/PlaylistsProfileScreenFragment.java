@@ -48,18 +48,4 @@ public class PlaylistsProfileScreenFragment extends BundleableFragment {
         return getArguments().<PlaylistsProfileScreen>getParcelable("screen");
     }
 
-    @Override
-    protected void setupActionBar() {
-        PlaylistsProfileScreen s = (PlaylistsProfileScreen) getScreen();
-        MusicActivityComponent component = DaggerService.getDaggerComponent(getActivity());
-//        ToolbarOwner toolbarOwner = component.actionBarOwner();
-//        TracksDragSwipeComponent component1 = DaggerService.getDaggerComponent(getScope());
-//        TracksDragSwipePresenter presenter = component1.presenter();
-//        toolbarOwner.setConfig(toolbarOwner.getConfig().buildUpon()
-//                .clearTitle()
-//                .setTitle(s.playlist.name)
-//                .setSubtitle(UtilsCommon.makeLabel(getActivity(),
-//                        R.plurals.Nsongs, s.playlist.trackUris.size()))
-//                .setMenuConfig(presenter.getMenuConfig()).build());
-    }
 }
