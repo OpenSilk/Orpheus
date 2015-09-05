@@ -11,6 +11,7 @@
 
 package org.opensilk.music.playback;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -20,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.session.MediaSession;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.widget.RemoteViews;
@@ -170,6 +172,7 @@ public class NotificationHelper {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void buildNotificationInternal() {
         if (mCurrentInfo.hasAnyNull() || mService == null) {
             return;
@@ -371,11 +374,7 @@ public class NotificationHelper {
     }
 
     private int getPlayPauseIcon(boolean isPlaying) {
-        if (VersionUtils.hasLollipop()) {
-            return isPlaying ? R.drawable.ic_pause_black_36dp : R.drawable.ic_play_arrow_black_36dp;
-        } else {
-            return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
-        }
+        return isPlaying ? R.drawable.ic_pause_white_36dp : R.drawable.ic_play_arrow_white_36dp;
     }
 
 }

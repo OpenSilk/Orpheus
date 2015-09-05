@@ -54,13 +54,13 @@ public class PlaybackQueueTest {
         when(mSettings.getInt(PlaybackPreferences.CURRENT_POS, 0)).thenReturn(5);
         mMetaHelper = mock(MediaMetadataHelper.class);
         for (int ii=0; ii<20; ii++) {
-            when(mMetaHelper.buildQueueItem(Uri.parse("content://someauthority1/lib1/id"+ii), ii))
-                    .thenReturn(new MediaSessionCompat.QueueItem(
-                            new MediaDescriptionCompat.Builder()
-                                .setTitle("title"+ii)
-                            .setSubtitle("subtitle" + ii)
-                            .setMediaId(Uri.parse("content://someauthority1/lib1/id" + ii).toString())
-                            .build(), ii));
+//            when(mMetaHelper.buildQueueItem(Uri.parse("content://someauthority1/lib1/id"+ii), ii))
+//                    .thenReturn(new MediaSessionCompat.QueueItem(
+//                            new MediaDescriptionCompat.Builder()
+//                                .setTitle("title"+ii)
+//                            .setSubtitle("subtitle" + ii)
+//                            .setMediaId(Uri.parse("content://someauthority1/lib1/id" + ii).toString())
+//                            .build(), ii));
         }
         mPlaybackQueue = new PlaybackQueue(mSettings, mMetaHelper);
         mPlaybackQueue.load();
