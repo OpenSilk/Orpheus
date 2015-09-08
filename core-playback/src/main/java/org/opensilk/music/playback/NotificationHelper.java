@@ -182,7 +182,7 @@ public class NotificationHelper {
                 R.layout.notification_template_base);
 
         // Set up the content view
-        initCollapsedLayout(mCurrentInfo.track.name,
+        initCollapsedLayout(mCurrentInfo.track.getDisplayName(),
                 mCurrentInfo.track.artistName, mCurrentInfo.bitmap);
 
         // Notification Builder
@@ -204,7 +204,7 @@ public class NotificationHelper {
             // Control playback from the notification
             initExpandedPlaybackActions(mCurrentInfo.isPlaying);
             // Set up the expanded content view
-            initExpandedLayout(mCurrentInfo.track.name, mCurrentInfo.track.albumName,
+            initExpandedLayout(mCurrentInfo.track.getDisplayName(), mCurrentInfo.track.albumName,
                     mCurrentInfo.track.artistName, mCurrentInfo.bitmap);
         }
 

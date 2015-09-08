@@ -150,8 +150,8 @@ public class MediaMetadataHelper {
         final Uri artUri = currentInfo.artUri;
         final long duration = mediaSession.getController().getPlaybackState().getBufferedPosition();
         MediaMetadataCompat m = new MediaMetadataCompat.Builder()
-                .putString(METADATA_KEY_TITLE, t.name)
-                .putString(METADATA_KEY_DISPLAY_TITLE, t.name)
+                .putString(METADATA_KEY_TITLE, t.getDisplayName())
+                .putString(METADATA_KEY_DISPLAY_TITLE, t.getDisplayName())
                 .putString(METADATA_KEY_ARTIST, t.artistName)
                 .putString(METADATA_KEY_DISPLAY_SUBTITLE, t.artistName)
                 //.putString(METADATA_KEY_DISPLAY_DESCRIPTION, TODO)
@@ -181,7 +181,7 @@ public class MediaMetadataHelper {
         ArtInfo artInfo = UtilsArt.makeBestfitArtInfo(track.albumArtistName,
                 track.artistName, track.albumName, track.artworkUri);
         MediaDescription desc = new MediaDescription.Builder()
-                .setTitle(track.name)
+                .setTitle(track.getDisplayName())
                 .setSubtitle(track.artistName)
                 .setMediaId(uri.toString())
                 .setExtras(BundleHelper.builder().putParcleable(artInfo).get())
