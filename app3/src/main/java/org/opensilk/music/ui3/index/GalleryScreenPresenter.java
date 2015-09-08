@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
@@ -41,7 +42,7 @@ import rx.functions.Func2;
 /**
  * Created by drew on 4/20/15.
  */
-@GalleryScreenScope
+@ScreenScope
 public class GalleryScreenPresenter extends ViewPresenter<GalleryScreenView> {
 
     final AppPreferences preferences;

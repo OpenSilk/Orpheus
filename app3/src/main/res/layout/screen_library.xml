@@ -44,19 +44,19 @@
       android:layout_height="match_parent"
       app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-  <fragment
-      android:id="@+id/library_footer_fragment"
-      android:layout_width="match_parent"
-      android:layout_height="@dimen/footer_height"
-      android:layout_gravity="bottom"
-      android:name="org.opensilk.music.ui3.main.FooterScreenFragment"
-      app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior"
-      tools:layout="@layout/screen_footer"/>
+    <include
+        android:id="@+id/footer_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/footer_height"
+        android:layout_gravity="bottom"
+        android:name="org.opensilk.music.ui3.main.FooterScreenFragment"
+        app:layout_behavior="org.opensilk.common.ui.behavior.QuickReturnFooterBehavior"
+        layout="@layout/screen_footer"/>
 
   <android.support.design.widget.FloatingActionButton
       android:layout_height="wrap_content"
       android:layout_width="wrap_content"
-      app:layout_anchor="@id/library_footer_fragment"
+      app:layout_anchor="@id/footer_fragment"
       app:layout_anchorGravity="top|right|end"
       android:src="@drawable/ic_play_arrow_white_36dp"
       android:layout_margin="16dp"

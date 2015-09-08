@@ -17,7 +17,9 @@
 
 package org.opensilk.music.ui3.index;
 
+import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.music.ui3.MusicActivityComponent;
+import org.opensilk.music.ui3.main.FooterScreenComponent;
 
 import dagger.Component;
 import rx.functions.Func2;
@@ -25,12 +27,12 @@ import rx.functions.Func2;
 /**
  * Created by drew on 5/5/15.
  */
-@GalleryScreenScope
+@ScreenScope
 @Component(
         dependencies = MusicActivityComponent.class,
         modules = GalleryScreenModule.class
 )
-public interface GalleryScreenComponent extends MusicActivityComponent {
+public interface GalleryScreenComponent extends MusicActivityComponent, FooterScreenComponent {
     Func2<MusicActivityComponent, GalleryScreen, GalleryScreenComponent> FACTORY =
             new Func2<MusicActivityComponent, GalleryScreen, GalleryScreenComponent>() {
                 @Override
