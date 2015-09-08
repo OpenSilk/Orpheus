@@ -29,7 +29,7 @@ import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui.theme.OrpheusTheme;
-import org.opensilk.music.ui3.gallery.GalleryPage;
+import org.opensilk.music.ui3.index.GalleryPage;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -48,6 +48,8 @@ import timber.log.Timber;
  */
 @Singleton
 public class AppPreferences extends PreferencesWrapper {
+
+    public static final String KEY_INDEX = "index";
 
     private static final String VERSION = "__version__";
     private static final int MY_VERSION = 301;
@@ -317,7 +319,11 @@ public class AppPreferences extends PreferencesWrapper {
     }
 
     public String makePluginPrefKey(LibraryConfig libraryConfig, String key) {
-        return libraryConfig.authority+"."+key;
+        return makePrefKey(libraryConfig.authority, key);
+    }
+
+    public String makePrefKey(String root, String key) {
+        return root + "." + key;
     }
 
     /*

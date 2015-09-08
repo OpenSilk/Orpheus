@@ -19,7 +19,6 @@ package org.opensilk.music.ui3.common;
 
 import org.opensilk.common.ui.mortar.Screen;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 
 /**
  * Created by drew on 5/5/15.
@@ -27,11 +26,9 @@ import org.opensilk.music.library.LibraryInfo;
 public class BundleableScreen extends Screen {
 
     public final LibraryConfig libraryConfig;
-    public final LibraryInfo libraryInfo;
 
-    public BundleableScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
+    public BundleableScreen(LibraryConfig libraryConfig) {
         this.libraryConfig = libraryConfig;
-        this.libraryInfo = libraryInfo;
     }
 
     @Override

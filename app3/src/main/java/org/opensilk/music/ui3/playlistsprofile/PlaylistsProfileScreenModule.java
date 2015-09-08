@@ -21,7 +21,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.widget.PopupMenu;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.R;
@@ -29,25 +28,17 @@ import org.opensilk.music.library.LibraryConfig;
 import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.TrackSortOrder;
-import org.opensilk.music.model.ArtInfo;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
-import org.opensilk.music.ui3.common.BundleablePresenter;
-import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.OverflowHandler;
-import org.opensilk.music.ui3.dragswipe.DragSwipeRecyclerAdapter;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
-import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
-import org.opensilk.music.ui3.common.UtilsCommon;
 import org.opensilk.music.ui3.dragswipe.TrackDragSwipeEventListener;
 import org.opensilk.music.ui3.dragswipe.TrackItemClickListener;
 import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenter;
 import org.opensilk.music.ui3.dragswipe.TracksDragSwipePresenterConfig;
-
-import java.util.List;
 
 import javax.inject.Named;
 
@@ -71,15 +62,9 @@ public class PlaylistsProfileScreenModule {
         return screen.libraryConfig;
     }
 
-    @Provides
-    public LibraryInfo provideLibraryInfo() {
-        return screen.libraryInfo;
-    }
-
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return LibraryUris.playlistTracks(screen.libraryConfig.authority,
-                screen.libraryInfo.libraryId, screen.libraryInfo.folderId);
+        return Uri.EMPTY;
     }
 
     @Provides @Named("loader_sortorder")

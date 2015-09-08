@@ -21,7 +21,6 @@ import android.os.Bundle;
 
 import org.opensilk.common.ui.mortarfragment.MortarFragment;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 
 /**
  * Created by drew on 5/5/15.
@@ -29,24 +28,21 @@ import org.opensilk.music.library.LibraryInfo;
 public abstract class BundleableFragment extends MortarFragment {
 
     protected LibraryConfig mLibraryConfig;
-    protected LibraryInfo mLibraryInfo;
     protected String mTitle;
 
-    protected static Bundle makeCommonArgsBundle(LibraryConfig config, LibraryInfo info, String title) {
-        return makeCommonArgsBundle(config.dematerialize(), info, title);
+    protected static Bundle makeCommonArgsBundle(LibraryConfig config, String title) {
+        return makeCommonArgsBundle(config.dematerialize(), title);
     }
 
-    protected static Bundle makeCommonArgsBundle(Bundle config, LibraryInfo info, String title) {
+    protected static Bundle makeCommonArgsBundle(Bundle config, String title) {
         Bundle b = new Bundle();
         b.putBundle("config", config);
-        b.putParcelable("info", info);
         b.putString("title", title);
         return b;
     }
 
     protected void extractCommonArgs() {
         mLibraryConfig = LibraryConfig.materialize(getArguments().getBundle("config"));
-        mLibraryInfo = getArguments().getParcelable("info");
     }
 
 }

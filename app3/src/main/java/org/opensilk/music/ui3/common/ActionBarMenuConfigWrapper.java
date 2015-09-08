@@ -20,29 +20,20 @@ package org.opensilk.music.ui3.common;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.text.TextUtils;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.common.ui.mortar.ActivityResultsActivity;
 import org.opensilk.common.ui.mortar.ActivityResultsController;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryConstants;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.library.provider.LibraryUris;
-import org.opensilk.music.playback.control.PlaybackController;
-import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.library.LandingScreenFragment;
 
 import javax.inject.Inject;
 
-import mortar.MortarScope;
 import rx.functions.Func2;
 
 /**
@@ -52,7 +43,6 @@ import rx.functions.Func2;
 public class ActionBarMenuConfigWrapper {
 
     final LibraryConfig libraryConfig;
-    final LibraryInfo libraryInfo;
     final FragmentManagerOwner fm;
     final AppPreferences settings;
     final ActivityResultsController activityResultsController;
@@ -60,13 +50,11 @@ public class ActionBarMenuConfigWrapper {
     @Inject
     public ActionBarMenuConfigWrapper(
             LibraryConfig libraryConfig,
-            LibraryInfo libraryInfo,
             FragmentManagerOwner fm,
             AppPreferences settings,
             ActivityResultsController activityResultsController
     ) {
         this.libraryConfig = libraryConfig;
-        this.libraryInfo = libraryInfo;
         this.fm = fm;
         this.settings = settings;
         this.activityResultsController = activityResultsController;
@@ -75,17 +63,17 @@ public class ActionBarMenuConfigWrapper {
     public ActionBarMenuConfig injectCommonItems(ActionBarMenuConfig originalConfig) {
         ActionBarMenuConfig.Builder builder = ActionBarMenuConfig.builder();
 
-        if (originalConfig != null && originalConfig.menus != null && originalConfig.menus.length > 0) {
-            builder.withMenus(originalConfig.menus);
+        if (originalConfig != null && originalConfig.getMenus() != null && originalConfig.getMenus().length > 0) {
+            builder.withMenus(originalConfig.getCustomMenus());
         }
-        if (originalConfig != null && originalConfig.customMenus != null && originalConfig.customMenus.length > 0) {
-            builder.withMenus(originalConfig.customMenus);
+        if (originalConfig != null && originalConfig.getCustomMenus() != null && originalConfig.getCustomMenus().length > 0) {
+            builder.withMenus(originalConfig.getCustomMenus());
         }
 
         applyCommonItems(builder);
 
         Func2<Context, Integer, Boolean> wrappedHandler =
-                originalConfig != null ? originalConfig.actionHandler : null;
+                originalConfig != null ? originalConfig.getActionHandler() : null;
 
         return builder.setActionHandler(getDelegateHandler(wrappedHandler)).build();
     }
@@ -128,10 +116,7 @@ public class ActionBarMenuConfigWrapper {
                             handled = true;
                             break;
                         case R.id.menu_library_settings:
-                            Intent intent = new Intent()
-                                    .setComponent(libraryConfig.<ComponentName>getMeta(LibraryConfig.META_SETTINGS_COMPONENT))
-                                    .putExtra(LibraryConstants.EXTRA_LIBRARY_ID, libraryInfo.libraryId)
-                                    .putExtra(LibraryConstants.EXTRA_LIBRARY_INFO, libraryInfo);
+                            Intent intent = new Intent().setComponent(libraryConfig.<ComponentName>getMeta(LibraryConfig.META_SETTINGS_COMPONENT));
                             activityResultsController.startActivityForResult(intent, ActivityRequestCodes.LIBRARY_SETTINGS, null);
                             handled = true;
                             break;

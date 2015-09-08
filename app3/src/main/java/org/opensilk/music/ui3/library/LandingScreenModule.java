@@ -18,9 +18,6 @@
 package org.opensilk.music.ui3.library;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
-import org.opensilk.common.ui.mortar.ActionBarConfig;
-import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 
 import dagger.Module;
 import dagger.Provides;

@@ -27,6 +27,7 @@ import org.opensilk.music.model.Artist;
 import org.opensilk.music.model.Folder;
 import org.opensilk.music.model.Playlist;
 import org.opensilk.music.model.Track;
+import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,32 +51,23 @@ public class DeleteRequest implements Parcelable {
     }
 
     public static DeleteRequest forAlbum(String authority, String libraryId, Album album) {
-        Uri uri = LibraryUris.albumTracks(authority, libraryId, album.identity);
-        Uri notifyUri = LibraryUris.albums(authority, libraryId);
-        return new DeleteRequest(album.name, uri, null, null, notifyUri);
+        return new DeleteRequest(album.getDisplayName(), album.getUri(), null, null, album.getParentUri());
     }
 
     public static DeleteRequest forArtist(String authority, String libraryId, Artist artist) {
-        Uri uri = LibraryUris.artistTracks(authority, libraryId, artist.identity);
-        Uri notifyUri = LibraryUris.artists(authority, libraryId);
-        return new DeleteRequest(artist.name, uri, null, null, notifyUri);
+        return new DeleteRequest(artist.getDisplayName(), artist.getUri(), null, null, artist.getParentUri());
     }
 
     public static DeleteRequest forFolder(String authority, String libraryId, Folder folder) {
-        Uri uri = LibraryUris.folders(authority, libraryId, folder.identity);
-        Uri notifyUri = LibraryUris.folders(authority, libraryId, folder.parentIdentity);
-        return new DeleteRequest(folder.name, null, uri, null, notifyUri);
+        return new DeleteRequest(folder.getDisplayName(), null, folder.getUri(), null, folder.getParentUri());
     }
 
     public static DeleteRequest forPlaylist(String authority, String libraryId, Playlist playlist) {
-        Uri uri = LibraryUris.playlist(authority, libraryId, playlist.identity);
-        Uri notifyUri = LibraryUris.playlists(authority, libraryId);
-        return new DeleteRequest(playlist.name, null, uri, null, notifyUri);
+        return new DeleteRequest(playlist.getDisplayName(), null, playlist.getUri(), null, playlist.getParentUri());
     }
 
     public static DeleteRequest forTrack(String authority, String libraryId, Track track, Uri notifyUri) {
-        Uri uri = LibraryUris.track(authority, libraryId, track.identity);
-        return new DeleteRequest(track.name, null, null, Collections.singletonList(uri), notifyUri);
+        return new DeleteRequest(track.getDisplayName(), null, null, Collections.singletonList(track.getUri()), notifyUri);
     }
 
     @Override

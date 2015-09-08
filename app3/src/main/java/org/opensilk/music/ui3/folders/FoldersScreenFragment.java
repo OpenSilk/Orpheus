@@ -27,6 +27,7 @@ import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryExtras;
 import org.opensilk.music.library.provider.LibraryMethods;
 import org.opensilk.music.library.provider.LibraryUris;
+import org.opensilk.music.model.Folder;
 import org.opensilk.music.ui3.common.BundleableFragment;
 
 /**
@@ -35,24 +36,26 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class FoldersScreenFragment extends BundleableFragment {
     public static final String NAME = FoldersScreenFragment.class.getName();
 
-    public static FoldersScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
-        if (info.folderId == null) {
-            final Uri uri = LibraryUris.call(config.authority, info.libraryId);
-            Bundle reply = context.getContentResolver()
-                    .call(uri, LibraryMethods.DEFAULTFOLDER, null, LibraryExtras.b().putUri(uri).get());
-            if (LibraryExtras.getOk(reply)) {
-                LibraryInfo libraryInfo = LibraryExtras.getLibraryInfo(reply);
-                info = info.buildUpon(libraryInfo.folderId, libraryInfo.folderName);
-            }
-        }
-        Bundle args = makeCommonArgsBundle(config, info, info.folderName);
+    public static FoldersScreenFragment ni(Context context, LibraryConfig config, Folder folder) {
+//        if (info.folderId == null) {
+//            final Uri uri = LibraryUris.call(config.authority, info.libraryId);
+//            Bundle reply = context.getContentResolver()
+//                    .call(uri, LibraryMethods.DEFAULTFOLDER, null, LibraryExtras.b().putUri(uri).get());
+//            if (LibraryExtras.getOk(reply)) {
+//                LibraryInfo libraryInfo = LibraryExtras.getLibraryInfo(reply);
+//                info = info.buildUpon(libraryInfo.folderId, libraryInfo.folderName);
+//            }
+//        }
+        Bundle args = makeCommonArgsBundle(config, folder.getDisplayName());
+        args.putBundle("fldr", folder.toBundle());
         return factory(context, NAME, args);
     }
 
     @Override
     protected Screen newScreen() {
         extractCommonArgs();
-        return new FoldersScreen(mLibraryConfig, mLibraryInfo);
+        Folder folder = Folder.BUNDLE_CREATOR.fromBundle(getArguments().getBundle("fldr"));
+        return new FoldersScreen(mLibraryConfig, folder);
     }
 
 }

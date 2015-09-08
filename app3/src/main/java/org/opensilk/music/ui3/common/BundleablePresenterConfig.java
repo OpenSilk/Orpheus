@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.common;
 
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.music.model.spi.Bundleable;
 
 import java.util.ArrayList;
@@ -31,14 +32,14 @@ public class BundleablePresenterConfig {
     public final boolean wantsGrid;
     public final ItemClickListener itemClickListener;
     public final OverflowClickListener overflowClickListener;
-    public final ActionBarMenuConfig menuConfig;
+    public final ActionBarMenuHandler menuConfig;
     public final List<Bundleable> loaderSeed;
 
     public BundleablePresenterConfig(
             boolean wantsGrid,
             ItemClickListener itemClickListener,
             OverflowClickListener overflowClickListener,
-            ActionBarMenuConfig menuConfig,
+            ActionBarMenuHandler menuConfig,
             List<Bundleable> loaderSeed
     ) {
         this.wantsGrid = wantsGrid;

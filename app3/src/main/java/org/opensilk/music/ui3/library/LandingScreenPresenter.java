@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 
 import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
@@ -33,19 +32,11 @@ import org.opensilk.common.ui.mortar.ActivityResultsListener;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryCapability;
-import org.opensilk.music.library.LibraryConstants;
-import org.opensilk.music.library.LibraryInfo;
-import org.opensilk.music.ui3.albums.AlbumsScreenFragment;
-import org.opensilk.music.ui3.artists.ArtistsScreenFragment;
 import org.opensilk.music.ui3.common.ActionBarMenuConfigWrapper;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
-import org.opensilk.music.ui3.folders.FoldersScreenFragment;
-import org.opensilk.music.ui3.gallery.GalleryPage;
-import org.opensilk.music.ui3.gallery.GalleryScreenFragment;
-import org.opensilk.music.ui3.genres.GenresScreenFragment;
+import org.opensilk.music.ui3.index.GalleryPage;
+import org.opensilk.music.ui3.index.GalleryScreenFragment;
 import org.opensilk.music.ui3.library.LandingScreenViewAdapter.ViewItem;
-import org.opensilk.music.ui3.playlists.PlaylistsScreenFragment;
-import org.opensilk.music.ui3.tracks.TracksScreenFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +61,6 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     final Context appContext;
     final ToolbarOwner toolbarOwner;
 
-    LibraryInfo currentSelection;
     int lastval;
 
     @Inject
@@ -100,37 +90,32 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     @DebugLog
     protected void onLoad(Bundle savedInstanceState) {
         super.onLoad(savedInstanceState);
-        if (savedInstanceState != null) {
-            savedInstanceState.setClassLoader(getClass().getClassLoader());
-            currentSelection = savedInstanceState.getParcelable("selection");
-            lastval = savedInstanceState.getInt("lastval");
-        }
-        if (currentSelection == null) {
-            currentSelection = settings.getLibraryInfo(screen.libraryConfig, AppPreferences.DEFAULT_LIBRARY);
-        }
-        if (currentSelection == null) {
-            lastval = 0;
-            Intent i = new Intent().setComponent(screen.libraryConfig.pickerComponent);
-            activityResultsController.startActivityForResult(i, ActivityRequestCodes.LIBRARY_PICKER, null);
-        } else {
-            createCategories();
-        }
+//        if (savedInstanceState != null) {
+//            savedInstanceState.setClassLoader(getClass().getClassLoader());
+//            currentSelection = savedInstanceState.getParcelable("selection");
+//            lastval = savedInstanceState.getInt("lastval");
+//        }
+//        if (currentSelection == null) {
+//            currentSelection = settings.getLibraryInfo(screen.libraryConfig, AppPreferences.DEFAULT_LIBRARY);
+//        }
+//        if (currentSelection == null) {
+//            lastval = 0;
+//            Intent i = new Intent().setComponent(screen.libraryConfig.pickerComponent);
+//            activityResultsController.startActivityForResult(i, ActivityRequestCodes.LIBRARY_PICKER, null);
+//        } else {
+//            createCategories();
+//        }
         updateActionBar();
     }
 
     @Override
     protected void onSave(Bundle outState) {
         super.onSave(outState);
-        outState.putParcelable("selection", currentSelection);
+//        outState.putParcelable("selection", currentSelection);
         outState.putInt("lastval", lastval);
     }
 
     void createCategories() {
-        if (screen.libraryConfig.hasAbility(LibraryCapability.GALLERY)) {
-            openGallery(false);
-            return;
-        }
-
         List<ViewItem> items = new ArrayList<>();
         if (screen.libraryConfig.hasAbility(LibraryCapability.FOLDERSTRACKS)) {
             items.add(ViewItem.FOLDERS);
@@ -171,22 +156,22 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
         switch (requestCode) {
             case ActivityRequestCodes.LIBRARY_PICKER:
                 if (resultCode == Activity.RESULT_OK) {
-                    currentSelection = data.getParcelableExtra(LibraryConstants.EXTRA_LIBRARY_INFO);
-                    if (currentSelection == null) {
-                        Timber.e("Library chooser should set EXTRA_LIBRARY_INFO");
-                        String id = data.getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
-                        if (TextUtils.isEmpty(id)) {
-                            Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
-                            //TODO show error
-                            return true;
-                        }
-                        currentSelection = new LibraryInfo(id, null, null, null);
-                    }
-                    if (currentSelection.folderId != null || currentSelection.folderName != null) {
-                        Timber.w("Please stop setting folderId and folderName in the returned LibraryInfo");
-                        currentSelection = currentSelection.buildUpon(null, null);
-                    }
-                    settings.setLibraryInfo(screen.libraryConfig, AppPreferences.DEFAULT_LIBRARY, currentSelection);
+//                    currentSelection = data.getParcelableExtra(LibraryConstants.EXTRA_LIBRARY_INFO);
+//                    if (currentSelection == null) {
+//                        Timber.e("Library chooser should set EXTRA_LIBRARY_INFO");
+//                        String id = data.getStringExtra(LibraryConstants.EXTRA_LIBRARY_ID);
+//                        if (TextUtils.isEmpty(id)) {
+//                            Timber.e("Library chooser must set EXTRA_LIBRARY_ID");
+//                            //TODO show error
+//                            return true;
+//                        }
+//                        currentSelection = new LibraryInfo(id, null, null, null);
+//                    }
+//                    if (currentSelection.folderId != null || currentSelection.folderName != null) {
+//                        Timber.w("Please stop setting folderId and folderName in the returned LibraryInfo");
+//                        currentSelection = currentSelection.buildUpon(null, null);
+//                    }
+//                    settings.setLibraryInfo(screen.libraryConfig, AppPreferences.DEFAULT_LIBRARY, currentSelection);
                     updateActionBar();
                     createCategories();
                 } else {
@@ -221,54 +206,27 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     }
 
     void openFolders(boolean bs) {
-        FoldersScreenFragment f = FoldersScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
-        fm.replaceMainContent(f, bs);
+
     }
 
     void openAlbums(boolean bs) {
-        AlbumsScreenFragment f = AlbumsScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
-        fm.replaceMainContent(f, bs);
+
     }
 
     void openArtists(boolean bs) {
-        ArtistsScreenFragment f = ArtistsScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
-        fm.replaceMainContent(f, bs);
+
     }
 
     void openGenres(boolean bs) {
-        GenresScreenFragment f = GenresScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
-        fm.replaceMainContent(f, bs);
+
     }
 
     void openPlaylists(boolean bs) {
-        PlaylistsScreenFragment f = PlaylistsScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
-        fm.replaceMainContent(f, bs);
+
     }
 
     void openTracks(boolean bs) {
-        TracksScreenFragment f = TracksScreenFragment.ni(appContext, screen.libraryConfig, currentSelection);
-        fm.replaceMainContent(f, bs);
-    }
 
-    void openGallery(boolean bs) {
-        List<GalleryPage> pages = new ArrayList<>();
-        if (screen.libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
-            pages.add(GalleryPage.PLAYLIST);
-        }
-        if (screen.libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
-            pages.add(GalleryPage.ARTIST);
-        }
-        if (screen.libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
-            pages.add(GalleryPage.ALBUM);
-        }
-        if (screen.libraryConfig.hasAbility(LibraryCapability.GENRES)) {
-            pages.add(GalleryPage.GENRE);
-        }
-        if (screen.libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
-            pages.add(GalleryPage.SONG);
-        }
-        GalleryScreenFragment f = GalleryScreenFragment.ni(appContext, screen.libraryConfig, currentSelection, pages);
-        fm.replaceMainContent(f, bs);
     }
 
     boolean isGalleryEligible() {
@@ -287,14 +245,14 @@ public class LandingScreenPresenter extends ViewPresenter<LandingScreenView> imp
     void updateActionBar() {
         ActionBarConfig.Builder builder = ActionBarConfig.builder()
                 .setTitle(screen.libraryConfig.label);
-        if (currentSelection != null) {
-            ActionBarMenuConfig.Builder menuBuilder = ActionBarMenuConfig.builder();
-            ActionBarMenuConfigWrapper wrapper = new ActionBarMenuConfigWrapper(
-                    screen.libraryConfig, currentSelection, fm, settings, activityResultsController);
-            wrapper.applyCommonItems(menuBuilder);
-            menuBuilder.setActionHandler(wrapper.getDelegateHandler(null));
-            builder.setMenuConfig(menuBuilder.build());
-        }
+//        if (currentSelection != null) {
+//            ActionBarMenuConfig.Builder menuBuilder = ActionBarMenuConfig.builder();
+//            ActionBarMenuConfigWrapper wrapper = new ActionBarMenuConfigWrapper(
+//                    screen.libraryConfig, currentSelection, fm, settings, activityResultsController);
+//            wrapper.applyCommonItems(menuBuilder);
+//            menuBuilder.setActionHandler(wrapper.getDelegateHandler(null));
+//            builder.setMenuConfig(menuBuilder.build());
+//        }
         toolbarOwner.setConfig(builder.build());
     }
 

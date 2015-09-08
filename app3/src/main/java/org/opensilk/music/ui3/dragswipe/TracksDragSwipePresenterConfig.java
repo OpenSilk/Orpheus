@@ -18,14 +18,7 @@
 package org.opensilk.music.ui3.dragswipe;
 
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
-import org.opensilk.music.model.Track;
-import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowClickListener;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by drew on 5/6/15.

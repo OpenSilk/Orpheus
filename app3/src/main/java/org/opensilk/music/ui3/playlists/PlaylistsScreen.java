@@ -25,7 +25,6 @@ import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableScreen;
 
@@ -38,8 +37,8 @@ import mortar.MortarScope;
 @WithComponentFactory(PlaylistsScreen.Factory.class)
 public class PlaylistsScreen extends BundleableScreen {
 
-    public PlaylistsScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
-        super(libraryConfig, libraryInfo);
+    public PlaylistsScreen(LibraryConfig libraryConfig) {
+        super(libraryConfig);
     }
 
     public static class Factory extends ComponentFactory<PlaylistsScreen> {

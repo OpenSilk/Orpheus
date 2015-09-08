@@ -67,14 +67,14 @@ public class TracksDragSwipeRecyclerAdapter extends BaseDragSwipeRecyclerAdapter
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Track track = (Track) getItem(position);
         ArtInfo artInfo = UtilsCommon.makeBestfitArtInfo(track.albumArtistName, track.artistName, track.albumName, track.artworkUri);
-        holder.title.setText(track.name);
+        holder.title.setText(track.getDisplayName());
         holder.subtitle.setText(track.artistName);
         if (holder.extraInfo != null && track.duration > 0) {
             holder.extraInfo.setText(UtilsCommon.makeTimeString(holder.itemView.getContext(), track.duration));
             holder.extraInfo.setVisibility(View.VISIBLE);
         }
         if (artInfo == ArtInfo.NULLINSTANCE) {
-            setLetterTileDrawable(holder, track.name);
+            setLetterTileDrawable(holder, track.getDisplayName());
         } else {
             holder.subscriptions.add(presenter.getRequestor().newRequest(holder.artwork,
                     null, artInfo, ArtworkType.THUMBNAIL));

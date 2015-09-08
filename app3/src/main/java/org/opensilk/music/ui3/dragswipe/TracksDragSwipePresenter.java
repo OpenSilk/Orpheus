@@ -26,19 +26,14 @@ import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.SimpleObserver;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.common.ui.mortar.HasOptionsMenu;
-import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.ui3.common.BundleablePresenterConfig;
-import org.opensilk.music.ui3.common.BundleableRecyclerView;
-import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
 import org.opensilk.music.ui3.common.OverflowClickListener;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 

@@ -27,7 +27,6 @@ import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryCapability;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.FolderTrackSortOrder;
 import org.opensilk.music.library.sort.TrackSortOrder;
@@ -112,7 +111,6 @@ public class OverflowHandler implements OverflowClickListener {
     };
 
     final LibraryConfig libraryConfig;
-    final LibraryInfo libraryInfo;
     final PlaybackController playbackController;
     final AppPreferences appPreferences;
     final FragmentManagerOwner fm;
@@ -121,14 +119,12 @@ public class OverflowHandler implements OverflowClickListener {
     @Inject
     public OverflowHandler(
             LibraryConfig libraryConfig,
-            LibraryInfo libraryInfo,
             PlaybackController playbackController,
             AppPreferences appPreferences,
             FragmentManagerOwner fm,
             @Named("loader_uri") Uri loaderUri
     ) {
         this.libraryConfig = libraryConfig;
-        this.libraryInfo = libraryInfo;
         this.playbackController = playbackController;
         this.appPreferences = appPreferences;
         this.fm = fm;
@@ -172,8 +168,18 @@ public class OverflowHandler implements OverflowClickListener {
 //        }
     }
 
+    static class LibInfo {
+        final String authority;
+        final String libraryId;
+        LibInfo(Bundleable item) {
+            authority = item.getUri().getAuthority();
+            libraryId = item.getUri().getPathSegments().get(0);
+        }
+    }
+
     @Override
     public boolean onItemClicked(Context context, OverflowAction action, Bundleable item) {
+        final LibInfo libraryInfo = new LibInfo(item);
         Uri uri;
         String sortOrder;
         if (item instanceof Album) {

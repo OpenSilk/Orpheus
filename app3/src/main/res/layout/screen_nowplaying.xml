@@ -116,4 +116,12 @@
 
     </RelativeLayout>
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_gravity="top"
+        android:background="@android:color/transparent"
+        style="?toolbarStyle"/>
+
 </org.opensilk.music.ui3.nowplaying.NowPlayingScreenView>

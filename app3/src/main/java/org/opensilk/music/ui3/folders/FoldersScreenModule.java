@@ -20,14 +20,12 @@ package org.opensilk.music.ui3.folders;
 import android.content.Context;
 import android.net.Uri;
 
-import org.opensilk.common.core.dagger2.ForApplication;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.library.sort.FolderTrackSortOrder;
 import org.opensilk.music.model.Folder;
@@ -41,7 +39,6 @@ import org.opensilk.music.ui3.common.BundleablePresenterConfig;
 import org.opensilk.music.ui3.common.ItemClickDelegate;
 import org.opensilk.music.ui3.common.ItemClickListener;
 import org.opensilk.music.ui3.common.OverflowAction;
-import org.opensilk.music.ui3.common.OverflowClickListener;
 import org.opensilk.music.ui3.common.OverflowHandler;
 
 import javax.inject.Named;
@@ -67,15 +64,9 @@ public class FoldersScreenModule {
         return screen.libraryConfig;
     }
 
-    @Provides
-    public LibraryInfo provideLibraryInfo() {
-        return screen.libraryInfo;
-    }
-
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return LibraryUris.folders(screen.libraryConfig.authority,
-                screen.libraryInfo.libraryId, screen.libraryInfo.folderId);
+        return Uri.EMPTY;
     }
 
     @Provides @Named("loader_sortorder")
@@ -102,8 +93,7 @@ public class FoldersScreenModule {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
                 if (item instanceof Folder) {
-                    LibraryInfo info = screen.libraryInfo.buildUpon(item.getIdentity(), item.getName());
-                    FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, info);
+                    FoldersScreenFragment f = FoldersScreenFragment.ni(context, screen.libraryConfig, (Folder)item);
                     presenter.getFm().replaceMainContent(f, true);
                 } else if (item instanceof Track) {
                     delegate.playAllItems(context, presenter.getItems(), item);
@@ -122,13 +112,12 @@ public class FoldersScreenModule {
         ActionBarMenuConfig.Builder builder = ActionBarMenuConfig.builder();
 
         builder.withMenu(R.menu.folder_sort_by);
-        if (screen.libraryInfo.folderId != null) {
-            builder.withMenus(ActionBarMenuConfig.toObject(OverflowHandler.FOLDERS));
-        }
+//        if (screen.libraryInfo.folderId != null) {
+//            builder.withMenus(ActionBarMenuConfig.toObject(OverflowHandler.FOLDERS));
+//        }
 
         Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
                 screen.libraryConfig,
-                screen.libraryInfo,
                 AppPreferences.FOLDER_SORT_ORDER,
                 null,
                 appPreferences
@@ -148,11 +137,7 @@ public class FoldersScreenModule {
                     default:
                         try {
                             return foldersOverflowHandler.onItemClicked(context,
-                                    OverflowAction.valueOf(integer),
-                                    Folder.builder()
-                                            .setIdentity(screen.libraryInfo.folderId)
-                                            .setName(screen.libraryInfo.folderName)
-                                            .build());
+                                    OverflowAction.valueOf(integer), screen.folder);
                         } catch (IllegalArgumentException e) {
                             return false;
                         }

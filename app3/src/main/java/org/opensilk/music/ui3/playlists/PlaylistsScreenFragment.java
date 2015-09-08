@@ -32,14 +32,14 @@ import org.opensilk.music.ui3.common.BundleableFragment;
 public class PlaylistsScreenFragment extends BundleableFragment {
     public static final String NAME = PlaylistsScreenFragment.class.getName();
 
-    public static PlaylistsScreenFragment ni(Context context, LibraryConfig config, LibraryInfo info) {
-        Bundle args = makeCommonArgsBundle(config, info, context.getString(R.string.page_playlists));
+    public static PlaylistsScreenFragment ni(Context context, LibraryConfig config) {
+        Bundle args = makeCommonArgsBundle(config, context.getString(R.string.page_playlists));
         return factory(context, NAME, args);
     }
 
     @Override
     protected Screen newScreen() {
         extractCommonArgs();
-        return new PlaylistsScreen(mLibraryConfig, mLibraryInfo);
+        return new PlaylistsScreen(mLibraryConfig);
     }
 }

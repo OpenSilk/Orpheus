@@ -64,15 +64,9 @@ public class PlaylistsScreenModule {
         return screen.libraryConfig;
     }
 
-    @Provides
-    public LibraryInfo provideLibraryInfo() {
-        return screen.libraryInfo;
-    }
-
     @Provides @Named("loader_uri")
     public Uri provideLoaderUri() {
-        return LibraryUris.playlists(screen.libraryConfig.authority,
-                screen.libraryInfo.libraryId);
+        return Uri.EMPTY;
     }
 
     @Provides @Named("loader_sortorder")
@@ -101,8 +95,7 @@ public class PlaylistsScreenModule {
         return new ItemClickListener() {
             @Override
             public void onItemClicked(BundleablePresenter presenter, Context context, Bundleable item) {
-                TracksDragSwipeActivity.startSelf(context, new PlaylistsProfileScreen(screen.libraryConfig,
-                        screen.libraryInfo.buildUpon(item.getIdentity(), item.getName()), (Playlist) item));
+                TracksDragSwipeActivity.startSelf(context, new PlaylistsProfileScreen(screen.libraryConfig, (Playlist) item));
             }
         };
     }
@@ -115,7 +108,6 @@ public class PlaylistsScreenModule {
 
         Func2<Context, Integer, Boolean> handler = new ActionBarMenuBaseHandler(
                 screen.libraryConfig,
-                screen.libraryInfo,
                 AppPreferences.PLAYLIST_SORT_ORDER,
                 AppPreferences.PLAYLIST_LAYOUT,
                 appPreferences

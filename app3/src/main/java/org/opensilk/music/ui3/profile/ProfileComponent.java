@@ -28,4 +28,5 @@ public interface ProfileComponent extends BundleableComponent {
     void inject(ProfileLandscapeView view);
     void inject(ProfileLandscapeRecyclerView view);
     void inject(ProfileView2Portrait view);
+    void inject(ProfileView2DragSwipePortrait view);
 }

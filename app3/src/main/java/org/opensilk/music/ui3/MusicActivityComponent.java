@@ -28,6 +28,8 @@ import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.playback.control.PlaybackController;
 import org.opensilk.music.ui3.main.MainPresenter;
 
+import javax.inject.Named;
+
 /**
  * Requires ActivityResultsOwnerModule
  *
@@ -41,4 +43,5 @@ public interface MusicActivityComponent extends MortarFragmentActivityComponent 
     PlaybackController playbackController();
     MainPresenter mainPresenter();
     ToolbarOwner toolbarOwner();
+    @Named("IndexProviderAuthority") String indexProviderAuthority();
 }

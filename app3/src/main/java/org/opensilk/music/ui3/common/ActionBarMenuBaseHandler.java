@@ -22,9 +22,6 @@ import android.content.Context;
 import org.apache.commons.lang3.StringUtils;
 import org.opensilk.music.AppPreferences;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
-
-import javax.inject.Named;
 
 import rx.functions.Func2;
 
@@ -34,20 +31,17 @@ import rx.functions.Func2;
 public abstract class ActionBarMenuBaseHandler implements Func2<Context, Integer, Boolean> {
 
     protected final LibraryConfig libraryConfig;
-    protected final LibraryInfo libraryInfo;
     protected final String sortOrderKey;
     protected final String layoutKey;
     protected final AppPreferences appPreferences;
 
     public ActionBarMenuBaseHandler(
             LibraryConfig libraryConfig,
-            LibraryInfo libraryInfo,
             String sortOrderKey,
             String layoutKey,
             AppPreferences appPreferences
     ) {
         this.libraryConfig = libraryConfig;
-        this.libraryInfo = libraryInfo;
         this.sortOrderKey = sortOrderKey;
         this.layoutKey = layoutKey;
         this.appPreferences = appPreferences;

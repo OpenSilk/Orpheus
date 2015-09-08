@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import org.opensilk.common.core.mortar.DaggerService;
-import org.opensilk.common.ui.mortar.ActionBarConfig;
 import org.opensilk.common.ui.mortar.DrawerOwner;
 import org.opensilk.common.ui.mortar.DrawerOwnerActivity;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
@@ -42,11 +41,11 @@ import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.loader.LibraryProviderInfoLoader;
 import org.opensilk.music.settings.SettingsActivity;
 import org.opensilk.music.ui3.common.ActivityRequestCodes;
-import org.opensilk.music.ui3.gallery.GalleryPage;
-import org.opensilk.music.ui3.gallery.GalleryScreenFragment;
+import org.opensilk.music.ui3.index.GalleryPage;
+import org.opensilk.music.ui3.index.GalleryScreenFragment;
+import org.opensilk.music.ui3.library.LibraryScreenFragment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -55,7 +54,6 @@ import javax.inject.Named;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import mortar.MortarScope;
-import rx.functions.Action1;
 
 import static org.opensilk.music.library.provider.LibraryMethods.LIBRARYCONF;
 
@@ -216,38 +214,14 @@ public class LauncherActivity extends MusicActivity implements DrawerOwnerActivi
             switch (menuItem.getItemId()) {
                 case R.id.my_library: {
                     menuItem.setChecked(true);
-                    Bundle config = getApplicationContext().getContentResolver().call(
-                            LibraryUris.call(mMediaStoreLibraryAuthority), LIBRARYCONF, null, null);
-                    if (config == null) {
-                        throw new RuntimeException("Got null config for index provider");
-                    }
-                    LibraryConfig libraryConfig = LibraryConfig.materialize(config);
-                    List<GalleryPage> pages = new ArrayList<>();
-                    if (libraryConfig.hasAbility(LibraryCapability.PLAYLISTS)) {
-                        pages.add(GalleryPage.PLAYLIST);
-                    }
-                    if (libraryConfig.hasAbility(LibraryCapability.ARTISTS)) {
-                        pages.add(GalleryPage.ARTIST);
-                    }
-                    if (libraryConfig.hasAbility(LibraryCapability.ALBUMS)) {
-                        pages.add(GalleryPage.ALBUM);
-                    }
-                    if (libraryConfig.hasAbility(LibraryCapability.GENRES)) {
-                        pages.add(GalleryPage.GENRE);
-                    }
-                    if (libraryConfig.hasAbility(LibraryCapability.TRACKS)) {
-                        pages.add(GalleryPage.SONG);
-                    }
-                    LibraryInfo currentSelection = mSettings.getLibraryInfo(libraryConfig,
-                            AppPreferences.DEFAULT_LIBRARY);
-                    GalleryScreenFragment f = GalleryScreenFragment.ni(LauncherActivity.this,
-                            libraryConfig, currentSelection, pages);
                     mFm.killBackStack();
-                    mFm.replaceMainContent(f, false);
+                    mFm.replaceMainContent(GalleryScreenFragment.ni(LauncherActivity.this), false);
                     break;
                 }
                 case R.id.folders:
                     menuItem.setChecked(true);
+                    mFm.killBackStack();
+                    mFm.replaceMainContent(LibraryScreenFragment.ni(), false);
                     break;
                 case R.id.settings: {
                     Intent i = new Intent(LauncherActivity.this, SettingsActivity.class);

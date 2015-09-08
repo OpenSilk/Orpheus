@@ -27,7 +27,8 @@
     app:umanoPanelHeight="?actionBarSize"
     app:umanoShadowHeight="4dp"
     app:umanoParalaxOffset="100dp"
-    app:umanoDragView="@+id/queue_toolbar">
+    app:umanoDragView="@+id/queue_toolbar"
+    android:fitsSystemWindows="true">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -39,14 +40,6 @@
             android:layout_height="match_parent"
             android:name="org.opensilk.music.ui3.nowplaying.NowPlayingScreenFragment"
             tools:layout="@layout/screen_nowplaying"/>
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/main_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:layout_gravity="top"
-            android:background="@android:color/transparent"
-            style="?toolbarStyle"/>
 
     </FrameLayout>
 

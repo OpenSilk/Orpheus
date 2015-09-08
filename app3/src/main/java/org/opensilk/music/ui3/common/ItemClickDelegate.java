@@ -23,7 +23,6 @@ import android.net.Uri;
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
 import org.opensilk.music.library.provider.LibraryUris;
 import org.opensilk.music.model.Track;
 import org.opensilk.music.model.spi.Bundleable;
@@ -40,18 +39,12 @@ import javax.inject.Inject;
 @ScreenScope
 public class ItemClickDelegate {
 
-    final LibraryConfig libraryConfig;
-    final LibraryInfo libraryInfo;
     final PlaybackController playbackController;
 
     @Inject
     public ItemClickDelegate(
-            LibraryConfig libraryConfig,
-            LibraryInfo libraryInfo,
             PlaybackController playbackController
     ) {
-        this.libraryConfig = libraryConfig;
-        this.libraryInfo = libraryInfo;
         this.playbackController = playbackController;
     }
 
@@ -63,14 +56,14 @@ public class ItemClickDelegate {
         List<Uri> toPlay = new ArrayList<>(adapterItems.size());
         for (Bundleable b : adapterItems) {
             if (b instanceof Track) {
-                toPlay.add(LibraryUris.track(libraryConfig.authority, libraryInfo.libraryId, b.getIdentity()));
+                toPlay.add(b.getUri());
             }
         }
         if (toPlay.isEmpty()) {
             return;//TODO toast?
         }
         //lazy way to find its new pos in case there were folders before it in the adapteritems
-        int pos = toPlay.indexOf(LibraryUris.track(libraryConfig.authority, libraryInfo.libraryId, clickedItem.getIdentity()));
+        int pos = toPlay.indexOf(clickedItem.getUri());
 
         playbackController.playAll(toPlay, pos);
     }

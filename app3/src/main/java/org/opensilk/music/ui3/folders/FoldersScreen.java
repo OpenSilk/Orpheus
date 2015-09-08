@@ -18,6 +18,7 @@
 package org.opensilk.music.ui3.folders;
 
 import android.content.res.Resources;
+import android.net.Uri;
 
 import org.opensilk.common.core.mortar.DaggerService;
 import org.opensilk.common.ui.mortar.ComponentFactory;
@@ -25,7 +26,7 @@ import org.opensilk.common.ui.mortar.Layout;
 import org.opensilk.common.ui.mortar.WithComponentFactory;
 import org.opensilk.music.R;
 import org.opensilk.music.library.LibraryConfig;
-import org.opensilk.music.library.LibraryInfo;
+import org.opensilk.music.model.Folder;
 import org.opensilk.music.ui3.MusicActivityComponent;
 import org.opensilk.music.ui3.common.BundleableScreen;
 
@@ -38,13 +39,16 @@ import mortar.MortarScope;
 @WithComponentFactory(FoldersScreen.Factory.class)
 public class FoldersScreen extends BundleableScreen {
 
-    public FoldersScreen(LibraryConfig libraryConfig, LibraryInfo libraryInfo) {
-        super(libraryConfig, libraryInfo);
+    final Folder folder;
+
+    public FoldersScreen(LibraryConfig libraryConfig, Folder folder) {
+        super(libraryConfig);
+        this.folder = folder;
     }
 
     @Override
     public String getName() {
-        return super.getName() + "-" + libraryInfo.folderId;
+        return super.getName() + "-" + folder.getUri();
     }
 
     public static class Factory extends ComponentFactory<FoldersScreen> {

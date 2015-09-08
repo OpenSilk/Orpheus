@@ -19,15 +19,13 @@ package org.opensilk.music.ui3.common;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.widget.PopupMenu;
 
 import org.opensilk.common.core.dagger2.ScreenScope;
 import org.opensilk.common.core.rx.RxLoader;
 import org.opensilk.common.core.rx.SimpleObserver;
 import org.opensilk.common.ui.mortar.ActionBarMenuConfig;
+import org.opensilk.common.ui.mortar.ActionBarMenuHandler;
 import org.opensilk.common.ui.mortar.HasOptionsMenu;
 import org.opensilk.common.ui.mortarfragment.FragmentManagerOwner;
 import org.opensilk.music.AppPreferences;
@@ -35,19 +33,16 @@ import org.opensilk.music.R;
 import org.opensilk.music.artwork.requestor.ArtworkRequestManager;
 import org.opensilk.music.loader.BundleableLoader;
 import org.opensilk.music.model.spi.Bundleable;
-import org.opensilk.music.model.util.BundleableUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import hugo.weaving.DebugLog;
 import mortar.MortarScope;
 import mortar.Presenter;
-import mortar.ViewPresenter;
 import mortar.bundler.BundleService;
 import rx.Subscription;
 
@@ -67,7 +62,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     protected final FragmentManagerOwner fm;
     protected final ItemClickListener itemClickListener;
     protected final OverflowClickListener overflowClickListener;
-    protected final ActionBarMenuConfig menuConfig;
+    protected final ActionBarMenuHandler menuConfig;
     protected final List<Bundleable> loaderSeed;
 
     protected Boolean wantGrid;
@@ -81,8 +76,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
             ArtworkRequestManager requestor,
             BundleableLoader loader,
             FragmentManagerOwner fm,
-            BundleablePresenterConfig config,
-            OverflowHandler defaultOverflowHandler
+            BundleablePresenterConfig config
     ) {
         this.preferences = preferences;
         this.requestor = requestor;
@@ -90,8 +84,7 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
         this.fm = fm;
         this.wantGrid = config.wantsGrid;
         this.itemClickListener = config.itemClickListener;
-        this.overflowClickListener = config.overflowClickListener != null ?
-                config.overflowClickListener : defaultOverflowHandler;
+        this.overflowClickListener = config.overflowClickListener;
         this.menuConfig = config.menuConfig;
         this.loaderSeed = config.loaderSeed;
     }
@@ -259,19 +252,19 @@ public class BundleablePresenter extends Presenter<BundleableRecyclerView2>
     }
 
     public void onItemClicked(Context context, Bundleable item) {
-        itemClickListener.onItemClicked(this, context, item);
+        if (itemClickListener != null) itemClickListener.onItemClicked(this, context, item);
     }
 
     public void onOverflowClicked(Context context, PopupMenu m, Bundleable item) {
-        overflowClickListener.onBuildMenu(context, m, item);
+        if (overflowClickListener != null) overflowClickListener.onBuildMenu(context, m, item);
     }
 
     public boolean onOverflowActionClicked(Context context, OverflowAction action, Bundleable item) {
-        return overflowClickListener.onItemClicked(context, action, item);
+        return overflowClickListener != null && overflowClickListener.onItemClicked(context, action, item);
     }
 
     @Override
-    public ActionBarMenuConfig getMenuConfig() {
+    public ActionBarMenuHandler getMenuConfig() {
         return menuConfig;
     }
 
